@@ -1,24 +1,28 @@
 import React, {useEffect, useState} from 'react';
-import {View, Tabs, Tab, Container, Content} from 'native-base'
-import StoragePhotos from '../components/StoragePhotos'
-import BoxPhotos from '../components/BoxPhotos'
+import {View, Tabs, Tab, Container, Content} from 'native-base';
+import StoragePhotos from '../components/StoragePhotos';
+import BoxPhotos from '../components/BoxPhotos';
+import {StyleSheet} from 'react-native';
 
 const HomePage = () => {
-
   return (
     <Container>
-      <Content>
       <Tabs>
         <Tab heading="Storage Photos">
-          <StoragePhotos />
+          <Content>
+            <StoragePhotos />
+          </Content>
         </Tab>
         <Tab heading="The Box Photos">
-          <BoxPhotos />
+          <Content>
+            <BoxPhotos />
+          </Content>
         </Tab>
       </Tabs>
-      </Content>
     </Container>
   );
 };
+
+const styles = StyleSheet.create({});
 
 export default HomePage;
