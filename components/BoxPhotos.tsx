@@ -34,7 +34,7 @@ const StogagePhotos = () => {
 
   useEffect(() => {
     if (per) {
-      navigation.navigate("HomePage")
+      navigation.navigate('HomePage');
       CameraRoll.getPhotos({
         first: 5,
         assetType: 'Photos',
@@ -80,5 +80,7 @@ const StogagePhotos = () => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({});
 
 export default StogagePhotos;
