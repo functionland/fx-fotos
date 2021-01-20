@@ -17,8 +17,36 @@ import {useNavigation} from '@react-navigation/native';
 import {getUserBoxMedia} from '../utils/APICAlls';
 import store from '../store/store';
 import {sortPhotos} from '../utils/functions';
-import {ScrollView} from 'react-native-gesture-handler';
+import {
+  PinchGestureHandler,
+  PinchGestureHandlerGestureEvent,
+  ScrollView,
+} from 'react-native-gesture-handler';
 import RenderSortedPhotos from './RenderSortedPhotos';
+import Animated from 'react-native-reanimated';
+
+const pinchAndZoomHandler = (
+  event: PinchGestureHandlerGestureEvent,
+  condition: 'day' | 'month' | 'week',
+) => {
+  let zoomOrPinch: 'zoom' | 'pinch';
+  let result: 'day' | 'month' | 'week' = 'day';
+  if (event.nativeEvent.scale > 1) {
+    zoomOrPinch = 'zoom';
+  } else {
+    zoomOrPinch = 'pinch';
+  }
+
+  if (condition == 'day') {
+    zoomOrPinch == 'zoom' ? (result = 'day') : (result = 'week');
+  } else if (condition == 'week') {
+    zoomOrPinch == 'zoom' ? (result = 'day') : (result = 'month');
+  } else if (condition == 'month') {
+    zoomOrPinch == 'zoom' ? (result = 'week') : (result = 'month');
+  }
+
+  return result;
+};
 
 const renderPhotos = (sortedPhotosObject: any) => {
   let result = [];
@@ -89,17 +117,17 @@ const Photos = () => {
   }, [allPhotos && sortCondition]);
 
   return (
-    <View>
-      <Button
-        onPress={() => {
-          setSortCondition('month');
-        }}
-        title="change Condition"
-      />
+    <PinchGestureHandler
+      onGestureEvent={(event) =>
+        setSortCondition(pinchAndZoomHandler(event, sortCondition))
+      }
+      onHandlerStateChange={() => console.log('soote')}>
+      {/* <Animated.View> */}
       <ScrollView>
         {sortedPhotos ? renderPhotos(sortedPhotos) : <Text></Text>}
       </ScrollView>
-    </View>
+      {/* </Animated.View> */}
+    </PinchGestureHandler>
   );
 };
 
