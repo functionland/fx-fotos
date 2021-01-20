@@ -2,6 +2,10 @@ import {PermissionsAndroid, Platform} from 'react-native';
 
 export async function storagePermission() {
   if (Platform.OS === 'android') {
+    const permission = await PermissionsAndroid.check(
+      PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+    );
+
     const result = await PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
       {
