@@ -19,9 +19,11 @@
     "react-native": "0.63.4",
     "react-native-fast-image": "^8.3.4",
     "react-native-gesture-handler": "^1.9.0",
-    "react-native-reanimated": "^1.13.2",
+    "react-native-reanimated": "^2.0.0-rc.2",
     "react-native-safe-area-context": "^3.1.9",
-    "react-native-screens": "^2.16.1"
+    "react-native-screens": "^2.16.1",
+    "react-redux": "^7.2.2",
+    "redux": "^4.0.5"
   },
   "devDependencies": {
     "@babel/core": "^7.8.4",
