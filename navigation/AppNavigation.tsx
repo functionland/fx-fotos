@@ -9,8 +9,12 @@ const Stack = createStackNavigator();
 const AppNavigation = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="HomePage">
-        <Stack.Screen name="HomePage" component={HomePage} options={{headerShown: false}} />
+      <Stack.Navigator>
+        <Stack.Screen
+          name="HomePage"
+          component={HomePage}
+          options={{headerShown: false}}
+        />
         <Stack.Screen
           name="PermissionError"
           component={PermissionError}
