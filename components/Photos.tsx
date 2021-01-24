@@ -1,76 +1,30 @@
 import React, {useEffect, useState} from 'react';
-import {
-  SafeAreaView,
-  StyleSheet,
-  View,
-  Image,
-  FlatList,
-  PermissionsAndroid,
-  Platform,
-  Text,
-  Button,
-} from 'react-native';
+import {Text} from 'react-native';
 import CameraRoll, {PhotoIdentifier} from '@react-native-community/cameraroll';
-import FastImage from 'react-native-fast-image';
 import {storagePermission} from '../utils/permissions';
 import {useNavigation} from '@react-navigation/native';
 import {getUserBoxMedia} from '../utils/APICAlls';
 import store from '../store/store';
 import {sortPhotos} from '../utils/functions';
-import {
-  PinchGestureHandler,
-  PinchGestureHandlerGestureEvent,
-  ScrollView,
-} from 'react-native-gesture-handler';
-import RenderSortedPhotos from './RenderSortedPhotos';
-import Animated from 'react-native-reanimated';
+import PinchToZoom from './PinchToZoom';
+import RenderPhotos from './RenderPhotos';
 
-const pinchAndZoomHandler = (
-  event: PinchGestureHandlerGestureEvent,
-  condition: 'day' | 'month' | 'week',
-) => {
-  let zoomOrPinch: 'zoom' | 'pinch';
-  let result: 'day' | 'month' | 'week' = 'day';
-  if (event.nativeEvent.scale > 1) {
-    zoomOrPinch = 'zoom';
-  } else {
-    zoomOrPinch = 'pinch';
-  }
-
-  if (condition == 'day') {
-    zoomOrPinch == 'zoom' ? (result = 'day') : (result = 'week');
-  } else if (condition == 'week') {
-    zoomOrPinch == 'zoom' ? (result = 'day') : (result = 'month');
-  } else if (condition == 'month') {
-    zoomOrPinch == 'zoom' ? (result = 'week') : (result = 'month');
-  }
-
-  return result;
-};
-
-const renderPhotos = (sortedPhotosObject: any) => {
-  let result = [];
-  for (let photoChunk of Object.keys(sortedPhotosObject)) {
-    result.push(
-      <RenderSortedPhotos
-        title={photoChunk}
-        photos={sortedPhotosObject[photoChunk]}
-      />,
-    );
-  }
-
-  return result;
-};
+interface sortedPhotos {
+  day: {[key: string]: Array<PhotoIdentifier>};
+  week: {[key: string]: Array<PhotoIdentifier>};
+  month: {[key: string]: Array<PhotoIdentifier>};
+}
 
 const Photos = () => {
   const [storagePhotos, setStoragePhotos] = useState<Array<PhotoIdentifier>>();
   const [boxPhotos, setBoxPhotos] = useState<Array<PhotoIdentifier>>();
   const [allPhotos, setAllPhotos] = useState<Array<PhotoIdentifier>>();
-  const [sortedPhotos, setSortedPhotos] = useState<any>();
+  const [sortedPhotos, setSortedPhotos] = useState<sortedPhotos>();
   const [sortCondition, setSortCondition] = useState<'day' | 'month' | 'week'>(
     'day',
   );
   const [per, setPer] = useState<boolean>(false);
+  const [pinchScale, setPinchScale] = useState<number>(0);
 
   const navigation = useNavigation();
 
@@ -92,7 +46,7 @@ const Photos = () => {
     if (per) {
       navigation.navigate('HomePage');
       CameraRoll.getPhotos({
-        first: 100,
+        first: 20,
         assetType: 'All',
       })
         .then((res) => {
@@ -111,23 +65,25 @@ const Photos = () => {
 
   useEffect(() => {
     if (allPhotos && sortCondition) {
-      let sorted = sortPhotos(allPhotos, sortCondition);
-      setSortedPhotos(sorted);
+      let sorted: any = sortPhotos(allPhotos);
+
+      if (sorted != undefined) {
+        // console.log(sorted);
+        setSortedPhotos({...sorted});
+        console.log('sorted', sorted);
+      }
     }
   }, [allPhotos && sortCondition]);
 
   return (
-    <PinchGestureHandler
-      onGestureEvent={(event) =>
-        setSortCondition(pinchAndZoomHandler(event, sortCondition))
-      }
-      onHandlerStateChange={() => console.log('soote')}>
-      {/* <Animated.View> */}
-      <ScrollView>
-        {sortedPhotos ? renderPhotos(sortedPhotos) : <Text></Text>}
-      </ScrollView>
-      {/* </Animated.View> */}
-    </PinchGestureHandler>
+    <PinchToZoom setPinchScale={setPinchScale}>
+      {/* // setSortCondition={setSortCondition}> */}
+      {sortedPhotos ? (
+        <RenderPhotos pinchScale={pinchScale} photos={sortedPhotos} />
+      ) : (
+        <Text></Text>
+      )}
+    </PinchToZoom>
   );
 };
 

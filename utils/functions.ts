@@ -1,33 +1,26 @@
 import {PhotoIdentifier} from '@react-native-community/cameraroll';
+import {sortedPhotosObject} from '../types/interfaces';
 
-export const sortPhotos = (
-  photos: Array<PhotoIdentifier>,
-  condition: 'week' | 'day' | 'month',
-) => {
+export const sortPhotos = (photos: Array<PhotoIdentifier>) => {
   let timestamps = photos
     .map((photo) => photo.node.timestamp * 1000)
     .sort((a, b) => b - a);
   let timestamps_str = timestamps.map((timestamp) => timestamp.toString());
-  let result: any = {};
+  let result: any = {day: {}, month: {}, week: {}};
 
-  if (condition == 'day') {
-    for (let timestamp of timestamps_str) {
-      result[timestampToDate(+timestamp, 'day')] = [];
-    }
+  for (let timestamp of timestamps_str) {
+    result.day[timestampToDate(+timestamp, 'day')] = [];
+    result.month[timestampToDate(+timestamp, 'month')] = [];
+    result.month[timestampToDate(+timestamp, 'week')] = [];
+  }
 
-    for (let photo of photos) {
-      result[timestampToDate(photo.node.timestamp * 1000, 'day')].push(photo);
-      //   result[new Date(photo.node.timestamp).toString()] = res;
-    }
-  } else if (condition == 'month') {
-    for (let timestamp of timestamps_str) {
-      result[timestampToDate(+timestamp, 'month')] = [];
-    }
-
-    for (let photo of photos) {
-      result[timestampToDate(photo.node.timestamp * 1000, 'month')].push(photo);
-      //   result[new Date(photo.node.timestamp).toString()] = res;
-    }
+  for (let photo of photos) {
+    result['day'][timestampToDate(photo.node.timestamp * 1000, 'day')].push(
+      photo,
+    );
+    result['month'][timestampToDate(photo.node.timestamp * 1000, 'month')].push(
+      photo,
+    );
   }
 
   return result;

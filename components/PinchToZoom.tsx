@@ -1,21 +1,26 @@
-import {ReactChildren} from 'react';
-import {Button} from 'react-native';
-import {PinchGestureHandler} from 'react-native-gesture-handler';
-import Animated from 'react-native-reanimated';
-import Photos from './Photos';
+import {
+  PinchGestureHandler,
+  PinchGestureHandlerGestureEvent,
+  ScrollView,
+} from 'react-native-gesture-handler';
+import React from 'react';
+
+const pinchAndZoomHandler = (event: PinchGestureHandlerGestureEvent) => {
+  return event.nativeEvent.scale;
+};
 
 interface Props {
   children: Element;
-  sortCondition: 'day' | 'month' | 'week';
-  setSortCondition: Function;
+  setPinchScale: Function;
 }
 
 const PinchToZoom: React.FC<Props> = (props) => {
   return (
     <PinchGestureHandler
-      onGestureEvent={() => console.log('sege')}
-      onHandlerStateChange={() => console.log('soote')}>
-      <Animated.View>{props.children}</Animated.View>
+      onGestureEvent={(event) =>
+        props.setPinchScale(pinchAndZoomHandler(event))
+      }>
+      <ScrollView>{props.children}</ScrollView>
     </PinchGestureHandler>
   );
 };
