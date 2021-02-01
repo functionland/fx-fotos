@@ -2,12 +2,15 @@ import React, {useEffect, useState} from 'react';
 import {View, Tabs, Tab, Container, Content} from 'native-base';
 import Photos from '../components/Photos';
 import {StyleSheet} from 'react-native';
+import PinchAndZoom from '../components/PinchAndZoom';
 
 const HomePage = () => {
   return (
-    <Container>
+    // <Container>
+      // {/* <PinchAndZoom> */}
       <Photos />
-    </Container>
+      // {/* </PinchAndZoom> */}
+    // </Container>
   );
 };
 

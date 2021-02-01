@@ -10,22 +10,18 @@ import {
   sortedPhotosObject,
 } from '../types/interfaces';
 import RenderSortedPhotos from './RenderSortedPhotos';
+import PinchAndZoom from './PinchAndZoom';
 
 interface Props {
   photos: sortedPhotosObject;
-  pinchScale: number;
+  sortCondition: sortCondition;
 }
 
 const RenderPhotos: React.FC<Props> = (props) => {
   const [viewOpacity, setViewOpacity] = useState(new Animated.Value(1));
   const [viewScale, setViewScale] = useState(new Animated.Value(1));
 
-  useEffect(() => {
-    if (props.pinchScale) {
-    }
-  }, [props.pinchScale]);
-
-  const renderPhoto = (photoObject: sortedPhotosObject, pinchScale: number) => {
+  const renderPhoto = (photoObject: sortedPhotosObject) => {
     let result = [];
 
     result.push(
@@ -37,10 +33,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
       //       outputRange: [1, 5],
       //     }),
       //   }}>
-      <RenderSortedPhotos
-        photoObject={photoObject['day']}
-        pinchScale={pinchScale}
-      />,
+      <RenderSortedPhotos photoObject={photoObject['day']} />,
       // </Animated.ScrollView>,
       // <Animated.ScrollView
       //   style={{
@@ -53,10 +46,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
       //       outputRange: [5, 1],
       //     }),
       //   }}>
-      //   <RenderSortedPhotos
-      //     photoObject={photoObject['month']}
-      //     pinchScale={pinchScale}
-      //   />
+      <RenderSortedPhotos photoObject={photoObject['month']} />,
       // </Animated.ScrollView>,
       // <RenderSortedPhotos
       //   photoObject={photoObject['week']}
@@ -64,20 +54,12 @@ const RenderPhotos: React.FC<Props> = (props) => {
       // />,
     );
 
+    result.map;
+
     return result;
   };
 
-  return (
-    <ScrollView style={styles.container}>
-      {props.photos ? (
-        <View style={styles.photoContainer}>
-          {renderPhoto(props.photos, props.pinchScale)}
-        </View>
-      ) : (
-        <Text></Text>
-      )}
-    </ScrollView>
-  );
+  return <>{props.photos ? renderPhoto(props.photos) : <Text></Text>}</>;
 };
 
 const styles = StyleSheet.create({

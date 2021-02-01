@@ -6,8 +6,11 @@ import {useNavigation} from '@react-navigation/native';
 import {getUserBoxMedia} from '../utils/APICAlls';
 import store from '../store/store';
 import {sortPhotos} from '../utils/functions';
-import PinchToZoom from './PinchToZoom';
 import RenderPhotos from './RenderPhotos';
+import PinchAndZoom from './PinchAndZoom';
+import {ScrollView} from 'react-native-gesture-handler';
+import {sortCondition} from '../types/interfaces';
+import RenderSortedPhotos from './RenderSortedPhotos';
 
 interface sortedPhotos {
   day: {[key: string]: Array<PhotoIdentifier>};
@@ -24,7 +27,7 @@ const Photos = () => {
     'day',
   );
   const [per, setPer] = useState<boolean>(false);
-  const [pinchScale, setPinchScale] = useState<number>(0);
+  const [renderPhotos, setRenderPhotos] = useState<any>();
 
   const navigation = useNavigation();
 
@@ -64,26 +67,47 @@ const Photos = () => {
   }, [per]);
 
   useEffect(() => {
-    if (allPhotos && sortCondition) {
-      let sorted: any = sortPhotos(allPhotos);
+    let result: any = {
+      day: [],
+      month: [],
+      week: [],
+    };
+    let sortConditionArray = ['day', 'month', 'week'];
 
-      if (sorted != undefined) {
-        // console.log(sorted);
-        setSortedPhotos({...sorted});
-        console.log('sorted', sorted);
+    let sortedPhotos: sortedPhotos;
+
+    if (allPhotos) {
+      sortedPhotos = {...sortPhotos(allPhotos)};
+    } else {
+      return;
+    }
+
+    if (allPhotos && sortCondition) {
+      for (let photos of sortConditionArray) {
+        if (photos == sortCondition) {
+          result[photos] = (
+            <PinchAndZoom
+              sortCondition={sortCondition}
+              setSortCondition={setSortCondition}>
+              <RenderSortedPhotos photoObject={sortedPhotos[sortCondition]} />
+            </PinchAndZoom>
+          );
+        } else if (photos == 'day' || photos == 'month' || photos == 'week') {
+          result[photos] = (
+            <RenderSortedPhotos photoObject={sortedPhotos[photos]} />
+          );
+        }
       }
     }
-  }, [allPhotos && sortCondition]);
+    console.log(sortCondition);
+
+    setRenderPhotos(Object.values(result));
+  }, [allPhotos, sortCondition]);
 
   return (
-    <PinchToZoom setPinchScale={setPinchScale}>
-      {/* // setSortCondition={setSortCondition}> */}
-      {sortedPhotos ? (
-        <RenderPhotos pinchScale={pinchScale} photos={sortedPhotos} />
-      ) : (
-        <Text></Text>
-      )}
-    </PinchToZoom>
+    // <PinchAndZoom>
+    <ScrollView>{renderPhotos ? renderPhotos : <Text></Text>}</ScrollView>
+    // </PinchAndZoom>
   );
 };
 
