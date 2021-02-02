@@ -40,19 +40,13 @@ const getDistance = (touches: Array<NativeTouchEvent>) => {
 
 const opacityChange = (
   opacityValue: any,
-  toValue: number,
-  props: Props,
-  pinchAndZoom: 'pinch' | 'zoom' | undefined,
+  toValue: number
 ) => {
   Animated.timing(opacityValue, {
     toValue,
     duration: 400,
     useNativeDriver: false,
   }).start();
-
-  props.setSortCondition(
-    sortConditionChange(props.sortCondition, pinchAndZoom),
-  );
 };
 
 const resetAnimation = (animation: any, toValue: number) => {
@@ -65,12 +59,12 @@ const resetAnimation = (animation: any, toValue: number) => {
 
 interface Props {
   children: Element;
-  sortCondition: sortCondition;
-  setSortCondition: Function;
+  fromValue: number;
+  toValue: number;
 }
 
 const PinchAndZoom: React.FC<Props> = (props) => {
-  const viewOpacity = new Animated.Value(1);
+  const viewOpacity = new Animated.Value(props.fromValue);
   let initialTouch: Array<NativeTouchEvent> = [];
   let currentTouch: Array<NativeTouchEvent> = [];
   let pinchAndZoom: 'pinch' | 'zoom' | undefined = undefined;
@@ -99,11 +93,12 @@ const PinchAndZoom: React.FC<Props> = (props) => {
         let initialDistance = getDistance(initialTouch);
         let currentDistance = getDistance(currentTouch);
         if (initialDistance < currentDistance) {
-          pinchAndZoom = 'pinch';
-          opacityChange(viewOpacity, 1, props, pinchAndZoom);
-        } else if (initialDistance > currentDistance) {
           pinchAndZoom = 'zoom';
-          opacityChange(viewOpacity, 0, props, pinchAndZoom);
+          opacityChange(viewOpacity, props.toValue);
+          
+        } else if (initialDistance > currentDistance) {
+          pinchAndZoom = 'pinch';
+          opacityChange(viewOpacity, props.toValue);
         }
       }
 
@@ -113,10 +108,8 @@ const PinchAndZoom: React.FC<Props> = (props) => {
     onPanResponderRelease: (event, gesture) => {
       let initialDistance = getDistance(initialTouch);
       let currentDistance = getDistance(currentTouch);
-      if (currentDistance - initialDistance < 10) {
-        resetAnimation(viewOpacity, 1);
-      } else {
-        console.log('sege');
+      if (currentDistance - initialDistance < 2) {
+        resetAnimation(viewOpacity, props.fromValue);
       }
     },
   });

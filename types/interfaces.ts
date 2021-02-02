@@ -7,11 +7,8 @@ export interface reduxState {
     token: string;
   };
   box: Array<PhotoIdentifier>;
-  // imageSizes: {
-  //   imageWidth: number;
-  //   imageHeight: number;
-  // };
   images: Array<sortedPhotos>;
+  sortCondition: sortCondition;
 }
 
 export interface sortedPhotos {

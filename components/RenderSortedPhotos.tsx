@@ -11,8 +11,6 @@ interface Props {
 
 const renderComponent = (props: Props) => {
   let result: Array<Element> = [];
-  
-  console.log("sege")
 
   for (let photoTitle of Object.keys(props.photoObject)) {
     // result.push();
@@ -38,7 +36,6 @@ const renderComponent = (props: Props) => {
       </SafeAreaView>,
     );
   }
-  console.log('hello', result);
 
   return result;
 };

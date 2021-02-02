@@ -1,5 +1,4 @@
-import Animated from 'react-native-reanimated';
-import {compose, createStore} from 'redux';
+import {createStore} from 'redux';
 import {reducer} from './reducer';
 
 const initialStore = {
@@ -28,10 +27,7 @@ const initialStore = {
       },
     },
   ],
-  // imageSizes: {
-  //   imageWidth: new Animated.Value(50),
-  //   imageHeight: new Animated.Value(50),
-  // },
+  sortCondition: 'day',
 };
 
 let store = createStore(reducer as any, initialStore);

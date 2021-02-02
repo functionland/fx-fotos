@@ -11,6 +11,8 @@ import PinchAndZoom from './PinchAndZoom';
 import {ScrollView} from 'react-native-gesture-handler';
 import {sortCondition} from '../types/interfaces';
 import RenderSortedPhotos from './RenderSortedPhotos';
+import Animated from 'react-native-reanimated';
+import PhotosContainer from './PhotosContainer';
 
 interface sortedPhotos {
   day: {[key: string]: Array<PhotoIdentifier>};
@@ -82,19 +84,25 @@ const Photos = () => {
       return;
     }
 
+    let animationValue = 1;
+
     if (allPhotos && sortCondition) {
-      for (let photos of sortConditionArray) {
+      for (let photos of sortConditionArray.reverse()) {
         if (photos == sortCondition) {
           result[photos] = (
             <PinchAndZoom
-              sortCondition={sortCondition}
-              setSortCondition={setSortCondition}>
+              fromValue={animationValue === 0 ? 0 : 1}
+              toValue={animationValue === 0 ? 1 : 0}>
               <RenderSortedPhotos photoObject={sortedPhotos[sortCondition]} />
             </PinchAndZoom>
           );
         } else if (photos == 'day' || photos == 'month' || photos == 'week') {
           result[photos] = (
-            <RenderSortedPhotos photoObject={sortedPhotos[photos]} />
+            <PinchAndZoom
+              fromValue={animationValue === 0 ? 1 : 0}
+              toValue={animationValue === 0 ? 0 : 1}>
+              <RenderSortedPhotos photoObject={sortedPhotos[photos]} />
+            </PinchAndZoom>
           );
         }
       }
@@ -106,7 +114,8 @@ const Photos = () => {
 
   return (
     // <PinchAndZoom>
-    <ScrollView>{renderPhotos ? renderPhotos : <Text></Text>}</ScrollView>
+    // <ScrollView>{renderPhotos ? renderPhotos : <Text></Text>}</ScrollView>
+    <PhotosContainer />
     // </PinchAndZoom>
   );
 };

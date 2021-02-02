@@ -22,19 +22,8 @@ export const reducer: Reducer<reduxState, reduxAction> = (
 
       return {...state, user: userInfo};
 
-    // case Constant.actionTypes.imageSizeChange:
-    //   let imageWidth = new Animated.Value(state.imageSizes.imageWidth);
-    //   let imageHeight = new Animated.Value(state.imageSizes.imageHeight);
-
-    //   Animated.timing(imageWidth, {
-    //     duration: 400,
-    //     toValue: 100,
-    //     useNativeDriver: false}).start();
-
-    //   return {
-    //     ...state,
-    //     imageSizes: {...state.imageSizes, imageWidth: imageWidth},
-    //   };
+    case Constant.actionTypes.sortConditionChange:
+      return {...state, sortCondition: action.payload};
 
     default:
       return {...state};

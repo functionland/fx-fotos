@@ -1,5 +1,5 @@
-import {PhotoIdentifier} from '@react-native-community/cameraroll';
-import {sortedPhotosObject} from '../types/interfaces';
+import CameraRoll, {PhotoIdentifier} from '@react-native-community/cameraroll';
+import {NativeTouchEvent} from 'react-native';
 
 export const sortPhotos = (photos: Array<PhotoIdentifier>) => {
   let timestamps = photos
@@ -64,4 +64,32 @@ export const timestampToDate = (
   } else {
     return 'unknown';
   }
+};
+
+export const getStoragePhotos = (per: boolean, numberOfPhotos: number) => {
+  if (per) {
+    return new Promise((resolve, reject) =>
+      CameraRoll.getPhotos({
+        first: numberOfPhotos,
+        assetType: 'All',
+      })
+        .then((res) => resolve(res))
+        .catch((err) => reject(err)),
+    );
+  }
+};
+
+export const pow2abs = (a: number, b: number) => {
+  return Math.pow(Math.abs(a - b), 2);
+};
+
+export const getDistance = (touches: Array<NativeTouchEvent>) => {
+  const [a, b] = touches;
+
+  if (a == null || b == null) {
+    return 0;
+  }
+  return Math.sqrt(
+    pow2abs(a.locationX, b.locationX) + pow2abs(a.locationY, b.locationY),
+  );
 };

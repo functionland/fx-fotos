@@ -1,70 +1,44 @@
-import {PhotoIdentifier} from '@react-native-community/cameraroll';
-import {Image, StyleSheet, Text, View} from 'react-native';
-import React, {useRef, useEffect, useState} from 'react';
-import FastImage from 'react-native-fast-image';
-import {FlatList, ScrollView} from 'react-native-gesture-handler';
-import {Animated} from 'react-native';
-import {
-  sortCondition,
-  sortedPhotos,
-  sortedPhotosObject,
-} from '../types/interfaces';
+import {Text} from 'react-native';
+import React, {ReactNode} from 'react';
+import {reduxState, sortedPhotosObject} from '../types/interfaces';
 import RenderSortedPhotos from './RenderSortedPhotos';
+import {useSelector} from 'react-redux';
 import PinchAndZoom from './PinchAndZoom';
+import { ScrollView } from 'react-native-gesture-handler';
 
 interface Props {
   photos: sortedPhotosObject;
-  sortCondition: sortCondition;
 }
 
 const RenderPhotos: React.FC<Props> = (props) => {
-  const [viewOpacity, setViewOpacity] = useState(new Animated.Value(1));
-  const [viewScale, setViewScale] = useState(new Animated.Value(1));
+  const sortCondition = useSelector((state: reduxState) => state.sortCondition);
 
   const renderPhoto = (photoObject: sortedPhotosObject) => {
-    let result = [];
+    let result: Array<ReactNode> = [];
 
-    result.push(
-      // <Animated.ScrollView
-      //   style={{
-      //     opacity: viewOpacity,
-      //     width: viewScale.interpolate({
-      //       inputRange: [1, 2],
-      //       outputRange: [1, 5],
-      //     }),
-      //   }}>
-      <RenderSortedPhotos photoObject={photoObject['day']} />,
-      // </Animated.ScrollView>,
-      // <Animated.ScrollView
-      //   style={{
-      //     opacity: viewOpacity.interpolate({
-      //       inputRange: [0, 1],
-      //       outputRange: [1, 0],
-      //     }),
-      //     width: viewScale.interpolate({
-      //       inputRange: [1, 2],
-      //       outputRange: [5, 1],
-      //     }),
-      //   }}>
-      <RenderSortedPhotos photoObject={photoObject['month']} />,
-      // </Animated.ScrollView>,
-      // <RenderSortedPhotos
-      //   photoObject={photoObject['week']}
-      //   pinchScale={pinchScale}
-      // />,
-    );
-
-    result.map;
-
+    for (let condition of Object.keys(photoObject)) {
+      if (condition == sortCondition) {
+        result.push(
+          <PinchAndZoom fromValue={1} toValue={0}>
+            <RenderSortedPhotos photoObject={photoObject[condition]} />
+          </PinchAndZoom>,
+        );
+      } else if (
+        condition == 'day' ||
+        condition == 'month' ||
+        condition == 'week'
+      ) {
+        result.push(
+          <PinchAndZoom fromValue={0} toValue={1}>
+            <RenderSortedPhotos photoObject={photoObject[condition]} />
+          </PinchAndZoom>,
+        );
+      }
+    }
     return result;
   };
 
-  return <>{props.photos ? renderPhoto(props.photos) : <Text></Text>}</>;
+  return <ScrollView>{props.photos ? renderPhoto(props.photos) : <Text></Text>}</ScrollView>;
 };
-
-const styles = StyleSheet.create({
-  photoContainer: {},
-  container: {},
-});
 
 export default RenderPhotos;

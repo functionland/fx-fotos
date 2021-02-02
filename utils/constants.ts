@@ -9,6 +9,6 @@ export const Constant = {
     storage: {
       setStorageMedia: 'SET_STORAGE_MEDIA',
     },
-    imageSizeChange: 'IMAGE_SIZE_CHANGE',
+    sortConditionChange: 'SORT_CONDITION_CHANGE',
   },
 };
