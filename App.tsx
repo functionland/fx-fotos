@@ -1,9 +1,15 @@
 import React, {useEffect} from 'react';
 import {SafeAreaView, StyleSheet} from 'react-native';
+import {Provider} from 'react-redux';
 import AppNavigation from './navigation/AppNavigation';
+import store from './store/store';
 
 const App = () => {
-  return <AppNavigation />;
+  return (
+    <Provider store={store}>
+      <AppNavigation />
+    </Provider>
+  );
 };
 
 const styles = StyleSheet.create({});
