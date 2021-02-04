@@ -12,9 +12,7 @@ export interface reduxState {
 }
 
 export interface sortedPhotos {
-  photos: Array<PhotoIdentifier>;
-  title: string;
-  sizes: number;
+  [key: string]: Array<PhotoIdentifier>;
 }
 
 export interface reduxAction {
