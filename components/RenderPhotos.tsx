@@ -1,44 +1,51 @@
-import {Text} from 'react-native';
-import React, {ReactNode} from 'react';
-import {reduxState, sortedPhotosObject} from '../types/interfaces';
-import RenderSortedPhotos from './RenderSortedPhotos';
-import {useSelector} from 'react-redux';
-import PinchAndZoom from './PinchAndZoom';
-import { ScrollView } from 'react-native-gesture-handler';
+import {Image, Text, View} from 'native-base';
+import React, {ReactElement} from 'react';
+import FastImage from 'react-native-fast-image';
+import {FlatList, Dimensions, Animated} from 'react-native';
+import {sortedPhotos} from '../types/interfaces';
+
+const SCREEN_WIDTH = Dimensions.get('screen').width;
 
 interface Props {
-  photos: sortedPhotosObject;
+  photos: sortedPhotos;
+  width: string;
+  height: number;
+  numColumn: number;
+  opacity: Animated.AnimatedInterpolation;
 }
 
 const RenderPhotos: React.FC<Props> = (props) => {
-  const sortCondition = useSelector((state: reduxState) => state.sortCondition);
-
-  const renderPhoto = (photoObject: sortedPhotosObject) => {
-    let result: Array<ReactNode> = [];
-
-    for (let condition of Object.keys(photoObject)) {
-      if (condition == sortCondition) {
-        result.push(
-          <PinchAndZoom fromValue={1} toValue={0}>
-            <RenderSortedPhotos photoObject={photoObject[condition]} />
-          </PinchAndZoom>,
-        );
-      } else if (
-        condition == 'day' ||
-        condition == 'month' ||
-        condition == 'week'
-      ) {
-        result.push(
-          <PinchAndZoom fromValue={0} toValue={1}>
-            <RenderSortedPhotos photoObject={photoObject[condition]} />
-          </PinchAndZoom>,
-        );
-      }
+  const renderPhotos = (photos: sortedPhotos) => {
+    let result = [];
+    for (let date of Object.keys(photos)) {
+      result.push(
+        <FlatList
+          key={date}
+          data={photos[date]}
+          numColumns={props.numColumn}
+          ListHeaderComponent={<Text>{date}</Text>}
+          renderItem={({item}) => (
+            <FastImage
+              key={item.node.image.uri}
+              source={{uri: item.node.image.uri}}
+              style={{
+                width: props.width,
+                height: props.height,
+                margin: 5,
+              }}
+            />
+          )}
+        />,
+      );
     }
     return result;
   };
 
-  return <ScrollView>{props.photos ? renderPhoto(props.photos) : <Text></Text>}</ScrollView>;
+  return (
+    <Animated.View style={{opacity: props.opacity}}>
+      {props.photos ? renderPhotos(props.photos) : <Text>ERROR</Text>}
+    </Animated.View>
+  );
 };
 
 export default RenderPhotos;
