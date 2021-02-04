@@ -1,16 +1,12 @@
-import React, {useEffect, useState} from 'react';
-import {View, Tabs, Tab, Container, Content} from 'native-base';
-import Photos from '../components/Photos';
-import {StyleSheet} from 'react-native';
-import PinchAndZoom from '../components/PinchAndZoom';
+import React from 'react';
+import {SafeAreaView, StyleSheet} from 'react-native';
+import PhotosContainer from '../components/PhotosContainer';
 
 const HomePage = () => {
   return (
-    // <Container>
-      // {/* <PinchAndZoom> */}
-      <Photos />
-      // {/* </PinchAndZoom> */}
-    // </Container>
+    <SafeAreaView style={{flex: 1}}>
+      <PhotosContainer />
+    </SafeAreaView>
   );
 };
 
