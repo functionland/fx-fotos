@@ -18,7 +18,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         result.push(
           <RenderPhotos
             photos={photos[condition]}
-            width={'45%'}
+            width={'49%'}
             height={200}
             numColumn={2}
             opacity={props.opacity.interpolate({
@@ -48,7 +48,7 @@ const AllPhotos: React.FC<Props> = (props) => {
               outputRange: [1, 0],
             })}
             photos={photos[condition]}
-            width={'20%'}
+            width={'24%'}
             height={100}
             numColumn={4}
           />,
