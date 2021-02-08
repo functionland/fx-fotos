@@ -11,7 +11,6 @@ export const sortPhotos = (photos: Array<PhotoIdentifier>) => {
   for (let timestamp of timestamps_str) {
     result.day[timestampToDate(+timestamp, 'day')] = [];
     result.month[timestampToDate(+timestamp, 'month')] = [];
-    result.month[timestampToDate(+timestamp, 'week')] = [];
   }
 
   for (let photo of photos) {
@@ -32,7 +31,7 @@ export const sortPhotos = (photos: Array<PhotoIdentifier>) => {
 
 export const timestampToDate = (
   timestamp: number,
-  condition: 'day' | 'month' | 'week',
+  condition: 'day' | 'month',
 ) => {
   let date = new Date(timestamp);
   let month = date.getUTCMonth() + 1; //months from 1-12
