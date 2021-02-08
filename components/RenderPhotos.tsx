@@ -31,7 +31,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
               style={{
                 width: props.width,
                 height: props.height,
-                margin: 5,
+                margin: 2,
               }}
             />
           )}
