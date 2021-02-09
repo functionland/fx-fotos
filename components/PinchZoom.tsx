@@ -1,7 +1,9 @@
-import {View} from 'native-base';
-import React, {Children, useMemo, useState} from 'react';
-import {Animated, NativeTouchEvent, PanResponder} from 'react-native';
+import React, {useState} from 'react';
+import {Animated, Dimensions, PanResponder} from 'react-native';
 import {getDistance} from '../utils/functions';
+
+const WINDOW_WIDTH = Dimensions.get('screen').width;
+const WINDOW_HEIGHT = Dimensions.get('screen').height;
 
 interface Props {
   opacity: Animated.Value;
@@ -12,6 +14,9 @@ const PinchZoom: React.FC<Props> = (props) => {
   let initialYs: Array<number> = [];
   let currentXs: Array<number> = [];
   let currentYs: Array<number> = [];
+  let zIndex: number = 0;
+  let initial_distance: number = 0;
+  let current_distance: number = 0;
 
   const resetAnimation = () => {
     Animated.spring(props.opacity, {
@@ -20,57 +25,66 @@ const PinchZoom: React.FC<Props> = (props) => {
     }).start();
   };
 
-  const panResponder = useMemo(
-    () =>
-      PanResponder.create({
-        onStartShouldSetPanResponder: (event) => {
-          let touches = event.nativeEvent.touches;
+  const panResponder = useState(() =>
+    PanResponder.create({
+      onStartShouldSetPanResponder: (event, gesture) => {
+        let touches = event.nativeEvent.touches;
+        if (gesture.numberActiveTouches == 2) {
+          zIndex = 2;
+          return true;
+        } else {
+          zIndex = 0;
+          return false;
+        }
+      },
+      onPanResponderStart: (initial_event, initial_gesture) => {
+        let touches = initial_event.nativeEvent.touches;
 
-          if (touches.length == 2) {
-            return true;
-          } else {
-            return false;
-          }
-        },
-        onPanResponderStart: (initial_event, initial_gesture) => {
-          let touches = initial_event.nativeEvent.touches;
-          if (touches.length == 2) {
-            initialXs = [];
-            initialYs = [];
-            initialXs.push(touches[0].locationX);
-            initialXs.push(touches[1].locationX);
-            initialYs.push(touches[0].locationY);
-            initialYs.push(touches[1].locationY);
-          }
-        },
-        onMoveShouldSetPanResponder: () => true,
-        onPanResponderMove: (event, gesture) => {
-          let touches = event.nativeEvent.touches;
-          if (touches.length == 2) {
-            currentXs = [];
-            currentYs = [];
-            currentXs.push(touches[0].locationX);
-            currentXs.push(touches[1].locationX);
-            currentYs.push(touches[0].locationY);
-            currentYs.push(touches[1].locationY);
-          }
-          console.log('Xs', initialXs, currentXs);
-          console.log('Ys', initialYs, currentYs);
-        },
-        onPanResponderRelease: (event, gesture) => {
-          let touches = event.nativeEvent.touches;
-          console.log('Xs', initialXs, currentXs);
-          console.log('Ys', initialYs, currentYs);
-          if (touches.length == 2) {
-            console.log('Xs', initialXs, currentXs);
-            console.log('Ys', initialYs, currentYs);
-          }
-        },
-      }),
-    [],
-  );
+        initialXs = [];
+        initialYs = [];
+
+        initialXs.push(touches[0].locationX);
+        initialXs.push(touches[1].locationX);
+        initialYs.push(touches[0].locationY);
+        initialYs.push(touches[1].locationY);
+      },
+      onPanResponderMove: (event, gesture) => {
+        let touches = event.nativeEvent.touches;
+
+        if (touches.length == 2) {
+          currentXs = [];
+          currentYs = [];
+
+          currentXs.push(touches[0].locationX);
+          currentXs.push(touches[1].locationX);
+          currentYs.push(touches[0].locationY);
+          currentYs.push(touches[1].locationY);
+
+          initial_distance = getDistance(
+            initialXs[0],
+            initialYs[0],
+            initialXs[1],
+            initialYs[1],
+          );
+          current_distance = getDistance(
+            currentXs[0],
+            currentYs[0],
+            currentXs[1],
+            currentYs[1],
+          );
+        }
+        props.opacity = new Animated.Value(initial_distance - current_distance);
+      },
+    }),
+  )[0];
   return (
-    <Animated.View {...panResponder.panHandlers}>
+    <Animated.View
+      style={{
+        width: WINDOW_WIDTH,
+        height: WINDOW_HEIGHT,
+        zIndex: 2,
+      }}
+      {...panResponder.panHandlers}>
       {props.children}
     </Animated.View>
   );
