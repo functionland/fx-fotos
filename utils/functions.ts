@@ -82,13 +82,8 @@ export const pow2abs = (a: number, b: number) => {
   return Math.pow(Math.abs(a - b), 2);
 };
 
-export const getDistance = (touches: Array<NativeTouchEvent>) => {
-  const [a, b] = touches;
+export const getDistance = (x1: number, y1: number, x2: number, y2: number) => {
+  let distance = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
 
-  if (a == null || b == null) {
-    return 0;
-  }
-  return Math.sqrt(
-    pow2abs(a.locationX, b.locationX) + pow2abs(a.locationY, b.locationY),
-  );
+  return distance;
 };
