@@ -2,60 +2,127 @@ import {Text} from 'native-base';
 import React from 'react';
 import {ScrollView} from 'react-native-gesture-handler';
 import {Animated} from 'react-native';
-import {sortedPhotosObject} from '../types/interfaces';
+import {
+  reduxState,
+  sortedPhotos,
+  sortedPhotosObject,
+} from '../types/interfaces';
 import RenderPhotos from './RenderPhotos';
+import PinchZoom from './PinchZoom';
+import {useSelector} from 'react-redux';
 
 interface Props {
   photos: sortedPhotosObject;
-  opacity: Animated.Value;
+  distance: Animated.Value;
 }
 
+const renderPhotosWidthAnimation = (
+  photos: sortedPhotos,
+  width: string,
+  height: number,
+  numCol: number,
+  distance: Animated.Value,
+  hasPinchAndZoom: boolean,
+) => {
+  if (hasPinchAndZoom) {
+    return (
+      <RenderPhotos
+        photos={photos}
+        width={width}
+        height={height}
+        numColumn={numCol}
+        distance={distance}
+      />
+    );
+  } else {
+    return (
+      <RenderPhotos
+        photos={photos}
+        width={width}
+        height={height}
+        numColumn={numCol}
+        distance={distance}
+      />
+    );
+  }
+};
+
 const AllPhotos: React.FC<Props> = (props) => {
+  const sortCondition = useSelector((state: reduxState) => state.sortCondition);
+
   const renderPhotos = (photos: any) => {
     let result: Array<Element> = [];
+
     for (let condition of Object.keys(photos)) {
-      if (condition == 'day')
+      if (condition == sortCondition && condition == 'day')
         result.push(
-          <RenderPhotos
-            photos={photos[condition]}
-            width={'49%'}
-            height={200}
-            numColumn={2}
-            opacity={props.opacity.interpolate({
-              inputRange: [0, 1],
-              outputRange: [0, 1],
-            })}
-          />,
+          renderPhotosWidthAnimation(
+            photos[condition],
+            '49%',
+            200,
+            2,
+            props.distance,
+            true,
+          ),
         );
-      if (condition == 'week')
+      else if (condition == sortCondition && condition == 'month')
         result.push(
-          <RenderPhotos
-            opacity={props.opacity.interpolate({
-              inputRange: [0, 1],
-              outputRange: [0, 1],
-            })}
-            photos={photos[condition]}
-            width={'30%'}
-            height={50}
-            numColumn={3}
-          />,
+          renderPhotosWidthAnimation(
+            photos[condition],
+            '30%',
+            50,
+            3,
+            props.distance,
+            true,
+          ),
         );
-      if (condition == 'month')
+      else if (condition == sortCondition && condition == 'month')
         result.push(
-          <RenderPhotos
-            opacity={props.opacity.interpolate({
-              inputRange: [0, 1],
-              outputRange: [1, 0],
-            })}
-            photos={photos[condition]}
-            width={'24%'}
-            height={100}
-            numColumn={4}
-          />,
+          renderPhotosWidthAnimation(
+            photos[condition],
+            '24%',
+            100,
+            4,
+            props.distance,
+            true,
+          ),
+        );
+      else if (condition == 'day')
+        result.push(
+          renderPhotosWidthAnimation(
+            photos[condition],
+            '49%',
+            200,
+            2,
+            props.distance,
+            false,
+          ),
+        );
+      else if (condition == 'month')
+        result.push(
+          renderPhotosWidthAnimation(
+            photos[condition],
+            '30%',
+            50,
+            3,
+            props.distance,
+            false,
+          ),
+        );
+      else if (condition == 'month')
+        result.push(
+          renderPhotosWidthAnimation(
+            photos[condition],
+            '24%',
+            100,
+            4,
+            props.distance,
+            false,
+          ),
         );
     }
 
-    return result;
+    return result.reverse();
   };
 
   return (

@@ -14,7 +14,7 @@ const PhotosContainer = () => {
   const [photos, setPhotos] = useState<sortedPhotosObject>();
   const [storagePhotos, setStoragePhotos] = useState<Array<PhotoIdentifier>>();
   const navigation = useNavigation();
-  const opacity = useRef(new Animated.Value(0)).current;
+  let distance = new Animated.Value(0);
 
   useEffect(() => {
     if (per) {
@@ -40,8 +40,8 @@ const PhotosContainer = () => {
   }, [storagePhotos]);
 
   return photos ? (
-    <PinchZoom opacity={opacity}>
-      <AllPhotos opacity={opacity} photos={photos} />
+    <PinchZoom distance={distance}>
+      <AllPhotos distance={distance} photos={photos} />
     </PinchZoom>
   ) : (
     <></>

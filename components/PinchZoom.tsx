@@ -1,3 +1,4 @@
+import {Text} from 'native-base';
 import React, {useState} from 'react';
 import {Animated, Dimensions, PanResponder} from 'react-native';
 import {getDistance} from '../utils/functions';
@@ -6,7 +7,7 @@ const WINDOW_WIDTH = Dimensions.get('screen').width;
 const WINDOW_HEIGHT = Dimensions.get('screen').height;
 
 interface Props {
-  opacity: Animated.Value;
+  distance: Animated.Value;
 }
 
 const PinchZoom: React.FC<Props> = (props) => {
@@ -14,16 +15,10 @@ const PinchZoom: React.FC<Props> = (props) => {
   let initialYs: Array<number> = [];
   let currentXs: Array<number> = [];
   let currentYs: Array<number> = [];
+  let distance = props.distance;
   let zIndex: number = 0;
   let initial_distance: number = 0;
   let current_distance: number = 0;
-
-  const resetAnimation = () => {
-    Animated.spring(props.opacity, {
-      toValue: props.opacity,
-      useNativeDriver: false,
-    }).start();
-  };
 
   const panResponder = useState(() =>
     PanResponder.create({
@@ -47,6 +42,12 @@ const PinchZoom: React.FC<Props> = (props) => {
         initialXs.push(touches[1].locationX);
         initialYs.push(touches[0].locationY);
         initialYs.push(touches[1].locationY);
+      },
+      onPanResponderGrant: () => {
+        initialXs = initialXs;
+        initialYs = initialYs;
+        currentXs = currentXs;
+        currentYs = currentYs;
       },
       onPanResponderMove: (event, gesture) => {
         let touches = event.nativeEvent.touches;
@@ -73,7 +74,15 @@ const PinchZoom: React.FC<Props> = (props) => {
             currentYs[1],
           );
         }
-        props.opacity = new Animated.Value(initial_distance - current_distance);
+
+        props.distance.setValue(initial_distance - current_distance);
+
+        // props.setDistance(distance);
+
+        console.log(distance);
+      },
+      onPanResponderRelease: () => {
+        zIndex = 0;
       },
     }),
   )[0];
@@ -82,7 +91,7 @@ const PinchZoom: React.FC<Props> = (props) => {
       style={{
         width: WINDOW_WIDTH,
         height: WINDOW_HEIGHT,
-        zIndex: 2,
+        zIndex: zIndex,
       }}
       {...panResponder.panHandlers}>
       {props.children}

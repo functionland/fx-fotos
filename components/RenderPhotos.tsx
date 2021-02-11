@@ -11,7 +11,7 @@ interface Props {
   width: string;
   height: number;
   numColumn: number;
-  opacity: Animated.AnimatedInterpolation;
+  distance: Animated.Value;
 }
 
 const RenderPhotos: React.FC<Props> = (props) => {
@@ -25,13 +25,16 @@ const RenderPhotos: React.FC<Props> = (props) => {
           numColumns={props.numColumn}
           ListHeaderComponent={<Text>{date}</Text>}
           renderItem={({item}) => (
-            <FastImage
+            <Animated.Image
               key={item.node.image.uri}
               source={{uri: item.node.image.uri}}
               style={{
                 width: props.width,
                 height: props.height,
-                margin: 2,
+                margin: props.distance.interpolate({
+                  inputRange: [-200, 500],
+                  outputRange: [0, 50],
+                }),
               }}
             />
           )}
@@ -42,7 +45,15 @@ const RenderPhotos: React.FC<Props> = (props) => {
   };
 
   return (
-    <Animated.View style={{opacity: props.opacity}}>
+    <Animated.View
+      style={{
+        // position: 'absolute',
+        opacity: props.distance.interpolate({
+          inputRange: [-200, 0, 200],
+          outputRange: [0, 1, 0],
+        }),
+        width: SCREEN_WIDTH,
+      }}>
       {props.photos ? renderPhotos(props.photos) : <Text>ERROR</Text>}
     </Animated.View>
   );
