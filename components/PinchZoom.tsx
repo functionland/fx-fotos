@@ -1,4 +1,3 @@
-import {Text} from 'native-base';
 import React, {useState} from 'react';
 import {Animated, Dimensions, PanResponder} from 'react-native';
 import {getDistance} from '../utils/functions';
@@ -15,7 +14,6 @@ const PinchZoom: React.FC<Props> = (props) => {
   let initialYs: Array<number> = [];
   let currentXs: Array<number> = [];
   let currentYs: Array<number> = [];
-  let distance = props.distance;
   let zIndex: number = 0;
   let initial_distance: number = 0;
   let current_distance: number = 0;
@@ -76,13 +74,18 @@ const PinchZoom: React.FC<Props> = (props) => {
         }
 
         props.distance.setValue(initial_distance - current_distance);
-
-        // props.setDistance(distance);
-
-        console.log(distance);
       },
       onPanResponderRelease: () => {
         zIndex = 0;
+        let animationProgress = 0;
+        props.distance.stopAnimation((event) => (animationProgress = event));
+        if (Math.sqrt(Math.pow(animationProgress, 2)) < 200) {
+          Animated.timing(props.distance, {
+            toValue: 0,
+            duration: 250,
+            useNativeDriver: false,
+          }).start();
+        }
       },
     }),
   )[0];
