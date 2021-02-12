@@ -8,7 +8,7 @@ const SCREEN_WIDTH = Dimensions.get('screen').width;
 
 interface Props {
   photos: sortedPhotos;
-  width: string;
+  width: number;
   height: number;
   numColumn: number;
   distance: Animated.Value;
@@ -29,12 +29,12 @@ const RenderPhotos: React.FC<Props> = (props) => {
               key={item.node.image.uri}
               source={{uri: item.node.image.uri}}
               style={{
-                width: props.width,
-                height: props.height,
-                margin: props.distance.interpolate({
-                  inputRange: [-200, 500],
-                  outputRange: [0, 50],
+                width: props.distance.interpolate({
+                  inputRange: [0, 500],
+                  outputRange: [`${props.width}%`, `${props.width / 2}%`],
                 }),
+                height: props.height,
+                margin: 2,
               }}
             />
           )}

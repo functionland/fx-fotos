@@ -18,7 +18,7 @@ interface Props {
 
 const renderPhotosWidthAnimation = (
   photos: sortedPhotos,
-  width: string,
+  width: number,
   height: number,
   numCol: number,
   distance: Animated.Value,
@@ -58,7 +58,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         result.push(
           renderPhotosWidthAnimation(
             photos[condition],
-            '49%',
+            49,
             200,
             2,
             props.distance,
@@ -69,7 +69,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         result.push(
           renderPhotosWidthAnimation(
             photos[condition],
-            '30%',
+            30,
             50,
             3,
             props.distance,
@@ -80,7 +80,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         result.push(
           renderPhotosWidthAnimation(
             photos[condition],
-            '24%',
+            24,
             100,
             4,
             props.distance,
@@ -91,7 +91,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         result.push(
           renderPhotosWidthAnimation(
             photos[condition],
-            '49%',
+            49,
             200,
             2,
             props.distance,
@@ -102,7 +102,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         result.push(
           renderPhotosWidthAnimation(
             photos[condition],
-            '30%',
+            30,
             50,
             3,
             props.distance,
@@ -113,7 +113,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         result.push(
           renderPhotosWidthAnimation(
             photos[condition],
-            '24%',
+            24,
             100,
             4,
             props.distance,
