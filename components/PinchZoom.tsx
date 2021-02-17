@@ -41,12 +41,6 @@ const PinchZoom: React.FC<Props> = (props) => {
         initialYs.push(touches[0].locationY);
         initialYs.push(touches[1].locationY);
       },
-      onPanResponderGrant: () => {
-        initialXs = initialXs;
-        initialYs = initialYs;
-        currentXs = currentXs;
-        currentYs = currentYs;
-      },
       onPanResponderMove: (event, gesture) => {
         let touches = event.nativeEvent.touches;
 
