@@ -1,133 +1,58 @@
-import {Text} from 'native-base';
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {ScrollView} from 'react-native-gesture-handler';
 import {Animated} from 'react-native';
 import {
   reduxState,
-  sortedPhotos,
+  sortCondition,
   sortedPhotosObject,
 } from '../types/interfaces';
-import RenderPhotos from './RenderPhotos';
-import PinchZoom from './PinchZoom';
+import RenderPhotos from './RenderPhotostest';
 import {useSelector} from 'react-redux';
+import RenderAllPhotos from './RenderAllPhotos';
 
 interface Props {
   photos: sortedPhotosObject;
   distance: Animated.Value;
 }
 
-const renderPhotosWidthAnimation = (
-  photos: sortedPhotos,
-  width: number,
-  height: number,
-  numCol: number,
-  distance: Animated.Value,
-  hasPinchAndZoom: boolean,
-) => {
-  if (hasPinchAndZoom) {
-    return (
-      <RenderPhotos
-        photos={photos}
-        width={width}
-        height={height}
-        numColumn={numCol}
-        distance={distance}
-      />
-    );
-  } else {
-    return (
-      <RenderPhotos
-        photos={photos}
-        width={width}
-        height={height}
-        numColumn={numCol}
-        distance={distance}
-      />
-    );
-  }
-};
+let sortDetails = [
+  {sortCode: 'month', width: 30, height: 150},
+  {sortCode: 'day', width: 48, height: 200},
+];
 
 const AllPhotos: React.FC<Props> = (props) => {
   const sortCondition = useSelector((state: reduxState) => state.sortCondition);
+  // const [sortDetails, setSortDetails] = useState<sortDetails>();
 
-  const renderPhotos = (photos: any) => {
-    let result: Array<Element> = [];
+  // useEffect(() => {
+  //   switch (sortCondition) {
+  //     case 'day':
+  //       setSortDetails({});
+  //     case 'month':
+  //       setSortDetails({});
 
-    for (let condition of Object.keys(photos)) {
-      if (condition == sortCondition && condition == 'day')
-        result.push(
-          renderPhotosWidthAnimation(
-            photos[condition],
-            48,
-            200,
-            2,
-            props.distance,
-            true,
-          ),
-        );
-      else if (condition == sortCondition && condition == 'month')
-        result.push(
-          renderPhotosWidthAnimation(
-            photos[condition],
-            30,
-            50,
-            3,
-            props.distance,
-            true,
-          ),
-        );
-      else if (condition == sortCondition && condition == 'month')
-        result.push(
-          renderPhotosWidthAnimation(
-            photos[condition],
-            24,
-            100,
-            4,
-            props.distance,
-            true,
-          ),
-        );
-      else if (condition == 'day')
-        result.push(
-          renderPhotosWidthAnimation(
-            photos[condition],
-            48,
-            200,
-            2,
-            props.distance,
-            false,
-          ),
-        );
-      else if (condition == 'month')
-        result.push(
-          renderPhotosWidthAnimation(
-            photos[condition],
-            30,
-            50,
-            3,
-            props.distance,
-            false,
-          ),
-        );
-      else if (condition == 'month')
-        result.push(
-          renderPhotosWidthAnimation(
-            photos[condition],
-            24,
-            100,
-            4,
-            props.distance,
-            false,
-          ),
-        );
-    }
-
-    return result.reverse();
-  };
+  //     default:
+  //       setSortDetails({
+  //         sortCode: 'day',
+  //         width: 48,
+  //         height: 200,
+  //       });
+  //   }
+  // }, [sortCondition]);
 
   return (
     <ScrollView>
-      {props.photos ? renderPhotos(props.photos) : <Text>ERROR</Text>}
+      {/* {props.photos ? renderPhotos(props.photos) : <Text>ERROR</Text>} */}
+      <RenderAllPhotos
+        photos={props.photos['day']}
+        distance={props.distance}
+        sortDetails={sortDetails}
+      />
+      <RenderAllPhotos
+        photos={props.photos['month']}
+        distance={props.distance}
+        sortDetails={sortDetails}
+      />
     </ScrollView>
   );
 };
