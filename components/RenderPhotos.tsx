@@ -5,6 +5,7 @@ import {FlatList, Dimensions, Animated, Modal, Image} from 'react-native';
 import {sortedPhotos} from '../types/interfaces';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import SinglePhoto from './SinglePhoto';
+import CustomFlatList from './CustomFlatList';
 
 const SCREEN_WIDTH = Dimensions.get('screen').width;
 const SCREEN_HEIGHT = Dimensions.get('screen').height;
@@ -18,45 +19,16 @@ interface Props {
 }
 
 const RenderPhotos: React.FC<Props> = (props) => {
-  const [showModal, setShowModal] = useState<boolean>(false);
-  const [imageUri, setImageUri] = useState<string>();
-
-  useEffect(() => {
-    if (imageUri !== '') {
-      setShowModal(true);
-    }
-  }, [imageUri]);
-
   const renderPhotos = (photos: sortedPhotos) => {
     let result = [];
     for (let date of Object.keys(photos)) {
       result.push(
-        <FlatList
-          key={date}
-          data={photos[date]}
-          numColumns={props.numColumn}
-          ListHeaderComponent={<Text>{date}</Text>}
-          renderItem={({item}) => (
-            <TouchableOpacity
-              style={{width: SCREEN_WIDTH / props.numColumn}}
-              onPress={(event) => {
-                setImageUri(item.node.image.uri);
-                setShowModal(true);
-              }}>
-              <Animated.Image
-                key={item.node.image.uri}
-                source={{uri: item.node.image.uri}}
-                style={{
-                  // width: props.distance.interpolate({
-                  // inputRange: [0, 500],
-                  // outputRange: [`${props.width}%`, `${props.width / 2}%`],
-                  // }),
-                  height: props.height,
-                  margin: 2,
-                }}
-              />
-            </TouchableOpacity>
-          )}
+        <CustomFlatList
+          distance={props.distance}
+          width={props.width}
+          height={props.height}
+          photos={photos[date]}
+          title={date}
         />,
       );
     }
@@ -77,17 +49,9 @@ const RenderPhotos: React.FC<Props> = (props) => {
                 outputRange: [1, 0, 1],
               }),
         width: SCREEN_WIDTH,
+        height: SCREEN_HEIGHT,
       }}>
       {props.photos ? renderPhotos(props.photos) : <Text>ERROR</Text>}
-      {imageUri && showModal ? (
-        <SinglePhoto
-          showModal={showModal}
-          setShowModal={setShowModal}
-          imageUri={imageUri}
-        />
-      ) : (
-        void 0
-      )}
     </Animated.View>
   );
 };

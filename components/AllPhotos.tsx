@@ -58,7 +58,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         result.push(
           renderPhotosWidthAnimation(
             photos[condition],
-            49,
+            48,
             200,
             2,
             props.distance,
@@ -91,7 +91,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         result.push(
           renderPhotosWidthAnimation(
             photos[condition],
-            49,
+            48,
             200,
             2,
             props.distance,
