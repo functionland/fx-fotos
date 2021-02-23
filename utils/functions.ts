@@ -6,15 +6,19 @@ export const sortPhotos = (photos: Array<PhotoIdentifier>) => {
     .map((photo) => photo.node.timestamp * 1000)
     .sort((a, b) => b - a);
   let timestamps_str = timestamps.map((timestamp) => timestamp.toString());
-  let result: any = {day: {}, month: {}, week: {}};
+  let result: any = {largeDay: {}, month: {}, smallDay: {}};
 
   for (let timestamp of timestamps_str) {
-    result.day[timestampToDate(+timestamp, 'day')] = [];
+    result.largeDay[timestampToDate(+timestamp, 'day')] = [];
+    result.smallDay[timestampToDate(+timestamp, 'day')] = [];
     result.month[timestampToDate(+timestamp, 'month')] = [];
   }
 
   for (let photo of photos) {
-    result['day'][timestampToDate(photo.node.timestamp * 1000, 'day')].push(
+    result['smallDay'][timestampToDate(photo.node.timestamp * 1000, 'day')].push(
+      photo,
+    );
+    result['largeDay'][timestampToDate(photo.node.timestamp * 1000, 'day')].push(
       photo,
     );
     result['month'][timestampToDate(photo.node.timestamp * 1000, 'month')].push(
@@ -87,3 +91,9 @@ export const getDistance = (x1: number, y1: number, x2: number, y2: number) => {
 
   return distance;
 };
+
+export const findDiameter = (width: number, height: number) => {
+  let pow2 = Math.pow(width, 2) + Math.pow(height, 2)
+
+  return Math.sqrt(pow2)
+}
