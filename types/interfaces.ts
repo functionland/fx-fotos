@@ -26,4 +26,10 @@ export interface sortedPhotosObject {
   month: {[key: string]: Array<PhotoIdentifier>};
 }
 
+export interface sortDetails {
+  sortCode: sortCondition;
+  width: number;
+  height: number;
+}
+
 export type sortCondition = 'day' | 'month' | 'week';
