@@ -1,6 +1,5 @@
 import React from 'react';
-import {Animated, Dimensions} from 'react-native';
-import {FlatList, ScrollView} from 'react-native-gesture-handler';
+import {FlatList, ScrollView, Animated, Dimensions, Text} from 'react-native';
 import {sortedPhotos} from '../types/interfaces';
 
 const SCREEN_WIDTH = Dimensions.get('screen').width;
@@ -26,6 +25,7 @@ const renderFlatLists = (photos: sortedPhotos, props: Props) => {
         key={date}
         data={photos[date]}
         style={{width: SCREEN_WIDTH}}
+        ListHeaderComponent={<Text>{date}</Text>}
         numColumns={props.rowCount}
         renderItem={({item}) => (
           <Animated.Image
@@ -36,7 +36,7 @@ const renderFlatLists = (photos: sortedPhotos, props: Props) => {
               padding: props.padding,
               opacity: props.opacity,
               height: SCREEN_HEIGHT / (props.rowCount * 2),
-              width: SCREEN_WIDTH / props.rowCount
+              width: SCREEN_WIDTH / props.rowCount,
             }}
           />
         )}
@@ -48,7 +48,13 @@ const renderFlatLists = (photos: sortedPhotos, props: Props) => {
 };
 
 const RenderPhotos: React.FC<Props> = (props) => {
-  return <ScrollView key={props.separator}>{renderFlatLists(props.photos, props)}</ScrollView>;
+  console.log(props.opacity)
+
+  return (
+    <ScrollView style={{flex: 1, margin: 5}} key={props.separator}>
+      {renderFlatLists(props.photos, props)}
+    </ScrollView>
+  );
 };
 
 export default RenderPhotos;
