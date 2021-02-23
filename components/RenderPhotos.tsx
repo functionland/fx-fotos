@@ -1,59 +1,52 @@
-import {Text, View} from 'native-base';
-import React, {ReactElement, useEffect, useState} from 'react';
-import FastImage from 'react-native-fast-image';
-import {FlatList, Dimensions, Animated, Modal, Image} from 'react-native';
+import React from 'react';
+import {Animated, Dimensions} from 'react-native';
+import {FlatList, ScrollView} from 'react-native-gesture-handler';
 import {sortedPhotos} from '../types/interfaces';
-import {TouchableOpacity} from 'react-native-gesture-handler';
-import SinglePhoto from './SinglePhoto';
-import CustomFlatList from './CustomFlatList';
 
 const SCREEN_WIDTH = Dimensions.get('screen').width;
 const SCREEN_HEIGHT = Dimensions.get('screen').height;
 
 interface Props {
   photos: sortedPhotos;
-  width: number;
-  height: number;
-  numColumn: number;
-  distance: Animated.Value;
+  padding: Animated.AnimatedInterpolation;
+  maxWidth: number;
+  minWidth: number;
+  rowCount: 2 | 3 | 4;
+  opacity: Animated.AnimatedInterpolation;
+  date: Date;
+  separator: 'largeDay' | 'smallDay' | 'month';
 }
 
-const RenderPhotos: React.FC<Props> = (props) => {
-  const renderPhotos = (photos: sortedPhotos) => {
-    let result = [];
-    for (let date of Object.keys(photos)) {
-      result.push(
-        <CustomFlatList
-          distance={props.distance}
-          width={props.width}
-          height={props.height}
-          photos={photos[date]}
-          title={date}
-        />,
-      );
-    }
-    return result;
-  };
+const renderFlatLists = (photos: sortedPhotos, props: Props) => {
+  let result = [];
 
-  return (
-    <Animated.View
-      style={{
-        opacity:
-          props.numColumn === 2
-            ? props.distance.interpolate({
-                inputRange: [-200, 0, 200],
-                outputRange: [0, 1, 0],
-              })
-            : props.distance.interpolate({
-                inputRange: [-200, 0, 200],
-                outputRange: [1, 0, 1],
-              }),
-        width: SCREEN_WIDTH,
-        height: SCREEN_HEIGHT,
-      }}>
-      {props.photos ? renderPhotos(props.photos) : <Text>ERROR</Text>}
-    </Animated.View>
-  );
+  for (let date of Object.keys(photos)) {
+    result.push(
+      <FlatList
+        key={date}
+        data={photos[date]}
+        style={{width: SCREEN_WIDTH}}
+        numColumns={props.rowCount}
+        renderItem={({item}) => (
+          <Animated.Image
+            source={{uri: item.node.image.uri}}
+            style={{
+              maxWidth: props.maxWidth,
+              minWidth: props.minWidth,
+              padding: props.padding,
+              opacity: props.opacity,
+            }}
+          />
+        )}
+      />,
+    );
+  }
+
+  return result;
+};
+
+const RenderPhotos: React.FC<Props> = (props) => {
+  return <ScrollView key={props.separator}>{renderFlatLists(props.photos, props)}</ScrollView>;
 };
 
 export default RenderPhotos;
