@@ -21,8 +21,8 @@ export interface reduxAction {
 }
 
 export interface sortedPhotosObject {
-  day: {[key: string]: Array<PhotoIdentifier>};
-  week: {[key: string]: Array<PhotoIdentifier>};
+  largeDay: {[key: string]: Array<PhotoIdentifier>};
+  smallDay: {[key: string]: Array<PhotoIdentifier>};
   month: {[key: string]: Array<PhotoIdentifier>};
 }
 
