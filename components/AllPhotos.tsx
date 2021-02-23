@@ -24,11 +24,11 @@ interface paddingChanges {
 const createRenderPhotos = (
   photos: sortedPhotosObject,
   distance: Animated.Value,
-  props: Props,
   opacityChanges: opacityChanges,
   paddingChanges: paddingChanges,
 ) => {
   let result = [];
+  console.log(distance);
   for (let condition of Object.keys(photos)) {
     let date = new Date();
     if (condition == 'smallDay') {
@@ -36,12 +36,12 @@ const createRenderPhotos = (
         <RenderPhotos
           minWidth={100}
           maxWidth={150}
-          padding={props.distance.interpolate({
+          padding={distance.interpolate({
             inputRange: [-400, 0, 400],
             outputRange: paddingChanges.smallDay,
           })}
           date={date}
-          opacity={props.distance.interpolate({
+          opacity={distance.interpolate({
             inputRange: [-400, 0, 400],
             outputRange: opacityChanges.smallDay,
           })}
@@ -55,12 +55,12 @@ const createRenderPhotos = (
         <RenderPhotos
           minWidth={150}
           maxWidth={200}
-          padding={props.distance.interpolate({
+          padding={distance.interpolate({
             inputRange: [-400, 0, 400],
             outputRange: paddingChanges.largeDay,
           })}
           date={date}
-          opacity={props.distance.interpolate({
+          opacity={distance.interpolate({
             inputRange: [-400, 0, 400],
             outputRange: opacityChanges.largeDay,
           })}
@@ -74,12 +74,12 @@ const createRenderPhotos = (
         <RenderPhotos
           minWidth={80}
           maxWidth={150}
-          padding={props.distance.interpolate({
+          padding={distance.interpolate({
             inputRange: [-400, 0, 400],
             outputRange: paddingChanges.month,
           })}
           date={date}
-          opacity={props.distance.interpolate({
+          opacity={distance.interpolate({
             inputRange: [-400, 0, 400],
             outputRange: opacityChanges.month,
           })}
@@ -107,12 +107,12 @@ const paddingChanges = {
 };
 
 const AllPhotos: React.FC<Props> = (props) => {
+  
   return (
     <ScrollView>
       {createRenderPhotos(
         props.photos,
         props.distance,
-        props,
         opacityChanges,
         paddingChanges,
       )}
