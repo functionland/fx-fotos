@@ -76,9 +76,21 @@ const PinchZoom: React.FC<Props> = (props) => {
         zIndex = 0;
         let animationProgress = 0;
         props.distance.stopAnimation((event) => (animationProgress = event));
-        if (animationProgress < WINDOW_DIAMETER * 0.05) {
+        if (Math.abs(animationProgress) < WINDOW_DIAMETER * 0.05) {
           Animated.timing(props.distance, {
             toValue: 0,
+            duration: 250,
+            useNativeDriver: false,
+          }).start();
+        } else if (animationProgress < -(WINDOW_DIAMETER * 0.05)) {
+          Animated.timing(props.distance, {
+            toValue: -400,
+            duration: 250,
+            useNativeDriver: false,
+          }).start();
+        } else if (animationProgress > WINDOW_DIAMETER * 0.05) {
+          Animated.timing(props.distance, {
+            toValue: 400,
             duration: 250,
             useNativeDriver: false,
           }).start();
