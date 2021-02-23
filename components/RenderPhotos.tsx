@@ -35,6 +35,8 @@ const renderFlatLists = (photos: sortedPhotos, props: Props) => {
               minWidth: props.minWidth,
               padding: props.padding,
               opacity: props.opacity,
+              height: SCREEN_HEIGHT / (props.rowCount * 2),
+              width: SCREEN_WIDTH / props.rowCount
             }}
           />
         )}
