@@ -1,6 +1,6 @@
 import {PhotoIdentifier} from '@react-native-community/cameraroll';
 import {useNavigation} from '@react-navigation/native';
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Animated} from 'react-native';
 import {sortedPhotosObject} from '../types/interfaces';
 import {getUserBoxMedia} from '../utils/APICAlls';
