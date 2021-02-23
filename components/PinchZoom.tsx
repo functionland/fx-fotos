@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {Animated, Dimensions, PanResponder} from 'react-native';
-import {getDistance} from '../utils/functions';
+import {findDiameter, getDistance} from '../utils/functions';
 
 const WINDOW_WIDTH = Dimensions.get('screen').width;
 const WINDOW_HEIGHT = Dimensions.get('screen').height;
@@ -70,10 +70,13 @@ const PinchZoom: React.FC<Props> = (props) => {
         props.distance.setValue(initial_distance - current_distance);
       },
       onPanResponderRelease: () => {
+        let WINDOW_DIAMETER = Math.sqrt(
+          Math.pow(WINDOW_WIDTH, 2) + Math.pow(WINDOW_HEIGHT, 2),
+        );
         zIndex = 0;
         let animationProgress = 0;
         props.distance.stopAnimation((event) => (animationProgress = event));
-        if (Math.sqrt(Math.pow(animationProgress, 2)) < 200) {
+        if (animationProgress < WINDOW_DIAMETER * 0.05) {
           Animated.timing(props.distance, {
             toValue: 0,
             duration: 250,
