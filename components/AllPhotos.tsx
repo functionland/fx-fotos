@@ -75,8 +75,8 @@ const createRenderPhotos = (
     } else if (condition == 'month') {
       result.push(
         <RenderPhotos
-          minWidth={SCREEN_WIDTH / 3}
-          maxWidth={SCREEN_WIDTH}
+          minWidth={SCREEN_WIDTH / 5}
+          maxWidth={SCREEN_WIDTH / 3}
           margin={distance.interpolate({
             inputRange: [-SCREEN_WIDTH * 0.8, SCREEN_WIDTH * 0.8],
             outputRange: paddingChanges.month,
@@ -86,7 +86,7 @@ const createRenderPhotos = (
             inputRange: [-SCREEN_WIDTH * 0.8, SCREEN_WIDTH * 0.8],
             outputRange: opacityChanges.month,
           })}
-          rowCount={2}
+          rowCount={4}
           photos={photos['month']}
           separator="month"
         />,
