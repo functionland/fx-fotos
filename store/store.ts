@@ -27,7 +27,7 @@ const initialStore = {
       },
     },
   ],
-  sortCondition: 'day',
+  sortCondition: 'largeDay',
 };
 
 let store = createStore(reducer as any, initialStore);
