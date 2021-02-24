@@ -1,6 +1,13 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Animated, Dimensions, PanResponder} from 'react-native';
-import {findDiameter, getDistance} from '../utils/functions';
+import {useDispatch, useSelector} from 'react-redux';
+import {reduxState, sortCondition} from '../types/interfaces';
+import {Constant} from '../utils/constants';
+import {
+  changeSortCondition,
+  findDiameter,
+  getDistance,
+} from '../utils/functions';
 
 const WINDOW_WIDTH = Dimensions.get('screen').width;
 const WINDOW_HEIGHT = Dimensions.get('screen').height;
@@ -17,6 +24,18 @@ const PinchZoom: React.FC<Props> = (props) => {
   let zIndex: number = 0;
   let initial_distance: number = 0;
   let current_distance: number = 0;
+
+  console.log(props.distance);
+
+  const sortCondition = useSelector((state: reduxState) => state.sortCondition);
+  const dispatch = useDispatch();
+
+  const dispatchSortCondition = (newSortCondition: sortCondition) => {
+    dispatch({
+      type: Constant.actionTypes.sortConditionChange,
+      payload: newSortCondition,
+    });
+  };
 
   const panResponder = useState(() =>
     PanResponder.create({
@@ -84,16 +103,20 @@ const PinchZoom: React.FC<Props> = (props) => {
           }).start();
         } else if (animationProgress < -(WINDOW_DIAMETER * 0.05)) {
           Animated.timing(props.distance, {
-            toValue: -400,
+            toValue: -WINDOW_WIDTH * 0.8,
             duration: 250,
             useNativeDriver: false,
-          }).start();
+          }).start(() =>
+            dispatchSortCondition(changeSortCondition(sortCondition, 'zoom')),
+          );
         } else if (animationProgress > WINDOW_DIAMETER * 0.05) {
           Animated.timing(props.distance, {
-            toValue: 400,
+            toValue: WINDOW_WIDTH * 0.8,
             duration: 250,
             useNativeDriver: false,
-          }).start();
+          }).start(() =>
+            dispatchSortCondition(changeSortCondition(sortCondition, 'pinch')),
+          );
         }
       },
     }),
