@@ -1,11 +1,12 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {ScrollView} from 'react-native-gesture-handler';
-import {Animated, Dimensions} from 'react-native';
+import {Animated, Dimensions, View} from 'react-native';
 import {reduxState, sortedPhotosObject} from '../types/interfaces';
 import RenderPhotos from './RenderPhotos';
 import {useSelector} from 'react-redux';
 
 const SCREEN_WIDTH = Dimensions.get('screen').width;
+const SCREEN_HEIGHT = Dimensions.get('screen').height;
 
 interface Props {
   photos: sortedPhotosObject;
@@ -31,7 +32,6 @@ const createRenderPhotos = (
   paddingChanges: paddingChanges,
 ) => {
   let result = [];
-  console.log(distance);
   for (let condition of Object.keys(photos)) {
     let date = new Date();
     if (condition == 'smallDay') {
@@ -53,7 +53,8 @@ const createRenderPhotos = (
           separator="smallDay"
         />,
       );
-    } else if (condition == 'largeDay') {
+    }
+    if (condition == 'largeDay') {
       result.push(
         <RenderPhotos
           minWidth={SCREEN_WIDTH / 3}
@@ -72,7 +73,8 @@ const createRenderPhotos = (
           separator="largeDay"
         />,
       );
-    } else if (condition == 'month') {
+    }
+    if (condition == 'month') {
       result.push(
         <RenderPhotos
           minWidth={SCREEN_WIDTH / 5}
@@ -97,30 +99,58 @@ const createRenderPhotos = (
   return result;
 };
 
+const defaultOpacityChanges = {
+  smallDay: [0, 1],
+  largeDay: [0, 1],
+  month: [0, 1],
+};
+
+const defaultPaddingChanges = {
+  smallDay: [0, 3],
+  largeDay: [0, 3],
+  month: [0, 3],
+};
+
 const AllPhotos: React.FC<Props> = (props) => {
   const sortCondition = useSelector((state: reduxState) => state.sortCondition);
 
-  const opacityChanges = {
-    smallDay: sortCondition === 'smallDay' ? [1, 0] : [0, 1],
-    largeDay: sortCondition === 'largeDay' ? [1, 0] : [0, 1],
-    month: sortCondition === 'month' ? [1, 0] : [0, 1],
-  };
+  const [opacityChanges, setOpacityChanges] = useState<opacityChanges>(
+    defaultOpacityChanges,
+  );
+  const [paddingChanges, setPaddingChanges] = useState<paddingChanges>(
+    defaultPaddingChanges,
+  );
 
-  const paddingChanges = {
-    smallDay: sortCondition === 'smallDay' ? [5, 3] : [0, 3],
-    largeDay: sortCondition === 'largeDay' ? [5, 3] : [0, 3],
-    month: sortCondition === 'month' ? [5, 3] : [0, 3],
-  };
+  useEffect(() => {
+    if (sortCondition) {
+      let _opacityChanges = {...opacityChanges};
+      for (let condition of Object.keys(opacityChanges)) {
+        if (condition == sortCondition) {
+          _opacityChanges[condition] = [1, 0];
+        } else if (condition == 'smallDay') {
+          _opacityChanges[condition] = [0, 1];
+        } else if (condition == 'largeDay') {
+          _opacityChanges[condition] = [0, 1];
+        } else if (condition == 'month') {
+          _opacityChanges[condition] = [0, 1];
+        }
+      }
+      console.log(_opacityChanges);
+      setOpacityChanges(_opacityChanges);
+    }
+  }, [sortCondition]);
+
+  useEffect(() => {}, [opacityChanges]);
 
   return (
-    <ScrollView>
-      {createRenderPhotos(
-        props.photos,
-        props.distance,
-        opacityChanges,
-        paddingChanges,
-      )}
-    </ScrollView>
+    <View style={{flex: 1, minHeight: SCREEN_HEIGHT}}>
+        {createRenderPhotos(
+          props.photos,
+          props.distance,
+          opacityChanges,
+          paddingChanges,
+        )}
+    </View>
   );
 };
 

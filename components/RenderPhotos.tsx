@@ -50,7 +50,7 @@ const renderFlatLists = (photos: sortedPhotos, props: Props) => {
 
 const RenderPhotos: React.FC<Props> = (props) => {
   return (
-    <ScrollView style={{flex: 1, margin: 5}} key={props.separator}>
+    <ScrollView style={{position: "absolute", width: SCREEN_WIDTH}} key={props.separator}>
       {renderFlatLists(props.photos, props)}
     </ScrollView>
   );
