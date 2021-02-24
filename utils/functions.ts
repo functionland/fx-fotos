@@ -1,5 +1,6 @@
 import CameraRoll, {PhotoIdentifier} from '@react-native-community/cameraroll';
 import {NativeTouchEvent} from 'react-native';
+import { sortCondition } from '../types/interfaces';
 
 export const sortPhotos = (photos: Array<PhotoIdentifier>) => {
   let timestamps = photos
@@ -96,4 +97,14 @@ export const findDiameter = (width: number, height: number) => {
   let pow2 = Math.pow(width, 2) + Math.pow(height, 2)
 
   return Math.sqrt(pow2)
+}
+
+export const changeSortCondition = (sortCondition: sortCondition, pinchOrZoom: "pinch" | "zoom") => {
+  if (sortCondition == "largeDay" && pinchOrZoom == "pinch") return "smallDay"
+  if (sortCondition == "largeDay" && pinchOrZoom == "zoom") return "largeDay"
+  if (sortCondition == "smallDay" && pinchOrZoom == "pinch") return "month"
+  if (sortCondition == "smallDay" && pinchOrZoom == "zoom") return "largeDay"
+  if (sortCondition == "month" && pinchOrZoom == "pinch") return "month"
+  if (sortCondition == "month" && pinchOrZoom == "zoom") return "smallDay"
+  else return "largeDay"
 }
