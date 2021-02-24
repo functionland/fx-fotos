@@ -9,8 +9,8 @@ import {
   getDistance,
 } from '../utils/functions';
 
-const WINDOW_WIDTH = Dimensions.get('screen').width;
-const WINDOW_HEIGHT = Dimensions.get('screen').height;
+const SCREEN_WIDTH = Dimensions.get('screen').width;
+const SCREEN_HEIGHT = Dimensions.get('screen').height;
 
 interface Props {
   distance: Animated.Value;
@@ -89,43 +89,53 @@ const PinchZoom: React.FC<Props> = (props) => {
         props.distance.setValue(initial_distance - current_distance);
       },
       onPanResponderRelease: () => {
-        let WINDOW_DIAMETER = Math.sqrt(
-          Math.pow(WINDOW_WIDTH, 2) + Math.pow(WINDOW_HEIGHT, 2),
-        );
         zIndex = 0;
-        let animationProgress = 0;
-        props.distance.stopAnimation((event) => (animationProgress = event));
-        if (Math.abs(animationProgress) < WINDOW_DIAMETER * 0.05) {
+        let animationProgress = (props.distance as any)._value;
+        if (Math.abs(animationProgress) < SCREEN_WIDTH * 0.1) {
           Animated.timing(props.distance, {
-            toValue: -WINDOW_WIDTH * 0.8,
-            duration: 250,
-            useNativeDriver: false,
-          }).start();
-        } else if (animationProgress < -(WINDOW_DIAMETER * 0.05)) {
-          Animated.timing(props.distance, {
-            toValue: -WINDOW_WIDTH * 0.8,
+            toValue: -SCREEN_WIDTH * 0.8,
             duration: 250,
             useNativeDriver: false,
           }).start(() =>
-            dispatchSortCondition(changeSortCondition(sortCondition, 'zoom')),
+            dispatch({
+              type: Constant.actionTypes.sortConditionChange,
+              payload: sortCondition,
+            }),
           );
-        } else if (animationProgress > WINDOW_DIAMETER * 0.05) {
+        } else if (animationProgress < -(SCREEN_WIDTH * 0.1)) {
           Animated.timing(props.distance, {
-            toValue: WINDOW_WIDTH * 0.8,
+            toValue: -SCREEN_WIDTH * 0.8,
             duration: 250,
             useNativeDriver: false,
           }).start(() =>
-            dispatchSortCondition(changeSortCondition(sortCondition, 'pinch')),
+            dispatch({
+              type: Constant.actionTypes.sortConditionChange,
+              payload: changeSortCondition(sortCondition, 'zoom'),
+            }),
+          );
+        } else if (animationProgress > SCREEN_WIDTH * 0.1) {
+          Animated.timing(props.distance, {
+            toValue: SCREEN_WIDTH * 0.8,
+            duration: 250,
+            useNativeDriver: false,
+          }).start(() =>
+            dispatch({
+              type: Constant.actionTypes.sortConditionChange,
+              payload: changeSortCondition(sortCondition, 'pinch'),
+            }),
           );
         }
       },
     }),
   )[0];
+
+  console.log(sortCondition);
+
   return (
     <Animated.View
       style={{
-        width: WINDOW_WIDTH,
-        height: WINDOW_HEIGHT,
+        width: SCREEN_WIDTH,
+        height: SCREEN_HEIGHT,
         zIndex: zIndex,
       }}
       {...panResponder.panHandlers}>
