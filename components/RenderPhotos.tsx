@@ -1,13 +1,14 @@
 import React from 'react';
 import {FlatList, ScrollView, Animated, Dimensions, Text} from 'react-native';
-import {sortedPhotos} from '../types/interfaces';
+import {useSelector} from 'react-redux';
+import {reduxState, sortedPhotos} from '../types/interfaces';
 
 const SCREEN_WIDTH = Dimensions.get('screen').width;
 const SCREEN_HEIGHT = Dimensions.get('screen').height;
 
 interface Props {
   photos: sortedPhotos;
-  padding: Animated.AnimatedInterpolation;
+  margin: Animated.AnimatedInterpolation;
   maxWidth: number;
   minWidth: number;
   rowCount: 2 | 3 | 4;
@@ -33,7 +34,7 @@ const renderFlatLists = (photos: sortedPhotos, props: Props) => {
             style={{
               maxWidth: props.maxWidth,
               minWidth: props.minWidth,
-              padding: props.padding,
+              margin: props.margin,
               opacity: props.opacity,
               height: SCREEN_HEIGHT / (props.rowCount * 2),
               width: SCREEN_WIDTH / props.rowCount,
@@ -48,8 +49,6 @@ const renderFlatLists = (photos: sortedPhotos, props: Props) => {
 };
 
 const RenderPhotos: React.FC<Props> = (props) => {
-  console.log(props.opacity)
-
   return (
     <ScrollView style={{flex: 1, margin: 5}} key={props.separator}>
       {renderFlatLists(props.photos, props)}
