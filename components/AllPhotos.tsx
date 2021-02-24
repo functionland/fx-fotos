@@ -1,8 +1,11 @@
 import React from 'react';
 import {ScrollView} from 'react-native-gesture-handler';
-import {Animated} from 'react-native';
-import {sortedPhotosObject} from '../types/interfaces';
+import {Animated, Dimensions} from 'react-native';
+import {reduxState, sortedPhotosObject} from '../types/interfaces';
 import RenderPhotos from './RenderPhotos';
+import {useSelector} from 'react-redux';
+
+const SCREEN_WIDTH = Dimensions.get('screen').width;
 
 interface Props {
   photos: sortedPhotosObject;
@@ -34,15 +37,15 @@ const createRenderPhotos = (
     if (condition == 'smallDay') {
       result.push(
         <RenderPhotos
-          minWidth={100}
-          maxWidth={150}
-          padding={distance.interpolate({
-            inputRange: [-400, 0, 400],
+          minWidth={SCREEN_WIDTH / 4}
+          maxWidth={SCREEN_WIDTH / 2}
+          margin={distance.interpolate({
+            inputRange: [-SCREEN_WIDTH * 0.8, SCREEN_WIDTH * 0.8],
             outputRange: paddingChanges.smallDay,
           })}
           date={date}
           opacity={distance.interpolate({
-            inputRange: [-400, 0, 400],
+            inputRange: [-SCREEN_WIDTH * 0.8, SCREEN_WIDTH * 0.8],
             outputRange: opacityChanges.smallDay,
           })}
           rowCount={3}
@@ -53,15 +56,15 @@ const createRenderPhotos = (
     } else if (condition == 'largeDay') {
       result.push(
         <RenderPhotos
-          minWidth={150}
-          maxWidth={200}
-          padding={distance.interpolate({
-            inputRange: [-400, 0, 400],
+          minWidth={SCREEN_WIDTH / 3}
+          maxWidth={SCREEN_WIDTH}
+          margin={distance.interpolate({
+            inputRange: [-SCREEN_WIDTH * 0.8, SCREEN_WIDTH * 0.8],
             outputRange: paddingChanges.largeDay,
           })}
           date={date}
           opacity={distance.interpolate({
-            inputRange: [-400, 0, 400],
+            inputRange: [-SCREEN_WIDTH * 0.8, SCREEN_WIDTH * 0.8],
             outputRange: opacityChanges.largeDay,
           })}
           rowCount={2}
@@ -72,15 +75,15 @@ const createRenderPhotos = (
     } else if (condition == 'month') {
       result.push(
         <RenderPhotos
-          minWidth={80}
-          maxWidth={150}
-          padding={distance.interpolate({
-            inputRange: [-400, 0, 400],
+          minWidth={SCREEN_WIDTH / 3}
+          maxWidth={SCREEN_WIDTH}
+          margin={distance.interpolate({
+            inputRange: [-SCREEN_WIDTH * 0.8, SCREEN_WIDTH * 0.8],
             outputRange: paddingChanges.month,
           })}
           date={date}
           opacity={distance.interpolate({
-            inputRange: [-400, 0, 400],
+            inputRange: [-SCREEN_WIDTH * 0.8, SCREEN_WIDTH * 0.8],
             outputRange: opacityChanges.month,
           })}
           rowCount={2}
@@ -94,20 +97,21 @@ const createRenderPhotos = (
   return result;
 };
 
-const opacityChanges = {
-  smallDay: [0, 1, 0],
-  largeDay: [1, 0, 1],
-  month: [0, 1, 0],
-};
-
-const paddingChanges = {
-  smallDay: [5, 3, 0],
-  largeDay: [0, 3, 5],
-  month: [0, 3, 5],
-};
-
 const AllPhotos: React.FC<Props> = (props) => {
-  
+  const sortCondition = useSelector((state: reduxState) => state.sortCondition);
+
+  const opacityChanges = {
+    smallDay: sortCondition === 'smallDay' ? [1, 0] : [0, 1],
+    largeDay: sortCondition === 'largeDay' ? [1, 0] : [0, 1],
+    month: sortCondition === 'month' ? [1, 0] : [0, 1],
+  };
+
+  const paddingChanges = {
+    smallDay: sortCondition === 'smallDay' ? [5, 3] : [0, 3],
+    largeDay: sortCondition === 'largeDay' ? [5, 3] : [0, 3],
+    month: sortCondition === 'month' ? [5, 3] : [0, 3],
+  };
+
   return (
     <ScrollView>
       {createRenderPhotos(
