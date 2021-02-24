@@ -32,4 +32,4 @@ export interface sortDetails {
   height: number;
 }
 
-export type sortCondition = 'day' | 'month' | 'week';
+export type sortCondition = 'largeDay' | 'month' | 'smallDay';
