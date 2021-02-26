@@ -1,6 +1,9 @@
 import CameraRoll, {PhotoIdentifier} from '@react-native-community/cameraroll';
 import {NativeTouchEvent} from 'react-native';
-import {sortCondition} from '../types/interfaces';
+import {
+  changeSortConditionAndNumColumns,
+  sortCondition,
+} from '../types/interfaces';
 
 // export const sortPhotos = (photos: Array<PhotoIdentifier>) => {
 //   let timestamps = photos
@@ -131,15 +134,51 @@ export const findDiameter = (width: number, height: number) => {
   return Math.sqrt(pow2);
 };
 
-export const changeSortCondition = (
-  sortCondition: sortCondition,
-  pinchOrZoom: 'pinch' | 'zoom',
+export const changeSortCondition: changeSortConditionAndNumColumns = (
+  sortCondition,
+  pinchOrZoom,
+  numCols,
 ) => {
-  if (sortCondition == 'largeDay' && pinchOrZoom == 'pinch') return 'smallDay';
-  if (sortCondition == 'largeDay' && pinchOrZoom == 'zoom') return 'largeDay';
-  if (sortCondition == 'smallDay' && pinchOrZoom == 'pinch') return 'month';
-  if (sortCondition == 'smallDay' && pinchOrZoom == 'zoom') return 'largeDay';
-  if (sortCondition == 'month' && pinchOrZoom == 'pinch') return 'month';
-  if (sortCondition == 'month' && pinchOrZoom == 'zoom') return 'smallDay';
-  else return 'largeDay';
+  let result = {
+    sortCondition: 'day',
+    numColumns: 2,
+  };
+
+  console.log('sortCondition', sortCondition);
+  console.log('numCols', numCols);
+
+  if (sortCondition == 'day') {
+    if (numCols == 2) {
+      if (pinchOrZoom == 'pinch')
+        result = {...result, sortCondition: 'day', numColumns: 3};
+      else if (pinchOrZoom == 'zoom')
+        result = {...result, sortCondition: 'day', numColumns: 2};
+    } else if (numCols == 3) {
+      if (pinchOrZoom == 'pinch')
+        result = {...result, sortCondition: 'month', numColumns: 4};
+      else if (pinchOrZoom == 'zoom')
+        result = {...result, sortCondition: 'day', numColumns: 2};
+    }
+  } else if (sortCondition == 'month') {
+    if (pinchOrZoom == 'pinch')
+      result = {...result, sortCondition: 'month', numColumns: 4};
+    else if (pinchOrZoom == 'zoom')
+      result = {...result, sortCondition: 'day', numColumns: 3};
+  }
+
+  return result;
+};
+
+export const opacityTransition = (
+  sortCondition: sortCondition,
+  numColumns: 2 | 3 | 4,
+  thisComponentSeperator: 'day' | 'month',
+  thisComponentNumCol: 2 | 3 | 4,
+) => {
+  if (
+    thisComponentSeperator == sortCondition &&
+    thisComponentNumCol == numColumns
+  )
+    return [1, 0];
+  else return [0, 1];
 };
