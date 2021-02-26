@@ -27,7 +27,7 @@ const initialStore = {
       },
     },
   ],
-  sortCondition: 'largeDay',
+  sortCondition: 'day',
   numColumns: 2
 };
 
