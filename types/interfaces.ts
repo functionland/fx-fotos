@@ -20,11 +20,11 @@ export interface reduxAction {
   payload: any;
 }
 
-export interface sortedPhotosObject {
-  largeDay: {[key: string]: Array<PhotoIdentifier>};
-  smallDay: {[key: string]: Array<PhotoIdentifier>};
-  month: {[key: string]: Array<PhotoIdentifier>};
-}
+// export interface sortedPhotosObject {
+//   day: {[key: string]: Array<PhotoIdentifier>};
+//   smallDay: {[key: string]: Array<PhotoIdentifier>};
+//   month: {[key: string]: Array<PhotoIdentifier>};
+// }
 
 export interface sortDetails {
   sortCode: sortCondition;

@@ -28,6 +28,7 @@ const initialStore = {
     },
   ],
   sortCondition: 'largeDay',
+  numColumns: 2
 };
 
 let store = createStore(reducer as any, initialStore);

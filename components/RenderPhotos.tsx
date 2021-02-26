@@ -1,5 +1,13 @@
+import {View} from 'native-base';
 import React from 'react';
-import {FlatList, ScrollView, Animated, Dimensions, Text} from 'react-native';
+import {
+  FlatList,
+  ScrollView,
+  Animated,
+  Dimensions,
+  Text,
+  SafeAreaView,
+} from 'react-native';
 import {useSelector} from 'react-redux';
 import {reduxState, sortedPhotos} from '../types/interfaces';
 
@@ -14,7 +22,7 @@ interface Props {
   rowCount: 2 | 3 | 4;
   opacity: Animated.AnimatedInterpolation;
   date: Date;
-  separator: 'largeDay' | 'smallDay' | 'month';
+  separator: 'day' | 'month';
 }
 
 const renderFlatLists = (photos: sortedPhotos, props: Props) => {
@@ -26,7 +34,7 @@ const renderFlatLists = (photos: sortedPhotos, props: Props) => {
         key={date}
         data={photos[date]}
         style={{width: SCREEN_WIDTH}}
-        ListHeaderComponent={<Text>{date}</Text>}
+        ListHeaderComponent={<Animated.Text style={{opacity: props.opacity}}>{date}</Animated.Text>}
         numColumns={props.rowCount}
         renderItem={({item}) => (
           <Animated.Image
@@ -50,7 +58,7 @@ const renderFlatLists = (photos: sortedPhotos, props: Props) => {
 
 const RenderPhotos: React.FC<Props> = (props) => {
   return (
-    <ScrollView style={{position: "absolute", width: SCREEN_WIDTH}} key={props.separator}>
+    <ScrollView style={{flex: 1, position: 'absolute'}} key={props.separator}>
       {renderFlatLists(props.photos, props)}
     </ScrollView>
   );

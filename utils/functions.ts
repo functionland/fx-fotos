@@ -1,30 +1,62 @@
 import CameraRoll, {PhotoIdentifier} from '@react-native-community/cameraroll';
 import {NativeTouchEvent} from 'react-native';
-import { sortCondition } from '../types/interfaces';
+import {sortCondition} from '../types/interfaces';
 
-export const sortPhotos = (photos: Array<PhotoIdentifier>) => {
+// export const sortPhotos = (photos: Array<PhotoIdentifier>) => {
+//   let timestamps = photos
+//     .map((photo) => photo.node.timestamp * 1000)
+//     .sort((a, b) => b - a);
+//   let timestamps_str = timestamps.map((timestamp) => timestamp.toString());
+//   let result: any = {largeDay: {}, month: {}, smallDay: {}};
+
+//   for (let timestamp of timestamps_str) {
+//     result.largeDay[timestampToDate(+timestamp, 'day')] = [];
+//     result.smallDay[timestampToDate(+timestamp, 'day')] = [];
+//     result.month[timestampToDate(+timestamp, 'month')] = [];
+//   }
+
+//   for (let photo of photos) {
+//     result['smallDay'][
+//       timestampToDate(photo.node.timestamp * 1000, 'day')
+//     ].push(photo);
+//     result['largeDay'][
+//       timestampToDate(photo.node.timestamp * 1000, 'day')
+//     ].push(photo);
+//     result['month'][timestampToDate(photo.node.timestamp * 1000, 'month')].push(
+//       photo,
+//     );
+//   }
+
+//   return result;
+// };
+
+export const sortPhotos = (
+  photos: Array<PhotoIdentifier>,
+  sortCondition: 'day' | 'month',
+) => {
+  let result: any = {};
   let timestamps = photos
     .map((photo) => photo.node.timestamp * 1000)
     .sort((a, b) => b - a);
   let timestamps_str = timestamps.map((timestamp) => timestamp.toString());
-  let result: any = {largeDay: {}, month: {}, smallDay: {}};
+  if (sortCondition == 'day') {
+    for (let TS of timestamps_str) {
+      result[timestampToDate(+TS, 'day')] = [];
+    }
+    for (let photo of photos) {
+      result[timestampToDate(photo.node.timestamp * 1000, 'day')].push(photo);
+    }
 
-  for (let timestamp of timestamps_str) {
-    result.largeDay[timestampToDate(+timestamp, 'day')] = [];
-    result.smallDay[timestampToDate(+timestamp, 'day')] = [];
-    result.month[timestampToDate(+timestamp, 'month')] = [];
-  }
+    return result;
+  } else if (sortCondition == 'month') {
+    for (let TS of timestamps_str) {
+      result[timestampToDate(+TS, 'month')] = [];
+    }
+    for (let photo of photos) {
+      result[timestampToDate(photo.node.timestamp * 1000, 'month')].push(photo);
+    }
 
-  for (let photo of photos) {
-    result['smallDay'][timestampToDate(photo.node.timestamp * 1000, 'day')].push(
-      photo,
-    );
-    result['largeDay'][timestampToDate(photo.node.timestamp * 1000, 'day')].push(
-      photo,
-    );
-    result['month'][timestampToDate(photo.node.timestamp * 1000, 'month')].push(
-      photo,
-    );
+    return result;
   }
 
   return result;
@@ -94,17 +126,20 @@ export const getDistance = (x1: number, y1: number, x2: number, y2: number) => {
 };
 
 export const findDiameter = (width: number, height: number) => {
-  let pow2 = Math.pow(width, 2) + Math.pow(height, 2)
+  let pow2 = Math.pow(width, 2) + Math.pow(height, 2);
 
-  return Math.sqrt(pow2)
-}
+  return Math.sqrt(pow2);
+};
 
-export const changeSortCondition = (sortCondition: sortCondition, pinchOrZoom: "pinch" | "zoom") => {
-  if (sortCondition == "largeDay" && pinchOrZoom == "pinch") return "smallDay"
-  if (sortCondition == "largeDay" && pinchOrZoom == "zoom") return "largeDay"
-  if (sortCondition == "smallDay" && pinchOrZoom == "pinch") return "month"
-  if (sortCondition == "smallDay" && pinchOrZoom == "zoom") return "largeDay"
-  if (sortCondition == "month" && pinchOrZoom == "pinch") return "month"
-  if (sortCondition == "month" && pinchOrZoom == "zoom") return "smallDay"
-  else return "largeDay"
-}
+export const changeSortCondition = (
+  sortCondition: sortCondition,
+  pinchOrZoom: 'pinch' | 'zoom',
+) => {
+  if (sortCondition == 'largeDay' && pinchOrZoom == 'pinch') return 'smallDay';
+  if (sortCondition == 'largeDay' && pinchOrZoom == 'zoom') return 'largeDay';
+  if (sortCondition == 'smallDay' && pinchOrZoom == 'pinch') return 'month';
+  if (sortCondition == 'smallDay' && pinchOrZoom == 'zoom') return 'largeDay';
+  if (sortCondition == 'month' && pinchOrZoom == 'pinch') return 'month';
+  if (sortCondition == 'month' && pinchOrZoom == 'zoom') return 'smallDay';
+  else return 'largeDay';
+};
