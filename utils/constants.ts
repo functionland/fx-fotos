@@ -10,5 +10,6 @@ export const Constant = {
       setStorageMedia: 'SET_STORAGE_MEDIA',
     },
     sortConditionChange: 'SORT_CONDITION_CHANGE',
+    numColumnsChange: 'NUMBER_OF_COLUMNS_CHANGE',
   },
 };
