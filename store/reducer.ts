@@ -25,6 +25,8 @@ export const reducer: Reducer<reduxState, reduxAction> = (
     case Constant.actionTypes.sortConditionChange:
       return {...state, sortCondition: action.payload};
 
+    case Constant.actionTypes.numColumnsChange:
+      return {...state, numColumns: action.payload};
     default:
       return {...state};
   }
