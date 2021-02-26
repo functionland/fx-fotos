@@ -20,7 +20,8 @@ interface Props {
   maxWidth: number;
   minWidth: number;
   rowCount: 2 | 3 | 4;
-  opacity: Animated.AnimatedInterpolation;
+  // opacity: Animated.AnimatedInterpolation;
+  opacity: number
   date: Date;
   separator: 'day' | 'month';
 }
