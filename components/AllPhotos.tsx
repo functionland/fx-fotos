@@ -22,7 +22,7 @@ const AllPhotos: React.FC<Props> = (props) => {
 
   // console.log(opacityTransition(sortCondition, numColumns, 'day', 2));
   // console.log(props.distance);
-  console.log(state)
+  // console.log(state)
 
   return (
     <SafeAreaView style={{flex: 1}}>

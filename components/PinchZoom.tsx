@@ -25,22 +25,36 @@ const PinchZoom: React.FC<Props> = (props) => {
   let initial_distance: number = 0;
   let current_distance: number = 0;
 
-  const changeGlobalState = (
-    sortCondition: string | undefined,
-    numCols: number | undefined,
-  ) => {
-    if (sortCondition && numCols) {
-      dispatch({
-        type: Constant.actionTypes.sortConditionChange,
-        payload: sortCondition,
-      });
-      dispatch({type: Constant.actionTypes.numColumnsChange, payload: numCols});
-    }
-  };
-
   const sortCondition = useSelector((state: reduxState) => state.sortCondition);
   const numColumns = useSelector((state: reduxState) => state.numColumns);
+
+  const [sortConditionState, setSortConditionState] = useState<string>("day")
+  const [numColumnsState, setNumColumnsState] = useState<number>(2)
+
+  useEffect(() => {
+    if(sortConditionState){
+      dispatch({type: Constant.actionTypes.sortConditionChange, payload: sortConditionState})
+    }
+  }, [sortConditionState])
+
+  useEffect(() => {
+    if (numColumnsState){
+      dispatch({type: Constant.actionTypes.numColumnsChange, payload: numColumnsState})
+    }
+  }, [numColumnsState])
+
   const dispatch = useDispatch();
+
+  const animationTransition = (pinchOrZoom: "pinch" | "zoom") => {
+
+    console.log("sortConditionState", sortConditionState, "numColumnsState", numColumnsState)
+
+    let _sortCondition = changeSortCondition(sortCondition, pinchOrZoom, numColumns).sortCondition
+    let _numColumns = changeSortCondition(sortCondition, pinchOrZoom, numColumns).numColumns
+
+    setSortConditionState(_sortCondition)
+    setNumColumnsState(_numColumns)
+  }
 
   const panResponder = useState(() =>
     PanResponder.create({
@@ -101,32 +115,19 @@ const PinchZoom: React.FC<Props> = (props) => {
             toValue: -SCREEN_WIDTH * 0.8,
             duration: 250,
             useNativeDriver: false,
-          }).start(() => changeGlobalState(sortCondition, numColumns));
+          }).start();
         } else if (animationProgress < -(SCREEN_WIDTH * 0.1)) {
           Animated.timing(props.distance, {
             toValue: -SCREEN_WIDTH * 0.8,
             duration: 250,
             useNativeDriver: false,
-          }).start(() => {
-            changeGlobalState(
-              changeSortCondition(sortCondition, 'zoom', numColumns)
-                .sortCondition,
-              changeSortCondition(sortCondition, 'zoom', numColumns).numColumns,
-            );
-          });
+          }).start(() => animationTransition("zoom"));
         } else if (animationProgress > SCREEN_WIDTH * 0.1) {
           Animated.timing(props.distance, {
             toValue: SCREEN_WIDTH * 0.8,
             duration: 250,
             useNativeDriver: false,
-          }).start(() => {
-            changeGlobalState(
-              changeSortCondition(sortCondition, 'pinch', numColumns)
-                .sortCondition,
-              changeSortCondition(sortCondition, 'pinch', numColumns)
-                .numColumns,
-            );
-          });
+          }).start(() => animationTransition("pinch"));
         }
       },
     }),

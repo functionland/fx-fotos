@@ -144,26 +144,58 @@ export const changeSortCondition: changeSortConditionAndNumColumns = (
     numColumns: 2,
   };
 
-  console.log('sortCondition', sortCondition);
-  console.log('numCols', numCols);
+  // console.log('sortCondition', sortCondition);
+  // console.log('numCols', numCols);
 
-  if (sortCondition == 'day') {
-    if (numCols == 2) {
-      if (pinchOrZoom == 'pinch')
-        result = {...result, sortCondition: 'day', numColumns: 3};
-      else if (pinchOrZoom == 'zoom')
+  // if (sortCondition == 'day') {
+  //   if (numCols == 2) {
+  //     if (pinchOrZoom == 'pinch')
+  //       result = {...result, sortCondition: 'day', numColumns: 3};
+  //     else if (pinchOrZoom == 'zoom')
+  //       result = {...result, sortCondition: 'day', numColumns: 2};
+  //   } else if (numCols == 3) {
+  //     if (pinchOrZoom == 'pinch')
+  //       result = {...result, sortCondition: 'month', numColumns: 4};
+  //     else if (pinchOrZoom == 'zoom')
+  //       result = {...result, sortCondition: 'day', numColumns: 2};
+  //   }
+  // } else if (sortCondition == 'month') {
+  //   if (pinchOrZoom == 'pinch')
+  //     result = {...result, sortCondition: 'month', numColumns: 4};
+  //   else if (pinchOrZoom == 'zoom')
+  //     result = {...result, sortCondition: 'day', numColumns: 3};
+  // }
+
+  console.log(typeof numCols);
+
+  if (pinchOrZoom === 'zoom') {
+    if (sortCondition === 'day') {
+      if (numCols === 2) {
+        console.log('A');
         result = {...result, sortCondition: 'day', numColumns: 2};
-    } else if (numCols == 3) {
-      if (pinchOrZoom == 'pinch')
-        result = {...result, sortCondition: 'month', numColumns: 4};
-      else if (pinchOrZoom == 'zoom')
+      } else if (numCols === 3) {
+        console.log('B');
         result = {...result, sortCondition: 'day', numColumns: 2};
-    }
-  } else if (sortCondition == 'month') {
-    if (pinchOrZoom == 'pinch')
-      result = {...result, sortCondition: 'month', numColumns: 4};
-    else if (pinchOrZoom == 'zoom')
+      }
+    } else if (sortCondition === 'month') {
+      console.log('C');
       result = {...result, sortCondition: 'day', numColumns: 3};
+    }
+  }
+
+  if (pinchOrZoom === 'pinch') {
+    if (sortCondition === 'day') {
+      if (numCols === 2) {
+        console.log('D');
+        result = {...result, sortCondition: 'day', numColumns: 3};
+      } else if (numCols === 3) {
+        console.log('E');
+        result = {...result, sortCondition: 'month', numColumns: 4};
+      }
+    } else if (sortCondition === 'month') {
+      console.log('F');
+      result = {...result, sortCondition: 'month', numColumns: 4};
+    }
   }
 
   return result;
