@@ -144,30 +144,6 @@ export const changeSortCondition: changeSortConditionAndNumColumns = (
     numColumns: 2,
   };
 
-  // console.log('sortCondition', sortCondition);
-  // console.log('numCols', numCols);
-
-  // if (sortCondition == 'day') {
-  //   if (numCols == 2) {
-  //     if (pinchOrZoom == 'pinch')
-  //       result = {...result, sortCondition: 'day', numColumns: 3};
-  //     else if (pinchOrZoom == 'zoom')
-  //       result = {...result, sortCondition: 'day', numColumns: 2};
-  //   } else if (numCols == 3) {
-  //     if (pinchOrZoom == 'pinch')
-  //       result = {...result, sortCondition: 'month', numColumns: 4};
-  //     else if (pinchOrZoom == 'zoom')
-  //       result = {...result, sortCondition: 'day', numColumns: 2};
-  //   }
-  // } else if (sortCondition == 'month') {
-  //   if (pinchOrZoom == 'pinch')
-  //     result = {...result, sortCondition: 'month', numColumns: 4};
-  //   else if (pinchOrZoom == 'zoom')
-  //     result = {...result, sortCondition: 'day', numColumns: 3};
-  // }
-
-  console.log(typeof numCols);
-
   if (pinchOrZoom === 'zoom') {
     if (sortCondition === 'day') {
       if (numCols === 2) {
