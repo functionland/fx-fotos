@@ -28,33 +28,44 @@ const PinchZoom: React.FC<Props> = (props) => {
   const sortCondition = useSelector((state: reduxState) => state.sortCondition);
   const numColumns = useSelector((state: reduxState) => state.numColumns);
 
-  const [sortConditionState, setSortConditionState] = useState<string>("day")
-  const [numColumnsState, setNumColumnsState] = useState<number>(2)
+  const [sortConditionState, setSortConditionState] = useState<string>('day');
+  const [numColumnsState, setNumColumnsState] = useState<number>(2);
 
   useEffect(() => {
-    if(sortConditionState){
-      dispatch({type: Constant.actionTypes.sortConditionChange, payload: sortConditionState})
+    // console.log(sortCondition, numColumns)
+    if (sortConditionState) {
+      dispatch({
+        type: Constant.actionTypes.sortConditionChange,
+        payload: sortConditionState,
+      });
     }
-  }, [sortConditionState])
+  }, [sortConditionState]);
 
   useEffect(() => {
-    if (numColumnsState){
-      dispatch({type: Constant.actionTypes.numColumnsChange, payload: numColumnsState})
+    if (numColumnsState) {
+      dispatch({
+        type: Constant.actionTypes.numColumnsChange,
+        payload: numColumnsState,
+      });
     }
-  }, [numColumnsState])
+  }, [numColumnsState]);
 
   const dispatch = useDispatch();
 
-  const animationTransition = (pinchOrZoom: "pinch" | "zoom") => {
-
-    console.log("sortConditionState", sortConditionState, "numColumnsState", numColumnsState)
-
-    let _sortCondition = changeSortCondition(sortCondition, pinchOrZoom, numColumns).sortCondition
-    let _numColumns = changeSortCondition(sortCondition, pinchOrZoom, numColumns).numColumns
-
-    setSortConditionState(_sortCondition)
-    setNumColumnsState(_numColumns)
-  }
+  const animationTransition = (
+    event: {finished: boolean},
+    pinchOrZoom: 'pinch' | 'zoom',
+  ) => {
+    let _sortCondition = changeSortCondition(
+      sortCondition,
+      pinchOrZoom,
+      numColumns,
+    );
+    if (event.finished) {
+      setSortConditionState(_sortCondition.sortCondition);
+      setNumColumnsState(_sortCondition.numColumns);
+    }
+  };
 
   const panResponder = useState(() =>
     PanResponder.create({
@@ -117,17 +128,15 @@ const PinchZoom: React.FC<Props> = (props) => {
             useNativeDriver: false,
           }).start();
         } else if (animationProgress < -(SCREEN_WIDTH * 0.1)) {
-          Animated.timing(props.distance, {
+          Animated.spring(props.distance, {
             toValue: -SCREEN_WIDTH * 0.8,
-            duration: 250,
             useNativeDriver: false,
-          }).start(() => animationTransition("zoom"));
+          }).start((event) => animationTransition(event, 'zoom'));
         } else if (animationProgress > SCREEN_WIDTH * 0.1) {
-          Animated.timing(props.distance, {
+          Animated.spring(props.distance, {
             toValue: SCREEN_WIDTH * 0.8,
-            duration: 250,
             useNativeDriver: false,
-          }).start(() => animationTransition("pinch"));
+          }).start((event) => animationTransition(event, 'pinch'));
         }
       },
     }),
