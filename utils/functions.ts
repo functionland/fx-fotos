@@ -180,13 +180,81 @@ export const changeSortCondition: changeSortConditionAndNumColumns = (
 export const opacityTransition = (
   sortCondition: sortCondition,
   numColumns: 2 | 3 | 4,
-  thisComponentSeperator: 'day' | 'month',
-  thisComponentNumCol: 2 | 3 | 4,
+  pinchOrZoom: 'pinch' | 'zoom' | undefined,
 ) => {
-  if (
-    thisComponentSeperator == sortCondition &&
-    thisComponentNumCol == numColumns
-  )
-    return [1, 0];
-  else return [0, 1];
+  let result: any = {
+    day: {
+      col: {
+        2: [0, 0],
+        3: [0, 0],
+      },
+    },
+    month: {
+      col: {
+        4: [0, 0],
+      },
+    },
+  };
+
+  if (sortCondition === 'day') {
+    if (numColumns === 2) {
+      result = {
+        ...result,
+        day: {...result.day, col: {...result.day.col, 2: [1, 0]}},
+      };
+    } else if (numColumns === 3) {
+      result = {
+        ...result,
+        day: {...result.day, col: {...result.day.col, 3: [1, 0]}},
+      };
+    }
+  } else if (sortCondition === 'month') {
+    if (numColumns === 4) {
+      result = {
+        ...result,
+        month: {...result.month, col: {...result.month.col, 4: [1, 0]}},
+      };
+    }
+  }
+
+  if (pinchOrZoom === undefined) {
+    return result;
+  }
+
+  let newSortCondition = changeSortCondition(
+    sortCondition,
+    pinchOrZoom,
+    numColumns,
+  ).sortCondition;
+  let newNumColumns = changeSortCondition(
+    sortCondition,
+    pinchOrZoom,
+    numColumns,
+  ).numColumns;
+
+  console.log("newNumColumns", newNumColumns)
+  console.log("newSortCondition", newSortCondition)
+
+  if (newSortCondition === 'day') {
+    if (newNumColumns === 2) {
+      result = {
+        ...result,
+        day: {...result.day, col: {...result.day.col, 2: [0, 1]}},
+      };
+    } else if (newNumColumns === 3) {
+      result = {
+        ...result,
+        day: {...result.day, col: {...result.day.col, 3: [0, 1]}},
+      };
+    }
+  } else if (newSortCondition === 'month') {
+    if (newNumColumns === 4) {
+      result = {
+        ...result,
+        month: {...result.month, col: {...result.month.col, 4: [0, 1]}},
+      };
+    }
+  }
+
+  return result;
 };
