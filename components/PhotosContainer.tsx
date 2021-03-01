@@ -1,6 +1,6 @@
 import {PhotoIdentifier} from '@react-native-community/cameraroll';
 import {useNavigation} from '@react-navigation/native';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {Animated} from 'react-native';
 import {getUserBoxMedia} from '../utils/APICAlls';
 import {getStoragePhotos, sortPhotos} from '../utils/functions';
@@ -13,7 +13,8 @@ const PhotosContainer = () => {
   const [photos, setPhotos] = useState<Array<PhotoIdentifier>>();
   const [storagePhotos, setStoragePhotos] = useState<Array<PhotoIdentifier>>();
   const navigation = useNavigation();
-  let distance = new Animated.Value(0);
+  let distance = useRef(new Animated.Value(0)).current;
+  const [pinchOrZoom, setPinchOrZoom] = useState<"pinch" | "zoom" | undefined>()
 
   useEffect(() => {
     if (per) {
@@ -39,8 +40,8 @@ const PhotosContainer = () => {
   }, [storagePhotos]);
 
   return photos ? (
-    <PinchZoom distance={distance}>
-      <AllPhotos distance={distance} photos={photos} />
+    <PinchZoom setPinchOrZoom={setPinchOrZoom} distance={distance}>
+      <AllPhotos pinchOrZoom={pinchOrZoom} distance={distance} photos={photos} />
     </PinchZoom>
   ) : (
     <></>
