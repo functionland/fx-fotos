@@ -13,12 +13,13 @@ const SCREEN_HEIGHT = Dimensions.get('screen').height;
 interface Props {
   photos: Array<PhotoIdentifier>;
   distance: Animated.Value;
+  pinchOrZoom: 'pinch' | 'zoom' | undefined;
 }
 
 const AllPhotos: React.FC<Props> = (props) => {
   const sortCondition = useSelector((state: reduxState) => state.sortCondition);
   const numColumns = useSelector((state: reduxState) => state.numColumns);
-  const state = useSelector((state: reduxState) => state)
+  const state = useSelector((state: reduxState) => state);
 
   // console.log(opacityTransition(sortCondition, numColumns, 'day', 2));
   // console.log(props.distance);
@@ -34,12 +35,16 @@ const AllPhotos: React.FC<Props> = (props) => {
         })}
         maxWidth={SCREEN_WIDTH / 2}
         minWidth={SCREEN_WIDTH / 3}
-        rowCount={2}
-        // opacity={props.distance.interpolate({
-        //   inputRange: [-SCREEN_WIDTH * 0.8, SCREEN_WIDTH * 0.8],
-        //   outputRange: opacityTransition(sortCondition, numColumns, 'day', 2),
-        // })}
-        opacity={opacityTransition(sortCondition, numColumns, 'day', 2)[0]}
+        numColumns={2}
+        opacity={props.distance.interpolate({
+          inputRange: [0, SCREEN_WIDTH * 0.8],
+          outputRange: opacityTransition(
+            sortCondition,
+            numColumns,
+            props.pinchOrZoom,
+          ).day.col[2],
+        })}
+        // opacity={opacityTransition(sortCondition, numColumns, 'day', 2)}
         date={new Date()}
         separator="day"
       />
@@ -51,12 +56,16 @@ const AllPhotos: React.FC<Props> = (props) => {
         })}
         maxWidth={SCREEN_WIDTH / 2}
         minWidth={SCREEN_WIDTH / 4}
-        rowCount={3}
-        // opacity={props.distance.interpolate({
-        //   inputRange: [-SCREEN_WIDTH * 0.8, SCREEN_WIDTH * 0.8],
-        //   outputRange: opacityTransition(sortCondition, numColumns, 'day', 3),
-        // })}
-        opacity={opacityTransition(sortCondition, numColumns, 'day', 3)[0]}
+        numColumns={3}
+        opacity={props.distance.interpolate({
+          inputRange: [0, SCREEN_WIDTH * 0.8],
+          outputRange: opacityTransition(
+            sortCondition,
+            numColumns,
+            props.pinchOrZoom,
+          ).day.col[3],
+        })}
+        // opacity={opacityTransition(sortCondition, numColumns, 'day', 3)}
         date={new Date()}
         separator="day"
       />
@@ -68,12 +77,16 @@ const AllPhotos: React.FC<Props> = (props) => {
         })}
         maxWidth={SCREEN_WIDTH / 3}
         minWidth={SCREEN_WIDTH / 5}
-        rowCount={4}
-        // opacity={props.distance.interpolate({
-        //   inputRange: [-SCREEN_WIDTH * 0.8, SCREEN_WIDTH * 0.8],
-        //   outputRange: opacityTransition(sortCondition, numColumns, 'month', 4),
-        // })}
-        opacity={opacityTransition(sortCondition, numColumns, 'month', 4)[0]}
+        numColumns={4}
+        opacity={props.distance.interpolate({
+          inputRange: [0, SCREEN_WIDTH * 0.8],
+          outputRange: opacityTransition(
+            sortCondition,
+            numColumns,
+            props.pinchOrZoom,
+          ).month.col[4],
+        })}
+        // opacity={opacityTransition(sortCondition, numColumns, 'month', 4)}
         date={new Date()}
         separator="month"
       />
