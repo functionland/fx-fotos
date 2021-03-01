@@ -19,9 +19,8 @@ interface Props {
   margin: Animated.AnimatedInterpolation;
   maxWidth: number;
   minWidth: number;
-  rowCount: 2 | 3 | 4;
-  // opacity: Animated.AnimatedInterpolation;
-  opacity: number
+  numColumns: 2 | 3 | 4;
+  opacity: Animated.AnimatedInterpolation;
   date: Date;
   separator: 'day' | 'month';
 }
@@ -35,8 +34,10 @@ const renderFlatLists = (photos: sortedPhotos, props: Props) => {
         key={date}
         data={photos[date]}
         style={{width: SCREEN_WIDTH}}
-        ListHeaderComponent={<Animated.Text style={{opacity: props.opacity}}>{date}</Animated.Text>}
-        numColumns={props.rowCount}
+        ListHeaderComponent={
+          <Animated.Text style={{opacity: props.opacity}}>{date}</Animated.Text>
+        }
+        numColumns={props.numColumns}
         renderItem={({item}) => (
           <Animated.Image
             source={{uri: item.node.image.uri}}
@@ -45,8 +46,8 @@ const renderFlatLists = (photos: sortedPhotos, props: Props) => {
               minWidth: props.minWidth,
               margin: props.margin,
               opacity: props.opacity,
-              height: SCREEN_HEIGHT / (props.rowCount * 2),
-              width: SCREEN_WIDTH / props.rowCount,
+              height: SCREEN_HEIGHT / (props.numColumns * 2),
+              width: SCREEN_WIDTH / props.numColumns,
             }}
           />
         )}
@@ -59,7 +60,9 @@ const renderFlatLists = (photos: sortedPhotos, props: Props) => {
 
 const RenderPhotos: React.FC<Props> = (props) => {
   return (
-    <ScrollView style={{flex: 1, position: 'absolute'}} key={props.separator}>
+    <ScrollView
+      style={{flex: 1, position: 'absolute'}}
+      key={props.separator + props.numColumns}>
       {renderFlatLists(props.photos, props)}
     </ScrollView>
   );
