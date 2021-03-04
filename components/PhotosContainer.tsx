@@ -7,6 +7,7 @@ import {getStoragePhotos, sortPhotos} from '../utils/functions';
 import {storagePermission} from '../utils/permissions';
 import AllPhotos from './AllPhotos';
 import PinchZoom from './PinchZoom';
+import {sortCondition} from '../types/interfaces';
 
 const PhotosContainer = () => {
   const [per, setPer] = useState<boolean>();
@@ -14,7 +15,11 @@ const PhotosContainer = () => {
   const [storagePhotos, setStoragePhotos] = useState<Array<PhotoIdentifier>>();
   const navigation = useNavigation();
   let distance = useRef(new Animated.Value(0)).current;
-  const [pinchOrZoom, setPinchOrZoom] = useState<"pinch" | "zoom" | undefined>()
+  const [pinchOrZoom, setPinchOrZoom] = useState<
+    'pinch' | 'zoom' | undefined
+  >();
+  const [sortCondition, setSortCondition] = useState<sortCondition>('day');
+  const [numColumns, setNumColumns] = useState<2 | 3 | 4>(2);
 
   useEffect(() => {
     if (per) {
@@ -40,8 +45,20 @@ const PhotosContainer = () => {
   }, [storagePhotos]);
 
   return photos ? (
-    <PinchZoom setPinchOrZoom={setPinchOrZoom} distance={distance}>
-      <AllPhotos pinchOrZoom={pinchOrZoom} distance={distance} photos={photos} />
+    <PinchZoom
+      setPinchOrZoom={setPinchOrZoom}
+      distance={distance}
+      setSortCondition={setSortCondition}
+      setNumColumns={setNumColumns}
+      sortCondition={sortCondition}
+      numColumns={numColumns}>
+      <AllPhotos
+        pinchOrZoom={pinchOrZoom}
+        distance={distance}
+        photos={photos}
+        sortCondition={sortCondition}
+        numColumns={numColumns}
+      />
     </PinchZoom>
   ) : (
     <></>
