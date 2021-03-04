@@ -1,4 +1,4 @@
-import {View} from 'native-base';
+import {Image, View} from 'native-base';
 import React from 'react';
 import {
   FlatList,
@@ -8,7 +8,7 @@ import {
   Text,
   SafeAreaView,
 } from 'react-native';
-import {useSelector} from 'react-redux';
+import FastImage from 'react-native-fast-image';
 import {reduxState, sortedPhotos} from '../types/interfaces';
 
 const SCREEN_WIDTH = Dimensions.get('screen').width;
@@ -30,10 +30,10 @@ const renderFlatLists = (photos: sortedPhotos, props: Props) => {
 
   for (let date of Object.keys(photos)) {
     result.push(
-      <FlatList
+      <Animated.FlatList
         key={date}
         data={photos[date]}
-        style={{width: SCREEN_WIDTH}}
+        style={{width: SCREEN_WIDTH, opacity: props.opacity}}
         ListHeaderComponent={
           <Animated.Text style={{opacity: props.opacity}}>{date}</Animated.Text>
         }
@@ -44,10 +44,9 @@ const renderFlatLists = (photos: sortedPhotos, props: Props) => {
             style={{
               maxWidth: props.maxWidth,
               minWidth: props.minWidth,
-              margin: props.margin,
-              opacity: props.opacity,
               height: SCREEN_HEIGHT / (props.numColumns * 2),
               width: SCREEN_WIDTH / props.numColumns,
+              margin: props.margin,
             }}
           />
         )}
