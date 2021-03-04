@@ -1,9 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import {ScrollView} from 'react-native-gesture-handler';
 import {Animated, Dimensions, SafeAreaView, View} from 'react-native';
-import {reduxState} from '../types/interfaces';
+import {reduxState, sortCondition} from '../types/interfaces';
 import RenderPhotos from './RenderPhotos';
-import {useSelector} from 'react-redux';
 import {PhotoIdentifier} from '@react-native-community/cameraroll';
 import {opacityTransition, sortPhotos} from '../utils/functions';
 
@@ -14,24 +13,18 @@ interface Props {
   photos: Array<PhotoIdentifier>;
   distance: Animated.Value;
   pinchOrZoom: 'pinch' | 'zoom' | undefined;
+  sortCondition: sortCondition;
+  numColumns: 2 | 3 | 4;
 }
 
 const AllPhotos: React.FC<Props> = (props) => {
-  const sortCondition = useSelector((state: reduxState) => state.sortCondition);
-  const numColumns = useSelector((state: reduxState) => state.numColumns);
-  const state = useSelector((state: reduxState) => state);
-
-  // console.log(opacityTransition(sortCondition, numColumns, 'day', 2));
-  // console.log(props.distance);
-  // console.log(state)
-
   return (
     <SafeAreaView style={{flex: 1}}>
       <RenderPhotos
         photos={sortPhotos(props.photos, 'day')}
         margin={props.distance.interpolate({
-          inputRange: [-SCREEN_WIDTH * 0.8, SCREEN_WIDTH * 0.8],
-          outputRange: [0, 3],
+          inputRange: [0, SCREEN_WIDTH * 0.8],
+          outputRange: [5, 15],
         })}
         maxWidth={SCREEN_WIDTH / 2}
         minWidth={SCREEN_WIDTH / 3}
@@ -39,8 +32,8 @@ const AllPhotos: React.FC<Props> = (props) => {
         opacity={props.distance.interpolate({
           inputRange: [0, SCREEN_WIDTH * 0.8],
           outputRange: opacityTransition(
-            sortCondition,
-            numColumns,
+            props.sortCondition,
+            props.numColumns,
             props.pinchOrZoom,
           ).day.col[2],
         })}
@@ -51,8 +44,8 @@ const AllPhotos: React.FC<Props> = (props) => {
       <RenderPhotos
         photos={sortPhotos(props.photos, 'day')}
         margin={props.distance.interpolate({
-          inputRange: [-SCREEN_WIDTH * 0.8, SCREEN_WIDTH * 0.8],
-          outputRange: [0, 3],
+          inputRange: [0, SCREEN_WIDTH * 0.8],
+          outputRange: [5, 15],
         })}
         maxWidth={SCREEN_WIDTH / 2}
         minWidth={SCREEN_WIDTH / 4}
@@ -60,8 +53,8 @@ const AllPhotos: React.FC<Props> = (props) => {
         opacity={props.distance.interpolate({
           inputRange: [0, SCREEN_WIDTH * 0.8],
           outputRange: opacityTransition(
-            sortCondition,
-            numColumns,
+            props.sortCondition,
+            props.numColumns,
             props.pinchOrZoom,
           ).day.col[3],
         })}
@@ -72,8 +65,8 @@ const AllPhotos: React.FC<Props> = (props) => {
       <RenderPhotos
         photos={sortPhotos(props.photos, 'month')}
         margin={props.distance.interpolate({
-          inputRange: [-SCREEN_WIDTH * 0.8, SCREEN_WIDTH * 0.8],
-          outputRange: [0, 3],
+          inputRange: [0, SCREEN_WIDTH * 0.8],
+          outputRange: [5, 15],
         })}
         maxWidth={SCREEN_WIDTH / 3}
         minWidth={SCREEN_WIDTH / 5}
@@ -81,8 +74,8 @@ const AllPhotos: React.FC<Props> = (props) => {
         opacity={props.distance.interpolate({
           inputRange: [0, SCREEN_WIDTH * 0.8],
           outputRange: opacityTransition(
-            sortCondition,
-            numColumns,
+            props.sortCondition,
+            props.numColumns,
             props.pinchOrZoom,
           ).month.col[4],
         })}
