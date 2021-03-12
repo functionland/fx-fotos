@@ -19,12 +19,12 @@ interface Props {
 
 const AllPhotos: React.FC<Props> = (props) => {
   return (
-    <SafeAreaView style={{flex: 1}}>
+    <ScrollView style={{flex: 1}} contentContainerStyle={{width: SCREEN_WIDTH, height: 1000}}>
       <RenderPhotos
         photos={sortPhotos(props.photos, 'day')}
         margin={props.distance.interpolate({
           inputRange: [0, SCREEN_WIDTH * 0.8],
-          outputRange: [5, 15],
+          outputRange: [1, 5],
         })}
         maxWidth={SCREEN_WIDTH / 2}
         minWidth={SCREEN_WIDTH / 3}
@@ -45,7 +45,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         photos={sortPhotos(props.photos, 'day')}
         margin={props.distance.interpolate({
           inputRange: [0, SCREEN_WIDTH * 0.8],
-          outputRange: [5, 15],
+          outputRange: [1, 5],
         })}
         maxWidth={SCREEN_WIDTH / 2}
         minWidth={SCREEN_WIDTH / 4}
@@ -66,7 +66,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         photos={sortPhotos(props.photos, 'month')}
         margin={props.distance.interpolate({
           inputRange: [0, SCREEN_WIDTH * 0.8],
-          outputRange: [5, 15],
+          outputRange: [1, 5],
         })}
         maxWidth={SCREEN_WIDTH / 3}
         minWidth={SCREEN_WIDTH / 5}
@@ -83,7 +83,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         date={new Date()}
         separator="month"
       />
-    </SafeAreaView>
+    </ScrollView>
   );
 };
 
