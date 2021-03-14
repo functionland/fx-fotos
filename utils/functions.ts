@@ -5,34 +5,6 @@ import {
   sortCondition,
 } from '../types/interfaces';
 
-// export const sortPhotos = (photos: Array<PhotoIdentifier>) => {
-//   let timestamps = photos
-//     .map((photo) => photo.node.timestamp * 1000)
-//     .sort((a, b) => b - a);
-//   let timestamps_str = timestamps.map((timestamp) => timestamp.toString());
-//   let result: any = {largeDay: {}, month: {}, smallDay: {}};
-
-//   for (let timestamp of timestamps_str) {
-//     result.largeDay[timestampToDate(+timestamp, 'day')] = [];
-//     result.smallDay[timestampToDate(+timestamp, 'day')] = [];
-//     result.month[timestampToDate(+timestamp, 'month')] = [];
-//   }
-
-//   for (let photo of photos) {
-//     result['smallDay'][
-//       timestampToDate(photo.node.timestamp * 1000, 'day')
-//     ].push(photo);
-//     result['largeDay'][
-//       timestampToDate(photo.node.timestamp * 1000, 'day')
-//     ].push(photo);
-//     result['month'][timestampToDate(photo.node.timestamp * 1000, 'month')].push(
-//       photo,
-//     );
-//   }
-
-//   return result;
-// };
-
 export const sortPhotos = (
   photos: Array<PhotoIdentifier>,
   sortCondition: 'day' | 'month',
@@ -107,14 +79,11 @@ export const timestampToDate = (
 
 export const getStoragePhotos = (per: boolean, numberOfPhotos: number) => {
   if (per) {
-    return new Promise((resolve, reject) =>
-      CameraRoll.getPhotos({
-        first: numberOfPhotos,
-        assetType: 'All',
-      })
-        .then((res) => resolve(res))
-        .catch((err) => reject(err)),
-    );
+    let photos = CameraRoll.getPhotos({
+      first: numberOfPhotos,
+      assetType: 'All',
+    });
+    return photos;
   }
 };
 
@@ -232,8 +201,8 @@ export const opacityTransition = (
     numColumns,
   ).numColumns;
 
-  console.log("newNumColumns", newNumColumns)
-  console.log("newSortCondition", newSortCondition)
+  console.log('newNumColumns', newNumColumns);
+  console.log('newSortCondition', newSortCondition);
 
   if (newSortCondition === 'day') {
     if (newNumColumns === 2) {

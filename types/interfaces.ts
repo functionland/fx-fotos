@@ -9,7 +9,10 @@ export interface reduxState {
   box: Array<PhotoIdentifier>;
   images: Array<sortedPhotos>;
   sortCondition: sortCondition;
+  loading: boolean;
+  photos: Array<PhotoIdentifier>;
   numColumns: 2 | 3 | 4;
+  numberOfPhotos: number;
 }
 
 export interface sortedPhotos {

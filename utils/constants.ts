@@ -3,6 +3,11 @@ export const Constant = {
     user: {
       setUser: 'SET_USER',
     },
+    photos: {
+      getPhotosRequest: "GET_PHOTOS_REQUEST",
+      getPhotosSuccess: "GET_PHOTOS_SUCCESS",
+      getPhotosFailure: "GET_PHOTOS_FAILURE"
+    },
     box: {
       setBoxMedia: 'SET_BOX_MEDIA',
     },

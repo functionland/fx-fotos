@@ -1,5 +1,6 @@
-import {createStore} from 'redux';
+import {applyMiddleware, createStore} from 'redux';
 import {reducer} from './reducer';
+import thunk from "redux-thunk"
 
 const initialStore = {
   user: {
@@ -7,6 +8,7 @@ const initialStore = {
     email: 'alibalouchi.74@gmail.com',
     token: '',
   },
+  photos: [],
   Box: [
     {
       node: {
@@ -27,10 +29,13 @@ const initialStore = {
       },
     },
   ],
+  error: [],
   sortCondition: 'day',
-  numColumns: 2
+  numColumns: 2,
+  loading: false,
+  numberOfPhotos: 20
 };
 
-let store = createStore(reducer as any, initialStore);
+let store = createStore(reducer as any, initialStore, applyMiddleware(thunk));
 
 export default store;
