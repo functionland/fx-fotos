@@ -5,6 +5,9 @@ import {reduxState, sortCondition} from '../types/interfaces';
 import RenderPhotos from './RenderPhotos';
 import {PhotoIdentifier} from '@react-native-community/cameraroll';
 import {opacityTransition, sortPhotos} from '../utils/functions';
+import {useDispatch, useSelector} from 'react-redux';
+import {getPhotos} from '../store/actions';
+import {Button, Text} from 'native-base';
 
 const SCREEN_WIDTH = Dimensions.get('screen').width;
 const SCREEN_HEIGHT = Dimensions.get('screen').height;
@@ -18,10 +21,32 @@ interface Props {
 }
 
 const AllPhotos: React.FC<Props> = (props) => {
+  const photos = useSelector((state: reduxState) => state.photos);
+  const loading = useSelector((state: reduxState) => state.loading);
+
+  const dispatch = useDispatch();
+  const getMorePhotos = () => {
+    dispatch(getPhotos());
+  };
+
+  useEffect(() => {
+    getMorePhotos();
+  }, []);
+
   return (
-    <ScrollView style={{flex: 1}} contentContainerStyle={{width: SCREEN_WIDTH, height: 1000}}>
+    <ScrollView
+      style={{flex: 1}}
+      contentContainerStyle={{
+        width: SCREEN_WIDTH,
+        height:
+          (photos.length / 20) * SCREEN_HEIGHT !== 0
+            ? (photos.length / 20) * SCREEN_HEIGHT
+            : SCREEN_HEIGHT,
+      }}>
       <RenderPhotos
-        photos={sortPhotos(props.photos, 'day')}
+        photos={sortPhotos(photos, 'day')}
+        loading={loading}
+        getMorePhotosFunction={getMorePhotos}
         margin={props.distance.interpolate({
           inputRange: [0, SCREEN_WIDTH * 0.8],
           outputRange: [1, 5],
@@ -42,7 +67,9 @@ const AllPhotos: React.FC<Props> = (props) => {
         separator="day"
       />
       <RenderPhotos
-        photos={sortPhotos(props.photos, 'day')}
+        photos={sortPhotos(photos, 'day')}
+        loading={loading}
+        getMorePhotosFunction={getMorePhotos}
         margin={props.distance.interpolate({
           inputRange: [0, SCREEN_WIDTH * 0.8],
           outputRange: [1, 5],
@@ -63,7 +90,9 @@ const AllPhotos: React.FC<Props> = (props) => {
         separator="day"
       />
       <RenderPhotos
-        photos={sortPhotos(props.photos, 'month')}
+        photos={sortPhotos(photos, 'month')}
+        loading={loading}
+        getMorePhotosFunction={getMorePhotos}
         margin={props.distance.interpolate({
           inputRange: [0, SCREEN_WIDTH * 0.8],
           outputRange: [1, 5],

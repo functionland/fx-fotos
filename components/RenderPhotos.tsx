@@ -23,10 +23,16 @@ interface Props {
   numColumns: 2 | 3 | 4;
   opacity: Animated.AnimatedInterpolation;
   date: Date;
+  loading: boolean;
   separator: 'day' | 'month';
+  getMorePhotosFunction: Function;
 }
 
-const renderFlatLists = (photos: sortedPhotos, props: Props, imageWidth: Animated.AnimatedInterpolation) => {
+const renderFlatLists = (
+  photos: sortedPhotos,
+  props: Props,
+  imageWidth: Animated.AnimatedInterpolation,
+) => {
   let result = [];
 
   // let margin = props.margin.addListener(({value}) => {
@@ -56,10 +62,10 @@ const renderFlatLists = (photos: sortedPhotos, props: Props, imageWidth: Animate
             style={{
               maxWidth: props.maxWidth,
               minWidth: props.minWidth,
-              height: SCREEN_HEIGHT / (props.numColumns * 2),
+              height: 200,
               width: imageWidth,
               margin: props.margin,
-              backgroundColor: 'red',
+              backgroundColor: props.loading == true ? 'green' : 'red',
             }}></Animated.View>
         )}
       />,
@@ -82,7 +88,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
     <View
       style={{
         width: SCREEN_WIDTH,
-        height: 'auto',
+        // height: SCREEN_HEIGHT,
         position: 'absolute',
         top: 0,
         bottom: 0,
