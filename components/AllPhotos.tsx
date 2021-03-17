@@ -4,7 +4,7 @@ import {Animated, Dimensions, SafeAreaView, View} from 'react-native';
 import {reduxState, sortCondition} from '../types/interfaces';
 import RenderPhotos from './RenderPhotos';
 import {PhotoIdentifier} from '@react-native-community/cameraroll';
-import {opacityTransition, sortPhotos} from '../utils/functions';
+import {opacityTransition, sortPhotos, test} from '../utils/functions';
 import {useDispatch, useSelector} from 'react-redux';
 import {getPhotos} from '../store/actions';
 import {Button, Text} from 'native-base';
@@ -38,13 +38,11 @@ const AllPhotos: React.FC<Props> = (props) => {
       style={{flex: 1}}
       contentContainerStyle={{
         width: SCREEN_WIDTH,
-        height:
-          (photos.length / 20) * SCREEN_HEIGHT !== 0
-            ? (photos.length / 20) * SCREEN_HEIGHT
-            : SCREEN_HEIGHT,
+        // height: "auto",
+        flexGrow: 1
       }}>
       <RenderPhotos
-        photos={sortPhotos(photos, 'day')}
+        photos={test(sortPhotos(photos, 'day'))}
         loading={loading}
         getMorePhotosFunction={getMorePhotos}
         margin={props.distance.interpolate({
@@ -67,7 +65,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         separator="day"
       />
       <RenderPhotos
-        photos={sortPhotos(photos, 'day')}
+        photos={test(sortPhotos(photos, 'day'))}
         loading={loading}
         getMorePhotosFunction={getMorePhotos}
         margin={props.distance.interpolate({
@@ -90,7 +88,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         separator="day"
       />
       <RenderPhotos
-        photos={sortPhotos(photos, 'month')}
+        photos={test(sortPhotos(photos, 'month'))}
         loading={loading}
         getMorePhotosFunction={getMorePhotos}
         margin={props.distance.interpolate({
