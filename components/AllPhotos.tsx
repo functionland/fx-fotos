@@ -24,8 +24,11 @@ const AllPhotos: React.FC<Props> = (props) => {
   const photos = useSelector((state: reduxState) => state.photos);
   const loading = useSelector((state: reduxState) => state.loading);
 
+  const [wrapperHeight, setWrapperHeight] = useState<number>();
+
   const dispatch = useDispatch();
   const getMorePhotos = () => {
+    console.log('getting more photos');
     dispatch(getPhotos());
   };
 
@@ -33,15 +36,22 @@ const AllPhotos: React.FC<Props> = (props) => {
     getMorePhotos();
   }, []);
 
+  console.log('wrapperHeight', wrapperHeight);
+
   return (
     <ScrollView
       style={{flex: 1}}
       contentContainerStyle={{
         width: SCREEN_WIDTH,
+        height: wrapperHeight ? wrapperHeight + 200 : SCREEN_HEIGHT,
+        // flexWrap: "wrap",
+        // alignSelf: "baseline"
         // height: "auto",
-        flexGrow: 1
+        // flexGrow: 1,
       }}>
       <RenderPhotos
+        setWrapperHeight={setWrapperHeight}
+        wrpperHeight={wrapperHeight}
         photos={test(sortPhotos(photos, 'day'))}
         loading={loading}
         getMorePhotosFunction={getMorePhotos}
@@ -65,6 +75,8 @@ const AllPhotos: React.FC<Props> = (props) => {
         separator="day"
       />
       <RenderPhotos
+        setWrapperHeight={setWrapperHeight}
+        wrpperHeight={wrapperHeight}
         photos={test(sortPhotos(photos, 'day'))}
         loading={loading}
         getMorePhotosFunction={getMorePhotos}
@@ -89,6 +101,8 @@ const AllPhotos: React.FC<Props> = (props) => {
       />
       <RenderPhotos
         photos={test(sortPhotos(photos, 'month'))}
+        wrpperHeight={wrapperHeight}
+        setWrapperHeight={setWrapperHeight}
         loading={loading}
         getMorePhotosFunction={getMorePhotos}
         margin={props.distance.interpolate({

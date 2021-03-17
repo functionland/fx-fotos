@@ -30,6 +30,8 @@ interface Props {
   loading: boolean;
   separator: 'day' | 'month';
   getMorePhotosFunction: Function;
+  setWrapperHeight: Function;
+  wrpperHeight: number | undefined
 }
 
 const RenderPhotos: React.FC<Props> = (props) => {
@@ -40,6 +42,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
     photos: Array<PhotoIdentifier>,
     opacity: Animated.AnimatedInterpolation,
     numCol: 2 | 3 | 4,
+    setWrapperHeight: Function,
   ) => {
     return (
       <PhotosChunk
@@ -47,6 +50,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
         photos={photos}
         opacity={opacity}
         numCol={numCol}
+        setWrapperHeight={setWrapperHeight}
       />
     );
     // return <Text>SEGE</Text>
@@ -56,16 +60,24 @@ const RenderPhotos: React.FC<Props> = (props) => {
 
   return props.photos ? (
     <FlatList
+      // scrollEnabled={true}
       data={props.photos}
       renderItem={({item}) =>
-        renderChunkPhotos(item.date, item.data, props.opacity, props.numColumns)
+        renderChunkPhotos(
+          item.date,
+          item.data,
+          props.opacity,
+          props.numColumns,
+          props.setWrapperHeight,
+        )
       }
-      onEndReached={() => console.log('end reached')}
-      contentContainerStyle={{flexGrow: 1}}
+      onEndReached={() => console.log('getting photo')}
+      // contentContainerStyle={{flexGrow: 1}}
       onEndReachedThreshold={0.9}
       style={{
+        flex: 1,
         width: SCREEN_WIDTH,
-        // height: SCREEN_HEIGHT,
+        height: props.wrpperHeight,
         position: 'absolute',
         top: 0,
         bottom: 0,

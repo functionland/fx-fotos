@@ -2,6 +2,7 @@ import {PhotoIdentifier} from '@react-native-community/cameraroll';
 import {View} from 'native-base';
 import React from 'react';
 import {Animated, Text} from 'react-native';
+import {event} from 'react-native-reanimated';
 import {useSelector} from 'react-redux';
 import {reduxState} from '../types/interfaces';
 
@@ -10,6 +11,7 @@ interface Props {
   photos: Array<PhotoIdentifier>;
   opacity: Animated.AnimatedInterpolation;
   numCol: 2 | 3 | 4;
+  setWrapperHeight: Function;
 }
 
 const renderPhotos = (
@@ -45,7 +47,12 @@ const PhotosChunk: React.FC<Props> = (props) => {
   const loading = useSelector((state: reduxState) => state.loading);
 
   return (
-    <Animated.View style={{width: '100%'}}>
+    <Animated.View
+      style={{width: '100%'}}
+      onLayout={(event) => {
+        let {height} = event.nativeEvent.layout;
+        props.setWrapperHeight(height);
+      }}>
       <Animated.Text style={{opacity: props.opacity}}>
         {props.date}
       </Animated.Text>
