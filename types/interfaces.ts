@@ -39,3 +39,8 @@ export interface sortDetails {
 }
 
 export type sortCondition = 'day' | 'month';
+
+export interface photoChunk {
+  date: string,
+  data: Array<PhotoIdentifier>
+}

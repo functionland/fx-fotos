@@ -32,12 +32,14 @@ export const reducer: Reducer<reduxState, reduxAction> = (
   // }
   switch (action.type) {
     case Constant.actionTypes.photos.getPhotosRequest:
+      console.log("REQ")
       return {
         ...state,
         loading: true,
         error: [],
       };
     case Constant.actionTypes.photos.getPhotosSuccess:
+      console.log("SUC")
       return {
         ...state,
         loading: false,
@@ -46,6 +48,7 @@ export const reducer: Reducer<reduxState, reduxAction> = (
         numberOfPhotos: state.numberOfPhotos + 20
       };
     case Constant.actionTypes.photos.getPhotosFailure:
+      console.log("FAI")
       return {
         ...state,
         loading: false,

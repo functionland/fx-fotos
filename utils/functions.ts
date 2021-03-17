@@ -1,9 +1,14 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import CameraRoll, {PhotoIdentifier} from '@react-native-community/cameraroll';
 import {NativeTouchEvent} from 'react-native';
+import {useDispatch} from 'react-redux';
 import {
   changeSortConditionAndNumColumns,
+  photoChunk,
   sortCondition,
+  sortedPhotos,
 } from '../types/interfaces';
+import {Constant} from './constants';
 
 export const sortPhotos = (
   photos: Array<PhotoIdentifier>,
@@ -226,4 +231,43 @@ export const opacityTransition = (
   }
 
   return result;
+};
+
+export const test = (photos: any) => {
+  let result: Array<photoChunk> = [];
+
+  for (let sortedPhotosDate of Object.keys(photos)) {
+    let _result = {
+      date: sortedPhotosDate,
+      data: photos[sortedPhotosDate],
+    };
+    result.push(_result);
+  }
+
+  return result;
+};
+
+export const storeData = async (key: string, value: any) => {
+  const dispatch = useDispatch();
+  try {
+    await AsyncStorage.setItem(key, value);
+  } catch {
+    dispatch({
+      type: Constant.actionTypes.error.setError,
+      payload: 'setting data from local storage failed',
+    });
+  }
+};
+
+export const getData = async (key: string) => {
+  const dispatch = useDispatch();
+  try {
+    let value = await AsyncStorage.getItem(key);
+    return value;
+  } catch {
+    dispatch({
+      type: Constant.actionTypes.error.setError,
+      payload: 'getting data from local storage failed',
+    });
+  }
 };
