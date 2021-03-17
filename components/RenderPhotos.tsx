@@ -1,4 +1,5 @@
-import {Image, View} from 'native-base';
+import {PhotoIdentifier} from '@react-native-community/cameraroll';
+import {Image, Spinner, View} from 'native-base';
 import React from 'react';
 import {
   FlatList,
@@ -10,13 +11,16 @@ import {
   StyleSheet,
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
-import {reduxState, sortedPhotos} from '../types/interfaces';
+import {useSelector} from 'react-redux';
+import {photoChunk, reduxState, sortedPhotos} from '../types/interfaces';
+import {sortPhotos} from '../utils/functions';
+import PhotosChunk from './PhotosChunk';
 
 const SCREEN_WIDTH = Dimensions.get('screen').width;
 const SCREEN_HEIGHT = Dimensions.get('screen').height;
 
 interface Props {
-  photos: sortedPhotos;
+  photos: Array<photoChunk>;
   margin: Animated.AnimatedInterpolation;
   maxWidth: number;
   minWidth: number;
@@ -28,64 +32,37 @@ interface Props {
   getMorePhotosFunction: Function;
 }
 
-const renderFlatLists = (
-  photos: sortedPhotos,
-  props: Props,
-  imageWidth: Animated.AnimatedInterpolation,
-) => {
-  let result = [];
-
-  // let margin = props.margin.addListener(({value}) => {
-  //   return value;
-  // });
-
-  // console.log('margin', margin);
-
-  for (let date of Object.keys(photos)) {
-    result.push(
-      <Animated.FlatList
-        key={date}
-        data={photos[date]}
-        style={{width: SCREEN_WIDTH, opacity: props.opacity}}
-        contentContainerStyle={{
-          justifyContent: 'space-evenly',
-          alignItems: 'flex-start',
-        }}
-        ListHeaderComponent={
-          <Animated.Text style={{opacity: props.opacity}}>{date}</Animated.Text>
-        }
-        numColumns={props.numColumns}
-        renderItem={({item}) => (
-          // <Animated.Image
-          //   source={{uri: item.node.image.uri}}
-          <Animated.View
-            style={{
-              maxWidth: props.maxWidth,
-              minWidth: props.minWidth,
-              height: 200,
-              width: imageWidth,
-              margin: props.margin,
-              backgroundColor: props.loading == true ? 'green' : 'red',
-            }}></Animated.View>
-        )}
-      />,
-    );
-  }
-
-  return result;
-};
-
 const RenderPhotos: React.FC<Props> = (props) => {
-  let imageWidth = props.margin.interpolate({
-    inputRange: [1, 5],
-    outputRange: [
-      SCREEN_WIDTH / props.numColumns - 8,
-      SCREEN_WIDTH / props.numColumns - 40,
-    ],
-  });
+  const numColumns = useSelector((state: reduxState) => state.numColumns);
 
-  return (
-    <View
+  const renderChunkPhotos = (
+    date: string,
+    photos: Array<PhotoIdentifier>,
+    opacity: Animated.AnimatedInterpolation,
+    numCol: 2 | 3 | 4,
+  ) => {
+    return (
+      <PhotosChunk
+        date={date}
+        photos={photos}
+        opacity={opacity}
+        numCol={numCol}
+      />
+    );
+    // return <Text>SEGE</Text>
+  };
+
+  console.log('numColumns', numColumns);
+
+  return props.photos ? (
+    <FlatList
+      data={props.photos}
+      renderItem={({item}) =>
+        renderChunkPhotos(item.date, item.data, props.opacity, props.numColumns)
+      }
+      onEndReached={() => console.log('end reached')}
+      contentContainerStyle={{flexGrow: 1}}
+      onEndReachedThreshold={0.9}
       style={{
         width: SCREEN_WIDTH,
         // height: SCREEN_HEIGHT,
@@ -93,9 +70,11 @@ const RenderPhotos: React.FC<Props> = (props) => {
         top: 0,
         bottom: 0,
       }}
-      key={props.separator + props.numColumns}>
-      {renderFlatLists(props.photos, props, imageWidth)}
-    </View>
+      numColumns={props.numColumns}
+      key={props.separator + props.numColumns}
+    />
+  ) : (
+    <Spinner />
   );
 };
 

@@ -56,7 +56,6 @@ const PhotosChunk: React.FC<Props> = (props) => {
           flexWrap: 'wrap',
           width: '100%',
           flexGrow: 1,
-          flexBasis: 1
         }}>
         {renderPhotos(props.photos, props.opacity, props.numCol, loading)}
       </View>
