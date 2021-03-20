@@ -1,12 +1,23 @@
-import React, {useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {Animated, Dimensions, PanResponder} from 'react-native';
-import {getDistance} from '../utils/functions';
+import {reduxState, sortCondition} from '../types/interfaces';
+import {Constant} from '../utils/constants';
+import {
+  changeSortCondition,
+  findDiameter,
+  getDistance,
+} from '../utils/functions';
 
-const WINDOW_WIDTH = Dimensions.get('screen').width;
-const WINDOW_HEIGHT = Dimensions.get('screen').height;
+const SCREEN_WIDTH = Dimensions.get('screen').width;
+const SCREEN_HEIGHT = Dimensions.get('screen').height;
 
 interface Props {
   distance: Animated.Value;
+  setPinchOrZoom: Function;
+  setSortCondition: Function;
+  setNumColumns: Function;
+  numColumns: 2 | 3 | 4;
+  sortCondition: sortCondition;
 }
 
 const PinchZoom: React.FC<Props> = (props) => {
@@ -18,7 +29,22 @@ const PinchZoom: React.FC<Props> = (props) => {
   let initial_distance: number = 0;
   let current_distance: number = 0;
 
-  const panResponder = useState(() =>
+  const animationTransition = (
+    event: {finished: boolean},
+    pinchOrZoom: 'pinch' | 'zoom',
+  ) => {
+    let _sortCondition = changeSortCondition(
+      props.sortCondition,
+      pinchOrZoom,
+      props.numColumns,
+    );
+    if (event.finished) {
+      props.setSortCondition(_sortCondition.sortCondition);
+      props.setNumColumns(_sortCondition.numColumns);
+    }
+  };
+
+  const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: (event, gesture) => {
         let touches = event.nativeEvent.touches;
@@ -71,23 +97,39 @@ const PinchZoom: React.FC<Props> = (props) => {
       },
       onPanResponderRelease: () => {
         zIndex = 0;
-        let animationProgress = 0;
-        props.distance.stopAnimation((event) => (animationProgress = event));
-        if (Math.sqrt(Math.pow(animationProgress, 2)) < 200) {
+        let animationProgress = (props.distance as any)._value;
+        if (Math.abs(animationProgress) < SCREEN_WIDTH * 0.1) {
           Animated.timing(props.distance, {
-            toValue: 0,
+            toValue: -SCREEN_WIDTH * 0.8,
             duration: 250,
             useNativeDriver: false,
           }).start();
+        } else if (animationProgress < -(SCREEN_WIDTH * 0.1)) {
+          Animated.spring(props.distance, {
+            toValue: -SCREEN_WIDTH * 0.8,
+            useNativeDriver: false,
+          }).start((event) => {
+            animationTransition(event, 'zoom');
+            props.setPinchOrZoom('zoom');
+          });
+        } else if (animationProgress > SCREEN_WIDTH * 0.1) {
+          Animated.spring(props.distance, {
+            toValue: SCREEN_WIDTH * 0.8,
+            useNativeDriver: false,
+          }).start((event) => {
+            animationTransition(event, 'pinch');
+            props.setPinchOrZoom('pinch');
+          });
         }
       },
     }),
-  )[0];
+  ).current;
+
   return (
     <Animated.View
       style={{
-        width: WINDOW_WIDTH,
-        height: WINDOW_HEIGHT,
+        width: SCREEN_WIDTH,
+        height: SCREEN_HEIGHT,
         zIndex: zIndex,
       }}
       {...panResponder.panHandlers}>

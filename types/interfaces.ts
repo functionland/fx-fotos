@@ -9,6 +9,10 @@ export interface reduxState {
   box: Array<PhotoIdentifier>;
   images: Array<sortedPhotos>;
   sortCondition: sortCondition;
+  loading: boolean;
+  photos: Array<PhotoIdentifier>;
+  numColumns: 2 | 3 | 4;
+  numberOfPhotos: number;
 }
 
 export interface sortedPhotos {
@@ -20,10 +24,12 @@ export interface reduxAction {
   payload: any;
 }
 
-export interface sortedPhotosObject {
-  day: {[key: string]: Array<PhotoIdentifier>};
-  week: {[key: string]: Array<PhotoIdentifier>};
-  month: {[key: string]: Array<PhotoIdentifier>};
+export interface changeSortConditionAndNumColumns {
+  (
+    sortCondition: sortCondition,
+    pinchOrZoom: 'pinch' | 'zoom',
+    numCols: 2 | 3 | 4,
+  ): {sortCondition: string; numColumns: number};
 }
 
 export interface sortDetails {
@@ -32,4 +38,9 @@ export interface sortDetails {
   height: number;
 }
 
-export type sortCondition = 'day' | 'month' | 'week';
+export type sortCondition = 'day' | 'month';
+
+export interface photoChunk {
+  date: string,
+  data: Array<PhotoIdentifier>
+}

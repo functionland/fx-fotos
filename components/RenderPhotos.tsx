@@ -1,58 +1,92 @@
-import {Text, View} from 'native-base';
-import React, {ReactElement, useEffect, useState} from 'react';
+import {PhotoIdentifier} from '@react-native-community/cameraroll';
+import {Image, Spinner, View} from 'native-base';
+import React from 'react';
+import {
+  FlatList,
+  ScrollView,
+  Animated,
+  Dimensions,
+  Text,
+  SafeAreaView,
+  StyleSheet,
+} from 'react-native';
 import FastImage from 'react-native-fast-image';
-import {FlatList, Dimensions, Animated, Modal, Image} from 'react-native';
-import {sortedPhotos} from '../types/interfaces';
-import {TouchableOpacity} from 'react-native-gesture-handler';
-import SinglePhoto from './SinglePhoto';
-import CustomFlatList from './CustomFlatList';
+import {useSelector} from 'react-redux';
+import {photoChunk, reduxState, sortedPhotos} from '../types/interfaces';
+import {sortPhotos} from '../utils/functions';
+import PhotosChunk from './PhotosChunk';
 
 const SCREEN_WIDTH = Dimensions.get('screen').width;
 const SCREEN_HEIGHT = Dimensions.get('screen').height;
 
 interface Props {
-  photos: sortedPhotos;
-  width: number;
-  height: number;
-  numColumn: number;
-  distance: Animated.Value;
+  photos: Array<photoChunk>;
+  margin: Animated.AnimatedInterpolation;
+  maxWidth: number;
+  minWidth: number;
+  numColumns: 2 | 3 | 4;
+  opacity: Animated.AnimatedInterpolation;
+  date: Date;
+  loading: boolean;
+  separator: 'day' | 'month';
+  getMorePhotosFunction: Function;
+  setWrapperHeight: Function;
+  wrpperHeight: number | undefined
 }
 
 const RenderPhotos: React.FC<Props> = (props) => {
-  const renderPhotos = (photos: sortedPhotos) => {
-    let result = [];
-    for (let date of Object.keys(photos)) {
-      result.push(
-        <CustomFlatList
-          distance={props.distance}
-          width={props.width}
-          height={props.height}
-          photos={photos[date]}
-          title={date}
-        />,
-      );
-    }
-    return result;
+  const numColumns = useSelector((state: reduxState) => state.numColumns);
+
+  const renderChunkPhotos = (
+    date: string,
+    photos: Array<PhotoIdentifier>,
+    opacity: Animated.AnimatedInterpolation,
+    numCol: 2 | 3 | 4,
+    setWrapperHeight: Function,
+  ) => {
+    return (
+      <PhotosChunk
+        date={date}
+        photos={photos}
+        opacity={opacity}
+        numCol={numCol}
+        setWrapperHeight={setWrapperHeight}
+      />
+    );
+    // return <Text>SEGE</Text>
   };
 
-  return (
-    <Animated.View
+  console.log('numColumns', numColumns);
+
+  return props.photos ? (
+    <FlatList
+      // scrollEnabled={true}
+      data={props.photos}
+      renderItem={({item}) =>
+        renderChunkPhotos(
+          item.date,
+          item.data,
+          props.opacity,
+          props.numColumns,
+          props.setWrapperHeight,
+        )
+      }
+      onEndReached={() => console.log('getting photo')}
+      // contentContainerStyle={{flexGrow: 1}}
+      onEndReachedThreshold={0.9}
       style={{
-        opacity:
-          props.numColumn === 2
-            ? props.distance.interpolate({
-                inputRange: [-200, 0, 200],
-                outputRange: [0, 1, 0],
-              })
-            : props.distance.interpolate({
-                inputRange: [-200, 0, 200],
-                outputRange: [1, 0, 1],
-              }),
+        flex: 1,
         width: SCREEN_WIDTH,
-        height: SCREEN_HEIGHT,
-      }}>
-      {props.photos ? renderPhotos(props.photos) : <Text>ERROR</Text>}
-    </Animated.View>
+        height: props.wrpperHeight,
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+      }}
+      numColumns={props.numColumns}
+      key={props.separator + props.numColumns}
+    />
+  ) : (
+    <Spinner />
   );
 };
 

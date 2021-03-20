@@ -2,19 +2,24 @@ import {PhotoIdentifier} from '@react-native-community/cameraroll';
 import {useNavigation} from '@react-navigation/native';
 import React, {useEffect, useRef, useState} from 'react';
 import {Animated} from 'react-native';
-import {sortedPhotosObject} from '../types/interfaces';
 import {getUserBoxMedia} from '../utils/APICAlls';
 import {getStoragePhotos, sortPhotos} from '../utils/functions';
 import {storagePermission} from '../utils/permissions';
 import AllPhotos from './AllPhotos';
 import PinchZoom from './PinchZoom';
+import {sortCondition} from '../types/interfaces';
 
 const PhotosContainer = () => {
   const [per, setPer] = useState<boolean>();
-  const [photos, setPhotos] = useState<sortedPhotosObject>();
+  const [photos, setPhotos] = useState<Array<PhotoIdentifier>>();
   const [storagePhotos, setStoragePhotos] = useState<Array<PhotoIdentifier>>();
   const navigation = useNavigation();
-  let distance = new Animated.Value(0);
+  let distance = useRef(new Animated.Value(0)).current;
+  const [pinchOrZoom, setPinchOrZoom] = useState<
+    'pinch' | 'zoom' | undefined
+  >();
+  const [sortCondition, setSortCondition] = useState<sortCondition>('day');
+  const [numColumns, setNumColumns] = useState<2 | 3 | 4>(2);
 
   useEffect(() => {
     if (per) {
@@ -35,13 +40,25 @@ const PhotosContainer = () => {
     let boxPhotos: Array<PhotoIdentifier> = getUserBoxMedia('');
     if (storagePhotos) {
       let photos = boxPhotos.concat(storagePhotos);
-      setPhotos(sortPhotos(photos));
+      setPhotos(photos);
     }
   }, [storagePhotos]);
 
   return photos ? (
-    <PinchZoom distance={distance}>
-      <AllPhotos distance={distance} photos={photos} />
+    <PinchZoom
+      setPinchOrZoom={setPinchOrZoom}
+      distance={distance}
+      setSortCondition={setSortCondition}
+      setNumColumns={setNumColumns}
+      sortCondition={sortCondition}
+      numColumns={numColumns}>
+      <AllPhotos
+        pinchOrZoom={pinchOrZoom}
+        distance={distance}
+        photos={photos}
+        sortCondition={sortCondition}
+        numColumns={numColumns}
+      />
     </PinchZoom>
   ) : (
     <></>

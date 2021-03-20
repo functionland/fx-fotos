@@ -6,24 +6,26 @@ export async function storagePermission() {
       PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
     );
 
-    const result = await PermissionsAndroid.request(
-      PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
-      {
-        title: 'Permission Explanation',
-        message: 'ReactNativeForYou would like to access your photos!',
-        buttonNeutral: 'Ask Me Later',
-        buttonNegative: 'Cancel',
-        buttonPositive: 'OK',
-      },
-    );
-    if (result !== 'granted') {
-      console.log('Access to pictures was denied');
-      return false;
-    } else {
-      console.log('Access to pictures was granted');
+    if (permission) {
       return true;
+    } else {
+      const result = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+        {
+          title: 'Permission Explanation',
+          message: 'ReactNativeForYou would like to access your photos!',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        },
+      );
+      if (result !== 'granted') {
+        console.log('Access to pictures was denied');
+        return false;
+      } else {
+        console.log('Access to pictures was granted');
+        return true;
+      }
     }
   }
-
-  return false;
 }

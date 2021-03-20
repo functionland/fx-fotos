@@ -3,6 +3,14 @@ export const Constant = {
     user: {
       setUser: 'SET_USER',
     },
+    error: {
+      setError: 'SET_ERROR',
+    },
+    photos: {
+      getPhotosRequest: 'GET_PHOTOS_REQUEST',
+      getPhotosSuccess: 'GET_PHOTOS_SUCCESS',
+      getPhotosFailure: 'GET_PHOTOS_FAILURE',
+    },
     box: {
       setBoxMedia: 'SET_BOX_MEDIA',
     },
@@ -10,5 +18,6 @@ export const Constant = {
       setStorageMedia: 'SET_STORAGE_MEDIA',
     },
     sortConditionChange: 'SORT_CONDITION_CHANGE',
+    numColumnsChange: 'NUMBER_OF_COLUMNS_CHANGE',
   },
 };
