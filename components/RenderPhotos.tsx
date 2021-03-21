@@ -1,6 +1,6 @@
 import {PhotoIdentifier} from '@react-native-community/cameraroll';
 import {Image, Spinner, View} from 'native-base';
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   FlatList,
   ScrollView,
@@ -31,11 +31,25 @@ interface Props {
   separator: 'day' | 'month';
   getMorePhotosFunction: Function;
   setWrapperHeight: Function;
-  wrpperHeight: number | undefined
+  wrapperHeight: number | undefined;
 }
 
 const RenderPhotos: React.FC<Props> = (props) => {
   const numColumns = useSelector((state: reduxState) => state.numColumns);
+
+  const [wrapperHeightTemp, setWrapperHeightTemp] = useState<number>();
+
+  useEffect(() => {
+    let wrapperHeight = 0;
+    if (props.wrapperHeight && wrapperHeightTemp) {
+      wrapperHeight = props.wrapperHeight + wrapperHeightTemp;
+    } else if (props.wrapperHeight) {
+      wrapperHeight = props.wrapperHeight;
+    } else if (wrapperHeightTemp) {
+      wrapperHeight = wrapperHeightTemp;
+    }
+    props.setWrapperHeight(wrapperHeight);
+  }, [wrapperHeightTemp]);
 
   const renderChunkPhotos = (
     date: string,
@@ -50,13 +64,11 @@ const RenderPhotos: React.FC<Props> = (props) => {
         photos={photos}
         opacity={opacity}
         numCol={numCol}
-        setWrapperHeight={setWrapperHeight}
+        setWrapperHeight={setWrapperHeightTemp}
       />
     );
     // return <Text>SEGE</Text>
   };
-
-  console.log('numColumns', numColumns);
 
   return props.photos ? (
     <FlatList
@@ -71,13 +83,13 @@ const RenderPhotos: React.FC<Props> = (props) => {
           props.setWrapperHeight,
         )
       }
-      onEndReached={() => console.log('getting photo')}
+      // onEndReached={() => props.getMorePhotosFunction()}
       // contentContainerStyle={{flexGrow: 1}}
-      onEndReachedThreshold={0.9}
+      // onEndReachedThreshold={0.5}
       style={{
         flex: 1,
         width: SCREEN_WIDTH,
-        height: props.wrpperHeight,
+        height: props.wrapperHeight,
         position: 'absolute',
         top: 0,
         bottom: 0,

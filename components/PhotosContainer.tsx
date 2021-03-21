@@ -1,7 +1,7 @@
 import {PhotoIdentifier} from '@react-native-community/cameraroll';
 import {useNavigation} from '@react-navigation/native';
 import React, {useEffect, useRef, useState} from 'react';
-import {Animated} from 'react-native';
+import {Animated, SafeAreaView} from 'react-native';
 import {getUserBoxMedia} from '../utils/APICAlls';
 import {getStoragePhotos, sortPhotos} from '../utils/functions';
 import {storagePermission} from '../utils/permissions';
@@ -52,6 +52,7 @@ const PhotosContainer = () => {
       setNumColumns={setNumColumns}
       sortCondition={sortCondition}
       numColumns={numColumns}>
+        <SafeAreaView style={{flex: 1}}>
       <AllPhotos
         pinchOrZoom={pinchOrZoom}
         distance={distance}
@@ -59,6 +60,7 @@ const PhotosContainer = () => {
         sortCondition={sortCondition}
         numColumns={numColumns}
       />
+      </SafeAreaView>
     </PinchZoom>
   ) : (
     <></>
