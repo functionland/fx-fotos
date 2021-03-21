@@ -7,7 +7,7 @@ import {PhotoIdentifier} from '@react-native-community/cameraroll';
 import {opacityTransition, sortPhotos, test} from '../utils/functions';
 import {useDispatch, useSelector} from 'react-redux';
 import {getPhotos} from '../store/actions';
-import {Button, Text} from 'native-base';
+import {Button, Spinner, Text} from 'native-base';
 
 const SCREEN_WIDTH = Dimensions.get('screen').width;
 const SCREEN_HEIGHT = Dimensions.get('screen').height;
@@ -25,25 +25,32 @@ const AllPhotos: React.FC<Props> = (props) => {
   const loading = useSelector((state: reduxState) => state.loading);
 
   const [wrapperHeight, setWrapperHeight] = useState<number>();
+  const [componentLoading, setComponentLoading] = useState<boolean>(true);
 
   const dispatch = useDispatch();
   const getMorePhotos = () => {
-    console.log('getting more photos');
+    console.log('getting more photos'.toUpperCase());
     dispatch(getPhotos());
+    console.log("SEGE")
   };
 
   useEffect(() => {
     getMorePhotos();
   }, []);
 
-  console.log('wrapperHeight', wrapperHeight);
+  useEffect(() => {
+    if (photos) {
+      setComponentLoading(true);
+    }
+  }, [photos]);
 
-  return (
+  return componentLoading ? (
     <ScrollView
-      style={{flex: 1}}
+      style={{height: "auto"}}
+      key={'All-Photos-Container'}
       contentContainerStyle={{
         width: SCREEN_WIDTH,
-        height: wrapperHeight ? wrapperHeight + 200 : SCREEN_HEIGHT,
+        height: wrapperHeight ? wrapperHeight : SCREEN_HEIGHT,
         // flexWrap: "wrap",
         // alignSelf: "baseline"
         // height: "auto",
@@ -51,7 +58,7 @@ const AllPhotos: React.FC<Props> = (props) => {
       }}>
       <RenderPhotos
         setWrapperHeight={setWrapperHeight}
-        wrpperHeight={wrapperHeight}
+        wrapperHeight={wrapperHeight}
         photos={test(sortPhotos(photos, 'day'))}
         loading={loading}
         getMorePhotosFunction={getMorePhotos}
@@ -76,7 +83,7 @@ const AllPhotos: React.FC<Props> = (props) => {
       />
       <RenderPhotos
         setWrapperHeight={setWrapperHeight}
-        wrpperHeight={wrapperHeight}
+        wrapperHeight={wrapperHeight}
         photos={test(sortPhotos(photos, 'day'))}
         loading={loading}
         getMorePhotosFunction={getMorePhotos}
@@ -101,7 +108,7 @@ const AllPhotos: React.FC<Props> = (props) => {
       />
       <RenderPhotos
         photos={test(sortPhotos(photos, 'month'))}
-        wrpperHeight={wrapperHeight}
+        wrapperHeight={wrapperHeight}
         setWrapperHeight={setWrapperHeight}
         loading={loading}
         getMorePhotosFunction={getMorePhotos}
@@ -125,6 +132,8 @@ const AllPhotos: React.FC<Props> = (props) => {
         separator="month"
       />
     </ScrollView>
+  ) : (
+    <Spinner />
   );
 };
 
