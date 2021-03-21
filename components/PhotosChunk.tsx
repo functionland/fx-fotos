@@ -2,6 +2,7 @@ import {PhotoIdentifier} from '@react-native-community/cameraroll';
 import {View} from 'native-base';
 import React from 'react';
 import {Animated, Text} from 'react-native';
+import {FlatList} from 'react-native-gesture-handler';
 import {event} from 'react-native-reanimated';
 import {useSelector} from 'react-redux';
 import {reduxState} from '../types/interfaces';
@@ -27,9 +28,10 @@ const renderPhotos = (
       <Animated.View
         // <Animated.Image
         // source={{uri: photo.node.image.uri}}
+        key={photo.node.image.uri}
         style={{
           height: 200,
-          backgroundColor: loading ? 'grey' : 'red',
+          backgroundColor: loading ? 'blue' : 'red',
           margin: 3,
           opacity: opacity,
           width: `${90 / numCol}%`,
@@ -48,6 +50,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
 
   return (
     <Animated.View
+      key={props.date}
       style={{width: '100%'}}
       onLayout={(event) => {
         let {height} = event.nativeEvent.layout;
@@ -59,14 +62,24 @@ const PhotosChunk: React.FC<Props> = (props) => {
       <View
         style={{
           flexDirection: 'row',
-          flex: 1,
+          // flex: 1,
           flexWrap: 'wrap',
           width: '100%',
+          height: "auto",
+          // minHeight: SCREEN_HEIGHT,
           flexGrow: 1,
         }}>
         {renderPhotos(props.photos, props.opacity, props.numCol, loading)}
       </View>
     </Animated.View>
+    // <FlatList
+    //   data={props.photos}
+    //   keyExtractor={(photo) => photo.node.image.uri}
+    //   ListHeaderComponent={() => <Text>{props.date}</Text>}
+    //   renderItem={({item}) => (
+    //     <Animated.Image source={{uri: item.node.image.uri}} />
+    //   )}
+    // />
   );
 };
 
