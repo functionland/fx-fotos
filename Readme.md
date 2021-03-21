@@ -89,54 +89,64 @@ For now we have two pages in the app:
 
 ## Components descripction
 
-In the HomePage we have only one custom components:
-- PhotosContainer
-> this component is responsible for getting the photos and videos from storage and feed the AllPhotos component with storage photos.
-> this component include the PinchZoom component and AllPhotos component
-- PinchZoom
-> This component is responsible for all the animations and actions we want to do when animations done.
-> This component is wraped around the AllPhotos component.
-> The prop types of this component is :
-> - distance: Animated.Value
-> - setPinchOrZoom: Function
-> - setSortCondition: Function
-> - setNumColumns: Function
-> - numColumns: 2 | 3 | 4
-> - sortCondition: sortCondition
+The components are as follows:
+### PhotosContainer
+- this component is responsible for getting the photos and videos from storage and feed the AllPhotos component with storage photos.
+- this component include the PinchZoom component and AllPhotos component
+### PinchZoom
+- This component is responsible for all the animations and actions we want to do when animations done.
+- This component is wraped around the AllPhotos component.
+- The prop types of this component is :
+    - distance: Animated.Value
+    - setPinchOrZoom: Function
+    - setSortCondition: Function
+    - setNumColumns: Function
+    - numColumns: 2 | 3 | 4
+    - sortCondition: sortCondition
 
-- AllPhotos
-> This component is wraped the three RenderPhotos components and is responsible for lazy load the photos and feed the render photos with proper data.
->  The three different kind of RenderPhotos is the month view with 4 columns of photos, the day view with 3 columns of photos and the day view with 2 columns of photos.
->  The prop types of the component is:
-> - photos: array of PhotoIdentifier
-> - distance: Animated.Value
-> - pinchOrZoom: 'pinch' | 'zoom' | undefined
-> - sortCondition: sortCondition
-> - numColumns: 2 | 3 | 4
+### AllPhotos
+- This component is wraped the three RenderPhotos components and is responsible for lazy load the photos and feed the render photos with proper data.
+-  The three different kind of RenderPhotos is the month view with 4 columns of photos, the day view with 3 columns of photos and the day view with 2 columns of photos.
+-  The prop types of the component is:
+    - photos: array of PhotoIdentifier
+    - distance: Animated.Value
+    - pinchOrZoom: 'pinch' | 'zoom' | undefined
+    - sortCondition: sortCondition
+    - numColumns: 2 | 3 | 4
 
-- RenderPhotos
-> This component includes with the number of PhotosChunk components and one FlatList that wraped all the PhotosChunk components that we want to show the user.
-> The height of this component is the height of the user's phone screen.
-> The prop types is:
-> - photos: array of photoChunk
-> - margin: Animated.AnimatedInterpolation
-> - maxWidth: number
-> - minWidth: number
-> - numColumns: 2 | 3 | 4
-> - opacity: Animated.AnimatedInterpolation
-> - date: Date
-> - loading: boolean
-> - separator: 'day' | 'month'
-> - getMorePhotosFunction: Function
-> - setWrapperHeight: Function
-> - wrapperHeight: number | undefined
-> 
-- PhotosChunk:
-> This component has one title called date and number of photos which captured on that date.
-> It should render all photos in flex display with the date title on top of photos and the photos and the title should disappear or appear with the pinch or zoom animation.
-> It has prop types like this:
-> - date: string
-> - photos: array of PhotoIdentifier
-> - opacity: Animated.AnimatedInterpolation
-> - numCol: 2 | 3 | 4
-> - setWrapperHeight: Function
+### RenderPhotos
+- This component includes with the number of PhotosChunk components and one FlatList that wraped all the PhotosChunk components that we want to show the user.
+- The height of this component is the height of the user's phone screen.
+- The prop types is:
+    - photos: array of photoChunk
+    - margin: Animated.AnimatedInterpolation
+    - maxWidth: number
+    - minWidth: number
+    - numColumns: 2 | 3 | 4
+    - opacity: Animated.AnimatedInterpolation
+    - date: Date
+    - loading: boolean
+    - separator: 'day' | 'month'
+    - getMorePhotosFunction: Function
+    - setWrapperHeight: Function
+    - wrapperHeight: number | undefined
+
+### PhotosChunk:
+- This component has one title called date and number of photos which captured on that date.
+- It should render all photos in flex display with the date title on top of photos and the photos and the title should disappear or appear with the pinch or zoom animation.
+- It has prop types like this:
+    - date: string
+    - photos: array of PhotoIdentifier
+    - opacity: Animated.AnimatedInterpolation
+    - numCol: 2 | 3 | 4
+    - setWrapperHeight: Function
+
+## Components diagram
+
+```mermaid
+graph LR
+A[Square Rect] -- Link text --> B((Circle))
+A --> C(Round Rect)
+B --> D{Rhombus}
+C --> D
+```
