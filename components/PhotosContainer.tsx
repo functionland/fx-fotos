@@ -39,8 +39,8 @@ const PhotosContainer = () => {
   useEffect(() => {
     let boxPhotos: Array<PhotoIdentifier> = getUserBoxMedia('');
     if (storagePhotos) {
-      let photos = boxPhotos.concat(storagePhotos);
-      setPhotos(photos);
+      let photos_i = boxPhotos.concat(storagePhotos);
+      setPhotos(photos_i);
     }
   }, [storagePhotos]);
 

@@ -4,12 +4,16 @@ import PhotosContainer from '../components/PhotosContainer';
 
 const HomePage = () => {
   return (
-    <SafeAreaView style={{flex: 1}}>
+    <SafeAreaView style={styles.SafeAreaView}>
       <PhotosContainer />
     </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  SafeAreaView: {
+    flex: 1,
+  },
+});
 
 export default HomePage;
