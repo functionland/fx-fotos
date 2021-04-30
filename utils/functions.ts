@@ -233,7 +233,7 @@ export const opacityTransition = (
   return result;
 };
 
-export const test = (photos: any) => {
+export const groupPhotosByDate = (photos: any) => {
   let result: Array<photoChunk> = [];
 
   for (let sortedPhotosDate of Object.keys(photos)) {

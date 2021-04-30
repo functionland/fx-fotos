@@ -1,19 +1,9 @@
 import {PhotoIdentifier} from '@react-native-community/cameraroll';
-import {Image, Spinner, View} from 'native-base';
+import {Spinner} from 'native-base';
 import React from 'react';
-import {
-  FlatList,
-  ScrollView,
-  Animated,
-  Dimensions,
-  Text,
-  SafeAreaView,
-  StyleSheet,
-} from 'react-native';
-import FastImage from 'react-native-fast-image';
+import {FlatList, Animated, Dimensions} from 'react-native';
 import {useSelector} from 'react-redux';
-import {photoChunk, reduxState, sortedPhotos} from '../types/interfaces';
-import {sortPhotos} from '../utils/functions';
+import {photoChunk, reduxState} from '../types/interfaces';
 import PhotosChunk from './PhotosChunk';
 
 const SCREEN_WIDTH = Dimensions.get('screen').width;
@@ -31,7 +21,7 @@ interface Props {
   separator: 'day' | 'month';
   getMorePhotosFunction: Function;
   setWrapperHeight: Function;
-  wrpperHeight: number | undefined
+  wrapperHeight: number | undefined;
 }
 
 const RenderPhotos: React.FC<Props> = (props) => {
@@ -53,14 +43,13 @@ const RenderPhotos: React.FC<Props> = (props) => {
         setWrapperHeight={setWrapperHeight}
       />
     );
-    // return <Text>SEGE</Text>
   };
 
   console.log('numColumns', numColumns);
 
   return props.photos ? (
     <FlatList
-      // scrollEnabled={true}
+      scrollEnabled={true}
       data={props.photos}
       renderItem={({item}) =>
         renderChunkPhotos(
@@ -77,7 +66,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
       style={{
         flex: 1,
         width: SCREEN_WIDTH,
-        height: props.wrpperHeight,
+        height: props.wrapperHeight,
         position: 'absolute',
         top: 0,
         bottom: 0,

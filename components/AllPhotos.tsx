@@ -1,13 +1,16 @@
 import React, {useEffect, useState} from 'react';
 import {ScrollView} from 'react-native-gesture-handler';
-import {Animated, Dimensions, SafeAreaView, View} from 'react-native';
+import {Animated, Dimensions} from 'react-native';
 import {reduxState, sortCondition} from '../types/interfaces';
 import RenderPhotos from './RenderPhotos';
 import {PhotoIdentifier} from '@react-native-community/cameraroll';
-import {opacityTransition, sortPhotos, test} from '../utils/functions';
+import {
+  opacityTransition,
+  sortPhotos,
+  groupPhotosByDate,
+} from '../utils/functions';
 import {useDispatch, useSelector} from 'react-redux';
 import {getPhotos} from '../store/actions';
-import {Button, Text} from 'native-base';
 
 const SCREEN_WIDTH = Dimensions.get('screen').width;
 const SCREEN_HEIGHT = Dimensions.get('screen').height;
@@ -49,10 +52,11 @@ const AllPhotos: React.FC<Props> = (props) => {
         // height: "auto",
         // flexGrow: 1,
       }}>
+
       <RenderPhotos
         setWrapperHeight={setWrapperHeight}
-        wrpperHeight={wrapperHeight}
-        photos={test(sortPhotos(photos, 'day'))}
+        wrapperHeight={wrapperHeight}
+        photos={groupPhotosByDate(sortPhotos(photos, 'day'))}
         loading={loading}
         getMorePhotosFunction={getMorePhotos}
         margin={props.distance.interpolate({
@@ -76,8 +80,8 @@ const AllPhotos: React.FC<Props> = (props) => {
       />
       <RenderPhotos
         setWrapperHeight={setWrapperHeight}
-        wrpperHeight={wrapperHeight}
-        photos={test(sortPhotos(photos, 'day'))}
+        wrapperHeight={wrapperHeight}
+        photos={groupPhotosByDate(sortPhotos(photos, 'day'))}
         loading={loading}
         getMorePhotosFunction={getMorePhotos}
         margin={props.distance.interpolate({
@@ -100,8 +104,8 @@ const AllPhotos: React.FC<Props> = (props) => {
         separator="day"
       />
       <RenderPhotos
-        photos={test(sortPhotos(photos, 'month'))}
-        wrpperHeight={wrapperHeight}
+        photos={groupPhotosByDate(sortPhotos(photos, 'month'))}
+        wrapperHeight={wrapperHeight}
         setWrapperHeight={setWrapperHeight}
         loading={loading}
         getMorePhotosFunction={getMorePhotos}

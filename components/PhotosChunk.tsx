@@ -1,7 +1,6 @@
 import {PhotoIdentifier} from '@react-native-community/cameraroll';
-import {View} from 'native-base';
 import React from 'react';
-import {Animated, Text} from 'react-native';
+import {Animated} from 'react-native';
 import {event} from 'react-native-reanimated';
 import {useSelector} from 'react-redux';
 import {reduxState} from '../types/interfaces';
@@ -24,9 +23,10 @@ const renderPhotos = (
 
   for (let photo of photos) {
     result.push(
-      <Animated.View
-        // <Animated.Image
-        // source={{uri: photo.node.image.uri}}
+      //<Animated.View
+      <Animated.Image
+        source={{uri: photo.node.image.uri}}
+        // eslint-disable-next-line react-native/no-inline-styles
         style={{
           height: 200,
           backgroundColor: loading ? 'grey' : 'red',
@@ -34,8 +34,6 @@ const renderPhotos = (
           opacity: opacity,
           width: `${90 / numCol}%`,
         }}
-        // width={200}
-        // height={200}
       />,
     );
   }
@@ -49,14 +47,15 @@ const PhotosChunk: React.FC<Props> = (props) => {
   return (
     <Animated.View
       style={{width: '100%'}}
-      onLayout={(event) => {
-        let {height} = event.nativeEvent.layout;
+      onLayout={(event_r) => {
+        let {height} = event_r.nativeEvent.layout;
         props.setWrapperHeight(height);
       }}>
       <Animated.Text style={{opacity: props.opacity}}>
         {props.date}
       </Animated.Text>
-      <View
+      <Animated.View
+        // eslint-disable-next-line react-native/no-inline-styles
         style={{
           flexDirection: 'row',
           flex: 1,
@@ -65,7 +64,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
           flexGrow: 1,
         }}>
         {renderPhotos(props.photos, props.opacity, props.numCol, loading)}
-      </View>
+      </Animated.View>
     </Animated.View>
   );
 };
