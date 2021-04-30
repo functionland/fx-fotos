@@ -1,6 +1,6 @@
 import {PhotoIdentifier} from '@react-native-community/cameraroll';
 import React from 'react';
-import {Animated} from 'react-native';
+import {Animated, Text} from 'react-native';
 import {event} from 'react-native-reanimated';
 import {useSelector} from 'react-redux';
 import {reduxState} from '../types/interfaces';
@@ -23,9 +23,9 @@ const renderPhotos = (
 
   for (let photo of photos) {
     result.push(
-      //<Animated.View
-      <Animated.Image
-        source={{uri: photo.node.image.uri}}
+      <Animated.View
+      //<Animated.Image
+        //source={{uri: photo.node.image.uri}}
         // eslint-disable-next-line react-native/no-inline-styles
         style={{
           height: 200,
@@ -34,7 +34,10 @@ const renderPhotos = (
           opacity: opacity,
           width: `${90 / numCol}%`,
         }}
-      />,
+      ///>,
+      >
+        <Text>{photo.node.image.uri}</Text>
+      </Animated.View>
     );
   }
 

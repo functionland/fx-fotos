@@ -8,9 +8,10 @@ import {storagePermission} from '../utils/permissions';
 import AllPhotos from './AllPhotos';
 import PinchZoom from './PinchZoom';
 import {sortCondition} from '../types/interfaces';
+import {getPhotos} from '../store/actions';
 
 const PhotosContainer = () => {
-  const [per, setPer] = useState<boolean>();
+  const [permission, setPermission] = useState<boolean>();
   const [photos, setPhotos] = useState<Array<PhotoIdentifier>>();
   const [storagePhotos, setStoragePhotos] = useState<Array<PhotoIdentifier>>();
   const navigation = useNavigation();
@@ -18,21 +19,24 @@ const PhotosContainer = () => {
   const [pinchOrZoom, setPinchOrZoom] = useState<
     'pinch' | 'zoom' | undefined
   >();
-  const [sortCondition, setSortCondition] = useState<sortCondition>('day');
+  const [sortCondition_i, setSortCondition_i] = useState<sortCondition>('day');
   const [numColumns, setNumColumns] = useState<2 | 3 | 4>(2);
 
+  //TODO: Change this function to the getPhotos in actions like in AllPhotos
   useEffect(() => {
-    if (per) {
+    if (permission) {
       navigation.navigate('HomePage');
-      getStoragePhotos(per, 20)?.then((res: any) => {
+      getStoragePhotos(permission, 20)?.then((res: any) => {
         setStoragePhotos(res.edges);
       });
-    } else navigation.navigate('PermissionError');
-  }, [per]);
+    } else {
+      navigation.navigate('PermissionError');
+    }
+  }, [permission]);
 
   useEffect(() => {
     storagePermission()
-      .then((res) => setPer(res))
+      .then((res) => setPermission(res))
       .catch((error) => {});
   }, []);
 
@@ -48,15 +52,15 @@ const PhotosContainer = () => {
     <PinchZoom
       setPinchOrZoom={setPinchOrZoom}
       distance={distance}
-      setSortCondition={setSortCondition}
+      setSortCondition={setSortCondition_i}
       setNumColumns={setNumColumns}
-      sortCondition={sortCondition}
+      sortCondition={sortCondition_i}
       numColumns={numColumns}>
       <AllPhotos
         pinchOrZoom={pinchOrZoom}
         distance={distance}
         photos={photos}
-        sortCondition={sortCondition}
+        sortCondition={sortCondition_i}
         numColumns={numColumns}
       />
     </PinchZoom>

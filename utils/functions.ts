@@ -26,7 +26,7 @@ export const sortPhotos = (
     for (let photo of photos) {
       result[timestampToDate(photo.node.timestamp * 1000, 'day')].push(photo);
     }
-
+    //console.log("photos2"+JSON.stringify(photos, null, 2));
     return result;
   } else if (sortCondition == 'month') {
     for (let TS of timestamps_str) {

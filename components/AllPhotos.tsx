@@ -40,7 +40,6 @@ const AllPhotos: React.FC<Props> = (props) => {
   }, []);
 
   console.log('wrapperHeight', wrapperHeight);
-
   return (
     <ScrollView
       style={{flex: 1}}

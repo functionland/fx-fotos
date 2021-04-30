@@ -6,7 +6,7 @@ export const getPhotos = () => {
   return async (dispatch: any, getState: any) => {
     let permission = false;
     const state = getState()
-    const numberOfPhotos = state.numberOfPhotos
+    const numberOfPhotos = state.numberOfPhotos;
 
     dispatch({type: Constant.actionTypes.photos.getPhotosRequest});
 
@@ -20,7 +20,7 @@ export const getPhotos = () => {
       );
 
     try {
-      const response = await getStoragePhotos(permission,  numberOfPhotos + 20);
+      const response = await getStoragePhotos(permission, numberOfPhotos + 20);
       dispatch({
         type: Constant.actionTypes.photos.getPhotosSuccess,
         payload: response?.edges,
