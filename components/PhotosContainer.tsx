@@ -1,9 +1,9 @@
-import {PhotoIdentifier} from '@react-native-community/cameraroll';
+import * as MediaLibrary from "expo-media-library";
 import {useNavigation} from '@react-navigation/native';
 import React, {useEffect, useRef, useState} from 'react';
 import {Animated} from 'react-native';
 import {getUserBoxMedia} from '../utils/APICAlls';
-import {getStoragePhotos, sortPhotos} from '../utils/functions';
+import {getStorageMedia, sortPhotos} from '../utils/functions';
 import {storagePermission} from '../utils/permissions';
 import AllPhotos from './AllPhotos';
 import PinchZoom from './PinchZoom';
@@ -12,8 +12,8 @@ import {getPhotos} from '../store/actions';
 
 const PhotosContainer = () => {
   const [permission, setPermission] = useState<boolean>();
-  const [photos, setPhotos] = useState<Array<PhotoIdentifier>>();
-  const [storagePhotos, setStoragePhotos] = useState<Array<PhotoIdentifier>>();
+  const [photos, setPhotos] = useState<Array<MediaLibrary.Asset>>();
+  const [storagePhotos, setStoragePhotos] = useState<Array<MediaLibrary.Asset>>();
   const navigation = useNavigation();
   let distance = useRef(new Animated.Value(0)).current;
   const [pinchOrZoom, setPinchOrZoom] = useState<
@@ -26,8 +26,8 @@ const PhotosContainer = () => {
   useEffect(() => {
     if (permission) {
       navigation.navigate('HomePage');
-      getStoragePhotos(permission, 20)?.then((res: any) => {
-        setStoragePhotos(res.edges);
+      getStorageMedia(permission, 20, '0')?.then((res: any) => {
+        setStoragePhotos(res.assets);
       });
     } else {
       navigation.navigate('PermissionError');
@@ -41,7 +41,7 @@ const PhotosContainer = () => {
   }, []);
 
   useEffect(() => {
-    let boxPhotos: Array<PhotoIdentifier> = getUserBoxMedia('');
+    let boxPhotos: Array<MediaLibrary.Asset> = getUserBoxMedia('');
     if (storagePhotos) {
       let photos_i = boxPhotos.concat(storagePhotos);
       setPhotos(photos_i);

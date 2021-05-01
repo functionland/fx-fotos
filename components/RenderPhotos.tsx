@@ -1,7 +1,6 @@
-import {PhotoIdentifier} from '@react-native-community/cameraroll';
-import {Spinner} from 'native-base';
+import * as MediaLibrary from "expo-media-library";
 import React from 'react';
-import {FlatList, Animated, Dimensions} from 'react-native';
+import {FlatList, Animated, Dimensions, Text} from 'react-native';
 import {useSelector} from 'react-redux';
 import {photoChunk, reduxState} from '../types/interfaces';
 import PhotosChunk from './PhotosChunk';
@@ -29,7 +28,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
 
   const renderChunkPhotos = (
     date: string,
-    photos: Array<PhotoIdentifier>,
+    photos: Array<MediaLibrary.Asset>,
     opacity: Animated.AnimatedInterpolation,
     numCol: 2 | 3 | 4,
     setWrapperHeight: Function,
@@ -75,7 +74,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
       key={props.separator + props.numColumns}
     />
   ) : (
-    <Spinner />
+    <Text>Loading...</Text>
   );
 };
 

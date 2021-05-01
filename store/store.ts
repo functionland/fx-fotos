@@ -4,8 +4,8 @@ import thunk from "redux-thunk"
 
 const initialStore = {
   user: {
-    name: 'Ali Balouchi',
-    email: 'alibalouchi.74@gmail.com',
+    name: 'Test User',
+    email: 'testuser@gmail.com',
     token: '',
   },
   photos: [],

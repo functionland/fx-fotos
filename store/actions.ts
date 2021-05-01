@@ -1,12 +1,12 @@
 import {Constant} from '../utils/constants';
-import {getStoragePhotos} from '../utils/functions';
+import {getStorageMedia} from '../utils/functions';
 import {storagePermission} from '../utils/permissions';
 
-export const getPhotos = () => {
+export const getPhotos = (limit: number = 20, after: string = '0') => {
   return async (dispatch: any, getState: any) => {
     let permission = false;
-    const state = getState()
-    const numberOfPhotos = state.numberOfPhotos;
+    //const state = getState()
+    //const lastPhotoCurser = state.lastPhotoCurser;
 
     dispatch({type: Constant.actionTypes.photos.getPhotosRequest});
 
@@ -20,10 +20,10 @@ export const getPhotos = () => {
       );
 
     try {
-      const response = await getStoragePhotos(permission, numberOfPhotos + 20);
+      const response = await getStorageMedia(permission, limit, after);
       dispatch({
         type: Constant.actionTypes.photos.getPhotosSuccess,
-        payload: response?.edges,
+        payload: response?.assets,
       });
     } catch {
       dispatch({

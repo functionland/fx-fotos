@@ -1,4 +1,4 @@
-import {PhotoIdentifier} from '@react-native-community/cameraroll';
+import * as MediaLibrary from "expo-media-library";
 
 export interface reduxState {
   user: {
@@ -6,17 +6,17 @@ export interface reduxState {
     email: string;
     token: string;
   };
-  box: Array<PhotoIdentifier>;
+  box: Array<MediaLibrary.Asset>;
   images: Array<sortedPhotos>;
   sortCondition: sortCondition;
   loading: boolean;
-  photos: Array<PhotoIdentifier>;
+  photos: Array<MediaLibrary.Asset>;
   numColumns: 2 | 3 | 4;
   numberOfPhotos: number;
 }
 
 export interface sortedPhotos {
-  [key: string]: Array<PhotoIdentifier>;
+  [key: string]: Array<MediaLibrary.Asset>;
 }
 
 export interface reduxAction {
@@ -42,5 +42,5 @@ export type sortCondition = 'day' | 'month';
 
 export interface photoChunk {
   date: string,
-  data: Array<PhotoIdentifier>
+  data: Array<MediaLibrary.Asset>
 }

@@ -1,6 +1,5 @@
-import {Text, View} from 'react-native';
+import {Text, View, Button} from 'react-native';
 import React, {useState, useEffect} from 'react';
-import {Button} from 'native-base';
 import {storagePermission} from '../utils/permissions';
 import {useNavigation} from '@react-navigation/native';
 
@@ -23,9 +22,10 @@ const PermissionError = () => {
       <Button
         onPress={() => {
           setPermission();
-        }}>
-        <Text>Allow Permission</Text>
-      </Button>
+        }}
+        title='Allow Permission'
+        accessibilityLabel='Allow Permission'
+        />
     </View>
   );
 };

@@ -3,7 +3,7 @@ import {ScrollView} from 'react-native-gesture-handler';
 import {Animated, Dimensions} from 'react-native';
 import {reduxState, sortCondition} from '../types/interfaces';
 import RenderPhotos from './RenderPhotos';
-import {PhotoIdentifier} from '@react-native-community/cameraroll';
+import * as MediaLibrary from "expo-media-library";
 import {
   opacityTransition,
   sortPhotos,
@@ -16,7 +16,7 @@ const SCREEN_WIDTH = Dimensions.get('screen').width;
 const SCREEN_HEIGHT = Dimensions.get('screen').height;
 
 interface Props {
-  photos: Array<PhotoIdentifier>;
+  photos: Array<MediaLibrary.Asset>;
   distance: Animated.Value;
   pinchOrZoom: 'pinch' | 'zoom' | undefined;
   sortCondition: sortCondition;
@@ -32,7 +32,7 @@ const AllPhotos: React.FC<Props> = (props) => {
   const dispatch = useDispatch();
   const getMorePhotos = () => {
     console.log('getting more photos');
-    dispatch(getPhotos());
+    dispatch(getPhotos(20, ''));
   };
 
   useEffect(() => {

@@ -1,4 +1,4 @@
-import {PhotoIdentifier} from '@react-native-community/cameraroll';
+import * as MediaLibrary from "expo-media-library";
 import React from 'react';
 import {Animated, Text} from 'react-native';
 import {event} from 'react-native-reanimated';
@@ -7,14 +7,14 @@ import {reduxState} from '../types/interfaces';
 
 interface Props {
   date: string;
-  photos: Array<PhotoIdentifier>;
+  photos: Array<MediaLibrary.Asset>;
   opacity: Animated.AnimatedInterpolation;
   numCol: 2 | 3 | 4;
   setWrapperHeight: Function;
 }
 
 const renderPhotos = (
-  photos: Array<PhotoIdentifier>,
+  photos: Array<MediaLibrary.Asset>,
   opacity: Animated.AnimatedInterpolation,
   numCol: 2 | 3 | 4,
   loading: boolean,
@@ -36,7 +36,7 @@ const renderPhotos = (
         }}
       ///>,
       >
-        <Text>{photo.node.image.uri}</Text>
+        <Text>{photo.uri}</Text>
       </Animated.View>
     );
   }
@@ -58,7 +58,6 @@ const PhotosChunk: React.FC<Props> = (props) => {
         {props.date}
       </Animated.Text>
       <Animated.View
-        // eslint-disable-next-line react-native/no-inline-styles
         style={{
           flexDirection: 'row',
           flex: 1,

@@ -1,7 +1,5 @@
 import {Reducer} from 'react';
-import {Animated, Easing} from 'react-native';
 import {reduxAction, reduxState} from '../types/interfaces';
-import {getUserInfo, getUserBoxMedia} from '../utils/APICAlls';
 import {Constant} from '../utils/constants';
 
 export const reducer: Reducer<reduxState, reduxAction> = (
