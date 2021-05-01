@@ -1,4 +1,4 @@
-import * as MediaLibrary from "expo-media-library";
+import * as MediaLibrary from 'expo-media-library';
 import React from 'react';
 import {Animated, Text} from 'react-native';
 import {event} from 'react-native-reanimated';

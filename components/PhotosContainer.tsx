@@ -1,4 +1,4 @@
-import * as MediaLibrary from "expo-media-library";
+import * as MediaLibrary from 'expo-media-library';
 import {useNavigation} from '@react-navigation/native';
 import React, {useEffect, useRef, useState} from 'react';
 import {Animated} from 'react-native';
@@ -13,7 +13,9 @@ import {getPhotos} from '../store/actions';
 const PhotosContainer = () => {
   const [permission, setPermission] = useState<boolean>();
   const [photos, setPhotos] = useState<Array<MediaLibrary.Asset>>();
-  const [storagePhotos, setStoragePhotos] = useState<Array<MediaLibrary.Asset>>();
+  const [storagePhotos, setStoragePhotos] = useState<
+    Array<MediaLibrary.Asset>
+  >();
   const navigation = useNavigation();
   let distance = useRef(new Animated.Value(0)).current;
   const [pinchOrZoom, setPinchOrZoom] = useState<

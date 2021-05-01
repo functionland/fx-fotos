@@ -3,7 +3,7 @@ import {ScrollView} from 'react-native-gesture-handler';
 import {Animated, Dimensions} from 'react-native';
 import {reduxState, sortCondition} from '../types/interfaces';
 import RenderPhotos from './RenderPhotos';
-import * as MediaLibrary from "expo-media-library";
+import * as MediaLibrary from 'expo-media-library';
 import {
   opacityTransition,
   sortPhotos,

@@ -1,4 +1,4 @@
-import * as MediaLibrary from "expo-media-library";
+import * as MediaLibrary from 'expo-media-library';
 
 export interface reduxState {
   user: {
@@ -26,7 +26,7 @@ export interface reduxAction {
 
 export interface changeSortConditionAndNumColumns {
   (
-    sortCondition: sortCondition,
+    sortCondition_i: sortCondition,
     pinchOrZoom: 'pinch' | 'zoom',
     numCols: 2 | 3 | 4,
   ): {sortCondition: string; numColumns: number};
@@ -41,6 +41,6 @@ export interface sortDetails {
 export type sortCondition = 'day' | 'month';
 
 export interface photoChunk {
-  date: string,
-  data: Array<MediaLibrary.Asset>
+  date: string;
+  data: Array<MediaLibrary.Asset>;
 }

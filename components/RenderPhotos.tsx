@@ -1,4 +1,4 @@
-import * as MediaLibrary from "expo-media-library";
+import * as MediaLibrary from 'expo-media-library';
 import React from 'react';
 import {FlatList, Animated, Dimensions, Text} from 'react-native';
 import {useSelector} from 'react-redux';

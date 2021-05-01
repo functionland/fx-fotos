@@ -1,38 +1,36 @@
-import * as MediaLibrary from "expo-media-library";
-import { NativeTouchEvent } from "react-native";
+import * as MediaLibrary from 'expo-media-library';
 import {
   changeSortConditionAndNumColumns,
   photoChunk,
   sortCondition,
-  sortedPhotos,
-} from "../types/interfaces";
+} from '../types/interfaces';
 
 export const sortPhotos = (
   medias: Array<MediaLibrary.Asset>,
-  sortCondition: "day" | "month"
+  sortCondition_i: 'day' | 'month',
 ) => {
   let result: any = {};
-  console.log("medias: "+JSON.stringify(medias, null, 2));
-  if(medias && medias.length){
+  console.log('medias: ' + JSON.stringify(medias, null, 2));
+  if (medias && medias.length) {
     let timestamps = medias
       .map((media) => media.modificationTime)
       .sort((a, b) => b - a);
     let timestamps_str = timestamps.map((timestamp) => timestamp.toString());
-    if (sortCondition == "day") {
+    if (sortCondition_i === 'day') {
       for (let TS of timestamps_str) {
-        result[timestampToDate(+TS, "day")] = [];
+        result[timestampToDate(+TS, 'day')] = [];
       }
       for (let media of medias) {
-        result[timestampToDate(media.modificationTime, "day")].push(media);
+        result[timestampToDate(media.modificationTime, 'day')].push(media);
       }
       //console.log("photos2"+JSON.stringify(photos, null, 2));
       return result;
-    } else if (sortCondition == "month") {
+    } else if (sortCondition_i === 'month') {
       for (let TS of timestamps_str) {
-        result[timestampToDate(+TS, "month")] = [];
+        result[timestampToDate(+TS, 'month')] = [];
       }
       for (let media of medias) {
-        result[timestampToDate(media.modificationTime, "month")].push(media);
+        result[timestampToDate(media.modificationTime, 'month')].push(media);
       }
 
       return result;
@@ -47,7 +45,7 @@ export const sortPhotos = (
 
 export const timestampToDate = (
   timestamp: number,
-  condition: "day" | "month"
+  condition: 'day' | 'month',
 ) => {
   let date = new Date(timestamp);
   let month = date.getUTCMonth() + 1; //months from 1-12
@@ -55,29 +53,29 @@ export const timestampToDate = (
   let year = date.getUTCFullYear();
   let result;
 
-  if (condition == "day") {
+  if (condition === 'day') {
     result = new Date(year, month, day).toString().split(year.toString())[0];
-  } else if (condition == "month") {
+  } else if (condition === 'month') {
     const monthNames = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
     ];
     result = monthNames[new Date(year, month).getMonth()];
   }
   if (result) {
     return result;
   } else {
-    return "unknown";
+    return 'unknown';
   }
 };
 
@@ -90,14 +88,14 @@ export const getStorageMedia = (
   mediaType: Array<any> = [
     MediaLibrary.MediaType.photo,
     MediaLibrary.MediaType.video,
-  ]
+  ],
 ) => {
-  if(after==''){
+  if (after === '') {
     after = '0';
   }
   console.log([
-    "start getStorageMedia with parameters: ",
-    { parameters: { permission: permission, limit: limit, after: after } },
+    'start getStorageMedia with parameters: ',
+    {parameters: {permission: permission, limit: limit, after: after}},
   ]);
   if (permission) {
     let mediaFilter: MediaLibrary.AssetsOptions = {
@@ -109,7 +107,7 @@ export const getStorageMedia = (
       createdBefore: createdBefore,
     };
 
-    let media =  MediaLibrary.getAssetsAsync(mediaFilter);
+    let media = MediaLibrary.getAssetsAsync(mediaFilter);
     return media;
   }
 };
@@ -131,42 +129,42 @@ export const findDiameter = (width: number, height: number) => {
 };
 
 export const changeSortCondition: changeSortConditionAndNumColumns = (
-  sortCondition,
-  pinchOrZoom,
-  numCols
+  sortCondition_i: sortCondition,
+  pinchOrZoom: 'pinch' | 'zoom',
+  numCols: 2 | 3 | 4,
 ) => {
   let result = {
-    sortCondition: "day",
+    sortCondition: 'day',
     numColumns: 2,
   };
 
-  if (pinchOrZoom === "zoom") {
-    if (sortCondition === "day") {
+  if (pinchOrZoom === 'zoom') {
+    if (sortCondition_i === 'day') {
       if (numCols === 2) {
-        console.log("A");
-        result = { ...result, sortCondition: "day", numColumns: 2 };
+        console.log('A');
+        result = {...result, sortCondition: 'day', numColumns: 2};
       } else if (numCols === 3) {
-        console.log("B");
-        result = { ...result, sortCondition: "day", numColumns: 2 };
+        console.log('B');
+        result = {...result, sortCondition: 'day', numColumns: 2};
       }
-    } else if (sortCondition === "month") {
-      console.log("C");
-      result = { ...result, sortCondition: "day", numColumns: 3 };
+    } else if (sortCondition_i === 'month') {
+      console.log('C');
+      result = {...result, sortCondition: 'day', numColumns: 3};
     }
   }
 
-  if (pinchOrZoom === "pinch") {
-    if (sortCondition === "day") {
+  if (pinchOrZoom === 'pinch') {
+    if (sortCondition_i === 'day') {
       if (numCols === 2) {
-        console.log("D");
-        result = { ...result, sortCondition: "day", numColumns: 3 };
+        console.log('D');
+        result = {...result, sortCondition: 'day', numColumns: 3};
       } else if (numCols === 3) {
-        console.log("E");
-        result = { ...result, sortCondition: "month", numColumns: 4 };
+        console.log('E');
+        result = {...result, sortCondition: 'month', numColumns: 4};
       }
-    } else if (sortCondition === "month") {
-      console.log("F");
-      result = { ...result, sortCondition: "month", numColumns: 4 };
+    } else if (sortCondition_i === 'month') {
+      console.log('F');
+      result = {...result, sortCondition: 'month', numColumns: 4};
     }
   }
 
@@ -174,9 +172,9 @@ export const changeSortCondition: changeSortConditionAndNumColumns = (
 };
 
 export const opacityTransition = (
-  sortCondition: sortCondition,
+  sortCondition_i: sortCondition,
   numColumns: 2 | 3 | 4,
-  pinchOrZoom: "pinch" | "zoom" | undefined
+  pinchOrZoom: 'pinch' | 'zoom' | undefined,
 ) => {
   let result: any = {
     day: {
@@ -192,23 +190,23 @@ export const opacityTransition = (
     },
   };
 
-  if (sortCondition === "day") {
+  if (sortCondition_i === 'day') {
     if (numColumns === 2) {
       result = {
         ...result,
-        day: { ...result.day, col: { ...result.day.col, 2: [1, 0] } },
+        day: {...result.day, col: {...result.day.col, 2: [1, 0]}},
       };
     } else if (numColumns === 3) {
       result = {
         ...result,
-        day: { ...result.day, col: { ...result.day.col, 3: [1, 0] } },
+        day: {...result.day, col: {...result.day.col, 3: [1, 0]}},
       };
     }
-  } else if (sortCondition === "month") {
+  } else if (sortCondition_i === 'month') {
     if (numColumns === 4) {
       result = {
         ...result,
-        month: { ...result.month, col: { ...result.month.col, 4: [1, 0] } },
+        month: {...result.month, col: {...result.month.col, 4: [1, 0]}},
       };
     }
   }
@@ -218,36 +216,36 @@ export const opacityTransition = (
   }
 
   let newSortCondition = changeSortCondition(
-    sortCondition,
+    sortCondition_i,
     pinchOrZoom,
-    numColumns
+    numColumns,
   ).sortCondition;
   let newNumColumns = changeSortCondition(
-    sortCondition,
+    sortCondition_i,
     pinchOrZoom,
-    numColumns
+    numColumns,
   ).numColumns;
 
-  console.log("newNumColumns", newNumColumns);
-  console.log("newSortCondition", newSortCondition);
+  console.log('newNumColumns', newNumColumns);
+  console.log('newSortCondition', newSortCondition);
 
-  if (newSortCondition === "day") {
+  if (newSortCondition === 'day') {
     if (newNumColumns === 2) {
       result = {
         ...result,
-        day: { ...result.day, col: { ...result.day.col, 2: [0, 1] } },
+        day: {...result.day, col: {...result.day.col, 2: [0, 1]}},
       };
     } else if (newNumColumns === 3) {
       result = {
         ...result,
-        day: { ...result.day, col: { ...result.day.col, 3: [0, 1] } },
+        day: {...result.day, col: {...result.day.col, 3: [0, 1]}},
       };
     }
-  } else if (newSortCondition === "month") {
+  } else if (newSortCondition === 'month') {
     if (newNumColumns === 4) {
       result = {
         ...result,
-        month: { ...result.month, col: { ...result.month.col, 4: [0, 1] } },
+        month: {...result.month, col: {...result.month.col, 4: [0, 1]}},
       };
     }
   }
