@@ -47,15 +47,17 @@ const renderPhotos = (
 
 const PhotosChunk: React.FC<Props> = (props) => {
   const loading = useSelector((state: reduxState) => state.loading);
-
   return (
     <Animated.View
-      style={{width: '100%'}}
+      style={{width: '50%'}}
       onLayout={(event_r) => {
         let {height} = event_r.nativeEvent.layout;
         props.setWrapperHeight(height);
-      }}>
-      <Animated.Text style={{opacity: props.opacity}}>
+      }}
+      key={'PhotoChunkHolderView_' + props.date + '_' + props.numCol}>
+      <Animated.Text
+        style={{opacity: props.opacity}}
+        key={'PhotoChunkHolderText_' + props.date + '_' + props.numCol}>
         {props.date}
       </Animated.Text>
       <Animated.View
@@ -65,7 +67,8 @@ const PhotosChunk: React.FC<Props> = (props) => {
           flexWrap: 'wrap',
           width: '100%',
           flexGrow: 1,
-        }}>
+        }}
+        key={'PhotoChunkHolderPhoto_' + props.date + '_' + props.numCol}>
         {renderPhotos(props.photos, props.opacity, props.numCol, loading)}
       </Animated.View>
     </Animated.View>

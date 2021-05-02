@@ -40,6 +40,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
         opacity={opacity}
         numCol={numCol}
         setWrapperHeight={setWrapperHeight}
+        key={date + numCol}
       />
     );
   };
@@ -48,7 +49,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
 
   return props.photos ? (
     <FlatList
-      scrollEnabled={true}
+      scrollEnabled={false}
       data={props.photos}
       renderItem={({item}) =>
         renderChunkPhotos(

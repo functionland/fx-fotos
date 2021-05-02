@@ -41,7 +41,6 @@ export const sectionizeMedia = (
       }
     }
   }
-  console.log("result"+JSON.stringify(result));
   return result;
 };
 
