@@ -3,11 +3,10 @@ import {ScrollView} from 'react-native-gesture-handler';
 import {Animated, Dimensions} from 'react-native';
 import {reduxState, sortCondition} from '../types/interfaces';
 import RenderPhotos from './RenderPhotos';
-import * as MediaLibrary from 'expo-media-library';
+import * as MediaLibrary from "expo-media-library";
 import {
   opacityTransition,
-  sortPhotos,
-  groupPhotosByDate,
+  sectionizeMedia,
 } from '../utils/functions';
 import {useDispatch, useSelector} from 'react-redux';
 import {getPhotos} from '../store/actions';
@@ -51,11 +50,10 @@ const AllPhotos: React.FC<Props> = (props) => {
         // height: "auto",
         // flexGrow: 1,
       }}>
-
       <RenderPhotos
         setWrapperHeight={setWrapperHeight}
         wrapperHeight={wrapperHeight}
-        photos={groupPhotosByDate(sortPhotos(photos, 'day'))}
+        photos={sectionizeMedia(photos, 'day')}
         loading={loading}
         getMorePhotosFunction={getMorePhotos}
         margin={props.distance.interpolate({
@@ -80,7 +78,7 @@ const AllPhotos: React.FC<Props> = (props) => {
       <RenderPhotos
         setWrapperHeight={setWrapperHeight}
         wrapperHeight={wrapperHeight}
-        photos={groupPhotosByDate(sortPhotos(photos, 'day'))}
+        photos={sectionizeMedia(photos, 'day')}
         loading={loading}
         getMorePhotosFunction={getMorePhotos}
         margin={props.distance.interpolate({
@@ -103,7 +101,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         separator="day"
       />
       <RenderPhotos
-        photos={groupPhotosByDate(sortPhotos(photos, 'month'))}
+        photos={sectionizeMedia(photos, 'month')}
         wrapperHeight={wrapperHeight}
         setWrapperHeight={setWrapperHeight}
         loading={loading}

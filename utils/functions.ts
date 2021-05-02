@@ -5,12 +5,51 @@ import {
   sortCondition,
 } from '../types/interfaces';
 
+export const sectionizeMedia = (
+  medias: Array<MediaLibrary.Asset>,
+  sortCondition_i: 'day' | 'month',
+) => {
+  let result: Array<photoChunk> = [];
+  if (medias && medias.length) {
+    let currentTimestamp = '';
+    let timestampIndexInData = -1;
+    for (let media of medias) {
+      let mediaTimestamp = timestampToDate(
+        media.modificationTime,
+        sortCondition_i,
+      );
+      if (currentTimestamp !== mediaTimestamp) {
+        currentTimestamp = mediaTimestamp;
+        timestampIndexInData = result.findIndex(
+          (x: photoChunk) => x.date === currentTimestamp,
+        );
+      }
+      if (timestampIndexInData > -1) {
+        if (result[timestampIndexInData].data) {
+          result[timestampIndexInData].data.push(media);
+        } else {
+          result[timestampIndexInData].data = [];
+          result[timestampIndexInData].data.push(media);
+        }
+      } else {
+        if (currentTimestamp) {
+          let temp = [];
+          temp.push(media);
+          result.push({date: currentTimestamp, data: temp});
+          timestampIndexInData = result.length - 1;
+        }
+      }
+    }
+  }
+  console.log("result"+JSON.stringify(result));
+  return result;
+};
+
 export const sortPhotos = (
   medias: Array<MediaLibrary.Asset>,
   sortCondition_i: 'day' | 'month',
 ) => {
   let result: any = {};
-  console.log('medias: ' + JSON.stringify(medias, null, 2));
   if (medias && medias.length) {
     let timestamps = medias
       .map((media) => media.modificationTime)
@@ -23,7 +62,6 @@ export const sortPhotos = (
       for (let media of medias) {
         result[timestampToDate(media.modificationTime, 'day')].push(media);
       }
-      //console.log("photos2"+JSON.stringify(photos, null, 2));
       return result;
     } else if (sortCondition_i === 'month') {
       for (let TS of timestamps_str) {
@@ -36,6 +74,7 @@ export const sortPhotos = (
       return result;
     }
   }
+  //console.log(JSON.stringify(result));
   return result;
 };
 
@@ -263,6 +302,5 @@ export const groupPhotosByDate = (medias: any) => {
     };
     result.push(_result);
   }
-
   return result;
 };

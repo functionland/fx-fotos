@@ -7,12 +7,15 @@ import {getStorageMedia, sortPhotos} from '../utils/functions';
 import {storagePermission} from '../utils/permissions';
 import AllPhotos from './AllPhotos';
 import PinchZoom from './PinchZoom';
-import {sortCondition} from '../types/interfaces';
+import {sortCondition, MediaItem} from '../types/interfaces';
 import {getPhotos} from '../store/actions';
 
 const PhotosContainer = () => {
   const [permission, setPermission] = useState<boolean>();
   const [photos, setPhotos] = useState<Array<MediaLibrary.Asset>>();
+  const [mediaEndCursor, setMediaEndCursor] = useState<string>('0');
+  const [mediaHasNextPage, setMediaHasNextPage] = useState<boolean>(true);
+  const [mediaTotalCount , setMediaTotalCount] = useState<number>(99999);
   const [storagePhotos, setStoragePhotos] = useState<
     Array<MediaLibrary.Asset>
   >();
@@ -28,9 +31,14 @@ const PhotosContainer = () => {
   useEffect(() => {
     if (permission) {
       navigation.navigate('HomePage');
-      getStorageMedia(permission, 20, '0')?.then((res: any) => {
-        setStoragePhotos(res.assets);
-      });
+      getStorageMedia(permission, 20, mediaEndCursor)?.then(
+        (res: MediaItem) => {
+          setStoragePhotos(res.assets);
+          setMediaEndCursor(res.endCursor);
+          setMediaHasNextPage(res.hasNextPage);
+          setMediaTotalCount(res.totalCount);
+        },
+      );
     } else {
       navigation.navigate('PermissionError');
     }

@@ -24,7 +24,7 @@ const renderPhotos = (
   for (let photo of photos) {
     result.push(
       <Animated.View
-      //<Animated.Image
+        //<Animated.Image
         //source={{uri: photo.node.image.uri}}
         // eslint-disable-next-line react-native/no-inline-styles
         style={{
@@ -34,10 +34,11 @@ const renderPhotos = (
           opacity: opacity,
           width: `${90 / numCol}%`,
         }}
-      ///>,
+        key={photo.uri}
+        ///>,
       >
         <Text>{photo.uri}</Text>
-      </Animated.View>
+      </Animated.View>,
     );
   }
 

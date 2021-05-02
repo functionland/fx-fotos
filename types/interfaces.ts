@@ -44,3 +44,10 @@ export interface photoChunk {
   date: string;
   data: Array<MediaLibrary.Asset>;
 }
+
+export interface MediaItem {
+  assets: Array<MediaLibrary.Asset>;
+  endCursor: string;
+  hasNextPage: boolean;
+  totalCount: number;
+}
