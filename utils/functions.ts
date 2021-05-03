@@ -26,16 +26,16 @@ export const sectionizeMedia = (
       }
       if (timestampIndexInData > -1) {
         if (result[timestampIndexInData].data) {
-          result[timestampIndexInData].data.push(media);
+          result[timestampIndexInData].data[0].push(media);
         } else {
-          result[timestampIndexInData].data = [];
-          result[timestampIndexInData].data.push(media);
+          result[timestampIndexInData].data = [[]];
+          result[timestampIndexInData].data[0].push(media);
         }
       } else {
         if (currentTimestamp) {
           let temp = [];
           temp.push(media);
-          result.push({date: currentTimestamp, data: temp});
+          result.push({date: currentTimestamp, data: [temp]});
           timestampIndexInData = result.length - 1;
         }
       }
@@ -86,7 +86,7 @@ export const timestampToDate = (
   condition: 'day' | 'month',
 ) => {
   let date = new Date(timestamp);
-  let month = date.getUTCMonth() + 1; //months from 1-12
+  let month = date.getUTCMonth(); //months from 1-12
   let day = date.getUTCDate();
   let year = date.getUTCFullYear();
   let result;

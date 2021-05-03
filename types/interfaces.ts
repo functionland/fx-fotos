@@ -42,7 +42,7 @@ export type sortCondition = 'day' | 'month';
 
 export interface photoChunk {
   date: string;
-  data: Array<MediaLibrary.Asset>;
+  data: Array<Array<MediaLibrary.Asset>>;
 }
 
 export interface MediaItem {
