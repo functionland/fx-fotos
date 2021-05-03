@@ -13,7 +13,7 @@ const SCREEN_HEIGHT = Dimensions.get('screen').height;
 
 interface Props {
   photos: Array<MediaLibrary.Asset>;
-  distance: Animated.Value;
+  scale: Animated.Value;
   pinchOrZoom: 'pinch' | 'zoom' | undefined;
   sortCondition: sortCondition;
   numColumns: 2 | 3 | 4;
@@ -53,14 +53,14 @@ const AllPhotos: React.FC<Props> = (props) => {
         photos={sectionizeMedia(photos, 'day')}
         loading={loading}
         getMorePhotosFunction={getMorePhotos}
-        margin={props.distance.interpolate({
+        margin={props.scale.interpolate({
           inputRange: [0, SCREEN_WIDTH * 0.8],
           outputRange: [1, 5],
         })}
         maxWidth={SCREEN_WIDTH / 2}
         minWidth={SCREEN_WIDTH / 3}
         numColumns={2}
-        opacity={props.distance.interpolate({
+        opacity={props.scale.interpolate({
           inputRange: [0, SCREEN_WIDTH * 0.8],
           outputRange: opacityTransition(
             props.sortCondition,
@@ -71,6 +71,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         // opacity={opacityTransition(sortCondition, numColumns, 'day', 2)}
         date={new Date()}
         separator="day"
+        zIndex={(props.numColumns === 2)?1:0}
       />
       <RenderPhotos
         setWrapperHeight={setWrapperHeight}
@@ -78,14 +79,14 @@ const AllPhotos: React.FC<Props> = (props) => {
         photos={sectionizeMedia(photos, 'day')}
         loading={loading}
         getMorePhotosFunction={getMorePhotos}
-        margin={props.distance.interpolate({
+        margin={props.scale.interpolate({
           inputRange: [0, SCREEN_WIDTH * 0.8],
           outputRange: [1, 5],
         })}
         maxWidth={SCREEN_WIDTH / 2}
         minWidth={SCREEN_WIDTH / 4}
         numColumns={3}
-        opacity={props.distance.interpolate({
+        opacity={props.scale.interpolate({
           inputRange: [0, SCREEN_WIDTH * 0.8],
           outputRange: opacityTransition(
             props.sortCondition,
@@ -96,6 +97,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         // opacity={opacityTransition(sortCondition, numColumns, 'day', 3)}
         date={new Date()}
         separator="day"
+        zIndex={(props.numColumns === 3)?1:0}
       />
       <RenderPhotos
         photos={sectionizeMedia(photos, 'month')}
@@ -103,14 +105,14 @@ const AllPhotos: React.FC<Props> = (props) => {
         setWrapperHeight={setWrapperHeight}
         loading={loading}
         getMorePhotosFunction={getMorePhotos}
-        margin={props.distance.interpolate({
+        margin={props.scale.interpolate({
           inputRange: [0, SCREEN_WIDTH * 0.8],
           outputRange: [1, 5],
         })}
         maxWidth={SCREEN_WIDTH / 3}
         minWidth={SCREEN_WIDTH / 5}
         numColumns={4}
-        opacity={props.distance.interpolate({
+        opacity={props.scale.interpolate({
           inputRange: [0, SCREEN_WIDTH * 0.8],
           outputRange: opacityTransition(
             props.sortCondition,
@@ -121,6 +123,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         // opacity={opacityTransition(sortCondition, numColumns, 'month', 4)}
         date={new Date()}
         separator="month"
+        zIndex={(props.numColumns === 4)?1:0}
       />
     </ScrollView>
   );

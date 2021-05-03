@@ -20,7 +20,7 @@ const PhotosContainer = () => {
     Array<MediaLibrary.Asset>
   >();
   const navigation = useNavigation();
-  let distance = useRef(new Animated.Value(0)).current;
+  let scale = useRef(new Animated.Value(0)).current;
   const [pinchOrZoom, setPinchOrZoom] = useState<
     'pinch' | 'zoom' | undefined
   >();
@@ -61,14 +61,14 @@ const PhotosContainer = () => {
   return photos ? (
     <PinchZoom
       setPinchOrZoom={setPinchOrZoom}
-      distance={distance}
+      scale={scale}
       setSortCondition={setSortCondition_i}
       setNumColumns={setNumColumns}
       sortCondition={sortCondition_i}
       numColumns={numColumns}>
       <AllPhotos
         pinchOrZoom={pinchOrZoom}
-        distance={distance}
+        scale={scale}
         photos={photos}
         sortCondition={sortCondition_i}
         numColumns={numColumns}

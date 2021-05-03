@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState, createRef} from 'react';
 import {Animated, Dimensions, PanResponder} from 'react-native';
 import {reduxState, sortCondition} from '../types/interfaces';
 import {Constant} from '../utils/constants';
@@ -7,12 +7,18 @@ import {
   findDiameter,
   getDistance,
 } from '../utils/functions';
+import {
+  PinchGestureHandler,
+  State,
+  PinchGestureHandlerEventPayload,
+  GestureEvent,
+} from 'react-native-gesture-handler';
 
 const SCREEN_WIDTH = Dimensions.get('screen').width;
 const SCREEN_HEIGHT = Dimensions.get('screen').height;
 
 interface Props {
-  distance: Animated.Value;
+  scale: Animated.Value;
   setPinchOrZoom: Function;
   setSortCondition: Function;
   setNumColumns: Function;
@@ -21,38 +27,44 @@ interface Props {
 }
 
 const PinchZoom: React.FC<Props> = (props) => {
-  let initialXs: Array<number> = [];
-  let initialYs: Array<number> = [];
-  let currentXs: Array<number> = [];
-  let currentYs: Array<number> = [];
-  let zIndex: number = 0;
-  let initial_distance: number = 0;
-  let current_distance: number = 0;
+  let pinchRef = createRef();
+  let _pinchScale = new Animated.Value(1);
+  let _onPinchGestureEvent = Animated.event(
+    [{ nativeEvent: { scale: _pinchScale } }],
+    { useNativeDriver: true }
+  );
+
+  let _onPinchHandlerStateChange = (event:GestureEvent<PinchGestureHandlerEventPayload>) => {
+    if (event.nativeEvent.oldState === State.ACTIVE) {
+      console.log(event.nativeEvent.scale);
+      animationTransition(event);
+      _pinchScale.setValue(1);
+    }
+  };
 
   const animationTransition = (
-    event: {finished: boolean},
-    pinchOrZoom: 'pinch' | 'zoom',
+    event:GestureEvent<PinchGestureHandlerEventPayload>
   ) => {
     let _sortCondition = changeSortCondition(
       props.sortCondition,
-      pinchOrZoom,
+      (event.nativeEvent.scale > 1)?'pinch':'zoom',
       props.numColumns,
     );
-    if (event.finished) {
+    if (event.nativeEvent.oldState === State.ACTIVE) {
       props.setSortCondition(_sortCondition.sortCondition);
       props.setNumColumns(_sortCondition.numColumns);
     }
   };
-
+/*
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: (event, gesture) => {
         let touches = event.nativeEvent.touches;
         if (gesture.numberActiveTouches == 2) {
-          zIndex = 2;
+          //zIndex = 2;
           return true;
         } else {
-          zIndex = 0;
+         // zIndex = 0;
           return false;
         }
       },
@@ -123,18 +135,23 @@ const PinchZoom: React.FC<Props> = (props) => {
         }
       },
     }),
-  ).current;
+  ).current;*/
 
   return (
+    <PinchGestureHandler
+                ref={pinchRef}
+                onGestureEvent={_onPinchGestureEvent}
+                onHandlerStateChange={_onPinchHandlerStateChange}>
     <Animated.View
       style={{
         width: SCREEN_WIDTH,
         height: SCREEN_HEIGHT,
-        zIndex: zIndex,
+        zIndex: 3,
       }}
-      {...panResponder.panHandlers}>
+      >
       {props.children}
     </Animated.View>
+    </PinchGestureHandler>
   );
 };
 

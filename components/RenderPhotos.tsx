@@ -29,6 +29,7 @@ interface Props {
   getMorePhotosFunction: Function;
   setWrapperHeight: Function;
   wrapperHeight: number | undefined;
+  zIndex: number;
 }
 
 const RenderPhotos: React.FC<Props> = (props) => {
@@ -67,7 +68,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
         right: 0,
         left: 0,
         opacity: props.opacity,
-        zIndex: props.numColumns === numColumns ? 1 : 0,
+        zIndex: props.zIndex,
       }}>
       <SectionList
         sections={props.photos}
