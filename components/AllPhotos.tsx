@@ -76,12 +76,14 @@ const AllPhotos: React.FC<Props> = (props) => {
         loading={loading}
         getMorePhotosFunction={getMorePhotos}
         margin={props.scale.interpolate({
-          inputRange: [0, 1, 4],
+          inputRange: [0, 1, 3],
           outputRange: [5, 1, 5],
         })}
+        maxWidth={SCREEN_WIDTH / 2}
+        minWidth={SCREEN_WIDTH / 3}
         numColumns={2}
         opacity={props.scale.interpolate({
-          inputRange: [0, 1, 4],
+          inputRange: [0, 1, 3],
           outputRange: opacityRange.day.col[2],
         })}
         // opacity={opacityTransition(sortCondition, numColumns, 'day', 2)}
@@ -96,12 +98,14 @@ const AllPhotos: React.FC<Props> = (props) => {
         loading={loading}
         getMorePhotosFunction={getMorePhotos}
         margin={props.scale.interpolate({
-          inputRange: [0, 1, 4],
+          inputRange: [0, 1, 3],
           outputRange: [5, 1, 5],
         })}
+        maxWidth={SCREEN_WIDTH / 2}
+        minWidth={SCREEN_WIDTH / 4}
         numColumns={3}
         opacity={props.scale.interpolate({
-          inputRange: [0, 1, 4],
+          inputRange: [0, 1, 3],
           outputRange: opacityRange.day.col[3],
         })}
         // opacity={opacityTransition(sortCondition, numColumns, 'day', 3)}
@@ -116,12 +120,14 @@ const AllPhotos: React.FC<Props> = (props) => {
         loading={loading}
         getMorePhotosFunction={getMorePhotos}
         margin={props.scale.interpolate({
-          inputRange: [0, 1, 4],
+          inputRange: [0, 1, 3],
           outputRange: [5, 1, 5],
         })}
+        maxWidth={SCREEN_WIDTH / 3}
+        minWidth={SCREEN_WIDTH / 5}
         numColumns={4}
         opacity={props.scale.interpolate({
-          inputRange: [0, 1, 4],
+          inputRange: [0, 1, 3],
           outputRange: opacityRange.month.col[4],
         })}
         // opacity={opacityTransition(sortCondition, numColumns, 'month', 4)}

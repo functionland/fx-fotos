@@ -35,7 +35,7 @@ interface Props {
 const RenderPhotos: React.FC<Props> = (props) => {
   const numColumns = useSelector((state: reduxState) => state.numColumns);
 
-  console.log('numColumns', numColumns);
+ //console.log('numColumns', numColumns);
 
   return props.photos ? (
     <Animated.View

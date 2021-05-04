@@ -29,6 +29,7 @@ interface Props {
 
 let _pinchOrZoom: 'pinch'|'zoom'|undefined = undefined;
 const PinchZoom: React.FC<Props> = (props) => {
+  const [allowAnimation, setAllowAnimation] = useState<boolean>(true);
   let _onPinchGestureEvent = Animated.event(
     [{ nativeEvent: { scale: props.scale } }],
     { useNativeDriver: true }
@@ -56,113 +57,55 @@ const PinchZoom: React.FC<Props> = (props) => {
   const animationTransition = (
     event:GestureEvent<PinchGestureHandlerEventPayload>
   ) => {
-    if(event.nativeEvent.scale > 1.3 || event.nativeEvent.scale < 0.8){
-      let _sortCondition = changeSortCondition(
-        props.sortCondition,
-        _pinchOrZoom,
-        props.numColumns,
-      );
-      props.setSortCondition(_sortCondition.sortCondition);
-      props.setNumColumns(_sortCondition.numColumns);
+    if(event.nativeEvent.state !== State.ACTIVE){
+      console.log('animation end cycle');
+      if((event.nativeEvent.scale > 1.3 && props.numColumns>2) || (event.nativeEvent.scale < 0.8 && props.numColumns<4)){
+        let finalVal:number = 0;
+        let _sortCondition = changeSortCondition(
+          props.sortCondition,
+          _pinchOrZoom,
+          props.numColumns,
+        );
+        if(event.nativeEvent.scale > 1){
+          finalVal = 3;
+        }else if(event.nativeEvent.scale < 1){
+          finalVal = 0;
+        }
+        setAllowAnimation(false);
+        Animated.timing(props.scale, {
+          toValue: finalVal,
+          duration: 250,
+          useNativeDriver: true
+        }).start(() => {
+          console.log('animation ended');
+          props.setSortCondition(_sortCondition.sortCondition);
+          props.setNumColumns(_sortCondition.numColumns);
+          props.setPinchOrZoom(undefined);
+          props.scale.setValue(1);
+          setAllowAnimation(true);
+        });
+      }else{
+        console.log("here"+event.nativeEvent.state);
+        props.setPinchOrZoom(undefined);
+        props.scale.setValue(1);
+      }
     }
-    props.setPinchOrZoom(undefined);
-    props.scale.setValue(1);
   };
-/*
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: (event, gesture) => {
-        let touches = event.nativeEvent.touches;
-        if (gesture.numberActiveTouches == 2) {
-          //zIndex = 2;
-          return true;
-        } else {
-         // zIndex = 0;
-          return false;
-        }
-      },
-      onPanResponderStart: (initial_event, initial_gesture) => {
-        let touches = initial_event.nativeEvent.touches;
-
-        initialXs = [];
-        initialYs = [];
-
-        initialXs.push(touches[0].locationX);
-        initialXs.push(touches[1].locationX);
-        initialYs.push(touches[0].locationY);
-        initialYs.push(touches[1].locationY);
-      },
-      onPanResponderMove: (event, gesture) => {
-        let touches = event.nativeEvent.touches;
-
-        if (touches.length == 2) {
-          currentXs = [];
-          currentYs = [];
-
-          currentXs.push(touches[0].locationX);
-          currentXs.push(touches[1].locationX);
-          currentYs.push(touches[0].locationY);
-          currentYs.push(touches[1].locationY);
-
-          initial_distance = getDistance(
-            initialXs[0],
-            initialYs[0],
-            initialXs[1],
-            initialYs[1],
-          );
-          current_distance = getDistance(
-            currentXs[0],
-            currentYs[0],
-            currentXs[1],
-            currentYs[1],
-          );
-        }
-
-        props.distance.setValue(initial_distance - current_distance);
-      },
-      onPanResponderRelease: () => {
-        zIndex = 0;
-        let animationProgress = (props.distance as any)._value;
-        if (Math.abs(animationProgress) < SCREEN_WIDTH * 0.1) {
-          Animated.timing(props.distance, {
-            toValue: -SCREEN_WIDTH * 0.8,
-            duration: 250,
-            useNativeDriver: false,
-          }).start();
-        } else if (animationProgress < -(SCREEN_WIDTH * 0.1)) {
-          Animated.spring(props.distance, {
-            toValue: -SCREEN_WIDTH * 0.8,
-            useNativeDriver: false,
-          }).start((event) => {
-            animationTransition(event, 'zoom');
-            props.setPinchOrZoom('zoom');
-          });
-        } else if (animationProgress > SCREEN_WIDTH * 0.1) {
-          Animated.spring(props.distance, {
-            toValue: SCREEN_WIDTH * 0.8,
-            useNativeDriver: false,
-          }).start((event) => {
-            animationTransition(event, 'pinch');
-            props.setPinchOrZoom('pinch');
-          });
-        }
-      },
-    }),
-  ).current;*/
 
   return (
     <PinchGestureHandler
-                onGestureEvent={_onPinchGestureEvent}
-                onHandlerStateChange={_onPinchHandlerStateChange}>
-    <Animated.View
-      style={{
-        width: SCREEN_WIDTH,
-        height: SCREEN_HEIGHT,
-        zIndex: 3,
-      }}
+    enabled={allowAnimation}
+    onGestureEvent={_onPinchGestureEvent}
+    onHandlerStateChange={_onPinchHandlerStateChange}>
+      <Animated.View
+        style={{
+          width: SCREEN_WIDTH,
+          height: SCREEN_HEIGHT,
+          zIndex: 3,
+        }}
       >
-      {props.children}
-    </Animated.View>
+        {props.children}
+      </Animated.View>
     </PinchGestureHandler>
   );
 };

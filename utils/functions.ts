@@ -131,10 +131,6 @@ export const getStorageMedia = (
   if (after === '') {
     after = '0';
   }
-  console.log([
-    'start getStorageMedia with parameters: ',
-    {parameters: {permission: permission, limit: limit, after: after}},
-  ]);
   if (permission) {
     let mediaFilter: MediaLibrary.AssetsOptions = {
       first: limit,
@@ -179,14 +175,11 @@ export const changeSortCondition: changeSortConditionAndNumColumns = (
   if (pinchOrZoom === 'pinch') {
     if (sortCondition_i === 'day') {
       if (numCols === 2) {
-        console.log('A');
         result = {...result, sortCondition: 'day', numColumns: 2};
       } else if (numCols === 3) {
-        console.log('B');
         result = {...result, sortCondition: 'day', numColumns: 2};
       }
     } else if (sortCondition_i === 'month') {
-      console.log('C');
       result = {...result, sortCondition: 'day', numColumns: 3};
     }
   }
@@ -194,14 +187,11 @@ export const changeSortCondition: changeSortConditionAndNumColumns = (
   if (pinchOrZoom === 'zoom') {
     if (sortCondition_i === 'day') {
       if (numCols === 2) {
-        console.log('D');
         result = {...result, sortCondition: 'day', numColumns: 3};
       } else if (numCols === 3) {
-        console.log('E');
         result = {...result, sortCondition: 'month', numColumns: 4};
       }
     } else if (sortCondition_i === 'month') {
-      console.log('F');
       result = {...result, sortCondition: 'month', numColumns: 4};
     }
   }
@@ -231,7 +221,6 @@ export const opacityTransition = (
 
     if(sortCondition_i === 'day' && numColumns === 2){
       if(pinchOrZoom==='zoom'){
-        console.log("HERE11");
         result = {
           day: {
             col: {
@@ -246,7 +235,6 @@ export const opacityTransition = (
           },
         };
       }else if(pinchOrZoom==='pinch'){
-        console.log("HERE12");
         result = {
           day: {
             col: {
@@ -277,7 +265,6 @@ export const opacityTransition = (
       }
     } else if(sortCondition_i === 'day' && numColumns === 3){
       if(pinchOrZoom==='zoom'){
-        console.log("HERE21");
         result = {
           day: {
             col: {
@@ -292,7 +279,6 @@ export const opacityTransition = (
           },
         };
       }else if(pinchOrZoom==='pinch'){
-        console.log("HERE22");
         result = {
           day: {
             col: {

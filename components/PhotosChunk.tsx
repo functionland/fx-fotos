@@ -25,7 +25,7 @@ const renderPhoto = (
         source={{uri: photo.uri}}
         // eslint-disable-next-line react-native/no-inline-styles
         style={{
-          height: SCREEN_WIDTH / 2,
+          height: SCREEN_WIDTH / numCol,
           backgroundColor: loading ? 'grey' : 'white',
           margin: 3,
         }}
