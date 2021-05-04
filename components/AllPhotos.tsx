@@ -49,13 +49,13 @@ const AllPhotos: React.FC<Props> = (props) => {
       props.pinchOrZoom,
     );
     setOpacityRange(_opacityRange);
-    console.log([props.pinchOrZoom, props.numColumns,props.sortCondition]);
-    console.log(_opacityRange);
-    console.log(opacityRange);
+    //console.log([props.pinchOrZoom, props.numColumns,props.sortCondition]);
+    //console.log(_opacityRange);
+    //console.log(opacityRange);
   }, [props.pinchOrZoom, props.numColumns, props.sortCondition, props.scale]);
 
   useEffect(()=>{
-    console.log(opacityRange);
+    //console.log(opacityRange);
   }, [opacityRange])
 
   return (

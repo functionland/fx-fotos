@@ -36,11 +36,21 @@ const PinchZoom: React.FC<Props> = (props) => {
   );
 
   let _onPinchHandlerStateChange = (event:GestureEvent<PinchGestureHandlerEventPayload>) => {
-    _pinchOrZoom = ((event.nativeEvent.scale > 1)?'pinch':'zoom');
-    props.setPinchOrZoom(_pinchOrZoom);
     if (event.nativeEvent.oldState === State.ACTIVE) {
-      console.log(event.nativeEvent.scale);
+      console.log('should not call this a lot1');
+      console.log(event.nativeEvent);
       animationTransition(event);
+    }else if (event.nativeEvent.state === State.ACTIVE) {
+      console.log('should not call this a lot2');
+      console.log(event.nativeEvent);
+      if(event.nativeEvent.scale > 1){
+        _pinchOrZoom = 'pinch';
+      }else if(event.nativeEvent.scale < 1){
+        _pinchOrZoom = 'zoom';
+      }else{
+        _pinchOrZoom = undefined;
+      }
+      props.setPinchOrZoom(_pinchOrZoom);
     }
   };
 
