@@ -29,7 +29,6 @@ interface Props {
 
 let _pinchOrZoom: 'pinch'|'zoom'|undefined = undefined;
 const PinchZoom: React.FC<Props> = (props) => {
-  let pinchRef = createRef();
   let _onPinchGestureEvent = Animated.event(
     [{ nativeEvent: { scale: props.scale } }],
     { useNativeDriver: true }
@@ -37,12 +36,12 @@ const PinchZoom: React.FC<Props> = (props) => {
 
   let _onPinchHandlerStateChange = (event:GestureEvent<PinchGestureHandlerEventPayload>) => {
     if (event.nativeEvent.oldState === State.ACTIVE) {
-      console.log('should not call this a lot1');
-      console.log(event.nativeEvent);
+      //console.log('should not call this a lot1');
+      //console.log(event.nativeEvent);
       animationTransition(event);
     }else if (event.nativeEvent.state === State.ACTIVE) {
-      console.log('should not call this a lot2');
-      console.log(event.nativeEvent);
+      //console.log('should not call this a lot2');
+      //console.log(event.nativeEvent);
       if(event.nativeEvent.scale > 1){
         _pinchOrZoom = 'pinch';
       }else if(event.nativeEvent.scale < 1){
@@ -57,13 +56,15 @@ const PinchZoom: React.FC<Props> = (props) => {
   const animationTransition = (
     event:GestureEvent<PinchGestureHandlerEventPayload>
   ) => {
-    let _sortCondition = changeSortCondition(
-      props.sortCondition,
-      _pinchOrZoom,
-      props.numColumns,
-    );
-    props.setSortCondition(_sortCondition.sortCondition);
-    props.setNumColumns(_sortCondition.numColumns);
+    if(event.nativeEvent.scale > 1.3 || event.nativeEvent.scale < 0.8){
+      let _sortCondition = changeSortCondition(
+        props.sortCondition,
+        _pinchOrZoom,
+        props.numColumns,
+      );
+      props.setSortCondition(_sortCondition.sortCondition);
+      props.setNumColumns(_sortCondition.numColumns);
+    }
     props.setPinchOrZoom(undefined);
     props.scale.setValue(1);
   };
@@ -151,7 +152,6 @@ const PinchZoom: React.FC<Props> = (props) => {
 
   return (
     <PinchGestureHandler
-                ref={pinchRef}
                 onGestureEvent={_onPinchGestureEvent}
                 onHandlerStateChange={_onPinchHandlerStateChange}>
     <Animated.View

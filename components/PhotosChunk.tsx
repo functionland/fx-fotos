@@ -1,6 +1,6 @@
 import * as MediaLibrary from 'expo-media-library';
 import React from 'react';
-import {Animated, FlatList, Text, StyleSheet, Dimensions} from 'react-native';
+import {Animated, FlatList, Text, StyleSheet, Dimensions, View} from 'react-native';
 import {event} from 'react-native-reanimated';
 import {useSelector} from 'react-redux';
 import {reduxState} from '../types/interfaces';
@@ -20,7 +20,7 @@ const renderPhoto = (
   loading: boolean,
 ) => {
   return (
-    <Animated.View style={styles.AnimatedView}>
+    <View style={styles.AnimatedView}>
       <Animated.Image
         source={{uri: photo.uri}}
         // eslint-disable-next-line react-native/no-inline-styles
@@ -31,7 +31,7 @@ const renderPhoto = (
         }}
         key={photo.uri}
       />
-    </Animated.View>
+    </View>
     //  <Text>{photo.uri}</Text>
   );
 };

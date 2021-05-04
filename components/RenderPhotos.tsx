@@ -53,7 +53,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
         opacity: props.opacity,
         zIndex: props.zIndex,
       }}>
-      <SectionList
+      <Animated.SectionList
         sections={props.photos}
         //keyExtractor={(item, index) => item.uri + index}
         renderItem={({item}) =>
