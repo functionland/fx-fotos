@@ -27,9 +27,9 @@ export interface reduxAction {
 export interface changeSortConditionAndNumColumns {
   (
     sortCondition_i: sortCondition,
-    pinchOrZoom: 'pinch' | 'zoom',
+    pinchOrZoom: 'pinch' | 'zoom' | undefined,
     numCols: 2 | 3 | 4,
-  ): {sortCondition: string; numColumns: number};
+  ): {sortCondition: sortCondition; numColumns: 2 | 3 | 4};
 }
 
 export interface sortDetails {

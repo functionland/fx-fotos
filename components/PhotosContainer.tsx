@@ -20,12 +20,13 @@ const PhotosContainer = () => {
     Array<MediaLibrary.Asset>
   >();
   const navigation = useNavigation();
-  let scale = useRef(new Animated.Value(0)).current;
+  let scale = useRef(new Animated.Value(1)).current;
   const [pinchOrZoom, setPinchOrZoom] = useState<
     'pinch' | 'zoom' | undefined
   >();
   const [sortCondition_i, setSortCondition_i] = useState<sortCondition>('day');
   const [numColumns, setNumColumns] = useState<2 | 3 | 4>(2);
+  const [animationDone, setAnimationDone] = useState<boolean>(false);
 
   //TODO: Change this function to the getPhotos in actions like in AllPhotos
   useEffect(() => {
@@ -61,13 +62,16 @@ const PhotosContainer = () => {
   return photos ? (
     <PinchZoom
       setPinchOrZoom={setPinchOrZoom}
+      pinchOrZoom={pinchOrZoom}
       scale={scale}
+      setAnimationDone={setAnimationDone}
       setSortCondition={setSortCondition_i}
       setNumColumns={setNumColumns}
       sortCondition={sortCondition_i}
       numColumns={numColumns}>
       <AllPhotos
         pinchOrZoom={pinchOrZoom}
+        animationDone={animationDone}
         scale={scale}
         photos={photos}
         sortCondition={sortCondition_i}

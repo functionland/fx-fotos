@@ -168,15 +168,15 @@ export const findDiameter = (width: number, height: number) => {
 
 export const changeSortCondition: changeSortConditionAndNumColumns = (
   sortCondition_i: sortCondition,
-  pinchOrZoom: 'pinch' | 'zoom',
+  pinchOrZoom: 'pinch' | 'zoom' | undefined,
   numCols: 2 | 3 | 4,
 ) => {
-  let result = {
+  let result:{sortCondition: sortCondition,numColumns:2|3|4} = {
     sortCondition: 'day',
     numColumns: 2,
   };
 
-  if (pinchOrZoom === 'zoom') {
+  if (pinchOrZoom === 'pinch') {
     if (sortCondition_i === 'day') {
       if (numCols === 2) {
         console.log('A');
@@ -191,7 +191,7 @@ export const changeSortCondition: changeSortConditionAndNumColumns = (
     }
   }
 
-  if (pinchOrZoom === 'pinch') {
+  if (pinchOrZoom === 'zoom') {
     if (sortCondition_i === 'day') {
       if (numCols === 2) {
         console.log('D');
@@ -213,78 +213,144 @@ export const opacityTransition = (
   sortCondition_i: sortCondition,
   numColumns: 2 | 3 | 4,
   pinchOrZoom: 'pinch' | 'zoom' | undefined,
+  animationDone: boolean,
 ) => {
   let result: any = {
     day: {
       col: {
-        2: [0, 0],
-        3: [0, 0],
+        2: [0, 0, 0],
+        3: [0, 0, 0],
       },
     },
     month: {
       col: {
-        4: [0, 0],
+        4: [0, 0, 0],
       },
     },
   };
 
-  if (sortCondition_i === 'day') {
-    if (numColumns === 2) {
-      result = {
-        ...result,
-        day: {...result.day, col: {...result.day.col, 2: [1, 0]}},
-      };
-    } else if (numColumns === 3) {
-      result = {
-        ...result,
-        day: {...result.day, col: {...result.day.col, 3: [1, 0]}},
-      };
-    }
-  } else if (sortCondition_i === 'month') {
-    if (numColumns === 4) {
-      result = {
-        ...result,
-        month: {...result.month, col: {...result.month.col, 4: [1, 0]}},
-      };
-    }
+  if(sortCondition_i === 'day' && numColumns === 2){
+    result = {
+      day: {
+        col: {
+          2: [0, 1, 0],
+          3: [0, 0, 0],
+        },
+      },
+      month: {
+        col: {
+          4: [0, 0, 0],
+        },
+      },
+    };
+  }else if(sortCondition_i === 'day' && numColumns === 3){
+    result = {
+      day: {
+        col: {
+          2: [0, 0, 0],
+          3: [0, 1, 0],
+        },
+      },
+      month: {
+        col: {
+          4: [0, 0, 0],
+        },
+      },
+    };
+  }else if(sortCondition_i === 'month' && numColumns === 4){
+    result = {
+      day: {
+        col: {
+          2: [0, 0, 0],
+          3: [0, 0, 0],
+        },
+      },
+      month: {
+        col: {
+          4: [0, 1, 0],
+        },
+      },
+    };
   }
 
-  if (pinchOrZoom === undefined) {
-    return result;
-  }
-
-  let newSortCondition = changeSortCondition(
-    sortCondition_i,
-    pinchOrZoom,
-    numColumns,
-  ).sortCondition;
-  let newNumColumns = changeSortCondition(
-    sortCondition_i,
-    pinchOrZoom,
-    numColumns,
-  ).numColumns;
-
-  console.log('newNumColumns', newNumColumns);
-  console.log('newSortCondition', newSortCondition);
-
-  if (newSortCondition === 'day') {
-    if (newNumColumns === 2) {
-      result = {
-        ...result,
-        day: {...result.day, col: {...result.day.col, 2: [0, 1]}},
-      };
-    } else if (newNumColumns === 3) {
-      result = {
-        ...result,
-        day: {...result.day, col: {...result.day.col, 3: [0, 1]}},
-      };
-    }
-  } else if (newSortCondition === 'month') {
-    if (newNumColumns === 4) {
-      result = {
-        ...result,
-        month: {...result.month, col: {...result.month.col, 4: [0, 1]}},
-      };
+  if(!animationDone){
+    if(sortCondition_i === 'day' && numColumns === 2){
+      if(pinchOrZoom==='zoom'){
+        console.log("HEREHERE11");
+        result = {
+          day: {
+            col: {
+              2: [0, 1, 0],
+              3: [1, 0, 1],
+            },
+          },
+          month: {
+            col: {
+              4: [0, 0, 0],
+            },
+          },
+        };
+      }else if(pinchOrZoom==='pinch'){
+        console.log("HEREHERE12");
+        result = {
+          day: {
+            col: {
+              2: [0, 1, 0],
+              3: [0, 0, 0],
+            },
+          },
+          month: {
+            col: {
+              4: [0, 0, 0],
+            },
+          },
+        };
+      }
+    } else if(sortCondition_i === 'day' && numColumns === 3){
+      if(pinchOrZoom==='zoom'){
+        console.log("HEREHERE21");
+        result = {
+          day: {
+            col: {
+              2: [0, 0, 0],
+              3: [0, 1, 0],
+            },
+          },
+          month: {
+            col: {
+              4: [1, 0, 1],
+            },
+          },
+        };
+      }else if(pinchOrZoom==='pinch'){
+        console.log("HEREHERE22");
+        result = {
+          day: {
+            col: {
+              2: [1, 0, 1],
+              3: [0, 1, 0],
+            },
+          },
+          month: {
+            col: {
+              4: [0, 0, 0],
+            },
+          },
+        };
+      }
+    } else if(sortCondition_i === 'month' && numColumns === 4){
+      if(pinchOrZoom==='zoom'){
+        result = {
+          ...result,
+          month: {...result.month, col: {...result.month.col, 4: [0, 1, 0]}},
+        };
+      }else if(pinchOrZoom==='pinch'){
+        result = {
+          ...result,
+          day: {...result.day, col: {...result.day.col, 3:[1, 0, 1]}},
+          month: {...result.month, col: {...result.month.col, 4:[0, 1, 0]}}
+        };
+      }
     }
   }
 

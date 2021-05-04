@@ -17,6 +17,7 @@ interface Props {
   pinchOrZoom: 'pinch' | 'zoom' | undefined;
   sortCondition: sortCondition;
   numColumns: 2 | 3 | 4;
+  animationDone: boolean;
 }
 
 const AllPhotos: React.FC<Props> = (props) => {
@@ -35,7 +36,16 @@ const AllPhotos: React.FC<Props> = (props) => {
     getMorePhotos();
   }, []);
 
-  console.log('wrapperHeight', wrapperHeight);
+  /*let result = opacityTransition(
+    'day',
+    2,
+    'zoom',
+    false,
+  );
+  console.log('AllPhotos', JSON.stringify({wrapperHeight:wrapperHeight,sortCondition:props.sortCondition,
+    numColumns:props.numColumns, pinchOrZoom: props.pinchOrZoom,scale: props.scale,
+    result:result}));*/
+
   return (
     <ScrollView
       style={{flex: 1}}
@@ -54,18 +64,19 @@ const AllPhotos: React.FC<Props> = (props) => {
         loading={loading}
         getMorePhotosFunction={getMorePhotos}
         margin={props.scale.interpolate({
-          inputRange: [0, SCREEN_WIDTH * 0.8],
-          outputRange: [1, 5],
+          inputRange: [0, 1, 3],
+          outputRange: [5, 1, 5],
         })}
         maxWidth={SCREEN_WIDTH / 2}
         minWidth={SCREEN_WIDTH / 3}
         numColumns={2}
         opacity={props.scale.interpolate({
-          inputRange: [0, SCREEN_WIDTH * 0.8],
+          inputRange: [0, 1, 3],
           outputRange: opacityTransition(
             props.sortCondition,
             props.numColumns,
             props.pinchOrZoom,
+            props.animationDone,
           ).day.col[2],
         })}
         // opacity={opacityTransition(sortCondition, numColumns, 'day', 2)}
@@ -80,18 +91,19 @@ const AllPhotos: React.FC<Props> = (props) => {
         loading={loading}
         getMorePhotosFunction={getMorePhotos}
         margin={props.scale.interpolate({
-          inputRange: [0, SCREEN_WIDTH * 0.8],
-          outputRange: [1, 5],
+          inputRange: [0, 1, 3],
+          outputRange: [5, 1, 5],
         })}
         maxWidth={SCREEN_WIDTH / 2}
         minWidth={SCREEN_WIDTH / 4}
         numColumns={3}
         opacity={props.scale.interpolate({
-          inputRange: [0, SCREEN_WIDTH * 0.8],
+          inputRange: [0, 1, 3],
           outputRange: opacityTransition(
             props.sortCondition,
             props.numColumns,
             props.pinchOrZoom,
+            props.animationDone,
           ).day.col[3],
         })}
         // opacity={opacityTransition(sortCondition, numColumns, 'day', 3)}
@@ -106,18 +118,19 @@ const AllPhotos: React.FC<Props> = (props) => {
         loading={loading}
         getMorePhotosFunction={getMorePhotos}
         margin={props.scale.interpolate({
-          inputRange: [0, SCREEN_WIDTH * 0.8],
-          outputRange: [1, 5],
+          inputRange: [0, 1, 3],
+          outputRange: [5, 1, 5],
         })}
         maxWidth={SCREEN_WIDTH / 3}
         minWidth={SCREEN_WIDTH / 5}
         numColumns={4}
         opacity={props.scale.interpolate({
-          inputRange: [0, SCREEN_WIDTH * 0.8],
+          inputRange: [0, 1, 3],
           outputRange: opacityTransition(
             props.sortCondition,
             props.numColumns,
             props.pinchOrZoom,
+            props.animationDone,
           ).month.col[4],
         })}
         // opacity={opacityTransition(sortCondition, numColumns, 'month', 4)}
