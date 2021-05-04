@@ -19,7 +19,6 @@ const SCREEN_HEIGHT = Dimensions.get('screen').height;
 
 interface Props {
   scale: Animated.Value;
-  setAnimationDone: Function;
   setPinchOrZoom: Function;
   pinchOrZoom:'pinch'|'zoom'|undefined;
   setSortCondition: Function;
@@ -36,10 +35,9 @@ const PinchZoom: React.FC<Props> = (props) => {
     { useNativeDriver: true }
   );
 
-  
   let _onPinchHandlerStateChange = (event:GestureEvent<PinchGestureHandlerEventPayload>) => {
     _pinchOrZoom = ((event.nativeEvent.scale > 1)?'pinch':'zoom');
-    props.setAnimationDone(false);
+    props.setPinchOrZoom(_pinchOrZoom);
     if (event.nativeEvent.oldState === State.ACTIVE) {
       console.log(event.nativeEvent.scale);
       animationTransition(event);
@@ -56,9 +54,8 @@ const PinchZoom: React.FC<Props> = (props) => {
     );
     props.setSortCondition(_sortCondition.sortCondition);
     props.setNumColumns(_sortCondition.numColumns);
-    props.setPinchOrZoom(_pinchOrZoom);
+    props.setPinchOrZoom(undefined);
     props.scale.setValue(1);
-    props.setAnimationDone(true);
   };
 /*
   const panResponder = useRef(

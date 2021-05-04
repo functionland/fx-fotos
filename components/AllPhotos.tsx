@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import {ScrollView} from 'react-native-gesture-handler';
 import {Animated, Dimensions} from 'react-native';
 import {reduxState, sortCondition} from '../types/interfaces';
@@ -17,7 +17,6 @@ interface Props {
   pinchOrZoom: 'pinch' | 'zoom' | undefined;
   sortCondition: sortCondition;
   numColumns: 2 | 3 | 4;
-  animationDone: boolean;
 }
 
 const AllPhotos: React.FC<Props> = (props) => {
@@ -36,15 +35,28 @@ const AllPhotos: React.FC<Props> = (props) => {
     getMorePhotos();
   }, []);
 
-  /*let result = opacityTransition(
+  let _opacityRange = opacityTransition(
     'day',
     2,
     'zoom',
-    false,
   );
-  console.log('AllPhotos', JSON.stringify({wrapperHeight:wrapperHeight,sortCondition:props.sortCondition,
-    numColumns:props.numColumns, pinchOrZoom: props.pinchOrZoom,scale: props.scale,
-    result:result}));*/
+  
+  const[opacityRange, setOpacityRange] = useState(_opacityRange);
+  useEffect(() => {
+    _opacityRange = opacityTransition(
+      props.sortCondition,
+      props.numColumns,
+      props.pinchOrZoom,
+    );
+    setOpacityRange(_opacityRange);
+    console.log([props.pinchOrZoom, props.numColumns,props.sortCondition]);
+    console.log(_opacityRange);
+    console.log(opacityRange);
+  }, [props.pinchOrZoom, props.numColumns, props.sortCondition, props.scale]);
+
+  useEffect(()=>{
+    console.log(opacityRange);
+  }, [opacityRange])
 
   return (
     <ScrollView
@@ -76,7 +88,6 @@ const AllPhotos: React.FC<Props> = (props) => {
             props.sortCondition,
             props.numColumns,
             props.pinchOrZoom,
-            props.animationDone,
           ).day.col[2],
         })}
         // opacity={opacityTransition(sortCondition, numColumns, 'day', 2)}
@@ -99,12 +110,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         numColumns={3}
         opacity={props.scale.interpolate({
           inputRange: [0, 1, 3],
-          outputRange: opacityTransition(
-            props.sortCondition,
-            props.numColumns,
-            props.pinchOrZoom,
-            props.animationDone,
-          ).day.col[3],
+          outputRange: opacityRange.day.col[3],
         })}
         // opacity={opacityTransition(sortCondition, numColumns, 'day', 3)}
         date={new Date()}
@@ -126,12 +132,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         numColumns={4}
         opacity={props.scale.interpolate({
           inputRange: [0, 1, 3],
-          outputRange: opacityTransition(
-            props.sortCondition,
-            props.numColumns,
-            props.pinchOrZoom,
-            props.animationDone,
-          ).month.col[4],
+          outputRange: opacityRange.month.col[4],
         })}
         // opacity={opacityTransition(sortCondition, numColumns, 'month', 4)}
         date={new Date()}

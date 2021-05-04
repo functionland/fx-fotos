@@ -35,23 +35,6 @@ interface Props {
 const RenderPhotos: React.FC<Props> = (props) => {
   const numColumns = useSelector((state: reduxState) => state.numColumns);
 
-  const renderChunkPhotos = (
-    photos: Array<MediaLibrary.Asset>,
-    opacity: Animated.AnimatedInterpolation,
-    numCol: 2 | 3 | 4,
-    setWrapperHeight: Function,
-  ) => {
-    return (
-      <PhotosChunk
-        photos={photos}
-        opacity={opacity}
-        numCol={numCol}
-        setWrapperHeight={setWrapperHeight}
-        //key={'PhotosChunk' + numCol}
-      />
-    );
-  };
-
   console.log('numColumns', numColumns);
 
   return props.photos ? (
@@ -74,12 +57,13 @@ const RenderPhotos: React.FC<Props> = (props) => {
         sections={props.photos}
         //keyExtractor={(item, index) => item.uri + index}
         renderItem={({item}) =>
-          renderChunkPhotos(
-            item,
-            props.opacity,
-            props.numColumns,
-            props.setWrapperHeight,
-          )
+          <PhotosChunk
+            photos={item}
+            opacity={props.opacity}
+            numCol={props.numColumns}
+            setWrapperHeight={props.setWrapperHeight}
+            //key={'PhotosChunk' + numCol}
+          />
         }
         onEndReached={() => console.log('getting photo')}
         // contentContainerStyle={{flexGrow: 1}}

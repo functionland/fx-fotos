@@ -213,7 +213,6 @@ export const opacityTransition = (
   sortCondition_i: sortCondition,
   numColumns: 2 | 3 | 4,
   pinchOrZoom: 'pinch' | 'zoom' | undefined,
-  animationDone: boolean,
 ) => {
   let result: any = {
     day: {
@@ -229,54 +228,10 @@ export const opacityTransition = (
     },
   };
 
-  if(sortCondition_i === 'day' && numColumns === 2){
-    result = {
-      day: {
-        col: {
-          2: [0, 1, 0],
-          3: [0, 0, 0],
-        },
-      },
-      month: {
-        col: {
-          4: [0, 0, 0],
-        },
-      },
-    };
-  }else if(sortCondition_i === 'day' && numColumns === 3){
-    result = {
-      day: {
-        col: {
-          2: [0, 0, 0],
-          3: [0, 1, 0],
-        },
-      },
-      month: {
-        col: {
-          4: [0, 0, 0],
-        },
-      },
-    };
-  }else if(sortCondition_i === 'month' && numColumns === 4){
-    result = {
-      day: {
-        col: {
-          2: [0, 0, 0],
-          3: [0, 0, 0],
-        },
-      },
-      month: {
-        col: {
-          4: [0, 1, 0],
-        },
-      },
-    };
-  }
 
-  if(!animationDone){
     if(sortCondition_i === 'day' && numColumns === 2){
       if(pinchOrZoom==='zoom'){
-        console.log("HEREHERE11");
+        console.log("HERE11");
         result = {
           day: {
             col: {
@@ -291,7 +246,21 @@ export const opacityTransition = (
           },
         };
       }else if(pinchOrZoom==='pinch'){
-        console.log("HEREHERE12");
+        console.log("HERE12");
+        result = {
+          day: {
+            col: {
+              2: [0, 1, 0],
+              3: [0, 0, 0],
+            },
+          },
+          month: {
+            col: {
+              4: [0, 0, 0],
+            },
+          },
+        };
+      }else{
         result = {
           day: {
             col: {
@@ -308,7 +277,7 @@ export const opacityTransition = (
       }
     } else if(sortCondition_i === 'day' && numColumns === 3){
       if(pinchOrZoom==='zoom'){
-        console.log("HEREHERE21");
+        console.log("HERE21");
         result = {
           day: {
             col: {
@@ -323,11 +292,25 @@ export const opacityTransition = (
           },
         };
       }else if(pinchOrZoom==='pinch'){
-        console.log("HEREHERE22");
+        console.log("HERE22");
         result = {
           day: {
             col: {
               2: [1, 0, 1],
+              3: [0, 1, 0],
+            },
+          },
+          month: {
+            col: {
+              4: [0, 0, 0],
+            },
+          },
+        };
+      }else{
+        result = {
+          day: {
+            col: {
+              2: [0, 0, 0],
               3: [0, 1, 0],
             },
           },
@@ -350,9 +333,22 @@ export const opacityTransition = (
           day: {...result.day, col: {...result.day.col, 3:[1, 0, 1]}},
           month: {...result.month, col: {...result.month.col, 4:[0, 1, 0]}}
         };
+      }else{
+        result = {
+          day: {
+            col: {
+              2: [0, 0, 0],
+              3: [0, 0, 0],
+            },
+          },
+          month: {
+            col: {
+              4: [0, 1, 0],
+            },
+          },
+        };
       }
     }
-  }
 
   return result;
 };
