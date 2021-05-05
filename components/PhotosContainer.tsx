@@ -21,6 +21,11 @@ const PhotosContainer = () => {
   >();
   const navigation = useNavigation();
   let scale = useRef(new Animated.Value(1)).current;
+  let baseScale: Animated.AnimatedAddition = useRef(Animated.add(0,0)).current;
+  baseScale = Animated.add(baseScale, scale.interpolate({
+    inputRange: [0, 1, 4],
+    outputRange: [1, 0, -1],
+}));
   const [pinchOrZoom, setPinchOrZoom] = useState<
     'pinch' | 'zoom' | undefined
   >();
@@ -63,6 +68,7 @@ const PhotosContainer = () => {
       setPinchOrZoom={setPinchOrZoom}
       pinchOrZoom={pinchOrZoom}
       scale={scale}
+      baseScale={baseScale}
       setSortCondition={setSortCondition_i}
       setNumColumns={setNumColumns}
       sortCondition={sortCondition_i}
@@ -70,6 +76,7 @@ const PhotosContainer = () => {
       <AllPhotos
         pinchOrZoom={pinchOrZoom}
         scale={scale}
+        baseScale={baseScale}
         photos={photos}
         sortCondition={sortCondition_i}
         numColumns={numColumns}
