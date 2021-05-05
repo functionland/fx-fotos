@@ -1,3 +1,4 @@
+import * as MediaLibrary from 'expo-media-library';
 export const getUserInfo = (username: string, password: string) => {
   console.log(username, password);
   let user = {
@@ -10,6 +11,6 @@ export const getUserInfo = (username: string, password: string) => {
 
 export const getUserBoxMedia = (userToken: string) => {
   console.log('Box Media Fetched');
-  let boxMedia = [];
+  let boxMedia:Array<MediaLibrary.Asset> = [];
   return boxMedia;
 };

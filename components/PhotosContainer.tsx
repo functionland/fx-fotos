@@ -2,7 +2,7 @@ import * as MediaLibrary from 'expo-media-library';
 import {useNavigation} from '@react-navigation/native';
 import React, {useEffect, useRef, useState} from 'react';
 import {Animated} from 'react-native';
-import {getUserBoxMedia} from '../utils/APICAlls';
+import {getUserBoxMedia} from '../utils/APICalls';
 import {getStorageMedia} from '../utils/functions';
 import {storagePermission} from '../utils/permissions';
 import AllPhotos from './AllPhotos';
