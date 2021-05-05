@@ -1,5 +1,5 @@
 import {Text, View, Button} from 'react-native';
-import React, {useState, useEffect} from 'react';
+import React from 'react';
 import {storagePermission} from '../utils/permissions';
 import {useNavigation} from '@react-navigation/native';
 

@@ -1,11 +1,8 @@
-import React, {useEffect, useRef, useState, createRef} from 'react';
-import {Animated, Dimensions, PanResponder} from 'react-native';
-import {reduxState, sortCondition} from '../types/interfaces';
-import {Constant} from '../utils/constants';
+import React, {useState, createRef} from 'react';
+import {Animated, Dimensions} from 'react-native';
+import {sortCondition} from '../types/interfaces';
 import {
   changeSortCondition,
-  findDiameter,
-  getDistance,
 } from '../utils/functions';
 import {
   PinchGestureHandler,
@@ -20,6 +17,7 @@ const SCREEN_HEIGHT = Dimensions.get('screen').height;
 interface Props {
   scale: Animated.Value;
   baseScale: Animated.AnimatedAddition;
+  baseScale2: Animated.Value;
   setPinchOrZoom: Function;
   pinchOrZoom:'pinch'|'zoom'|undefined;
   setSortCondition: Function;
@@ -39,21 +37,20 @@ const PinchZoom: React.FC<Props> = (props) => {
   let _onPinchHandlerStateChange = (event:GestureEvent<PinchGestureHandlerEventPayload>) => {
     if (event.nativeEvent.oldState === State.ACTIVE && event.nativeEvent.state !== State.ACTIVE) {
       animationTransition(event);
-    }else if (event.nativeEvent.state === State.ACTIVE) {
-      if(event.nativeEvent.scale > 1){
-        _pinchOrZoom = 'pinch';
-      }else if(event.nativeEvent.scale < 1){
-        _pinchOrZoom = 'zoom';
-      }else{
-        _pinchOrZoom = undefined;
-      }
-      props.setPinchOrZoom(_pinchOrZoom);
     }
   };
 
   const animationTransition = (
     event:GestureEvent<PinchGestureHandlerEventPayload>
   ) => {
+    if(event.nativeEvent.scale > 1){
+      _pinchOrZoom = 'pinch';
+    }else if(event.nativeEvent.scale < 1){
+      _pinchOrZoom = 'zoom';
+    }else{
+      _pinchOrZoom = undefined;
+    }
+
       console.log('animation end cycle');
       if((event.nativeEvent.scale > 1.3 && props.numColumns>2) || (event.nativeEvent.scale < 0.8 && props.numColumns<4)){
         let finalVal:number = 0;
@@ -76,13 +73,23 @@ const PinchZoom: React.FC<Props> = (props) => {
           useNativeDriver: true
         }).start(() => {
           console.log('forward animation ended');
-          props.scale.setValue(finalVal);
-          console.log(props.baseScale);
-          console.log(props.scale);
-          console.log(finalVal);
+          
           props.setSortCondition(_sortCondition.sortCondition);
           props.setNumColumns(_sortCondition.numColumns);
           props.setPinchOrZoom(undefined);
+          props.scale.setValue(1);
+          if(_sortCondition.numColumns===2){
+            props.baseScale2.setValue(0);
+          }else if(_sortCondition.numColumns===3){
+            props.baseScale2.setValue(1);
+          }else if(_sortCondition.numColumns===4){
+            props.baseScale2.setValue(2);
+          }
+
+          console.log(props.baseScale2);
+          console.log(props.baseScale);
+          console.log(props.scale);
+          console.log(finalVal);
           setAllowAnimation(true);
         });
       }else{

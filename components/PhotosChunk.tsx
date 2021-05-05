@@ -1,9 +1,6 @@
 import * as MediaLibrary from 'expo-media-library';
 import React from 'react';
 import {Animated, FlatList, Text, StyleSheet, Dimensions, View} from 'react-native';
-import {event} from 'react-native-reanimated';
-import {useSelector} from 'react-redux';
-import {reduxState} from '../types/interfaces';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 interface Props {
@@ -11,6 +8,7 @@ interface Props {
   opacity: Animated.AnimatedInterpolation;
   numCol: 2 | 3 | 4;
   setWrapperHeight: Function;
+  loading: boolean;
 }
 
 const renderPhoto = (
@@ -37,7 +35,6 @@ const renderPhoto = (
 };
 
 const PhotosChunk: React.FC<Props> = (props) => {
-  const loading = useSelector((state: reduxState) => state.loading);
   return (
     <Animated.View
       style={styles.AnimatedView}
@@ -46,7 +43,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
         data={props.photos}
         numColumns={props.numCol}
         renderItem={({item}) =>
-          renderPhoto(item, props.opacity, props.numCol, loading)
+          renderPhoto(item, props.opacity, props.numCol, props.loading)
         }
         style={styles.FlatList}
       />

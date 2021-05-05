@@ -1,16 +1,12 @@
-import * as MediaLibrary from 'expo-media-library';
 import React from 'react';
 import {
-  SectionList,
   Animated,
   Dimensions,
   Text,
   StyleSheet,
   StatusBar,
-  View,
 } from 'react-native';
-import {useSelector} from 'react-redux';
-import {photoChunk, reduxState} from '../types/interfaces';
+import {photoChunk} from '../types/interfaces';
 import PhotosChunk from './PhotosChunk';
 
 const SCREEN_WIDTH = Dimensions.get('screen').width;
@@ -26,17 +22,12 @@ interface Props {
   date: Date;
   loading: boolean;
   separator: 'day' | 'month';
-  getMorePhotosFunction: Function;
   setWrapperHeight: Function;
   wrapperHeight: number | undefined;
   zIndex: number;
 }
 
 const RenderPhotos: React.FC<Props> = (props) => {
-  const numColumns = useSelector((state: reduxState) => state.numColumns);
-
- //console.log('numColumns', numColumns);
-
   return props.photos ? (
     <Animated.View
       // eslint-disable-next-line react-native/no-inline-styles
@@ -62,6 +53,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
             opacity={props.opacity}
             numCol={props.numColumns}
             setWrapperHeight={props.setWrapperHeight}
+            loading={props.loading}
             //key={'PhotosChunk' + numCol}
           />
         }
