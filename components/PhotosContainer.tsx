@@ -19,13 +19,20 @@ const PhotosContainer = () => {
     Array<MediaLibrary.Asset>
   >();
   const navigation = useNavigation();
+
   let scale = useRef(new Animated.Value(1)).current;
-  let baseScale: Animated.AnimatedAddition = useRef(Animated.add(0,0)).current;
   let baseScale2 = useRef(new Animated.Value(0)).current;
-  baseScale = Animated.add(baseScale2, scale.interpolate({
+  const baseScale: Animated.AnimatedAddition = useRef(Animated.add(baseScale2, scale.interpolate({
     inputRange: [0, 1, 4],
     outputRange: [1, 0, -1],
-}));
+  }))).current;
+
+  const scrollIndicator = useRef(new Animated.Value(0)).current;
+  const focalX = useRef(new Animated.Value(0)).current;
+  const focalY = useRef(new Animated.Value(0)).current;
+  const numberOfPointers = useRef(new Animated.Value(0)).current;
+  const velocity = useRef(new Animated.Value(0)).current;
+
   const [pinchOrZoom, setPinchOrZoom] = useState<
     'pinch' | 'zoom' | undefined
   >();
@@ -38,7 +45,7 @@ const PhotosContainer = () => {
     if (permission) {
       navigation.navigate('HomePage');
       setLoading(true);
-      getStorageMedia(permission, 20, mediaEndCursor)?.then(
+      getStorageMedia(permission, 50, mediaEndCursor)?.then(
         (res: MediaItem) => {
           setStoragePhotos(res.assets);
           setMediaEndCursor(res.endCursor);
@@ -76,7 +83,12 @@ const PhotosContainer = () => {
       setSortCondition={setSortCondition_i}
       setNumColumns={setNumColumns}
       sortCondition={sortCondition_i}
-      numColumns={numColumns}>
+      numColumns={numColumns}
+      focalX={focalX}
+      focalY={focalY}
+      numberOfPointers={numberOfPointers}
+      velocity={velocity}
+    >
       <AllPhotos
         pinchOrZoom={pinchOrZoom}
         scale={scale}
@@ -85,6 +97,10 @@ const PhotosContainer = () => {
         sortCondition={sortCondition_i}
         numColumns={numColumns}
         loading={loading}
+        focalX={focalX}
+        focalY={focalY}
+        numberOfPointers={numberOfPointers}
+        velocity={velocity}
       />
     </PinchZoom>
   ) : (

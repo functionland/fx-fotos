@@ -24,6 +24,10 @@ interface Props {
   setNumColumns: Function;
   numColumns: 2 | 3 | 4;
   sortCondition: sortCondition;
+  focalX: Animated.Value;
+  focalY: Animated.Value;
+  numberOfPointers: Animated.Value;
+  velocity: Animated.Value;
 }
 
 let _pinchOrZoom: 'pinch'|'zoom'|undefined = undefined;
@@ -31,10 +35,11 @@ const PinchZoom: React.FC<Props> = (props) => {
   let pinchRef = createRef();
   const [allowAnimation, setAllowAnimation] = useState<boolean>(true);
   let _onPinchGestureEvent = Animated.event(
-    [{ nativeEvent: { scale: props.scale } }],
+    [{ nativeEvent: { scale: props.scale, focalX:props.focalX, focalY:props.focalY, numberOfPointers:props.numberOfPointers, velocity:props.velocity } }],
     { useNativeDriver: true }
   );
   let _onPinchHandlerStateChange = (event:GestureEvent<PinchGestureHandlerEventPayload>) => {
+    console.log(event.nativeEvent);
     if (event.nativeEvent.oldState === State.ACTIVE && event.nativeEvent.state !== State.ACTIVE) {
       animationTransition(event);
     }

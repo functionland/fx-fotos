@@ -1,10 +1,11 @@
-import React from 'react';
+import React, {useEffect, useRef} from 'react';
 import {
   Animated,
   Dimensions,
   Text,
   StyleSheet,
   StatusBar,
+  SectionList,
 } from 'react-native';
 import {photoChunk} from '../types/interfaces';
 import PhotosChunk from './PhotosChunk';
@@ -22,9 +23,9 @@ interface Props {
   date: Date;
   loading: boolean;
   separator: 'day' | 'month';
-  setWrapperHeight: Function;
-  wrapperHeight: number | undefined;
   zIndex: number;
+  scale: Animated.Value;
+  sizeTransformScale: Animated.AnimatedInterpolation;
 }
 
 const RenderPhotos: React.FC<Props> = (props) => {
@@ -34,17 +35,39 @@ const RenderPhotos: React.FC<Props> = (props) => {
       style={{
         flex: 1,
         width: SCREEN_WIDTH,
-        height: props.wrapperHeight,
+        height: SCREEN_HEIGHT,
         position: 'absolute',
         top: 0,
         bottom: 0,
-        marginTop: StatusBar.currentHeight || 0,
         right: 0,
         left: 0,
         opacity: props.opacity,
         zIndex: props.zIndex,
+        transform: [
+          {
+            scale: props.sizeTransformScale
+          },
+          {
+            translateX: Animated.divide(
+              Animated.subtract(
+                Animated.multiply(
+                  props.sizeTransformScale,SCREEN_WIDTH), 
+                SCREEN_WIDTH)
+              , Animated.multiply(2,props.sizeTransformScale))
+          },
+          {
+            translateY: Animated.divide(
+              Animated.subtract(
+                Animated.multiply(
+                  props.sizeTransformScale,(SCREEN_HEIGHT-(StatusBar.currentHeight || 0))
+                ), (SCREEN_HEIGHT-(StatusBar.currentHeight || 0))
+              )
+              , Animated.multiply(2,props.sizeTransformScale))
+          }
+        ],
       }}>
-      <Animated.SectionList
+      <SectionList
+        initialNumToRender={Math.ceil(SCREEN_HEIGHT/(SCREEN_WIDTH/props.numColumns)) + props.numColumns*4}
         sections={props.photos}
         //keyExtractor={(item, index) => item.uri + index}
         renderItem={({item}) =>
@@ -52,19 +75,22 @@ const RenderPhotos: React.FC<Props> = (props) => {
             photos={item}
             opacity={props.opacity}
             numCol={props.numColumns}
-            setWrapperHeight={props.setWrapperHeight}
             loading={props.loading}
+            scale={props.scale}
             //key={'PhotosChunk' + numCol}
           />
         }
         onEndReached={() => console.log('getting photo')}
         // contentContainerStyle={{flexGrow: 1}}
-        onEndReachedThreshold={0.9}
+        onEndReachedThreshold={0.7}
+        //onRefresh={()=>{console.log('getting new photo')}}
+        //refreshing={false}
+        removeClippedSubviews={true}
         // eslint-disable-next-line react-native/no-inline-styles
         style={{
           flex: 1,
           width: SCREEN_WIDTH,
-          height: props.wrapperHeight,
+          height: SCREEN_HEIGHT,
           position: 'absolute',
           top: 0,
           bottom: 0,
@@ -76,6 +102,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
           <Text style={styles.header}>{date}</Text>
         )}
         key={props.separator + props.numColumns}
+        scrollEnabled={false}
       />
     </Animated.View>
   ) : (
@@ -84,7 +111,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
       style={{
         flex: 1,
         width: SCREEN_WIDTH,
-        height: props.wrapperHeight,
+        height: SCREEN_HEIGHT,
         position: 'absolute',
         top: 0,
         bottom: 0,

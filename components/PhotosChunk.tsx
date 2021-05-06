@@ -7,8 +7,8 @@ interface Props {
   photos: Array<MediaLibrary.Asset>;
   opacity: Animated.AnimatedInterpolation;
   numCol: 2 | 3 | 4;
-  setWrapperHeight: Function;
   loading: boolean;
+  scale: Animated.Value;
 }
 
 const renderPhoto = (
@@ -18,14 +18,15 @@ const renderPhoto = (
   loading: boolean,
 ) => {
   return (
-    <View style={styles.AnimatedView}>
+    <View style={[styles.AnimatedView,{flex: 1/numCol,}]}>
       <Animated.Image
         source={{uri: photo.uri}}
         // eslint-disable-next-line react-native/no-inline-styles
         style={{
           height: SCREEN_WIDTH / numCol,
+          width: SCREEN_WIDTH / numCol,
           backgroundColor: loading ? 'grey' : 'white',
-          margin: 3,
+          margin: 1,
         }}
         key={photo.uri}
       />
@@ -36,7 +37,7 @@ const renderPhoto = (
 
 const PhotosChunk: React.FC<Props> = (props) => {
   return (
-    <Animated.View
+    <View
       style={styles.AnimatedView}
       key={'PhotoChunkHolderView_' + props.numCol}>
       <FlatList
@@ -46,19 +47,22 @@ const PhotosChunk: React.FC<Props> = (props) => {
           renderPhoto(item, props.opacity, props.numCol, props.loading)
         }
         style={styles.FlatList}
+        columnWrapperStyle={{alignItems:'flex-start', }}
       />
-    </Animated.View>
+    </View>
   );
 };
 const styles = StyleSheet.create({
   FlatList: {
-    //flexDirection: 'row',
-    flex: 1,
+    //flexDirection: "row",
+    //flex: 1,
+    //flexWrap:"wrap",
+    width: SCREEN_WIDTH,
     //flexWrap: 'wrap',
     //flexGrow: 1,
   },
   AnimatedView: {
-    flex: 1,
+    width: SCREEN_WIDTH,
   },
 });
 export default PhotosChunk;

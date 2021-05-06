@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {ScrollView} from 'react-native-gesture-handler';
-import {Animated, Dimensions} from 'react-native';
+import {Animated, Dimensions, View, StatusBar} from 'react-native';
 import {sortCondition} from '../types/interfaces';
 import RenderPhotos from './RenderPhotos';
 import * as MediaLibrary from 'expo-media-library';
@@ -17,82 +17,98 @@ interface Props {
   sortCondition: sortCondition;
   numColumns: 2 | 3 | 4;
   loading: boolean;
+  focalX: Animated.Value;
+  focalY: Animated.Value;
+  numberOfPointers: Animated.Value;
+  velocity: Animated.Value;
 }
 
 const AllPhotos: React.FC<Props> = (props) => {
-  const [wrapperHeight, setWrapperHeight] = useState<number>();
   return (
-    <ScrollView
-      style={{flex: 1}}
-      contentContainerStyle={{
+    <View
+      style={{
+        flex: 1,
         width: SCREEN_WIDTH,
-        height: wrapperHeight ? wrapperHeight + 200 : SCREEN_HEIGHT,
-        // flexWrap: "wrap",
-        // alignSelf: "baseline"
-        // height: "auto",
-        // flexGrow: 1,
-      }}>
+        height: SCREEN_HEIGHT,
+        marginTop: StatusBar.currentHeight || 0,
+      }}
+    >
       <RenderPhotos
-        setWrapperHeight={setWrapperHeight}
-        wrapperHeight={wrapperHeight}
         photos={sectionizeMedia(props.photos, 'day')}
         loading={props.loading}
         margin={props.baseScale.interpolate({
           inputRange: [0, 1, 3],
-          outputRange: [5, 1, 5],
+          outputRange: [0, 0, 0],
         })}
-        maxWidth={SCREEN_WIDTH / 2}
-        minWidth={SCREEN_WIDTH / 3}
+        maxWidth={SCREEN_WIDTH*2}
+        minWidth={SCREEN_WIDTH/2}
         numColumns={2}
         opacity={props.baseScale.interpolate({
           inputRange: [-1, 0, 1],
           outputRange: [0, 1, 0],
         })}
+        sizeTransformScale={
+          props.baseScale.interpolate({
+            inputRange: [-1, 0, 1],
+            outputRange: [2.2, 1, 0.66667],
+          })
+        }
         date={new Date()}
         separator="day"
         zIndex={(props.numColumns === 2)?1:0}
+        scale={props.scale}
       />
       <RenderPhotos
-        setWrapperHeight={setWrapperHeight}
-        wrapperHeight={wrapperHeight}
         photos={sectionizeMedia(props.photos, 'day')}
         loading={props.loading}
         margin={props.baseScale.interpolate({
           inputRange: [0, 1, 3],
-          outputRange: [5, 1, 5],
+          outputRange: [0, 0, 0],
         })}
-        maxWidth={SCREEN_WIDTH / 2}
-        minWidth={SCREEN_WIDTH / 4}
+        maxWidth={SCREEN_WIDTH*2}
+        minWidth={SCREEN_WIDTH/2}
         numColumns={3}
         opacity={props.baseScale.interpolate({
           inputRange: [0, 1, 2],
           outputRange: [0, 1, 0],
         })}
+        sizeTransformScale={
+          props.baseScale.interpolate({
+            inputRange: [0, 1, 2],
+            outputRange: [1.5, 1, 0.75],
+          })
+        }
         date={new Date()}
         separator="day"
         zIndex={(props.numColumns === 3)?1:0}
+        scale={props.scale}
       />
       <RenderPhotos
         photos={sectionizeMedia(props.photos, 'month')}
-        wrapperHeight={wrapperHeight}
-        setWrapperHeight={setWrapperHeight}
         loading={props.loading}
         margin={props.baseScale.interpolate({
           inputRange: [0, 1, 3],
-          outputRange: [5, 1, 5],
+          outputRange: [0, 0, 0],
         })}
-        maxWidth={SCREEN_WIDTH / 3}
-        minWidth={SCREEN_WIDTH / 5}
+        maxWidth={SCREEN_WIDTH*2}
+        minWidth={SCREEN_WIDTH/2}
         numColumns={4}
         opacity={props.baseScale.interpolate({
           inputRange: [1, 2, 3],
           outputRange: [0, 1, 0],
         })}
+        sizeTransformScale={
+          props.baseScale.interpolate({
+            inputRange: [1, 2, 3],
+            outputRange: [1.3333, 1, 0.8],
+          })
+        }
         date={new Date()}
         separator="month"
         zIndex={(props.numColumns === 4)?1:0}
+        scale={props.scale}
       />
-    </ScrollView>
+    </View>
   );
 };
 
