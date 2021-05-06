@@ -77,7 +77,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
             numCol={props.numColumns}
             loading={props.loading}
             scale={props.scale}
-            //key={'PhotosChunk' + numCol}
+            key={'PhotosChunk' + props.numColumns}
           />
         }
         onEndReached={() => console.log('getting photo')}
