@@ -3,14 +3,30 @@
   "main": "node_modules/expo/AppEntry.js",
   "version": "0.4",
   "description": "Media Gallery",
-  "keywords": ["media", "gallery", "google photo", "google photo clone", "react native gallery", "photo gallery", "media gallery", "google photos", "GPhotos", "react-native gallery","react native photo gallery", "android", "ios","android gallery","ios gallery"],
+  "keywords": [
+    "media",
+    "gallery",
+    "google photo",
+    "google photo clone",
+    "react native gallery",
+    "photo gallery",
+    "media gallery",
+    "google photos",
+    "GPhotos",
+    "react-native gallery",
+    "react native photo gallery",
+    "android",
+    "ios",
+    "android gallery",
+    "ios gallery"
+  ],
   "homepage": "https://github.com/functionland/photos",
-  "bugs":{
-    "url":"https://github.com/functionland/photos/issues",
+  "bugs": {
+    "url": "https://github.com/functionland/photos/issues",
     "email": "shariati@directionx.ca"
   },
   "license": "SEE LICENSE IN FILE LICENSE",
-  "author":{
+  "author": {
     "name": "Ehsan Shariati Varnosfaderani",
     "email": "shariati@directionx.ca",
     "url": "https://www.linkedin.com/in/ehsanehsan/"
