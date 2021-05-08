@@ -13,7 +13,7 @@ const PhotosContainer = () => {
   const initialPhotoNumber:number = 50;
   const [permission, setPermission] = useState<boolean>();
   const [photos, setPhotos] = useState<Array<MediaLibrary.Asset>>();
-  const [mediaEndCursor, setMediaEndCursor] = useState<string>('0');
+  const [mediaEndCursor, setMediaEndCursor] = useState<string>();
   const [mediaHasNextPage, setMediaHasNextPage] = useState<boolean>(true);
   const [mediaTotalCount , setMediaTotalCount] = useState<number>(99999);
   const [storagePhotos, setStoragePhotos] = useState<
@@ -46,7 +46,7 @@ const PhotosContainer = () => {
     if (permission) {
       navigation.navigate('HomePage');
       setLoading(true);
-      getStorageMedia(permission, initialPhotoNumber, mediaEndCursor)?.then(
+      getStorageMedia(permission, initialPhotoNumber)?.then(
         (res: MediaItem) => {
           setStoragePhotos(res.assets);
           setMediaEndCursor(res.endCursor);
@@ -54,7 +54,7 @@ const PhotosContainer = () => {
           setMediaTotalCount(res.totalCount);
           setLoading(false);
         },
-      );
+      ).catch(error => console.log(error));
     } else {
       navigation.navigate('PermissionError');
     }

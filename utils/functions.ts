@@ -117,7 +117,7 @@ export const timestampToDate = (
 export const getStorageMedia = (
   permission: boolean = false,
   limit: number = 20,
-  after: string = '0',
+  after: string = '',
   createdBefore: Date | number | undefined = undefined,
   createdAfter: Date | number | undefined = undefined,
   mediaType: Array<any> = [
@@ -125,18 +125,21 @@ export const getStorageMedia = (
     MediaType.video,
   ],
 ) => {
-  if (after === '') {
-    after = '0';
-  }
   if (permission) {
     let mediaFilter: AssetsOptions = {
       first: limit,
       mediaType: mediaType,
       sortBy: [SortBy.modificationTime],
-      after: after,
-      createdAfter: createdAfter,
-      createdBefore: createdBefore,
     };
+    if(after){
+      mediaFilter.after = after;
+    }
+    if(createdAfter){
+      mediaFilter.createdAfter = createdAfter;
+    }
+    if(createdBefore){
+      mediaFilter.createdBefore = createdBefore;
+    }
 
     let media = getAssetsAsync(mediaFilter);
     return media;
