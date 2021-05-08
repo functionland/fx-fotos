@@ -1,4 +1,4 @@
-import React, {useEffect, useRef} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   Animated,
   Dimensions,
@@ -6,15 +6,19 @@ import {
   StyleSheet,
   StatusBar,
   SectionList,
+  ActivityIndicator,
 } from 'react-native';
-import {photoChunk} from '../types/interfaces';
+import { flatMedia, FlatSection } from '../types/interfaces';
 import PhotosChunk from './PhotosChunk';
+import { RecyclerListView, DataProvider } from 'recyclerlistview';
+import { LayoutUtil } from '../utils/LayoutUtil';
+import { Asset } from 'expo-media-library';
 
 const SCREEN_WIDTH = Dimensions.get('screen').width;
 const SCREEN_HEIGHT = Dimensions.get('screen').height;
 
 interface Props {
-  photos: Array<photoChunk>;
+  photos: FlatSection;
   margin: Animated.AnimatedInterpolation;
   maxWidth: number;
   minWidth: number;
@@ -29,7 +33,42 @@ interface Props {
 }
 
 const RenderPhotos: React.FC<Props> = (props) => {
-  return props.photos ? (
+  const [dataProvider, setDataProvider] = useState<DataProvider>(new DataProvider((r1, r2) => {
+    return r1 !== r2;
+  }));
+  const [layoutProvider, setLayoutProvider] = useState<any>(LayoutUtil.getLayoutProvider(2, 'day', props.photos.headerIndexes));
+
+  useEffect(()=>{
+    setDataProvider(dataProvider.cloneWithRows(props.photos.flatMedias));
+  },[props.photos]);
+  useEffect(()=>{
+    setLayoutProvider(LayoutUtil.getLayoutProvider(props.numColumns, props.separator, props.photos.headerIndexes));
+  },[props.numColumns, props.separator]);
+
+  const renderFooter = () => {
+    //Second view makes sure we don't unnecessarily change height of the list on this event. That might cause indicator to remain invisible
+    //The empty view can be removed once you've fetched all the data
+    return (false)
+      ? <ActivityIndicator
+          style={{ margin: 10 }}
+          size="large"
+          color={'black'}
+        />
+      : <></>;
+  };
+
+  const rowRenderer = (type:string | number, data:flatMedia) => {
+    //We have only one view type so not checks are needed here
+    return <PhotosChunk
+      photo={data}
+      opacity={props.opacity}
+      numCol={props.numColumns}
+      loading={props.loading}
+      scale={props.scale}
+      key={'PhotosChunk' + props.numColumns}
+    />;
+  };
+  return props.photos.flatMedias ? (
     <Animated.View
       // eslint-disable-next-line react-native/no-inline-styles
       style={{
@@ -65,28 +104,9 @@ const RenderPhotos: React.FC<Props> = (props) => {
               , Animated.multiply(2,props.sizeTransformScale))
           }
         ],
-      }}>
-      <SectionList
-        initialNumToRender={Math.ceil(SCREEN_HEIGHT/(SCREEN_WIDTH/props.numColumns)) + props.numColumns*4}
-        sections={props.photos}
-        //keyExtractor={(item, index) => item.uri + index}
-        renderItem={({item}) =>
-          <PhotosChunk
-            photos={item}
-            opacity={props.opacity}
-            numCol={props.numColumns}
-            loading={props.loading}
-            scale={props.scale}
-            key={'PhotosChunk' + props.numColumns}
-          />
-        }
-        onEndReached={() => console.log('getting photo')}
-        // contentContainerStyle={{flexGrow: 1}}
-        onEndReachedThreshold={0.7}
-        //onRefresh={()=>{console.log('getting new photo')}}
-        //refreshing={false}
-        removeClippedSubviews={true}
-        // eslint-disable-next-line react-native/no-inline-styles
+      }}
+    >
+      <RecyclerListView
         style={{
           flex: 1,
           width: SCREEN_WIDTH,
@@ -98,11 +118,15 @@ const RenderPhotos: React.FC<Props> = (props) => {
           right: 0,
           left: 0,
         }}
-        renderSectionHeader={({section: {date}}) => (
-          <Text style={styles.header}>{date}</Text>
-        )}
-        key={props.separator + props.numColumns}
-        scrollEnabled={false}
+        contentContainerStyle={{ margin: 0 }}
+        onEndReached={() => console.log('getting photo')}
+        onEndReachedThreshold={0.6}
+        dataProvider={dataProvider}
+        layoutProvider={layoutProvider}
+        rowRenderer={rowRenderer}
+        renderFooter={renderFooter}
+        scrollEnabled={true}
+        key={"RecyclerListView_"+props.separator + props.numColumns}
       />
     </Animated.View>
   ) : (

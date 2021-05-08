@@ -1,4 +1,4 @@
-import * as MediaLibrary from 'expo-media-library';
+import {Asset} from 'expo-media-library';
 
 export interface reduxState {
   user: {
@@ -6,17 +6,17 @@ export interface reduxState {
     email: string;
     token: string;
   };
-  box: Array<MediaLibrary.Asset>;
+  box: Array<Asset>;
   images: Array<sortedPhotos>;
   sortCondition: sortCondition;
   loading: boolean;
-  photos: Array<MediaLibrary.Asset>;
+  photos: Array<Asset>;
   numColumns: 2 | 3 | 4;
   numberOfPhotos: number;
 }
 
 export interface sortedPhotos {
-  [key: string]: Array<MediaLibrary.Asset>;
+  [key: string]: Array<Asset>;
 }
 
 export interface reduxAction {
@@ -41,12 +41,20 @@ export interface sortDetails {
 export type sortCondition = 'day' | 'month';
 
 export interface photoChunk {
-  date: string;
-  data: Array<Array<MediaLibrary.Asset>>;
+  date: {value:string;};
+  data: Array<{value:Asset;}>;
+}
+
+export interface flatMedia {
+  value:Asset|string;
+}
+export interface FlatSection {
+  flatMedias: Array<flatMedia>;
+  headerIndexes: Array<{header:string;index:number}>;
 }
 
 export interface MediaItem {
-  assets: Array<MediaLibrary.Asset>;
+  assets: Array<Asset>;
   endCursor: string;
   hasNextPage: boolean;
   totalCount: number;

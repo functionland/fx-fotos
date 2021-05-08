@@ -1,12 +1,14 @@
-import * as MediaLibrary from 'expo-media-library';
+import {Asset, MediaType, AssetsOptions, SortBy, getAssetsAsync} from 'expo-media-library';
 import {
   changeSortConditionAndNumColumns,
   photoChunk,
   sortCondition,
+  FlatSection,
+  flatMedia,
 } from '../types/interfaces';
 
 export const sectionizeMedia = (
-  medias: Array<MediaLibrary.Asset>,
+  medias: Array<Asset>,
   sortCondition_i: 'day' | 'month',
 ) => {
   let result: Array<photoChunk> = [];
@@ -21,21 +23,21 @@ export const sectionizeMedia = (
       if (currentTimestamp !== mediaTimestamp) {
         currentTimestamp = mediaTimestamp;
         timestampIndexInData = result.findIndex(
-          (x: photoChunk) => x.date === currentTimestamp,
+          (x: photoChunk) => x.date.value === currentTimestamp,
         );
       }
       if (timestampIndexInData > -1) {
         if (result[timestampIndexInData].data) {
-          result[timestampIndexInData].data[0].push(media);
+          result[timestampIndexInData].data.push({value:media});
         } else {
-          result[timestampIndexInData].data = [[]];
-          result[timestampIndexInData].data[0].push(media);
+          result[timestampIndexInData].data = [];
+          result[timestampIndexInData].data.push({value:media});
         }
       } else {
         if (currentTimestamp) {
           let temp = [];
-          temp.push(media);
-          result.push({date: currentTimestamp, data: [temp]});
+          temp.push({value:media});
+          result.push({date: {value:currentTimestamp}, data: temp});
           timestampIndexInData = result.length - 1;
         }
       }
@@ -44,6 +46,38 @@ export const sectionizeMedia = (
   return result;
 };
 
+export const flattenDates = (
+  sectionedMedias: Array<photoChunk>,
+  flatMedias: Array<flatMedia> = [],
+  headerIndexes:Array<{header:string;index:number}> = [],
+) => {
+  let index:number = 0;
+  for(let section of sectionedMedias){
+    let dataLength:number = section.data.length;
+    let prevIndex = headerIndexes.findIndex(x => x.header === section.date.value);
+    if(prevIndex > -1){
+      index = headerIndexes[prevIndex].index;
+      for(let i=0; i<headerIndexes.length; i++){
+        if(headerIndexes[i].index > index){
+          headerIndexes[i].index = headerIndexes[i].index + dataLength;
+        }
+      }
+    }else{
+      index = flatMedias.length;
+      headerIndexes.push({header:section.date.value,index:index});
+      flatMedias.push(section.date);
+    }
+    
+    if(dataLength){
+      flatMedias.splice(index+1, 0, ...section.data);
+    }
+  }
+  let result:FlatSection = {
+    flatMedias: flatMedias,
+    headerIndexes: headerIndexes,
+  };
+  return result;
+}
 export const timestampToDate = (
   timestamp: number,
   condition: 'day' | 'month',
@@ -87,24 +121,24 @@ export const getStorageMedia = (
   createdBefore: Date | number | undefined = undefined,
   createdAfter: Date | number | undefined = undefined,
   mediaType: Array<any> = [
-    MediaLibrary.MediaType.photo,
-    MediaLibrary.MediaType.video,
+    MediaType.photo,
+    MediaType.video,
   ],
 ) => {
   if (after === '') {
     after = '0';
   }
   if (permission) {
-    let mediaFilter: MediaLibrary.AssetsOptions = {
+    let mediaFilter: AssetsOptions = {
       first: limit,
       mediaType: mediaType,
-      sortBy: [MediaLibrary.SortBy.modificationTime],
+      sortBy: [SortBy.modificationTime],
       after: after,
       createdAfter: createdAfter,
       createdBefore: createdBefore,
     };
 
-    let media = MediaLibrary.getAssetsAsync(mediaFilter);
+    let media = getAssetsAsync(mediaFilter);
     return media;
   }
 };
