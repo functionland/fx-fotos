@@ -40,6 +40,7 @@ const PhotosContainer = () => {
   const [sortCondition_i, setSortCondition_i] = useState<sortCondition>('day');
   const [numColumns, setNumColumns] = useState<2 | 3 | 4>(2);
   const [loading, setLoading] = useState<boolean>(false);
+  const [isPinchAndZoom, setIsPinchAndZoom] = useState<boolean>(false);
 
   //TODO: Change this function to the getPhotos in actions like in AllPhotos
   useEffect(() => {
@@ -89,6 +90,8 @@ const PhotosContainer = () => {
       focalY={focalY}
       numberOfPointers={numberOfPointers}
       velocity={velocity}
+      setIsPinchAndZoom={setIsPinchAndZoom}
+      isPinchAndZoom={isPinchAndZoom}
     >
       <AllPhotos
         pinchOrZoom={pinchOrZoom}
@@ -102,6 +105,7 @@ const PhotosContainer = () => {
         focalY={focalY}
         numberOfPointers={numberOfPointers}
         velocity={velocity}
+        isPinchAndZoom={isPinchAndZoom}
       />
     </PinchZoom>
   ) : (

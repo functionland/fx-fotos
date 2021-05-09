@@ -21,6 +21,7 @@ interface Props {
   focalY: Animated.Value;
   numberOfPointers: Animated.Value;
   velocity: Animated.Value;
+  isPinchAndZoom: boolean;
 }
 
 const AllPhotos: React.FC<Props> = (props) => {
@@ -59,6 +60,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         separator="day"
         zIndex={(props.numColumns === 2)?1:0}
         scale={props.scale}
+        isPinchAndZoom={props.isPinchAndZoom}
       />
       <RenderPhotos
         photos={dayFlatten}
@@ -84,6 +86,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         separator="day"
         zIndex={(props.numColumns === 3)?1:0}
         scale={props.scale}
+        isPinchAndZoom={props.isPinchAndZoom}
       />
       <RenderPhotos
         photos={monthFlatten}
@@ -109,6 +112,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         separator="month"
         zIndex={(props.numColumns === 4)?1:0}
         scale={props.scale}
+        isPinchAndZoom={props.isPinchAndZoom}
       />
     </View>
   );

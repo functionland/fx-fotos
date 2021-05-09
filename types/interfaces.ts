@@ -59,3 +59,17 @@ export interface MediaItem {
   hasNextPage: boolean;
   totalCount: number;
 }
+export interface ScrollEvent {
+  nativeEvent: {
+      contentOffset: {
+          x: number,
+          y: number,
+      },
+      layoutMeasurement?: Dimension,
+      contentSize?: Dimension,
+  };
+}
+export interface Dimension {
+  height: number;
+  width: number;
+}

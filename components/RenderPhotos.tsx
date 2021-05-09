@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, createRef, useState, useRef} from 'react';
 import {
   Animated,
   Dimensions,
@@ -8,9 +8,9 @@ import {
   SectionList,
   ActivityIndicator,
 } from 'react-native';
-import { flatMedia, FlatSection } from '../types/interfaces';
+import { flatMedia, FlatSection, ScrollEvent } from '../types/interfaces';
 import PhotosChunk from './PhotosChunk';
-import { RecyclerListView, DataProvider } from 'recyclerlistview';
+import { RecyclerListView, DataProvider, AutoScroll } from 'recyclerlistview';
 import { LayoutUtil } from '../utils/LayoutUtil';
 import { Asset } from 'expo-media-library';
 
@@ -30,6 +30,7 @@ interface Props {
   zIndex: number;
   scale: Animated.Value;
   sizeTransformScale: Animated.AnimatedInterpolation;
+  isPinchAndZoom: boolean;
 }
 
 const RenderPhotos: React.FC<Props> = (props) => {
@@ -37,6 +38,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
     return r1 !== r2;
   }));
   const [layoutProvider, setLayoutProvider] = useState<any>(LayoutUtil.getLayoutProvider(2, 'day', props.photos.headerIndexes));
+  const scrollRef:any = useRef();
 
   useEffect(()=>{
     setDataProvider(dataProvider.cloneWithRows(props.photos.flatMedias));
@@ -56,7 +58,9 @@ const RenderPhotos: React.FC<Props> = (props) => {
         />
       : <></>;
   };
-
+  const scrollHandle = (rawEvent: ScrollEvent, offsetX: number, offsetY: number) => {
+    return;
+  }
   const rowRenderer = (type:string | number, data:flatMedia) => {
     //We have only one view type so not checks are needed here
     return <PhotosChunk
@@ -68,6 +72,23 @@ const RenderPhotos: React.FC<Props> = (props) => {
       key={'PhotosChunk' + props.numColumns}
     />;
   };
+
+  
+ useEffect(()=>{
+    const scrollToLocation = (offset:number) => {
+      console.log("HERE "+offset);
+      if(scrollRef){
+        //scrollRef.current?.scrollToOffset(0, offset, true);
+        AutoScroll.scrollNow(scrollRef.current, 0, 0, 0, offset, 1).then(()=>{
+          //console.log("scroll done");
+        }).catch(e=>console.log(e));
+      }
+    }
+    if(props.numColumns===2){
+      //scrollToLocation(1000);
+    }
+  });
+
   return props.photos.flatMedias ? (
     <Animated.View
       // eslint-disable-next-line react-native/no-inline-styles
@@ -107,6 +128,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
       }}
     >
       <RecyclerListView
+        ref={scrollRef}
         style={{
           flex: 1,
           width: SCREEN_WIDTH,
@@ -125,8 +147,9 @@ const RenderPhotos: React.FC<Props> = (props) => {
         layoutProvider={layoutProvider}
         rowRenderer={rowRenderer}
         renderFooter={renderFooter}
-        scrollEnabled={true}
+        scrollEnabled={!props.isPinchAndZoom}
         key={"RecyclerListView_"+props.separator + props.numColumns}
+        onScroll={scrollHandle}
       />
     </Animated.View>
   ) : (

@@ -28,6 +28,8 @@ interface Props {
   focalY: Animated.Value;
   numberOfPointers: Animated.Value;
   velocity: Animated.Value;
+  setIsPinchAndZoom: Function;
+  isPinchAndZoom: boolean;
 }
 
 let _pinchOrZoom: 'pinch'|'zoom'|undefined = undefined;
@@ -39,7 +41,11 @@ const PinchZoom: React.FC<Props> = (props) => {
     { useNativeDriver: true }
   );
   let _onPinchHandlerStateChange = (event:GestureEvent<PinchGestureHandlerEventPayload>) => {
-    console.log(event.nativeEvent);
+    if(event.nativeEvent.numberOfPointers > 1 && !props.isPinchAndZoom){
+      props.setIsPinchAndZoom(true);
+    }else if(props.isPinchAndZoom && event.nativeEvent.numberOfPointers == 1){
+      props.setIsPinchAndZoom(false);
+    }
     if (event.nativeEvent.oldState === State.ACTIVE && event.nativeEvent.state !== State.ACTIVE) {
       animationTransition(event);
     }
@@ -96,6 +102,7 @@ const PinchZoom: React.FC<Props> = (props) => {
           console.log(props.scale);
           console.log(finalVal);
           setAllowAnimation(true);
+          props.setIsPinchAndZoom(false);
         });
       }else{
         console.log("here"+event.nativeEvent.state);
