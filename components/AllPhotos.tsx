@@ -6,8 +6,8 @@ import RenderPhotos from './RenderPhotos';
 import * as MediaLibrary from 'expo-media-library';
 import {sectionizeMedia, flattenDates} from '../utils/functions';
 
-const SCREEN_WIDTH = Dimensions.get('screen').width;
-const SCREEN_HEIGHT = Dimensions.get('screen').height;
+const SCREEN_WIDTH = Dimensions.get('window').width;
+const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 interface Props {
   photos: Array<MediaLibrary.Asset>;
@@ -25,6 +25,7 @@ interface Props {
 }
 
 const AllPhotos: React.FC<Props> = (props) => {
+  const [scrollOffset, setScrollOffset] = useState<{[key:string]:(2|3|4|number)}>({'in':0,'to':0});
   let dayFlatten = flattenDates(sectionizeMedia(props.photos, 'day'));
   let monthFlatten = flattenDates(sectionizeMedia(props.photos, 'month'));
   return (
@@ -61,6 +62,8 @@ const AllPhotos: React.FC<Props> = (props) => {
         zIndex={(props.numColumns === 2)?1:0}
         scale={props.scale}
         isPinchAndZoom={props.isPinchAndZoom}
+        scrollOffset={scrollOffset}
+        setScrollOffset={setScrollOffset}
       />
       <RenderPhotos
         photos={dayFlatten}
@@ -87,6 +90,8 @@ const AllPhotos: React.FC<Props> = (props) => {
         zIndex={(props.numColumns === 3)?1:0}
         scale={props.scale}
         isPinchAndZoom={props.isPinchAndZoom}
+        scrollOffset={scrollOffset}
+        setScrollOffset={setScrollOffset}
       />
       <RenderPhotos
         photos={monthFlatten}
@@ -113,6 +118,8 @@ const AllPhotos: React.FC<Props> = (props) => {
         zIndex={(props.numColumns === 4)?1:0}
         scale={props.scale}
         isPinchAndZoom={props.isPinchAndZoom}
+        scrollOffset={scrollOffset}
+        setScrollOffset={setScrollOffset}
       />
     </View>
   );

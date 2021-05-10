@@ -14,8 +14,8 @@ import { RecyclerListView, DataProvider, AutoScroll } from 'recyclerlistview';
 import { LayoutUtil } from '../utils/LayoutUtil';
 import { Asset } from 'expo-media-library';
 
-const SCREEN_WIDTH = Dimensions.get('screen').width;
-const SCREEN_HEIGHT = Dimensions.get('screen').height;
+const SCREEN_WIDTH = Dimensions.get('window').width;
+const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 interface Props {
   photos: FlatSection;
@@ -31,6 +31,8 @@ interface Props {
   scale: Animated.Value;
   sizeTransformScale: Animated.AnimatedInterpolation;
   isPinchAndZoom: boolean;
+  scrollOffset:{[key:number]:number};
+  setScrollOffset: Function;
 }
 
 const RenderPhotos: React.FC<Props> = (props) => {
@@ -38,7 +40,9 @@ const RenderPhotos: React.FC<Props> = (props) => {
     return r1 !== r2;
   }));
   const [layoutProvider, setLayoutProvider] = useState<any>(LayoutUtil.getLayoutProvider(2, 'day', props.photos.headerIndexes));
+  const [baseOffset, setBaseOffset] = useState<number>(0);
   const scrollRef:any = useRef();
+  const scrollRefInternal:any = useRef();
 
   useEffect(()=>{
     setDataProvider(dataProvider.cloneWithRows(props.photos.flatMedias));
@@ -58,9 +62,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
         />
       : <></>;
   };
-  const scrollHandle = (rawEvent: ScrollEvent, offsetX: number, offsetY: number) => {
-    return;
-  }
+  
   const rowRenderer = (type:string | number, data:flatMedia) => {
     //We have only one view type so not checks are needed here
     return <PhotosChunk
@@ -74,20 +76,39 @@ const RenderPhotos: React.FC<Props> = (props) => {
   };
 
   
- useEffect(()=>{
-    const scrollToLocation = (offset:number) => {
-      console.log("HERE "+offset);
+  const scrollToLocation = (offset:number) => {
       if(scrollRef){
         //scrollRef.current?.scrollToOffset(0, offset, true);
         AutoScroll.scrollNow(scrollRef.current, 0, 0, 0, offset, 1).then(()=>{
-          //console.log("scroll done");
+          console.log("scroll done");
         }).catch(e=>console.log(e));
       }
-    }
-    if(props.numColumns===2){
+  }
+
+  const onScrollEnd = () => {
+    let lastOffset = scrollRef?.current.getCurrentScrollOffset();
+    props.setScrollOffset({'in':props.numColumns, 'to':lastOffset});
+  }
+  useEffect(()=>{
+      scrollRef?.current.scrollToOffset(0,1000,true);
+      if(props.numColumns===2){
+        console.log('here');
       //scrollToLocation(1000);
+      }
+    
+  },[scrollRef, scrollRef.current]);
+
+  const adjustScrollPosition = (newOffset:{[key:string]:(2|3|4|number)}) => {
+    let numColumns:number = props.numColumns;
+    if( numColumns !== newOffset.in){
+      let offset =newOffset.to * newOffset.in/numColumns;
+      console.log('scrolling ' + props.numColumns+ ' to '+offset);
+      scrollRef?.current.scrollToOffset(0,offset,true);
     }
-  });
+  }
+  useEffect(()=>{
+    adjustScrollPosition(props.scrollOffset);
+  },[props.scrollOffset]);
 
   return props.photos.flatMedias ? (
     <Animated.View
@@ -149,7 +170,10 @@ const RenderPhotos: React.FC<Props> = (props) => {
         renderFooter={renderFooter}
         scrollEnabled={!props.isPinchAndZoom}
         key={"RecyclerListView_"+props.separator + props.numColumns}
-        onScroll={scrollHandle}
+        scrollViewProps={{
+          //ref: scrollRefInternal,
+          onMomentumScrollEnd: onScrollEnd
+        }}
       />
     </Animated.View>
   ) : (

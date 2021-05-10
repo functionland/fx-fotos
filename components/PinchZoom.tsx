@@ -11,8 +11,8 @@ import {
   GestureEvent,
 } from 'react-native-gesture-handler';
 
-const SCREEN_WIDTH = Dimensions.get('screen').width;
-const SCREEN_HEIGHT = Dimensions.get('screen').height;
+const SCREEN_WIDTH = Dimensions.get('window').width;
+const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 interface Props {
   scale: Animated.Value;
@@ -41,49 +41,58 @@ const PinchZoom: React.FC<Props> = (props) => {
     { useNativeDriver: true }
   );
   let _onPinchHandlerStateChange = (event:GestureEvent<PinchGestureHandlerEventPayload>) => {
-    if(event.nativeEvent.numberOfPointers > 1 && !props.isPinchAndZoom){
+    if (event.nativeEvent.oldState === State.ACTIVE && event.nativeEvent.state !== State.ACTIVE) {
+      let scale:number = event.nativeEvent.scale;
+      if((scale > 1.3 && props.numColumns>2) || (scale < 0.8 && props.numColumns<4)){
+        setAllowAnimation(false);
+        Animated.timing(props.scale, {
+          toValue: scale>1?4:0,
+          duration: 250,
+          useNativeDriver: true
+        }).start(() => {
+          animationTransition(scale);
+        });
+
+      }else{
+        Animated.timing(props.scale, {
+          toValue: 1,
+          duration: 50,
+          useNativeDriver: true
+        }).start(() => {
+          console.log('revert animation ended');
+          props.scale.setValue(1);
+          props.setPinchOrZoom(undefined);
+          setAllowAnimation(true);
+        });
+      }
+    }
+    /*if(event.nativeEvent.numberOfPointers > 1 && !props.isPinchAndZoom){
       props.setIsPinchAndZoom(true);
     }else if(props.isPinchAndZoom && event.nativeEvent.numberOfPointers == 1){
       props.setIsPinchAndZoom(false);
-    }
-    if (event.nativeEvent.oldState === State.ACTIVE && event.nativeEvent.state !== State.ACTIVE) {
-      animationTransition(event);
-    }
+    }*/
   };
 
   const animationTransition = (
-    event:GestureEvent<PinchGestureHandlerEventPayload>
+    scale:number
   ) => {
-    if(event.nativeEvent.scale > 1){
+    if(scale > 1){
       _pinchOrZoom = 'pinch';
-    }else if(event.nativeEvent.scale < 1){
+    }else if(scale < 1){
       _pinchOrZoom = 'zoom';
     }else{
       _pinchOrZoom = undefined;
     }
 
       console.log('animation end cycle');
-      if((event.nativeEvent.scale > 1.3 && props.numColumns>2) || (event.nativeEvent.scale < 0.8 && props.numColumns<4)){
-        let finalVal:number = 0;
+      
         let _sortCondition = changeSortCondition(
           props.sortCondition,
           _pinchOrZoom,
           props.numColumns,
         );
-        if(event.nativeEvent.scale > 1){
-          finalVal = 4;
-        }else if(event.nativeEvent.scale < 1){
-          finalVal = 0;
-        }
         console.log(props.baseScale);
         console.log(props.scale);
-        setAllowAnimation(false);
-        Animated.timing(props.scale, {
-          toValue: finalVal,
-          duration: 250,
-          useNativeDriver: true
-        }).start(() => {
-          console.log('forward animation ended');
           
           props.setSortCondition(_sortCondition.sortCondition);
           props.setNumColumns(_sortCondition.numColumns);
@@ -100,23 +109,8 @@ const PinchZoom: React.FC<Props> = (props) => {
           console.log(props.baseScale2);
           console.log(props.baseScale);
           console.log(props.scale);
-          console.log(finalVal);
           setAllowAnimation(true);
           props.setIsPinchAndZoom(false);
-        });
-      }else{
-        console.log("here"+event.nativeEvent.state);
-        Animated.timing(props.scale, {
-          toValue: 1,
-          duration: 50,
-          useNativeDriver: true
-        }).start(() => {
-          console.log('revert animation ended');
-          props.scale.setValue(1);
-          props.setPinchOrZoom(undefined);
-          setAllowAnimation(true);
-        });
-      }
   };
 
   return (
