@@ -74,6 +74,8 @@ const AllPhotos: React.FC<Props> = (props) => {
         scrollOffset={scrollOffset}
         setScrollOffset={setScrollOffset}
         setLoadMore={props.setLoadMore}
+        focalY={props.focalY}
+        numberOfPointers={props.numberOfPointers}
       />
       <RenderPhotos
         photos={dayFlatten}
@@ -103,6 +105,8 @@ const AllPhotos: React.FC<Props> = (props) => {
         scrollOffset={scrollOffset}
         setScrollOffset={setScrollOffset}
         setLoadMore={props.setLoadMore}
+        focalY={props.focalY}
+        numberOfPointers={props.numberOfPointers}
       />
       <RenderPhotos
         photos={monthFlatten}
@@ -132,6 +136,8 @@ const AllPhotos: React.FC<Props> = (props) => {
         scrollOffset={scrollOffset}
         setScrollOffset={setScrollOffset}
         setLoadMore={props.setLoadMore}
+        focalY={props.focalY}
+        numberOfPointers={props.numberOfPointers}
       />
     </View>
     ):(

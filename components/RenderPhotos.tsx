@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { flatMedia, FlatSection, ScrollEvent } from '../types/interfaces';
 import PhotosChunk from './PhotosChunk';
+import ThumbScroll from './ThumbScroll';
 import { RecyclerListView, DataProvider, AutoScroll } from 'recyclerlistview';
 import { LayoutUtil } from '../utils/LayoutUtil';
 import { Asset } from 'expo-media-library';
@@ -34,16 +35,20 @@ interface Props {
   scrollOffset:{[key:number]:number};
   setScrollOffset: Function;
   setLoadMore: Function;
+  focalY: Animated.Value;
+  numberOfPointers: Animated.Value;
 }
 
 const RenderPhotos: React.FC<Props> = (props) => {
+  const headerHeight = 20;
   const [dataProvider, setDataProvider] = useState<DataProvider>(new DataProvider((r1, r2) => {
     return r1 !== r2;
   }));
-  const [layoutProvider, setLayoutProvider] = useState<any>(LayoutUtil.getLayoutProvider(2, 'day', props.photos.headerIndexes));
+  const [layoutProvider, setLayoutProvider] = useState<any>(LayoutUtil.getLayoutProvider(2, 'day', props.photos.headerIndexes, headerHeight));
   const [viewLoaded, setViewLoaded] = useState<boolean>(false);
   const scrollRef:any = useRef();
-  const scrollRefInternal:any = useRef();
+  const [lastScrollOffset, setLastScrollOffset] = useState<number>(0);
+
 
   useEffect(()=>{
     setDataProvider(dataProvider.cloneWithRows(props.photos.layout));
@@ -88,6 +93,8 @@ const RenderPhotos: React.FC<Props> = (props) => {
 
   const onScrollEnd = () => {
     let lastIndex = scrollRef?.current.findApproxFirstVisibleIndex();
+    let lastOffset = scrollRef?.current.getCurrentScrollOffset();
+    setLastScrollOffset(lastOffset);
     //console.log(lastIndex);
     props.setScrollOffset({'in':props.numColumns, 'to':lastIndex});
   }
@@ -147,6 +154,20 @@ const RenderPhotos: React.FC<Props> = (props) => {
         ],
       }}
     >
+      <ThumbScroll
+        indicatorHeight={10}
+        flexibleIndicator={false}
+        shouldIndicatorHide={false}
+        hideTimeout={500}
+        scrollY={props.focalY}
+        lastOffset={lastScrollOffset}
+        numColumns={props.numColumns}
+        headerIndexes={props.photos.headerIndexes}
+        numberOfPointers={props.numberOfPointers}
+        headerHeight={headerHeight}
+        scrollIndicatorContainerStyle={{}}
+        scrollIndicatorStyle={{}}
+      />
       <RecyclerListView
         ref={scrollRef}
         style={{

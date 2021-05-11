@@ -41,6 +41,7 @@ const PinchZoom: React.FC<Props> = (props) => {
     { useNativeDriver: true }
   );
   let _onPinchHandlerStateChange = (event:GestureEvent<PinchGestureHandlerEventPayload>) => {
+    console.log(event.nativeEvent);
     if (event.nativeEvent.oldState === State.ACTIVE && event.nativeEvent.state !== State.ACTIVE) {
       let scale:number = event.nativeEvent.scale;
       if((scale > 1.3 && props.numColumns>2) || (scale < 0.8 && props.numColumns<4)){
@@ -53,7 +54,7 @@ const PinchZoom: React.FC<Props> = (props) => {
           animationTransition(scale);
         });
 
-      }else{
+      }else if(scale !== 1){
         Animated.timing(props.scale, {
           toValue: 1,
           duration: 50,

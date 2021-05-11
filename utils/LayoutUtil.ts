@@ -1,13 +1,12 @@
 import { LayoutProvider } from 'recyclerlistview';
 import { Dimensions } from 'react-native';
 
-const headerHeight:number = 20;
 export class LayoutUtil {
   static getWindowWidth() {
     // To deal with precision issues on android
     return Math.round(Dimensions.get('window').width * 1000) / 1000; //Adjustment for margin given to RLV;
   }
-  static getLayoutProvider(colNum:number, groupBy:string, headerIndexes:Array<{header:string;index:number}>) {
+  static getLayoutProvider(colNum:number, groupBy:string, headerIndexes:Array<{header:string;index:number}>, headerHeight:number=20) {
     switch (groupBy) {
       case 'day':
         return new LayoutProvider(

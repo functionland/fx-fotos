@@ -201,6 +201,10 @@ export const getStorageMedia = (
   }
 };
 
+export const calcLayoutHeight = (numColumns:2|3|4, headerIndexes:Array<{header:string;index:number;count:number;yearStart:string}> , screenWidth:number, headerHeight:number) => {
+  return headerIndexes.reduce((total, elm)=>{return (elm.count*(screenWidth/numColumns)+headerHeight);}, 0);
+}
+
 export const pow2abs = (a: number, b: number) => {
   return Math.pow(Math.abs(a - b), 2);
 };

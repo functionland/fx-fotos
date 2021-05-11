@@ -50,7 +50,7 @@ export interface flatMedia {
 }
 export interface FlatSection {
   layout: Array<Asset|string>;
-  headerIndexes:Array<{header:string;index:number;yearStart:string}>;
+  headerIndexes:Array<{header:string;index:number;yearStart:string;count:number}>;
 }
 
 export interface MediaItem {
