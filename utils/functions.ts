@@ -7,11 +7,12 @@ import {
   flatMedia,
 } from '../types/interfaces';
 
+/*
 export const sectionizeMedia = (
   medias: Array<Asset>,
   sortCondition_i: 'day' | 'month',
+  sectionedMedia: Array<photoChunk> = [],
 ) => {
-  let result: Array<photoChunk> = [];
   if (medias && medias.length) {
     let currentTimestamp = '';
     let timestampIndexInData = -1;
@@ -19,31 +20,31 @@ export const sectionizeMedia = (
       let mediaTimestamp = timestampToDate(
         media.modificationTime,
         sortCondition_i,
-      );
+      ).value;
       if (currentTimestamp !== mediaTimestamp) {
         currentTimestamp = mediaTimestamp;
-        timestampIndexInData = result.findIndex(
+        timestampIndexInData = sectionedMedia.findIndex(
           (x: photoChunk) => x.date.value === currentTimestamp,
         );
       }
       if (timestampIndexInData > -1) {
-        if (result[timestampIndexInData].data) {
-          result[timestampIndexInData].data.push({value:media});
+        if (sectionedMedia[timestampIndexInData].data) {
+          sectionedMedia[timestampIndexInData].data.push({value:media});
         } else {
-          result[timestampIndexInData].data = [];
-          result[timestampIndexInData].data.push({value:media});
+          sectionedMedia[timestampIndexInData].data = [];
+          sectionedMedia[timestampIndexInData].data.push({value:media});
         }
       } else {
         if (currentTimestamp) {
           let temp = [];
           temp.push({value:media});
-          result.push({date: {value:currentTimestamp}, data: temp});
-          timestampIndexInData = result.length - 1;
+          sectionedMedia.push({date: {value:currentTimestamp}, data: temp});
+          timestampIndexInData = sectionedMedia.length - 1;
         }
       }
     }
   }
-  return result;
+  return sectionedMedia;
 };
 
 export const flattenDates = (
@@ -75,21 +76,77 @@ export const flattenDates = (
   let result:FlatSection = {
     flatMedias: flatMedias,
     headerIndexes: headerIndexes,
+    sectionedMedias: sectionedMedias
   };
   return result;
+}*/
+
+export const ipfsHash = (
+  media: Asset,
+) => {
+  let result:string = Math.random().toString(36).substring(7);
+  return result;
 }
+
+export const prepareLayout = (
+  newMedias: Array<Asset>,
+  sortConditions: Array<'day' | 'month'>,
+  lastTimestamp: number = 0,
+) => {
+  let output:{[key:string]:FlatSection} = {};
+  
+  for(let j=0; j<sortConditions.length; j++){
+    let layout:Array<Asset|string> = [];
+    let headerIndexes:Array<{header:string;index:number;count:number;yearStart:string}> = [];
+    let count = 0;
+    let sortCondition_i = sortConditions[j];
+    
+    let lastTimestampObj = timestampToDate(
+      lastTimestamp,
+      sortCondition_i,
+    );
+    let lastTimestampString = lastTimestampObj.value;
+    let lastYear = lastTimestampObj.year;
+    for(let i=0; i<newMedias.length; i++){
+      let yearStart = '';
+      let mediaTimestampObj = timestampToDate(
+        newMedias[i].modificationTime,
+        sortCondition_i,
+      );
+      let mediaTimestampString = mediaTimestampObj.value;
+      let mediaTimestampYear = mediaTimestampObj.year;
+      if(lastTimestampString !== mediaTimestampString && lastYear !== mediaTimestampYear){
+        lastTimestampString = mediaTimestampString;
+        layout.push(lastTimestampString);
+        if(headerIndexes.length>1){
+          headerIndexes[headerIndexes.length-1].count = count;
+        }
+        if(mediaTimestampYear !== lastTimestampString){
+          yearStart = mediaTimestampYear;
+        }
+        headerIndexes.push({header:lastTimestampString, index:layout.length-1, count: 0, yearStart: yearStart});
+        count = 0;
+      }
+      count = count + 1;
+      layout.push(newMedias[i]);
+    }
+    output[sortCondition_i] = {layout:layout, headerIndexes: headerIndexes};
+  }
+  return output;
+}
+
 export const timestampToDate = (
   timestamp: number,
-  condition: 'day' | 'month',
+  condition: ('day' | 'month') | 'year',
 ) => {
   let date = new Date(timestamp);
   let month = date.getUTCMonth(); //months from 1-12
   let day = date.getUTCDate();
   let year = date.getUTCFullYear();
-  let result;
+  let result:{value:string, year:string} = {value:'', year: String(year)};
 
   if (condition === 'day') {
-    result = new Date(year, month, day).toString().split(year.toString())[0];
+    result.value = new Date(year, month, day).toString().split(year.toString())[0];
   } else if (condition === 'month') {
     const monthNames = [
       'January',
@@ -105,18 +162,16 @@ export const timestampToDate = (
       'November',
       'December',
     ];
-    result = monthNames[new Date(year, month).getMonth()];
+    result.value = monthNames[new Date(year, month).getMonth()];
+  }else if (condition === 'year') {
+    result.value = String(year);
   }
-  if (result) {
-    return result;
-  } else {
-    return 'unknown';
-  }
+  return result;
 };
 
 export const getStorageMedia = (
   permission: boolean = false,
-  limit: number = 20,
+  limit: number = 99999999999999,
   after: string = '',
   createdBefore: Date | number | undefined = undefined,
   createdAfter: Date | number | undefined = undefined,

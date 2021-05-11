@@ -1,10 +1,10 @@
 import React, {useEffect, useState} from 'react';
 import {ScrollView} from 'react-native-gesture-handler';
-import {Animated, Dimensions, View, StatusBar} from 'react-native';
-import {sortCondition} from '../types/interfaces';
+import {Animated, Dimensions, View, StatusBar, Text} from 'react-native';
+import {sortCondition, FlatSection} from '../types/interfaces';
 import RenderPhotos from './RenderPhotos';
 import * as MediaLibrary from 'expo-media-library';
-import {sectionizeMedia, flattenDates} from '../utils/functions';
+import {prepareLayout} from '../utils/functions';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -22,13 +22,22 @@ interface Props {
   numberOfPointers: Animated.Value;
   velocity: Animated.Value;
   isPinchAndZoom: boolean;
+  setLoadMore: Function;
 }
 
 const AllPhotos: React.FC<Props> = (props) => {
   const [scrollOffset, setScrollOffset] = useState<{[key:string]:(2|3|4|number)}>({'in':0,'to':0});
-  let dayFlatten = flattenDates(sectionizeMedia(props.photos, 'day'));
-  let monthFlatten = flattenDates(sectionizeMedia(props.photos, 'month'));
+  const [dayFlatten, setDayFlatten] = useState<FlatSection>({layout:[],headerIndexes:[]});
+  const [monthFlatten, setMonthFlatten] = useState<FlatSection>({layout:[],headerIndexes:[]});
+
+  useEffect(()=>{
+    let layout = prepareLayout(props.photos,['day', 'month']);
+    setDayFlatten(layout['day']);
+    setMonthFlatten(layout['month']);
+  },[props.photos]);
+  
   return (
+    dayFlatten.layout.length>0?(
     <View
       style={{
         flex: 1,
@@ -64,6 +73,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         isPinchAndZoom={props.isPinchAndZoom}
         scrollOffset={scrollOffset}
         setScrollOffset={setScrollOffset}
+        setLoadMore={props.setLoadMore}
       />
       <RenderPhotos
         photos={dayFlatten}
@@ -92,6 +102,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         isPinchAndZoom={props.isPinchAndZoom}
         scrollOffset={scrollOffset}
         setScrollOffset={setScrollOffset}
+        setLoadMore={props.setLoadMore}
       />
       <RenderPhotos
         photos={monthFlatten}
@@ -120,8 +131,12 @@ const AllPhotos: React.FC<Props> = (props) => {
         isPinchAndZoom={props.isPinchAndZoom}
         scrollOffset={scrollOffset}
         setScrollOffset={setScrollOffset}
+        setLoadMore={props.setLoadMore}
       />
     </View>
+    ):(
+      <View><Text>No Photos</Text></View>
+    )
   );
 };
 

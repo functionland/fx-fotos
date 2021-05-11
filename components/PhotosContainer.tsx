@@ -10,10 +10,10 @@ import PinchZoom from './PinchZoom';
 import {sortCondition, MediaItem} from '../types/interfaces';
 
 const PhotosContainer = () => {
-  const initialPhotoNumber:number = 50;
+  const initialPhotoNumber:number = 20;
   const [permission, setPermission] = useState<boolean>();
   const [photos, setPhotos] = useState<Array<MediaLibrary.Asset>>();
-  const [mediaEndCursor, setMediaEndCursor] = useState<string>();
+  const [mediaEndCursor, setMediaEndCursor] = useState<string>('');
   const [mediaHasNextPage, setMediaHasNextPage] = useState<boolean>(true);
   const [mediaTotalCount , setMediaTotalCount] = useState<number>(99999);
   const [storagePhotos, setStoragePhotos] = useState<
@@ -41,16 +41,19 @@ const PhotosContainer = () => {
   const [numColumns, setNumColumns] = useState<2 | 3 | 4>(2);
   const [loading, setLoading] = useState<boolean>(false);
   const [isPinchAndZoom, setIsPinchAndZoom] = useState<boolean>(false);
+  const [loadMore, setLoadMore] = useState<number>(0);
 
   //TODO: Change this function to the getPhotos in actions like in AllPhotos
   useEffect(() => {
-    if (permission) {
+    if (permission && mediaHasNextPage && !loading) {
       navigation.navigate('HomePage');
       setLoading(true);
-      getStorageMedia(permission, initialPhotoNumber)?.then(
+      getStorageMedia(permission)?.then(
         (res: MediaItem) => {
           setStoragePhotos(res.assets);
           setMediaEndCursor(res.endCursor);
+          console.log("endCursor="+res.endCursor);
+          console.log("count="+res.assets.length);
           setMediaHasNextPage(res.hasNextPage);
           setMediaTotalCount(res.totalCount);
           setLoading(false);
@@ -106,6 +109,7 @@ const PhotosContainer = () => {
         numberOfPointers={numberOfPointers}
         velocity={velocity}
         isPinchAndZoom={isPinchAndZoom}
+        setLoadMore={setLoadMore}
       />
     </PinchZoom>
   ) : (

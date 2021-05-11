@@ -33,6 +33,7 @@ interface Props {
   isPinchAndZoom: boolean;
   scrollOffset:{[key:number]:number};
   setScrollOffset: Function;
+  setLoadMore: Function;
 }
 
 const RenderPhotos: React.FC<Props> = (props) => {
@@ -40,12 +41,12 @@ const RenderPhotos: React.FC<Props> = (props) => {
     return r1 !== r2;
   }));
   const [layoutProvider, setLayoutProvider] = useState<any>(LayoutUtil.getLayoutProvider(2, 'day', props.photos.headerIndexes));
-  const [baseOffset, setBaseOffset] = useState<number>(0);
+  const [viewLoaded, setViewLoaded] = useState<boolean>(false);
   const scrollRef:any = useRef();
   const scrollRefInternal:any = useRef();
 
   useEffect(()=>{
-    setDataProvider(dataProvider.cloneWithRows(props.photos.flatMedias));
+    setDataProvider(dataProvider.cloneWithRows(props.photos.layout));
   },[props.photos]);
   useEffect(()=>{
     setLayoutProvider(LayoutUtil.getLayoutProvider(props.numColumns, props.separator, props.photos.headerIndexes));
@@ -63,7 +64,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
       : <></>;
   };
   
-  const rowRenderer = (type:string | number, data:flatMedia) => {
+  const rowRenderer = (type:string | number, data:Asset|string) => {
     //We have only one view type so not checks are needed here
     return <PhotosChunk
       photo={data}
@@ -86,31 +87,29 @@ const RenderPhotos: React.FC<Props> = (props) => {
   }
 
   const onScrollEnd = () => {
-    let lastOffset = scrollRef?.current.getCurrentScrollOffset();
-    props.setScrollOffset({'in':props.numColumns, 'to':lastOffset});
+    let lastIndex = scrollRef?.current.findApproxFirstVisibleIndex();
+    //console.log(lastIndex);
+    props.setScrollOffset({'in':props.numColumns, 'to':lastIndex});
   }
   useEffect(()=>{
-      scrollRef?.current.scrollToOffset(0,1000,true);
-      if(props.numColumns===2){
-        console.log('here');
-      //scrollToLocation(1000);
-      }
-    
+      //scrollRef?.current.scrollToOffset(0,1000,true);
+      setViewLoaded(true);
   },[scrollRef, scrollRef.current]);
 
   const adjustScrollPosition = (newOffset:{[key:string]:(2|3|4|number)}) => {
     let numColumns:number = props.numColumns;
-    if( numColumns !== newOffset.in){
-      let offset =newOffset.to * newOffset.in/numColumns;
-      console.log('scrolling ' + props.numColumns+ ' to '+offset);
-      scrollRef?.current.scrollToOffset(0,offset,true);
+    if( viewLoaded && numColumns !== newOffset.in){
+      //let offset =newOffset.to * newOffset.in/numColumns;
+      //console.log('scrolling ' + props.numColumns+ ' to '+offset);
+      //scrollRef?.current.scrollToOffset(0,offset,true);
+      scrollRef?.current?.scrollToIndex(newOffset.to, true);
     }
   }
   useEffect(()=>{
     adjustScrollPosition(props.scrollOffset);
   },[props.scrollOffset]);
 
-  return props.photos.flatMedias ? (
+  return props.photos.layout ? (
     <Animated.View
       // eslint-disable-next-line react-native/no-inline-styles
       style={{
@@ -162,8 +161,8 @@ const RenderPhotos: React.FC<Props> = (props) => {
           left: 0,
         }}
         contentContainerStyle={{ margin: 0 }}
-        onEndReached={() => console.log('getting photo')}
-        onEndReachedThreshold={0.6}
+        onEndReached={() => props.setLoadMore(new Date().getTime())}
+        onEndReachedThreshold={0.4}
         dataProvider={dataProvider}
         layoutProvider={layoutProvider}
         rowRenderer={rowRenderer}

@@ -6,7 +6,7 @@ import { flatMedia } from '../types/interfaces';
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const isIOS = Platform.OS === 'ios';
 interface Props {
-  photo: flatMedia;
+  photo: Asset|string;
   opacity: Animated.AnimatedInterpolation;
   numCol: 2 | 3 | 4;
   loading: boolean;
@@ -30,10 +30,10 @@ const PhotosChunk: React.FC<Props> = (props) => {
     }
   };
   
-  if(typeof props.photo.value === 'string'){
+  if(typeof props.photo === 'string'){
     return (
       <View style={{flex: 1, width: SCREEN_WIDTH,}}>
-        <Text>{props.photo.value}</Text>
+        <Text>{props.photo}</Text>
       </View>
     )
   }else{
@@ -43,7 +43,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
           ref={ref => {
             setImageRef(ref);
           }}
-          source={{uri: props.photo.value.uri}}
+          source={{uri: props.photo.uri}}
           // eslint-disable-next-line react-native/no-inline-styles
           style={{
             height: SCREEN_WIDTH / props.numCol,
@@ -51,7 +51,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
             backgroundColor: props.loading ? 'grey' : 'white',
             margin: 1,
           }}
-          key={props.photo.value.uri}
+          key={props.photo.uri}
           onLoad={handleOnLoad}
         />
       </View>

@@ -49,8 +49,8 @@ export interface flatMedia {
   value:Asset|string;
 }
 export interface FlatSection {
-  flatMedias: Array<flatMedia>;
-  headerIndexes: Array<{header:string;index:number}>;
+  layout: Array<Asset|string>;
+  headerIndexes:Array<{header:string;index:number;yearStart:string}>;
 }
 
 export interface MediaItem {
