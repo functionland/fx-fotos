@@ -11,7 +11,7 @@ export class LayoutUtil {
       case 'day':
         return new LayoutProvider(
           () => {
-            return colNum; //Since we have just one view type
+            return colNum>0?colNum:2; //Since we have just one view type
           },
           (type, dim, index) => {
             let isHeader = headerIndexes.findIndex(x=>x.index===index);
@@ -28,7 +28,7 @@ export class LayoutUtil {
       case 'month':
         return new LayoutProvider(
           () => {
-            return colNum;
+            return colNum>0?colNum:2;
           },
           (type, dim, index) => {
             let isHeader = headerIndexes.findIndex(x=>x.index===index);
@@ -45,7 +45,7 @@ export class LayoutUtil {
       default:
         return new LayoutProvider(
           () => {
-            return 2;
+            return colNum>0?colNum:2;
           },
           (type, dim, index) => {
             let isHeader = headerIndexes.findIndex(x=>x.index===index);

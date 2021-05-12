@@ -1,6 +1,6 @@
 import React, { useState, useEffect, createRef, useRef } from 'react';
 
-import { Dimensions, View, StyleSheet, Animated, StyleProp } from 'react-native';
+import { Dimensions, StatusBar, StyleSheet, Animated, StyleProp } from 'react-native';
 import {calcLayoutHeight} from '../utils/functions';
 
 import {
@@ -21,19 +21,21 @@ interface Props {
     scrollIndicatorContainerStyle:StyleProp<{}>;
     scrollIndicatorStyle:StyleProp<{}>;
     lastOffset:number;
+    setLastOffset:Function;
     numColumns: 2 | 3 | 4;
     headerIndexes:Array<{header:string;index:number;count:number;yearStart:string}>;
     numberOfPointers: Animated.Value;
     scrollY: Animated.Value;
     velocityY: Animated.Value;
     headerHeight: number;
+    fullSizeContentHeight: number;
 }
 const ThumbScroll: React.FC<Props> = (props) => {
     let panRef = createRef();
-
+    const absoluteY = useRef(new Animated.Value(0)).current;
+    const y = useRef(new Animated.Value(0)).current;
     
-    let numberOfPointers = useRef(new Animated.Value(0)).current;
-    const [fullSizeContentHeight, setFullSizeContentHeight] = useState<number>(0);
+    let numberOfPointers = useRef(new Animated.Value(1)).current;
 
     const [fadeAnim] = useState(
         new Animated.Value(props.shouldIndicatorHide ? 0 : 1),
@@ -43,11 +45,12 @@ const ThumbScroll: React.FC<Props> = (props) => {
         props.shouldIndicatorHide,
     );
 
-    const transformY:Animated.AnimatedInterpolation = Animated.add(Animated.multiply(Animated.subtract(props.numberOfPointers, 2) , props.scrollY), props.lastOffset).interpolate({
+    /*const transformY:Animated.AnimatedInterpolation = Animated.add(Animated.multiply(Animated.subtract(2, props.numberOfPointers) , props.scrollY), props.lastOffset).interpolate({
         inputRange: [0, fullSizeContentHeight],
         outputRange: [0, SCREEN_HEIGHT]  // 0 : 150, 0.5 : 75, 1 : 0
-    });
-
+    });*/
+    const transformY:Animated.AnimatedInterpolation = props.scrollY;
+    //const transformY:Animated.AnimatedInterpolation = Animated.add(Animated.subtract(Animated.subtract(absoluteY, y), (StatusBar.currentHeight||0)),props.scrollY);
     const runHideTimer = () => {
         props.shouldIndicatorHide && setIsIndicatorHidden(true);
     };
@@ -57,20 +60,24 @@ const ThumbScroll: React.FC<Props> = (props) => {
     };
 
     let _onPanGestureEvent = Animated.event(
-        [{ nativeEvent: { translationY: props.scrollY, velocityY: props.velocityY,} }],
+        [{ nativeEvent: { translationY: props.scrollY, velocityY: props.velocityY,absoluteY: absoluteY, y: y, numberOfPointers:numberOfPointers} }],
         { useNativeDriver: true }
       );
     let _onPanHandlerStateChange = (event:HandlerStateChangeEvent<PanGestureHandlerEventPayload>) => {
-        console.log(State);
-        console.log(event.nativeEvent);
-        if (event.nativeEvent.state !== State.ACTIVE) {
+        //console.log(State);
+        //console.log(event.nativeEvent);
+        if (event.nativeEvent.state !== State.ACTIVE && event.nativeEvent.oldState === State.ACTIVE) {
+            let currentY = event.nativeEvent.absoluteY - event.nativeEvent.y - (StatusBar.currentHeight||0);
+            if(currentY<0){currentY=0;}
+            if(currentY>SCREEN_HEIGHT){currentY=SCREEN_HEIGHT;}
+            props.setLastOffset(currentY);
             startIndicatorShowHide();
         }
     };
-
     useEffect(()=> {
-        setFullSizeContentHeight(calcLayoutHeight(props.numColumns,props.headerIndexes, SCREEN_WIDTH, props.headerHeight));
-    },[props.numColumns, props.headerIndexes]);
+        props.scrollY.setValue(0);
+        //console.log(props.lastOffset);
+    },[props.lastOffset]);
 
     let startIndicatorShowHide = () =>{
         //Hide / show Animation effect
@@ -109,28 +116,20 @@ const ThumbScroll: React.FC<Props> = (props) => {
                         enableTrackpadTwoFingerGesture={false}
                     >
                         <Animated.View
-                    style={[
-                        styles.scrollIndicatorContainer,
-                        { opacity: fadeAnim },
-                        props.scrollIndicatorContainerStyle,
-                    ]}
-                >
-                    <Animated.View
-                        style={[
-                            styles.scrollIndicator,
-                            { 
-                                top: 0, 
-                                height: 150,
-                                transform: [{
-                                    translateY: transformY,
-                                  }],
-                            
-                            },
-                            props.scrollIndicatorStyle,
-                        ]}
-                    >
-                    </Animated.View>
-                </Animated.View>   
+                            style={[
+                                styles.scrollIndicator,
+                                { 
+                                    top: props.lastOffset, 
+                                    height: props.indicatorHeight,
+                                    transform: [{
+                                        translateY: transformY,
+                                    }],
+                                    opacity: fadeAnim,
+                                },
+                                props.scrollIndicatorStyle,
+                            ]}
+                        >
+                        </Animated.View>
                     </PanGestureHandler>
 
     );

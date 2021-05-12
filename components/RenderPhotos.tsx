@@ -5,7 +5,6 @@ import {
   Text,
   StyleSheet,
   StatusBar,
-  SectionList,
   ActivityIndicator,
 } from 'react-native';
 import { flatMedia, FlatSection, ScrollEvent } from '../types/interfaces';
@@ -14,6 +13,7 @@ import ThumbScroll from './ThumbScroll';
 import { RecyclerListView, DataProvider, AutoScroll } from 'recyclerlistview';
 import { LayoutUtil } from '../utils/LayoutUtil';
 import { Asset } from 'expo-media-library';
+import {calcLayoutHeight} from '../utils/functions';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -41,6 +41,7 @@ interface Props {
 
 const RenderPhotos: React.FC<Props> = (props) => {
   const headerHeight = 20;
+  const indicatorHeight = 140;
   const [dataProvider, setDataProvider] = useState<DataProvider>(new DataProvider((r1, r2) => {
     return r1 !== r2;
   }));
@@ -48,14 +49,17 @@ const RenderPhotos: React.FC<Props> = (props) => {
   const [viewLoaded, setViewLoaded] = useState<boolean>(false);
   const scrollRef:any = useRef();
   const [lastScrollOffset, setLastScrollOffset] = useState<number>(0);
+  const [layoutHeight, setLayoutHeight] = useState<number>(99999999999999);
 
   const scrollY = useRef(new Animated.Value(0)).current;
   const velocityY = useRef(new Animated.Value(0)).current;
 
+  
 
   useEffect(()=>{
     setDataProvider(dataProvider.cloneWithRows(props.photos.layout));
   },[props.photos]);
+
   useEffect(()=>{
     setLayoutProvider(LayoutUtil.getLayoutProvider(props.numColumns, props.separator, props.photos.headerIndexes));
   },[props.numColumns, props.separator]);
@@ -96,11 +100,11 @@ const RenderPhotos: React.FC<Props> = (props) => {
 
   const onScrollEnd = () => {
     let lastIndex = scrollRef?.current.findApproxFirstVisibleIndex();
-    let lastOffset = scrollRef?.current.getCurrentScrollOffset();
-    setLastScrollOffset(lastOffset);
     //console.log(lastIndex);
     props.setScrollOffset({'in':props.numColumns, 'to':lastIndex});
   }
+
+  
   useEffect(()=>{
       //scrollRef?.current.scrollToOffset(0,1000,true);
       setViewLoaded(true);
@@ -118,6 +122,18 @@ const RenderPhotos: React.FC<Props> = (props) => {
   useEffect(()=>{
     adjustScrollPosition(props.scrollOffset);
   },[props.scrollOffset]);
+
+  const _onScroll = (rawEvent: ScrollEvent, offsetX: number, offsetY: number) => {
+    if(layoutHeight===99999999999999){
+      let sampleHeight = scrollRef?.current?.getContentDimension();
+      if(sampleHeight.height!==0){
+        setLayoutHeight(sampleHeight.height);
+      }
+    }
+    let adjustedOffset = (offsetY * SCREEN_HEIGHT)/layoutHeight;
+
+    setLastScrollOffset(adjustedOffset*((SCREEN_HEIGHT-indicatorHeight)/SCREEN_HEIGHT));
+  }
 
   return props.photos.layout ? (
     <Animated.View
@@ -179,6 +195,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
         rowRenderer={rowRenderer}
         renderFooter={renderFooter}
         scrollEnabled={!props.isPinchAndZoom}
+        onScroll={_onScroll}
         key={"RecyclerListView_"+props.separator + props.numColumns}
         scrollViewProps={{
           //ref: scrollRefInternal,
@@ -188,17 +205,19 @@ const RenderPhotos: React.FC<Props> = (props) => {
         }}
       />
       <ThumbScroll
-        indicatorHeight={10}
+        indicatorHeight={indicatorHeight}
         flexibleIndicator={false}
         shouldIndicatorHide={false}
         hideTimeout={500}
         lastOffset={lastScrollOffset}
+        setLastOffset={setLastScrollOffset}
         numColumns={props.numColumns}
         headerIndexes={props.photos.headerIndexes}
         numberOfPointers={props.numberOfPointers}
         headerHeight={headerHeight}
         scrollY={scrollY}
         velocityY={velocityY}
+        fullSizeContentHeight={layoutHeight}
         scrollIndicatorContainerStyle={{}}
         scrollIndicatorStyle={{}}
       />

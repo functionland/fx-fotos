@@ -118,7 +118,7 @@ export const prepareLayout = (
       if(lastTimestampString !== mediaTimestampString && lastYear !== mediaTimestampYear){
         lastTimestampString = mediaTimestampString;
         layout.push(lastTimestampString);
-        if(headerIndexes.length>1){
+        if(headerIndexes.length>=1){
           headerIndexes[headerIndexes.length-1].count = count;
         }
         if(mediaTimestampYear !== lastTimestampString){
@@ -202,7 +202,12 @@ export const getStorageMedia = (
 };
 
 export const calcLayoutHeight = (numColumns:2|3|4, headerIndexes:Array<{header:string;index:number;count:number;yearStart:string}> , screenWidth:number, headerHeight:number) => {
-  return headerIndexes.reduce((total, elm)=>{return (elm.count*(screenWidth/numColumns)+headerHeight);}, 0);
+  return headerIndexes.reduce((total, elm)=>{return total+(Math.ceil(elm.count/numColumns)*(screenWidth/numColumns)+headerHeight);}, 0);
+  /*let height:number = 0;
+  for(let i=0;i<headerIndexes.length;i++){
+    height = height + (Math.ceil(headerIndexes[i].count/numColumns)*(screenWidth/numColumns)+headerHeight)
+  }
+  return height;*/
 }
 
 export const pow2abs = (a: number, b: number) => {
