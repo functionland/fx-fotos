@@ -8,7 +8,7 @@ import {
   PinchGestureHandler,
   State,
   PinchGestureHandlerEventPayload,
-  GestureEvent,
+  HandlerStateChangeEvent,
 } from 'react-native-gesture-handler';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -40,8 +40,7 @@ const PinchZoom: React.FC<Props> = (props) => {
     [{ nativeEvent: { scale: props.scale, focalX:props.focalX, focalY:props.focalY, numberOfPointers:props.numberOfPointers, velocity:props.velocity } }],
     { useNativeDriver: true }
   );
-  let _onPinchHandlerStateChange = (event:GestureEvent<PinchGestureHandlerEventPayload>) => {
-    console.log(event.nativeEvent);
+  let _onPinchHandlerStateChange = (event:HandlerStateChangeEvent<PinchGestureHandlerEventPayload>) => {
     if (event.nativeEvent.oldState === State.ACTIVE && event.nativeEvent.state !== State.ACTIVE) {
       let scale:number = event.nativeEvent.scale;
       if((scale > 1.3 && props.numColumns>2) || (scale < 0.8 && props.numColumns<4)){

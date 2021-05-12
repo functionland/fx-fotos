@@ -49,6 +49,9 @@ const RenderPhotos: React.FC<Props> = (props) => {
   const scrollRef:any = useRef();
   const [lastScrollOffset, setLastScrollOffset] = useState<number>(0);
 
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const velocityY = useRef(new Animated.Value(0)).current;
+
 
   useEffect(()=>{
     setDataProvider(dataProvider.cloneWithRows(props.photos.layout));
@@ -154,20 +157,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
         ],
       }}
     >
-      <ThumbScroll
-        indicatorHeight={10}
-        flexibleIndicator={false}
-        shouldIndicatorHide={false}
-        hideTimeout={500}
-        scrollY={props.focalY}
-        lastOffset={lastScrollOffset}
-        numColumns={props.numColumns}
-        headerIndexes={props.photos.headerIndexes}
-        numberOfPointers={props.numberOfPointers}
-        headerHeight={headerHeight}
-        scrollIndicatorContainerStyle={{}}
-        scrollIndicatorStyle={{}}
-      />
+      
       <RecyclerListView
         ref={scrollRef}
         style={{
@@ -192,8 +182,25 @@ const RenderPhotos: React.FC<Props> = (props) => {
         key={"RecyclerListView_"+props.separator + props.numColumns}
         scrollViewProps={{
           //ref: scrollRefInternal,
-          onMomentumScrollEnd: onScrollEnd
+          onMomentumScrollEnd: onScrollEnd,
+          automaticallyAdjustContentInsets: true,
+
         }}
+      />
+      <ThumbScroll
+        indicatorHeight={10}
+        flexibleIndicator={false}
+        shouldIndicatorHide={false}
+        hideTimeout={500}
+        lastOffset={lastScrollOffset}
+        numColumns={props.numColumns}
+        headerIndexes={props.photos.headerIndexes}
+        numberOfPointers={props.numberOfPointers}
+        headerHeight={headerHeight}
+        scrollY={scrollY}
+        velocityY={velocityY}
+        scrollIndicatorContainerStyle={{}}
+        scrollIndicatorStyle={{}}
       />
     </Animated.View>
   ) : (
