@@ -5,6 +5,8 @@ import {
   sortCondition,
   FlatSection,
   flatMedia,
+  headerIndex,
+  layout
 } from '../types/interfaces';
 
 /*
@@ -93,79 +95,98 @@ export const prepareLayout = (
   sortConditions: Array<'day' | 'month'>,
   lastTimestamp: number = 0,
 ) => {
-  let output:{[key:string]:FlatSection} = {};
+  let output:FlatSection = {layout:[], headerIndexes:[]};
   
-  for(let j=0; j<sortConditions.length; j++){
-    let layout:Array<Asset|string> = [];
-    let headerIndexes:Array<{header:string;index:number;count:number;yearStart:string}> = [];
-    let count = 0;
-    let sortCondition_i = sortConditions[j];
+    let layout: Array<layout> = [];
+    let headerIndexes:Array<headerIndex> = [];
+    let count = {'day':0, 'month':0};
+
     
     let lastTimestampObj = timestampToDate(
       lastTimestamp,
-      sortCondition_i,
+      [...sortConditions, 'year'],
     );
-    let lastTimestampString = lastTimestampObj.value;
+    
     let lastYear = lastTimestampObj.year;
     for(let i=0; i<newMedias.length; i++){
-      let yearStart = '';
+      let yearStart = {'day':'','month':''};
       let mediaTimestampObj = timestampToDate(
         newMedias[i].modificationTime,
-        sortCondition_i,
+        [...sortConditions, 'year'],
       );
-      let mediaTimestampString = mediaTimestampObj.value;
+
       let mediaTimestampYear = mediaTimestampObj.year;
-      if(lastTimestampString !== mediaTimestampString && lastYear !== mediaTimestampYear){
-        lastTimestampString = mediaTimestampString;
-        layout.push(lastTimestampString);
-        if(headerIndexes.length>=1){
-          headerIndexes[headerIndexes.length-1].count = count;
+      for(let j=0;j<sortConditions.length;j++){
+        let sortCondition_j = sortConditions[j];
+        if(mediaTimestampObj[sortCondition_j] !== lastTimestampObj[sortCondition_j] || lastYear !== mediaTimestampYear){
+          lastTimestampObj[sortCondition_j] = mediaTimestampObj[sortCondition_j];
+          lastYear = mediaTimestampObj.year;
+          layout.push({value:mediaTimestampObj[sortCondition_j], sortCondition: sortCondition_j});
+          
+          let headerIndexLength = headerIndexes.length;
+          let lastHeaderIndex = [...headerIndexes].reverse().findIndex(headerIndex => headerIndex.sortCondition === sortCondition_j);
+          if(lastHeaderIndex>-1){
+            headerIndexes[headerIndexLength -1 -lastHeaderIndex].count = count[sortCondition_j];
+          }
+
+          if(mediaTimestampYear !== lastYear){
+            yearStart.day = lastYear;
+          }
+          headerIndexes.push({header:mediaTimestampObj[sortCondition_j], index:layout.length-1, count: 0, yearStart: yearStart.day, sortCondition: sortCondition_j});
+          count[sortCondition_j] = 0;
         }
-        if(mediaTimestampYear !== lastTimestampString){
-          yearStart = mediaTimestampYear;
-        }
-        headerIndexes.push({header:lastTimestampString, index:layout.length-1, count: 0, yearStart: yearStart});
-        count = 0;
+        count[sortCondition_j] = count[sortCondition_j] + 1;
       }
-      count = count + 1;
-      layout.push(newMedias[i]);
+
+      layout.push({value:newMedias[i], sortCondition: ''});
+
     }
-    headerIndexes[headerIndexes.length-1].count = newMedias.length - 1 - headerIndexes[headerIndexes.length-1].index;
-    output[sortCondition_i] = {layout:layout, headerIndexes: headerIndexes};
-  }
+
+    let lastHeaderIndex = {'day':-1, 'month':-1};
+    let headerIndexLength = headerIndexes.length;
+    for(let j=0;j<sortConditions.length;j++){
+      let sortCondition_j = sortConditions[j];
+      lastHeaderIndex[sortCondition_j] = [...headerIndexes].reverse().findIndex(headerIndex => headerIndex.sortCondition === sortCondition_j);
+      if(lastHeaderIndex[sortCondition_j]>-1){
+        headerIndexes[headerIndexLength -1 -lastHeaderIndex[sortCondition_j]].count = count[sortCondition_j];
+      }
+    }
+
+    output = {layout:layout, headerIndexes: headerIndexes};
   return output;
 }
 
 export const timestampToDate = (
   timestamp: number,
-  condition: ('day' | 'month') | 'year',
+  conditions: Array<('day' | 'month') | 'year'>,
 ) => {
   let date = new Date(timestamp);
   let month = date.getUTCMonth(); //months from 1-12
   let day = date.getUTCDate();
   let year = date.getUTCFullYear();
-  let result:{value:string, year:string} = {value:'', year: String(year)};
-
-  if (condition === 'day') {
-    result.value = new Date(year, month, day).toString().split(year.toString())[0];
-  } else if (condition === 'month') {
-    const monthNames = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ];
-    result.value = monthNames[new Date(year, month).getMonth()];
-  }else if (condition === 'year') {
-    result.value = String(year);
+  let result:{[key:string]:string} = {};
+  for(let i=0;i<conditions.length;i++){
+    if (conditions[i] === 'day') {
+      result.day = new Date(year, month, day).toString().split(year.toString())[0];
+    } else if (conditions[i] === 'month') {
+      const monthNames = [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
+      ];
+      result.month = monthNames[new Date(year, month).getMonth()];
+    }else if (conditions[i] === 'year') {
+      result.year = String(year);
+    }
   }
   return result;
 };
@@ -183,10 +204,14 @@ export const getStorageMedia = (
 ) => {
   if (permission) {
     let mediaFilter: AssetsOptions = {
-      first: limit,
       mediaType: mediaType,
       sortBy: [SortBy.modificationTime],
     };
+    if(limit){
+      mediaFilter.first = limit;
+    }else{
+      mediaFilter.first = 9999999999999999;
+    }
     if(after){
       mediaFilter.after = after;
     }

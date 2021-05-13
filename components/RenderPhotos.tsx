@@ -7,7 +7,7 @@ import {
   StatusBar,
   ActivityIndicator,
 } from 'react-native';
-import { flatMedia, FlatSection, ScrollEvent } from '../types/interfaces';
+import { layout, FlatSection, ScrollEvent } from '../types/interfaces';
 import PhotosChunk from './PhotosChunk';
 import ThumbScroll from './ThumbScroll';
 import { RecyclerListView, DataProvider, AutoScroll } from 'recyclerlistview';
@@ -27,7 +27,7 @@ interface Props {
   opacity: Animated.AnimatedInterpolation;
   date: Date;
   loading: boolean;
-  separator: 'day' | 'month';
+  sortCondition: 'day' | 'month';
   zIndex: number;
   scale: Animated.Value;
   sizeTransformScale: Animated.AnimatedInterpolation;
@@ -45,7 +45,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
   const [dataProvider, setDataProvider] = useState<DataProvider>(new DataProvider((r1, r2) => {
     return r1 !== r2;
   }));
-  const [layoutProvider, setLayoutProvider] = useState<any>(LayoutUtil.getLayoutProvider(2, 'day', props.photos.headerIndexes, headerHeight));
+  const [layoutProvider, setLayoutProvider] = useState<any>(LayoutUtil.getLayoutProvider(2, 'day', props.photos.headerIndexes, headerHeight, props.photos.layout));
   const [viewLoaded, setViewLoaded] = useState<boolean>(false);
   const scrollRef:any = useRef();
   const [lastScrollOffset, setLastScrollOffset] = useState<number>(0);
@@ -61,8 +61,8 @@ const RenderPhotos: React.FC<Props> = (props) => {
   },[props.photos]);
 
   useEffect(()=>{
-    setLayoutProvider(LayoutUtil.getLayoutProvider(props.numColumns, props.separator, props.photos.headerIndexes));
-  },[props.numColumns, props.separator]);
+    setLayoutProvider(LayoutUtil.getLayoutProvider(props.numColumns, props.sortCondition, props.photos.headerIndexes, headerHeight, props.photos.layout));
+  },[props.numColumns, props.sortCondition]);
 
   const renderFooter = () => {
     //Second view makes sure we don't unnecessarily change height of the list on this event. That might cause indicator to remain invisible
@@ -76,7 +76,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
       : <></>;
   };
   
-  const rowRenderer = (type:string | number, data:Asset|string) => {
+  const rowRenderer = (type:string | number, data:layout) => {
     //We have only one view type so not checks are needed here
     return <PhotosChunk
       photo={data}
@@ -84,7 +84,8 @@ const RenderPhotos: React.FC<Props> = (props) => {
       numCol={props.numColumns}
       loading={props.loading}
       scale={props.scale}
-      key={'PhotosChunk' + props.numColumns}
+      //key={'PhotosChunk' + props.numColumns}
+      sortCondition={props.sortCondition}
     />;
   };
 
@@ -207,7 +208,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
         renderFooter={renderFooter}
         scrollEnabled={!props.isPinchAndZoom}
         onScroll={_onScroll}
-        key={"RecyclerListView_"+props.separator + props.numColumns}
+        key={"RecyclerListView_"+props.sortCondition + props.numColumns}
         scrollViewProps={{
           //ref: scrollRefInternal,
           onMomentumScrollEnd: onScrollEnd,

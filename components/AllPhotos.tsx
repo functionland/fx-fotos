@@ -27,17 +27,15 @@ interface Props {
 
 const AllPhotos: React.FC<Props> = (props) => {
   const [scrollOffset, setScrollOffset] = useState<{[key:string]:(2|3|4|number)}>({'in':0,'to':0});
-  const [dayFlatten, setDayFlatten] = useState<FlatSection>({layout:[],headerIndexes:[]});
-  const [monthFlatten, setMonthFlatten] = useState<FlatSection>({layout:[],headerIndexes:[]});
+  const [preparedMedia, setPreparedMedia] = useState<FlatSection>({layout:[],headerIndexes:[]});
 
   useEffect(()=>{
-    let layout = prepareLayout(props.photos,['day', 'month']);
-    setDayFlatten(layout['day']);
-    setMonthFlatten(layout['month']);
+    let prepared = prepareLayout(props.photos,['day', 'month']);
+    setPreparedMedia(prepared);
   },[props.photos]);
   
   return (
-    dayFlatten.layout.length>0?(
+    preparedMedia.layout.length>0?(
     <View
       style={{
         flex: 1,
@@ -47,7 +45,7 @@ const AllPhotos: React.FC<Props> = (props) => {
       }}
     >
       <RenderPhotos
-        photos={dayFlatten}
+        photos={preparedMedia}
         loading={props.loading}
         margin={props.baseScale.interpolate({
           inputRange: [0, 1, 3],
@@ -67,7 +65,7 @@ const AllPhotos: React.FC<Props> = (props) => {
           })
         }
         date={new Date()}
-        separator="day"
+        sortCondition="day"
         zIndex={(props.numColumns === 2)?1:0}
         scale={props.scale}
         isPinchAndZoom={props.isPinchAndZoom}
@@ -78,7 +76,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         numberOfPointers={props.numberOfPointers}
       />
       <RenderPhotos
-        photos={dayFlatten}
+        photos={preparedMedia}
         loading={props.loading}
         margin={props.baseScale.interpolate({
           inputRange: [0, 1, 3],
@@ -98,7 +96,7 @@ const AllPhotos: React.FC<Props> = (props) => {
           })
         }
         date={new Date()}
-        separator="day"
+        sortCondition="day"
         zIndex={(props.numColumns === 3)?1:0}
         scale={props.scale}
         isPinchAndZoom={props.isPinchAndZoom}
@@ -109,7 +107,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         numberOfPointers={props.numberOfPointers}
       />
       <RenderPhotos
-        photos={monthFlatten}
+        photos={preparedMedia}
         loading={props.loading}
         margin={props.baseScale.interpolate({
           inputRange: [0, 1, 3],
@@ -129,7 +127,7 @@ const AllPhotos: React.FC<Props> = (props) => {
           })
         }
         date={new Date()}
-        separator="month"
+        sortCondition="month"
         zIndex={(props.numColumns === 4)?1:0}
         scale={props.scale}
         isPinchAndZoom={props.isPinchAndZoom}

@@ -10,7 +10,7 @@ import PinchZoom from './PinchZoom';
 import {sortCondition, MediaItem} from '../types/interfaces';
 
 const PhotosContainer = () => {
-  const initialPhotoNumber:number = 20;
+  const initialPhotoNumber:number = 0;
   const [permission, setPermission] = useState<boolean>();
   const [photos, setPhotos] = useState<Array<MediaLibrary.Asset>>();
   const [mediaEndCursor, setMediaEndCursor] = useState<string>('');
@@ -48,7 +48,7 @@ const PhotosContainer = () => {
     if (permission && mediaHasNextPage && !loading) {
       navigation.navigate('HomePage');
       setLoading(true);
-      getStorageMedia(permission)?.then(
+      getStorageMedia(permission, initialPhotoNumber)?.then(
         (res: MediaItem) => {
           setStoragePhotos(res.assets);
           setMediaEndCursor(res.endCursor);

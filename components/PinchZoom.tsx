@@ -91,8 +91,6 @@ const PinchZoom: React.FC<Props> = (props) => {
           _pinchOrZoom,
           props.numColumns,
         );
-        console.log(props.baseScale);
-        console.log(props.scale);
           
           props.setSortCondition(_sortCondition.sortCondition);
           props.setNumColumns(_sortCondition.numColumns);
@@ -105,10 +103,6 @@ const PinchZoom: React.FC<Props> = (props) => {
           }else if(_sortCondition.numColumns===4){
             props.baseScale2.setValue(2);
           }
-
-          console.log(props.baseScale2);
-          console.log(props.baseScale);
-          console.log(props.scale);
           setAllowAnimation(true);
           props.setIsPinchAndZoom(false);
   };

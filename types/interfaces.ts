@@ -49,8 +49,8 @@ export interface flatMedia {
   value:Asset|string;
 }
 export interface FlatSection {
-  layout: Array<Asset|string>;
-  headerIndexes:Array<{header:string;index:number;yearStart:string;count:number}>;
+  layout: layout[];
+  headerIndexes:headerIndex[];
 }
 
 export interface MediaItem {
@@ -73,3 +73,7 @@ export interface Dimension {
   height: number;
   width: number;
 }
+
+export interface layout {value:Asset|string; sortCondition:'day'|'month'|''};
+
+export interface headerIndex {header:string;index:number;count:number;yearStart:string; sortCondition:'day'|'month'};
