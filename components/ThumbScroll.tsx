@@ -1,7 +1,6 @@
 import React, { useState, useEffect, createRef, useRef } from 'react';
 
 import { Dimensions, StatusBar, StyleSheet, Animated, StyleProp } from 'react-native';
-import {calcLayoutHeight} from '../utils/functions';
 
 import {
     PanGestureHandler,
@@ -29,11 +28,13 @@ interface Props {
     velocityY: Animated.Value;
     headerHeight: number;
     fullSizeContentHeight: number;
+    scrollRef: any;
 }
 const ThumbScroll: React.FC<Props> = (props) => {
     let panRef = createRef();
     const absoluteY = useRef(new Animated.Value(0)).current;
     const y = useRef(new Animated.Value(0)).current;
+    const resetScrollY = useRef(new Animated.Value(1)).current;
     
     let numberOfPointers = useRef(new Animated.Value(1)).current;
 
@@ -64,19 +65,23 @@ const ThumbScroll: React.FC<Props> = (props) => {
         { useNativeDriver: true }
       );
     let _onPanHandlerStateChange = (event:HandlerStateChangeEvent<PanGestureHandlerEventPayload>) => {
-        //console.log(State);
         //console.log(event.nativeEvent);
-        if (event.nativeEvent.state !== State.ACTIVE && event.nativeEvent.oldState === State.ACTIVE) {
-            let currentY = event.nativeEvent.absoluteY - event.nativeEvent.y - (StatusBar.currentHeight||0);
-            if(currentY<0){currentY=0;}
-            if(currentY>SCREEN_HEIGHT){currentY=SCREEN_HEIGHT;}
-            props.setLastOffset(currentY);
+        if(event.nativeEvent.state === State.ACTIVE && event.nativeEvent.oldState !== State.ACTIVE){
+            resetScrollY.setValue(1);
+        }else if (event.nativeEvent.state !== State.ACTIVE && event.nativeEvent.oldState === State.ACTIVE) {
+            //let currentY = event.nativeEvent.absoluteY - event.nativeEvent.y - (StatusBar.currentHeight||0);
+            //if(currentY<0){currentY=0;}
+            //if(currentY>SCREEN_HEIGHT){currentY=SCREEN_HEIGHT;}
+            let temp = props.lastOffset;
+            //console.log('temp='+temp);
+            //console.log('event.nativeEvent.translationY='+event.nativeEvent.translationY);
+            props.setLastOffset(temp+event.nativeEvent.translationY);
             startIndicatorShowHide();
         }
     };
     useEffect(()=> {
-        props.scrollY.setValue(0);
-        //console.log(props.lastOffset);
+        resetScrollY.setValue(0);
+        console.log('props.lastOffset='+props.lastOffset);
     },[props.lastOffset]);
 
     let startIndicatorShowHide = () =>{
@@ -122,7 +127,7 @@ const ThumbScroll: React.FC<Props> = (props) => {
                                     top: props.lastOffset, 
                                     height: props.indicatorHeight,
                                     transform: [{
-                                        translateY: transformY,
+                                        translateY: Animated.multiply(props.scrollY, resetScrollY),
                                     }],
                                     opacity: fadeAnim,
                                 },

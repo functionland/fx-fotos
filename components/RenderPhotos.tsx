@@ -106,8 +106,20 @@ const RenderPhotos: React.FC<Props> = (props) => {
 
   
   useEffect(()=>{
-      //scrollRef?.current.scrollToOffset(0,1000,true);
       setViewLoaded(true);
+      console.log("this should happen once");
+      let animateId = scrollY.addListener(({ value }) => {
+        //console.log(scrollRef.current);
+        let sampleHeight = scrollRef?.current?.getContentDimension().height;
+        //console.log('-----');
+        //console.log(value);
+       
+        let ViewOffset = ((value+lastScrollOffset)*sampleHeight)/(SCREEN_HEIGHT-indicatorHeight);
+        //console.log(ViewOffset);
+        
+        scrollRef.current.scrollToOffset(0, ViewOffset, false );
+        
+    });
   },[scrollRef, scrollRef.current]);
 
   const adjustScrollPosition = (newOffset:{[key:string]:(2|3|4|number)}) => {
@@ -173,7 +185,6 @@ const RenderPhotos: React.FC<Props> = (props) => {
         ],
       }}
     >
-      
       <RecyclerListView
         ref={scrollRef}
         style={{
@@ -218,6 +229,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
         scrollY={scrollY}
         velocityY={velocityY}
         fullSizeContentHeight={layoutHeight}
+        scrollRef={scrollRef}
         scrollIndicatorContainerStyle={{}}
         scrollIndicatorStyle={{}}
       />

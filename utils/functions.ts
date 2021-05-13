@@ -130,6 +130,7 @@ export const prepareLayout = (
       count = count + 1;
       layout.push(newMedias[i]);
     }
+    headerIndexes[headerIndexes.length-1].count = newMedias.length - 1 - headerIndexes[headerIndexes.length-1].index;
     output[sortCondition_i] = {layout:layout, headerIndexes: headerIndexes};
   }
   return output;
