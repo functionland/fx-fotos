@@ -1,6 +1,6 @@
 import React, { useState, useEffect, createRef, useRef } from 'react';
 
-import { Dimensions, StatusBar, StyleSheet, Animated, StyleProp } from 'react-native';
+import { Dimensions, StyleSheet, Animated, StyleProp } from 'react-native';
 
 import {
     PanGestureHandler,
@@ -10,7 +10,6 @@ import {
   } from 'react-native-gesture-handler';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
-const SCREEN_WIDTH = Dimensions.get('window').width;
 
 interface Props {
     indicatorHeight:number;
@@ -20,15 +19,17 @@ interface Props {
     scrollIndicatorContainerStyle:StyleProp<{}>;
     scrollIndicatorStyle:StyleProp<{}>;
     lastOffset:number;
-    setLastOffset:Function;
-    numColumns: 2 | 3 | 4;
+    setLastScrollOffset:Function;
+    numColumns:2|3|4;
     headerIndexes:Array<{header:string;index:number;count:number;yearStart:string}>;
-    numberOfPointers: Animated.Value;
-    scrollY: Animated.Value;
-    velocityY: Animated.Value;
-    headerHeight: number;
-    fullSizeContentHeight: number;
-    scrollRef: any;
+    numberOfPointers:Animated.Value;
+    scrollY:Animated.Value;
+    velocityY:Animated.Value;
+    headerHeight:number;
+    fullSizeContentHeight:number;
+    scrollRef:any;
+    setStartScroll:Function;
+    startScroll:boolean;
 }
 const ThumbScroll: React.FC<Props> = (props) => {
     let panRef = createRef();
@@ -66,23 +67,24 @@ const ThumbScroll: React.FC<Props> = (props) => {
       );
     let _onPanHandlerStateChange = (event:HandlerStateChangeEvent<PanGestureHandlerEventPayload>) => {
         //console.log(event.nativeEvent);
-        if(event.nativeEvent.state === State.ACTIVE && event.nativeEvent.oldState !== State.ACTIVE){
-            resetScrollY.setValue(1);
-        }else if (event.nativeEvent.state !== State.ACTIVE && event.nativeEvent.oldState === State.ACTIVE) {
-            //let currentY = event.nativeEvent.absoluteY - event.nativeEvent.y - (StatusBar.currentHeight||0);
-            //if(currentY<0){currentY=0;}
-            //if(currentY>SCREEN_HEIGHT){currentY=SCREEN_HEIGHT;}
-            let temp = props.lastOffset;
-            //console.log('temp='+temp);
-            //console.log('event.nativeEvent.translationY='+event.nativeEvent.translationY);
-            props.setLastOffset(temp+event.nativeEvent.translationY);
+        if (event.nativeEvent.state === State.ACTIVE) {
+            props.setStartScroll(true);
+        }
+        if (event.nativeEvent.oldState === State.ACTIVE) {
+            let temp = props.lastOffset + event.nativeEvent.translationY;
+            props.setLastScrollOffset(temp);
+            props.scrollY.setOffset(temp);
+            props.scrollY.setValue(0);
             startIndicatorShowHide();
         }
     };
     useEffect(()=> {
-        resetScrollY.setValue(0);
-        console.log('props.lastOffset='+props.lastOffset);
+        //props.setStartScroll(false);
     },[props.lastOffset]);
+
+    useEffect(()=>{
+console.log('startScroll is '+ props.startScroll+ ' in '+props.numColumns);
+    },[props.startScroll])
 
     let startIndicatorShowHide = () =>{
         //Hide / show Animation effect
@@ -124,10 +126,15 @@ const ThumbScroll: React.FC<Props> = (props) => {
                             style={[
                                 styles.scrollIndicator,
                                 { 
-                                    top: props.lastOffset, 
+                                    top: 0, 
                                     height: props.indicatorHeight,
                                     transform: [{
-                                        translateY: Animated.multiply(props.scrollY, resetScrollY),
+                                        translateY: props.scrollY.interpolate({
+                                            inputRange: [0, SCREEN_HEIGHT-props.indicatorHeight],
+                                            outputRange: [0, SCREEN_HEIGHT-props.indicatorHeight],
+                                            extrapolateRight: 'clamp',
+                                            extrapolateLeft: 'clamp',
+                                          }),
                                     }],
                                     opacity: fadeAnim,
                                 },

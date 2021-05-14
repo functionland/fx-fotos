@@ -12,8 +12,6 @@ import PhotosChunk from './PhotosChunk';
 import ThumbScroll from './ThumbScroll';
 import { RecyclerListView, DataProvider, AutoScroll } from 'recyclerlistview';
 import { LayoutUtil } from '../utils/LayoutUtil';
-import { Asset } from 'expo-media-library';
-import {calcLayoutHeight} from '../utils/functions';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -51,10 +49,12 @@ const RenderPhotos: React.FC<Props> = (props) => {
   const [lastScrollOffset, setLastScrollOffset] = useState<number>(0);
   const [layoutHeight, setLayoutHeight] = useState<number>(99999999999999);
 
+  const [startScroll, setStartScroll] = useState<boolean>(false);
+  const startScrollRef = useRef(startScroll);
+  startScrollRef.current = startScroll;
+
   const scrollY = useRef(new Animated.Value(0)).current;
   const velocityY = useRef(new Animated.Value(0)).current;
-
-  
 
   useEffect(()=>{
     setDataProvider(dataProvider.cloneWithRows(props.photos.layout));
@@ -105,22 +105,21 @@ const RenderPhotos: React.FC<Props> = (props) => {
     props.setScrollOffset({'in':props.numColumns, 'to':lastIndex});
   }
 
-  
+  const scrollBarToViewSync = (value:number)=> {
+    if(startScrollRef.current){
+      let sampleHeight = scrollRef?.current?.getContentDimension().height;
+      let ViewOffset = ((value)*sampleHeight)/(SCREEN_HEIGHT-indicatorHeight);
+      scrollRef.current.scrollToOffset(0, ViewOffset/2, false );
+    }
+  }
+
   useEffect(()=>{
       setViewLoaded(true);
-      console.log("this should happen once");
+      console.log("this should happen once in "+props.numColumns);
+      scrollY.removeAllListeners();
       let animateId = scrollY.addListener(({ value }) => {
-        //console.log(scrollRef.current);
-        let sampleHeight = scrollRef?.current?.getContentDimension().height;
-        //console.log('-----');
-        //console.log(value);
-       
-        let ViewOffset = ((value+lastScrollOffset)*sampleHeight)/(SCREEN_HEIGHT-indicatorHeight);
-        //console.log(ViewOffset);
-        
-        scrollRef.current.scrollToOffset(0, ViewOffset, false );
-        
-    });
+        scrollBarToViewSync(value);
+      });
   },[scrollRef, scrollRef.current]);
 
   const adjustScrollPosition = (newOffset:{[key:string]:(2|3|4|number)}) => {
@@ -137,15 +136,19 @@ const RenderPhotos: React.FC<Props> = (props) => {
   },[props.scrollOffset]);
 
   const _onScroll = (rawEvent: ScrollEvent, offsetX: number, offsetY: number) => {
-    if(layoutHeight===99999999999999){
-      let sampleHeight = scrollRef?.current?.getContentDimension();
-      if(sampleHeight.height!==0){
-        setLayoutHeight(sampleHeight.height);
+    if(!startScrollRef.current){
+      if(layoutHeight===99999999999999){
+        let sampleHeight = scrollRef?.current?.getContentDimension();
+        if(sampleHeight.height!==0){
+          setLayoutHeight(sampleHeight.height);
+        }
       }
+      let adjustedOffset = (offsetY * SCREEN_HEIGHT)/layoutHeight;
+      let screenOffset = adjustedOffset*((SCREEN_HEIGHT-indicatorHeight)/SCREEN_HEIGHT);
+      scrollY.setOffset(screenOffset);
+      //console.log('screenOffset='+screenOffset);
+      //setLastScrollOffset(screenOffset);
     }
-    let adjustedOffset = (offsetY * SCREEN_HEIGHT)/layoutHeight;
-
-    setLastScrollOffset(adjustedOffset*((SCREEN_HEIGHT-indicatorHeight)/SCREEN_HEIGHT));
   }
 
   return props.photos.layout ? (
@@ -213,7 +216,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
           //ref: scrollRefInternal,
           onMomentumScrollEnd: onScrollEnd,
           automaticallyAdjustContentInsets: true,
-
+          showsVerticalScrollIndicator:false,
         }}
       />
       <ThumbScroll
@@ -222,7 +225,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
         shouldIndicatorHide={false}
         hideTimeout={500}
         lastOffset={lastScrollOffset}
-        setLastOffset={setLastScrollOffset}
+        setLastScrollOffset={setLastScrollOffset}
         numColumns={props.numColumns}
         headerIndexes={props.photos.headerIndexes}
         numberOfPointers={props.numberOfPointers}
@@ -231,6 +234,8 @@ const RenderPhotos: React.FC<Props> = (props) => {
         velocityY={velocityY}
         fullSizeContentHeight={layoutHeight}
         scrollRef={scrollRef}
+        setStartScroll={setStartScroll}
+        startScroll={startScroll}
         scrollIndicatorContainerStyle={{}}
         scrollIndicatorStyle={{}}
       />
