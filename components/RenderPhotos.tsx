@@ -6,16 +6,35 @@ import {
   StyleSheet,
   StatusBar,
   ActivityIndicator,
+  ScrollView,
 } from 'react-native';
 import { layout, FlatSection, ScrollEvent } from '../types/interfaces';
 import PhotosChunk from './PhotosChunk';
 import ThumbScroll from './ThumbScroll';
-import { RecyclerListView, DataProvider, AutoScroll } from 'recyclerlistview';
+import { RecyclerListView, DataProvider, AutoScroll, BaseScrollView } from 'recyclerlistview';
 import { LayoutUtil } from '../utils/LayoutUtil';
+import PropTypes from 'prop-types';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
+class ExternalScrollView extends BaseScrollView {
+  private _scrollViewRef: any;
+
+  scrollTo(...args: any[]) {
+    if (this._scrollViewRef) { 
+      this._scrollViewRef?.scrollTo(...args);
+    }
+  }
+  render() {
+    return <Animated.ScrollView {...this.props}
+    style={{}}
+     ref={(scrollView: any) => {this._scrollViewRef = scrollView;}}
+     scrollEventThrottle={1}
+     onScroll={Animated.event([(this.props as any).animatedEvent], {listener: this.props.onScroll,useNativeDriver: true})}
+     />
+  }
+}
 interface Props {
   photos: FlatSection;
   margin: Animated.AnimatedInterpolation;
@@ -46,15 +65,18 @@ const RenderPhotos: React.FC<Props> = (props) => {
   const [layoutProvider, setLayoutProvider] = useState<any>(LayoutUtil.getLayoutProvider(2, 'day', props.photos.headerIndexes, headerHeight, props.photos.layout));
   const [viewLoaded, setViewLoaded] = useState<boolean>(false);
   const scrollRef:any = useRef();
+  const scrollRefExternal:any = useRef();
   const [lastScrollOffset, setLastScrollOffset] = useState<number>(0);
   const [layoutHeight, setLayoutHeight] = useState<number>(99999999999999);
 
   const [startScroll, setStartScroll] = useState<boolean>(false);
+  const [endScroll, setEndScroll] = useState<boolean>(false);
   const startScrollRef = useRef(startScroll);
   startScrollRef.current = startScroll;
 
   const scrollY = useRef(new Animated.Value(0)).current;
   const velocityY = useRef(new Animated.Value(0)).current;
+  const layoutHeightAnimated = useRef(new Animated.Value(9999999999999)).current;
 
   useEffect(()=>{
     setDataProvider(dataProvider.cloneWithRows(props.photos.layout));
@@ -99,10 +121,12 @@ const RenderPhotos: React.FC<Props> = (props) => {
       }
   }
 
-  const onScrollEnd = () => {
+  const _onMomentumScrollEnd = () => {
     let lastIndex = scrollRef?.current.findApproxFirstVisibleIndex();
-    //console.log(lastIndex);
     props.setScrollOffset({'in':props.numColumns, 'to':lastIndex});
+  }
+  const _onScrollEnd = () => {
+    console.log('scroll end called');
   }
 
   const scrollBarToViewSync = (value:number)=> {
@@ -115,42 +139,43 @@ const RenderPhotos: React.FC<Props> = (props) => {
 
   useEffect(()=>{
       setViewLoaded(true);
-      console.log("this should happen once in "+props.numColumns);
-      scrollY.removeAllListeners();
+      //console.log("this should happen once in "+props.numColumns);
+      /*scrollY.removeAllListeners();
       let animateId = scrollY.addListener(({ value }) => {
-        scrollBarToViewSync(value);
-      });
+        console.log('scrollY='+value);
+        setStartScroll(true);
+        //UNCOMMENT//scrollBarToViewSync(value);
+      });*/
   },[scrollRef, scrollRef.current]);
 
   const adjustScrollPosition = (newOffset:{[key:string]:(2|3|4|number)}) => {
     let numColumns:number = props.numColumns;
     if( viewLoaded && numColumns !== newOffset.in){
-      //let offset =newOffset.to * newOffset.in/numColumns;
-      //console.log('scrolling ' + props.numColumns+ ' to '+offset);
-      //scrollRef?.current.scrollToOffset(0,offset,true);
-      scrollRef?.current?.scrollToIndex(newOffset.to, true);
+      scrollRef?.current?.scrollToIndex(newOffset.to, false);
     }
   }
   useEffect(()=>{
     adjustScrollPosition(props.scrollOffset);
   },[props.scrollOffset]);
 
+  useEffect(()=>{
+    if(endScroll === true){
+      _onMomentumScrollEnd();
+    }
+  },[endScroll]);
+
   const _onScroll = (rawEvent: ScrollEvent, offsetX: number, offsetY: number) => {
     if(!startScrollRef.current){
-      if(layoutHeight===99999999999999){
-        let sampleHeight = scrollRef?.current?.getContentDimension();
-        if(sampleHeight.height!==0){
-          setLayoutHeight(sampleHeight.height);
-        }
-      }
-      let adjustedOffset = (offsetY * SCREEN_HEIGHT)/layoutHeight;
+      let adjustedOffset = (offsetY * SCREEN_HEIGHT)/(rawEvent?.nativeEvent?.contentSize?.height || 99999999999);
       let screenOffset = adjustedOffset*((SCREEN_HEIGHT-indicatorHeight)/SCREEN_HEIGHT);
       scrollY.setOffset(screenOffset);
       //console.log('screenOffset='+screenOffset);
       //setLastScrollOffset(screenOffset);
+    }else{
+      setStartScroll(false);
     }
   }
-
+  
   return props.photos.layout ? (
     <Animated.View
       // eslint-disable-next-line react-native/no-inline-styles
@@ -191,6 +216,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
     >
       <RecyclerListView
         ref={scrollRef}
+        externalScrollView={ExternalScrollView}
         style={{
           flex: 1,
           width: SCREEN_WIDTH,
@@ -210,13 +236,14 @@ const RenderPhotos: React.FC<Props> = (props) => {
         rowRenderer={rowRenderer}
         renderFooter={renderFooter}
         scrollEnabled={!props.isPinchAndZoom}
-        onScroll={_onScroll}
+        //onScroll={_onScroll}
         key={"RecyclerListView_"+props.sortCondition + props.numColumns}
         scrollViewProps={{
-          //ref: scrollRefInternal,
-          onMomentumScrollEnd: onScrollEnd,
+          //ref: scrollRefExternal,
+          onMomentumScrollEnd: _onMomentumScrollEnd,
           automaticallyAdjustContentInsets: true,
           showsVerticalScrollIndicator:false,
+          animatedEvent:{nativeEvent: {contentOffset: {y: scrollY}, contentSize: {height: layoutHeightAnimated}}},
         }}
       />
       <ThumbScroll
@@ -235,9 +262,11 @@ const RenderPhotos: React.FC<Props> = (props) => {
         fullSizeContentHeight={layoutHeight}
         scrollRef={scrollRef}
         setStartScroll={setStartScroll}
+        setEndScroll={setEndScroll}
         startScroll={startScroll}
         scrollIndicatorContainerStyle={{}}
         scrollIndicatorStyle={{}}
+        layoutHeight={layoutHeightAnimated}
       />
     </Animated.View>
   ) : (

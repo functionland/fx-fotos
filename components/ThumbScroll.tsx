@@ -30,6 +30,8 @@ interface Props {
     scrollRef:any;
     setStartScroll:Function;
     startScroll:boolean;
+    setEndScroll: Function;
+    layoutHeight: Animated.Value;
 }
 const ThumbScroll: React.FC<Props> = (props) => {
     let panRef = createRef();
@@ -66,9 +68,8 @@ const ThumbScroll: React.FC<Props> = (props) => {
         { useNativeDriver: true }
       );
     let _onPanHandlerStateChange = (event:HandlerStateChangeEvent<PanGestureHandlerEventPayload>) => {
-        //console.log(event.nativeEvent);
         if (event.nativeEvent.state === State.ACTIVE) {
-            props.setStartScroll(true);
+            props.setEndScroll(false);
         }
         if (event.nativeEvent.oldState === State.ACTIVE) {
             let temp = props.lastOffset + event.nativeEvent.translationY;
@@ -79,11 +80,13 @@ const ThumbScroll: React.FC<Props> = (props) => {
         }
     };
     useEffect(()=> {
-        //props.setStartScroll(false);
+        setTimeout(()=>{
+            props.setEndScroll(true);
+        },1);
     },[props.lastOffset]);
 
     useEffect(()=>{
-console.log('startScroll is '+ props.startScroll+ ' in '+props.numColumns);
+
     },[props.startScroll])
 
     let startIndicatorShowHide = () =>{
@@ -108,9 +111,7 @@ console.log('startScroll is '+ props.startScroll+ ' in '+props.numColumns);
     }
 
     return (
- 
-                
-                
+
                     <PanGestureHandler
                         ref={panRef}
                         onGestureEvent={_onPanGestureEvent}
@@ -129,7 +130,7 @@ console.log('startScroll is '+ props.startScroll+ ' in '+props.numColumns);
                                     top: 0, 
                                     height: props.indicatorHeight,
                                     transform: [{
-                                        translateY: props.scrollY.interpolate({
+                                        translateY: Animated.multiply(props.scrollY, Animated.divide((SCREEN_HEIGHT-props.indicatorHeight), Animated.subtract(props.layoutHeight, SCREEN_HEIGHT))).interpolate({
                                             inputRange: [0, SCREEN_HEIGHT-props.indicatorHeight],
                                             outputRange: [0, SCREEN_HEIGHT-props.indicatorHeight],
                                             extrapolateRight: 'clamp',
