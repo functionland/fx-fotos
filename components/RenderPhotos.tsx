@@ -58,7 +58,7 @@ interface Props {
 
 const RenderPhotos: React.FC<Props> = (props) => {
   const headerHeight = 20;
-  const indicatorHeight = 140;
+  const indicatorHeight = 50;
   const [dataProvider, setDataProvider] = useState<DataProvider>(new DataProvider((r1, r2) => {
     return r1 !== r2;
   }));
@@ -136,6 +136,10 @@ const RenderPhotos: React.FC<Props> = (props) => {
   }
   const _onScrollEnd = () => {
     console.log('scroll end called');
+    let sampleHeight = scrollRef?.current?.getContentDimension().height;
+    let lastOffset = scrollRef?.current.getCurrentScrollOffset();
+    let lastScrollOffset = lastOffset*(SCREEN_HEIGHT-indicatorHeight)/(sampleHeight-SCREEN_HEIGHT);
+    setLastScrollOffset(lastScrollOffset);
   }
 
   const scrollBarToViewSync = (value:number)=> {
@@ -257,6 +261,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
         scrollViewProps={{
           //ref: scrollRefExternal,
           onMomentumScrollEnd: _onMomentumScrollEnd,
+          onScrollEndDrag: _onScrollEnd,
           automaticallyAdjustContentInsets: true,
           showsVerticalScrollIndicator:false,
           animatedEvent:{nativeEvent: {contentOffset: {y: scrollY}, contentSize: {height: layoutHeightAnimated}}},

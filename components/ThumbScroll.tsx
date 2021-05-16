@@ -1,6 +1,8 @@
 import React, { useState, useEffect, createRef, useRef } from 'react';
 
-import { Dimensions, StyleSheet, Animated, StyleProp, TouchableHighlight , Text, View } from 'react-native';
+import { Dimensions, StyleSheet, Animated, StyleProp, Image , Text, View } from 'react-native';
+import { scrollImage } from '../assets/images';
+const exampleImageUri = Image.resolveAssetSource(scrollImage).uri;
 
 import {
     PanGestureHandler,
@@ -123,7 +125,7 @@ const ThumbScroll: React.FC<Props> = (props) => {
 
     
     return (
-                        <Animated.View style={[styles.scrollIndicatorContainer, {height: props.indicatorHeight,}]}>
+                        <Animated.View style={[styles.scrollIndicatorContainer,  {height: props.indicatorHeight,}]}>
                             <PanGestureHandler
                                 ref={panRef_glide}
                                 onGestureEvent={_onDragPanGestureEvent}
@@ -154,7 +156,12 @@ const ThumbScroll: React.FC<Props> = (props) => {
                                     props.scrollIndicatorStyle,
                                 ]}
                             >
-                                
+                                <Image
+                                    source={ scrollImage} 
+                                    style={[styles.image]} 
+                                    resizeMethod='resize'
+                                    resizeMode='stretch'
+                                />
                             </Animated.View>
                             </PanGestureHandler>
                         </Animated.View>
@@ -167,20 +174,26 @@ const styles = StyleSheet.create({
         top: 0,
         position: 'absolute',
         right: 0,
-        width: 0,
+        width: 50,
+        height:50,
         opacity: 1,
         zIndex:1,
     },
     scrollIndicator: {
-        top: 0,
-        position: 'absolute',
-        right: 0,
-        width: 160,
-        borderRadius: 3,
-        opacity: 0.5,
-        backgroundColor: 'blue',
+        right: -25,
         zIndex:4,
+        borderRadius: 50,
+        backgroundColor: 'whitesmoke',
+        height:50,
+        width:50,
+        flexWrap: 'wrap',
     },
+    image: {
+        marginLeft:5,
+        height: 30,
+        width:20,
+        marginTop:10,
+    }
 });
 
 export default ThumbScroll;
