@@ -75,8 +75,11 @@ const RenderPhotos: React.FC<Props> = (props) => {
   startScrollRef.current = startScroll;
 
   const scrollY = useRef(new Animated.Value(0)).current;
+  const isDragging = useRef(new Animated.Value(2)).current; //2:is scrolling using screen slide, 1: is scrolling using thumb scroll
   const velocityY = useRef(new Animated.Value(0)).current;
   const layoutHeightAnimated = useRef(new Animated.Value(9999999999999)).current;
+
+  const dragY = useRef(new Animated.Value(0)).current;
 
   useEffect(()=>{
     setDataProvider(dataProvider.cloneWithRows(props.photos.layout));
@@ -124,19 +127,32 @@ const RenderPhotos: React.FC<Props> = (props) => {
   const _onMomentumScrollEnd = () => {
     let lastIndex = scrollRef?.current.findApproxFirstVisibleIndex();
     props.setScrollOffset({'in':props.numColumns, 'to':lastIndex});
+    console.log('momentum ended');
+    let lastOffset = scrollRef?.current.getCurrentScrollOffset();
+    let sampleHeight = scrollRef?.current?.getContentDimension().height;
+    let lastScrollOffset = lastOffset*(SCREEN_HEIGHT-indicatorHeight)/(sampleHeight-SCREEN_HEIGHT);
+    console.log('lastScrollOffset='+lastScrollOffset+', lastOffset='+lastOffset+', sampleHeight='+sampleHeight);
+    setLastScrollOffset(lastScrollOffset);
   }
   const _onScrollEnd = () => {
     console.log('scroll end called');
   }
 
   const scrollBarToViewSync = (value:number)=> {
-    if(startScrollRef.current){
-      let sampleHeight = scrollRef?.current?.getContentDimension().height;
-      let ViewOffset = ((value)*sampleHeight)/(SCREEN_HEIGHT-indicatorHeight);
-      scrollRef.current.scrollToOffset(0, ViewOffset/2, false );
-    }
+    console.log('value+lastScrollOffset='+(value+lastScrollOffset));
+    let sampleHeight = scrollRef?.current?.getContentDimension().height;
+    let ViewOffset = ((value+lastScrollOffset)*(sampleHeight-SCREEN_HEIGHT))/(SCREEN_HEIGHT-indicatorHeight);
+    console.log('value='+value);
+    console.log('ViewOffset='+ViewOffset);
+    console.log('sampleHeight='+sampleHeight);
+    console.log('SCREEN_HEIGHT='+SCREEN_HEIGHT);
+    scrollRef.current.scrollToOffset(0, ViewOffset, false );
   }
-
+  dragY.removeAllListeners();
+  let animateId = dragY.addListener(({ value }) => {
+    scrollBarToViewSync(value);
+  });
+ 
   useEffect(()=>{
       setViewLoaded(true);
       //console.log("this should happen once in "+props.numColumns);
@@ -267,6 +283,8 @@ const RenderPhotos: React.FC<Props> = (props) => {
         scrollIndicatorContainerStyle={{}}
         scrollIndicatorStyle={{}}
         layoutHeight={layoutHeightAnimated}
+        isDragging={isDragging}
+        dragY={dragY}
       />
     </Animated.View>
   ) : (
