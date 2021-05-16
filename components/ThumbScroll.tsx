@@ -1,6 +1,8 @@
 import React, { useState, useEffect, createRef, useRef } from 'react';
 
-import { Dimensions, StyleSheet, Animated, StyleProp } from 'react-native';
+import { Dimensions, StyleSheet, Animated, StyleProp, Image , Text, View } from 'react-native';
+import { scrollImage } from '../assets/images';
+const exampleImageUri = Image.resolveAssetSource(scrollImage).uri;
 
 import {
     PanGestureHandler,
@@ -30,12 +32,16 @@ interface Props {
     scrollRef:any;
     setStartScroll:Function;
     startScroll:boolean;
+    setEndScroll: Function;
+    layoutHeight: Animated.Value;
+    isDragging:Animated.Value;
+    dragY:Animated.Value;
 }
 const ThumbScroll: React.FC<Props> = (props) => {
-    let panRef = createRef();
+    //const AnimatedTouchable = Animated.createAnimatedComponent(TouchableWithoutFeedback);
+    let panRef_glide = createRef();
     const absoluteY = useRef(new Animated.Value(0)).current;
     const y = useRef(new Animated.Value(0)).current;
-    const resetScrollY = useRef(new Animated.Value(1)).current;
     
     let numberOfPointers = useRef(new Animated.Value(1)).current;
 
@@ -61,29 +67,39 @@ const ThumbScroll: React.FC<Props> = (props) => {
         props.shouldIndicatorHide && setIsIndicatorHidden(false);
     };
 
-    let _onPanGestureEvent = Animated.event(
-        [{ nativeEvent: { translationY: props.scrollY, velocityY: props.velocityY,absoluteY: absoluteY, y: y, numberOfPointers:numberOfPointers} }],
+    const _onDragPanGestureEvent = Animated.event(
+        [{ nativeEvent: { translationY:props.dragY, velocityY: props.velocityY,absoluteY: absoluteY, y: y, numberOfPointers:numberOfPointers} }],
         { useNativeDriver: true }
       );
-    let _onPanHandlerStateChange = (event:HandlerStateChangeEvent<PanGestureHandlerEventPayload>) => {
-        //console.log(event.nativeEvent);
-        if (event.nativeEvent.state === State.ACTIVE) {
-            props.setStartScroll(true);
+    const _onDragPanHandlerStateChange = (event:HandlerStateChangeEvent<PanGestureHandlerEventPayload>) => {
+        //console.log([event.nativeEvent.absoluteY,event.nativeEvent.y,event.nativeEvent.translationY]);
+        if (event.nativeEvent.state === State.BEGAN && event.nativeEvent.oldState !== State.ACTIVE) {
+            console.log('glide touched');
+            //props.isDragging.setValue(1);
         }
-        if (event.nativeEvent.oldState === State.ACTIVE) {
+        if (event.nativeEvent.state !== State.ACTIVE && event.nativeEvent.oldState === State.ACTIVE) {
+            
+            props.isDragging.setValue(2);
             let temp = props.lastOffset + event.nativeEvent.translationY;
+            if(temp<0){temp=0;}
+            if(temp>SCREEN_HEIGHT){temp=SCREEN_HEIGHT;}
+            console.log('temp='+temp);
+            
+            //props.dragY.setOffset(temp);
+            
             props.setLastScrollOffset(temp);
-            props.scrollY.setOffset(temp);
-            props.scrollY.setValue(0);
+            //props.scrollY.setOffset(temp);
             startIndicatorShowHide();
         }
     };
+
     useEffect(()=> {
-        //props.setStartScroll(false);
+        console.log('props.lastOffset='+props.lastOffset);
+        props.dragY.setValue(0);
     },[props.lastOffset]);
 
     useEffect(()=>{
-console.log('startScroll is '+ props.startScroll+ ' in '+props.numColumns);
+
     },[props.startScroll])
 
     let startIndicatorShowHide = () =>{
@@ -107,72 +123,77 @@ console.log('startScroll is '+ props.startScroll+ ' in '+props.numColumns);
         }
     }
 
+    
     return (
- 
-                
-                
-                    <PanGestureHandler
-                        ref={panRef}
-                        onGestureEvent={_onPanGestureEvent}
-                        onHandlerStateChange={_onPanHandlerStateChange}
-                        maxPointers={1}
-                        minPointers={1}
-                        shouldCancelWhenOutside={false}
-                        //hitSlop={{ right: 0, width:140 }}
-                        avgTouches={false}
-                        enableTrackpadTwoFingerGesture={false}
-                    >
-                        <Animated.View
-                            style={[
-                                styles.scrollIndicator,
-                                { 
-                                    top: 0, 
-                                    height: props.indicatorHeight,
-                                    transform: [{
-                                        translateY: props.scrollY.interpolate({
-                                            inputRange: [0, SCREEN_HEIGHT-props.indicatorHeight],
-                                            outputRange: [0, SCREEN_HEIGHT-props.indicatorHeight],
-                                            extrapolateRight: 'clamp',
-                                            extrapolateLeft: 'clamp',
-                                          }),
-                                    }],
-                                    opacity: fadeAnim,
-                                },
-                                props.scrollIndicatorStyle,
-                            ]}
-                        >
+                        <Animated.View style={[styles.scrollIndicatorContainer,  {height: props.indicatorHeight,}]}>
+                            <PanGestureHandler
+                                ref={panRef_glide}
+                                onGestureEvent={_onDragPanGestureEvent}
+                                onHandlerStateChange={_onDragPanHandlerStateChange}
+                                maxPointers={1}
+                                minPointers={1}
+                                shouldCancelWhenOutside={false}
+                                //hitSlop={{ right: 0, width:140 }}
+                                avgTouches={false}
+                                enableTrackpadTwoFingerGesture={false}
+                            >
+                            <Animated.View 
+                                style={[
+                                    styles.scrollIndicator,
+                                    { 
+                                        height: props.indicatorHeight,
+                                        zIndex:5,
+                                        transform: [{
+                                            translateY: Animated.multiply(props.scrollY, Animated.divide((SCREEN_HEIGHT-props.indicatorHeight), Animated.subtract(props.layoutHeight, SCREEN_HEIGHT))).interpolate({
+                                                inputRange: [0, SCREEN_HEIGHT-props.indicatorHeight],
+                                                outputRange: [0, SCREEN_HEIGHT-props.indicatorHeight],
+                                                extrapolateRight: 'clamp',
+                                                extrapolateLeft: 'clamp',
+                                            }),
+                                        }],
+                                        opacity: fadeAnim,
+                                    },
+                                    props.scrollIndicatorStyle,
+                                ]}
+                            >
+                                <Image
+                                    source={ scrollImage} 
+                                    style={[styles.image]} 
+                                    resizeMethod='resize'
+                                    resizeMode='stretch'
+                                />
+                            </Animated.View>
+                            </PanGestureHandler>
                         </Animated.View>
-                    </PanGestureHandler>
 
     );
 };
 
 const styles = StyleSheet.create({
-    scrollViewContainer: {
-        //flex: 1,
-        width:50,
-    },
     scrollIndicatorContainer: {
-        position: 'absolute',
         top: 0,
-        right: 2,
-        bottom: 0,
-        overflow: 'visible',
-        borderRadius: 10,
-        width: 60,
-        marginVertical: 3,
-        height: SCREEN_HEIGHT,
+        position: 'absolute',
+        right: 0,
+        width: 50,
+        height:50,
+        opacity: 1,
         zIndex:1,
     },
     scrollIndicator: {
-        position: 'absolute',
-        right: 0,
-        width: 160,
-        borderRadius: 3,
-        opacity: 0.5,
-        backgroundColor: 'blue',
+        right: -25,
         zIndex:4,
+        borderRadius: 50,
+        backgroundColor: 'whitesmoke',
+        height:50,
+        width:50,
+        flexWrap: 'wrap',
     },
+    image: {
+        marginLeft:5,
+        height: 30,
+        width:20,
+        marginTop:10,
+    }
 });
 
 export default ThumbScroll;
