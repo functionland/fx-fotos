@@ -6,7 +6,7 @@ import {
   StyleSheet,
   StatusBar,
   ActivityIndicator,
-  ScrollView,
+  View,
 } from 'react-native';
 import { layout, FlatSection, ScrollEvent } from '../types/interfaces';
 import PhotosChunk from './PhotosChunk';
@@ -54,6 +54,9 @@ interface Props {
   setLoadMore: Function;
   focalY: Animated.Value;
   numberOfPointers: Animated.Value;
+  modalShown: boolean;
+  setModalShown: Function;
+  setSinglePhotoIndex: Function;
 }
 
 const RenderPhotos: React.FC<Props> = (props) => {
@@ -105,17 +108,24 @@ const RenderPhotos: React.FC<Props> = (props) => {
       : <></>;
   };
   
-  const rowRenderer = (type:string | number, data:layout) => {
+  const rowRenderer = (type:string | number, data:layout, index: number) => {
     //We have only one view type so not checks are needed here
-    return <PhotosChunk
-      photo={data}
-      opacity={props.opacity}
-      numCol={props.numColumns}
-      loading={props.loading}
-      scale={props.scale}
-      //key={'PhotosChunk' + props.numColumns}
-      sortCondition={props.sortCondition}
-    />;
+    return (
+    <View style={{position:'relative', zIndex:4}}>
+      <PhotosChunk
+        photo={data}
+        opacity={props.opacity}
+        numCol={props.numColumns}
+        loading={props.loading}
+        scale={props.scale}
+        key={'PhotosChunk_col' + props.numColumns + '_id' + index}
+        index={index}
+        sortCondition={props.sortCondition}
+        modalShown={props.modalShown}
+        setModalShown={props.setModalShown}
+        setSinglePhotoIndex={props.setSinglePhotoIndex}
+      />
+    </View>);
   };
 
   
@@ -177,13 +187,6 @@ const RenderPhotos: React.FC<Props> = (props) => {
  
   useEffect(()=>{
       setViewLoaded(true);
-      //console.log("this should happen once in "+props.numColumns);
-      /*scrollY.removeAllListeners();
-      let animateId = scrollY.addListener(({ value }) => {
-        console.log('scrollY='+value);
-        setStartScroll(true);
-        //UNCOMMENT//scrollBarToViewSync(value);
-      });*/
   },[scrollRef, scrollRef.current]);
 
   const adjustScrollPosition = (newOffset:{[key:string]:(2|3|4|number)}) => {

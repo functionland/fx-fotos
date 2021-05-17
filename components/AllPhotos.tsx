@@ -3,14 +3,15 @@ import {ScrollView} from 'react-native-gesture-handler';
 import {Animated, Dimensions, View, StatusBar, Text} from 'react-native';
 import {sortCondition, FlatSection} from '../types/interfaces';
 import RenderPhotos from './RenderPhotos';
-import * as MediaLibrary from 'expo-media-library';
+import SinglePhoto from './SinglePhoto';
+import { Asset } from 'expo-media-library';
 import {prepareLayout} from '../utils/functions';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 interface Props {
-  photos: Array<MediaLibrary.Asset>;
+  photos: Array<Asset>;
   scale: Animated.Value;
   baseScale: Animated.AnimatedAddition;
   pinchOrZoom: 'pinch' | 'zoom' | undefined;
@@ -28,6 +29,8 @@ interface Props {
 const AllPhotos: React.FC<Props> = (props) => {
   const [scrollOffset, setScrollOffset] = useState<{[key:string]:(2|3|4|number)}>({'in':0,'to':0});
   const [preparedMedia, setPreparedMedia] = useState<FlatSection>({layout:[],headerIndexes:[]});
+  const [modalShown, setModalShown] = useState<boolean>(false);
+  const [singlePhotoIndex, setSinglePhotoIndex] = useState<number>(1);
 
   useEffect(()=>{
     let prepared = prepareLayout(props.photos,['day', 'month']);
@@ -74,6 +77,9 @@ const AllPhotos: React.FC<Props> = (props) => {
         setLoadMore={props.setLoadMore}
         focalY={props.focalY}
         numberOfPointers={props.numberOfPointers}
+        modalShown={modalShown}
+        setModalShown={setModalShown}
+        setSinglePhotoIndex={setSinglePhotoIndex}
       />
       <RenderPhotos
         photos={preparedMedia}
@@ -105,6 +111,9 @@ const AllPhotos: React.FC<Props> = (props) => {
         setLoadMore={props.setLoadMore}
         focalY={props.focalY}
         numberOfPointers={props.numberOfPointers}
+        modalShown={modalShown}
+        setModalShown={setModalShown}
+        setSinglePhotoIndex={setSinglePhotoIndex}
       />
       <RenderPhotos
         photos={preparedMedia}
@@ -136,6 +145,15 @@ const AllPhotos: React.FC<Props> = (props) => {
         setLoadMore={props.setLoadMore}
         focalY={props.focalY}
         numberOfPointers={props.numberOfPointers}
+        modalShown={modalShown}
+        setModalShown={setModalShown}
+        setSinglePhotoIndex={setSinglePhotoIndex}
+      />
+      <SinglePhoto 
+        modalShown={modalShown}
+        setModalShown={setModalShown}
+        photos={preparedMedia}
+        singlePhotoIndex={singlePhotoIndex}
       />
     </View>
     ):(
