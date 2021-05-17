@@ -13,7 +13,7 @@ import PhotosChunk from './PhotosChunk';
 import ThumbScroll from './ThumbScroll';
 import { RecyclerListView, DataProvider, AutoScroll, BaseScrollView } from 'recyclerlistview';
 import { LayoutUtil } from '../utils/LayoutUtil';
-import PropTypes from 'prop-types';
+import FloatingFilters from './FloatingFilters';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -28,7 +28,7 @@ class ExternalScrollView extends BaseScrollView {
   }
   render() {
     return <Animated.ScrollView {...this.props}
-    style={{}}
+    style={{zIndex:1}}
      ref={(scrollView: any) => {this._scrollViewRef = scrollView;}}
      scrollEventThrottle={1}
      onScroll={Animated.event([(this.props as any).animatedEvent], {listener: this.props.onScroll,useNativeDriver: true})}
@@ -78,8 +78,12 @@ const RenderPhotos: React.FC<Props> = (props) => {
   const isDragging = useRef(new Animated.Value(2)).current; //2:is scrolling using screen slide, 1: is scrolling using thumb scroll
   const velocityY = useRef(new Animated.Value(0)).current;
   const layoutHeightAnimated = useRef(new Animated.Value(9999999999999)).current;
+  const [floatingFiltersOpacity, setFloatingFiltersOpacity] = useState<number>(0);
 
+  const [currentImageTimestamp, setCurrentImageTimestamp] = useState<number>(0);
   const dragY = useRef(new Animated.Value(0)).current;
+
+  const [showThumbScroll, setShowThumbScroll] = useState<boolean>(false);
 
   useEffect(()=>{
     setDataProvider(dataProvider.cloneWithRows(props.photos.layout));
@@ -131,8 +135,9 @@ const RenderPhotos: React.FC<Props> = (props) => {
     let lastOffset = scrollRef?.current.getCurrentScrollOffset();
     let sampleHeight = scrollRef?.current?.getContentDimension().height;
     let lastScrollOffset = lastOffset*(SCREEN_HEIGHT-indicatorHeight)/(sampleHeight-SCREEN_HEIGHT);
-    console.log('lastScrollOffset='+lastScrollOffset+', lastOffset='+lastOffset+', sampleHeight='+sampleHeight);
+    //console.log('lastScrollOffset='+lastScrollOffset+', lastOffset='+lastOffset+', sampleHeight='+sampleHeight);
     setLastScrollOffset(lastScrollOffset);
+    setShowThumbScroll(false);
   }
   const _onScrollEnd = () => {
     console.log('scroll end called');
@@ -143,14 +148,27 @@ const RenderPhotos: React.FC<Props> = (props) => {
   }
 
   const scrollBarToViewSync = (value:number)=> {
-    console.log('value+lastScrollOffset='+(value+lastScrollOffset));
+    //console.log('value+lastScrollOffset='+(value+lastScrollOffset));
     let sampleHeight = scrollRef?.current?.getContentDimension().height;
     let ViewOffset = ((value+lastScrollOffset)*(sampleHeight-SCREEN_HEIGHT))/(SCREEN_HEIGHT-indicatorHeight);
-    console.log('value='+value);
-    console.log('ViewOffset='+ViewOffset);
-    console.log('sampleHeight='+sampleHeight);
-    console.log('SCREEN_HEIGHT='+SCREEN_HEIGHT);
+    //console.log('value='+value);
+    //console.log('ViewOffset='+ViewOffset);
+    //console.log('sampleHeight='+sampleHeight);
+    //console.log('SCREEN_HEIGHT='+SCREEN_HEIGHT);
     scrollRef.current.scrollToOffset(0, ViewOffset, false );
+    let currentImageIndex = scrollRef.current.findApproxFirstVisibleIndex();
+    let currentImage = props.photos.layout[currentImageIndex].value;
+    let currentTimeStamp = 0;
+    if(typeof currentImage === 'string'){
+      currentImage = props.photos.layout[currentImageIndex+1]?.value;
+      if(currentImage && typeof currentImage === 'string'){
+        currentImage = props.photos.layout[currentImageIndex+2]?.value;
+      }
+    }
+    if(currentImage && typeof currentImage !== 'string'){
+      currentTimeStamp = currentImage.modificationTime;
+    }
+    setCurrentImageTimestamp(currentTimeStamp);
   }
   dragY.removeAllListeners();
   let animateId = dragY.addListener(({ value }) => {
@@ -185,15 +203,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
   },[endScroll]);
 
   const _onScroll = (rawEvent: ScrollEvent, offsetX: number, offsetY: number) => {
-    if(!startScrollRef.current){
-      let adjustedOffset = (offsetY * SCREEN_HEIGHT)/(rawEvent?.nativeEvent?.contentSize?.height || 99999999999);
-      let screenOffset = adjustedOffset*((SCREEN_HEIGHT-indicatorHeight)/SCREEN_HEIGHT);
-      scrollY.setOffset(screenOffset);
-      //console.log('screenOffset='+screenOffset);
-      //setLastScrollOffset(screenOffset);
-    }else{
-      setStartScroll(false);
-    }
+    setShowThumbScroll(true);
   }
   
   return props.photos.layout ? (
@@ -247,6 +257,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
           marginTop: 0,
           right: 0,
           left: 0,
+          zIndex:1,
         }}
         contentContainerStyle={{ margin: 0 }}
         onEndReached={() => props.setLoadMore(new Date().getTime())}
@@ -256,21 +267,24 @@ const RenderPhotos: React.FC<Props> = (props) => {
         rowRenderer={rowRenderer}
         renderFooter={renderFooter}
         scrollEnabled={!props.isPinchAndZoom}
-        //onScroll={_onScroll}
+        onScroll={_onScroll}
         key={"RecyclerListView_"+props.sortCondition + props.numColumns}
         scrollViewProps={{
           //ref: scrollRefExternal,
           onMomentumScrollEnd: _onMomentumScrollEnd,
-          onScrollEndDrag: _onScrollEnd,
+          //onScrollEndDrag: _onScrollEnd,
           automaticallyAdjustContentInsets: true,
           showsVerticalScrollIndicator:false,
           animatedEvent:{nativeEvent: {contentOffset: {y: scrollY}, contentSize: {height: layoutHeightAnimated}}},
         }}
       />
+      
       <ThumbScroll
         indicatorHeight={indicatorHeight}
         flexibleIndicator={false}
-        shouldIndicatorHide={false}
+        shouldIndicatorHide={true}
+        showThumbScroll={showThumbScroll}
+        setShowThumbScroll={setShowThumbScroll}
         hideTimeout={500}
         lastOffset={lastScrollOffset}
         setLastScrollOffset={setLastScrollOffset}
@@ -290,6 +304,18 @@ const RenderPhotos: React.FC<Props> = (props) => {
         layoutHeight={layoutHeightAnimated}
         isDragging={isDragging}
         dragY={dragY}
+        floatingFiltersOpacity = {floatingFiltersOpacity}
+        setFloatingFiltersOpacity = {setFloatingFiltersOpacity}
+        currentImageTimestamp={currentImageTimestamp}
+      />
+      <FloatingFilters
+        headerIndexes={props.photos.headerIndexes}
+        floatingFiltersOpacity={floatingFiltersOpacity}
+        numColumns={props.numColumns}
+        sortCondition={props.sortCondition}
+        scrollRef={scrollRef}
+        headerHeight={headerHeight}
+        layoutHeight={layoutHeightAnimated}
       />
     </Animated.View>
   ) : (

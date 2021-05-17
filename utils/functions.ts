@@ -107,7 +107,7 @@ export const prepareLayout = (
       [...sortConditions, 'year'],
     );
     
-    let lastYear = lastTimestampObj.year;
+    let lastYear = {'day':'', 'month': ''};
     for(let i=0; i<newMedias.length; i++){
       let yearStart = {'day':'','month':''};
       let mediaTimestampObj = timestampToDate(
@@ -118,9 +118,9 @@ export const prepareLayout = (
       let mediaTimestampYear = mediaTimestampObj.year;
       for(let j=0;j<sortConditions.length;j++){
         let sortCondition_j = sortConditions[j];
-        if(mediaTimestampObj[sortCondition_j] !== lastTimestampObj[sortCondition_j] || lastYear !== mediaTimestampYear){
+        if(mediaTimestampObj[sortCondition_j] !== lastTimestampObj[sortCondition_j] || lastYear[sortCondition_j] !== mediaTimestampYear){
           lastTimestampObj[sortCondition_j] = mediaTimestampObj[sortCondition_j];
-          lastYear = mediaTimestampObj.year;
+          
           layout.push({value:mediaTimestampObj[sortCondition_j], sortCondition: sortCondition_j});
           
           let headerIndexLength = headerIndexes.length;
@@ -128,11 +128,11 @@ export const prepareLayout = (
           if(lastHeaderIndex>-1){
             headerIndexes[headerIndexLength -1 -lastHeaderIndex].count = count[sortCondition_j];
           }
-
-          if(mediaTimestampYear !== lastYear){
-            yearStart.day = lastYear;
+          if(mediaTimestampYear !== lastYear[sortCondition_j]){
+            lastYear[sortCondition_j] = mediaTimestampObj.year;
+            yearStart[sortCondition_j] = lastYear[sortCondition_j];
           }
-          headerIndexes.push({header:mediaTimestampObj[sortCondition_j], index:layout.length-1, count: 0, yearStart: yearStart.day, sortCondition: sortCondition_j});
+          headerIndexes.push({header:mediaTimestampObj[sortCondition_j], index:layout.length-1, count: 0, yearStart: yearStart[sortCondition_j], sortCondition: sortCondition_j, timestamp: newMedias[i].modificationTime});
           count[sortCondition_j] = 0;
         }
         count[sortCondition_j] = count[sortCondition_j] + 1;

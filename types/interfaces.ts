@@ -76,4 +76,4 @@ export interface Dimension {
 
 export interface layout {value:Asset|string; sortCondition:'day'|'month'|''};
 
-export interface headerIndex {header:string;index:number;count:number;yearStart:string; sortCondition:'day'|'month'};
+export interface headerIndex {header:string;index:number;count:number;yearStart:string; sortCondition:'day'|'month'; timestamp: number;};

@@ -2,7 +2,8 @@ import React, { useState, useEffect, createRef, useRef } from 'react';
 
 import { Dimensions, StyleSheet, Animated, StyleProp, Image , Text, View } from 'react-native';
 import { scrollImage } from '../assets/images';
-const exampleImageUri = Image.resolveAssetSource(scrollImage).uri;
+import { headerIndex } from '../types/interfaces';
+import { timestampToDate } from '../utils/functions';
 
 import {
     PanGestureHandler,
@@ -18,12 +19,14 @@ interface Props {
     flexibleIndicator:boolean;
     shouldIndicatorHide:boolean;
     hideTimeout:number;
+    showThumbScroll:boolean;
+    setShowThumbScroll:Function;
     scrollIndicatorContainerStyle:StyleProp<{}>;
     scrollIndicatorStyle:StyleProp<{}>;
     lastOffset:number;
     setLastScrollOffset:Function;
     numColumns:2|3|4;
-    headerIndexes:Array<{header:string;index:number;count:number;yearStart:string}>;
+    headerIndexes:headerIndex[];
     numberOfPointers:Animated.Value;
     scrollY:Animated.Value;
     velocityY:Animated.Value;
@@ -36,6 +39,9 @@ interface Props {
     layoutHeight: Animated.Value;
     isDragging:Animated.Value;
     dragY:Animated.Value;
+    floatingFiltersOpacity: number;
+    setFloatingFiltersOpacity: Function;
+    currentImageTimestamp: number;
 }
 const ThumbScroll: React.FC<Props> = (props) => {
     //const AnimatedTouchable = Animated.createAnimatedComponent(TouchableWithoutFeedback);
@@ -67,54 +73,67 @@ const ThumbScroll: React.FC<Props> = (props) => {
         props.shouldIndicatorHide && setIsIndicatorHidden(false);
     };
 
+    const showFloatingFilters = () => {
+        console.log('showFloatingFilters');
+        props.setFloatingFiltersOpacity(1);
+    }
+    const hideFloatingFilters = () => {
+        console.log('hideFloatingFilters');
+        props.setFloatingFiltersOpacity(0);
+    }
+
     const _onDragPanGestureEvent = Animated.event(
         [{ nativeEvent: { translationY:props.dragY, velocityY: props.velocityY,absoluteY: absoluteY, y: y, numberOfPointers:numberOfPointers} }],
         { useNativeDriver: true }
       );
     const _onDragPanHandlerStateChange = (event:HandlerStateChangeEvent<PanGestureHandlerEventPayload>) => {
-        //console.log([event.nativeEvent.absoluteY,event.nativeEvent.y,event.nativeEvent.translationY]);
+        //console.log(event.nativeEvent);
         if (event.nativeEvent.state === State.BEGAN && event.nativeEvent.oldState !== State.ACTIVE) {
             console.log('glide touched');
             //props.isDragging.setValue(1);
+            showFloatingFilters();
+        }
+        if(event.nativeEvent.state === State.CANCELLED || event.nativeEvent.state === State.FAILED || event.nativeEvent.state === State.END){
+            hideFloatingFilters();
+            props.setShowThumbScroll(false);
         }
         if (event.nativeEvent.state !== State.ACTIVE && event.nativeEvent.oldState === State.ACTIVE) {
-            
+            hideFloatingFilters();
             props.isDragging.setValue(2);
             let temp = props.lastOffset + event.nativeEvent.translationY;
             if(temp<0){temp=0;}
             if(temp>SCREEN_HEIGHT){temp=SCREEN_HEIGHT;}
-            console.log('temp='+temp);
+            //console.log('temp='+temp);
             
             //props.dragY.setOffset(temp);
             
             props.setLastScrollOffset(temp);
             //props.scrollY.setOffset(temp);
-            startIndicatorShowHide();
         }
     };
 
     useEffect(()=> {
-        console.log('props.lastOffset='+props.lastOffset);
+        //console.log('props.lastOffset='+props.lastOffset);
         props.dragY.setValue(0);
     },[props.lastOffset]);
 
     useEffect(()=>{
-
-    },[props.startScroll])
+        startIndicatorShowHide();
+    },[props.showThumbScroll])
 
     let startIndicatorShowHide = () =>{
         //Hide / show Animation effect
         if (props.shouldIndicatorHide) {
-            isIndicatorHidden
+            props.showThumbScroll
                 ? Animated.timing(fadeAnim, {
-                      toValue: 0,
+                      toValue: 1,
                       duration: props.hideTimeout,
                       useNativeDriver: true,
                   }).start(()=>{
                     runHideTimer();
                   })
                 : Animated.timing(fadeAnim, {
-                      toValue: 1,
+                      toValue: 0,
                       duration: props.hideTimeout,
                       useNativeDriver: true,
                   }).start(()=>{
@@ -156,12 +175,18 @@ const ThumbScroll: React.FC<Props> = (props) => {
                                     props.scrollIndicatorStyle,
                                 ]}
                             >
-                                <Image
-                                    source={ scrollImage} 
-                                    style={[styles.image]} 
-                                    resizeMethod='resize'
-                                    resizeMode='stretch'
-                                />
+                                <View style={styles.scrollBar}>
+                                    <Image
+                                        source={ scrollImage} 
+                                        style={[styles.image]} 
+                                        resizeMethod='resize'
+                                        resizeMode='stretch'
+                                    />
+                                    <Animated.View style={[styles.scrollBarText, {opacity: props.floatingFiltersOpacity}]}>
+                                        <Text style={{color: 'grey'}}>{timestampToDate(props.currentImageTimestamp, ['month']).month}</Text>
+                                    </Animated.View>
+                                
+                                </View>
                             </Animated.View>
                             </PanGestureHandler>
                         </Animated.View>
@@ -189,10 +214,26 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
     },
     image: {
-        marginLeft:5,
-        height: 30,
-        width:20,
-        marginTop:10,
+        marginLeft:12,
+        height: 20,
+        width:10,
+        marginTop:15,
+    },
+    scrollBar: {
+        flex: 1,
+        flexDirection: 'row',
+        flexWrap: 'wrap'
+    },
+    scrollBarText: {
+        position: 'absolute',
+        right: 30,
+        top: 10,
+        backgroundColor: 'white',
+        opacity:0.8,
+        color: 'black',
+        width: 100,
+        borderRadius: 100,
+        alignItems: 'center',
     }
 });
 
