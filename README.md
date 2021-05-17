@@ -18,12 +18,12 @@ You can clone the project by running the command below to your terminal:
 
 for https cloning:
 ```bash
-git clone https://github.com/woforo/TheBox.git
+git clone https://github.com/functionland/photos.git
 ```
 
 for ssh cloning:
 ```bash
-git clone git@github.com:woforo/TheBox.git
+git clone git@github.com:functionland/photos.git
 ```
 [project github link](https://github.com/woforo/TheBox)
 
@@ -36,9 +36,7 @@ npm install
 
 ## Packages
 
-we use **react-native-community** for getting the data from user's phone.
-we use **react-redux** for global state.
-we use **redux-thunk** for feeding redux with asynchronose calls from user's phone gallery.
+we use **expo Media Libary** for getting the data from user's phone.
 
 ## Pages structure
 
