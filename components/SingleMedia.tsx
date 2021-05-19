@@ -54,6 +54,7 @@ const SingleMedia: React.FC<Props> = (props) => {
   }, [props.medias, props.singleMediaIndex, props.modalShown]);
 
   useEffect(()=>{
+    console.log('showModal='+showModal);
     showHideModal(showModal, imageWidth, imageHeight);
   },[showModal]);
 
@@ -69,7 +70,7 @@ const SingleMedia: React.FC<Props> = (props) => {
         useNativeDriver: true,
       }),
       Animated.timing(viewScale, {
-        toValue: {x:0, y:0},
+        toValue: {x:SCREEN_WIDTH/(props.numColumns*imageWidth), y:2*SCREEN_WIDTH/(props.numColumns*imageHeight*2)},
         duration: duration,
         useNativeDriver: true,
       }),
@@ -78,11 +79,26 @@ const SingleMedia: React.FC<Props> = (props) => {
         duration: duration,
         useNativeDriver: true,
       }),
+      Animated.timing(translationY, {
+        toValue: 0,
+        duration: duration,
+        useNativeDriver: true,
+      }),
+      Animated.timing(translationX, {
+        toValue: 0,
+        duration: duration,
+        useNativeDriver: true,
+      }),
     ]).start(()=>{
-      props.setModalShown(false);
+      
     });
+    setTimeout(()=>{
+      console.log('setting modalShown to false');
+      props.setModalShown(false);
+      viewScale.setValue({x:0, y:0});
+    }, duration/2)
   }
-  const showModalAnimation = (duration:number=200) => {
+  const showModalAnimation = (duration:number=300) => {
     Animated.parallel([
       Animated.timing(viewPosition, {
         toValue: { x: (SCREEN_WIDTH-imageWidth)/2, y: (SCREEN_HEIGHT-imageHeight)/2 },
@@ -109,6 +125,7 @@ const SingleMedia: React.FC<Props> = (props) => {
   const showHideModal = (showModal:boolean, imageWidth:number, imageHeight:number) => {
     if(showModal){
       viewPosition.setValue(props.imagePosition);
+      console.log(props.imagePosition);
       viewScale.setValue({x:SCREEN_WIDTH/(props.numColumns*imageWidth), y:2*SCREEN_WIDTH/(props.numColumns*imageHeight*2)})
       console.log('opening image');
       console.log([imageWidth, imageHeight, SCREEN_WIDTH, SCREEN_HEIGHT, props.imagePosition.x, props.imagePosition.y]);
@@ -173,7 +190,7 @@ const SingleMedia: React.FC<Props> = (props) => {
   }
 
   return (
-    <>
+    <View style={{zIndex:props.modalShown?1:0, width:SCREEN_WIDTH, height:SCREEN_HEIGHT}}>
     <Animated.View 
       style={[styles.ModalView, {
         opacity:modalOpacity, 
@@ -183,25 +200,51 @@ const SingleMedia: React.FC<Props> = (props) => {
         left: 0,
         transform: [
           {
+            translateY: Animated.subtract(Animated.add(viewPosition.y, translationY),StatusBar.currentHeight||0)
+          },
+          {
+            translateX: viewPosition.x
+          }
+        ],
+      }]}
+    >
+    <Animated.View 
+      style={[ {
+        //opacity:modalOpacity, 
+        position: 'relative',
+        width:'100%',
+        height:'100%',
+        top: 0,
+        left: 0,
+        transform: [
+          {
             scale: translationY.interpolate({
               inputRange: [-SCREEN_HEIGHT, -100, 0, 100, SCREEN_HEIGHT],
               outputRange: [0.9, 0.9, 1, 0.9, 0.9],
-            })
+            }),
           },
           { 
-            scaleX: viewScale.x,
+            scaleX: viewScale.x
           },
           {
             scaleY: viewScale.y,
           },
           {
-            translateX: Animated.subtract(viewPosition.x,Animated.multiply(Animated.subtract(1, viewScale.x), Animated.multiply(imageWidth,Animated.subtract(props.imagePosition.x, SCREEN_WIDTH/props.numColumns).interpolate({
-              inputRange: [-1*SCREEN_WIDTH/props.numColumns, 0],
-              outputRange: [1, 0],
-            }))))
+            translateX: Animated.divide(
+              Animated.subtract(
+                Animated.multiply(
+                  viewScale.x,SCREEN_WIDTH), 
+                SCREEN_WIDTH)
+              , Animated.multiply(2,Animated.add(viewScale.x, 0.000001)))
           },
           {
-            translateY: Animated.add(Animated.subtract(viewPosition.y,Animated.multiply(Animated.subtract(1, viewScale.y), imageHeight)), translationY)
+            translateY: Animated.divide(
+              Animated.subtract(
+                Animated.multiply(
+                  viewScale.y,(SCREEN_HEIGHT)
+                ), (SCREEN_HEIGHT)
+              )
+              , Animated.multiply(2,Animated.add(viewScale.y, 0.000001)))
           }
         ],
       }]}
@@ -212,6 +255,7 @@ const SingleMedia: React.FC<Props> = (props) => {
       >
         <Animated.View>
           <PanGestureHandler
+            maxPointers={1}
             ref={singleTapRef}
             onHandlerStateChange={_onPanHandlerStateChange}
             onGestureEvent={_onPanGestureEvent}
@@ -245,18 +289,19 @@ const SingleMedia: React.FC<Props> = (props) => {
         </Animated.View>
       </LongPressGestureHandler>
     </Animated.View>
+    </Animated.View>
     <Animated.View style={[styles.backdrop, 
       {opacity: Animated.multiply(viewScale.x, translationY.interpolate({
         inputRange: [-100, 0, 100],
         outputRange: [0, 1, 0],
       })).interpolate({
-        inputRange: [0, 1],
-        outputRange: [0, 1],
+        inputRange: [0, 0.5, 1],
+        outputRange: [0, 0, 1],
       })}]}
     >
 
     </Animated.View>
-    </>
+    </View>
   );
 };
 

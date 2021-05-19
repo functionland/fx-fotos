@@ -26,8 +26,10 @@ interface Props {
   setImagePosition: Function;
 }
 
+
 const PhotosChunk: React.FC<Props> = (props) => {
   const [imageRef, setImageRef] = useState<Image | null>();
+
   useEffect(()=>{
     if (isIOS && imageRef) {
       imageRef.setNativeProps({
@@ -59,7 +61,6 @@ const PhotosChunk: React.FC<Props> = (props) => {
       console.log('long tap');
     }
   }
-
   const longTapRef = createRef();
   const singleTapRef = createRef();
   
@@ -76,7 +77,6 @@ const PhotosChunk: React.FC<Props> = (props) => {
           zIndex:4, 
           flex: 1/props.numCol, 
           width: SCREEN_WIDTH/props.numCol,
-          opacity: props.modalShown?0:1
         }}>
         <LongPressGestureHandler
         ref={longTapRef}
@@ -88,8 +88,8 @@ const PhotosChunk: React.FC<Props> = (props) => {
           onHandlerStateChange={_onSingleTapHandlerStateChange}
           numberOfTaps={1}
         >
-            <Image
-              ref={ref => {
+            <Animated.Image
+              ref={(ref: React.SetStateAction<Image | null | undefined>) => {
                 setImageRef(ref);
               }}
               source={{uri: props.photo.value.uri}}
