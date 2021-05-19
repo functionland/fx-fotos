@@ -3,7 +3,7 @@ import {ScrollView} from 'react-native-gesture-handler';
 import {Animated, Dimensions, View, StatusBar, Text} from 'react-native';
 import {sortCondition, FlatSection} from '../types/interfaces';
 import RenderPhotos from './RenderPhotos';
-import SinglePhoto from './SinglePhoto';
+import SingleMedia from './SingleMedia';
 import { Asset } from 'expo-media-library';
 import {prepareLayout} from '../utils/functions';
 
@@ -31,6 +31,7 @@ const AllPhotos: React.FC<Props> = (props) => {
   const [preparedMedia, setPreparedMedia] = useState<FlatSection>({layout:[],headerIndexes:[]});
   const [modalShown, setModalShown] = useState<boolean>(false);
   const [singlePhotoIndex, setSinglePhotoIndex] = useState<number>(1);
+  const [imagePosition, setImagePosition] = useState<{x:number;y:number}>({x:0,y:0});
 
   useEffect(()=>{
     let prepared = prepareLayout(props.photos,['day', 'month']);
@@ -80,6 +81,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         modalShown={modalShown}
         setModalShown={setModalShown}
         setSinglePhotoIndex={setSinglePhotoIndex}
+        setImagePosition={setImagePosition}
       />
       <RenderPhotos
         photos={preparedMedia}
@@ -114,6 +116,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         modalShown={modalShown}
         setModalShown={setModalShown}
         setSinglePhotoIndex={setSinglePhotoIndex}
+        setImagePosition={setImagePosition}
       />
       <RenderPhotos
         photos={preparedMedia}
@@ -148,12 +151,15 @@ const AllPhotos: React.FC<Props> = (props) => {
         modalShown={modalShown}
         setModalShown={setModalShown}
         setSinglePhotoIndex={setSinglePhotoIndex}
+        setImagePosition={setImagePosition}
       />
-      <SinglePhoto 
+      <SingleMedia 
         modalShown={modalShown}
         setModalShown={setModalShown}
-        photos={preparedMedia}
-        singlePhotoIndex={singlePhotoIndex}
+        medias={preparedMedia}
+        singleMediaIndex={singlePhotoIndex}
+        imagePosition={imagePosition}
+        numColumns={props.numColumns}
       />
     </View>
     ):(

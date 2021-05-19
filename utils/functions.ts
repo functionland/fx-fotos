@@ -121,7 +121,7 @@ export const prepareLayout = (
         if(mediaTimestampObj[sortCondition_j] !== lastTimestampObj[sortCondition_j] || lastYear[sortCondition_j] !== mediaTimestampYear){
           lastTimestampObj[sortCondition_j] = mediaTimestampObj[sortCondition_j];
           
-          layout.push({value:mediaTimestampObj[sortCondition_j], sortCondition: sortCondition_j});
+          layout.push({value:mediaTimestampObj[sortCondition_j], sortCondition: sortCondition_j, index:-1});
           
           let headerIndexLength = headerIndexes.length;
           let lastHeaderIndex = [...headerIndexes].reverse().findIndex(headerIndex => headerIndex.sortCondition === sortCondition_j);
@@ -138,7 +138,7 @@ export const prepareLayout = (
         count[sortCondition_j] = count[sortCondition_j] + 1;
       }
 
-      layout.push({value:newMedias[i], sortCondition: ''});
+      layout.push({value:newMedias[i], sortCondition: '', index: i});
 
     }
 

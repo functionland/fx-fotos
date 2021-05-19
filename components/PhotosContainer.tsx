@@ -10,7 +10,7 @@ import PinchZoom from './PinchZoom';
 import {sortCondition, MediaItem} from '../types/interfaces';
 
 const PhotosContainer = () => {
-  const initialPhotoNumber:number = 0;
+  const initialPhotoNumber:number = 5;
   const [permission, setPermission] = useState<boolean>();
   const [photos, setPhotos] = useState<Array<MediaLibrary.Asset>>();
   const [mediaEndCursor, setMediaEndCursor] = useState<string>('');

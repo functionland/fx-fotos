@@ -1,7 +1,14 @@
 import {Asset} from 'expo-media-library';
-import React, {useEffect, useState} from 'react';
-import {Animated, Image, Text, StyleSheet, Dimensions, View, Platform, TouchableOpacity} from 'react-native';
+import React, {useEffect, useState, createRef} from 'react';
+import {Animated, Image, Text, StyleSheet, Dimensions, View, Platform} from 'react-native';
 import { layout } from '../types/interfaces';
+import {
+  LongPressGestureHandler,
+  TapGestureHandler,
+  HandlerStateChangeEvent,
+  TapGestureHandlerEventPayload,
+  State,
+} from 'react-native-gesture-handler';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const isIOS = Platform.OS === 'ios';
@@ -16,6 +23,7 @@ interface Props {
   modalShown: boolean;
   setModalShown: Function;
   setSinglePhotoIndex: Function;
+  setImagePosition: Function;
 }
 
 const PhotosChunk: React.FC<Props> = (props) => {
@@ -35,11 +43,25 @@ const PhotosChunk: React.FC<Props> = (props) => {
     }
   };
 
-  const onPressImage = () => {
-    console.log('image pressed '+props.index);
-    props.setSinglePhotoIndex(props.index);
-    props.setModalShown(true);
+
+  const _onSingleTapHandlerStateChange = ( event:HandlerStateChangeEvent<TapGestureHandlerEventPayload> ) => {
+    if (event.nativeEvent.oldState !== State.ACTIVE && event.nativeEvent.state === State.ACTIVE) {
+      let imageOffsetY = event.nativeEvent.absoluteY - event.nativeEvent.y;
+      let imageOffsetX = event.nativeEvent.absoluteX - event.nativeEvent.x;
+
+      props.setImagePosition({x:imageOffsetX, y:imageOffsetY});
+      props.setSinglePhotoIndex(props.index);
+      props.setModalShown(true);
+    }
   }
+  const _onLongTapHandlerStateChange = ( event:HandlerStateChangeEvent<TapGestureHandlerEventPayload> ) => {
+    if (event.nativeEvent.oldState === State.ACTIVE && event.nativeEvent.state !== State.ACTIVE) {
+      console.log('long tap');
+    }
+  }
+
+  const longTapRef = createRef();
+  const singleTapRef = createRef();
   
   if(props.photo.sortCondition === props.sortCondition || props.photo.sortCondition === ""){
     if(typeof props.photo.value === 'string'){
@@ -50,12 +72,22 @@ const PhotosChunk: React.FC<Props> = (props) => {
       )
     }else{
       return (
-        <TouchableOpacity onPress={onPressImage} 
-          style={[styles.Touchable,{width: SCREEN_WIDTH/props.numCol, 
-            height: SCREEN_WIDTH/props.numCol, }]}
-        
+        <Animated.View style={{
+          zIndex:4, 
+          flex: 1/props.numCol, 
+          width: SCREEN_WIDTH/props.numCol,
+          opacity: props.modalShown?0:1
+        }}>
+        <LongPressGestureHandler
+        ref={longTapRef}
+          onHandlerStateChange={_onLongTapHandlerStateChange}
+          minDurationMs={800}
         >
-          <View style={{zIndex:4, flex: 1/props.numCol, width: SCREEN_WIDTH/props.numCol,}}>
+        <TapGestureHandler
+          ref={singleTapRef}
+          onHandlerStateChange={_onSingleTapHandlerStateChange}
+          numberOfTaps={1}
+        >
             <Image
               ref={ref => {
                 setImageRef(ref);
@@ -72,8 +104,9 @@ const PhotosChunk: React.FC<Props> = (props) => {
               key={props.photo.value.uri}
               onLoad={handleOnLoad}
             />
-          </View>
-        </TouchableOpacity>
+          </TapGestureHandler>
+        </LongPressGestureHandler>
+        </Animated.View>
       );
     }
   }else{
@@ -83,17 +116,6 @@ const PhotosChunk: React.FC<Props> = (props) => {
   }
 };
 const styles = StyleSheet.create({
-  FlatList: {
-    //flexDirection: "row",
-    //flex: 1,
-    //flexWrap:"wrap",
-    width: SCREEN_WIDTH,
-    //flexWrap: 'wrap',
-    //flexGrow: 1,
-  },
-  Touchable: {
-    backgroundColor: 'red',
-    zIndex: 4
-   }
+  
 });
 export default PhotosChunk;

@@ -57,6 +57,7 @@ interface Props {
   modalShown: boolean;
   setModalShown: Function;
   setSinglePhotoIndex: Function;
+  setImagePosition: Function;
 }
 
 const RenderPhotos: React.FC<Props> = (props) => {
@@ -119,11 +120,12 @@ const RenderPhotos: React.FC<Props> = (props) => {
         loading={props.loading}
         scale={props.scale}
         key={'PhotosChunk_col' + props.numColumns + '_id' + index}
-        index={index}
+        index={data.index}
         sortCondition={props.sortCondition}
         modalShown={props.modalShown}
         setModalShown={props.setModalShown}
         setSinglePhotoIndex={props.setSinglePhotoIndex}
+        setImagePosition={props.setImagePosition}
       />
     </View>);
   };
