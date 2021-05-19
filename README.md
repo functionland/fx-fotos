@@ -1,7 +1,7 @@
-# The Box development guide
+# Photos development guide
 
 ## Project Description
-The Box is a react-native application for show the media files in user phone and sync the files with physical device.
+Photos is a react-native(expo) application to replace Google Photos/Apple Photos, and give freedom in hosting your photos on any platform, either centralized servers like Amazon or Microsoft, or decentralized solutions like "BOX". It is optimized for decentralized IPFS platforms like "BOX".
 
 ## table of content
 
