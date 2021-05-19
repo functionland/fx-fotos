@@ -1,5 +1,6 @@
 import React, { useState, useEffect, createRef, useRef } from 'react';
 import {Dimensions, Animated, StyleSheet, View, StatusBar } from 'react-native';
+import { useBackHandler } from '@react-native-community/hooks'
 import ImageView from './ImageView';
 import { Asset } from 'expo-media-library';
 import { FlatSection } from '../types/interfaces';
@@ -60,7 +61,7 @@ const SingleMedia: React.FC<Props> = (props) => {
 
   useEffect(()=>{
     setShowModal(props.modalShown);
-  },[props.modalShown])
+  },[props.modalShown]);
 
   const hideModalAnimation = (duration:number=400) => {
     Animated.parallel([
@@ -122,6 +123,14 @@ const SingleMedia: React.FC<Props> = (props) => {
       }),
     ]).start();
   }
+  useBackHandler(() => {
+    if (props.modalShown) {
+      hideModalAnimation();
+      return true
+    }
+    // let the default thing happen
+    return false
+  })
   const showHideModal = (showModal:boolean, imageWidth:number, imageHeight:number) => {
     if(showModal){
       viewPosition.setValue(props.imagePosition);
@@ -145,6 +154,11 @@ const SingleMedia: React.FC<Props> = (props) => {
   let translationX = new Animated.Value(0);
   let translationY = new Animated.Value(0);
 
+  let translationYvsX = Animated.multiply(translationY, Animated.divide(translationX, Animated.add(translationY,0.0000001)).interpolate({
+    inputRange: [-SCREEN_WIDTH, -1, -0.60, 0, 0.60, 1, SCREEN_WIDTH],
+    outputRange: [0,             0,  0,    1, 0,    0, 0],
+  }))
+
   const _onPinchGestureEvent = Animated.event(
     [{ nativeEvent: { scale: _pinchScale } }],
     { useNativeDriver: true }
@@ -159,7 +173,8 @@ const SingleMedia: React.FC<Props> = (props) => {
   }
   const _onPanHandlerStateChange = ( event:HandlerStateChangeEvent<PanGestureHandlerEventPayload> ) => {
     if (event.nativeEvent.oldState === State.ACTIVE && event.nativeEvent.state !== State.ACTIVE) {
-      if(event.nativeEvent.translationY > 50 || event.nativeEvent.translationY < -50){
+      console.log('translationX='+event.nativeEvent.translationX+', translationY='+event.nativeEvent.translationY+', calc='+event.nativeEvent.translationX/(event.nativeEvent.translationY+1))
+      if( (event.nativeEvent.translationY > 50 || event.nativeEvent.translationY < -50) && (((event.nativeEvent.translationX/(event.nativeEvent.translationY+1))>0 && (event.nativeEvent.translationX/(event.nativeEvent.translationY+1))<0.6) || ((event.nativeEvent.translationX/(event.nativeEvent.translationY+1))<0 && (event.nativeEvent.translationX/(event.nativeEvent.translationY+1))>-0.6))){
         hideModalAnimation();
       }else if(event.nativeEvent.translationY <= 50 && event.nativeEvent.translationY >= -50){
         showModalAnimation();
@@ -203,7 +218,7 @@ const SingleMedia: React.FC<Props> = (props) => {
         left: 0,
         transform: [
           {
-            translateY: Animated.subtract(Animated.add(viewPosition.y, translationY),StatusBar.currentHeight||0)
+            translateY: Animated.subtract(Animated.add(viewPosition.y, translationYvsX),StatusBar.currentHeight||0)
           },
           {
             translateX: viewPosition.x
@@ -221,7 +236,7 @@ const SingleMedia: React.FC<Props> = (props) => {
         left: 0,
         transform: [
           {
-            scale: translationY.interpolate({
+            scale: translationYvsX.interpolate({
               inputRange: [-SCREEN_HEIGHT, -100, 0, 100, SCREEN_HEIGHT],
               outputRange: [0.9, 0.9, 1, 0.9, 0.9],
             }),
@@ -294,7 +309,7 @@ const SingleMedia: React.FC<Props> = (props) => {
     </Animated.View>
     </Animated.View>
     <Animated.View style={[styles.backdrop, 
-      {opacity: Animated.multiply(viewScale.x, translationY.interpolate({
+      {opacity: Animated.multiply(viewScale.x, translationYvsX.interpolate({
         inputRange: [-100, 0, 100],
         outputRange: [0, 1, 0],
       })).interpolate({

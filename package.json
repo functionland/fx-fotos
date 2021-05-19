@@ -39,6 +39,7 @@
     "eject": "expo eject"
   },
   "dependencies": {
+    "@react-native-community/hooks": "^2.6.0",
     "@react-navigation/native": "^5.9.4",
     "@react-navigation/stack": "^5.14.4",
     "add": "^2.0.6",
