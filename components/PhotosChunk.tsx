@@ -24,6 +24,7 @@ interface Props {
   setModalShown: Function;
   setSinglePhotoIndex: Function;
   setImagePosition: Function;
+  headerHeight: number;
 }
 
 

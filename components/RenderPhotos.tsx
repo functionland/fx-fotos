@@ -126,6 +126,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
         setModalShown={props.setModalShown}
         setSinglePhotoIndex={props.setSinglePhotoIndex}
         setImagePosition={props.setImagePosition}
+        headerHeight={headerHeight}
       />
     </View>);
   };

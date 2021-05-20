@@ -55,7 +55,6 @@ const SingleMedia: React.FC<Props> = (props) => {
   }, [props.medias, props.singleMediaIndex, props.modalShown]);
 
   useEffect(()=>{
-    console.log('showModal='+showModal);
     showHideModal(showModal, imageWidth, imageHeight);
   },[showModal]);
 
@@ -94,7 +93,6 @@ const SingleMedia: React.FC<Props> = (props) => {
       
     });
     setTimeout(()=>{
-      console.log('setting modalShown to false');
       props.setModalShown(false);
       viewScale.setValue({x:0, y:0});
     }, duration/2)
@@ -134,10 +132,7 @@ const SingleMedia: React.FC<Props> = (props) => {
   const showHideModal = (showModal:boolean, imageWidth:number, imageHeight:number) => {
     if(showModal){
       viewPosition.setValue(props.imagePosition);
-      console.log(props.imagePosition);
       viewScale.setValue({x:SCREEN_WIDTH/(props.numColumns*imageWidth), y:2*SCREEN_WIDTH/(props.numColumns*imageHeight*2)})
-      console.log('opening image');
-      console.log([imageWidth, imageHeight, SCREEN_WIDTH, SCREEN_HEIGHT, props.imagePosition.x, props.imagePosition.y]);
       showModalAnimation();
     }else{
       console.log('closing image');
@@ -173,7 +168,6 @@ const SingleMedia: React.FC<Props> = (props) => {
   }
   const _onPanHandlerStateChange = ( event:HandlerStateChangeEvent<PanGestureHandlerEventPayload> ) => {
     if (event.nativeEvent.oldState === State.ACTIVE && event.nativeEvent.state !== State.ACTIVE) {
-      console.log('translationX='+event.nativeEvent.translationX+', translationY='+event.nativeEvent.translationY+', calc='+event.nativeEvent.translationX/(event.nativeEvent.translationY+1))
       if( (event.nativeEvent.translationY > 50 || event.nativeEvent.translationY < -50) && (((event.nativeEvent.translationX/(event.nativeEvent.translationY+1))>0 && (event.nativeEvent.translationX/(event.nativeEvent.translationY+1))<0.6) || ((event.nativeEvent.translationX/(event.nativeEvent.translationY+1))<0 && (event.nativeEvent.translationX/(event.nativeEvent.translationY+1))>-0.6))){
         hideModalAnimation();
       }else if(event.nativeEvent.translationY <= 50 && event.nativeEvent.translationY >= -50){
