@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {Animated, StyleSheet } from 'react-native';
 import { Asset } from 'expo-media-library';
 import { Video } from 'expo-av'
@@ -9,16 +9,36 @@ interface Props {
   imageWidth: number;
   imageScale: Animated.AnimatedMultiplication;
   media:Asset|undefined;
+  showModal: boolean;
 }
 
 const ImageViewer: React.FC<Props> = (props) => {
   if(props.media){
     if(props.media?.duration > 0){
-      const video = React.useRef(null);
+      let video:any;
+      const [isMute, setIsMute] = useState<boolean>(false);
+
+      useEffect(()=>{
+        if(video){
+          if(!props.showModal){
+            video?.unloadAsync();
+          }else{
+            video.loadAsync({uri: props.media?.uri},{shouldPlay: true, positionMillis: 0});
+          }
+        }
+      }, [props.showModal])
       return (
         <VideoPlayer
+          sliderColor='whitesmoke'
+          showFullscreenButton={false}
+          showMuteButton={true}
+          mute={() =>setIsMute(true)}
+          unmute={() =>setIsMute(false)}
+          isMute={isMute || !props.showModal}
           videoProps={{
-            shouldPlay: true,
+            ref: (v: any) => (video = v),
+            shouldPlay: props.showModal,
+            isMuted: isMute,
             resizeMode: Video.RESIZE_MODE_CONTAIN,
             source: {
               uri: props.media.uri,
@@ -27,6 +47,9 @@ const ImageViewer: React.FC<Props> = (props) => {
           inFullscreen={false}
           height= {props.imageHeight}
           width= {props.imageWidth}
+          fadeOutDuration={2000}
+          quickFadeOutDuration={2000}
+          showControlsOnLoad={true}
         />
       );
     }else{

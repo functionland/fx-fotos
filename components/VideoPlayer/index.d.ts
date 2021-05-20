@@ -10,7 +10,7 @@ declare type Error = {
     obj: Record<string, unknown>;
 };
 declare const _default: (props: {
-    videoProps: VideoProps;
+    videoProps: VideoProps & {ref:any};
 } & {
     height?: number | undefined;
     children?: null | undefined;
@@ -22,12 +22,16 @@ declare const _default: (props: {
     replayIcon?: (() => JSX.Element) | undefined;
     switchToLandscape?: (() => void) | undefined;
     switchToPortrait?: (() => void) | undefined;
+    mute?: (() => void) | undefined;
+    unmute?: (() => void) | undefined;
     inFullscreen?: boolean | undefined;
+    isMute?: boolean | undefined;
     sliderColor?: string | undefined;
     disableSlider?: boolean | undefined;
     thumbImage?: null | undefined;
     iosTrackImage?: null | undefined;
     showFullscreenButton?: boolean | undefined;
+    showMuteButton?: boolean | undefined;
     textStyle?: {
         color: string;
         fontSize: number;

@@ -96,10 +96,10 @@ const PhotosChunk: React.FC<Props> = (props) => {
               source={{uri: props.photo.value.uri}}
               // eslint-disable-next-line react-native/no-inline-styles
               style={{
-                height: SCREEN_WIDTH / props.numCol,
-                width: SCREEN_WIDTH / props.numCol,
+                height: (SCREEN_WIDTH / props.numCol) - 2.5,
+                width: (SCREEN_WIDTH / props.numCol) - 2.5,
                 backgroundColor: props.loading ? 'grey' : 'white',
-                margin: 1,
+                margin: 2.5,
                 zIndex:4,
               }}
               key={props.photo.value.uri}

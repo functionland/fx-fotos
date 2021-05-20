@@ -112,7 +112,7 @@ const SingleMedia: React.FC<Props> = (props) => {
     }, duration/2)
   }
   const showModalAnimation = (duration:number=300) => {
-    //console.log('in showModalAnimation:', {SCREEN_WIDTH:SCREEN_WIDTH, imageWidth:imageWidth, SCREEN_HEIGHT:SCREEN_HEIGHT, imageHeight:imageHeight, StausBar: StatusBar.currentHeight});
+    //console.log('in showModalAnimation:', {SCREEN_WIDTH:SCREEN_WIDTH, imageWidth:imageWidth, SCREEN_HEIGHT:SCREEN_HEIGHT, imageHeight:imageHeight, StatusBar: StatusBar.currentHeight});
     Animated.parallel([
       Animated.timing(viewPosition, {
         toValue: { x: (SCREEN_WIDTH-imageWidth)/2, y: (SCREEN_HEIGHT-imageHeight+2*(StatusBar.currentHeight||0))/2 },
@@ -320,6 +320,7 @@ const SingleMedia: React.FC<Props> = (props) => {
                         imageWidth={imageWidth}
                         imageScale={imageScale}
                         media={media}
+                        showModal={showModal}
                       />
                     </Animated.View>
                   </PinchGestureHandler>

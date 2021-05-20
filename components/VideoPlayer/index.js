@@ -1,7 +1,7 @@
 import { __rest } from "tslib";
 import { Audio, Video } from 'expo-av';
 import { Animated, Dimensions, Text, TouchableOpacity, TouchableWithoutFeedback, View, } from 'react-native';
-import { FullscreenEnterIcon, FullscreenExitIcon, PauseIcon, PlayIcon, ReplayIcon, Spinner, } from './assets/icons';
+import { FullscreenEnterIcon, FullscreenExitIcon, PauseIcon, PlayIcon, ReplayIcon, Spinner, MuteIcon, UnmuteIcon } from './assets/icons';
 import { useNetInfo } from '@react-native-community/netinfo';
 import { withDefaultProps } from 'with-default-props';
 import React, { useEffect, useState } from 'react';
@@ -41,6 +41,7 @@ const defaultProps = {
     children: null,
     debug: false,
     inFullscreen: false,
+    isMute: false,
     width: Dimensions.get('window').width,
     height: Dimensions.get('window').height,
     // Animations
@@ -55,8 +56,11 @@ const defaultProps = {
     spinner: Spinner,
     fullscreenEnterIcon: FullscreenEnterIcon,
     fullscreenExitIcon: FullscreenExitIcon,
+    muteIcon: MuteIcon,
+    unmuteIcon: UnmuteIcon,
     // Appearance
     showFullscreenButton: true,
+    showMuteButton: true,
     thumbImage: null,
     iosTrackImage: null,
     textStyle: {
@@ -70,6 +74,8 @@ const defaultProps = {
     playbackCallback: (callback) => { },
     switchToLandscape: () => console.warn(`Pass your logic to 'switchToLandscape' prop`),
     switchToPortrait: () => console.warn(`Pass your logic to 'switchToPortrait' prop`),
+    mute: () => console.warn(`Pass your logic to 'mute' prop`),
+    unmute: () => console.warn(`Pass your logic to 'unmute' prop`),
     showControlsOnLoad: false,
     sliderColor: SLIDER_COLOR,
     disableSlider: false,
@@ -339,7 +345,7 @@ const VideoPlayer = (props) => {
         }
         controlsTimer = setTimeout(() => onTimerDone(), hideControlsTimerDuration);
     };
-    const { playIcon: VideoPlayIcon, pauseIcon: VideoPauseIcon, spinner: VideoSpinner, fullscreenEnterIcon: VideoFullscreenEnterIcon, fullscreenExitIcon: VideoFullscreenExitIcon, replayIcon: VideoReplayIcon, switchToLandscape, switchToPortrait, inFullscreen, sliderColor, disableSlider, thumbImage, iosTrackImage, showFullscreenButton, textStyle, videoProps, videoBackground, width, height, } = props;
+    const { playIcon: VideoPlayIcon, pauseIcon: VideoPauseIcon, spinner: VideoSpinner, fullscreenEnterIcon: VideoFullscreenEnterIcon, fullscreenExitIcon: VideoFullscreenExitIcon, muteIcon: VideoMuteIcon, unmuteIcon: VideoUnmuteIcon,replayIcon: VideoReplayIcon, switchToLandscape, switchToPortrait, mute, unmute, inFullscreen, isMute, sliderColor, disableSlider, thumbImage, iosTrackImage, showFullscreenButton, showMuteButton, textStyle, videoProps, videoBackground, width, height, } = props;
     const centeredContentWidth = 60;
     const screenRatio = width / height;
     let videoHeight = height;
@@ -450,7 +456,7 @@ const VideoPlayer = (props) => {
         {/* Bottom bar */}
         <Animated.View pointerEvents={controlsState === ControlStates.Hidden ? 'none' : 'auto'} style={{
             position: 'absolute',
-            bottom: 0,
+            bottom: 30,
             width: videoWidth,
             opacity: controlsOpacity,
             flexDirection: 'row',
@@ -458,6 +464,7 @@ const VideoPlayer = (props) => {
             justifyContent: 'space-between',
             paddingBottom: 4,
             paddingHorizontal: 4,
+            zIndex: 10,
         }}>
           {/* Current time display */}
           <Text style={[textStyle, { backgroundColor: 'transparent', marginLeft: 5 }]}>
@@ -475,6 +482,13 @@ const VideoPlayer = (props) => {
           <Text style={[textStyle, { backgroundColor: 'transparent', marginRight: 5 }]}>
             {getMMSSFromMillis(playbackInstanceDuration)}
           </Text>
+
+          {/* Mute control */}
+          {showMuteButton && (<Control transparent={true} center={false} callback={() => {
+                isMute ? unmute() : mute();
+            }}>
+              {isMute ? <VideoUnmuteIcon /> : <VideoMuteIcon />}
+            </Control>)}
 
           {/* Fullscreen control */}
           {showFullscreenButton && (<Control transparent={true} center={false} callback={() => {
