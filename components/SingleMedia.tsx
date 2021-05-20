@@ -1,5 +1,5 @@
 import React, { useState, useEffect, createRef, useRef } from 'react';
-import {Dimensions, Animated, StyleSheet, View, StatusBar } from 'react-native';
+import {useWindowDimensions , Animated, StyleSheet, View, StatusBar } from 'react-native';
 import { useBackHandler } from '@react-native-community/hooks'
 import ImageView from './ImageView';
 import { Asset } from 'expo-media-library';
@@ -15,8 +15,6 @@ import {
   TapGestureHandlerEventPayload,
   State,
 } from 'react-native-gesture-handler';
-const SCREEN_WIDTH = Dimensions.get('screen').width;
-const SCREEN_HEIGHT = Dimensions.get('screen').height;
 
 interface Props {
   modalShown: boolean;
@@ -28,6 +26,9 @@ interface Props {
 }
 
 const SingleMedia: React.FC<Props> = (props) => {
+  const SCREEN_WIDTH = useWindowDimensions().width;
+  const SCREEN_HEIGHT = useWindowDimensions().height;
+
   const [media, setMedia] = useState<Asset|undefined>(undefined);
   const [imageHeight, setImageHeight] = useState<number>(SCREEN_HEIGHT);
   const [imageWidth, setImageWidth] = useState<number>(SCREEN_WIDTH);
@@ -37,24 +38,37 @@ const SingleMedia: React.FC<Props> = (props) => {
   const viewScale = useRef(new Animated.ValueXY({x:0,y:0})).current;
   const modalOpacity = useRef(new Animated.Value(0)).current;
 
-  let imageWidth_t = SCREEN_WIDTH;
-  let imageHeight_t = SCREEN_HEIGHT;
+  
   useEffect(()=>{
+    let imageWidth_t = SCREEN_WIDTH;
+    let imageHeight_t = SCREEN_HEIGHT;
     let medias:any[] = props.medias.layout.filter(item => typeof item.value !== 'string').map((item)=>{return item.value});
     let media:Asset = medias[props.singleMediaIndex];
     if(media && typeof media !== 'string'){
-      if(media.height/media.width > SCREEN_HEIGHT/SCREEN_WIDTH){
-        imageWidth_t = SCREEN_WIDTH * (media.height/(media.width || 1))
-        setImageWidth(imageWidth_t);
-      }else{
-        imageHeight_t = SCREEN_HEIGHT/(media.height/(media.width || 1))
-        setImageHeight(imageHeight_t);
+      if(media.height > SCREEN_HEIGHT && media.width > SCREEN_WIDTH){
+        if(media.height/media.width > SCREEN_HEIGHT/SCREEN_WIDTH){
+          imageWidth_t = media.width * SCREEN_HEIGHT/(media.height==0?1:media.height);
+        }else{
+          imageHeight_t = SCREEN_WIDTH * media.height/(media.width==0?1:media.width);
+        }
+      }else if(media.height > SCREEN_HEIGHT){
+        imageWidth_t = media.width * SCREEN_HEIGHT/(media.height==0?1:media.height);
+      }else if(media.width > SCREEN_WIDTH){
+        imageHeight_t = SCREEN_WIDTH * media.height/(media.width==0?1:media.width);
+      }else if(media.height <= SCREEN_HEIGHT && media.width <= SCREEN_WIDTH){
+        imageHeight_t = media.height;
+        imageWidth_t = media.width ;
       }
+      setImageWidth(imageWidth_t);
+      setImageHeight(imageHeight_t);
       setMedia(media);
+      //console.log('SCREEN_WIDTH='+SCREEN_WIDTH+', SCREEN_HEIGHT='+SCREEN_HEIGHT+', media.width='+media.width
+      //+', media.height='+media.height+', imageWidth_t='+imageWidth_t+', imageHeight_t='+imageHeight_t);
     }
-  }, [props.medias, props.singleMediaIndex, props.modalShown]);
+  }, [props.medias, props.singleMediaIndex, props.modalShown, SCREEN_WIDTH, SCREEN_HEIGHT]);
 
   useEffect(()=>{
+    //console.log('showModal with parameters:', {showModal:showModal, imageWidth:imageWidth, imageHeight:imageHeight})
     showHideModal(showModal, imageWidth, imageHeight);
   },[showModal]);
 
@@ -98,9 +112,10 @@ const SingleMedia: React.FC<Props> = (props) => {
     }, duration/2)
   }
   const showModalAnimation = (duration:number=300) => {
+    //console.log('in showModalAnimation:', {SCREEN_WIDTH:SCREEN_WIDTH, imageWidth:imageWidth, SCREEN_HEIGHT:SCREEN_HEIGHT, imageHeight:imageHeight, StausBar: StatusBar.currentHeight});
     Animated.parallel([
       Animated.timing(viewPosition, {
-        toValue: { x: (SCREEN_WIDTH-imageWidth)/2, y: (SCREEN_HEIGHT-imageHeight)/2 },
+        toValue: { x: (SCREEN_WIDTH-imageWidth)/2, y: (SCREEN_HEIGHT-imageHeight+2*(StatusBar.currentHeight||0))/2 },
         duration: duration,
         useNativeDriver: true,
       }),
@@ -278,13 +293,27 @@ const SingleMedia: React.FC<Props> = (props) => {
                 onHandlerStateChange={_onDoubleTapHandlerStateChange}
                 numberOfTaps={2}
               >
-                <View style={[styles.wrapper]}>
+                <View 
+                  style={[styles.wrapper, 
+                    {
+                      width: SCREEN_WIDTH, 
+                      height: SCREEN_HEIGHT,
+                    }]}
+                  >
                   <PinchGestureHandler
                     ref={pinchRef}
                     onGestureEvent={_onPinchGestureEvent}
                     onHandlerStateChange={_onPinchHandlerStateChange}
                   >
-                    <Animated.View style={[styles.container]} collapsable={false}>
+                    <Animated.View 
+                      style={[styles.container, 
+                        {
+                          width: SCREEN_WIDTH, 
+                          height: SCREEN_HEIGHT,
+                        }
+                      ]} 
+                      collapsable={false}
+                    >
                   
                       <ImageView
                         imageHeight={imageHeight}
@@ -303,13 +332,17 @@ const SingleMedia: React.FC<Props> = (props) => {
     </Animated.View>
     </Animated.View>
     <Animated.View style={[styles.backdrop, 
-      {opacity: Animated.multiply(viewScale.x, translationYvsX.interpolate({
-        inputRange: [-100, 0, 100],
-        outputRange: [0, 1, 0],
-      })).interpolate({
-        inputRange: [0, 0.5, 1],
-        outputRange: [0, 0, 1],
-      })}]}
+      {
+        opacity: Animated.multiply(viewScale.x, translationYvsX.interpolate({
+          inputRange: [-100, 0, 100],
+          outputRange: [0, 1, 0],
+        })).interpolate({
+          inputRange: [0, 0.5, 1],
+          outputRange: [0, 0, 1],
+        }),
+        height:  SCREEN_HEIGHT,
+        width: SCREEN_WIDTH,
+      }]}
     >
 
     </Animated.View>
@@ -323,14 +356,10 @@ const styles = StyleSheet.create({
     zIndex:5,
   },
   wrapper:{
-    width: SCREEN_WIDTH, 
-    height: SCREEN_HEIGHT,
     position: 'relative',
     zIndex:5,
   },
   container: {
-    width: SCREEN_WIDTH, 
-    height: SCREEN_HEIGHT,
     position: 'relative',
     zIndex:5,
   },
@@ -339,8 +368,6 @@ const styles = StyleSheet.create({
   },
   backdrop: {
     backgroundColor: 'black',
-    height:  SCREEN_HEIGHT,
-    width: SCREEN_WIDTH,
     zIndex: 4
   }
 });

@@ -1,6 +1,8 @@
 import React from 'react';
 import {Animated, StyleSheet } from 'react-native';
 import { Asset } from 'expo-media-library';
+import { Video } from 'expo-av'
+import VideoPlayer from './VideoPlayer';
 
 interface Props {
   imageHeight: number;
@@ -10,9 +12,26 @@ interface Props {
 }
 
 const ImageViewer: React.FC<Props> = (props) => {
-
-  return (
-    <Animated.Image
+  if(props.media){
+    if(props.media?.duration > 0){
+      const video = React.useRef(null);
+      return (
+        <VideoPlayer
+          videoProps={{
+            shouldPlay: true,
+            resizeMode: Video.RESIZE_MODE_CONTAIN,
+            source: {
+              uri: props.media.uri,
+            },
+          }}
+          inFullscreen={false}
+          height= {props.imageHeight}
+          width= {props.imageWidth}
+        />
+      );
+    }else{
+      return (
+        <Animated.Image
                 style={[
                   styles.pinchableImage,
                   {
@@ -25,11 +44,20 @@ const ImageViewer: React.FC<Props> = (props) => {
                 ]}
                 source={{uri: props.media?.uri}}
               />
-  );
+      );
+    }
+  }else{
+    return (
+      <></>
+    );
+  }
 };
 
 const styles = StyleSheet.create({
   pinchableImage: {
+
+  },
+  video: {
 
   }
 });

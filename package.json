@@ -40,10 +40,13 @@
   },
   "dependencies": {
     "@react-native-community/hooks": "^2.6.0",
+    "@react-native-community/netinfo": "6.0.0",
+    "@react-native-community/slider": "3.0.3",
     "@react-navigation/native": "^5.9.4",
     "@react-navigation/stack": "^5.14.4",
     "add": "^2.0.6",
     "expo": "~41.0.1",
+    "expo-av": "~9.1.2",
     "expo-image-manipulator": "^9.1.0",
     "expo-media-library": "~12.0.2",
     "expo-status-bar": "~1.0.4",
@@ -54,6 +57,8 @@
     "react-native-screens": "^3.1.1",
     "react-native-web": "~0.13.12",
     "recyclerlistview": "^3.0.5",
+    "tslib": "^2.2.0",
+    "with-default-props": "^0.2.1",
     "yarn": "^1.22.10"
   },
   "devDependencies": {
