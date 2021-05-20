@@ -240,6 +240,23 @@ export const pow2abs = (a: number, b: number) => {
   return Math.pow(Math.abs(a - b), 2);
 };
 
+
+export const prettyTime = (seconds:number) => {
+    const format = (val:number) => {
+
+      return `0${Math.floor(val)}`.slice(-2);
+    }
+    const hours = seconds / 3600;
+    const minutes = (seconds % 3600) / 60;
+    if(hours > 1){
+      return [hours, minutes, seconds % 60].map(format).join(':');
+    }else if(minutes > 1){
+      return [minutes, seconds % 60].map(format).join(':');
+    }else{
+      return '0:'+[seconds % 60].map(format).join(':');
+    }
+}
+
 export const changeSortCondition: changeSortConditionAndNumColumns = (
   sortCondition_i: sortCondition,
   pinchOrZoom: 'pinch' | 'zoom' | undefined,
