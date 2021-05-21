@@ -1,9 +1,12 @@
 import React, { useState, useEffect, createRef, useRef } from 'react';
-import {useWindowDimensions , Animated, StyleSheet, View, StatusBar, FlatList } from 'react-native';
+import {useWindowDimensions , Animated, StyleSheet, View, StatusBar } from 'react-native';
 import { useBackHandler } from '@react-native-community/hooks'
 import ImageView from './ImageView';
 import { Asset } from 'expo-media-library';
 import { FlatSection } from '../types/interfaces';
+import { RecyclerListView, DataProvider, AutoScroll, BaseScrollView } from 'recyclerlistview';
+import { LayoutUtil } from '../utils/LayoutUtil';
+
 import {
   LongPressGestureHandler,
   TapGestureHandler,
@@ -34,17 +37,24 @@ const SingleMedia: React.FC<Props> = (props) => {
   const [imageHeight, setImageHeight] = useState<number>(SCREEN_HEIGHT);
   const [imageWidth, setImageWidth] = useState<number>(SCREEN_WIDTH);
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [scrollEnabled, setScrollEnabled] = useState<boolean>(false);
 
   const viewPosition = useRef(new Animated.ValueXY(props.imagePosition)).current;
   const viewScale = useRef(new Animated.ValueXY({x:0,y:0})).current;
   const modalOpacity = useRef(new Animated.Value(0)).current;
 
+  const scrollRef:any = useRef();
+  const [dataProvider, setDataProvider] = useState<DataProvider>(new DataProvider((r1, r2) => {
+    return r1 !== r2;
+  }));
+  const [layoutProvider, setLayoutProvider] = useState<any>(LayoutUtil.getSingleImageLayoutProvider());
   
   useEffect(()=>{
     let imageWidth_t = SCREEN_WIDTH;
     let imageHeight_t = SCREEN_HEIGHT;
     let medias:any[] = props.medias.layout.filter(item => typeof item.value !== 'string').map((item)=>{return item.value});
     setMedias(medias);
+    setDataProvider(dataProvider.cloneWithRows(medias));
     let media:Asset = medias[props.singleMediaIndex];
     if(media && typeof media !== 'string'){
       if(media.height > SCREEN_HEIGHT && media.width > SCREEN_WIDTH){
@@ -193,11 +203,15 @@ const SingleMedia: React.FC<Props> = (props) => {
     }else if (event.nativeEvent.oldState !== State.ACTIVE && event.nativeEvent.state === State.ACTIVE) {
       if( ((event.nativeEvent.velocityX/(event.nativeEvent.velocityY+1))>0.6) || ((event.nativeEvent.translationX/(event.nativeEvent.translationY+1))<-0.6) ){
         console.log('scroll started');
+        setScrollEnabled(true);
         let newIndex = -1;
         if(event.nativeEvent.velocityX > 0){
           newIndex = props.singleMediaIndex - 1;
         }else if(event.nativeEvent.velocityX < 0){
           newIndex = props.singleMediaIndex + 1;
+        }
+        if(newIndex > -1 && scrollRef){
+          scrollRef?.current?.scrollToIndex(newIndex, true);
         }
       }
     }
@@ -224,17 +238,31 @@ const SingleMedia: React.FC<Props> = (props) => {
       console.log('long tap');
     }
   }
+  
 
   return (
-    <View style={{zIndex:props.modalShown?1:0, width:SCREEN_WIDTH, height:SCREEN_HEIGHT}}>
-      <FlatList
-      horizontal={true}
-      data={[{a:1}]}
-      showsHorizontalScrollIndicator={true}
-      initialNumToRender={3}
-      removeClippedSubviews={true}
-      renderItem={({ item }) => (
-        <>
+    <View style={{zIndex:props.modalShown?1:0, opacity:props.modalShown?1:0,width:SCREEN_WIDTH, height:SCREEN_HEIGHT}}>
+      <RecyclerListView
+      ref={scrollRef}
+      isHorizontal={true}
+      dataProvider={dataProvider}
+      layoutProvider={layoutProvider}
+      renderAheadOffset={2}
+      initialRenderIndex={props.singleMediaIndex}
+      scrollViewProps={{
+        disableIntervalMomentum: true,
+        disableScrollViewPanResponder: true,
+        scrollEnabled: scrollEnabled,
+        horizontal: true,
+        pagingEnabled: true,
+      }}
+      style={{
+        width:SCREEN_WIDTH, 
+        height:SCREEN_HEIGHT,
+        backgroundColor: 'black',
+      }}
+      rowRenderer={(type:string | number, item:Asset, index: number) => (
+        <View style={{width:SCREEN_WIDTH, height:SCREEN_HEIGHT}}>
       <Animated.View 
         style={[styles.ModalView, {
           opacity:modalOpacity.interpolate({
@@ -339,7 +367,7 @@ const SingleMedia: React.FC<Props> = (props) => {
                           imageHeight={imageHeight}
                           imageWidth={imageWidth}
                           imageScale={imageScale}
-                          media={media}
+                          media={item}
                           showModal={showModal}
                         />
                       </Animated.View>
@@ -367,7 +395,7 @@ const SingleMedia: React.FC<Props> = (props) => {
       >
 
       </Animated.View>
-      </>
+      </View>
       )}
       />
     </View>
