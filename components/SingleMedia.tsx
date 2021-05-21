@@ -1,5 +1,5 @@
 import React, { useState, useEffect, createRef, useRef } from 'react';
-import {useWindowDimensions , Animated, StyleSheet, View, StatusBar } from 'react-native';
+import {useWindowDimensions , Animated, StyleSheet, View, StatusBar, FlatList } from 'react-native';
 import { useBackHandler } from '@react-native-community/hooks'
 import ImageView from './ImageView';
 import { Asset } from 'expo-media-library';
@@ -30,6 +30,7 @@ const SingleMedia: React.FC<Props> = (props) => {
   const SCREEN_HEIGHT = useWindowDimensions().height;
 
   const [media, setMedia] = useState<Asset|undefined>(undefined);
+  const [medias, setMedias] = useState<Asset[]|undefined>(undefined);
   const [imageHeight, setImageHeight] = useState<number>(SCREEN_HEIGHT);
   const [imageWidth, setImageWidth] = useState<number>(SCREEN_WIDTH);
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -43,6 +44,7 @@ const SingleMedia: React.FC<Props> = (props) => {
     let imageWidth_t = SCREEN_WIDTH;
     let imageHeight_t = SCREEN_HEIGHT;
     let medias:any[] = props.medias.layout.filter(item => typeof item.value !== 'string').map((item)=>{return item.value});
+    setMedias(medias);
     let media:Asset = medias[props.singleMediaIndex];
     if(media && typeof media !== 'string'){
       if(media.height > SCREEN_HEIGHT && media.width > SCREEN_WIDTH){
@@ -188,6 +190,16 @@ const SingleMedia: React.FC<Props> = (props) => {
       }else if(event.nativeEvent.translationY <= 50 && event.nativeEvent.translationY >= -50){
         showModalAnimation();
       }
+    }else if (event.nativeEvent.oldState !== State.ACTIVE && event.nativeEvent.state === State.ACTIVE) {
+      if( ((event.nativeEvent.velocityX/(event.nativeEvent.velocityY+1))>0.6) || ((event.nativeEvent.translationX/(event.nativeEvent.translationY+1))<-0.6) ){
+        console.log('scroll started');
+        let newIndex = -1;
+        if(event.nativeEvent.velocityX > 0){
+          newIndex = props.singleMediaIndex - 1;
+        }else if(event.nativeEvent.velocityX < 0){
+          newIndex = props.singleMediaIndex + 1;
+        }
+      }
     }
   }
   const _onPanGestureEvent = Animated.event(
@@ -215,138 +227,149 @@ const SingleMedia: React.FC<Props> = (props) => {
 
   return (
     <View style={{zIndex:props.modalShown?1:0, width:SCREEN_WIDTH, height:SCREEN_HEIGHT}}>
-    <Animated.View 
-      style={[styles.ModalView, {
-        opacity:modalOpacity.interpolate({
-          inputRange: [0, 0.3, 1],
-          outputRange: [0, 1, 1],
-        }), 
-        width:props.modalShown?SCREEN_WIDTH:0,
-        height:props.modalShown?SCREEN_HEIGHT:0,
-        top: 0,
-        left: 0,
-        transform: [
-          {
-            translateY: Animated.subtract(Animated.add(viewPosition.y, translationYvsX),StatusBar.currentHeight||0)
-          },
-          {
-            translateX: viewPosition.x
-          }
-        ],
-      }]}
-    >
-    <Animated.View 
-      style={[ {
-        //opacity:modalOpacity, 
-        position: 'relative',
-        width:'100%',
-        height:'100%',
-        top: 0,
-        left: 0,
-        transform: [
-          {
-            scale: translationYvsX.interpolate({
-              inputRange: [-SCREEN_HEIGHT, -100, 0, 100, SCREEN_HEIGHT],
-              outputRange: [0.9, 0.9, 1, 0.9, 0.9],
-            }),
-          },
-          { 
-            scaleX: viewScale.x
-          },
-          {
-            scaleY: viewScale.y,
-          },
-          {
-            translateX: Animated.divide(
-              Animated.subtract(
-                Animated.multiply(
-                  viewScale.x,SCREEN_WIDTH), 
-                SCREEN_WIDTH)
-              , Animated.multiply(2,Animated.add(viewScale.x, 0.000001)))
-          },
-          {
-            translateY: Animated.divide(
-              Animated.subtract(
-                Animated.multiply(
-                  viewScale.y,(SCREEN_HEIGHT)
-                ), (SCREEN_HEIGHT)
-              )
-              , Animated.multiply(2,Animated.add(viewScale.y, 0.000001)))
-          }
-        ],
-      }]}
-    >
-      <LongPressGestureHandler
-        onHandlerStateChange={_onLongTapHandlerStateChange}
-        minDurationMs={800}
+      <FlatList
+      horizontal={true}
+      data={[{a:1}]}
+      showsHorizontalScrollIndicator={true}
+      initialNumToRender={3}
+      removeClippedSubviews={true}
+      renderItem={({ item }) => (
+        <>
+      <Animated.View 
+        style={[styles.ModalView, {
+          opacity:modalOpacity.interpolate({
+            inputRange: [0, 0.3, 1],
+            outputRange: [0, 1, 1],
+          }), 
+          width:props.modalShown?SCREEN_WIDTH:0,
+          height:props.modalShown?SCREEN_HEIGHT:0,
+          top: 0,
+          left: 0,
+          transform: [
+            {
+              translateY: Animated.subtract(Animated.add(viewPosition.y, translationYvsX),StatusBar.currentHeight||0)
+            },
+            {
+              translateX: viewPosition.x
+            }
+          ],
+        }]}
       >
-        <Animated.View>
-          <PanGestureHandler
-            maxPointers={1}
-            ref={singleTapRef}
-            onHandlerStateChange={_onPanHandlerStateChange}
-            onGestureEvent={_onPanGestureEvent}
-          >
-            <Animated.View>
-              <TapGestureHandler
-                ref={doubleTapRef}
-                onHandlerStateChange={_onDoubleTapHandlerStateChange}
-                numberOfTaps={2}
-              >
-                <View 
-                  style={[styles.wrapper, 
-                    {
-                      width: SCREEN_WIDTH, 
-                      height: SCREEN_HEIGHT,
-                    }]}
-                  >
-                  <PinchGestureHandler
-                    ref={pinchRef}
-                    onGestureEvent={_onPinchGestureEvent}
-                    onHandlerStateChange={_onPinchHandlerStateChange}
-                  >
-                    <Animated.View 
-                      style={[styles.container, 
-                        {
-                          width: SCREEN_WIDTH, 
-                          height: SCREEN_HEIGHT,
-                        }
-                      ]} 
-                      collapsable={false}
+      <Animated.View 
+        style={[ {
+          //opacity:modalOpacity, 
+          position: 'relative',
+          width:'100%',
+          height:'100%',
+          top: 0,
+          left: 0,
+          transform: [
+            {
+              scale: translationYvsX.interpolate({
+                inputRange: [-SCREEN_HEIGHT, -100, 0, 100, SCREEN_HEIGHT],
+                outputRange: [0.9, 0.9, 1, 0.9, 0.9],
+              }),
+            },
+            { 
+              scaleX: viewScale.x
+            },
+            {
+              scaleY: viewScale.y,
+            },
+            {
+              translateX: Animated.divide(
+                Animated.subtract(
+                  Animated.multiply(
+                    viewScale.x,SCREEN_WIDTH), 
+                  SCREEN_WIDTH)
+                , Animated.multiply(2,Animated.add(viewScale.x, 0.000001)))
+            },
+            {
+              translateY: Animated.divide(
+                Animated.subtract(
+                  Animated.multiply(
+                    viewScale.y,(SCREEN_HEIGHT)
+                  ), (SCREEN_HEIGHT)
+                )
+                , Animated.multiply(2,Animated.add(viewScale.y, 0.000001)))
+            }
+          ],
+        }]}
+      >
+        <LongPressGestureHandler
+          onHandlerStateChange={_onLongTapHandlerStateChange}
+          minDurationMs={800}
+        >
+          <Animated.View>
+            <PanGestureHandler
+              maxPointers={1}
+              ref={singleTapRef}
+              onHandlerStateChange={_onPanHandlerStateChange}
+              onGestureEvent={_onPanGestureEvent}
+            >
+              <Animated.View>
+                <TapGestureHandler
+                  ref={doubleTapRef}
+                  onHandlerStateChange={_onDoubleTapHandlerStateChange}
+                  numberOfTaps={2}
+                >
+                  <View 
+                    style={[styles.wrapper, 
+                      {
+                        width: SCREEN_WIDTH, 
+                        height: SCREEN_HEIGHT,
+                      }]}
                     >
-                  
-                      <ImageView
-                        imageHeight={imageHeight}
-                        imageWidth={imageWidth}
-                        imageScale={imageScale}
-                        media={media}
-                        showModal={showModal}
-                      />
-                    </Animated.View>
-                  </PinchGestureHandler>
-                </View>
-              </TapGestureHandler>
-            </Animated.View>
-          </PanGestureHandler>
-        </Animated.View>
-      </LongPressGestureHandler>
-    </Animated.View>
-    </Animated.View>
-    <Animated.View style={[styles.backdrop, 
-      {
-        opacity: Animated.multiply(viewScale.x, translationYvsX.interpolate({
-          inputRange: [-100, 0, 100],
-          outputRange: [0, 1, 0],
-        })).interpolate({
-          inputRange: [0, 0.5, 1],
-          outputRange: [0, 0, 1],
-        }),
-        height:  SCREEN_HEIGHT,
-        width: SCREEN_WIDTH,
-      }]}
-    >
+                    <PinchGestureHandler
+                      ref={pinchRef}
+                      onGestureEvent={_onPinchGestureEvent}
+                      onHandlerStateChange={_onPinchHandlerStateChange}
+                    >
+                      <Animated.View 
+                        style={[styles.container, 
+                          {
+                            width: SCREEN_WIDTH, 
+                            height: SCREEN_HEIGHT,
+                          }
+                        ]} 
+                        collapsable={false}
+                      >
+                    
+                        <ImageView
+                          imageHeight={imageHeight}
+                          imageWidth={imageWidth}
+                          imageScale={imageScale}
+                          media={media}
+                          showModal={showModal}
+                        />
+                      </Animated.View>
+                    </PinchGestureHandler>
+                  </View>
+                </TapGestureHandler>
+              </Animated.View>
+            </PanGestureHandler>
+          </Animated.View>
+        </LongPressGestureHandler>
+      </Animated.View>
+      </Animated.View>
+      <Animated.View style={[styles.backdrop, 
+        {
+          opacity: Animated.multiply(viewScale.x, translationYvsX.interpolate({
+            inputRange: [-100, 0, 100],
+            outputRange: [0, 1, 0],
+          })).interpolate({
+            inputRange: [0, 0.5, 1],
+            outputRange: [0, 0, 1],
+          }),
+          height:  SCREEN_HEIGHT,
+          width: SCREEN_WIDTH,
+        }]}
+      >
 
-    </Animated.View>
+      </Animated.View>
+      </>
+      )}
+      />
     </View>
   );
 };
