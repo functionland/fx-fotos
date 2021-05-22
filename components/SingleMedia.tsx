@@ -218,6 +218,11 @@ const SingleMedia: React.FC<Props> = (props) => {
       console.log('long tap');
     }
   }
+
+  const _onVisibleIndicesChanged = (index:number)=> {
+    console.log('onItemLayout='+index);
+    //setActiveIndex(0);
+  }
   
 
   return (
@@ -302,10 +307,7 @@ const SingleMedia: React.FC<Props> = (props) => {
                   layoutProvider={layoutProvider}
                   renderAheadOffset={1}
                   initialRenderIndex={props.singleMediaIndex}
-                  onVisibleIndicesChanged={(indexes) => {
-                    setActiveIndex(indexes[0]);
-                    console.log('test');
-                  }}
+                  onItemLayout={_onVisibleIndicesChanged}
                   scrollViewProps={{
                     disableIntervalMomentum: true,
                     disableScrollViewPanResponder: true,
@@ -313,14 +315,15 @@ const SingleMedia: React.FC<Props> = (props) => {
                     horizontal: true,
                     pagingEnabled: true,
                   }}
+                  extendedState={{modalShown:props.modalShown}}
                   style={{width:SCREEN_WIDTH, height:SCREEN_HEIGHT}}
-                  rowRenderer={(type:string | number, item:Asset, index: number) => (
+                  rowRenderer={(type:string | number, item:Asset, index: number, extendedState:any) => (
                     <Media
                       imageHeight={calcImageDimension(item).height}
                       imageWidth={calcImageDimension(item).width}
                       media={item}
-                      showModal={props.modalShown}
-                      activeIndex={activeIndex}
+                      state={extendedState}
+                      activeIndex={scrollRef?.current?.findApproxFirstVisibleIndex()}
                       index={index}
                     />
                   )}

@@ -16,7 +16,7 @@ interface Props {
   imageHeight: number;
   imageWidth: number;
   media:Asset|undefined;
-  showModal: boolean;
+  state: {modalShown:boolean}|undefined;
   activeIndex: number;
   index: number;
 }
@@ -60,20 +60,28 @@ const Media: React.FC<Props> = (props) => {
 
       let video:any;
       const [isMute, setIsMute] = useState<boolean>(false);
-
       useEffect(()=>{
-        console.log('useEffect props.showModal', {
-          'props.activeIndex':props.activeIndex,
-          'props.index':props.index,
-        });
+        if(props.state){
+          console.log(props.state);
+        }
+      },[props.state]);
+      useEffect(()=>{
         if(video && props?.media?.duration){
-          if(!(props.activeIndex===props.index?true:false)){
+          console.log('useEffect:', {
+            'props.activeIndex':props.activeIndex,
+            'props.index':props.index,
+            'props.state?.modalShown':props.state?.modalShown,
+            'first condition':!(props.activeIndex===props.index?true:false),
+            'second condition': !props.state?.modalShown
+          });
+          if(!(props.activeIndex===props.index?true:false) || !props.state?.modalShown){
+            console.log('video unloaded');
             video?.unloadAsync();
-          }else{
+          }else if(props.state?.modalShown && (props.activeIndex===props.index?true:false)){
             video.loadAsync({uri: props.media?.uri},{shouldPlay: true, positionMillis: 0});
           }
         }
-      }, [props.index, props.activeIndex]);
+      }, [props.index, props.activeIndex, props.state]);
 
       const buildMedia = (media:Asset|undefined) => {
         if(media){
@@ -85,10 +93,10 @@ const Media: React.FC<Props> = (props) => {
                 showMuteButton={true}
                 mute={() =>setIsMute(true)}
                 unmute={() =>setIsMute(false)}
-                isMute={isMute || !(props.activeIndex===props.index?true:false)}
+                isMute={isMute || !(props.activeIndex===props.index?true:false) || !props.state?.modalShown}
                 videoProps={{
                   ref: (v: any) => (video = v),
-                  shouldPlay: (props.activeIndex===props.index?true:false),
+                  shouldPlay: ((props.activeIndex===props.index?true:false) && props.state?.modalShown),
                   isMuted: isMute,
                   resizeMode: Video.RESIZE_MODE_CONTAIN,
                   source: {
