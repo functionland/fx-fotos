@@ -1,19 +1,15 @@
 import React, { useState, useEffect, createRef, useRef } from 'react';
 import {useWindowDimensions , Animated, StyleSheet, View, StatusBar } from 'react-native';
 import { useBackHandler } from '@react-native-community/hooks'
-import ImageView from './ImageView';
+import Media from './Media';
 import { Asset } from 'expo-media-library';
-import { FlatSection } from '../types/interfaces';
-import { RecyclerListView, DataProvider, AutoScroll, BaseScrollView } from 'recyclerlistview';
+import { RecyclerListView, DataProvider, } from 'recyclerlistview';
 import { LayoutUtil } from '../utils/LayoutUtil';
 
 import {
   LongPressGestureHandler,
-  TapGestureHandler,
-  PinchGestureHandler,
   PanGestureHandler,
   HandlerStateChangeEvent,
-  PinchGestureHandlerEventPayload,
   PanGestureHandlerEventPayload,
   TapGestureHandlerEventPayload,
   State,
@@ -22,7 +18,7 @@ import {
 interface Props {
   modalShown: boolean;
   setModalShown: Function;
-  medias: FlatSection;
+  medias: Asset[]|undefined;
   singleMediaIndex: number;
   imagePosition: {x:number, y:number};
   numColumns: 2|3|4;
@@ -33,11 +29,8 @@ const SingleMedia: React.FC<Props> = (props) => {
   const SCREEN_HEIGHT = useWindowDimensions().height;
 
   const [media, setMedia] = useState<Asset|undefined>(undefined);
-  const [medias, setMedias] = useState<Asset[]|undefined>(undefined);
-  const [imageHeight, setImageHeight] = useState<number>(SCREEN_HEIGHT);
-  const [imageWidth, setImageWidth] = useState<number>(SCREEN_WIDTH);
-  const [showModal, setShowModal] = useState<boolean>(false);
   const [scrollEnabled, setScrollEnabled] = useState<boolean>(false);
+  const [activeIndex, setActiveIndex] = useState<number>(-1);
 
   const viewPosition = useRef(new Animated.ValueXY(props.imagePosition)).current;
   const viewScale = useRef(new Animated.ValueXY({x:0,y:0})).current;
@@ -48,15 +41,11 @@ const SingleMedia: React.FC<Props> = (props) => {
     return r1 !== r2;
   }));
   const [layoutProvider, setLayoutProvider] = useState<any>(LayoutUtil.getSingleImageLayoutProvider());
-  
-  useEffect(()=>{
+
+  const calcImageDimension = (media:Asset|undefined) => {
     let imageWidth_t = SCREEN_WIDTH;
     let imageHeight_t = SCREEN_HEIGHT;
-    let medias:any[] = props.medias.layout.filter(item => typeof item.value !== 'string').map((item)=>{return item.value});
-    setMedias(medias);
-    setDataProvider(dataProvider.cloneWithRows(medias));
-    let media:Asset = medias[props.singleMediaIndex];
-    if(media && typeof media !== 'string'){
+    if(media){
       if(media.height > SCREEN_HEIGHT && media.width > SCREEN_WIDTH){
         if(media.height/media.width > SCREEN_HEIGHT/SCREEN_WIDTH){
           imageWidth_t = media.width * SCREEN_HEIGHT/(media.height==0?1:media.height);
@@ -70,25 +59,38 @@ const SingleMedia: React.FC<Props> = (props) => {
       }else if(media.height <= SCREEN_HEIGHT && media.width <= SCREEN_WIDTH){
         imageHeight_t = media.height;
         imageWidth_t = media.width ;
-      }
-      setImageWidth(imageWidth_t);
-      setImageHeight(imageHeight_t);
-      setMedia(media);
-      //console.log('SCREEN_WIDTH='+SCREEN_WIDTH+', SCREEN_HEIGHT='+SCREEN_HEIGHT+', media.width='+media.width
-      //+', media.height='+media.height+', imageWidth_t='+imageWidth_t+', imageHeight_t='+imageHeight_t);
+      }																												
     }
-  }, [props.medias, props.singleMediaIndex, props.modalShown, SCREEN_WIDTH, SCREEN_HEIGHT]);
+    return {height: imageHeight_t, width: imageWidth_t}
+  };
 
   useEffect(()=>{
-    //console.log('showModal with parameters:', {showModal:showModal, imageWidth:imageWidth, imageHeight:imageHeight})
-    showHideModal(showModal, imageWidth, imageHeight);
-  },[showModal]);
+    if(props.medias){
+      setDataProvider(dataProvider.cloneWithRows(props.medias));
+    }
+  }, [props.medias]);
 
   useEffect(()=>{
-    setShowModal(props.modalShown);
+    let imageDimensions = calcImageDimension(media);
+    showHideModal(props.modalShown, imageDimensions.width, imageDimensions.height);
+    if(props.modalShown){
+      scrollRef?.current?.scrollToIndex(props.singleMediaIndex, false);
+    }
+  },[media]);
+
+
+  useEffect(()=>{
+    console.log('in SingleMedia props.modalShown='+props.modalShown);
+    if(props.medias){
+      let media:Asset = props.medias[props.singleMediaIndex];
+      if(media && typeof media !== 'string'){
+        setMedia(media);
+      }
+    }
   },[props.modalShown]);
 
   const hideModalAnimation = (duration:number=400) => {
+    let imageDimensions = calcImageDimension(media);
     Animated.parallel([
       Animated.timing(viewPosition, {
         toValue: props.imagePosition,
@@ -96,7 +98,7 @@ const SingleMedia: React.FC<Props> = (props) => {
         useNativeDriver: true,
       }),
       Animated.timing(viewScale, {
-        toValue: {x:SCREEN_WIDTH/(props.numColumns*imageWidth), y:2*SCREEN_WIDTH/(props.numColumns*imageHeight*2)},
+        toValue: {x:SCREEN_WIDTH/(props.numColumns*imageDimensions.width), y:2*SCREEN_WIDTH/(props.numColumns*imageDimensions.height*2)},
         duration: duration,
         useNativeDriver: true,
       }),
@@ -119,15 +121,17 @@ const SingleMedia: React.FC<Props> = (props) => {
       
     });
     setTimeout(()=>{
+      console.log('setting modalShown to false')
       props.setModalShown(false);
       viewScale.setValue({x:0, y:0});
     }, duration/2)
   }
   const showModalAnimation = (duration:number=300) => {
+    let imageDimensions = calcImageDimension(media);
     //console.log('in showModalAnimation:', {SCREEN_WIDTH:SCREEN_WIDTH, imageWidth:imageWidth, SCREEN_HEIGHT:SCREEN_HEIGHT, imageHeight:imageHeight, StatusBar: StatusBar.currentHeight});
     Animated.parallel([
       Animated.timing(viewPosition, {
-        toValue: { x: (SCREEN_WIDTH-imageWidth)/2, y: (SCREEN_HEIGHT-imageHeight+2*(StatusBar.currentHeight||0))/2 },
+        toValue: { x: (SCREEN_WIDTH-imageDimensions.width)/2, y: (SCREEN_HEIGHT-imageDimensions.height+2*(StatusBar.currentHeight||0))/2 },
         duration: duration,
         useNativeDriver: true,
       }),
@@ -166,13 +170,10 @@ const SingleMedia: React.FC<Props> = (props) => {
     }
   }
 
-  let pinchRef = createRef();
+ 
   let singleTapRef = createRef();
-  let doubleTapRef = createRef();
-  let _baseImageScale = new Animated.Value(1);
-  let _pinchScale = new Animated.Value(1);
-  let imageScale = Animated.multiply(_baseImageScale, _pinchScale);
-  let _lastScale:number = 1;
+  
+ 
   let translationX = new Animated.Value(0);
   let translationY = new Animated.Value(0);
 
@@ -181,18 +182,7 @@ const SingleMedia: React.FC<Props> = (props) => {
     outputRange: [0,             0,  0,    1, 0,    0, 0],
   }))
 
-  const _onPinchGestureEvent = Animated.event(
-    [{ nativeEvent: { scale: _pinchScale } }],
-    { useNativeDriver: true }
-  );
-  const _onPinchHandlerStateChange = ( event:HandlerStateChangeEvent<PinchGestureHandlerEventPayload> ) => {
-    //console.log(event.nativeEvent);
-    if (event.nativeEvent.oldState === State.ACTIVE) {
-      _lastScale *= event.nativeEvent.scale;
-      _baseImageScale.setValue(_lastScale);
-      _pinchScale.setValue(1);
-    }
-  }
+  
   const _onPanHandlerStateChange = ( event:HandlerStateChangeEvent<PanGestureHandlerEventPayload> ) => {
     if (event.nativeEvent.oldState === State.ACTIVE && event.nativeEvent.state !== State.ACTIVE) {
       if( (event.nativeEvent.translationY > 50 || event.nativeEvent.translationY < -50) && (((event.nativeEvent.translationX/(event.nativeEvent.translationY+1))>0 && (event.nativeEvent.translationX/(event.nativeEvent.translationY+1))<0.6) || ((event.nativeEvent.translationX/(event.nativeEvent.translationY+1))<0 && (event.nativeEvent.translationX/(event.nativeEvent.translationY+1))>-0.6))){
@@ -221,17 +211,7 @@ const SingleMedia: React.FC<Props> = (props) => {
     { useNativeDriver: true }
   );
 
-  const _onDoubleTapHandlerStateChange = ( event:HandlerStateChangeEvent<TapGestureHandlerEventPayload> ) => {
-    if (event.nativeEvent.oldState === State.ACTIVE && event.nativeEvent.state !== State.ACTIVE) {
-      if(_lastScale > 1){
-        _lastScale = 1;
-        _baseImageScale.setValue(_lastScale);
-      }else{
-        _lastScale *= 2;
-        _baseImageScale.setValue(_lastScale);
-      }
-    }
-  }
+  
 
   const _onLongTapHandlerStateChange = ( event:HandlerStateChangeEvent<TapGestureHandlerEventPayload> ) => {
     if (event.nativeEvent.oldState === State.ACTIVE && event.nativeEvent.state !== State.ACTIVE) {
@@ -242,27 +222,6 @@ const SingleMedia: React.FC<Props> = (props) => {
 
   return (
     <View style={{zIndex:props.modalShown?1:0, opacity:props.modalShown?1:0,width:SCREEN_WIDTH, height:SCREEN_HEIGHT}}>
-      <RecyclerListView
-      ref={scrollRef}
-      isHorizontal={true}
-      dataProvider={dataProvider}
-      layoutProvider={layoutProvider}
-      renderAheadOffset={2}
-      initialRenderIndex={props.singleMediaIndex}
-      scrollViewProps={{
-        disableIntervalMomentum: true,
-        disableScrollViewPanResponder: true,
-        scrollEnabled: scrollEnabled,
-        horizontal: true,
-        pagingEnabled: true,
-      }}
-      style={{
-        width:SCREEN_WIDTH, 
-        height:SCREEN_HEIGHT,
-        backgroundColor: 'black',
-      }}
-      rowRenderer={(type:string | number, item:Asset, index: number) => (
-        <View style={{width:SCREEN_WIDTH, height:SCREEN_HEIGHT}}>
       <Animated.View 
         style={[styles.ModalView, {
           opacity:modalOpacity.interpolate({
@@ -335,46 +294,38 @@ const SingleMedia: React.FC<Props> = (props) => {
               onHandlerStateChange={_onPanHandlerStateChange}
               onGestureEvent={_onPanGestureEvent}
             >
-              <Animated.View>
-                <TapGestureHandler
-                  ref={doubleTapRef}
-                  onHandlerStateChange={_onDoubleTapHandlerStateChange}
-                  numberOfTaps={2}
-                >
-                  <View 
-                    style={[styles.wrapper, 
-                      {
-                        width: SCREEN_WIDTH, 
-                        height: SCREEN_HEIGHT,
-                      }]}
-                    >
-                    <PinchGestureHandler
-                      ref={pinchRef}
-                      onGestureEvent={_onPinchGestureEvent}
-                      onHandlerStateChange={_onPinchHandlerStateChange}
-                    >
-                      <Animated.View 
-                        style={[styles.container, 
-                          {
-                            width: SCREEN_WIDTH, 
-                            height: SCREEN_HEIGHT,
-                          }
-                        ]} 
-                        collapsable={false}
-                      >
-                    
-                        <ImageView
-                          imageHeight={imageHeight}
-                          imageWidth={imageWidth}
-                          imageScale={imageScale}
-                          media={item}
-                          showModal={showModal}
-                        />
-                      </Animated.View>
-                    </PinchGestureHandler>
-                  </View>
-                </TapGestureHandler>
-              </Animated.View>
+              <Animated.View style={{width:SCREEN_WIDTH, height:SCREEN_HEIGHT}}>
+                <RecyclerListView
+                  ref={scrollRef}
+                  isHorizontal={true}
+                  dataProvider={dataProvider}
+                  layoutProvider={layoutProvider}
+                  renderAheadOffset={1}
+                  initialRenderIndex={props.singleMediaIndex}
+                  onVisibleIndicesChanged={(indexes) => {
+                    setActiveIndex(indexes[0]);
+                    console.log('test');
+                  }}
+                  scrollViewProps={{
+                    disableIntervalMomentum: true,
+                    disableScrollViewPanResponder: true,
+                    scrollEnabled: false,
+                    horizontal: true,
+                    pagingEnabled: true,
+                  }}
+                  style={{width:SCREEN_WIDTH, height:SCREEN_HEIGHT}}
+                  rowRenderer={(type:string | number, item:Asset, index: number) => (
+                    <Media
+                      imageHeight={calcImageDimension(item).height}
+                      imageWidth={calcImageDimension(item).width}
+                      media={item}
+                      showModal={props.modalShown}
+                      activeIndex={activeIndex}
+                      index={index}
+                    />
+                  )}
+                />
+              </Animated.View>             
             </PanGestureHandler>
           </Animated.View>
         </LongPressGestureHandler>
@@ -395,9 +346,6 @@ const SingleMedia: React.FC<Props> = (props) => {
       >
 
       </Animated.View>
-      </View>
-      )}
-      />
     </View>
   );
 };
@@ -407,14 +355,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     zIndex:5,
   },
-  wrapper:{
-    position: 'relative',
-    zIndex:5,
-  },
-  container: {
-    position: 'relative',
-    zIndex:5,
-  },
+  
+  
   pinchableImage: {
 
   },
