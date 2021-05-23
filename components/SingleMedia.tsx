@@ -20,6 +20,7 @@ interface Props {
   setModalShown: Function;
   medias: Asset[]|undefined;
   singleMediaIndex: number;
+  setSinglePhotoIndex: Function;
   imagePosition: {x:number, y:number};
   numColumns: 2|3|4;
 }
@@ -82,9 +83,12 @@ const SingleMedia: React.FC<Props> = (props) => {
   useEffect(()=>{
     console.log('in SingleMedia props.modalShown='+props.modalShown);
     if(props.medias){
-      let media:Asset = props.medias[props.singleMediaIndex];
-      if(media && typeof media !== 'string'){
-        setMedia(media);
+      let newMedia:Asset = props.medias[props.singleMediaIndex];
+      if(newMedia && typeof newMedia !== 'string' && media !== newMedia){
+        setMedia(newMedia);
+      }else{
+        let imageDimensions = calcImageDimension(media);
+        showHideModal(props.modalShown, imageDimensions.width, imageDimensions.height);
       }
     }
   },[props.modalShown]);
@@ -219,9 +223,9 @@ const SingleMedia: React.FC<Props> = (props) => {
     }
   }
 
-  const _onVisibleIndicesChanged = (index:number)=> {
-    console.log('onItemLayout='+index);
-    //setActiveIndex(0);
+  const _onVisibleIndicesChanged = (indexes:number[])=> {
+    console.log('onItemLayout='+indexes[0]);
+    props.setSinglePhotoIndex(indexes[0]);
   }
   
 
@@ -307,7 +311,7 @@ const SingleMedia: React.FC<Props> = (props) => {
                   layoutProvider={layoutProvider}
                   renderAheadOffset={1}
                   initialRenderIndex={props.singleMediaIndex}
-                  onItemLayout={_onVisibleIndicesChanged}
+                  onVisibleIndicesChanged={_onVisibleIndicesChanged}
                   scrollViewProps={{
                     disableIntervalMomentum: true,
                     disableScrollViewPanResponder: true,
@@ -315,7 +319,7 @@ const SingleMedia: React.FC<Props> = (props) => {
                     horizontal: true,
                     pagingEnabled: true,
                   }}
-                  extendedState={{modalShown:props.modalShown}}
+                  extendedState={{modalShown:props.modalShown, activeIndex: props.singleMediaIndex}}
                   style={{width:SCREEN_WIDTH, height:SCREEN_HEIGHT}}
                   rowRenderer={(type:string | number, item:Asset, index: number, extendedState:any) => (
                     <Media
@@ -323,7 +327,6 @@ const SingleMedia: React.FC<Props> = (props) => {
                       imageWidth={calcImageDimension(item).width}
                       media={item}
                       state={extendedState}
-                      activeIndex={scrollRef?.current?.findApproxFirstVisibleIndex()}
                       index={index}
                     />
                   )}

@@ -160,6 +160,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         setModalShown={setModalShown}
         medias={medias}
         singleMediaIndex={singlePhotoIndex}
+        setSinglePhotoIndex={setSinglePhotoIndex}
         imagePosition={imagePosition}
         numColumns={props.numColumns}
       />

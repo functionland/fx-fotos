@@ -1,4 +1,4 @@
-import React, {useState, useEffect, createRef} from 'react';
+import React, {useState, useEffect, createRef, useRef} from 'react';
 import {Animated, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { Asset } from 'expo-media-library';
 import { Video } from 'expo-av'
@@ -16,8 +16,7 @@ interface Props {
   imageHeight: number;
   imageWidth: number;
   media:Asset|undefined;
-  state: {modalShown:boolean}|undefined;
-  activeIndex: number;
+  state: {modalShown:boolean;activeIndex: number;}|undefined;
   index: number;
 }
 
@@ -33,13 +32,22 @@ const Media: React.FC<Props> = (props) => {
   let imageScale = Animated.multiply(_baseImageScale, _pinchScale);
   let _lastScale:number = 1;
 
+  const isMounted = useRef(false);
+  
+  useEffect(() => {
+      isMounted.current = true;
+      return () => {isMounted.current = false;}
+  }, []);
+
+
+
   const _onPinchGestureEvent = Animated.event(
     [{ nativeEvent: { scale: _pinchScale } }],
     { useNativeDriver: true }
   );
   const _onPinchHandlerStateChange = ( event:HandlerStateChangeEvent<PinchGestureHandlerEventPayload> ) => {
     //console.log(event.nativeEvent);
-    if (event.nativeEvent.oldState === State.ACTIVE) {
+    if (event.nativeEvent.oldState === State.ACTIVE && isMounted.current) {
       _lastScale *= event.nativeEvent.scale;
       _baseImageScale.setValue(_lastScale);
       _pinchScale.setValue(1);
@@ -47,7 +55,7 @@ const Media: React.FC<Props> = (props) => {
   }
 
   const _onDoubleTapHandlerStateChange = ( event:HandlerStateChangeEvent<TapGestureHandlerEventPayload> ) => {
-    if (event.nativeEvent.oldState === State.ACTIVE && event.nativeEvent.state !== State.ACTIVE) {
+    if (event.nativeEvent.oldState === State.ACTIVE && event.nativeEvent.state !== State.ACTIVE && isMounted.current) {
       if(_lastScale > 1){
         _lastScale = 1;
         _baseImageScale.setValue(_lastScale);
@@ -66,22 +74,22 @@ const Media: React.FC<Props> = (props) => {
         }
       },[props.state]);
       useEffect(()=>{
-        if(video && props?.media?.duration){
+        if(video && props?.media?.duration && isMounted.current){
           console.log('useEffect:', {
-            'props.activeIndex':props.activeIndex,
+            'props.activeIndex':props.state?.activeIndex,
             'props.index':props.index,
             'props.state?.modalShown':props.state?.modalShown,
-            'first condition':!(props.activeIndex===props.index?true:false),
+            'first condition':!(props.state?.activeIndex===props.index?true:false),
             'second condition': !props.state?.modalShown
           });
-          if(!(props.activeIndex===props.index?true:false) || !props.state?.modalShown){
+          if(props.state?.activeIndex===props.index && !props.state?.modalShown){
             console.log('video unloaded');
             video?.unloadAsync();
-          }else if(props.state?.modalShown && (props.activeIndex===props.index?true:false)){
+          }else if(props.state?.modalShown && props.state?.activeIndex===props.index){
             video.loadAsync({uri: props.media?.uri},{shouldPlay: true, positionMillis: 0});
           }
         }
-      }, [props.index, props.activeIndex, props.state]);
+      }, [props.index, props.state?.activeIndex, props.state]);
 
       const buildMedia = (media:Asset|undefined) => {
         if(media){
@@ -93,10 +101,10 @@ const Media: React.FC<Props> = (props) => {
                 showMuteButton={true}
                 mute={() =>setIsMute(true)}
                 unmute={() =>setIsMute(false)}
-                isMute={isMute || !(props.activeIndex===props.index?true:false) || !props.state?.modalShown}
+                isMute={isMute || !(props.state?.activeIndex===props.index?true:false) || !props.state?.modalShown}
                 videoProps={{
                   ref: (v: any) => (video = v),
-                  shouldPlay: ((props.activeIndex===props.index?true:false) && props.state?.modalShown),
+                  shouldPlay: (props.state?.activeIndex===props.index && props.state?.modalShown),
                   isMuted: isMute,
                   resizeMode: Video.RESIZE_MODE_CONTAIN,
                   source: {
