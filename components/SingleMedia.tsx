@@ -3,7 +3,7 @@ import {useWindowDimensions , Animated, StyleSheet, View, StatusBar } from 'reac
 import { useBackHandler } from '@react-native-community/hooks'
 import Media from './Media';
 import { Asset } from 'expo-media-library';
-import { RecyclerListView, DataProvider, } from 'recyclerlistview';
+import { RecyclerListView, DataProvider, BaseScrollView, } from 'recyclerlistview';
 import { LayoutUtil } from '../utils/LayoutUtil';
 
 import {
@@ -13,7 +13,25 @@ import {
   PanGestureHandlerEventPayload,
   TapGestureHandlerEventPayload,
   State,
+  ScrollView,
 } from 'react-native-gesture-handler';
+
+class ExternalScrollView extends BaseScrollView {
+  private _scrollViewRef: any;
+
+  scrollTo(...args: any[]) {
+    if (this._scrollViewRef) { 
+      this._scrollViewRef?.scrollTo(...args);
+    }
+  }
+  render() {
+    return <ScrollView  {...this.props}
+    style={{zIndex:1}}
+     ref={(scrollView: any) => {this._scrollViewRef = scrollView;}}
+     scrollEventThrottle={1}
+     />
+  }
+}
 
 interface Props {
   modalShown: boolean;
@@ -32,6 +50,7 @@ const SingleMedia: React.FC<Props> = (props) => {
   const [media, setMedia] = useState<Asset|undefined>(undefined);
   const [scrollEnabled, setScrollEnabled] = useState<boolean>(false);
   const [activeIndex, setActiveIndex] = useState<number>(-1);
+  const [panGestureEnabled, setPanGestureEnabled] = useState<boolean>(true);
 
   const viewPosition = useRef(new Animated.ValueXY(props.imagePosition)).current;
   const viewScale = useRef(new Animated.ValueXY({x:0,y:0})).current;
@@ -205,7 +224,7 @@ const SingleMedia: React.FC<Props> = (props) => {
           newIndex = props.singleMediaIndex + 1;
         }
         if(newIndex > -1 && scrollRef){
-          scrollRef?.current?.scrollToIndex(newIndex, true);
+          //scrollRef?.current?.scrollToOffset(100,0,true);
         }
       }
     }
@@ -296,16 +315,19 @@ const SingleMedia: React.FC<Props> = (props) => {
           onHandlerStateChange={_onLongTapHandlerStateChange}
           minDurationMs={800}
         >
-          <Animated.View>
+          <Animated.View style={{width:SCREEN_WIDTH, height:SCREEN_HEIGHT}}>
             <PanGestureHandler
+              enabled={panGestureEnabled}
               maxPointers={1}
               ref={singleTapRef}
+              simultaneousHandlers={scrollRef}
               onHandlerStateChange={_onPanHandlerStateChange}
               onGestureEvent={_onPanGestureEvent}
             >
               <Animated.View style={{width:SCREEN_WIDTH, height:SCREEN_HEIGHT}}>
                 <RecyclerListView
                   ref={scrollRef}
+                  externalScrollView={ExternalScrollView}
                   isHorizontal={true}
                   dataProvider={dataProvider}
                   layoutProvider={layoutProvider}
@@ -314,13 +336,17 @@ const SingleMedia: React.FC<Props> = (props) => {
                   onVisibleIndicesChanged={_onVisibleIndicesChanged}
                   scrollViewProps={{
                     disableIntervalMomentum: true,
-                    disableScrollViewPanResponder: true,
-                    scrollEnabled: false,
+                    disableScrollViewPanResponder: false,
+                    scrollEnabled: true,
                     horizontal: true,
                     pagingEnabled: true,
+                    directionalLockEnabled: true,
                   }}
                   extendedState={{modalShown:props.modalShown, activeIndex: props.singleMediaIndex}}
-                  style={{width:SCREEN_WIDTH, height:SCREEN_HEIGHT}}
+                  style={{
+                    width:SCREEN_WIDTH, 
+                    height:SCREEN_HEIGHT,
+                  }}
                   rowRenderer={(type:string | number, item:Asset, index: number, extendedState:any) => (
                     <Media
                       imageHeight={calcImageDimension(item).height}
@@ -331,7 +357,7 @@ const SingleMedia: React.FC<Props> = (props) => {
                     />
                   )}
                 />
-              </Animated.View>             
+              </Animated.View>
             </PanGestureHandler>
           </Animated.View>
         </LongPressGestureHandler>
