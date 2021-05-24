@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from 'react';
-import {ScrollView} from 'react-native-gesture-handler';
 import {Animated, Dimensions, View, StatusBar, Text} from 'react-native';
 import {sortCondition, FlatSection} from '../types/interfaces';
 import RenderPhotos from './RenderPhotos';
@@ -32,10 +31,13 @@ const AllPhotos: React.FC<Props> = (props) => {
   const [modalShown, setModalShown] = useState<boolean>(false);
   const [singlePhotoIndex, setSinglePhotoIndex] = useState<number>(1);
   const [imagePosition, setImagePosition] = useState<{x:number;y:number}>({x:0,y:0});
+  const [medias, setMedias] = useState<Asset[]|undefined>(undefined);
 
   useEffect(()=>{
     let prepared = prepareLayout(props.photos,['day', 'month']);
     setPreparedMedia(prepared);
+    let onlyMedias:any[] = prepared.layout.filter(item => typeof item.value !== 'string').map((item)=>{return item.value});
+    setMedias(onlyMedias);
   },[props.photos]);
   
   return (
@@ -156,8 +158,9 @@ const AllPhotos: React.FC<Props> = (props) => {
       <SingleMedia 
         modalShown={modalShown}
         setModalShown={setModalShown}
-        medias={preparedMedia}
+        medias={medias}
         singleMediaIndex={singlePhotoIndex}
+        setSinglePhotoIndex={setSinglePhotoIndex}
         imagePosition={imagePosition}
         numColumns={props.numColumns}
       />
