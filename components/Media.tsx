@@ -154,7 +154,7 @@ const Media: React.FC<Props> = (props) => {
                         width: SCREEN_WIDTH, 
                         height: SCREEN_HEIGHT,
                       }]}
-                    >
+                  >
                     <PinchGestureHandler
                       ref={pinchRef}
                       onGestureEvent={_onPinchGestureEvent}
@@ -169,8 +169,8 @@ const Media: React.FC<Props> = (props) => {
                         ]} 
                         collapsable={false}
                       >
-              {buildMedia(props.media)}
-            </Animated.View>
+                        {buildMedia(props.media)}
+                      </Animated.View>
                     </PinchGestureHandler>
                   </Animated.View>
                 </TapGestureHandler>
