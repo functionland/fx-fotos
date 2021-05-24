@@ -1,10 +1,11 @@
 import React, { useState, useEffect, createRef, useRef } from 'react';
-import {useWindowDimensions , Animated, StyleSheet, View, StatusBar } from 'react-native';
+import {useWindowDimensions , Animated, StyleSheet, View, StatusBar, } from 'react-native';
 import { useBackHandler } from '@react-native-community/hooks'
 import Media from './Media';
 import { Asset } from 'expo-media-library';
 import { RecyclerListView, DataProvider, BaseScrollView, } from 'recyclerlistview';
 import { LayoutUtil } from '../utils/LayoutUtil';
+import { ScrollEvent } from '../types/interfaces';
 
 import {
   LongPressGestureHandler,
@@ -44,13 +45,19 @@ interface Props {
 }
 
 const SingleMedia: React.FC<Props> = (props) => {
+  const isMounted = useRef(false);
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {isMounted.current = false;}
+  }, []);
+
   const viewPosition = useRef(new Animated.ValueXY(props.imagePosition)).current;
 
   const SCREEN_WIDTH = useWindowDimensions().width;
   const SCREEN_HEIGHT = useWindowDimensions().height;
 
   const [media, setMedia] = useState<Asset|undefined>(undefined);
-  const [scrollEnabled, setScrollEnabled] = useState<boolean>(false);
+  const [scrollEnabled, setScrollEnabled] = useState<boolean>(true);
   const [activeIndex, setActiveIndex] = useState<number>(-1);
   const [panGestureEnabled, setPanGestureEnabled] = useState<boolean>(true);
 
@@ -86,23 +93,24 @@ const SingleMedia: React.FC<Props> = (props) => {
   };
 
   useEffect(()=>{
-    if(props.medias){
+    if(props.medias && isMounted.current){
       setDataProvider(dataProvider.cloneWithRows(props.medias));
     }
   }, [props.medias]);
 
   useEffect(()=>{
-    let imageDimensions = calcImageDimension(media);
-    showHideModal(props.modalShown, imageDimensions.width, imageDimensions.height);
-    if(props.modalShown){
-      scrollRef?.current?.scrollToIndex(props.singleMediaIndex, false);
+    if(isMounted.current){
+      let imageDimensions = calcImageDimension(media);
+      showHideModal(props.modalShown, imageDimensions.width, imageDimensions.height);
+      if(props.modalShown){
+        scrollRef?.current?.scrollToIndex(props.singleMediaIndex, false);
+      }
     }
   },[media]);
 
 
   useEffect(()=>{
-    console.log('in SingleMedia props.modalShown='+props.modalShown);
-    if(props.medias){
+    if(props.medias && isMounted.current){
       let newMedia:Asset = props.medias[props.singleMediaIndex];
       if(newMedia && typeof newMedia !== 'string' && media !== newMedia){
         setMedia(newMedia);
@@ -254,7 +262,6 @@ const SingleMedia: React.FC<Props> = (props) => {
   }
 
   const _onVisibleIndicesChanged = (indexes:number[])=> {
-    console.log('onItemLayout='+indexes[0]);
     props.setSinglePhotoIndex(indexes[0]);
   }
   
@@ -348,10 +355,10 @@ const SingleMedia: React.FC<Props> = (props) => {
                   scrollViewProps={{
                     disableIntervalMomentum: true,
                     disableScrollViewPanResponder: false,
-                    scrollEnabled: true,
                     horizontal: true,
                     pagingEnabled: true,
                     directionalLockEnabled: true,
+                    scrollEnabled: scrollEnabled
                   }}
                   extendedState={{modalShown:props.modalShown, activeIndex: props.singleMediaIndex}}
                   style={{
@@ -365,6 +372,7 @@ const SingleMedia: React.FC<Props> = (props) => {
                       media={item}
                       state={extendedState}
                       index={index}
+                      setScrollEnabled={setScrollEnabled}
                     />
                   )}
                 />

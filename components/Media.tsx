@@ -18,6 +18,7 @@ interface Props {
   media:Asset|undefined;
   state: {modalShown:boolean;activeIndex: number;}|undefined;
   index: number;
+  setScrollEnabled: Function;
 }
 
 const Media: React.FC<Props> = (props) => {
@@ -29,11 +30,11 @@ const Media: React.FC<Props> = (props) => {
 
   let _baseImageScale = new Animated.Value(1);
   let _pinchScale = new Animated.Value(1);
-  let imageScale = Animated.multiply(_baseImageScale, _pinchScale);
+  const imageScale = Animated.multiply(_baseImageScale, _pinchScale);
+  
   let _lastScale:number = 1;
 
   const isMounted = useRef(false);
-  
   useEffect(() => {
       isMounted.current = true;
       return () => {isMounted.current = false;}
@@ -46,7 +47,9 @@ const Media: React.FC<Props> = (props) => {
     { useNativeDriver: true }
   );
   const _onPinchHandlerStateChange = ( event:HandlerStateChangeEvent<PinchGestureHandlerEventPayload> ) => {
-    //console.log(event.nativeEvent);
+    if(event.nativeEvent.numberOfPointers > 1 && isMounted.current){
+      //props.setScrollEnabled(false);
+    }
     if (event.nativeEvent.oldState === State.ACTIVE && isMounted.current) {
       _lastScale *= event.nativeEvent.scale;
       _baseImageScale.setValue(_lastScale);
@@ -69,19 +72,7 @@ const Media: React.FC<Props> = (props) => {
       let video:any;
       const [isMute, setIsMute] = useState<boolean>(false);
       useEffect(()=>{
-        if(props.state){
-          console.log(props.state);
-        }
-      },[props.state]);
-      useEffect(()=>{
         if(video && props?.media?.duration && isMounted.current){
-          console.log('useEffect:', {
-            'props.activeIndex':props.state?.activeIndex,
-            'props.index':props.index,
-            'props.state?.modalShown':props.state?.modalShown,
-            'first condition':!(props.state?.activeIndex===props.index?true:false),
-            'second condition': !props.state?.modalShown
-          });
           if(props.state?.activeIndex===props.index && !props.state?.modalShown){
             console.log('video unloaded');
             video?.unloadAsync();
@@ -143,12 +134,13 @@ const Media: React.FC<Props> = (props) => {
         }
       }
 
-  
       return (
         <Animated.View
           style={{
             marginLeft: (SCREEN_WIDTH-props.imageWidth)/2,
-            marginTop: (SCREEN_HEIGHT-props.imageHeight)/2
+            marginTop: (SCREEN_HEIGHT-props.imageHeight)/2,
+            width: SCREEN_WIDTH,
+            height: SCREEN_HEIGHT,
           }}
         >
                 <TapGestureHandler
