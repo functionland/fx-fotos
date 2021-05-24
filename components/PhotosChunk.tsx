@@ -1,5 +1,5 @@
 import {Asset} from 'expo-media-library';
-import React, {useEffect, useState, createRef} from 'react';
+import React, {useEffect, useState, createRef, useRef} from 'react';
 import {Animated, Image, Text, StyleSheet, useWindowDimensions, View, Platform} from 'react-native';
 import { layout } from '../types/interfaces';
 import { prettyTime } from '../utils/functions';
@@ -33,6 +33,7 @@ interface Props {
 const PhotosChunk: React.FC<Props> = (props) => {
   const SCREEN_WIDTH = useWindowDimensions().width;
   const [imageRef, setImageRef] = useState<Image | null>();
+  const tempScale = useRef(new Animated.Value(1)).current;
 
   useEffect(()=>{
     if (isIOS && imageRef) {
@@ -51,17 +52,39 @@ const PhotosChunk: React.FC<Props> = (props) => {
 
 
   const _onSingleTapHandlerStateChange = ( event:HandlerStateChangeEvent<TapGestureHandlerEventPayload> ) => {
-    if (event.nativeEvent.oldState !== State.ACTIVE && event.nativeEvent.state === State.ACTIVE) {
+    if(event.nativeEvent.state === State.BEGAN){
+      Animated.timing(tempScale, {
+        toValue: 0.8,
+        duration: 1000,
+        useNativeDriver: true,
+      }).start();
+    }
+    if (event.nativeEvent.state === State.ACTIVE && event.nativeEvent.oldState === State.BEGAN) {
       let imageOffsetY = event.nativeEvent.absoluteY - event.nativeEvent.y;
       let imageOffsetX = event.nativeEvent.absoluteX - event.nativeEvent.x;
 
       props.setImagePosition({x:imageOffsetX, y:imageOffsetY});
       props.setSinglePhotoIndex(props.index);
       props.setModalShown(true);
+      Animated.timing(
+        tempScale, {
+          toValue: 1,
+          useNativeDriver: true,
+        }
+      ).stop();
+      tempScale.setValue(1);
+    }else if(event.nativeEvent.state === State.CANCELLED || event.nativeEvent.state === State.FAILED){
+      Animated.timing(
+        tempScale, {
+          toValue: 1,
+          useNativeDriver: true,
+        }
+      ).stop();
+      tempScale.setValue(1);
     }
   }
   const _onLongTapHandlerStateChange = ( event:HandlerStateChangeEvent<TapGestureHandlerEventPayload> ) => {
-    if (event.nativeEvent.oldState === State.ACTIVE && event.nativeEvent.state !== State.ACTIVE) {
+    if (event.nativeEvent.state === State.ACTIVE && event.nativeEvent.oldState !== State.ACTIVE) {
       console.log('long tap');
     }
   }
@@ -88,7 +111,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
                 width: (SCREEN_WIDTH / props.numCol) - 2.5,
                 backgroundColor: props.loading ? 'grey' : 'white',
                 margin: 2.5,
-                zIndex:4,
+                zIndex: 4,
               }}
               key={media.uri}
               onLoad={handleOnLoad}
@@ -136,6 +159,12 @@ const PhotosChunk: React.FC<Props> = (props) => {
           zIndex:4, 
           flex: 1/props.numCol, 
           width: SCREEN_WIDTH/props.numCol,
+          height: SCREEN_WIDTH/props.numCol,
+          transform: [
+            {
+              scale: tempScale
+            }
+          ]
         }}>
         <LongPressGestureHandler
         ref={longTapRef}
