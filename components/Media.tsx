@@ -145,7 +145,12 @@ const Media: React.FC<Props> = (props) => {
 
   
       return (
-        <Animated.View>
+        <Animated.View
+          style={{
+            marginLeft: (SCREEN_WIDTH-props.imageWidth)/2,
+            marginTop: (SCREEN_HEIGHT-props.imageHeight)/2
+          }}
+        >
                 <TapGestureHandler
                   ref={doubleTapRef}
                   onHandlerStateChange={_onDoubleTapHandlerStateChange}

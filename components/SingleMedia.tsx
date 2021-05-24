@@ -44,6 +44,8 @@ interface Props {
 }
 
 const SingleMedia: React.FC<Props> = (props) => {
+  const viewPosition = useRef(new Animated.ValueXY(props.imagePosition)).current;
+
   const SCREEN_WIDTH = useWindowDimensions().width;
   const SCREEN_HEIGHT = useWindowDimensions().height;
 
@@ -52,7 +54,6 @@ const SingleMedia: React.FC<Props> = (props) => {
   const [activeIndex, setActiveIndex] = useState<number>(-1);
   const [panGestureEnabled, setPanGestureEnabled] = useState<boolean>(true);
 
-  const viewPosition = useRef(new Animated.ValueXY(props.imagePosition)).current;
   const viewScale = useRef(new Animated.ValueXY({x:0,y:0})).current;
   const modalOpacity = useRef(new Animated.Value(0)).current;
 
@@ -114,14 +115,18 @@ const SingleMedia: React.FC<Props> = (props) => {
 
   const hideModalAnimation = (duration:number=400) => {
     let imageDimensions = calcImageDimension(media);
+    let thumbnailPositionMinusSingleImagePosition = {
+      x: props.imagePosition.x - (SCREEN_WIDTH/(props.numColumns*imageDimensions.width))*(SCREEN_WIDTH - imageDimensions.width)/2,
+      y: props.imagePosition.y - (SCREEN_WIDTH/(props.numColumns*imageDimensions.height))*(SCREEN_HEIGHT - imageDimensions.height)/2
+    };
     Animated.parallel([
       Animated.timing(viewPosition, {
-        toValue: props.imagePosition,
+        toValue: thumbnailPositionMinusSingleImagePosition,
         duration: duration,
         useNativeDriver: true,
       }),
       Animated.timing(viewScale, {
-        toValue: {x:SCREEN_WIDTH/(props.numColumns*imageDimensions.width), y:2*SCREEN_WIDTH/(props.numColumns*imageDimensions.height*2)},
+        toValue: {x:SCREEN_WIDTH/(props.numColumns*imageDimensions.width), y:SCREEN_WIDTH/(props.numColumns*imageDimensions.height)},
         duration: duration,
         useNativeDriver: true,
       }),
@@ -149,12 +154,13 @@ const SingleMedia: React.FC<Props> = (props) => {
       viewScale.setValue({x:0, y:0});
     }, duration/2)
   }
-  const showModalAnimation = (duration:number=300) => {
+  const showModalAnimation = (duration:number=400) => {
     let imageDimensions = calcImageDimension(media);
     //console.log('in showModalAnimation:', {SCREEN_WIDTH:SCREEN_WIDTH, imageWidth:imageWidth, SCREEN_HEIGHT:SCREEN_HEIGHT, imageHeight:imageHeight, StatusBar: StatusBar.currentHeight});
     Animated.parallel([
       Animated.timing(viewPosition, {
-        toValue: { x: (SCREEN_WIDTH-imageDimensions.width)/2, y: (SCREEN_HEIGHT-imageDimensions.height+2*(StatusBar.currentHeight||0))/2 },
+        //toValue: { x: (SCREEN_WIDTH-imageDimensions.width)/2, y: (SCREEN_HEIGHT-imageDimensions.height+2*(StatusBar.currentHeight||0))/2 },
+        toValue: {x:0, y:(StatusBar.currentHeight||0)},
         duration: duration,
         useNativeDriver: true,
       }),
@@ -185,8 +191,13 @@ const SingleMedia: React.FC<Props> = (props) => {
   })
   const showHideModal = (showModal:boolean, imageWidth:number, imageHeight:number) => {
     if(showModal){
-      viewPosition.setValue(props.imagePosition);
-      viewScale.setValue({x:SCREEN_WIDTH/(props.numColumns*imageWidth), y:2*SCREEN_WIDTH/(props.numColumns*imageHeight*2)})
+      let thumbnailPositionMinusSingleImagePosition = {
+        x: props.imagePosition.x - (SCREEN_WIDTH/(props.numColumns*imageWidth))*(SCREEN_WIDTH - imageWidth)/2,
+        y: props.imagePosition.y - (SCREEN_WIDTH/(props.numColumns*imageHeight))*(SCREEN_HEIGHT - imageHeight)/2
+      };
+      viewPosition.setValue(thumbnailPositionMinusSingleImagePosition);
+
+      viewScale.setValue({x:SCREEN_WIDTH/(props.numColumns*imageWidth), y:SCREEN_WIDTH/(props.numColumns*imageHeight)})
       showModalAnimation();
     }else{
       console.log('closing image');
@@ -255,7 +266,7 @@ const SingleMedia: React.FC<Props> = (props) => {
           opacity:modalOpacity.interpolate({
             inputRange: [0, 0.3, 1],
             outputRange: [0, 1, 1],
-          }), 
+          }),
           width:props.modalShown?SCREEN_WIDTH:0,
           height:props.modalShown?SCREEN_HEIGHT:0,
           top: 0,
