@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createRef, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 import { Dimensions, StyleSheet, Animated, StyleProp, Image , Text, View } from 'react-native';
 import { headerIndex } from '../types/interfaces';

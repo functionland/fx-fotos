@@ -31,7 +31,7 @@ const Media: React.FC<Props> = (props) => {
   const SCREEN_HEIGHT = useWindowDimensions().height;
 
   
-  let doubleTapRef = createRef();
+  let doubleTapRef = createRef<TapGestureHandler>();
   
   let _lastScale:number = 1;
 

@@ -224,7 +224,7 @@ const SingleMedia: React.FC<Props> = (props) => {
   }
 
  
-  let singleTapRef = createRef();
+  let singleTapRef = createRef<PanGestureHandler>();
   
  
   let translationX = new Animated.Value(0);

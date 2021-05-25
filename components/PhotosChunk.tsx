@@ -90,8 +90,8 @@ const PhotosChunk: React.FC<Props> = (props) => {
       console.log('long tap');
     }
   }
-  const longTapRef = createRef();
-  const singleTapRef = createRef();
+  const longTapRef = createRef<LongPressGestureHandler>();
+  const singleTapRef = createRef<TapGestureHandler>();
 
   const createThumbnail = (media:Asset) => {
     if(media.duration > 0){

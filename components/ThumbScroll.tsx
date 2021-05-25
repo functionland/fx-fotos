@@ -45,7 +45,7 @@ interface Props {
 }
 const ThumbScroll: React.FC<Props> = (props) => {
     //const AnimatedTouchable = Animated.createAnimatedComponent(TouchableWithoutFeedback);
-    let panRef_glide = createRef();
+    let panRef_glide = createRef<PanGestureHandler>();
     const absoluteY = useRef(new Animated.Value(0)).current;
     const y = useRef(new Animated.Value(0)).current;
     

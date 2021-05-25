@@ -34,7 +34,7 @@ interface Props {
 
 let _pinchOrZoom: 'pinch'|'zoom'|undefined = undefined;
 const PinchZoom: React.FC<Props> = (props) => {
-  let pinchRef = createRef();
+  let pinchRef = createRef<PinchGestureHandler>();
   const [allowAnimation, setAllowAnimation] = useState<boolean>(true);
   let _onPinchGestureEvent = Animated.event(
     [{ nativeEvent: { scale: props.scale, focalX:props.focalX, focalY:props.focalY, numberOfPointers:props.numberOfPointers, velocity:props.velocity } }],
