@@ -10,6 +10,7 @@ import {
   PinchGestureHandlerEventPayload,
   TapGestureHandlerEventPayload,
   State,
+  PinchGestureHandlerProps
 } from 'react-native-gesture-handler';
 
 interface Props {
@@ -19,13 +20,14 @@ interface Props {
   state: {modalShown:boolean;activeIndex: number;}|undefined;
   index: number;
   setScrollEnabled: Function;
+  pinchRef: React.RefObject<React.ComponentType<PinchGestureHandlerProps & React.RefAttributes<any>>>;
 }
 
 const Media: React.FC<Props> = (props) => {
   const SCREEN_WIDTH = useWindowDimensions().width;
   const SCREEN_HEIGHT = useWindowDimensions().height;
 
-  let pinchRef = createRef();
+  
   let doubleTapRef = createRef();
 
   let _baseImageScale = new Animated.Value(1);
@@ -156,7 +158,7 @@ const Media: React.FC<Props> = (props) => {
                       }]}
                   >
                     <PinchGestureHandler
-                      ref={pinchRef}
+                      ref={props.pinchRef}
                       onGestureEvent={_onPinchGestureEvent}
                       onHandlerStateChange={_onPinchHandlerStateChange}
                     >

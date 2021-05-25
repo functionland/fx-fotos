@@ -15,6 +15,7 @@ import {
   TapGestureHandlerEventPayload,
   State,
   ScrollView,
+  PinchGestureHandler
 } from 'react-native-gesture-handler';
 
 class ExternalScrollView extends BaseScrollView {
@@ -29,6 +30,7 @@ class ExternalScrollView extends BaseScrollView {
     return <ScrollView  {...this.props}
     style={{zIndex:1}}
      ref={(scrollView: any) => {this._scrollViewRef = scrollView;}}
+     waitFor={(this.props as any).waitFor}
      scrollEventThrottle={1}
      />
   }
@@ -55,6 +57,8 @@ const SingleMedia: React.FC<Props> = (props) => {
 
   const SCREEN_WIDTH = useWindowDimensions().width;
   const SCREEN_HEIGHT = useWindowDimensions().height;
+
+  const pinchRef = createRef<PinchGestureHandler>();
 
   const [media, setMedia] = useState<Asset|undefined>(undefined);
   const [scrollEnabled, setScrollEnabled] = useState<boolean>(true);
@@ -352,6 +356,7 @@ const SingleMedia: React.FC<Props> = (props) => {
                   renderAheadOffset={1}
                   initialRenderIndex={props.singleMediaIndex}
                   onVisibleIndicesChanged={_onVisibleIndicesChanged}
+                  waitFor={[pinchRef]}
                   scrollViewProps={{
                     disableIntervalMomentum: true,
                     disableScrollViewPanResponder: false,
@@ -373,6 +378,7 @@ const SingleMedia: React.FC<Props> = (props) => {
                       state={extendedState}
                       index={index}
                       setScrollEnabled={setScrollEnabled}
+                      pinchRef={pinchRef}
                     />
                   )}
                 />
