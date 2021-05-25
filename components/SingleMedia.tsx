@@ -58,12 +58,8 @@ const SingleMedia: React.FC<Props> = (props) => {
 
   const [media, setMedia] = useState<Asset|undefined>(undefined);
   const [scrollEnabled, setScrollEnabled] = useState<boolean>(true);
-  const [verticalScroll, setVerticalScroll] = useState<number>(1);
   const [activeIndex, setActiveIndex] = useState<number>(-1);
   const [panGestureEnabled, setPanGestureEnabled] = useState<boolean>(true);
-
-  const [nextMediaOpacity, setNextMediaOpacity] = useState<boolean>(false);
-  const [prevMediaOpacity, setPrevMediaOpacity] = useState<boolean>(false);
 
   const viewScale = useRef(new Animated.ValueXY({x:0,y:0})).current;
   const modalOpacity = useRef(new Animated.Value(0)).current;
@@ -101,14 +97,6 @@ const SingleMedia: React.FC<Props> = (props) => {
       setDataProvider(dataProvider.cloneWithRows(props.medias));
     }
   }, [props.medias]);
-
-  useEffect(()=>{
-    if(props.singleMediaIndex>-1 && isMounted.current){
-      translationX.setValue(0);
-      setNextMediaOpacity(false);
-      setPrevMediaOpacity(false);
-    }
-  }, [props.singleMediaIndex]);
 
   useEffect(()=>{
     if(isMounted.current){
@@ -231,58 +219,31 @@ const SingleMedia: React.FC<Props> = (props) => {
   let translationX = new Animated.Value(0);
   let translationY = new Animated.Value(0);
 
-  let translationYvsX = Animated.multiply(translationY, Animated.divide(translationX, Animated.add(translationY,0.01)).interpolate({
+  let translationYvsX = Animated.multiply(translationY, Animated.divide(translationX, Animated.add(translationY,0.0000001)).interpolate({
     inputRange: [-SCREEN_WIDTH, -1, -0.60, 0, 0.60, 1, SCREEN_WIDTH],
-    outputRange: [0,             0,  0,    verticalScroll, 0,    0, 0],
-  }));
-
-  let translationXvsY = Animated.divide(translationX, Animated.add(translationY,0.01)).interpolate({
-    inputRange: [-SCREEN_WIDTH, -1, -0.60, 0, 0.60, 1, SCREEN_WIDTH],
-    outputRange: [1,             1,  1,    0, 1,    1, 1],
-  });
+    outputRange: [0,             0,  0,    1, 0,    0, 0],
+  }))
 
   
   const _onPanHandlerStateChange = ( event:HandlerStateChangeEvent<PanGestureHandlerEventPayload> ) => {
-    if (event.nativeEvent.oldState === State.ACTIVE && event.nativeEvent.state !== State.ACTIVE && isMounted) {
+    if (event.nativeEvent.oldState === State.ACTIVE && event.nativeEvent.state !== State.ACTIVE) {
       if( (event.nativeEvent.translationY > 50 || event.nativeEvent.translationY < -50) && (((event.nativeEvent.translationX/(event.nativeEvent.translationY+1))>0 && (event.nativeEvent.translationX/(event.nativeEvent.translationY+1))<0.6) || ((event.nativeEvent.translationX/(event.nativeEvent.translationY+1))<0 && (event.nativeEvent.translationX/(event.nativeEvent.translationY+1))>-0.6))){
         hideModalAnimation();
-      }else if( ( (event.nativeEvent.translationY > 0 && event.nativeEvent.translationY < 50) || (event.nativeEvent.translationY < 0 && event.nativeEvent.translationY > -50)) && (((event.nativeEvent.translationX/(event.nativeEvent.translationY+1))>0 && (event.nativeEvent.translationX/(event.nativeEvent.translationY+1))<0.6) || ((event.nativeEvent.translationX/(event.nativeEvent.translationY+1))<0 && (event.nativeEvent.translationX/(event.nativeEvent.translationY+1))>-0.6))){
+      }else if(event.nativeEvent.translationY <= 50 && event.nativeEvent.translationY >= -50){
         showModalAnimation();
-      }else if( ((event.nativeEvent.translationX/(event.nativeEvent.translationY+1))>0.6) || ((event.nativeEvent.translationX/(event.nativeEvent.translationY+1))<-0.6) ){
-        let translationX_temp = event.nativeEvent.translationX;
-        if(Math.abs(translationX_temp) > 50){
-          Animated.timing(translationX, {
-            toValue: (translationX_temp>0?SCREEN_WIDTH:-1*SCREEN_WIDTH),
-            duration:400,
-            useNativeDriver: true,
-          }).start(()=>{
-            props.setSinglePhotoIndex(translationX_temp>0?props.singleMediaIndex-1:props.singleMediaIndex+1);
-            setVerticalScroll(1);
-          });
-        }else{
-          Animated.timing(translationX, {
-            toValue: 0,
-            duration:200,
-            useNativeDriver: true,
-          }).start(()=>{
-            setPrevMediaOpacity(false);
-            setNextMediaOpacity(false);
-            setVerticalScroll(1);
-          });
-        }
       }
     }else if (event.nativeEvent.oldState !== State.ACTIVE && event.nativeEvent.state === State.ACTIVE) {
-      if(isMounted){
-        if( ((event.nativeEvent.velocityX/(event.nativeEvent.velocityY+1))>0.6) || ((event.nativeEvent.translationX/(event.nativeEvent.translationY+1))<-0.6) ){
-          console.log('scroll started');
-          setScrollEnabled(true);
-          setVerticalScroll(0);
-          let newIndex = -1;
-          if(event.nativeEvent.velocityX > 0){
-            setPrevMediaOpacity(true);
-          }else if(event.nativeEvent.velocityX < 0){
-            setNextMediaOpacity(true);
-          }
+      if( ((event.nativeEvent.velocityX/(event.nativeEvent.velocityY+1))>0.6) || ((event.nativeEvent.translationX/(event.nativeEvent.translationY+1))<-0.6) ){
+        console.log('scroll started');
+        setScrollEnabled(true);
+        let newIndex = -1;
+        if(event.nativeEvent.velocityX > 0){
+          newIndex = props.singleMediaIndex - 1;
+        }else if(event.nativeEvent.velocityX < 0){
+          newIndex = props.singleMediaIndex + 1;
+        }
+        if(newIndex > -1 && scrollRef){
+          //scrollRef?.current?.scrollToOffset(100,0,true);
         }
       }
     }
@@ -304,7 +265,6 @@ const SingleMedia: React.FC<Props> = (props) => {
     props.setSinglePhotoIndex(indexes[0]);
   }
   
-  const imageScrollWidth = 3*SCREEN_WIDTH;
 
   return (
     <View style={{zIndex:props.modalShown?1:0, opacity:props.modalShown?1:0,width:SCREEN_WIDTH, height:SCREEN_HEIGHT}}>
@@ -355,10 +315,7 @@ const SingleMedia: React.FC<Props> = (props) => {
                   Animated.multiply(
                     viewScale.x,SCREEN_WIDTH), 
                   SCREEN_WIDTH)
-                , Animated.multiply(2,Animated.add(viewScale.x, 0.01))).interpolate({
-                  inputRange: [-SCREEN_WIDTH, SCREEN_WIDTH],
-                  outputRange: [-SCREEN_WIDTH, SCREEN_WIDTH]
-                })
+                , Animated.multiply(2,Animated.add(viewScale.x, 0.000001)))
             },
             {
               translateY: Animated.divide(
@@ -367,10 +324,7 @@ const SingleMedia: React.FC<Props> = (props) => {
                     viewScale.y,(SCREEN_HEIGHT)
                   ), (SCREEN_HEIGHT)
                 )
-                , Animated.multiply(2,Animated.add(viewScale.y, 0.01))).interpolate({
-                  inputRange: [-SCREEN_HEIGHT, SCREEN_HEIGHT],
-                  outputRange: [-SCREEN_HEIGHT, SCREEN_HEIGHT]
-                })
+                , Animated.multiply(2,Animated.add(viewScale.y, 0.000001)))
             }
           ],
         }]}
@@ -388,84 +342,40 @@ const SingleMedia: React.FC<Props> = (props) => {
               onHandlerStateChange={_onPanHandlerStateChange}
               onGestureEvent={_onPanGestureEvent}
             >
-              <Animated.View style={{
-                width:SCREEN_WIDTH*3, 
-                height:SCREEN_HEIGHT, 
-                flex:1,
-                flexDirection: 'row',
-                marginLeft: ((isMounted && props.singleMediaIndex > 0) ? -1*SCREEN_WIDTH:0)
-              }}>
-                {(isMounted && props.medias && props.medias[props.singleMediaIndex-1]) ? (
-                  <Animated.View 
-                    style={{
-                      marginLeft:0,
-                      marginTop:0,
-                      opacity: translationXvsY,
-                      flex:1/3,
-                      transform: [
-                        {
-                          translateX: Animated.multiply(1, translationX)
-                        }
-                      ]
-                    }}
-                  >
-                      <Media
-                        imageHeight={calcImageDimension(props.medias[props.singleMediaIndex-1]).height}
-                        imageWidth={calcImageDimension(props.medias[props.singleMediaIndex-1]).width}
-                        media={props.medias[props.singleMediaIndex-1]}
-                        state={{modalShown:props.modalShown,activeIndex: props.singleMediaIndex}}
-                        index={props.singleMediaIndex-1}
-                        setScrollEnabled={setScrollEnabled}
-                      />
-                  </Animated.View>
-                ):(
-                  <></>
-                )}
-                <Animated.View 
-                  style={{
-                    marginLeft:0,
-                    marginTop:0,
-                    flex:1/3,
-                    transform: [
-                      {
-                        translateX: Animated.multiply(1, translationX)
-                      }
-                    ]
+              <Animated.View style={{width:SCREEN_WIDTH, height:SCREEN_HEIGHT}}>
+                <RecyclerListView
+                  ref={scrollRef}
+                  externalScrollView={ExternalScrollView}
+                  isHorizontal={true}
+                  dataProvider={dataProvider}
+                  layoutProvider={layoutProvider}
+                  renderAheadOffset={1}
+                  initialRenderIndex={props.singleMediaIndex}
+                  onVisibleIndicesChanged={_onVisibleIndicesChanged}
+                  scrollViewProps={{
+                    disableIntervalMomentum: true,
+                    disableScrollViewPanResponder: false,
+                    horizontal: true,
+                    pagingEnabled: true,
+                    directionalLockEnabled: true,
+                    scrollEnabled: scrollEnabled
                   }}
-                >
+                  extendedState={{modalShown:props.modalShown, activeIndex: props.singleMediaIndex}}
+                  style={{
+                    width:SCREEN_WIDTH, 
+                    height:SCREEN_HEIGHT,
+                  }}
+                  rowRenderer={(type:string | number, item:Asset, index: number, extendedState:any) => (
                     <Media
-                      imageHeight={calcImageDimension(props.medias?props.medias[props.singleMediaIndex]:undefined).height}
-                      imageWidth={calcImageDimension(props.medias?props.medias[props.singleMediaIndex]:undefined).width}
-                      media={props.medias?props.medias[props.singleMediaIndex]:undefined}
-                      state={{modalShown:props.modalShown,activeIndex: props.singleMediaIndex}}
-                      index={props.singleMediaIndex}
+                      imageHeight={calcImageDimension(item).height}
+                      imageWidth={calcImageDimension(item).width}
+                      media={item}
+                      state={extendedState}
+                      index={index}
                       setScrollEnabled={setScrollEnabled}
                     />
-                </Animated.View>
-                {(isMounted && props.medias && props.medias[props.singleMediaIndex+1]) ? (
-                <Animated.View 
-                  style={{
-                    marginLeft: 0,
-                    marginTop:0,
-                    opacity: translationXvsY,
-                    flex:1/3,
-                    transform: [
-                      {
-                        translateX: Animated.multiply(1, translationX)
-                      }
-                    ]
-                  }}
-                >
-                  <Media
-                      imageHeight={calcImageDimension(props.medias[props.singleMediaIndex+1]).height}
-                      imageWidth={calcImageDimension(props.medias[props.singleMediaIndex+1]).width}
-                      media={props.medias[props.singleMediaIndex+1]}
-                      state={{modalShown:props.modalShown,activeIndex: props.singleMediaIndex}}
-                      index={props.singleMediaIndex+1}
-                      setScrollEnabled={setScrollEnabled}
-                    />
-                </Animated.View>
-                ):(<></>)}
+                  )}
+                />
               </Animated.View>
             </PanGestureHandler>
           </Animated.View>

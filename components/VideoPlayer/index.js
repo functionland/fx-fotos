@@ -193,7 +193,7 @@ const VideoPlayer = (props) => {
         }
     };
     // Seeking
-    const getSeekSliderPosition = () => ((playbackInstanceDuration)?(playbackInstancePosition / playbackInstanceDuration || 0):0);
+    const getSeekSliderPosition = () => playbackInstancePosition / playbackInstanceDuration || 0;
     const onSeekSliderValueChange = async () => {
         if (playbackInstance !== null && seekState !== SeekStates.Seeking) {
             updateSeekState(SeekStates.Seeking);
