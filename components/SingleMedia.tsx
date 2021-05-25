@@ -73,6 +73,13 @@ const SingleMedia: React.FC<Props> = (props) => {
     return r1 !== r2;
   }));
   const [layoutProvider, setLayoutProvider] = useState<any>(LayoutUtil.getSingleImageLayoutProvider());
+  
+  const _baseImageScale = new Animated.Value(1);
+  const _pinchScale = new Animated.Value(1);
+  const imageScale:Animated.AnimatedInterpolation = Animated.multiply(_baseImageScale, _pinchScale).interpolate({
+    inputRange: [0, 1, 4],
+    outputRange: [1, 1, 4]
+  });
 
   const calcImageDimension = (media:Asset|undefined) => {
     let imageWidth_t = SCREEN_WIDTH;
@@ -269,7 +276,6 @@ const SingleMedia: React.FC<Props> = (props) => {
     props.setSinglePhotoIndex(indexes[0]);
   }
   
-
   return (
     <View style={{zIndex:props.modalShown?1:0, opacity:props.modalShown?1:0,width:SCREEN_WIDTH, height:SCREEN_HEIGHT}}>
       <Animated.View 
@@ -363,7 +369,7 @@ const SingleMedia: React.FC<Props> = (props) => {
                     horizontal: true,
                     pagingEnabled: true,
                     directionalLockEnabled: true,
-                    scrollEnabled: scrollEnabled
+                    scrollEnabled: true,
                   }}
                   extendedState={{modalShown:props.modalShown, activeIndex: props.singleMediaIndex}}
                   style={{
@@ -379,6 +385,9 @@ const SingleMedia: React.FC<Props> = (props) => {
                       index={index}
                       setScrollEnabled={setScrollEnabled}
                       pinchRef={pinchRef}
+                      imageScale={imageScale}
+                      _baseImageScale={_baseImageScale}
+                      _pinchScale={_pinchScale}
                     />
                   )}
                 />
@@ -412,14 +421,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
     zIndex:5,
   },
-  
-  
   pinchableImage: {
 
   },
   backdrop: {
     backgroundColor: 'black',
-    zIndex: 4
+    zIndex: -1
   }
 });
 

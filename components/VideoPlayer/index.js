@@ -4,7 +4,7 @@ import { Animated, Dimensions, Text, TouchableOpacity, TouchableWithoutFeedback,
 import { FullscreenEnterIcon, FullscreenExitIcon, PauseIcon, PlayIcon, ReplayIcon, Spinner, MuteIcon, UnmuteIcon } from './assets/icons';
 import { useNetInfo } from '@react-native-community/netinfo';
 import { withDefaultProps } from 'with-default-props';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Slider from '@react-native-community/slider';
 const SLIDER_COLOR = '#009485';
 const BUFFERING_SHOW_DELAY = 200;
@@ -97,8 +97,16 @@ const VideoPlayer = (props) => {
     const [sliderWidth, setSliderWidth] = useState(0);
     const [controlsState, setControlsState] = useState(props.showControlsOnLoad ? ControlStates.Shown : ControlStates.Hidden);
     const [controlsOpacity] = useState(new Animated.Value(props.showControlsOnLoad ? 1 : 0));
+
+    const isMounted = useRef(false);
+    useEffect(() => {
+        isMounted.current = true;
+        return () => {isMounted.current = false;}
+    }, []);
+
     // Set audio mode to play even in silent mode (like the YouTube app)
     const setAudio = async () => {
+        if(!isMounted.current){return;}
         const { errorCallback } = props;
         try {
             await Audio.setAudioModeAsync({
@@ -120,15 +128,18 @@ const VideoPlayer = (props) => {
         }
     };
     useEffect(() => {
-        const { videoProps } = props;
-        if (videoProps.source === null) {
-            console.error('`Source` is a required property');
-            throw new Error('`Source` is required');
+        if(isMounted.current){
+            const { videoProps } = props;
+            if (videoProps.source === null) {
+                console.error('`Source` is a required property');
+                throw new Error('`Source` is required');
+            }
+            setAudio();
         }
-        setAudio();
     });
     // Handle events during playback
     const updatePlaybackState = (newPlaybackState) => {
+        if(!isMounted.current){return;}
         if (playbackState !== newPlaybackState) {
             const { debug } = props;
             debug &&
@@ -138,6 +149,7 @@ const VideoPlayer = (props) => {
         }
     };
     const updateSeekState = (newSeekState) => {
+        if(!isMounted.current){return;}
         const { debug } = props;
         debug &&
             console.info('[seek]', seekState, ' -> ', newSeekState, ' [playback] ', playbackState, ' [shouldPlay] ', shouldPlay);
@@ -160,14 +172,14 @@ const VideoPlayer = (props) => {
             console.error('Uncaught error when calling props.playbackCallback', e);
         }
         if (!status.isLoaded) {
-            if (status.error) {
+            if (status.error && isMounted.current) {
                 updatePlaybackState(PlaybackStates.Error);
                 const errorMsg = `Encountered a fatal error during playback: ${status.error}`;
                 setError(errorMsg);
                 errorCallback({ type: ErrorSeverity.Fatal, message: errorMsg, obj: {} });
             }
         }
-        else {
+        else if(isMounted.current){
             // Update current position, duration, and `shouldPlay`
             setPlaybackInstancePosition(status.positionMillis || 0);
             setPlaybackInstanceDuration(status.durationMillis || 0);
@@ -195,6 +207,7 @@ const VideoPlayer = (props) => {
     // Seeking
     const getSeekSliderPosition = () => (playbackInstanceDuration?(playbackInstancePosition / playbackInstanceDuration || 0):0);
     const onSeekSliderValueChange = async () => {
+        if(!isMounted.current){return;}
         if (playbackInstance !== null && seekState !== SeekStates.Seeking) {
             updateSeekState(SeekStates.Seeking);
             // A seek might have finished (Seeked) but since we are not in NotSeeking yet, the `shouldPlay` flag is still false,
@@ -252,6 +265,7 @@ const VideoPlayer = (props) => {
     };
     // Capture the width of the seekbar slider for use in `_onSeekbarTap`
     const onSliderLayout = (e) => {
+        if(!isMounted.current){return;}
         setSliderWidth(e.nativeEvent.layout.width);
     };
     // Controls view
@@ -263,7 +277,7 @@ const VideoPlayer = (props) => {
     };
     // Controls Behavior
     const replay = async () => {
-        if (playbackInstance !== null) {
+        if (playbackInstance !== null && isMounted.current) {
             await playbackInstance.setStatusAsync({
                 shouldPlay: true,
                 positionMillis: 0,
@@ -273,37 +287,42 @@ const VideoPlayer = (props) => {
         }
     };
     const togglePlay = async () => {
-        if (controlsState === ControlStates.Hidden) {
-            return;
-        }
-        const shouldPlay = playbackState !== PlaybackStates.Playing;
-        if (playbackInstance !== null) {
-            await playbackInstance.setStatusAsync({ shouldPlay });
+        if(isMounted.current){
+            if (controlsState === ControlStates.Hidden) {
+                return;
+            }
+            const shouldPlay = playbackState !== PlaybackStates.Playing;
+            if (playbackInstance !== null) {
+                await playbackInstance.setStatusAsync({ shouldPlay });
+            }
         }
     };
     const toggleControls = () => {
-        switch (controlsState) {
-            case ControlStates.Shown:
-                // If the controls are currently Shown, a tap should hide controls quickly
-                setControlsState(ControlStates.Hiding);
-                hideControls(true);
-                break;
-            case ControlStates.Hidden:
-                // If the controls are currently, show controls with fade-in animation
-                showControls();
-                setControlsState(ControlStates.Showing);
-                break;
-            case ControlStates.Hiding:
-                // If controls are fading out, a tap should reverse, and show controls
-                setControlsState(ControlStates.Showing);
-                showControls();
-                break;
-            case ControlStates.Showing:
-                // A tap when the controls are fading in should do nothing
-                break;
+        if(isMounted.current){
+            switch (controlsState) {
+                case ControlStates.Shown:
+                    // If the controls are currently Shown, a tap should hide controls quickly
+                    setControlsState(ControlStates.Hiding);
+                    hideControls(true);
+                    break;
+                case ControlStates.Hidden:
+                    // If the controls are currently, show controls with fade-in animation
+                    showControls();
+                    setControlsState(ControlStates.Showing);
+                    break;
+                case ControlStates.Hiding:
+                    // If controls are fading out, a tap should reverse, and show controls
+                    setControlsState(ControlStates.Showing);
+                    showControls();
+                    break;
+                case ControlStates.Showing:
+                    // A tap when the controls are fading in should do nothing
+                    break;
+            }
         }
     };
     const showControls = () => {
+        if(!isMounted.current){return;}
         const { fadeInDuration } = props;
         showingAnimation = Animated.timing(controlsOpacity, {
             toValue: 1,
@@ -334,11 +353,13 @@ const VideoPlayer = (props) => {
         });
     };
     const onTimerDone = () => {
+        if(!isMounted.current){return;}
         // After the controls timer runs out, fade away the controls slowly
         setControlsState(ControlStates.Hiding);
         hideControls();
     };
     const resetControlsTimer = () => {
+        if(!isMounted.current){return;}
         const { hideControlsTimerDuration } = props;
         if (controlsTimer) {
             clearTimeout(controlsTimer);

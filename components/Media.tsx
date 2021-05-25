@@ -21,6 +21,9 @@ interface Props {
   index: number;
   setScrollEnabled: Function;
   pinchRef: React.RefObject<React.ComponentType<PinchGestureHandlerProps & React.RefAttributes<any>>>;
+  imageScale:Animated.AnimatedInterpolation;
+  _baseImageScale: Animated.Value;
+  _pinchScale: Animated.Value;
 }
 
 const Media: React.FC<Props> = (props) => {
@@ -29,10 +32,6 @@ const Media: React.FC<Props> = (props) => {
 
   
   let doubleTapRef = createRef();
-
-  let _baseImageScale = new Animated.Value(1);
-  let _pinchScale = new Animated.Value(1);
-  const imageScale = Animated.multiply(_baseImageScale, _pinchScale);
   
   let _lastScale:number = 1;
 
@@ -45,7 +44,7 @@ const Media: React.FC<Props> = (props) => {
 
 
   const _onPinchGestureEvent = Animated.event(
-    [{ nativeEvent: { scale: _pinchScale } }],
+    [{ nativeEvent: { scale: props._pinchScale } }],
     { useNativeDriver: true }
   );
   const _onPinchHandlerStateChange = ( event:HandlerStateChangeEvent<PinchGestureHandlerEventPayload> ) => {
@@ -54,8 +53,8 @@ const Media: React.FC<Props> = (props) => {
     }
     if (event.nativeEvent.oldState === State.ACTIVE && isMounted.current) {
       _lastScale *= event.nativeEvent.scale;
-      _baseImageScale.setValue(_lastScale);
-      _pinchScale.setValue(1);
+      props._baseImageScale.setValue(_lastScale);
+      props._pinchScale.setValue(1);
     }
   }
 
@@ -63,10 +62,10 @@ const Media: React.FC<Props> = (props) => {
     if (event.nativeEvent.oldState === State.ACTIVE && event.nativeEvent.state !== State.ACTIVE && isMounted.current) {
       if(_lastScale > 1){
         _lastScale = 1;
-        _baseImageScale.setValue(_lastScale);
+        props._baseImageScale.setValue(_lastScale);
       }else{
         _lastScale *= 2;
-        _baseImageScale.setValue(_lastScale);
+        props._baseImageScale.setValue(_lastScale);
       }
     }
   }
@@ -121,7 +120,7 @@ const Media: React.FC<Props> = (props) => {
                     height: props.imageHeight,
                     width: props.imageWidth,
                     transform: [
-                      { scale: imageScale },
+                      { scale: (props.state?.modalShown && props.state?.activeIndex===props.index)?props.imageScale:1 },
                     ],
                   },
                 ]}
@@ -167,6 +166,10 @@ const Media: React.FC<Props> = (props) => {
                           {
                             width: SCREEN_WIDTH, 
                             height: SCREEN_HEIGHT,
+                            opacity: (props.state?.modalShown && props.state?.activeIndex===props.index)?1:(props.imageScale.interpolate({
+                              inputRange: [0, 0.99, 1, 1.01, 4],
+                              outputRange: [0, 0, 1, 0, 0],
+                            }))
                           }
                         ]} 
                         collapsable={false}

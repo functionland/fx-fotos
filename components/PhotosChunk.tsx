@@ -53,13 +53,15 @@ const PhotosChunk: React.FC<Props> = (props) => {
 
   const _onSingleTapHandlerStateChange = ( event:HandlerStateChangeEvent<TapGestureHandlerEventPayload> ) => {
     if(event.nativeEvent.state === State.BEGAN){
+      console.log('TAP state BEGAN');
       Animated.timing(tempScale, {
         toValue: 0.8,
         duration: 1000,
         useNativeDriver: true,
       }).start();
     }
-    if (event.nativeEvent.state === State.ACTIVE && event.nativeEvent.oldState === State.BEGAN) {
+    if (event.nativeEvent.state === State.ACTIVE && event.nativeEvent.oldState !== State.ACTIVE) {
+      console.log('TAP state ACTIVE');
       let imageOffsetY = event.nativeEvent.absoluteY - event.nativeEvent.y;
       let imageOffsetX = event.nativeEvent.absoluteX - event.nativeEvent.x;
 
