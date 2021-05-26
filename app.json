@@ -2,7 +2,7 @@
   "expo": {
     "name": "BoxPhotos",
     "slug": "BoxPhotos",
-    "version": "1.0.0",
+    "version": "0.8.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -23,7 +23,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "package": "land.fx.BoxPhotos"
     },
     "web": {
       "favicon": "./assets/favicon.png"

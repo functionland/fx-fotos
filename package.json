@@ -1,7 +1,7 @@
 {
-  "name": "@box/photos",
+  "name": "@functionland/photos",
   "main": "node_modules/expo/AppEntry.js",
-  "version": "0.4",
+  "version": "0.8",
   "description": "Media Gallery",
   "keywords": [
     "media",

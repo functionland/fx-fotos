@@ -62,3 +62,6 @@ buck-out/
 
 # CocoaPods
 /ios/Pods/
+assets/playStore/BoxPhotos-95a04a2b6f3443ae8b3fe6845d0797d1-signed.aab
+BoxPhotos.jks
+assets/playStore/screenshot.psd
