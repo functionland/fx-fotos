@@ -3,6 +3,7 @@ import {Animated, Dimensions, View, Text} from 'react-native';
 import {sortCondition, FlatSection} from '../types/interfaces';
 import RenderPhotos from './RenderPhotos';
 import SingleMedia from './SingleMedia';
+import Highlights from './Highlights';
 import { Asset } from 'expo-media-library';
 import {prepareLayout} from '../utils/functions';
 
@@ -23,6 +24,7 @@ interface Props {
   velocity: Animated.Value;
   isPinchAndZoom: boolean;
   setLoadMore: Function;
+  storiesHeight: number;
 }
 
 const AllPhotos: React.FC<Props> = (props) => {
@@ -47,8 +49,15 @@ const AllPhotos: React.FC<Props> = (props) => {
         flex: 1,
         width: SCREEN_WIDTH,
         height: SCREEN_HEIGHT,
+        position: 'relative'
       }}
     >
+      <Highlights
+            medias={medias?[medias[0], medias[1], medias[2]]:undefined}
+            duration={1500}
+            numColumns={props.numColumns}
+            height={props.storiesHeight}
+      />
       <RenderPhotos
         photos={preparedMedia}
         loading={props.loading}
@@ -83,6 +92,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         setModalShown={setModalShown}
         setSinglePhotoIndex={setSinglePhotoIndex}
         setImagePosition={setImagePosition}
+        storiesHeight={props.storiesHeight}
       />
       <RenderPhotos
         photos={preparedMedia}
@@ -118,6 +128,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         setModalShown={setModalShown}
         setSinglePhotoIndex={setSinglePhotoIndex}
         setImagePosition={setImagePosition}
+        storiesHeight={props.storiesHeight}
       />
       <RenderPhotos
         photos={preparedMedia}
@@ -153,6 +164,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         setModalShown={setModalShown}
         setSinglePhotoIndex={setSinglePhotoIndex}
         setImagePosition={setImagePosition}
+        storiesHeight={props.storiesHeight}
       />
       <SingleMedia 
         modalShown={modalShown}

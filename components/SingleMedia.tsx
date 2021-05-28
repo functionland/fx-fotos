@@ -255,7 +255,17 @@ const SingleMedia: React.FC<Props> = (props) => {
   }
   
   return (
-    <View style={{zIndex:props.modalShown?1:0, opacity:props.modalShown?1:0,width:SCREEN_WIDTH, height:SCREEN_HEIGHT}}>
+    <View 
+      style={{
+        zIndex:props.modalShown?1:0, 
+        opacity:props.modalShown?1:0,
+        width:SCREEN_WIDTH, 
+        height:SCREEN_HEIGHT,
+        position:'absolute',
+        top: 0,
+        left: 0,
+      }}
+    >
       <Animated.View 
         style={[styles.ModalView, {
           opacity:modalOpacity.interpolate({

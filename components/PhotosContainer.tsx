@@ -1,20 +1,21 @@
 import * as MediaLibrary from 'expo-media-library';
 import {useNavigation} from '@react-navigation/native';
 import React, {useEffect, useRef, useState} from 'react';
-import {Animated, View, useWindowDimensions, StatusBar} from 'react-native';
+import {Animated, SafeAreaView, useWindowDimensions, StatusBar, ScrollView, View} from 'react-native';
 import {getUserBoxMedia} from '../utils/APICalls';
 import {getStorageMedia} from '../utils/functions';
 import {storagePermission} from '../utils/permissions';
 import AllPhotos from './AllPhotos';
 import PinchZoom from './PinchZoom';
 import {sortCondition, MediaItem} from '../types/interfaces';
-import Highlights from './Highlights';
 
 const PhotosContainer = () => {
   const SCREEN_WIDTH = useWindowDimensions().width;
   const SCREEN_HEIGHT = useWindowDimensions().height;
 
   const initialPhotoNumber:number = 100;
+  const storiesHeight:number = 1.618*SCREEN_WIDTH/3;
+
   const [permission, setPermission] = useState<boolean>();
   const [photos, setPhotos] = useState<Array<MediaLibrary.Asset>>();
   const [mediaEndCursor, setMediaEndCursor] = useState<string>('');
@@ -81,53 +82,50 @@ const PhotosContainer = () => {
   }, [storagePhotos]);
 
   return photos ? (
-    <View
+    <SafeAreaView
       style={{
         flex: 1,
         width: SCREEN_WIDTH,
         height: SCREEN_HEIGHT,
         marginTop: StatusBar.currentHeight || 0,
+        position: 'relative'
       }}
     >
-    <Highlights
-        medias={photos?[photos[0], photos[1], photos[2]]:undefined}
-        duration={1500}
-        numColumns={numColumns}
-      />
-    <PinchZoom
-      setPinchOrZoom={setPinchOrZoom}
-      pinchOrZoom={pinchOrZoom}
-      scale={scale}
-      baseScale={baseScale}
-      baseScale2={baseScale2}
-      setSortCondition={setSortCondition_i}
-      setNumColumns={setNumColumns}
-      sortCondition={sortCondition_i}
-      numColumns={numColumns}
-      focalX={focalX}
-      focalY={focalY}
-      numberOfPointers={numberOfPointers}
-      velocity={velocity}
-      setIsPinchAndZoom={setIsPinchAndZoom}
-      isPinchAndZoom={isPinchAndZoom}
-    >
-      <AllPhotos
-        pinchOrZoom={pinchOrZoom}
-        scale={scale}
-        baseScale={baseScale}
-        photos={photos}
-        sortCondition={sortCondition_i}
-        numColumns={numColumns}
-        loading={loading}
-        focalX={focalX}
-        focalY={focalY}
-        numberOfPointers={numberOfPointers}
-        velocity={velocity}
-        isPinchAndZoom={isPinchAndZoom}
-        setLoadMore={setLoadMore}
-      />
-    </PinchZoom>
-    </View>
+          <PinchZoom
+            setPinchOrZoom={setPinchOrZoom}
+            pinchOrZoom={pinchOrZoom}
+            scale={scale}
+            baseScale={baseScale}
+            baseScale2={baseScale2}
+            setSortCondition={setSortCondition_i}
+            setNumColumns={setNumColumns}
+            sortCondition={sortCondition_i}
+            numColumns={numColumns}
+            focalX={focalX}
+            focalY={focalY}
+            numberOfPointers={numberOfPointers}
+            velocity={velocity}
+            setIsPinchAndZoom={setIsPinchAndZoom}
+            isPinchAndZoom={isPinchAndZoom}
+          >
+            <AllPhotos
+              pinchOrZoom={pinchOrZoom}
+              scale={scale}
+              baseScale={baseScale}
+              photos={photos}
+              sortCondition={sortCondition_i}
+              numColumns={numColumns}
+              loading={loading}
+              focalX={focalX}
+              focalY={focalY}
+              numberOfPointers={numberOfPointers}
+              velocity={velocity}
+              isPinchAndZoom={isPinchAndZoom}
+              setLoadMore={setLoadMore}
+              storiesHeight={storiesHeight}
+            />
+          </PinchZoom>
+    </SafeAreaView>
   ) : (
     <></>
   );

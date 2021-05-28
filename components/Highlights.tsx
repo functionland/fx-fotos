@@ -21,6 +21,7 @@ interface Props {
   duration: number;
   numColumns: 2|3|4;
   text?: string | undefined;
+  height: number;
 }
 
 const Highlights: React.FC<Props> = (props) => {
@@ -60,8 +61,8 @@ const Highlights: React.FC<Props> = (props) => {
         style= {[
           styles.container, 
           {
-            width: SCREEN_WIDTH/3,
-            height: 1.618*SCREEN_WIDTH/3
+            width: props.height/1.618,
+            height: props.height
           }
         ]}
       >

@@ -58,6 +58,7 @@ interface Props {
   setModalShown: Function;
   setSinglePhotoIndex: Function;
   setImagePosition: Function;
+  storiesHeight: number;
 }
 
 const RenderPhotos: React.FC<Props> = (props) => {
