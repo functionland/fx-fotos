@@ -7,7 +7,8 @@ import {getStorageMedia} from '../utils/functions';
 import {storagePermission} from '../utils/permissions';
 import AllPhotos from './AllPhotos';
 import PinchZoom from './PinchZoom';
-import {sortCondition, MediaItem} from '../types/interfaces';
+import {sortCondition, MediaItem, } from '../types/interfaces';
+
 
 const PhotosContainer = () => {
   const SCREEN_WIDTH = useWindowDimensions().width;

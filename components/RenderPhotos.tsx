@@ -8,9 +8,10 @@ import {
   ActivityIndicator,
   View,
 } from 'react-native';
-import { layout, FlatSection, ScrollEvent } from '../types/interfaces';
+import { layout, FlatSection, ScrollEvent, story } from '../types/interfaces';
 import PhotosChunk from './PhotosChunk';
 import ThumbScroll from './ThumbScroll';
+import Highlights from './Highlights';
 import { RecyclerListView, DataProvider, AutoScroll, BaseScrollView } from 'recyclerlistview';
 import { LayoutUtil } from '../utils/LayoutUtil';
 import FloatingFilters from './FloatingFilters';
@@ -59,6 +60,7 @@ interface Props {
   setSinglePhotoIndex: Function;
   setImagePosition: Function;
   storiesHeight: number;
+  stories: story[]|undefined;
 }
 
 const RenderPhotos: React.FC<Props> = (props) => {
@@ -67,7 +69,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
   const [dataProvider, setDataProvider] = useState<DataProvider>(new DataProvider((r1, r2) => {
     return r1 !== r2;
   }));
-  const [layoutProvider, setLayoutProvider] = useState<any>(LayoutUtil.getLayoutProvider(2, 'day', props.photos.headerIndexes, headerHeight, props.photos.layout));
+  const [layoutProvider, setLayoutProvider] = useState<any>(LayoutUtil.getLayoutProvider(2, 'day', props.photos.headerIndexes, headerHeight, props.photos.layout, props.storiesHeight));
   const [viewLoaded, setViewLoaded] = useState<boolean>(false);
   const scrollRef:any = useRef();
   const scrollRefExternal:any = useRef();
@@ -95,7 +97,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
   },[props.photos]);
 
   useEffect(()=>{
-    setLayoutProvider(LayoutUtil.getLayoutProvider(props.numColumns, props.sortCondition, props.photos.headerIndexes, headerHeight, props.photos.layout));
+    setLayoutProvider(LayoutUtil.getLayoutProvider(props.numColumns, props.sortCondition, props.photos.headerIndexes, headerHeight, props.photos.layout, props.storiesHeight));
   },[props.numColumns, props.sortCondition]);
 
   const renderFooter = () => {
@@ -112,8 +114,20 @@ const RenderPhotos: React.FC<Props> = (props) => {
   
   const rowRenderer = (type:string | number, data:layout, index: number) => {
     //We have only one view type so not checks are needed here
+    switch(type){
+      case 'story':
+        return (
+          <Highlights
+            stories={props.stories}
+            duration={1500}
+            numColumns={props.numColumns}
+            height={props.storiesHeight}
+          />
+        );
+      break;
+      default:
     return (
-    <View style={{position:'relative', zIndex:4}}>
+    <View style={{position:'relative', zIndex:1}}>
       <PhotosChunk
         photo={data}
         opacity={props.opacity}
@@ -130,6 +144,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
         headerHeight={headerHeight}
       />
     </View>);
+    }
   };
 
   

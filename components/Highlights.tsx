@@ -2,6 +2,8 @@ import { Asset } from 'expo-media-library';
 import React, {useEffect, useRef, useState, createRef} from 'react';
 import { View, SafeAreaView, useWindowDimensions, StyleSheet, Image } from 'react-native';
 import StoryContainer from './Story/stories/StoryContainer';
+import {story, } from '../types/interfaces';
+import { useBackHandler } from '@react-native-community/hooks'
 
 import {
   BAR_ACTIVE_COLOR,
@@ -17,7 +19,7 @@ import {
 import { calcImageDimension, } from '../utils/functions';
 
 interface Props {
-  medias:Asset[]|undefined;
+  stories:story[]|undefined;
   duration: number;
   numColumns: 2|3|4;
   text?: string | undefined;
@@ -30,12 +32,24 @@ const Highlights: React.FC<Props> = (props) => {
       isMounted.current = true;
       return () => {isMounted.current = false;}
   }, []);
+
+
   const [showStory, setShowStory] = useState<boolean>(false);
   const [images, setImages] = useState<Asset[]>([]);
+
 
   const SCREEN_WIDTH = useWindowDimensions().width;
   const SCREEN_HEIGHT = useWindowDimensions().height;
   const panRef = createRef<PanGestureHandler>();
+
+  useBackHandler(() => {
+      if (showStory) {
+        setShowStory(false);
+        return true;
+      }
+      // let the default thing happen
+      return false;
+  })
 
   const openHighlights = (medias:Asset[]) => {
     setImages(medias);
@@ -45,13 +59,13 @@ const Highlights: React.FC<Props> = (props) => {
 
   const _onPanHandlerStateChange = ( event:HandlerStateChangeEvent<PanGestureHandlerEventPayload> ) => {
     if (event.nativeEvent.state === State.END){
-      if(props.medias){
-        openHighlights(props.medias);
+      if(props.stories){
+        openHighlights(props.stories[0].medias);
       }
     }
   }
 
-  return props.medias ? (
+  return props.stories ? (
     <PanGestureHandler
       maxPointers={1}
       ref={panRef}
@@ -75,7 +89,7 @@ const Highlights: React.FC<Props> = (props) => {
             }
           ]}
           source={
-            {uri: props.medias[0]?.uri}
+            {uri: props.stories[0]?.medias[0]?.uri}
           }
         />
         <View style={

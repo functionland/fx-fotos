@@ -6,7 +6,8 @@ import {
   FlatSection,
   flatMedia,
   headerIndex,
-  layout
+  layout,
+  story
 } from '../types/interfaces';
 
 /*
@@ -100,7 +101,7 @@ export const prepareLayout = (
     let layout: Array<layout> = [];
     let headerIndexes:Array<headerIndex> = [];
     let count = {'day':0, 'month':0};
-
+    layout.push({value:'story placeholder', sortCondition: '', index: -1});
     
     let lastTimestampObj = timestampToDate(
       lastTimestamp,
@@ -315,3 +316,13 @@ export const calcImageDimension = (media:Asset|undefined, SCREEN_HEIGHT:number, 
   }
   return {height: imageHeight_t, width: imageWidth_t}
 };
+
+export const createStories = (media:Asset[]) =>{
+  let result:story[] = [
+    {
+      medias: [media[0], media[1], media[2]],
+      text: 'test',
+    }
+  ]
+  return result;
+}
