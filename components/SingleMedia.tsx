@@ -5,7 +5,7 @@ import Media from './Media';
 import { Asset } from 'expo-media-library';
 import { RecyclerListView, DataProvider, BaseScrollView, } from 'recyclerlistview';
 import { LayoutUtil } from '../utils/LayoutUtil';
-import { ScrollEvent } from '../types/interfaces';
+import { calcImageDimension } from '../utils/functions';
 
 import {
   LongPressGestureHandler,
@@ -81,28 +81,6 @@ const SingleMedia: React.FC<Props> = (props) => {
     outputRange: [1, 1, 4]
   });
 
-  const calcImageDimension = (media:Asset|undefined) => {
-    let imageWidth_t = SCREEN_WIDTH;
-    let imageHeight_t = SCREEN_HEIGHT;
-    if(media){
-      if(media.height > SCREEN_HEIGHT && media.width > SCREEN_WIDTH){
-        if(media.height/media.width > SCREEN_HEIGHT/SCREEN_WIDTH){
-          imageWidth_t = media.width * SCREEN_HEIGHT/(media.height==0?1:media.height);
-        }else{
-          imageHeight_t = SCREEN_WIDTH * media.height/(media.width==0?1:media.width);
-        }
-      }else if(media.height > SCREEN_HEIGHT){
-        imageWidth_t = media.width * SCREEN_HEIGHT/(media.height==0?1:media.height);
-      }else if(media.width > SCREEN_WIDTH){
-        imageHeight_t = SCREEN_WIDTH * media.height/(media.width==0?1:media.width);
-      }else if(media.height <= SCREEN_HEIGHT && media.width <= SCREEN_WIDTH){
-        imageHeight_t = media.height;
-        imageWidth_t = media.width ;
-      }																												
-    }
-    return {height: imageHeight_t, width: imageWidth_t}
-  };
-
   useEffect(()=>{
     if(props.medias && isMounted.current){
       setDataProvider(dataProvider.cloneWithRows(props.medias));
@@ -111,7 +89,7 @@ const SingleMedia: React.FC<Props> = (props) => {
 
   useEffect(()=>{
     if(isMounted.current){
-      let imageDimensions = calcImageDimension(media);
+      let imageDimensions = calcImageDimension(media, SCREEN_HEIGHT, SCREEN_WIDTH);
       showHideModal(props.modalShown, imageDimensions.width, imageDimensions.height);
       if(props.modalShown){
         scrollRef?.current?.scrollToIndex(props.singleMediaIndex, false);
@@ -126,14 +104,14 @@ const SingleMedia: React.FC<Props> = (props) => {
       if(newMedia && typeof newMedia !== 'string' && media !== newMedia){
         setMedia(newMedia);
       }else{
-        let imageDimensions = calcImageDimension(media);
+        let imageDimensions = calcImageDimension(media, SCREEN_HEIGHT, SCREEN_WIDTH);
         showHideModal(props.modalShown, imageDimensions.width, imageDimensions.height);
       }
     }
   },[props.modalShown]);
 
   const hideModalAnimation = (duration:number=400) => {
-    let imageDimensions = calcImageDimension(media);
+    let imageDimensions = calcImageDimension(media, SCREEN_HEIGHT, SCREEN_WIDTH);
     let thumbnailPositionMinusSingleImagePosition = {
       x: props.imagePosition.x - (SCREEN_WIDTH/(props.numColumns*imageDimensions.width))*(SCREEN_WIDTH - imageDimensions.width)/2,
       y: props.imagePosition.y - (SCREEN_WIDTH/(props.numColumns*imageDimensions.height))*(SCREEN_HEIGHT - imageDimensions.height)/2
@@ -174,7 +152,7 @@ const SingleMedia: React.FC<Props> = (props) => {
     }, duration/2)
   }
   const showModalAnimation = (duration:number=400) => {
-    let imageDimensions = calcImageDimension(media);
+    let imageDimensions = calcImageDimension(media, SCREEN_HEIGHT, SCREEN_WIDTH);
     //console.log('in showModalAnimation:', {SCREEN_WIDTH:SCREEN_WIDTH, imageWidth:imageWidth, SCREEN_HEIGHT:SCREEN_HEIGHT, imageHeight:imageHeight, StatusBar: StatusBar.currentHeight});
     Animated.parallel([
       Animated.timing(viewPosition, {
@@ -378,8 +356,8 @@ const SingleMedia: React.FC<Props> = (props) => {
                   }}
                   rowRenderer={(type:string | number, item:Asset, index: number, extendedState:any) => (
                     <Media
-                      imageHeight={calcImageDimension(item).height}
-                      imageWidth={calcImageDimension(item).width}
+                      imageHeight={calcImageDimension(item, SCREEN_HEIGHT, SCREEN_WIDTH).height}
+                      imageWidth={calcImageDimension(item, SCREEN_HEIGHT, SCREEN_WIDTH).width}
                       media={item}
                       state={extendedState}
                       index={index}

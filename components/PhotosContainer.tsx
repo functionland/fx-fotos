@@ -1,15 +1,19 @@
 import * as MediaLibrary from 'expo-media-library';
 import {useNavigation} from '@react-navigation/native';
 import React, {useEffect, useRef, useState} from 'react';
-import {Animated} from 'react-native';
+import {Animated, View, useWindowDimensions, StatusBar} from 'react-native';
 import {getUserBoxMedia} from '../utils/APICalls';
 import {getStorageMedia} from '../utils/functions';
 import {storagePermission} from '../utils/permissions';
 import AllPhotos from './AllPhotos';
 import PinchZoom from './PinchZoom';
 import {sortCondition, MediaItem} from '../types/interfaces';
+import Highlights from './Highlights';
 
 const PhotosContainer = () => {
+  const SCREEN_WIDTH = useWindowDimensions().width;
+  const SCREEN_HEIGHT = useWindowDimensions().height;
+
   const initialPhotoNumber:number = 100;
   const [permission, setPermission] = useState<boolean>();
   const [photos, setPhotos] = useState<Array<MediaLibrary.Asset>>();
@@ -77,6 +81,19 @@ const PhotosContainer = () => {
   }, [storagePhotos]);
 
   return photos ? (
+    <View
+      style={{
+        flex: 1,
+        width: SCREEN_WIDTH,
+        height: SCREEN_HEIGHT,
+        marginTop: StatusBar.currentHeight || 0,
+      }}
+    >
+    <Highlights
+        medias={photos?[photos[0], photos[1], photos[2]]:undefined}
+        duration={1500}
+        numColumns={numColumns}
+      />
     <PinchZoom
       setPinchOrZoom={setPinchOrZoom}
       pinchOrZoom={pinchOrZoom}
@@ -110,6 +127,7 @@ const PhotosContainer = () => {
         setLoadMore={setLoadMore}
       />
     </PinchZoom>
+    </View>
   ) : (
     <></>
   );

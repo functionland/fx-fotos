@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Animated, Dimensions, View, StatusBar, Text} from 'react-native';
+import {Animated, Dimensions, View, Text} from 'react-native';
 import {sortCondition, FlatSection} from '../types/interfaces';
 import RenderPhotos from './RenderPhotos';
 import SingleMedia from './SingleMedia';
@@ -47,7 +47,6 @@ const AllPhotos: React.FC<Props> = (props) => {
         flex: 1,
         width: SCREEN_WIDTH,
         height: SCREEN_HEIGHT,
-        marginTop: StatusBar.currentHeight || 0,
       }}
     >
       <RenderPhotos
@@ -164,6 +163,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         imagePosition={imagePosition}
         numColumns={props.numColumns}
       />
+      
     </View>
     ):(
       <View><Text>No Photos</Text></View>

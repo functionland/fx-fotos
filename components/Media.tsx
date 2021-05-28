@@ -1,5 +1,5 @@
 import React, {useState, useEffect, createRef, useRef} from 'react';
-import {Animated, StyleSheet, View, useWindowDimensions } from 'react-native';
+import {Animated, StyleSheet, useWindowDimensions } from 'react-native';
 import { Asset } from 'expo-media-library';
 import { Video } from 'expo-av'
 import VideoPlayer from './VideoPlayer';

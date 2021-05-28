@@ -293,3 +293,25 @@ export const changeSortCondition: changeSortConditionAndNumColumns = (
 
   return result;
 };
+
+export const calcImageDimension = (media:Asset|undefined, SCREEN_HEIGHT:number, SCREEN_WIDTH:number) => {
+  let imageWidth_t = SCREEN_WIDTH;
+  let imageHeight_t = SCREEN_HEIGHT;
+  if(media){
+    if(media.height > SCREEN_HEIGHT && media.width > SCREEN_WIDTH){
+      if(media.height/media.width > SCREEN_HEIGHT/SCREEN_WIDTH){
+        imageWidth_t = media.width * SCREEN_HEIGHT/(media.height==0?1:media.height);
+      }else{
+        imageHeight_t = SCREEN_WIDTH * media.height/(media.width==0?1:media.width);
+      }
+    }else if(media.height > SCREEN_HEIGHT){
+      imageWidth_t = media.width * SCREEN_HEIGHT/(media.height==0?1:media.height);
+    }else if(media.width > SCREEN_WIDTH){
+      imageHeight_t = SCREEN_WIDTH * media.height/(media.width==0?1:media.width);
+    }else if(media.height <= SCREEN_HEIGHT && media.width <= SCREEN_WIDTH){
+      imageHeight_t = media.height;
+      imageWidth_t = media.width ;
+    }																												
+  }
+  return {height: imageHeight_t, width: imageWidth_t}
+};
