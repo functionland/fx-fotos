@@ -84,6 +84,21 @@ const Highlights: React.FC<Props> = (props) => {
             {uri: props.story?.medias[0]?.uri}
           }
         />
+        <View
+          style={[
+            styles.mediaOverlay, {
+              width: SCREEN_WIDTH/3,
+              height: 1.618*SCREEN_WIDTH/3
+            }
+          ]}
+        >
+
+        </View>
+        <View style={styles.textHolder}>
+          <Text style={styles.text}>
+            {props.story?.text}
+          </Text>
+        </View>
       </View>
     </TapGestureHandler>
   ) : (
@@ -95,16 +110,41 @@ const styles = StyleSheet.create({
   media: {
     borderRadius: 10,
     overflow: 'hidden',
-    margin: 10
+    margin: 10,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    opacity: 0.5,
   },
-  storyHolder: {
-
+  mediaOverlay: {
+    borderRadius: 10,
+    overflow: 'hidden',
+    margin: 10,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    opacity: 0.3,
+    backgroundColor: 'black'
+  },
+  text: {
+    textAlign: 'center',
+    color: 'white',
+    fontSize: 22,
+    textShadowColor: 'black',
+    textShadowRadius: 4
+  },
+  textHolder:{
+    height: 50,
+    width:'100%',
+    position: 'absolute',
+    bottom: 0,
   },
   container: {
     position: 'absolute',
     top: 0,
     left: 0,
     zIndex:5,
+    alignItems: 'center',
   },
 });
 
