@@ -96,19 +96,26 @@ export const prepareLayout = (
   sortConditions: Array<'day' | 'month'>,
   lastTimestamp: number = 0,
 ) => {
-  let output:FlatSection = {layout:[], headerIndexes:[]};
+  let output:FlatSection = {layout:[], headerIndexes:[], stories: []};
   
     let layout: Array<layout> = [];
     let headerIndexes:Array<headerIndex> = [];
+    let stories:story[] = [];
     let count = {'day':0, 'month':0};
     layout.push({value:'story placeholder', sortCondition: '', index: -1});
-    
+
     let lastTimestampObj = timestampToDate(
       lastTimestamp,
       [...sortConditions, 'year'],
     );
     
     let lastYear = {'day':'', 'month': ''};
+
+    let counter1:{[key:number]:number} = {};
+    let counter2:{[key:number]:number} = {};
+    let counter3:{[key:number]:number} = {};
+    let highlightedMedia:{[key:string]:boolean}={};
+
     for(let i=0; i<newMedias.length; i++){
       let yearStart = {'day':'','month':''};
       let mediaTimestampObj = timestampToDate(
@@ -117,6 +124,67 @@ export const prepareLayout = (
       );
 
       let mediaTimestampYear = mediaTimestampObj.year;
+
+      //Creating stories
+      let now = new Date();
+      now.setHours(0, 0, 0, 0);
+
+      let media = new Date(newMedias[i].modificationTime);
+      media.setHours(0, 0, 0, 0);
+
+        //Current photos in the same year
+        if((now.getDate()===media.getDate()) && now.getFullYear()===media.getFullYear()){
+          if(!counter1[media.getMonth()]){
+            counter1[media.getMonth()] = 0;
+          }
+          counter1[media.getMonth()] = counter1[media.getMonth()] + 1;
+          if(!stories[0] || !stories[0].medias){
+            stories[0] = {medias:[], text: 'Recent'};
+          }
+          if(counter1[media.getMonth()] <= 2 && !highlightedMedia[newMedias[i].id]){
+            stories[0].medias.push(newMedias[i]);
+            highlightedMedia[newMedias[i].id]=true;
+          }
+        }
+
+        //Current photos in the past years
+        if(now.getDate()===media.getDate() && now.getMonth()===media.getMonth() && now.getFullYear()!==media.getFullYear() ){
+          let difference = now.getFullYear() - media.getFullYear();
+          if(!counter2[difference]){
+            counter2[difference] = 0;
+          }
+          counter2[difference] = counter2[difference] + 1;
+
+          if(!stories[difference] || !stories[difference].medias){
+            stories[difference] = {medias:[], text: difference+' '+(difference===1?'year':'years')+' ago'};
+          }
+          if(counter2[difference]<=6 && !highlightedMedia[newMedias[i].id]){
+            stories[difference].medias.push(newMedias[i]);
+            highlightedMedia[newMedias[i].id]=true;
+          }
+        }
+
+        //Current photos in the past months-->This is temporary for demo
+        if(now.getDate()===media.getDate() && now.getMonth()!==media.getMonth() && now.getFullYear()===media.getFullYear() ){
+          let difference = now.getMonth() - media.getMonth();
+          if(difference < 0){difference = 12+difference;}
+          if(!counter3[difference]){
+            counter3[difference] = 0;
+          }
+          counter3[difference] = counter3[difference] + 1;
+
+          if(!stories[difference] || !stories[difference].medias){
+            stories[difference] = {medias:[], text: difference+' '+(difference===1?'month':'months')+' ago'};
+          }
+          if(counter3[difference]<=6 && !highlightedMedia[newMedias[i].id]){
+            stories[difference].medias.push(newMedias[i]);
+            highlightedMedia[newMedias[i].id]=true;
+          }
+        }
+
+      //End of creating stories
+
+      //Creating media and headerIndex
       for(let j=0;j<sortConditions.length;j++){
         let sortCondition_j = sortConditions[j];
         if(mediaTimestampObj[sortCondition_j] !== lastTimestampObj[sortCondition_j] || lastYear[sortCondition_j] !== mediaTimestampYear){
@@ -153,7 +221,8 @@ export const prepareLayout = (
       }
     }
 
-    output = {layout:layout, headerIndexes: headerIndexes};
+    stories = stories.filter(x=>x?.medias[0]?.uri);
+    output = {layout:layout, headerIndexes: headerIndexes, stories: stories};
   return output;
 }
 
@@ -316,13 +385,3 @@ export const calcImageDimension = (media:Asset|undefined, SCREEN_HEIGHT:number, 
   }
   return {height: imageHeight_t, width: imageWidth_t}
 };
-
-export const createStories = (media:Asset[]) =>{
-  let result:story[] = [
-    {
-      medias: [media[0], media[1], media[2]],
-      text: 'test',
-    }
-  ]
-  return result;
-}

@@ -35,7 +35,7 @@ function ProgressItem(props: ProgressItemProps) {
           if (progress == OFFSET - 2) {
             isValid = true
           }
-          if (!isBlock) {
+          if (!isBlock && isMounted) {
             startProgress()
           } else {
             isBlock = false
@@ -76,11 +76,17 @@ function ProgressItem(props: ProgressItemProps) {
   }, [props.progressIndex])
 
   function startProgress() {
+    if(isMounted){
       clearTimeout(listener);
       setListener(setTimeout(() => {
+        if(isMounted){
           // setProgress(progress + 1)
           dispatch({ type: PROGRESS, payload: progress + 1 });
-        }, props.duration));
+        }else{
+          clearTimeout(listener);
+        }
+      }, props.duration));
+    }
   }
 
   function blockProgress() {

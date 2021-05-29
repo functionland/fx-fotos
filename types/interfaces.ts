@@ -48,9 +48,15 @@ export interface photoChunk {
 export interface flatMedia {
   value:Asset|string;
 }
+
+export interface story {
+  medias: Asset[],
+  text: string,
+};
 export interface FlatSection {
   layout: layout[];
   headerIndexes:headerIndex[];
+  stories:story[];
 }
 
 export interface MediaItem {
@@ -74,10 +80,7 @@ export interface Dimension {
   width: number;
 }
 
-export interface story {
-  medias: Asset[],
-  text: string,
-}
+
 export interface layout {value:Asset|string; sortCondition:'day'|'month'|'', index: number};
 
 export interface headerIndex {header:string;index:number;count:number;yearStart:string; sortCondition:'day'|'month'; timestamp: number;};

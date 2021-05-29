@@ -15,6 +15,7 @@ import {
   PanGestureHandlerEventPayload,
   State,
 } from 'react-native-gesture-handler';
+import { ScaleFromCenterAndroid } from "@react-navigation/stack/lib/typescript/src/TransitionConfigs/TransitionPresets"
 
 const StoryContainer = (props: StoryContainerProps) => {
   const isMounted = useRef(false);
@@ -26,9 +27,12 @@ const StoryContainer = (props: StoryContainerProps) => {
   const [progressIndex, setProgressIndex] = useState<number>(0)
   const [stopProgress, setStopProgress] = useState<boolean>(false);
   const SCREEN_WIDTH = useWindowDimensions().width;
+  const SCREEN_HEIGHT = useWindowDimensions().height;
 
   const translationX = new Animated.Value(0);
-  const translationY = new Animated.Value(0);
+  const translationY = useRef(new Animated.Value(0)).current;
+  const opacity = useRef(new Animated.Value(1)).current;
+  const scale = useRef(new Animated.Value(1)).current;
 
   const translationYvsX = Animated.multiply(translationY, Animated.divide(translationX, Animated.add(translationY,0.0000001)).interpolate({
     inputRange: [-SCREEN_WIDTH, -1, -0.60, 0, 0.60, 1, SCREEN_WIDTH],
@@ -54,7 +58,32 @@ const StoryContainer = (props: StoryContainerProps) => {
       listener1.remove();
       listener2.remove();
     };
-  }, [])
+  }, []);
+
+  const close = (direction:number = 1) => {
+    Animated.parallel([
+      Animated.timing(translationY, {
+        toValue: direction*SCREEN_HEIGHT,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacity, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scale, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+    ]).start();
+    setTimeout(()=>{
+      if(isMounted){
+        props.onComplete();
+      }
+    },300);
+  }
 
   function onShowKeyboard(e: any) {
     if(isMounted){
@@ -92,7 +121,7 @@ const StoryContainer = (props: StoryContainerProps) => {
         if (position < props.images.length) {
           setProgressIndex(position)
         } else {
-          props.onComplete()
+          close(1);
         }
       }
     }
@@ -125,7 +154,11 @@ const StoryContainer = (props: StoryContainerProps) => {
         console.log('setStopProgress false');
         setStopProgress(false);
         if((event.nativeEvent.translationY/event.nativeEvent.translationX > 0.6 || event.nativeEvent.translationY/event.nativeEvent.translationX < -0.6) && Math.abs(event.nativeEvent.translationY)>50 ){
-          props.onComplete();
+          if(event.nativeEvent.translationY>0){
+            close(1);
+          }else{
+            close(-1);
+          }
         }
       }
     }
@@ -167,9 +200,13 @@ const StoryContainer = (props: StoryContainerProps) => {
         style={[
           props.containerStyle ? props.containerStyle : styles.parentView,
           {
+            opacity: opacity,
             transform: [
               {
                 translateY: translationYvsX
+              },
+              {
+                scale: scale,
               }
             ]
           }

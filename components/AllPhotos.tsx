@@ -3,9 +3,10 @@ import {Animated, Dimensions, View, Text} from 'react-native';
 import {sortCondition, FlatSection, story} from '../types/interfaces';
 import RenderPhotos from './RenderPhotos';
 import SingleMedia from './SingleMedia';
+import StoryHolder from './StoryHolder';
 
 import { Asset } from 'expo-media-library';
-import {prepareLayout, createStories} from '../utils/functions';
+import {prepareLayout,} from '../utils/functions';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -29,20 +30,21 @@ interface Props {
 
 const AllPhotos: React.FC<Props> = (props) => {
   const [scrollOffset, setScrollOffset] = useState<{[key:string]:(2|3|4|number)}>({'in':0,'to':0});
-  const [preparedMedia, setPreparedMedia] = useState<FlatSection>({layout:[],headerIndexes:[]});
+  const [preparedMedia, setPreparedMedia] = useState<FlatSection>({layout:[],headerIndexes:[], stories:[]});
   const [modalShown, setModalShown] = useState<boolean>(false);
   const [singlePhotoIndex, setSinglePhotoIndex] = useState<number>(1);
   const [imagePosition, setImagePosition] = useState<{x:number;y:number}>({x:0,y:0});
   const [medias, setMedias] = useState<Asset[]|undefined>(undefined);
   const [stories, setStories] = useState<story[]|undefined>(undefined);
+  const [showStory, setShowStory] = useState<boolean>(false);
+  const [story, setStory] = useState<story|undefined>();
 
   useEffect(()=>{
     let prepared = prepareLayout(props.photos,['day', 'month']);
     setPreparedMedia(prepared);
     let onlyMedias:any[] = prepared.layout.filter(item => typeof item.value !== 'string').map((item)=>{return item.value});
     setMedias(onlyMedias);
-    let stories = createStories(onlyMedias);
-    setStories(stories);
+    setStories(prepared.stories);
   },[props.photos]);
   
   return (
@@ -91,6 +93,9 @@ const AllPhotos: React.FC<Props> = (props) => {
         setImagePosition={setImagePosition}
         storiesHeight={props.storiesHeight}
         stories={stories}
+        showStory={showStory}
+        setShowStory={setShowStory}
+        setStory={setStory}
       />
       <RenderPhotos
         photos={preparedMedia}
@@ -128,6 +133,9 @@ const AllPhotos: React.FC<Props> = (props) => {
         setImagePosition={setImagePosition}
         storiesHeight={props.storiesHeight}
         stories={stories}
+        showStory={showStory}
+        setShowStory={setShowStory}
+        setStory={setStory}
       />
       <RenderPhotos
         photos={preparedMedia}
@@ -165,6 +173,9 @@ const AllPhotos: React.FC<Props> = (props) => {
         setImagePosition={setImagePosition}
         storiesHeight={props.storiesHeight}
         stories={stories}
+        showStory={showStory}
+        setShowStory={setShowStory}
+        setStory={setStory}
       />
       <SingleMedia 
         modalShown={modalShown}
@@ -174,6 +185,13 @@ const AllPhotos: React.FC<Props> = (props) => {
         setSinglePhotoIndex={setSinglePhotoIndex}
         imagePosition={imagePosition}
         numColumns={props.numColumns}
+      />
+      <StoryHolder 
+        duration={1500}
+        showStory={showStory}
+        setShowStory={setShowStory}
+        numColumns={props.numColumns}
+        story={story}
       />
       
     </View>
