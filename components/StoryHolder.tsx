@@ -3,20 +3,13 @@ import React, {useEffect, useRef, useState, createRef} from 'react';
 import { View, SafeAreaView, useWindowDimensions, StyleSheet, Image } from 'react-native';
 import StoryContainer from './Story/stories/StoryContainer';
 import {story, } from '../types/interfaces';
-import { useBackHandler } from '@react-native-community/hooks'
+import { useBackHandler } from '@react-native-community/hooks';
+import { timestampToDate } from '../utils/functions';
 
 import {
   BAR_ACTIVE_COLOR,
   BAR_INACTIVE_COLOR,
 } from './Story/utils/colors';
-
-import {
-  TapGestureHandler,
-  HandlerStateChangeEvent,
-  TapGestureHandlerEventPayload,
-  State,
-} from 'react-native-gesture-handler';
-import { calcImageDimension, } from '../utils/functions';
 
 interface Props {
     story:story|undefined;
@@ -75,7 +68,7 @@ const StoryHolder: React.FC<Props> = (props) => {
         }}
         // Inbuilt User Information in header
         userProfile={{
-          
+            userName: timestampToDate(props.story?.medias[0]?.modificationTime,['day']).day,
         }}
         // Custom Header component option
 
