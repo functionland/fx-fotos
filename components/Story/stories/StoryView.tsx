@@ -12,17 +12,17 @@ function StoryView(props: StoryViewProps) {
   return (
     <SafeAreaView 
       style={styles.divStory}
-      key={props.id+"_SafeAreaView_View_ProgressiveImage_"+image.uri}
+      key={props.id+"_SafeAreaView_View_ProgressiveImage_"+image?.uri}
     >
       <View 
         style={styles.divStory}
-        key={props.id+"_View_ProgressiveImage_"+image.uri}
+        key={props.id+"_View_ProgressiveImage_"+image?.uri}
       >
         <ProgressiveImage
           style={props.imageStyle ? props.imageStyle : styles.imgStyle}
-          imgSource={{ uri: image.uri }}
-          thumbnailSource={{ uri: image.uri }}
-          id={props.id+"_ProgressiveImage_"+image.uri}
+          imgSource={{ uri: image?.uri }}
+          thumbnailSource={{ uri: image?.uri }}
+          id={props.id+"_ProgressiveImage_"+image?.uri}
         /> 
       </View>
     </SafeAreaView>

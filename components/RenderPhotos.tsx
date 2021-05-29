@@ -7,10 +7,14 @@ import {
   StatusBar,
   ActivityIndicator,
   View,
+  FlatList,
+  SafeAreaView,
+  ScrollView
 } from 'react-native';
-import { layout, FlatSection, ScrollEvent } from '../types/interfaces';
+import { layout, FlatSection, ScrollEvent, story,  } from '../types/interfaces';
 import PhotosChunk from './PhotosChunk';
 import ThumbScroll from './ThumbScroll';
+import Highlights from './Highlights';
 import { RecyclerListView, DataProvider, AutoScroll, BaseScrollView } from 'recyclerlistview';
 import { LayoutUtil } from '../utils/LayoutUtil';
 import FloatingFilters from './FloatingFilters';
@@ -59,6 +63,10 @@ interface Props {
   setSinglePhotoIndex: Function;
   setImagePosition: Function;
   storiesHeight: number;
+  stories: story[]|undefined;
+  setShowStory: Function;
+  showStory:boolean;
+  setStory:Function;
 }
 
 const RenderPhotos: React.FC<Props> = (props) => {
@@ -67,7 +75,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
   const [dataProvider, setDataProvider] = useState<DataProvider>(new DataProvider((r1, r2) => {
     return r1 !== r2;
   }));
-  const [layoutProvider, setLayoutProvider] = useState<any>(LayoutUtil.getLayoutProvider(2, 'day', props.photos.headerIndexes, headerHeight, props.photos.layout));
+  const [layoutProvider, setLayoutProvider] = useState<any>(LayoutUtil.getLayoutProvider(2, 'day', props.photos.headerIndexes, headerHeight, props.photos.layout, props.storiesHeight));
   const [viewLoaded, setViewLoaded] = useState<boolean>(false);
   const scrollRef:any = useRef();
   const scrollRefExternal:any = useRef();
@@ -89,13 +97,14 @@ const RenderPhotos: React.FC<Props> = (props) => {
   const dragY = useRef(new Animated.Value(0)).current;
 
   const [showThumbScroll, setShowThumbScroll] = useState<boolean>(false);
+  
 
   useEffect(()=>{
     setDataProvider(dataProvider.cloneWithRows(props.photos.layout));
   },[props.photos]);
 
   useEffect(()=>{
-    setLayoutProvider(LayoutUtil.getLayoutProvider(props.numColumns, props.sortCondition, props.photos.headerIndexes, headerHeight, props.photos.layout));
+    setLayoutProvider(LayoutUtil.getLayoutProvider(props.numColumns, props.sortCondition, props.photos.headerIndexes, headerHeight, props.photos.layout, props.storiesHeight));
   },[props.numColumns, props.sortCondition]);
 
   const renderFooter = () => {
@@ -111,9 +120,42 @@ const RenderPhotos: React.FC<Props> = (props) => {
   };
   
   const rowRenderer = (type:string | number, data:layout, index: number) => {
-    //We have only one view type so not checks are needed here
+    switch(type){
+      case 'story':
+        return (
+          <SafeAreaView  style={{position:'relative', zIndex:1}}>
+            <FlatList 
+              data={props.stories}
+              horizontal={true}
+              keyExtractor={(item:story, index:number) => 'StoryItem_'+index+'_'+item.text}
+              getItemLayout={(data, index) => {
+                return {
+                  length: 15+props.storiesHeight/1.618, 
+                  offset: index*(15+props.storiesHeight/1.618), 
+                  index: index
+                }
+              }}
+              showsHorizontalScrollIndicator={false}
+              renderItem={( {item} ) => (
+                <View style={{width:15+props.storiesHeight/1.618,height:props.storiesHeight+25}}>
+                <Highlights
+                  story={item}
+                  duration={1500}
+                  numColumns={props.numColumns}
+                  height={props.storiesHeight}
+                  showStory={props.showStory}
+                  setShowStory={props.setShowStory}
+                  setStory={props.setStory}
+                />
+                </View>
+              )}
+            />
+          </SafeAreaView>
+        );
+      break;
+      default:
     return (
-    <View style={{position:'relative', zIndex:4}}>
+    <View style={{position:'relative', zIndex:1}}>
       <PhotosChunk
         photo={data}
         opacity={props.opacity}
@@ -130,6 +172,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
         headerHeight={headerHeight}
       />
     </View>);
+    }
   };
 
   
@@ -144,9 +187,13 @@ const RenderPhotos: React.FC<Props> = (props) => {
 
   const _onMomentumScrollEnd = () => {
     let lastIndex = scrollRef?.current.findApproxFirstVisibleIndex();
-    props.setScrollOffset({'in':props.numColumns, 'to':lastIndex});
-    console.log('momentum ended');
     let lastOffset = scrollRef?.current.getCurrentScrollOffset();
+    if(lastOffset===0){
+      lastIndex = 0;
+    }
+    props.setScrollOffset({'in':props.numColumns, 'to':lastIndex});
+    //console.log(['momentum ended', {'in':props.numColumns, 'to':lastIndex}, lastOffset]);
+    
     let sampleHeight = scrollRef?.current?.getContentDimension().height;
     let lastScrollOffset = lastOffset*(SCREEN_HEIGHT-indicatorHeight)/(sampleHeight-SCREEN_HEIGHT);
     //console.log('lastScrollOffset='+lastScrollOffset+', lastOffset='+lastOffset+', sampleHeight='+sampleHeight);

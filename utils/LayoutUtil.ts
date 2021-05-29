@@ -24,25 +24,30 @@ export class LayoutUtil {
       }
     );
   }
-  static getLayoutProvider(colNum:number, groupBy:string, headerIndexes:headerIndex[], headerHeight:number=20, data:layout[]) {
+  static getLayoutProvider(colNum:number, groupBy:string, headerIndexes:headerIndex[], headerHeight:number=20, data:layout[], storiesHeight:number) {
         return new LayoutProvider(
-          () => {
-            return colNum>0?colNum:2; //Since we have just one view type
+          (index) => {
+            return index===0?'story':'image'; //Since we have just one view type
           },
           (type, dim, index) => {
             const windowWidth = LayoutUtil.getWindowWidth();
-            if(data[index].sortCondition===groupBy || data[index].sortCondition===""){
-              let isHeader = headerIndexes.findIndex(x=>x.index===index && x.sortCondition===groupBy);
-              if(isHeader > -1){
-                dim.width = windowWidth;
-                dim.height = headerHeight;
-              }else{
-                dim.width = windowWidth / colNum;
-                dim.height = windowWidth / colNum;
-              }
+            if(type==='story'){
+              dim.width = windowWidth;
+              dim.height = storiesHeight+25;
             }else{
-              dim.width = 0;
-              dim.height = 0;
+              if(data[index].sortCondition===groupBy || data[index].sortCondition===""){
+                let isHeader = headerIndexes.findIndex(x=>x.index===index && x.sortCondition===groupBy);
+                if(isHeader > -1){
+                  dim.width = windowWidth;
+                  dim.height = headerHeight;
+                }else{
+                  dim.width = windowWidth / colNum;
+                  dim.height = windowWidth / colNum;
+                }
+              }else{
+                dim.width = 0;
+                dim.height = 0;
+              }
             }
           }
         );
