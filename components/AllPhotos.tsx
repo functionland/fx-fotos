@@ -26,6 +26,8 @@ interface Props {
   isPinchAndZoom: boolean;
   setLoadMore: Function;
   storiesHeight: number;
+  scrollAnim: Animated.Value;
+  HEADER_HEIGHT: number;
 }
 
 const AllPhotos: React.FC<Props> = (props) => {
@@ -54,7 +56,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         flex: 1,
         width: SCREEN_WIDTH,
         height: SCREEN_HEIGHT,
-        position: 'relative'
+        position: 'relative',
       }}
     >
       <RenderPhotos
@@ -96,6 +98,8 @@ const AllPhotos: React.FC<Props> = (props) => {
         showStory={showStory}
         setShowStory={setShowStory}
         setStory={setStory}
+        scrollAnim={props.scrollAnim}
+        HEADER_HEIGHT={props.HEADER_HEIGHT}
       />
       <RenderPhotos
         photos={preparedMedia}
@@ -136,6 +140,8 @@ const AllPhotos: React.FC<Props> = (props) => {
         showStory={showStory}
         setShowStory={setShowStory}
         setStory={setStory}
+        scrollAnim={props.scrollAnim}
+        HEADER_HEIGHT={props.HEADER_HEIGHT}
       />
       <RenderPhotos
         photos={preparedMedia}
@@ -176,6 +182,8 @@ const AllPhotos: React.FC<Props> = (props) => {
         showStory={showStory}
         setShowStory={setShowStory}
         setStory={setStory}
+        scrollAnim={props.scrollAnim}
+        HEADER_HEIGHT={props.HEADER_HEIGHT}
       />
       <SingleMedia 
         modalShown={modalShown}

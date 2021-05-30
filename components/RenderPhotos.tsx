@@ -35,6 +35,7 @@ class ExternalScrollView extends BaseScrollView {
     style={{zIndex:1}}
      ref={(scrollView: any) => {this._scrollViewRef = scrollView;}}
      scrollEventThrottle={1}
+     nestedScrollEnabled = {true}
      onScroll={Animated.event([(this.props as any).animatedEvent], {listener: this.props.onScroll,useNativeDriver: true})}
      />
   }
@@ -67,6 +68,8 @@ interface Props {
   setShowStory: Function;
   showStory:boolean;
   setStory:Function;
+  scrollAnim: Animated.Value;
+  HEADER_HEIGHT: number;
 }
 
 const RenderPhotos: React.FC<Props> = (props) => {
@@ -75,7 +78,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
   const [dataProvider, setDataProvider] = useState<DataProvider>(new DataProvider((r1, r2) => {
     return r1 !== r2;
   }));
-  const [layoutProvider, setLayoutProvider] = useState<any>(LayoutUtil.getLayoutProvider(2, 'day', props.photos.headerIndexes, headerHeight, props.photos.layout, props.storiesHeight));
+  const [layoutProvider, setLayoutProvider] = useState<any>(LayoutUtil.getLayoutProvider(2, 'day', props.photos.headerIndexes, headerHeight, props.photos.layout, props.storiesHeight, props.HEADER_HEIGHT));
   const [viewLoaded, setViewLoaded] = useState<boolean>(false);
   const scrollRef:any = useRef();
   const scrollRefExternal:any = useRef();
@@ -87,7 +90,6 @@ const RenderPhotos: React.FC<Props> = (props) => {
   const startScrollRef = useRef(startScroll);
   startScrollRef.current = startScroll;
 
-  const scrollY = useRef(new Animated.Value(0)).current;
   const isDragging = useRef(new Animated.Value(2)).current; //2:is scrolling using screen slide, 1: is scrolling using thumb scroll
   const velocityY = useRef(new Animated.Value(0)).current;
   const layoutHeightAnimated = useRef(new Animated.Value(9999999999999)).current;
@@ -104,7 +106,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
   },[props.photos]);
 
   useEffect(()=>{
-    setLayoutProvider(LayoutUtil.getLayoutProvider(props.numColumns, props.sortCondition, props.photos.headerIndexes, headerHeight, props.photos.layout, props.storiesHeight));
+    setLayoutProvider(LayoutUtil.getLayoutProvider(props.numColumns, props.sortCondition, props.photos.headerIndexes, headerHeight, props.photos.layout, props.storiesHeight, props.HEADER_HEIGHT));
   },[props.numColumns, props.sortCondition]);
 
   const renderFooter = () => {
@@ -123,7 +125,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
     switch(type){
       case 'story':
         return (
-          <SafeAreaView  style={{position:'relative', zIndex:1}}>
+          <SafeAreaView  style={{position:'relative', zIndex:1,marginTop:30}}>
             <FlatList 
               data={props.stories}
               horizontal={true}
@@ -329,7 +331,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
           //onScrollEndDrag: _onScrollEnd,
           automaticallyAdjustContentInsets: true,
           showsVerticalScrollIndicator:false,
-          animatedEvent:{nativeEvent: {contentOffset: {y: scrollY}, contentSize: {height: layoutHeightAnimated}}},
+          animatedEvent:{nativeEvent: {contentOffset: {y: props.scrollAnim}, contentSize: {height: layoutHeightAnimated}}},
         }}
       />
       
@@ -346,7 +348,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
         headerIndexes={props.photos.headerIndexes}
         numberOfPointers={props.numberOfPointers}
         headerHeight={headerHeight}
-        scrollY={scrollY}
+        scrollY={props.scrollAnim}
         velocityY={velocityY}
         fullSizeContentHeight={layoutHeight}
         scrollRef={scrollRef}

@@ -1,7 +1,7 @@
 import * as MediaLibrary from 'expo-media-library';
 import {useNavigation} from '@react-navigation/native';
 import React, {useEffect, useRef, useState} from 'react';
-import {Animated, SafeAreaView, useWindowDimensions, StatusBar, ScrollView, View} from 'react-native';
+import {Animated, View, useWindowDimensions, } from 'react-native';
 import {getUserBoxMedia} from '../utils/APICalls';
 import {getStorageMedia} from '../utils/functions';
 import {storagePermission} from '../utils/permissions';
@@ -9,12 +9,16 @@ import AllPhotos from './AllPhotos';
 import PinchZoom from './PinchZoom';
 import {sortCondition, MediaItem, } from '../types/interfaces';
 
+interface Props {
+  scrollAnim: Animated.Value;
+  HEADER_HEIGHT: number;
+}
 
-const PhotosContainer = () => {
+const PhotosContainer: React.FC<Props> = (props) => {
   const SCREEN_WIDTH = useWindowDimensions().width;
   const SCREEN_HEIGHT = useWindowDimensions().height;
 
-  const initialPhotoNumber:number = 0;
+  const initialPhotoNumber:number = 500;
   const storiesHeight:number = 1.618*SCREEN_WIDTH/3;
 
   const [permission, setPermission] = useState<boolean>();
@@ -83,13 +87,14 @@ const PhotosContainer = () => {
   }, [storagePhotos]);
 
   return photos ? (
-    <SafeAreaView
+    <View
       style={{
         flex: 1,
+        flexDirection:'column',
         width: SCREEN_WIDTH,
         height: SCREEN_HEIGHT,
-        marginTop: StatusBar.currentHeight || 0,
-        position: 'relative'
+        position: 'relative',
+        zIndex:10
       }}
     >
           <PinchZoom
@@ -124,9 +129,11 @@ const PhotosContainer = () => {
               isPinchAndZoom={isPinchAndZoom}
               setLoadMore={setLoadMore}
               storiesHeight={storiesHeight}
+              scrollAnim={props.scrollAnim}
+              HEADER_HEIGHT={props.HEADER_HEIGHT}
             />
           </PinchZoom>
-    </SafeAreaView>
+    </View>
   ) : (
     <></>
   );
