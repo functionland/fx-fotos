@@ -1,5 +1,5 @@
 import React, {useState, createRef} from 'react';
-import {Animated, Dimensions} from 'react-native';
+import {Animated, Dimensions,View} from 'react-native';
 import {sortCondition} from '../types/interfaces';
 import {
   changeSortCondition,
@@ -108,11 +108,13 @@ const PinchZoom: React.FC<Props> = (props) => {
   };
 
   return (
+
     <PinchGestureHandler
     ref={pinchRef}
     enabled={allowAnimation}
     onGestureEvent={_onPinchGestureEvent}
-    onHandlerStateChange={_onPinchHandlerStateChange}>
+    onHandlerStateChange={_onPinchHandlerStateChange}
+    >
       <Animated.View
         style={{
           width: SCREEN_WIDTH,
@@ -123,6 +125,7 @@ const PinchZoom: React.FC<Props> = (props) => {
         {props.children}
       </Animated.View>
     </PinchGestureHandler>
+
   );
 };
 

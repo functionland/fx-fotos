@@ -51,7 +51,7 @@ const StoryHolder: React.FC<Props> = (props) => {
         width:props.showStory?SCREEN_WIDTH:0,
         height:props.showStory?SCREEN_HEIGHT:0,
         zIndex:5,
-        backgroundColor:'black'
+        backgroundColor:'black',
       }
     }>
       {/* Individual Story View component */}

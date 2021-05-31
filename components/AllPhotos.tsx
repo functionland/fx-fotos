@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import {Animated, Dimensions, View, Text} from 'react-native';
 import {sortCondition, FlatSection, story} from '../types/interfaces';
 import RenderPhotos from './RenderPhotos';
@@ -26,9 +26,48 @@ interface Props {
   isPinchAndZoom: boolean;
   setLoadMore: Function;
   storiesHeight: number;
+  scrollAnim: Animated.Value;
+  HEADER_HEIGHT: number;
+  setHeaderShown: Function;
 }
 
 const AllPhotos: React.FC<Props> = (props) => {
+  const isMounted = useRef(false);
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {isMounted.current = false;}
+  }, []);
+
+  const scrollY2 = useRef(new Animated.Value(0)).current;
+  const scrollY3 = useRef(new Animated.Value(0)).current;
+  const scrollY4 = useRef(new Animated.Value(0)).current;
+
+  //Remove the below with a more optimizes logic
+  if(props.numColumns===2){
+    scrollY2.removeAllListeners();
+    scrollY3.removeAllListeners();
+    scrollY4.removeAllListeners();
+    scrollY2.addListener(({value})=>{
+      props.scrollAnim.setValue(value);
+    });
+  }else if(props.numColumns===3){
+    scrollY2.removeAllListeners();
+    scrollY3.removeAllListeners();
+    scrollY4.removeAllListeners();
+    scrollY3.addListener(({value})=>{
+      props.scrollAnim.setValue(value);
+    });
+  }else if(props.numColumns===4){
+    scrollY2.removeAllListeners();
+    scrollY3.removeAllListeners();
+    scrollY4.removeAllListeners();
+    scrollY4.addListener(({value})=>{
+      props.scrollAnim.setValue(value);
+    });
+  }
+
+ 
+
   const [scrollOffset, setScrollOffset] = useState<{[key:string]:(2|3|4|number)}>({'in':0,'to':0});
   const [preparedMedia, setPreparedMedia] = useState<FlatSection>({layout:[],headerIndexes:[], stories:[]});
   const [modalShown, setModalShown] = useState<boolean>(false);
@@ -40,12 +79,24 @@ const AllPhotos: React.FC<Props> = (props) => {
   const [story, setStory] = useState<story|undefined>();
 
   useEffect(()=>{
-    let prepared = prepareLayout(props.photos,['day', 'month']);
-    setPreparedMedia(prepared);
-    let onlyMedias:any[] = prepared.layout.filter(item => typeof item.value !== 'string').map((item)=>{return item.value});
-    setMedias(onlyMedias);
-    setStories(prepared.stories);
+    if(isMounted){
+      let prepared = prepareLayout(props.photos,['day', 'month']);
+      setPreparedMedia(prepared);
+      let onlyMedias:any[] = prepared.layout.filter(item => typeof item.value !== 'string').map((item)=>{return item.value});
+      setMedias(onlyMedias);
+      setStories(prepared.stories);
+    }
   },[props.photos]);
+
+  useEffect(()=>{
+    if(isMounted){
+      if(modalShown || showStory){
+        props.setHeaderShown(false);
+      }else{
+        props.setHeaderShown(true);
+      }
+    }
+  },[modalShown, showStory]);
   
   return (
     preparedMedia.layout.length>0?(
@@ -53,8 +104,7 @@ const AllPhotos: React.FC<Props> = (props) => {
       style={{
         flex: 1,
         width: SCREEN_WIDTH,
-        height: SCREEN_HEIGHT,
-        position: 'relative'
+        position: 'relative',
       }}
     >
       <RenderPhotos
@@ -96,6 +146,8 @@ const AllPhotos: React.FC<Props> = (props) => {
         showStory={showStory}
         setShowStory={setShowStory}
         setStory={setStory}
+        scrollY={scrollY2}
+        HEADER_HEIGHT={props.HEADER_HEIGHT}
       />
       <RenderPhotos
         photos={preparedMedia}
@@ -136,6 +188,8 @@ const AllPhotos: React.FC<Props> = (props) => {
         showStory={showStory}
         setShowStory={setShowStory}
         setStory={setStory}
+        scrollY={scrollY3}
+        HEADER_HEIGHT={props.HEADER_HEIGHT}
       />
       <RenderPhotos
         photos={preparedMedia}
@@ -176,6 +230,8 @@ const AllPhotos: React.FC<Props> = (props) => {
         showStory={showStory}
         setShowStory={setShowStory}
         setStory={setStory}
+        scrollY={scrollY4}
+        HEADER_HEIGHT={props.HEADER_HEIGHT}
       />
       <SingleMedia 
         modalShown={modalShown}
