@@ -21,9 +21,10 @@ import FloatingFilters from './FloatingFilters';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
-
+const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
 class ExternalScrollView extends BaseScrollView {
   private _scrollViewRef: any;
+  
 
   scrollTo(...args: any[]) {
     if (this._scrollViewRef) { 
@@ -31,13 +32,15 @@ class ExternalScrollView extends BaseScrollView {
     }
   }
   render() {
-    return <Animated.ScrollView {...this.props}
+    return <AnimatedScrollView {...this.props}
     style={{zIndex:1}}
      ref={(scrollView: any) => {this._scrollViewRef = scrollView;}}
      scrollEventThrottle={1}
      nestedScrollEnabled = {true}
-     onScroll={Animated.event([(this.props as any).animatedEvent], {listener: this.props.onScroll,useNativeDriver: true})}
-     />
+     onScroll={Animated.event([(this.props as any).animatedEvent], {listener: this.props.onScroll, useNativeDriver: true})}
+     >
+       {this.props.children}
+       </AnimatedScrollView>
   }
 }
 interface Props {
@@ -90,6 +93,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
   const startScrollRef = useRef(startScroll);
   startScrollRef.current = startScroll;
 
+  const scrollY = useRef(new Animated.Value(0)).current;
   const isDragging = useRef(new Animated.Value(2)).current; //2:is scrolling using screen slide, 1: is scrolling using thumb scroll
   const velocityY = useRef(new Animated.Value(0)).current;
   const layoutHeightAnimated = useRef(new Animated.Value(9999999999999)).current;
@@ -188,19 +192,21 @@ const RenderPhotos: React.FC<Props> = (props) => {
   }
 
   const _onMomentumScrollEnd = () => {
-    let lastIndex = scrollRef?.current.findApproxFirstVisibleIndex();
-    let lastOffset = scrollRef?.current.getCurrentScrollOffset();
-    if(lastOffset===0){
-      lastIndex = 0;
-    }
-    props.setScrollOffset({'in':props.numColumns, 'to':lastIndex});
-    //console.log(['momentum ended', {'in':props.numColumns, 'to':lastIndex}, lastOffset]);
-    
-    let sampleHeight = scrollRef?.current?.getContentDimension().height;
-    let lastScrollOffset = lastOffset*(SCREEN_HEIGHT-indicatorHeight)/(sampleHeight-SCREEN_HEIGHT);
-    //console.log('lastScrollOffset='+lastScrollOffset+', lastOffset='+lastOffset+', sampleHeight='+sampleHeight);
-    setLastScrollOffset(lastScrollOffset);
-    setShowThumbScroll(false);
+    setTimeout(()=>{
+      let lastIndex = scrollRef?.current.findApproxFirstVisibleIndex();
+      let lastOffset = scrollRef?.current.getCurrentScrollOffset();
+      if(lastOffset===0){
+        lastIndex = 0;
+      }
+      props.setScrollOffset({'in':props.numColumns, 'to':lastIndex});
+      //console.log(['momentum ended', {'in':props.numColumns, 'to':lastIndex}, lastOffset]);
+      
+      let sampleHeight = scrollRef?.current?.getContentDimension().height;
+      let lastScrollOffset = lastOffset*(SCREEN_HEIGHT-indicatorHeight)/(sampleHeight-SCREEN_HEIGHT);
+      //console.log('lastScrollOffset='+lastScrollOffset+', lastOffset='+lastOffset+', sampleHeight='+sampleHeight);
+      setLastScrollOffset(lastScrollOffset);
+      setShowThumbScroll(false);
+    },100);
   }
   const _onScrollEnd = () => {
     console.log('scroll end called');
@@ -259,6 +265,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
   },[endScroll]);
 
   const _onScroll = (rawEvent: ScrollEvent, offsetX: number, offsetY: number) => {
+    //console.log(props.numColumns+'_'+rawEvent.nativeEvent.contentOffset.y);
     setShowThumbScroll(true);
   }
   
@@ -325,11 +332,13 @@ const RenderPhotos: React.FC<Props> = (props) => {
         scrollEnabled={!props.isPinchAndZoom}
         onScroll={_onScroll}
         key={"RecyclerListView_"+props.sortCondition + props.numColumns}
+        scrollEventThrottle={5}
         scrollViewProps={{
           //ref: scrollRefExternal,
           onMomentumScrollEnd: _onMomentumScrollEnd,
           //onScrollEndDrag: _onScrollEnd,
-          automaticallyAdjustContentInsets: true,
+          scrollEventThrottle:5,
+          automaticallyAdjustContentInsets: false,
           showsVerticalScrollIndicator:false,
           animatedEvent:{nativeEvent: {contentOffset: {y: props.scrollAnim}, contentSize: {height: layoutHeightAnimated}}},
         }}

@@ -1,7 +1,6 @@
 import React from 'react';
 import {SafeAreaView, StyleSheet, Animated, View, useWindowDimensions} from 'react-native';
 import PhotosContainer from '../components/PhotosContainer';
-import Header from '../components/Header';
 interface Props {
   scrollAnim: Animated.Value;
   HEADER_HEIGHT: number;
@@ -13,9 +12,6 @@ const HomePage: React.FC<Props> = (props) => {
 
   return (
     <SafeAreaView style={styles.SafeAreaView}>
-      <View style={[styles.View, {width: SCREEN_WIDTH, zIndex:2}]}>
-        <Header scrollAnim={props.scrollAnim} HEADER_HEIGHT={props.HEADER_HEIGHT} />
-      </View>
       <View style={[styles.View, {width: SCREEN_WIDTH, zIndex:1, }]}>
         <PhotosContainer scrollAnim={props.scrollAnim} HEADER_HEIGHT={props.HEADER_HEIGHT} />
       </View>
@@ -35,5 +31,4 @@ const styles = StyleSheet.create({
     left: 0
   }
 });
-
 export default HomePage;
