@@ -1,5 +1,5 @@
 import { LayoutProvider } from 'recyclerlistview';
-import { Dimensions } from 'react-native';
+import { Dimensions, StatusBar } from 'react-native';
 import {layout, headerIndex} from '../types/interfaces';
 
 export class LayoutUtil {
@@ -33,7 +33,7 @@ export class LayoutUtil {
             const windowWidth = LayoutUtil.getWindowWidth();
             if(type==='story'){
               dim.width = windowWidth;
-              dim.height = storiesHeight+25+mainHeaderHeight;
+              dim.height = storiesHeight+20+2*mainHeaderHeight;
             }else{
               if(data[index].sortCondition===groupBy || data[index].sortCondition===""){
                 let isHeader = headerIndexes.findIndex(x=>x.index===index && x.sortCondition===groupBy);

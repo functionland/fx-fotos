@@ -12,6 +12,7 @@ import {sortCondition, MediaItem, } from '../types/interfaces';
 interface Props {
   scrollAnim: Animated.Value;
   HEADER_HEIGHT: number;
+  setHeaderShown: Function;
 }
 
 const PhotosContainer: React.FC<Props> = (props) => {
@@ -92,7 +93,6 @@ const PhotosContainer: React.FC<Props> = (props) => {
         flex: 1,
         flexDirection:'column',
         width: SCREEN_WIDTH,
-        height: SCREEN_HEIGHT,
         position: 'relative',
         zIndex:10
       }}
@@ -131,6 +131,7 @@ const PhotosContainer: React.FC<Props> = (props) => {
               storiesHeight={storiesHeight}
               scrollAnim={props.scrollAnim}
               HEADER_HEIGHT={props.HEADER_HEIGHT}
+              setHeaderShown={props.setHeaderShown}
             />
           </PinchZoom>
     </View>

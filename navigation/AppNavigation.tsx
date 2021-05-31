@@ -1,31 +1,41 @@
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import PermissionError from '../pages/PermissionError';
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import HomePage from '../pages/HomePage';
-import {StyleSheet, Animated, View, StatusBar} from 'react-native';
+import {StyleSheet, Animated, View} from 'react-native';
 import Header from '../components/Header';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import { FontAwesome5 } from '@expo/vector-icons'; 
-import { BarStyleProps } from '../.history/components/Story/utils/interfaceHelper_20210527230613';
 
 const Stack = createStackNavigator();
 const Tab = createMaterialBottomTabNavigator();
 
 const AppNavigation = () => {
   const scrollAnim = useRef(new Animated.Value(0)).current;
+  const [headerShown, setHeaderShown] = useState<boolean>(true);
   const HEADER_HEIGHT = 30;
 
+  const clampedScrollY = scrollAnim.interpolate({
+    inputRange: [HEADER_HEIGHT, HEADER_HEIGHT + 1],
+    outputRange: [0, 1],
+    extrapolateLeft: 'clamp',
+    });
+    const minusScrollY = Animated.multiply(clampedScrollY, -1);
+    const translateY = Animated.diffClamp(minusScrollY, -HEADER_HEIGHT, 0);
+
   return (
-    <View style={styles.View}>
+    <Animated.View style={[styles.View, 
+    ]}>
       <NavigationContainer>
         <Stack.Navigator
           screenOptions={{
             headerStyle: {
-              backgroundColor: 'white',
+              //backgroundColor: 'white',
             },
-            headerShown: true,
-            headerTintColor: '#fff',
+            headerShown: headerShown,
+            headerTransparent:true,
+            //headerTintColor: '#fff',
             headerTitleStyle: {
               fontWeight: 'bold',
             },
@@ -38,7 +48,7 @@ const AppNavigation = () => {
               
             }}
           >
-            {props => <HomeNavigation {...props} scrollAnim={scrollAnim} HEADER_HEIGHT={HEADER_HEIGHT} />}
+            {props => <HomeNavigation {...props} scrollAnim={scrollAnim} HEADER_HEIGHT={HEADER_HEIGHT} setHeaderShown={setHeaderShown} headerShown={headerShown} />}
           </Stack.Screen>
           <Stack.Screen
             name="PermissionError"
@@ -47,17 +57,19 @@ const AppNavigation = () => {
           />
         </Stack.Navigator>
       </NavigationContainer>
-    </View>
+    </Animated.View>
   );
 };
 
 interface Props {
   scrollAnim: Animated.Value;
   HEADER_HEIGHT: number;
+  setHeaderShown: Function;
+  headerShown: boolean;
 }
 const HomeNavigation: React.FC<Props> = (mainProps) => {
   return (
-    <View style={[styles.View,{marginTop:0}]}>
+    <View style={[styles.View,{marginTop:0, }]}>
         <Tab.Navigator
           screenOptions={{
             tabBarColor: 'white',
@@ -73,6 +85,7 @@ const HomeNavigation: React.FC<Props> = (mainProps) => {
               width: 3,
               height: 3
             },
+            opacity:(mainProps.headerShown?1:0)
           }}
         >
           <Tab.Screen
@@ -84,7 +97,7 @@ const HomeNavigation: React.FC<Props> = (mainProps) => {
               ),
             }}
           >
-            {props => <HomePage {...props} scrollAnim={mainProps.scrollAnim} HEADER_HEIGHT={mainProps.HEADER_HEIGHT} />}
+            {props => <HomePage {...props} scrollAnim={mainProps.scrollAnim} HEADER_HEIGHT={mainProps.HEADER_HEIGHT} setHeaderShown={mainProps.setHeaderShown} />}
           </Tab.Screen>
           <Tab.Screen
             name="Search"
@@ -122,7 +135,7 @@ function Library() {
 const styles = StyleSheet.create({
   View: {
     flex: 1,
-    marginTop: StatusBar.currentHeight || 0,
+    //marginTop: StatusBar.currentHeight || 0,
     backgroundColor: 'white',
     position: 'relative',
   },

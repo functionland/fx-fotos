@@ -1,9 +1,10 @@
 import React from 'react';
-import {SafeAreaView, StyleSheet, Animated, View, useWindowDimensions} from 'react-native';
+import { SafeAreaView, StyleSheet, Animated, View, useWindowDimensions, StatusBar } from 'react-native';
 import PhotosContainer from '../components/PhotosContainer';
 interface Props {
   scrollAnim: Animated.Value;
   HEADER_HEIGHT: number;
+  setHeaderShown: Function;
 }
 
 const HomePage: React.FC<Props> = (props) => {
@@ -12,8 +13,12 @@ const HomePage: React.FC<Props> = (props) => {
 
   return (
     <SafeAreaView style={styles.SafeAreaView}>
-      <View style={[styles.View, {width: SCREEN_WIDTH, zIndex:1, }]}>
-        <PhotosContainer scrollAnim={props.scrollAnim} HEADER_HEIGHT={props.HEADER_HEIGHT} />
+      <View style={[styles.View, {width: SCREEN_WIDTH, zIndex:1, marginTop:(StatusBar.currentHeight||0)}]}>
+        <PhotosContainer 
+          scrollAnim={props.scrollAnim} 
+          HEADER_HEIGHT={props.HEADER_HEIGHT} 
+          setHeaderShown={props.setHeaderShown}
+        />
       </View>
     </SafeAreaView>
   );

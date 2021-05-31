@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import {Animated, Dimensions, View, Text} from 'react-native';
 import {sortCondition, FlatSection, story} from '../types/interfaces';
 import RenderPhotos from './RenderPhotos';
@@ -28,9 +28,16 @@ interface Props {
   storiesHeight: number;
   scrollAnim: Animated.Value;
   HEADER_HEIGHT: number;
+  setHeaderShown: Function;
 }
 
 const AllPhotos: React.FC<Props> = (props) => {
+  const isMounted = useRef(false);
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {isMounted.current = false;}
+  }, []);
+
   const [scrollOffset, setScrollOffset] = useState<{[key:string]:(2|3|4|number)}>({'in':0,'to':0});
   const [preparedMedia, setPreparedMedia] = useState<FlatSection>({layout:[],headerIndexes:[], stories:[]});
   const [modalShown, setModalShown] = useState<boolean>(false);
@@ -42,12 +49,24 @@ const AllPhotos: React.FC<Props> = (props) => {
   const [story, setStory] = useState<story|undefined>();
 
   useEffect(()=>{
-    let prepared = prepareLayout(props.photos,['day', 'month']);
-    setPreparedMedia(prepared);
-    let onlyMedias:any[] = prepared.layout.filter(item => typeof item.value !== 'string').map((item)=>{return item.value});
-    setMedias(onlyMedias);
-    setStories(prepared.stories);
+    if(isMounted){
+      let prepared = prepareLayout(props.photos,['day', 'month']);
+      setPreparedMedia(prepared);
+      let onlyMedias:any[] = prepared.layout.filter(item => typeof item.value !== 'string').map((item)=>{return item.value});
+      setMedias(onlyMedias);
+      setStories(prepared.stories);
+    }
   },[props.photos]);
+
+  useEffect(()=>{
+    if(isMounted){
+      if(modalShown || showStory){
+        props.setHeaderShown(false);
+      }else{
+        props.setHeaderShown(true);
+      }
+    }
+  },[modalShown, showStory]);
   
   return (
     preparedMedia.layout.length>0?(
@@ -55,7 +74,6 @@ const AllPhotos: React.FC<Props> = (props) => {
       style={{
         flex: 1,
         width: SCREEN_WIDTH,
-        height: SCREEN_HEIGHT,
         position: 'relative',
       }}
     >

@@ -129,7 +129,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
     switch(type){
       case 'story':
         return (
-          <SafeAreaView  style={{position:'relative', zIndex:1,marginTop:30}}>
+          <SafeAreaView  style={{position:'relative', zIndex:1,marginTop:2*props.HEADER_HEIGHT}}>
             <FlatList 
               data={props.stories}
               horizontal={true}

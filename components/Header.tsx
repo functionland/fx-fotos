@@ -1,5 +1,5 @@
 import React, {useEffect, createRef} from 'react';
-import { Animated, View, useWindowDimensions, StyleSheet, Image, Text } from 'react-native';
+import { Animated, View, useWindowDimensions, StyleSheet, Image, Text, StatusBar, SafeAreaView } from 'react-native';
 import {
     PanGestureHandler,
     HandlerStateChangeEvent,
@@ -26,12 +26,14 @@ const Header: React.FC<Props> = (props) => {
     extrapolateLeft: 'clamp',
     });
     const minusScrollY = Animated.multiply(clampedScrollY, -1);
-    const translateY = Animated.diffClamp(minusScrollY, -props.HEADER_HEIGHT, 0);
+    const translateY = Animated.diffClamp(minusScrollY, -props.HEADER_HEIGHT-(StatusBar.currentHeight||0), 0);
 
     return (
+        <SafeAreaView>
             <Animated.View 
             style={[styles.main, {
-                height: props.HEADER_HEIGHT,
+                height: props.HEADER_HEIGHT+2*(StatusBar.currentHeight || 0),
+                width: 400,
                 transform: [
                     {
                         translateY: translateY,
@@ -39,34 +41,40 @@ const Header: React.FC<Props> = (props) => {
                 ]
             }]}>
                     <View style={styles.item}></View>
-                    <View style={styles.item}>
+                    <View style={[styles.item, ]}>
                         <Image 
                             source={require('../assets/images/logo30.png')}
-                            style={styles.image}
+                            style={[styles.image,{bottom:props.HEADER_HEIGHT/2}]}
                         />
                     </View>
                     <View style={styles.item}></View>
             </Animated.View>
+        </SafeAreaView>
     )
 }
 const styles = StyleSheet.create({
     main: {
-      width: '100%',
-      flexDirection: 'row',
-      flexWrap: 'nowrap',
-      position: 'relative',
-      top: 0,
-      left: 0,
-      backgroundColor: 'white',
-
+        flexDirection: 'row',
+        flex:1,
+        flexWrap: 'nowrap',
+        position: 'relative',
+        top: 0,
+        left: 0,
+        marginTop: -1*(StatusBar.currentHeight || 0),
+        backgroundColor: 'white',
+        alignSelf: 'flex-start',
+        marginLeft: -15
     },
     item: {
         flex: 1/3,
         backgroundColor: 'transparent',
-        
+        bottom: 0,
+        height: '100%',
     },
     image: {
-        
+        position: 'absolute',
+        alignSelf:'center',
+        //backgroundColor: 'blue'
     }
   });
 
