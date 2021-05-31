@@ -71,7 +71,7 @@ interface Props {
   setShowStory: Function;
   showStory:boolean;
   setStory:Function;
-  scrollAnim: Animated.Value;
+  scrollY: Animated.Value;
   HEADER_HEIGHT: number;
 }
 
@@ -93,7 +93,6 @@ const RenderPhotos: React.FC<Props> = (props) => {
   const startScrollRef = useRef(startScroll);
   startScrollRef.current = startScroll;
 
-  const scrollY = useRef(new Animated.Value(0)).current;
   const isDragging = useRef(new Animated.Value(2)).current; //2:is scrolling using screen slide, 1: is scrolling using thumb scroll
   const velocityY = useRef(new Animated.Value(0)).current;
   const layoutHeightAnimated = useRef(new Animated.Value(9999999999999)).current;
@@ -340,7 +339,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
           scrollEventThrottle:5,
           automaticallyAdjustContentInsets: false,
           showsVerticalScrollIndicator:false,
-          animatedEvent:{nativeEvent: {contentOffset: {y: props.scrollAnim}, contentSize: {height: layoutHeightAnimated}}},
+          animatedEvent:{nativeEvent: {contentOffset: {y: props.scrollY}, contentSize: {height: layoutHeightAnimated}}},
         }}
       />
       
@@ -357,7 +356,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
         headerIndexes={props.photos.headerIndexes}
         numberOfPointers={props.numberOfPointers}
         headerHeight={headerHeight}
-        scrollY={props.scrollAnim}
+        scrollY={props.scrollY}
         velocityY={velocityY}
         fullSizeContentHeight={layoutHeight}
         scrollRef={scrollRef}

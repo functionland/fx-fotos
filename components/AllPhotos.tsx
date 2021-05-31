@@ -38,6 +38,36 @@ const AllPhotos: React.FC<Props> = (props) => {
     return () => {isMounted.current = false;}
   }, []);
 
+  const scrollY2 = useRef(new Animated.Value(0)).current;
+  const scrollY3 = useRef(new Animated.Value(0)).current;
+  const scrollY4 = useRef(new Animated.Value(0)).current;
+
+  //Remove the below with a more optimizes logic
+  if(props.numColumns===2){
+    scrollY2.removeAllListeners();
+    scrollY3.removeAllListeners();
+    scrollY4.removeAllListeners();
+    scrollY2.addListener(({value})=>{
+      props.scrollAnim.setValue(value);
+    });
+  }else if(props.numColumns===3){
+    scrollY2.removeAllListeners();
+    scrollY3.removeAllListeners();
+    scrollY4.removeAllListeners();
+    scrollY3.addListener(({value})=>{
+      props.scrollAnim.setValue(value);
+    });
+  }else if(props.numColumns===4){
+    scrollY2.removeAllListeners();
+    scrollY3.removeAllListeners();
+    scrollY4.removeAllListeners();
+    scrollY4.addListener(({value})=>{
+      props.scrollAnim.setValue(value);
+    });
+  }
+
+ 
+
   const [scrollOffset, setScrollOffset] = useState<{[key:string]:(2|3|4|number)}>({'in':0,'to':0});
   const [preparedMedia, setPreparedMedia] = useState<FlatSection>({layout:[],headerIndexes:[], stories:[]});
   const [modalShown, setModalShown] = useState<boolean>(false);
@@ -116,7 +146,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         showStory={showStory}
         setShowStory={setShowStory}
         setStory={setStory}
-        scrollAnim={props.scrollAnim}
+        scrollY={scrollY2}
         HEADER_HEIGHT={props.HEADER_HEIGHT}
       />
       <RenderPhotos
@@ -158,7 +188,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         showStory={showStory}
         setShowStory={setShowStory}
         setStory={setStory}
-        scrollAnim={props.scrollAnim}
+        scrollY={scrollY3}
         HEADER_HEIGHT={props.HEADER_HEIGHT}
       />
       <RenderPhotos
@@ -200,7 +230,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         showStory={showStory}
         setShowStory={setShowStory}
         setStory={setStory}
-        scrollAnim={props.scrollAnim}
+        scrollY={scrollY4}
         HEADER_HEIGHT={props.HEADER_HEIGHT}
       />
       <SingleMedia 
