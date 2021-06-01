@@ -40,8 +40,8 @@ node -v
 npm -v
 ```
 
-- Git
-You can use git to be able to easily download the files from github into our computer (unless in step 1, you prefer to download files manually from this github repository)
+- Git:
+You can use git to easily download the files from github into your computer (or if you prefer you can download files manually from this github repository in step 1 of cloning the application)
 [Download Git-Scm](https://git-scm.com/downloads)
 
 you can also check whether you already have NodeJs installed by running the following command in terminal window
@@ -50,7 +50,7 @@ you can also check whether you already have NodeJs installed by running the foll
 git --version
 ```
 
-Now you need to install expo-cli. If you want to know more about expo check their website.
+Now you need to install expo-cli. If you want to know more about expo check their website. [Expo](https://docs.expo.io/)
 ```
 npm install --global expo-cli
 ```
