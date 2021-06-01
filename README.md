@@ -4,7 +4,13 @@
 BOX Photos is a react-native(expo)+typescript application to replace Google Photos/Apple Photos, and give freedom in hosting your photos on any platform, either centralized servers like Amazon or Microsoft, or decentralized solutions like "BOX". It is optimized for decentralized IPFS platforms like "BOX". Your can easily use it with a "BOX" to host your files and photos with the same experience you had using Google Photos, however, with full privacy.
 
 ## demo
-Checkout demo video at: https://youtu.be/wDxaC1HF5PQ
+Checkout full demo video at: https://youtu.be/wDxaC1HF5PQ
+Features:
+- Pinch/zoom to switch between modes: https://youtu.be/ioK0zkew--w
+- Opening a single image in fullscreen mode: https://youtu.be/jPVqxPoNH9M
+- Header animation(hide on scroll down and show on scroll up): https://youtu.be/qjfiukClHqQ
+- Hightlights/Story: https://youtu.be/yEOnDtT3cX0
+- Fast scroll/Thumb scroll feature: https://youtu.be/QsDzOGyj9cM
 
 ## table of content
 
@@ -160,3 +166,14 @@ RenderPhotos <-- ThumbScroll
 RenderPhotos <-- Highlights
 RenderPhotos <-- FloatingFilters
 ```
+
+## Road map
+ * [x] Pinch/zoom to switch between 3 modes
+ * [x] Open each image/video in a Single image modal and scroll between images
+ * [x] Show highlights
+ * [x] Fast scroll/thumb scroll
+ * [ ] Select and unselect each image to delete/edit/share
+ * [ ] Connect with BOX, AWS and other cloud services to upload/download media
+ * [ ] Search page to search by date/tags
+ * [ ] Library page to show images by folder/Album
+ * [ ] AI features to do on-device analsis for face recognition/object recognition
