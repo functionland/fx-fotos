@@ -11,13 +11,13 @@ Or checkout indvidual fatures below:
 - Pinch/zoom to switch between modes: 
 - ![https://youtu.be/ioK0zkew--w](https://github.com/functionland/photos/blob/d0561842abf7dddac34bedcfd7902a68e94a2faa/assets/demo/BOX_Photos_pinchzoom_to_switch_between_modes.gif)
 - Opening a single image in fullscreen mode: 
-![https://youtu.be/jPVqxPoNH9M](https://github.com/functionland/photos/blob/d0561842abf7dddac34bedcfd7902a68e94a2faa/assets/demo/Single%20image%20modal%20scroll%20and%20zoom.gif)
+- ![https://youtu.be/jPVqxPoNH9M](https://github.com/functionland/photos/blob/d0561842abf7dddac34bedcfd7902a68e94a2faa/assets/demo/Single%20image%20modal%20scroll%20and%20zoom.gif)
 - Header animation(hide on scroll down and show on scroll up): 
-![https://youtu.be/qjfiukClHqQ](https://github.com/functionland/photos/blob/d0561842abf7dddac34bedcfd7902a68e94a2faa/assets/demo/Header%20hide%20on%20scroll%20down%20and%20show%20on%20scroll%20up.gif)
+- ![https://youtu.be/qjfiukClHqQ](https://github.com/functionland/photos/blob/d0561842abf7dddac34bedcfd7902a68e94a2faa/assets/demo/Header%20hide%20on%20scroll%20down%20and%20show%20on%20scroll%20up.gif)
 - Hightlights/Story: 
-![https://youtu.be/yEOnDtT3cX0](https://github.com/functionland/photos/blob/d0561842abf7dddac34bedcfd7902a68e94a2faa/assets/demo/Highlights.gif)
+- ![https://youtu.be/yEOnDtT3cX0](https://github.com/functionland/photos/blob/d0561842abf7dddac34bedcfd7902a68e94a2faa/assets/demo/Highlights.gif)
 - Fast scroll/Thumb scroll feature: 
-![https://youtu.be/QsDzOGyj9cM](https://github.com/functionland/photos/blob/d0561842abf7dddac34bedcfd7902a68e94a2faa/assets/demo/Fast%20scroll_thumb%20scroll.gif)
+- ![https://youtu.be/QsDzOGyj9cM](https://github.com/functionland/photos/blob/d0561842abf7dddac34bedcfd7902a68e94a2faa/assets/demo/Fast%20scroll_thumb%20scroll.gif)
 
 ## table of content
 
