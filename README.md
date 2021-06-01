@@ -4,7 +4,7 @@
 BOX Photos is a react-native(expo)+typescript application to replace Google Photos/Apple Photos, and give freedom in hosting your photos on any platform, either centralized servers like Amazon or Microsoft, or decentralized solutions like "BOX". It is optimized for decentralized IPFS platforms like "BOX". Your can easily use it with a "BOX" to host your files and photos with the same experience you had using Google Photos, however, with full privacy.
 
 ## demo
-Checkout demo video at: https://youtu.be/MUPcM_OKZhQ
+Checkout demo video at: https://youtu.be/wDxaC1HF5PQ
 
 ## table of content
 
