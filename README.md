@@ -25,6 +25,40 @@ Features:
 - [Pages structure](#pages-structure)
 - [Components structure](#components-structure)
 - [Components descripction](#components-descripction)
+- 
+### Installing Pre-requisites
+
+- NodeJS/NPM
+
+This application needs NodeJs to run. You can download and install NodeJs from the below link on any platform if you do not have it already.
+[Download NodeJS](https://nodejs.org/en/)
+
+you can also check if you already have NodeJs installed by running the following two commands in terminal window
+
+```
+node -v
+npm -v
+```
+
+- Git
+You can use git to be able to easily download the files from github into our computer (unless in step 1, you prefer to download files manually from this github repository)
+[Download Git-Scm](https://git-scm.com/downloads)
+
+you can also check whether you already have NodeJs installed by running the following command in terminal window
+
+```
+git --version
+```
+
+Now you need to install expo-cli. If you want to know more about expo check their website.
+```
+npm install --global expo-cli
+```
+
+Optional: if you prefer yarn you can install yarn.
+```
+npm install --global yarn
+```
 
 ## Clone the project
 
