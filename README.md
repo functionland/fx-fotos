@@ -19,13 +19,15 @@ Features:
 
 ## table of content
 
+- [Install npm, git and expo-cli](#Installing-Pre-requisites)
 - [Clone the project](#clone-the-project)
 - [Install requirements](#install-requirements)
+- [Run](#run)
 - [Packages](#packages)
 - [Pages structure](#pages-structure)
 - [Components structure](#components-structure)
 - [Components descripction](#components-descripction)
-- 
+
 ### Installing Pre-requisites
 
 - NodeJS/NPM
