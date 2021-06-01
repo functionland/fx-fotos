@@ -1,21 +1,23 @@
 # BOX Photos development guide
+Note: Project is still in alpha phase and not production ready. We aim to release beta version by end of June 2021.
 
 ## Project Description
 BOX Photos is a react-native(expo)+typescript application to replace Google Photos/Apple Photos, and give freedom in hosting your photos on any platform, either centralized servers like Amazon or Microsoft, or decentralized solutions like "BOX". It is optimized for decentralized IPFS platforms like "BOX". Your can easily use it with a "BOX" to host your files and photos with the same experience you had using Google Photos, however, with full privacy.
 
 ## demo
 Checkout full demo video at: https://youtu.be/wDxaC1HF5PQ
-Features:
+
+Or checkout indvidual fatures below:
 - Pinch/zoom to switch between modes: 
 - ![https://youtu.be/ioK0zkew--w](https://github.com/functionland/photos/blob/d0561842abf7dddac34bedcfd7902a68e94a2faa/assets/demo/BOX_Photos_pinchzoom_to_switch_between_modes.gif)
 - Opening a single image in fullscreen mode: 
-- ![https://youtu.be/jPVqxPoNH9M](https://github.com/functionland/photos/blob/d0561842abf7dddac34bedcfd7902a68e94a2faa/assets/demo/Single%20image%20modal%20scroll%20and%20zoom.gif)
+![https://youtu.be/jPVqxPoNH9M](https://github.com/functionland/photos/blob/d0561842abf7dddac34bedcfd7902a68e94a2faa/assets/demo/Single%20image%20modal%20scroll%20and%20zoom.gif)
 - Header animation(hide on scroll down and show on scroll up): 
-- ![https://youtu.be/qjfiukClHqQ](https://github.com/functionland/photos/blob/d0561842abf7dddac34bedcfd7902a68e94a2faa/assets/demo/Header%20hide%20on%20scroll%20down%20and%20show%20on%20scroll%20up.gif)
+![https://youtu.be/qjfiukClHqQ](https://github.com/functionland/photos/blob/d0561842abf7dddac34bedcfd7902a68e94a2faa/assets/demo/Header%20hide%20on%20scroll%20down%20and%20show%20on%20scroll%20up.gif)
 - Hightlights/Story: 
-- ![https://youtu.be/yEOnDtT3cX0](https://github.com/functionland/photos/blob/d0561842abf7dddac34bedcfd7902a68e94a2faa/assets/demo/Highlights.gif)
+![https://youtu.be/yEOnDtT3cX0](https://github.com/functionland/photos/blob/d0561842abf7dddac34bedcfd7902a68e94a2faa/assets/demo/Highlights.gif)
 - Fast scroll/Thumb scroll feature: 
-- ![https://youtu.be/QsDzOGyj9cM](https://github.com/functionland/photos/blob/d0561842abf7dddac34bedcfd7902a68e94a2faa/assets/demo/Fast%20scroll_thumb%20scroll.gif)
+![https://youtu.be/QsDzOGyj9cM](https://github.com/functionland/photos/blob/d0561842abf7dddac34bedcfd7902a68e94a2faa/assets/demo/Fast%20scroll_thumb%20scroll.gif)
 
 ## table of content
 
@@ -88,7 +90,7 @@ npm install
 
 ## Run
 
-You can run the application in expo-cli using the below command. It gives you a QR code which you can use on your phone(in expo GO application) to open and test the application. Or you can build the android or iOS installation files.
+You can run the application in expo-cli using the below command. It gives you a QR code which you can use on your phone(in expo GO application) to open and test the application on your phone(both iOS and Android). Or you can build the android or iOS installation files.
 
 ```bash
 expo start
