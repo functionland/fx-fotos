@@ -79,9 +79,17 @@ you can install the requirements with command:
 ```bash
 yarn install
 ```
-or
+or (do not use both)
 ```bash
 npm install
+```
+
+## Run
+
+You can run the application in expo-cli using the below command. It gives you a QR code which you can use on your phone(in expo GO application) to open and test the application. Or you can build the android or iOS installation files.
+
+```bash
+expo start
 ```
 
 ## Packages
