@@ -204,16 +204,13 @@ The components are as what follows:
 
 ```mermaid
 graph TD;
-App <-- AppNavigation <-- PermissionError
-AppNavigation <-- Header
-AppNavigation <-- HomePage <-- PhotosContainer <-- AllPhotos <-- RenderPhotos
-PhotosContainer <-- PinchZoom
-AllPhotos <-- StoryHolder <-- StoryContainer <-- (Story Component)
-AllPhotos <-- SingleMedia <-- Media
-RenderPhotos <-- PhotosChunk
-RenderPhotos <-- ThumbScroll
-RenderPhotos <-- Highlights
-RenderPhotos <-- FloatingFilters
+App --> AppNavigation --> PermissionError
+AppNavigation --> Header
+AppNavigation --> HomePage --> PhotosContainer --> AllPhotos --> RenderPhotos
+PhotosContainer --> PinchZoom
+AllPhotos --> StoryHolder --> StoryContainer --> StoryComponent
+AllPhotos --> SingleMedia --> Media
+RenderPhotos --> PhotosChunk & ThumbScroll & Highlights & FloatingFilters
 ```
 
 ## Road map
