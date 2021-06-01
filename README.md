@@ -34,10 +34,8 @@ for https cloning:
 ```bash
 git clone https://github.com/functionland/photos.git
 ```
-
-for ssh cloning:
 ```bash
-git clone git@github.com:functionland/photos.git
+cd photos
 ```
 
 
