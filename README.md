@@ -158,7 +158,7 @@ For now we have two pages in the app:
 
 ## Components descripction
 
-The components are as follows:
+The components are as what follows:
 ### PhotosContainer
 **Purpose:** this component is responsible for getting the photos and videos from storage and feed the AllPhotos component with storage photos.
 - this component include the PinchZoom component and AllPhotos component
@@ -203,7 +203,7 @@ The components are as follows:
 ## Components diagram
 
 ```mermaid
-graph LR
+graph TD;
 App <-- AppNavigation <-- PermissionError
 AppNavigation <-- Header
 AppNavigation <-- HomePage <-- PhotosContainer <-- AllPhotos <-- RenderPhotos
