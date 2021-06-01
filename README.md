@@ -43,7 +43,7 @@ cd photos
 
 you can install the requirements with command:
 ```bash
-expo install
+yarn install
 ```
 or
 ```bash
