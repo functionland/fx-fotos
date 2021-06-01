@@ -166,3 +166,14 @@ RenderPhotos <-- ThumbScroll
 RenderPhotos <-- Highlights
 RenderPhotos <-- FloatingFilters
 ```
+
+## Road map
+ * [x] Pinch/zoom to switch between 3 modes
+ * [x] Open each image/video in a Single image modal and scroll between images
+ * [x] Show highlights
+ * [x] Fast scroll/thumb scroll
+ * [ ] Select and unselect each image to delete/edit/share
+ * [ ] Connect with BOX, AWS and other cloud services to upload/download media
+ * [ ] Search page to search by date/tags
+ * [ ] Library page to show images by folder/Album
+ * [ ] AI features to do on-device analsis for face recognition/object recognition
