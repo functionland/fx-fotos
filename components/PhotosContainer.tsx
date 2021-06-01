@@ -19,7 +19,7 @@ const PhotosContainer: React.FC<Props> = (props) => {
   const SCREEN_WIDTH = useWindowDimensions().width;
   const SCREEN_HEIGHT = useWindowDimensions().height;
 
-  const initialPhotoNumber:number = 500;
+  const initialPhotoNumber:number = 0;
   const storiesHeight:number = 1.618*SCREEN_WIDTH/3;
 
   const [permission, setPermission] = useState<boolean>();
