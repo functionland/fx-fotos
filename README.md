@@ -39,7 +39,7 @@ for ssh cloning:
 ```bash
 git clone git@github.com:functionland/photos.git
 ```
-[project github link](https://github.com/woforo/TheBox)
+
 
 ## Install requirements
 
