@@ -1,3 +1,5 @@
+![https://github.com/functionland/photos/blob/ec715be25c34a8ae4f395d3f4d9b4d8515c8fec0/assets/images/logo.png]
+
 # BOX Photos development guide
 Note: Project is still in alpha phase and not production ready. We aim to release beta version by end of June 2021.
 
