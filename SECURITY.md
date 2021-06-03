@@ -6,7 +6,7 @@ Versions of photos project that are currently being supported with security upda
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 0.8.x   | :x:
+| 0.8.x   | :white_check_mark:
 
 ## Reporting a Vulnerability
 
