@@ -15,9 +15,10 @@ import { layout, FlatSection, ScrollEvent, story,  } from '../types/interfaces';
 import PhotosChunk from './PhotosChunk';
 import ThumbScroll from './ThumbScroll';
 import Highlights from './Highlights';
-import { RecyclerListView, DataProvider, AutoScroll, BaseScrollView } from 'recyclerlistview';
+import { RecyclerListView, DataProvider, AutoScroll, BaseScrollView, LayoutProvider } from 'recyclerlistview';
 import { LayoutUtil } from '../utils/LayoutUtil';
 import FloatingFilters from './FloatingFilters';
+import { headerIndex } from '../.history/types/interfaces_20210604185657';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -79,9 +80,9 @@ const RenderPhotos: React.FC<Props> = (props) => {
   const headerHeight = 20;
   const indicatorHeight = 50;
   const [dataProvider, setDataProvider] = useState<DataProvider>(new DataProvider((r1, r2) => {
-    return r1 !== r2;
+    return (typeof r1==='string')?(r1 !== r2):(r1.id !== r2.id);
   }));
-  const [layoutProvider, setLayoutProvider] = useState<any>(LayoutUtil.getLayoutProvider(2, 'day', props.photos.headerIndexes, headerHeight, props.photos.layout, props.storiesHeight, props.HEADER_HEIGHT));
+  const [layoutProvider, setLayoutProvider] = useState<LayoutProvider>(LayoutUtil.getLayoutProvider(2, 'day', [], headerHeight, [], props.storiesHeight, props.HEADER_HEIGHT));
   const [viewLoaded, setViewLoaded] = useState<boolean>(false);
   const scrollRef:any = useRef();
   const scrollRefExternal:any = useRef();
@@ -102,16 +103,17 @@ const RenderPhotos: React.FC<Props> = (props) => {
   const dragY = useRef(new Animated.Value(0)).current;
 
   const [showThumbScroll, setShowThumbScroll] = useState<boolean>(false);
+
   
 
   useEffect(()=>{
-    setDataProvider(dataProvider.cloneWithRows(props.photos.layout));
-    console.log('props.photos.layout.length='+props.photos.layout.length);
+    //setDataProvider(dataProvider.cloneWithRows(dataProvider.getAllData().concat(props.photos.layout),(dataProvider.getAllData().length>0?dataProvider.getAllData().length-1:undefined)));
+    setDataProvider(dataProvider.cloneWithRows(props.photos.layout,props.photos.layout.length));
+    if(props.numColumns===2){console.log('props.photos.layout.length='+props.photos.layout.length);}
+    
+    if(props.numColumns===2){console.log('re-layout');}
+    setLayoutProvider((oldLayoutProvider:LayoutProvider)=>LayoutUtil.getLayoutProvider(props.numColumns, props.sortCondition, props.photos.headerIndexes, headerHeight, props.photos.layout, props.storiesHeight, props.HEADER_HEIGHT));
   },[props.photos.layout]);
-
-  useEffect(()=>{
-    setLayoutProvider(LayoutUtil.getLayoutProvider(props.numColumns, props.sortCondition, props.photos.headerIndexes, headerHeight, props.photos.layout, props.storiesHeight, props.HEADER_HEIGHT));
-  },[props.numColumns, props.sortCondition]);
 
   const renderFooter = () => {
     //Second view makes sure we don't unnecessarily change height of the list on this event. That might cause indicator to remain invisible

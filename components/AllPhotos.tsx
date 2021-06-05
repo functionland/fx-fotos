@@ -90,6 +90,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         'stories': oldPreparedMedia.stories.concat(prepared.stories),
         'lastTimestamp': prepared.lastTimestamp
       }));
+      //setPreparedMedia(prepared);
       
       let onlyMedias:any[] = prepared.layout.filter(item => typeof item.value !== 'string').map((item)=>{return item.value});
       setMedias(oldOnlyMedia=>oldOnlyMedia.concat(onlyMedias));
