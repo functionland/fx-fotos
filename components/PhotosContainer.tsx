@@ -101,8 +101,6 @@ const PhotosContainer: React.FC<Props> = (props) => {
   useEffect(() => {
     let boxPhotos: Array<MediaLibrary.Asset> = getUserBoxMedia('');
     if (storagePhotos) {
-      console.log(storagePhotos[0]);
-      console.log(storagePhotos[storagePhotos.length-1]);
       setPhotos([...boxPhotos, ...storagePhotos]);
     }
   }, [storagePhotos]);

@@ -107,7 +107,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
   useEffect(()=>{
     setDataProvider(dataProvider.cloneWithRows(props.photos.layout));
     console.log('props.photos.layout.length='+props.photos.layout.length);
-  },[props.photos]);
+  },[props.photos.layout]);
 
   useEffect(()=>{
     setLayoutProvider(LayoutUtil.getLayoutProvider(props.numColumns, props.sortCondition, props.photos.headerIndexes, headerHeight, props.photos.layout, props.storiesHeight, props.HEADER_HEIGHT));
@@ -266,7 +266,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
 
   const _onScroll = (rawEvent: ScrollEvent, offsetX: number, offsetY: number) => {
     //console.log(props.numColumns+'_'+rawEvent.nativeEvent.contentOffset.y);
-    setShowThumbScroll(true);
+    //setShowThumbScroll(true);
   }
   
   return props.photos.layout ? (
@@ -339,12 +339,12 @@ const RenderPhotos: React.FC<Props> = (props) => {
           //onScrollEndDrag: _onScrollEnd,
           scrollEventThrottle:5,
           automaticallyAdjustContentInsets: false,
-          showsVerticalScrollIndicator:false,
+          showsVerticalScrollIndicator:true,
           animatedEvent:{nativeEvent: {contentOffset: {y: props.scrollY}, contentSize: {height: layoutHeightAnimated}}},
         }}
       />
       
-      <ThumbScroll
+      {/*<ThumbScroll
         indicatorHeight={indicatorHeight}
         flexibleIndicator={false}
         shouldIndicatorHide={true}
@@ -381,7 +381,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
         scrollRef={scrollRef}
         headerHeight={headerHeight}
         layoutHeight={layoutHeightAnimated}
-      />
+      />*/}
     </Animated.View>
   ) : (
     <Animated.View

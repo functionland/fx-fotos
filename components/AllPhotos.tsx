@@ -85,15 +85,15 @@ const AllPhotos: React.FC<Props> = (props) => {
       console.log('preparedMedia.layout:',{old:preparedMedia?.layout.length, added:prepared?.layout.length, header:prepared?.headerIndexes.length});
       setPreparedMedia(oldPreparedMedia =>  ({
         ...oldPreparedMedia,
-        'layout':[...oldPreparedMedia.layout, ...prepared.layout], 
-        'headerIndexes': [...oldPreparedMedia.headerIndexes, ...prepared.headerIndexes], 
-        'stories': [...oldPreparedMedia.stories, ...prepared.stories],
+        'layout':oldPreparedMedia.layout.concat(prepared.layout), 
+        'headerIndexes': oldPreparedMedia.headerIndexes.concat(prepared.headerIndexes), 
+        'stories': oldPreparedMedia.stories.concat(prepared.stories),
         'lastTimestamp': prepared.lastTimestamp
       }));
       
       let onlyMedias:any[] = prepared.layout.filter(item => typeof item.value !== 'string').map((item)=>{return item.value});
-      setMedias(oldOnlyMedia=>[...oldOnlyMedia, ...onlyMedias]);
-      setStories(oldStories=>[...oldStories,...prepared.stories]);
+      setMedias(oldOnlyMedia=>oldOnlyMedia.concat(onlyMedias));
+      setStories(oldStories=>oldStories.concat(prepared.stories));
     }
   },[props.photos]);
 
