@@ -106,6 +106,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
 
   useEffect(()=>{
     setDataProvider(dataProvider.cloneWithRows(props.photos.layout));
+    console.log('props.photos.layout.length='+props.photos.layout.length);
   },[props.photos]);
 
   useEffect(()=>{

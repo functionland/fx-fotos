@@ -35,7 +35,7 @@ export class LayoutUtil {
               dim.width = windowWidth;
               dim.height = storiesHeight+20+2*mainHeaderHeight;
             }else{
-              if(data[index].sortCondition===groupBy || data[index].sortCondition===""){
+              if(data[index]?.sortCondition===groupBy || data[index]?.sortCondition===""){
                 let isHeader = headerIndexes.findIndex(x=>x.index===index && x.sortCondition===groupBy);
                 if(isHeader > -1){
                   dim.width = windowWidth;

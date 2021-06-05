@@ -69,22 +69,31 @@ const AllPhotos: React.FC<Props> = (props) => {
  
 
   const [scrollOffset, setScrollOffset] = useState<{[key:string]:(2|3|4|number)}>({'in':0,'to':0});
-  const [preparedMedia, setPreparedMedia] = useState<FlatSection>({layout:[],headerIndexes:[], stories:[]});
+  const [preparedMedia, setPreparedMedia] = useState<FlatSection>({layout:[],headerIndexes:[], stories:[], lastTimestamp:0});
   const [modalShown, setModalShown] = useState<boolean>(false);
   const [singlePhotoIndex, setSinglePhotoIndex] = useState<number>(1);
   const [imagePosition, setImagePosition] = useState<{x:number;y:number}>({x:0,y:0});
-  const [medias, setMedias] = useState<Asset[]|undefined>(undefined);
-  const [stories, setStories] = useState<story[]|undefined>(undefined);
+  const [medias, setMedias] = useState<Asset[]>([]);
+  const [stories, setStories] = useState<story[]>([]);
   const [showStory, setShowStory] = useState<boolean>(false);
   const [story, setStory] = useState<story|undefined>();
 
   useEffect(()=>{
-    if(isMounted){
-      let prepared = prepareLayout(props.photos,['day', 'month']);
-      setPreparedMedia(prepared);
+    console.log('photos updated, length='+props.photos?.length);
+    if(isMounted && props.photos?.length){
+      let prepared = prepareLayout(props.photos,['day', 'month'], preparedMedia.lastTimestamp);
+      console.log('preparedMedia.layout:',{old:preparedMedia?.layout.length, added:prepared?.layout.length, header:prepared?.headerIndexes.length});
+      setPreparedMedia(oldPreparedMedia =>  ({
+        ...oldPreparedMedia,
+        'layout':[...oldPreparedMedia.layout, ...prepared.layout], 
+        'headerIndexes': [...oldPreparedMedia.headerIndexes, ...prepared.headerIndexes], 
+        'stories': [...oldPreparedMedia.stories, ...prepared.stories],
+        'lastTimestamp': prepared.lastTimestamp
+      }));
+      
       let onlyMedias:any[] = prepared.layout.filter(item => typeof item.value !== 'string').map((item)=>{return item.value});
-      setMedias(onlyMedias);
-      setStories(prepared.stories);
+      setMedias(oldOnlyMedia=>[...oldOnlyMedia, ...onlyMedias]);
+      setStories(oldStories=>[...oldStories,...prepared.stories]);
     }
   },[props.photos]);
 

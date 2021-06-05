@@ -57,6 +57,7 @@ export interface FlatSection {
   layout: layout[];
   headerIndexes:headerIndex[];
   stories:story[];
+  lastTimestamp:number;
 }
 
 export interface MediaItem {
