@@ -3,12 +3,14 @@
 # BOX Photos development guide
 Note: Project is still in alpha phase and not production ready. We aim to release beta version by end of June 2021.
 
+[Intro Blog](https://dev.to/fx/google-photos-open-source-alternative-with-react-native-80c)
+
 ## Project Description
 
 BOX Photos is a react-native(expo)+typescript application to replace Google Photos/Apple Photos, and give freedom in hosting your photos on any platform, either centralized servers like Amazon or Microsoft, or decentralized solutions like "BOX". It is optimized for decentralized IPFS platforms like "BOX". Your can easily use it with a "BOX" to host your files and photos with the same experience you had using Google Photos, however, with full privacy.
 
 ## Why?
-IPFS + BOX Photos = Wow!
+IPFS + BOX Photos = Awesome!
 
 Google photos is a great service with great benefits however, there are major setbacks with it:
 
