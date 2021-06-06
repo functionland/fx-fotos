@@ -81,7 +81,7 @@ const AllPhotos: React.FC<Props> = (props) => {
   useEffect(()=>{
     console.log('photos updated, length='+props.photos?.length);
     if(isMounted && props.photos?.length){
-      let prepared = prepareLayout(props.photos,['day', 'month'], preparedMedia.lastTimestamp);
+      let prepared = prepareLayout(props.photos,['day', 'month'], preparedMedia.lastTimestamp, medias.length);
       console.log('preparedMedia.layout:',{old:preparedMedia?.layout.length, added:prepared?.layout.length, header:prepared?.headerIndexes.length});
       setPreparedMedia(oldPreparedMedia =>  ({
         ...oldPreparedMedia,

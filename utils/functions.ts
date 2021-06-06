@@ -95,6 +95,7 @@ export const prepareLayout = (
   newMedias: Array<Asset>,
   sortConditions: Array<'day' | 'month'>,
   lastTimestamp: number = 0,
+  lastIndex: number,
 ) => {
   let output:FlatSection = {layout:[], headerIndexes:[], stories: [], lastTimestamp: lastTimestamp};
   
@@ -203,15 +204,16 @@ export const prepareLayout = (
             lastYear[sortCondition_j] = mediaTimestampObj.year;
             yearStart[sortCondition_j] = lastYear[sortCondition_j];
           }
-          headerIndexes.push({header:mediaTimestampObj[sortCondition_j], index:layout.length-1, count: 0, yearStart: yearStart[sortCondition_j], sortCondition: sortCondition_j, timestamp: newMedias[i].modificationTime});
+          headerIndexes.push({header:mediaTimestampObj[sortCondition_j], index:layout.length-1+lastIndex, count: 0, yearStart: yearStart[sortCondition_j], sortCondition: sortCondition_j, timestamp: newMedias[i].modificationTime});
           count[sortCondition_j] = 0;
         }
         count[sortCondition_j] = count[sortCondition_j] + 1;
       }
 
-      layout.push({value:newMedias[i], sortCondition: '', index: i});
+      layout.push({value:newMedias[i], sortCondition: '', index: i+lastIndex});
 
     }
+    
 
     let lastHeaderIndex = {'day':-1, 'month':-1};
     let headerIndexLength = headerIndexes.length;

@@ -31,7 +31,6 @@ interface Props {
     scrollY:Animated.Value;
     velocityY:Animated.Value;
     headerHeight:number;
-    fullSizeContentHeight:number;
     scrollRef:any;
     setStartScroll:Function;
     startScroll:boolean;

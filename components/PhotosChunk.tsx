@@ -64,7 +64,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
       console.log('TAP state ACTIVE');
       let imageOffsetY = event.nativeEvent.absoluteY - event.nativeEvent.y;
       let imageOffsetX = event.nativeEvent.absoluteX - event.nativeEvent.x;
-
+console.log(props.index);
       props.setImagePosition({x:imageOffsetX, y:imageOffsetY});
       props.setSinglePhotoIndex(props.index);
       props.setModalShown(true);

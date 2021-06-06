@@ -270,7 +270,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
 
   const _onScroll = (rawEvent: ScrollEvent, offsetX: number, offsetY: number) => {
     //console.log(props.numColumns+'_'+rawEvent.nativeEvent.contentOffset.y);
-    //setShowThumbScroll(true);
+    setShowThumbScroll(true);
   }
   
   return props.photos.layout ? (
@@ -338,17 +338,17 @@ const RenderPhotos: React.FC<Props> = (props) => {
         key={"RecyclerListView_"+props.sortCondition + props.numColumns}
         scrollEventThrottle={5}
         scrollViewProps={{
-          //ref: scrollRefExternal,
+          ////ref: scrollRefExternal,
           onMomentumScrollEnd: _onMomentumScrollEnd,
-          //onScrollEndDrag: _onScrollEnd,
+          ////onScrollEndDrag: _onScrollEnd,
           scrollEventThrottle:5,
           automaticallyAdjustContentInsets: false,
-          showsVerticalScrollIndicator:true,
+          showsVerticalScrollIndicator:false,
           animatedEvent:{nativeEvent: {contentOffset: {y: props.scrollY}, contentSize: {height: layoutHeightAnimated}}},
         }}
       />
       
-      {/*<ThumbScroll
+      <ThumbScroll
         indicatorHeight={indicatorHeight}
         flexibleIndicator={false}
         shouldIndicatorHide={true}
@@ -363,7 +363,6 @@ const RenderPhotos: React.FC<Props> = (props) => {
         headerHeight={headerHeight}
         scrollY={props.scrollY}
         velocityY={velocityY}
-        fullSizeContentHeight={layoutHeight}
         scrollRef={scrollRef}
         setStartScroll={setStartScroll}
         setEndScroll={setEndScroll}
@@ -385,7 +384,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
         scrollRef={scrollRef}
         headerHeight={headerHeight}
         layoutHeight={layoutHeightAnimated}
-      />*/}
+      />
     </Animated.View>
   ) : (
     <Animated.View
