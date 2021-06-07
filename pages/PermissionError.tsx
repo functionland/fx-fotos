@@ -17,7 +17,7 @@ const PermissionError = () => {
   };
 
   return (
-    <View>
+    <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
       <Text>Permission Error</Text>
       <Button
         onPress={() => {
