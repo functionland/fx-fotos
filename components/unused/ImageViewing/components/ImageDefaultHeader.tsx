@@ -6,22 +6,21 @@
  *
  */
 
-import React from "react";
-import { SafeAreaView, Text, TouchableOpacity, StyleSheet } from "react-native";
+import React from 'react';
+import {SafeAreaView, StyleSheet, Text, TouchableOpacity} from 'react-native';
 
 type Props = {
   onRequestClose: () => void;
 };
 
-const HIT_SLOP = { top: 16, left: 16, bottom: 16, right: 16 };
+const HIT_SLOP = {top: 16, left: 16, bottom: 16, right: 16};
 
-const ImageDefaultHeader = ({ onRequestClose }: Props) => (
+const ImageDefaultHeader = ({onRequestClose}: Props) => (
   <SafeAreaView style={styles.root}>
     <TouchableOpacity
       style={styles.closeButton}
       onPress={onRequestClose}
-      hitSlop={HIT_SLOP}
-    >
+      hitSlop={HIT_SLOP}>
       <Text style={styles.closeText}>✕</Text>
     </TouchableOpacity>
   </SafeAreaView>
@@ -29,24 +28,24 @@ const ImageDefaultHeader = ({ onRequestClose }: Props) => (
 
 const styles = StyleSheet.create({
   root: {
-    alignItems: "flex-end",
+    alignItems: 'flex-end',
   },
   closeButton: {
     marginRight: 8,
     marginTop: 8,
     width: 45,
     height: 45,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     borderRadius: 22.5,
-    backgroundColor: "#00000077",
+    backgroundColor: '#00000077',
   },
   closeText: {
     lineHeight: 25,
     fontSize: 25,
     paddingTop: 2,
-    textAlign: "center",
-    color: "#FFF",
+    textAlign: 'center',
+    color: '#FFF',
     includeFontPadding: false,
   },
 });

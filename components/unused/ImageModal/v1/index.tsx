@@ -1,17 +1,17 @@
-import React, { LegacyRef } from 'react';
+import React, {LegacyRef} from 'react';
 import {
   Animated,
-  View,
-  TouchableOpacity,
+  Dimensions,
   Image,
   ImageProps,
-  StatusBar,
-  Platform,
-  Dimensions,
   ImageStyle,
+  Platform,
+  StatusBar,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
-import { OnTap, OnMove } from './types';
+import {OnMove, OnTap} from './types';
 import ImageDetail from './ImageDetail';
 
 interface State {
@@ -52,7 +52,7 @@ export default class ImageModal extends React.Component<Props, State> {
 
   constructor(props: Props) {
     super(props);
-    const { isTranslucent } = props;
+    const {isTranslucent} = props;
     if (Platform.OS === 'android' && isTranslucent) {
       StatusBar.setTranslucent(isTranslucent);
     }
@@ -76,30 +76,34 @@ export default class ImageModal extends React.Component<Props, State> {
 
   private _setOrigin = (): void => {
     if (this._root) {
-      this._root.measureInWindow((x: number, y: number, width: number, height: number) => {
-        const { isTranslucent, onOpen } = this.props;
-        let newY: number = y;
-        if (typeof onOpen === 'function') {
-          onOpen();
-        }
-        if (isTranslucent) {
-          newY += StatusBar.currentHeight ? StatusBar.currentHeight : 0;
-          StatusBar.setHidden(true);
-        }
-        this.setState({
-          origin: {
-            width,
-            height,
-            x,
-            y: newY,
-          },
-        });
-      });
+      this._root.measureInWindow(
+        (x: number, y: number, width: number, height: number) => {
+          const {isTranslucent, onOpen} = this.props;
+          let newY: number = y;
+          if (typeof onOpen === 'function') {
+            onOpen();
+          }
+          if (isTranslucent) {
+            newY += StatusBar.currentHeight ? StatusBar.currentHeight : 0;
+            StatusBar.setHidden(true);
+          }
+          this.setState({
+            origin: {
+              width,
+              height,
+              x,
+              y: newY,
+            },
+          });
+        },
+      );
     }
   };
 
   private _open = (): void => {
-    if (this.props.disabled) return;
+    if (this.props.disabled) {
+      return;
+    }
 
     this._setOrigin();
     setTimeout(() => {
@@ -112,7 +116,7 @@ export default class ImageModal extends React.Component<Props, State> {
   };
 
   private _onClose = (): void => {
-    const { onClose } = this.props;
+    const {onClose} = this.props;
     this._originImageOpacity.setValue(1);
 
     setTimeout(() => {
@@ -149,19 +153,23 @@ export default class ImageModal extends React.Component<Props, State> {
       responderRelease,
       willClose,
     } = this.props;
-    const { isOpen, origin } = this.state;
+    const {isOpen, origin} = this.state;
     return (
       <View
         ref={(component): void => {
           this._root = component;
         }}
-        style={[{ alignSelf: 'baseline', backgroundColor: imageBackgroundColor }]}>
+        style={[
+          {alignSelf: 'baseline', backgroundColor: imageBackgroundColor},
+        ]}>
         <Animated.View
-          renderToHardwareTextureAndroid={renderToHardwareTextureAndroid === false ? false : true}
-          style={{ opacity: this._originImageOpacity }}>
+          renderToHardwareTextureAndroid={
+            renderToHardwareTextureAndroid === false ? false : true
+          }
+          style={{opacity: this._originImageOpacity}}>
           <TouchableOpacity
             activeOpacity={1}
-            style={{ alignSelf: 'baseline' }}
+            style={{alignSelf: 'baseline'}}
             onPress={this._open}
             onLongPress={onLongPressOriginImage}>
             <Image {...this.props} />
@@ -195,4 +203,4 @@ export default class ImageModal extends React.Component<Props, State> {
   }
 }
 
-export { ImageDetail };
+export {ImageDetail};

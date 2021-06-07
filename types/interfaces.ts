@@ -41,23 +41,23 @@ export interface sortDetails {
 export type sortCondition = 'day' | 'month';
 
 export interface photoChunk {
-  date: {value:string;};
-  data: Array<{value:Asset;}>;
+  date: {value: string};
+  data: Array<{value: Asset}>;
 }
 
 export interface flatMedia {
-  value:Asset|string;
+  value: Asset | string;
 }
 
 export interface story {
-  medias: Asset[],
-  text: string,
-};
+  medias: Asset[];
+  text: string;
+}
 export interface FlatSection {
   layout: layout[];
-  headerIndexes:headerIndex[];
-  stories:story[];
-  lastTimestamp:number;
+  headerIndexes: headerIndex[];
+  stories: story[];
+  lastTimestamp: number;
 }
 
 export interface MediaItem {
@@ -68,12 +68,12 @@ export interface MediaItem {
 }
 export interface ScrollEvent {
   nativeEvent: {
-      contentOffset: {
-          x: number,
-          y: number,
-      },
-      layoutMeasurement?: Dimension,
-      contentSize?: Dimension,
+    contentOffset: {
+      x: number;
+      y: number;
+    };
+    layoutMeasurement?: Dimension;
+    contentSize?: Dimension;
   };
 }
 export interface Dimension {
@@ -81,7 +81,17 @@ export interface Dimension {
   width: number;
 }
 
+export interface layout {
+  value: Asset | string;
+  sortCondition: 'day' | 'month' | '';
+  index: number;
+}
 
-export interface layout {value:Asset|string; sortCondition:'day'|'month'|'', index: number};
-
-export interface headerIndex {header:string;index:number;count:number;yearStart:string; sortCondition:'day'|'month'; timestamp: number;};
+export interface headerIndex {
+  header: string;
+  index: number;
+  count: number;
+  yearStart: string;
+  sortCondition: 'day' | 'month';
+  timestamp: number;
+}

@@ -1,1 +1,1 @@
-export const scrollImage = require('./scroll.png'); 
+export const scrollImage = require('./scroll.png');

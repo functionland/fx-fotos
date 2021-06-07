@@ -1,36 +1,33 @@
-import React, { useEffect, useState, CSSProperties } from "react";
-import { StoryViewProps } from "../utils/interfaceHelper";
-import { View, Image, StyleSheet, Text, SafeAreaView, Dimensions } from "react-native"; 
-import ProgressiveImage from "./ProgressiveImage"; 
+import React, {useState} from 'react';
+import {StoryViewProps} from '../utils/interfaceHelper';
+import {Dimensions, SafeAreaView, StyleSheet, View} from 'react-native';
+import ProgressiveImage from './ProgressiveImage';
 
 function StoryView(props: StoryViewProps) {
   const [refresh, setRefresh] = useState(true);
 
-  const image = props.images[props.progressIndex]
+  const image = props.images[props.progressIndex];
   // console.log(image);
 
   return (
-    <SafeAreaView 
+    <SafeAreaView
       style={styles.divStory}
-      key={props.id+"_SafeAreaView_View_ProgressiveImage_"+image?.uri}
-    >
-      <View 
+      key={props.id + '_SafeAreaView_View_ProgressiveImage_' + image?.uri}>
+      <View
         style={styles.divStory}
-        key={props.id+"_View_ProgressiveImage_"+image?.uri}
-      >
+        key={props.id + '_View_ProgressiveImage_' + image?.uri}>
         <ProgressiveImage
           style={props.imageStyle ? props.imageStyle : styles.imgStyle}
-          imgSource={{ uri: image?.uri }}
-          thumbnailSource={{ uri: image?.uri }}
-          id={props.id+"_ProgressiveImage_"+image?.uri}
-        /> 
+          imgSource={{uri: image?.uri}}
+          thumbnailSource={{uri: image?.uri}}
+          id={props.id + '_ProgressiveImage_' + image?.uri}
+        />
       </View>
     </SafeAreaView>
   );
 }
 
 export default StoryView;
-
 
 const styles = StyleSheet.create({
   divStory: {
@@ -46,10 +43,10 @@ const styles = StyleSheet.create({
   },
   imgStyle: {
     position: 'relative',
-    width: Dimensions.get("window").width,
-    height: Dimensions.get("window").width,
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').width,
     alignSelf: 'center',
     resizeMode: 'stretch',
     zIndex: 80,
-  }
+  },
 });

@@ -1,22 +1,22 @@
 import React from 'react';
 import {
-  StyleSheet,
-  View,
-  TouchableOpacity,
-  Text,
-  Dimensions,
   Animated,
-  PanResponder,
-  Modal,
-  SafeAreaView,
-  PanResponderInstance,
-  StatusBar,
+  Dimensions,
   Image,
   ImageResizeMode,
-  ImageSourcePropType
+  ImageSourcePropType,
+  Modal,
+  PanResponder,
+  PanResponderInstance,
+  SafeAreaView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
-import { OnTap, OnMove, ImageStyle } from '../types';
+import {ImageStyle, OnMove, OnTap} from '../types';
 
 const LONG_PRESS_TIME = 800;
 const DOUBLE_CLICK_INTERVAL = 250;
@@ -96,7 +96,9 @@ export default class ImageDetail extends React.Component<Props> {
   private _animatedPositionX = new Animated.Value(0);
   private _animatedPositionY = new Animated.Value(0);
   private _animatedFrame = new Animated.Value(0);
-  private _animatedOpacity = new Animated.Value(Dimensions.get('window').height);
+  private _animatedOpacity = new Animated.Value(
+    Dimensions.get('window').height,
+  );
   private _imagePanResponder?: PanResponderInstance = undefined;
 
   private _lastPositionX: null | number = null;
@@ -123,7 +125,8 @@ export default class ImageDetail extends React.Component<Props> {
 
   constructor(props: Props) {
     super(props);
-    const { onLongPress, onDoubleTap, swipeToDismiss, onTap, responderRelease } = props;
+    const {onLongPress, onDoubleTap, swipeToDismiss, onTap, responderRelease} =
+      props;
     this._imagePanResponder = PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onPanResponderTerminationRequest: () => false,
@@ -148,16 +151,23 @@ export default class ImageDetail extends React.Component<Props> {
 
         if (evt.nativeEvent.changedTouches.length > 1) {
           const centerX =
-            (evt.nativeEvent.changedTouches[0].pageX + evt.nativeEvent.changedTouches[1].pageX) / 2;
+            (evt.nativeEvent.changedTouches[0].pageX +
+              evt.nativeEvent.changedTouches[1].pageX) /
+            2;
           this._centerDiffX = centerX - windowWidth / 2;
 
           const centerY =
-            (evt.nativeEvent.changedTouches[0].pageY + evt.nativeEvent.changedTouches[1].pageY) / 2;
+            (evt.nativeEvent.changedTouches[0].pageY +
+              evt.nativeEvent.changedTouches[1].pageY) /
+            2;
           this._centerDiffY = centerY - windowHeight / 2;
         }
 
         if (evt.nativeEvent.changedTouches.length <= 1) {
-          if (new Date().getTime() - this._lastClickTime < (DOUBLE_CLICK_INTERVAL || 0)) {
+          if (
+            new Date().getTime() - this._lastClickTime <
+            (DOUBLE_CLICK_INTERVAL || 0)
+          ) {
             this._lastClickTime = 0;
             if (typeof onDoubleTap === 'function') {
               onDoubleTap();
@@ -180,9 +190,13 @@ export default class ImageDetail extends React.Component<Props> {
               this._scale = 2;
 
               const diffScale = this._scale - beforeScale;
-              this._positionX = ((windowWidth / 2 - this._doubleClickX) * diffScale) / this._scale;
+              this._positionX =
+                ((windowWidth / 2 - this._doubleClickX) * diffScale) /
+                this._scale;
 
-              this._positionY = ((windowHeight / 2 - this._doubleClickY) * diffScale) / this._scale;
+              this._positionY =
+                ((windowHeight / 2 - this._doubleClickY) * diffScale) /
+                this._scale;
             }
 
             this._imageDidMove('centerOn');
@@ -269,7 +283,8 @@ export default class ImageDetail extends React.Component<Props> {
 
               this._positionX += diffX / this._scale;
 
-              const horizontalMax = (windowWidth * this._scale - windowWidth) / 2 / this._scale;
+              const horizontalMax =
+                (windowWidth * this._scale - windowWidth) / 2 / this._scale;
               if (this._positionX < -horizontalMax) {
                 this._positionX = -horizontalMax;
                 this._horizontalWholeOuterCounter += -1 / 1e10;
@@ -284,7 +299,9 @@ export default class ImageDetail extends React.Component<Props> {
 
             if (this._horizontalWholeOuterCounter > (MAX_OVERFLOW || 0)) {
               this._horizontalWholeOuterCounter = MAX_OVERFLOW || 0;
-            } else if (this._horizontalWholeOuterCounter < -(MAX_OVERFLOW || 0)) {
+            } else if (
+              this._horizontalWholeOuterCounter < -(MAX_OVERFLOW || 0)
+            ) {
               this._horizontalWholeOuterCounter = -(MAX_OVERFLOW || 0);
             }
           }
@@ -333,7 +350,8 @@ export default class ImageDetail extends React.Component<Props> {
           this._zoomCurrentDistance = Number(diagonalDistance.toFixed(1));
 
           if (this._zoomLastDistance !== null) {
-            const distanceDiff = (this._zoomCurrentDistance - this._zoomLastDistance) / 200;
+            const distanceDiff =
+              (this._zoomCurrentDistance - this._zoomLastDistance) / 200;
             let zoom = this._scale + distanceDiff;
 
             if (zoom < MIN_SCALE) {
@@ -371,23 +389,27 @@ export default class ImageDetail extends React.Component<Props> {
         const moveDistance = Math.sqrt(
           gestureState.dx * gestureState.dx + gestureState.dy * gestureState.dy,
         );
-        const { locationX, locationY, pageX, pageY } = evt.nativeEvent;
+        const {locationX, locationY, pageX, pageY} = evt.nativeEvent;
 
-        if (evt.nativeEvent.changedTouches.length === 1 && moveDistance < CLICK_DISTANCE) {
-          
+        if (
+          evt.nativeEvent.changedTouches.length === 1 &&
+          moveDistance < CLICK_DISTANCE
+        ) {
         } else {
           if (typeof responderRelease === 'function') {
             responderRelease(gestureState.vx, this._scale);
           }
 
-          this._panResponderReleaseResolve(evt.nativeEvent.changedTouches.length);
+          this._panResponderReleaseResolve(
+            evt.nativeEvent.changedTouches.length,
+          );
         }
       },
     });
   }
 
   private _imageDidMove = (type: string): void => {
-    const { onMove } = this.props;
+    const {onMove} = this.props;
     if (typeof onMove === 'function') {
       onMove({
         type,
@@ -400,7 +422,7 @@ export default class ImageDetail extends React.Component<Props> {
   };
 
   private _panResponderReleaseResolve = (changedTouchesCount: number): void => {
-    const { swipeToDismiss } = this.props;
+    const {swipeToDismiss} = this.props;
     const windowWidth: number = Dimensions.get('window').width;
     const windowHeight: number = Dimensions.get('window').height;
     if (this._scale < 1) {
@@ -439,7 +461,8 @@ export default class ImageDetail extends React.Component<Props> {
     }
 
     if (windowHeight * this._scale > windowHeight) {
-      const verticalMax = (windowHeight * this._scale - windowHeight) / 2 / this._scale;
+      const verticalMax =
+        (windowHeight * this._scale - windowHeight) / 2 / this._scale;
       if (this._positionY < -verticalMax) {
         this._positionY = -verticalMax;
       } else if (this._positionY > verticalMax) {
@@ -453,7 +476,8 @@ export default class ImageDetail extends React.Component<Props> {
     }
 
     if (windowWidth * this._scale > windowWidth) {
-      const horizontalMax = (windowWidth * this._scale - windowWidth) / 2 / this._scale;
+      const horizontalMax =
+        (windowWidth * this._scale - windowWidth) / 2 / this._scale;
       if (this._positionX < -horizontalMax) {
         this._positionX = -horizontalMax;
       } else if (this._positionX > horizontalMax) {
@@ -494,7 +518,7 @@ export default class ImageDetail extends React.Component<Props> {
   };
 
   public close = (): void => {
-    const { isTranslucent, willClose, onClose } = this.props;
+    const {isTranslucent, willClose, onClose} = this.props;
     const windowHeight: number = Dimensions.get('window').height;
     if (isTranslucent) {
       StatusBar.setHidden(false);
@@ -506,11 +530,26 @@ export default class ImageDetail extends React.Component<Props> {
       }
 
       Animated.parallel([
-        Animated.timing(this._animatedScale, { toValue: 1, useNativeDriver: false }),
-        Animated.timing(this._animatedPositionX, { toValue: 0, useNativeDriver: false }),
-        Animated.timing(this._animatedPositionY, { toValue: 0, useNativeDriver: false }),
-        Animated.timing(this._animatedOpacity, { toValue: windowHeight, useNativeDriver: false }),
-        Animated.spring(this._animatedFrame, { toValue: 0, useNativeDriver: false }),
+        Animated.timing(this._animatedScale, {
+          toValue: 1,
+          useNativeDriver: false,
+        }),
+        Animated.timing(this._animatedPositionX, {
+          toValue: 0,
+          useNativeDriver: false,
+        }),
+        Animated.timing(this._animatedPositionY, {
+          toValue: 0,
+          useNativeDriver: false,
+        }),
+        Animated.timing(this._animatedOpacity, {
+          toValue: windowHeight,
+          useNativeDriver: false,
+        }),
+        Animated.spring(this._animatedFrame, {
+          toValue: 0,
+          useNativeDriver: false,
+        }),
       ]).start(() => {
         onClose();
         this._isAnimated = false;
@@ -530,7 +569,7 @@ export default class ImageDetail extends React.Component<Props> {
   }
 
   componentDidUpdate(): void {
-    const { isOpen, didOpen } = this.props;
+    const {isOpen, didOpen} = this.props;
 
     if (isOpen) {
       this._lastPositionX = null;
@@ -556,8 +595,14 @@ export default class ImageDetail extends React.Component<Props> {
       this._isAnimated = true;
 
       Animated.parallel([
-        Animated.timing(this._animatedOpacity, { toValue: 0, useNativeDriver: false }),
-        Animated.spring(this._animatedFrame, { toValue: 1, useNativeDriver: false }),
+        Animated.timing(this._animatedOpacity, {
+          toValue: 0,
+          useNativeDriver: false,
+        }),
+        Animated.spring(this._animatedFrame, {
+          toValue: 1,
+          useNativeDriver: false,
+        }),
       ]).start(() => {
         this._isAnimated = false;
         if (typeof didOpen === 'function') {
@@ -614,22 +659,27 @@ export default class ImageDetail extends React.Component<Props> {
 
     const background = (
       <Animated.View
-        renderToHardwareTextureAndroid={renderToHardwareTextureAndroid === false ? false : true}
+        renderToHardwareTextureAndroid={
+          renderToHardwareTextureAndroid === false ? false : true
+        }
         style={[
           Styles.background,
-          { backgroundColor: backgroundColor },
+          {backgroundColor: backgroundColor},
           {
             opacity: this._animatedOpacity.interpolate({
               inputRange: [0, windowHeight],
               outputRange: [1, 0],
             }),
           },
-        ]}></Animated.View>
+        ]}
+      />
     );
 
     const header = (
       <Animated.View
-        renderToHardwareTextureAndroid={renderToHardwareTextureAndroid === false ? false : true}
+        renderToHardwareTextureAndroid={
+          renderToHardwareTextureAndroid === false ? false : true
+        }
         style={[
           Styles.header,
           {
@@ -653,7 +703,9 @@ export default class ImageDetail extends React.Component<Props> {
 
     const footer = renderFooter && (
       <Animated.View
-        renderToHardwareTextureAndroid={renderToHardwareTextureAndroid === false ? false : true}
+        renderToHardwareTextureAndroid={
+          renderToHardwareTextureAndroid === false ? false : true
+        }
         style={[
           Styles.footer,
           {
@@ -674,11 +726,15 @@ export default class ImageDetail extends React.Component<Props> {
           width: '100%',
           height: '100%',
         }}
-        {...(this._imagePanResponder ? this._imagePanResponder.panHandlers : undefined)}>
+        {...(this._imagePanResponder
+          ? this._imagePanResponder.panHandlers
+          : undefined)}>
         {background}
         <Animated.View
           style={animateConf}
-          renderToHardwareTextureAndroid={renderToHardwareTextureAndroid === false ? false : true}>
+          renderToHardwareTextureAndroid={
+            renderToHardwareTextureAndroid === false ? false : true
+          }>
           <Image
             resizeMode={resizeMode}
             style={[

@@ -1,17 +1,19 @@
 /// <reference types="react" />
-import { AVPlaybackStatus, VideoProps } from 'expo-av';
+import {AVPlaybackStatus, VideoProps} from 'expo-av';
+
 declare enum ErrorSeverity {
-    Fatal = "Fatal",
-    NonFatal = "NonFatal"
+  Fatal = 'Fatal',
+  NonFatal = 'NonFatal',
 }
 declare type Error = {
-    type: ErrorSeverity;
-    message: string;
-    obj: Record<string, unknown>;
+  type: ErrorSeverity;
+  message: string;
+  obj: Record<string, unknown>;
 };
-declare const _default: (props: {
-    videoProps: VideoProps & {ref:any};
-} & {
+declare const _default: (
+  props: {
+    videoProps: VideoProps & {ref: any};
+  } & {
     height?: number | undefined;
     children?: null | undefined;
     playIcon?: (() => JSX.Element) | undefined;
@@ -32,10 +34,12 @@ declare const _default: (props: {
     iosTrackImage?: null | undefined;
     showFullscreenButton?: boolean | undefined;
     showMuteButton?: boolean | undefined;
-    textStyle?: {
-        color: string;
-        fontSize: number;
-    } | undefined;
+    textStyle?:
+      | {
+          color: string;
+          fontSize: number;
+        }
+      | undefined;
     videoBackground?: string | undefined;
     width?: number | undefined;
     videoRef?: null | undefined;
@@ -47,5 +51,7 @@ declare const _default: (props: {
     fadeOutDuration?: number | undefined;
     hideControlsTimerDuration?: number | undefined;
     showControlsOnLoad?: boolean | undefined;
-}, ref?: unknown) => JSX.Element;
+  },
+  ref?: unknown,
+) => JSX.Element;
 export default _default;
