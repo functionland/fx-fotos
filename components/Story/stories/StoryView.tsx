@@ -1,10 +1,10 @@
-import React, {useState} from 'react';
+import React from 'react';
 import {StoryViewProps} from '../utils/interfaceHelper';
 import {Dimensions, SafeAreaView, StyleSheet, View} from 'react-native';
 import ProgressiveImage from './ProgressiveImage';
 
 function StoryView(props: StoryViewProps) {
-  const [refresh, setRefresh] = useState(true);
+  // const [refresh, setRefresh] = useState(true);
 
   const image = props.images[props.progressIndex];
   // console.log(image);

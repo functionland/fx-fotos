@@ -16,10 +16,10 @@ import {
 interface Props {
   imageHeight: number;
   imageWidth: number;
-  media: Asset | undefined;
+  media?: Asset;
   state: {modalShown: boolean; activeIndex: number} | undefined;
   index: number;
-  setScrollEnabled: Function;
+  setScrollEnabled: React.Dispatch<React.SetStateAction<boolean>>;
   pinchRef: React.RefObject<
     React.ComponentType<PinchGestureHandlerProps & React.RefAttributes<any>>
   >;
@@ -99,7 +99,7 @@ const Media: React.FC<Props> = (props) => {
         );
       }
     }
-  }, [props.index, props.state?.activeIndex, props.state]);
+  }, [props.index, props.media, props.state, video]);
 
   const buildMedia = (media: Asset | undefined) => {
     if (media) {
@@ -113,7 +113,7 @@ const Media: React.FC<Props> = (props) => {
             unmute={() => setIsMute(false)}
             isMute={
               isMute ||
-              !(props.state?.activeIndex === props.index ? true : false) ||
+              !(props.state?.activeIndex === props.index) ||
               !props.state?.modalShown
             }
             videoProps={{

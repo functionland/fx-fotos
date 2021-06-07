@@ -26,14 +26,14 @@ import Slider from '@react-native-community/slider';
 const SLIDER_COLOR = '#009485';
 const BUFFERING_SHOW_DELAY = 200;
 // UI states
-var ControlStates;
+let ControlStates;
 (function (ControlStates) {
   ControlStates.Shown = 'Show';
   ControlStates.Showing = 'Showing';
   ControlStates.Hidden = 'Hidden';
   ControlStates.Hiding = 'Hiding';
 })(ControlStates || (ControlStates = {}));
-var PlaybackStates;
+let PlaybackStates;
 (function (PlaybackStates) {
   PlaybackStates.Loading = 'Loading';
   PlaybackStates.Playing = 'Playing';
@@ -42,13 +42,13 @@ var PlaybackStates;
   PlaybackStates.Error = 'Error';
   PlaybackStates.Ended = 'Ended';
 })(PlaybackStates || (PlaybackStates = {}));
-var SeekStates;
+let SeekStates;
 (function (SeekStates) {
   SeekStates.NotSeeking = 'NotSeeking';
   SeekStates.Seeking = 'Seeking';
   SeekStates.Seeked = 'Seeked';
 })(SeekStates || (SeekStates = {}));
-var ErrorSeverity;
+let ErrorSeverity;
 (function (ErrorSeverity) {
   ErrorSeverity.Fatal = 'Fatal';
   ErrorSeverity.NonFatal = 'NonFatal';
@@ -163,7 +163,7 @@ const VideoPlayer = (props) => {
         console.error('`Source` is a required property');
         throw new Error('`Source` is required');
       }
-      setAudio();
+      setAudio().then();
     }
   });
   // Handle events during playback
@@ -323,8 +323,8 @@ const VideoPlayer = (props) => {
       )
     ) {
       const value = e.nativeEvent.locationX / sliderWidth;
-      onSeekSliderValueChange();
-      onSeekSliderSlidingComplete(value);
+      onSeekSliderValueChange().then();
+      onSeekSliderSlidingComplete(value).then();
     }
   };
   // Capture the width of the seekbar slider for use in `_onSeekbarTap`
@@ -484,7 +484,7 @@ const VideoPlayer = (props) => {
       'source',
     ]);
   const Control = (_a) => {
-    var {callback, center, children, transparent = false} = _a,
+    const {callback, center, children, transparent = false} = _a,
       otherProps = __rest(_a, [
         'callback',
         'center',
@@ -517,8 +517,7 @@ const VideoPlayer = (props) => {
     );
   };
   const CenteredView = (_a) => {
-    var {children, style: viewStyle} = _a,
-      // pointerEvents,
+    const {children, style: viewStyle} = _a,
       otherProps = __rest(_a, ['children', 'style']);
     return (
       <Animated.View

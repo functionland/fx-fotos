@@ -1,6 +1,6 @@
 import * as MediaLibrary from 'expo-media-library';
 import {useNavigation} from '@react-navigation/native';
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {Animated, useWindowDimensions, View} from 'react-native';
 import {getUserBoxMedia} from '../utils/APICalls';
 import {getStorageMedia} from '../utils/functions';
@@ -12,19 +12,19 @@ import {sortCondition} from '../types/interfaces';
 interface Props {
   scrollAnim: Animated.Value;
   HEADER_HEIGHT: number;
-  setHeaderShown: Function;
+  setHeaderShown: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const PhotosContainer: React.FC<Props> = (props) => {
   const SCREEN_WIDTH = useWindowDimensions().width;
-  const SCREEN_HEIGHT = useWindowDimensions().height;
+  // const SCREEN_HEIGHT = useWindowDimensions().height;
 
   const initialPhotoNumber: number = 500;
   const storiesHeight: number = (1.618 * SCREEN_WIDTH) / 3;
 
   const [permission, setPermission] = useState<boolean>();
   const [photos, setPhotos] = useState<Array<MediaLibrary.Asset>>([]);
-  const [mediaEndCursor, setMediaEndCursor] = useState<string>('');
+  const [, setMediaEndCursor] = useState<string>('');
   const [mediaHasNextPage, setMediaHasNextPage] = useState<boolean>(true);
   const [mediaTotalCount, setMediaTotalCount] = useState<number>(99999);
   const [storagePhotos, setStoragePhotos] = useState<Array<MediaLibrary.Asset>>(
@@ -44,7 +44,7 @@ const PhotosContainer: React.FC<Props> = (props) => {
     ),
   ).current;
 
-  const scrollIndicator = useRef(new Animated.Value(0)).current;
+  // const scrollIndicator = useRef(new Animated.Value(0)).current;
   const focalX = useRef(new Animated.Value(0)).current;
   const focalY = useRef(new Animated.Value(0)).current;
   const numberOfPointers = useRef(new Animated.Value(0)).current;
@@ -57,52 +57,55 @@ const PhotosContainer: React.FC<Props> = (props) => {
   const [numColumns, setNumColumns] = useState<2 | 3 | 4>(2);
   const [loading, setLoading] = useState<boolean>(false);
   const [isPinchAndZoom, setIsPinchAndZoom] = useState<boolean>(false);
-  const [loadMore, setLoadMore] = useState<number>(0);
+  const [, setLoadMore] = useState<number>(0);
 
   //TODO: Change this function to the getPhotos in actions like in AllPhotos
-  async function getMedia(permission: boolean, photoNumber: number) {
-    let hasNextPage = true;
-    let endCursor: string = '';
-    let totalCount = mediaTotalCount;
-    while (hasNextPage) {
-      console.log('media fetch while');
-      setLoading(true);
-      await getStorageMedia(permission, photoNumber, endCursor)
-        ?.then((value) => {
-          if (value) {
-            console.log('getStorageMedia');
-            hasNextPage = value.hasNextPage;
-            endCursor = value.endCursor;
-            totalCount = value.totalCount;
-            //setStoragePhotos(oldStoragePhotos => [...oldStoragePhotos,...value.assets]);
-            setStoragePhotos(value.assets);
-            setMediaEndCursor(endCursor);
-            setMediaHasNextPage(hasNextPage);
-            setMediaTotalCount(totalCount);
-            console.log({
-              hasNextPage: hasNextPage,
-              endCursor: endCursor,
-              totalCount: totalCount,
-            });
-          }
-          setLoading(false);
-        })
-        .catch((error) => setLoading(false));
-    }
-  }
+  const getMedia = useCallback(
+    async (permission: boolean, photoNumber: number) => {
+      let hasNextPage = true;
+      let endCursor: string = '';
+      let totalCount = mediaTotalCount;
+      while (hasNextPage) {
+        console.log('media fetch while');
+        setLoading(true);
+        await getStorageMedia(permission, photoNumber, endCursor)
+          ?.then((value) => {
+            if (value) {
+              console.log('getStorageMedia');
+              hasNextPage = value.hasNextPage;
+              endCursor = value.endCursor;
+              totalCount = value.totalCount;
+              //setStoragePhotos(oldStoragePhotos => [...oldStoragePhotos,...value.assets]);
+              setStoragePhotos(value.assets);
+              setMediaEndCursor(endCursor);
+              setMediaHasNextPage(hasNextPage);
+              setMediaTotalCount(totalCount);
+              console.log({
+                hasNextPage: hasNextPage,
+                endCursor: endCursor,
+                totalCount: totalCount,
+              });
+            }
+            setLoading(false);
+          })
+          .catch(() => setLoading(false));
+      }
+    },
+    [mediaTotalCount],
+  );
   useEffect(() => {
     if (permission && mediaHasNextPage && !loading) {
       navigation.navigate('HomePage');
-      getMedia(permission, initialPhotoNumber);
+      getMedia(permission, initialPhotoNumber).then();
     } else {
       navigation.navigate('PermissionError');
     }
-  }, [permission]);
+  }, [getMedia, loading, mediaHasNextPage, navigation, permission]);
 
   useEffect(() => {
     storagePermission()
       .then((res) => setPermission(res))
-      .catch((error) => {});
+      .catch(() => {});
   }, []);
 
   useEffect(() => {

@@ -8,10 +8,10 @@ const PermissionError = () => {
 
   const setPermission = () => {
     storagePermission()
-      .then((res) => {
+      .then(() => {
         navigation.navigate('HomePage');
       })
-      .catch((err) => {
+      .catch(() => {
         return;
       });
   };

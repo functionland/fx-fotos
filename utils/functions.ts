@@ -1,11 +1,11 @@
 import {Asset, AssetsOptions, getAssetsAsync, MediaType, SortBy,} from 'expo-media-library';
 import {
-    changeSortConditionAndNumColumns,
-    FlatSection,
-    headerIndex,
-    layout,
-    sortCondition,
-    story,
+  changeSortConditionAndNumColumns,
+  FlatSection,
+  headerIndex,
+  layout as Layout,
+  sortCondition,
+  story,
 } from '../types/interfaces';
 
 /*
@@ -82,7 +82,7 @@ export const flattenDates = (
   return result;
 }*/
 
-export const ipfsHash = (media: Asset) => {
+export const ipfsHash = (_media: Asset) => {
   let result: string = Math.random().toString(36).substring(7);
   return result;
 };
@@ -100,7 +100,7 @@ export const prepareLayout = (
     lastTimestamp: lastTimestamp,
   };
 
-  let layout: Array<layout> = [];
+  let layout: Array<Layout> = [];
   let headerIndexes: Array<headerIndex> = [];
   let stories: story[] = [];
   let count = {day: 0, month: 0};
@@ -454,17 +454,17 @@ export const calcImageDimension = (
       if (media.height / media.width > SCREEN_HEIGHT / SCREEN_WIDTH) {
         imageWidth_t =
           (media.width * SCREEN_HEIGHT) /
-          (media.height == 0 ? 1 : media.height);
+          (media.height === 0 ? 1 : media.height);
       } else {
         imageHeight_t =
-          (SCREEN_WIDTH * media.height) / (media.width == 0 ? 1 : media.width);
+          (SCREEN_WIDTH * media.height) / (media.width === 0 ? 1 : media.width);
       }
     } else if (media.height > SCREEN_HEIGHT) {
       imageWidth_t =
-        (media.width * SCREEN_HEIGHT) / (media.height == 0 ? 1 : media.height);
+        (media.width * SCREEN_HEIGHT) / (media.height === 0 ? 1 : media.height);
     } else if (media.width > SCREEN_WIDTH) {
       imageHeight_t =
-        (SCREEN_WIDTH * media.height) / (media.width == 0 ? 1 : media.width);
+        (SCREEN_WIDTH * media.height) / (media.width === 0 ? 1 : media.width);
     } else if (media.height <= SCREEN_HEIGHT && media.width <= SCREEN_WIDTH) {
       imageHeight_t = media.height;
       imageWidth_t = media.width;

@@ -12,12 +12,12 @@ import PhotosContainer from '../components/PhotosContainer';
 interface Props {
   scrollAnim: Animated.Value;
   HEADER_HEIGHT: number;
-  setHeaderShown: Function;
+  setHeaderShown: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const HomePage: React.FC<Props> = (props) => {
   const SCREEN_WIDTH = useWindowDimensions().width;
-  const SCREEN_HEIGHT = useWindowDimensions().height;
+  // const SCREEN_HEIGHT = useWindowDimensions().height;
 
   return (
     <SafeAreaView style={styles.SafeAreaView}>

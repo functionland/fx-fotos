@@ -15,7 +15,7 @@ export class LayoutUtil {
       () => {
         return 2; //Since we have just one view type
       },
-      (type, dim, index) => {
+      (type, dim) => {
         const windowWidth = LayoutUtil.getWindowWidth();
         const windowHeight = LayoutUtil.getWindowHeight();
         dim.width = windowWidth;

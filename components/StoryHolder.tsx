@@ -1,5 +1,5 @@
 import React, {useEffect, useRef} from 'react';
-import {StyleSheet, useWindowDimensions, View} from 'react-native';
+import {useWindowDimensions, View} from 'react-native';
 import StoryContainer from './Story/stories/StoryContainer';
 import {story} from '../types/interfaces';
 import {useBackHandler} from '@react-native-community/hooks';
@@ -11,7 +11,7 @@ interface Props {
   story: story | undefined;
   duration: number;
   showStory: boolean;
-  setShowStory: Function;
+  setShowStory: React.Dispatch<React.SetStateAction<boolean>>;
   numColumns: 2 | 3 | 4;
 }
 
@@ -91,19 +91,19 @@ const StoryHolder: React.FC<Props> = (props) => {
   );
 };
 
-const styles = StyleSheet.create({
-  media: {
-    borderRadius: 10,
-    overflow: 'hidden',
-    margin: 10,
-  },
-  storyHolder: {},
-  container: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    zIndex: 5,
-  },
-});
+// const styles = StyleSheet.create({
+//   media: {
+//     borderRadius: 10,
+//     overflow: 'hidden',
+//     margin: 10,
+//   },
+//   storyHolder: {},
+//   container: {
+//     position: 'absolute',
+//     top: 0,
+//     left: 0,
+//     zIndex: 5,
+//   },
+// });
 
 export default StoryHolder;

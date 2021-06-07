@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   Animated,
   Easing,
@@ -12,9 +12,6 @@ import {
   View,
 } from 'react-native';
 import {BLACK, WHITE} from '../utils/colors';
-import SEND from '../images/send.png';
-import SMILEY from '../images/smiley.png';
-import ARROW from '../images/up-arrow.png';
 import {ReplyFooterProps} from '../utils/interfaceHelper';
 
 const ReplyFooterView = ({
@@ -24,6 +21,30 @@ const ReplyFooterView = ({
 }: ReplyFooterProps) => {
   const [keyboardPadding, setKeyboardPadding] = useState(0);
   const [showReply, setShowReply] = useState(true);
+
+  const animationValue = new Animated.Value(0);
+  const animatedStyle = {
+    transform: [{translateY: animationValue}],
+  };
+
+  const animate = useCallback(() => {
+    Animated.loop(
+      Animated.timing(animationValue, {
+        toValue: -15, // position where you want the component to end up
+        duration: 1500, // time the animation will take to complete, in ms
+        easing: Easing.bounce,
+        useNativeDriver: false, // <-- Add this
+      }),
+    ).start();
+  }, [animationValue]);
+
+  const onHideKeyboard = useCallback(() => {
+    if (Platform.OS === 'ios') {
+      setKeyboardPadding(0);
+    }
+    animate();
+    setShowReply(true);
+  }, [animate]);
 
   useEffect(() => {
     let listener1 = Keyboard.addListener(
@@ -39,46 +60,22 @@ const ReplyFooterView = ({
       listener1.remove();
       listener2.remove();
     };
-  }, []);
+  }, [onHideKeyboard]);
 
   useEffect(() => {
     if (showReply) {
       animate();
     }
-  }, [showReply, progressIndex]);
-
-  var animationValue = new Animated.Value(0);
-  const animatedStyle = {
-    transform: [{translateY: animationValue}],
-  };
-
-  const animate = () => {
-    Animated.loop(
-      Animated.timing(animationValue, {
-        toValue: -15, // position where you want the component to end up
-        duration: 1500, // time the animation will take to complete, in ms
-        easing: Easing.bounce,
-        useNativeDriver: false, // <-- Add this
-      }),
-    ).start();
-  };
+  }, [showReply, progressIndex, animate]);
 
   function onShowKeyboard(e: any) {
-    if (Platform.OS == 'ios') {
+    if (Platform.OS === 'ios') {
       let padding =
         e && (e.endCoordinates.height - e.startCoordinates.height) / 2;
       padding = padding >= 51 ? padding : 51;
       console.log('onShowKeyboard => ', padding);
       setKeyboardPadding(padding);
     }
-  }
-
-  function onHideKeyboard(e: any) {
-    if (Platform.OS == 'ios') {
-      setKeyboardPadding(0);
-    }
-    animate();
-    setShowReply(true);
   }
 
   return (
@@ -89,7 +86,10 @@ const ReplyFooterView = ({
           onPress={() => setShowReply(false)}>
           <Animated.View
             style={[styles.animatedBox, styles.imgStyle, animatedStyle]}>
-            <Animated.Image style={styles.imgStyle} source={ARROW} />
+            <Animated.Image
+              style={styles.imgStyle}
+              source={require('../images/up-arrow.png')}
+            />
           </Animated.View>
           <Text style={styles.titleStyle}>{'Reply'}</Text>
         </TouchableOpacity>
@@ -102,7 +102,10 @@ const ReplyFooterView = ({
             onPress={() =>
               onReplyButtonClick && onReplyButtonClick('smiley', progressIndex)
             }>
-            <Image style={styles.imgStyle} source={SMILEY} />
+            <Image
+              style={styles.imgStyle}
+              source={require('../images/smiley.png')}
+            />
           </TouchableOpacity>
           <TextInput
             autoFocus
@@ -124,7 +127,10 @@ const ReplyFooterView = ({
             onPress={() =>
               onReplyButtonClick && onReplyButtonClick('send', progressIndex)
             }>
-            <Image style={styles.imgStyle} source={SEND} />
+            <Image
+              style={styles.imgStyle}
+              source={require('../images/send.png')}
+            />
           </TouchableOpacity>
         </View>
       )}

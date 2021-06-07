@@ -1,4 +1,10 @@
-import React, {createRef, useEffect, useRef, useState} from 'react';
+import React, {
+  createRef,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import {
   Animated,
   StatusBar,
@@ -49,10 +55,10 @@ class ExternalScrollView extends BaseScrollView {
 
 interface Props {
   modalShown: boolean;
-  setModalShown: Function;
+  setModalShown: React.Dispatch<React.SetStateAction<boolean>>;
   medias: Asset[] | undefined;
   singleMediaIndex: number;
-  setSinglePhotoIndex: Function;
+  setSinglePhotoIndex: React.Dispatch<React.SetStateAction<number>>;
   imagePosition: {x: number; y: number};
   numColumns: 2 | 3 | 4;
 }
@@ -76,9 +82,9 @@ const SingleMedia: React.FC<Props> = (props) => {
   const pinchRef = createRef<PinchGestureHandler>();
 
   const [media, setMedia] = useState<Asset | undefined>(undefined);
-  const [scrollEnabled, setScrollEnabled] = useState<boolean>(true);
-  const [activeIndex, setActiveIndex] = useState<number>(-1);
-  const [panGestureEnabled, setPanGestureEnabled] = useState<boolean>(true);
+  const [, setScrollEnabled] = useState<boolean>(true);
+  // const [activeIndex, setActiveIndex] = useState<number>(-1);
+  const [panGestureEnabled] = useState<boolean>(true);
 
   const viewScale = useRef(new Animated.ValueXY({x: 0, y: 0})).current;
   const modalOpacity = useRef(new Animated.Value(0)).current;
@@ -89,7 +95,7 @@ const SingleMedia: React.FC<Props> = (props) => {
       return r1 !== r2;
     }),
   );
-  const [layoutProvider, setLayoutProvider] = useState<any>(
+  const [layoutProvider] = useState<any>(
     LayoutUtil.getSingleImageLayoutProvider(),
   );
 
@@ -103,11 +109,89 @@ const SingleMedia: React.FC<Props> = (props) => {
     outputRange: [1, 1, 4],
   });
 
+  let singleTapRef = createRef<PanGestureHandler>();
+
+  let translationX = new Animated.Value(0);
+  let translationY = new Animated.Value(0);
+
+  const showModalAnimation = useCallback(
+    (duration: number = 400) => {
+      // let imageDimensions = calcImageDimension(
+      //   media,
+      //   SCREEN_HEIGHT,
+      //   SCREEN_WIDTH,
+      // );
+      //console.log('in showModalAnimation:', {SCREEN_WIDTH:SCREEN_WIDTH, imageWidth:imageWidth, SCREEN_HEIGHT:SCREEN_HEIGHT, imageHeight:imageHeight, StatusBar: StatusBar.currentHeight});
+      Animated.parallel([
+        Animated.timing(viewPosition, {
+          //toValue: { x: (SCREEN_WIDTH-imageDimensions.width)/2, y: (SCREEN_HEIGHT-imageDimensions.height+2*(StatusBar.currentHeight||0))/2 },
+          toValue: {x: 0, y: StatusBar.currentHeight || 0},
+          duration: duration,
+          useNativeDriver: true,
+        }),
+        Animated.timing(viewScale, {
+          toValue: {x: 1, y: 1},
+          duration: duration,
+          useNativeDriver: true,
+        }),
+        Animated.timing(translationY, {
+          toValue: 0,
+          duration: duration,
+          useNativeDriver: true,
+        }),
+        Animated.timing(modalOpacity, {
+          toValue: 1,
+          duration: duration,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    },
+    [modalOpacity, translationY, viewPosition, viewScale],
+  );
+
+  const showHideModal = useCallback(
+    (showModal: boolean, imageWidth: number, imageHeight: number) => {
+      if (showModal) {
+        let thumbnailPositionMinusSingleImagePosition = {
+          x:
+            props.imagePosition.x -
+            ((SCREEN_WIDTH / (props.numColumns * imageWidth)) *
+              (SCREEN_WIDTH - imageWidth)) /
+              2,
+          y:
+            props.imagePosition.y -
+            ((SCREEN_WIDTH / (props.numColumns * imageHeight)) *
+              (SCREEN_HEIGHT - imageHeight)) /
+              2,
+        };
+        viewPosition.setValue(thumbnailPositionMinusSingleImagePosition);
+
+        viewScale.setValue({
+          x: SCREEN_WIDTH / (props.numColumns * imageWidth),
+          y: SCREEN_WIDTH / (props.numColumns * imageHeight),
+        });
+        showModalAnimation();
+      } else {
+        console.log('closing image');
+      }
+    },
+    [
+      SCREEN_HEIGHT,
+      SCREEN_WIDTH,
+      props.imagePosition.x,
+      props.imagePosition.y,
+      props.numColumns,
+      showModalAnimation,
+      viewPosition,
+      viewScale,
+    ],
+  );
+
   useEffect(() => {
     if (props.medias && isMounted.current) {
       setDataProvider(dataProvider.cloneWithRows(props.medias));
     }
-  }, [props.medias]);
+  }, [dataProvider, props.medias]);
 
   useEffect(() => {
     if (isMounted.current) {
@@ -125,7 +209,14 @@ const SingleMedia: React.FC<Props> = (props) => {
         scrollRef?.current?.scrollToIndex(props.singleMediaIndex, false);
       }
     }
-  }, [media]);
+  }, [
+    SCREEN_HEIGHT,
+    SCREEN_WIDTH,
+    media,
+    props.modalShown,
+    props.singleMediaIndex,
+    showHideModal,
+  ]);
 
   useEffect(() => {
     if (props.medias && isMounted.current) {
@@ -145,7 +236,15 @@ const SingleMedia: React.FC<Props> = (props) => {
         );
       }
     }
-  }, [props.modalShown]);
+  }, [
+    SCREEN_HEIGHT,
+    SCREEN_WIDTH,
+    media,
+    props.medias,
+    props.modalShown,
+    props.singleMediaIndex,
+    showHideModal,
+  ]);
 
   const hideModalAnimation = (duration: number = 400) => {
     let imageDimensions = calcImageDimension(
@@ -201,37 +300,7 @@ const SingleMedia: React.FC<Props> = (props) => {
       viewScale.setValue({x: 0, y: 0});
     }, duration / 2);
   };
-  const showModalAnimation = (duration: number = 400) => {
-    let imageDimensions = calcImageDimension(
-      media,
-      SCREEN_HEIGHT,
-      SCREEN_WIDTH,
-    );
-    //console.log('in showModalAnimation:', {SCREEN_WIDTH:SCREEN_WIDTH, imageWidth:imageWidth, SCREEN_HEIGHT:SCREEN_HEIGHT, imageHeight:imageHeight, StatusBar: StatusBar.currentHeight});
-    Animated.parallel([
-      Animated.timing(viewPosition, {
-        //toValue: { x: (SCREEN_WIDTH-imageDimensions.width)/2, y: (SCREEN_HEIGHT-imageDimensions.height+2*(StatusBar.currentHeight||0))/2 },
-        toValue: {x: 0, y: StatusBar.currentHeight || 0},
-        duration: duration,
-        useNativeDriver: true,
-      }),
-      Animated.timing(viewScale, {
-        toValue: {x: 1, y: 1},
-        duration: duration,
-        useNativeDriver: true,
-      }),
-      Animated.timing(translationY, {
-        toValue: 0,
-        duration: duration,
-        useNativeDriver: true,
-      }),
-      Animated.timing(modalOpacity, {
-        toValue: 1,
-        duration: duration,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  };
+
   useBackHandler(() => {
     if (props.modalShown) {
       hideModalAnimation();
@@ -240,40 +309,6 @@ const SingleMedia: React.FC<Props> = (props) => {
     // let the default thing happen
     return false;
   });
-  const showHideModal = (
-    showModal: boolean,
-    imageWidth: number,
-    imageHeight: number,
-  ) => {
-    if (showModal) {
-      let thumbnailPositionMinusSingleImagePosition = {
-        x:
-          props.imagePosition.x -
-          ((SCREEN_WIDTH / (props.numColumns * imageWidth)) *
-            (SCREEN_WIDTH - imageWidth)) /
-            2,
-        y:
-          props.imagePosition.y -
-          ((SCREEN_WIDTH / (props.numColumns * imageHeight)) *
-            (SCREEN_HEIGHT - imageHeight)) /
-            2,
-      };
-      viewPosition.setValue(thumbnailPositionMinusSingleImagePosition);
-
-      viewScale.setValue({
-        x: SCREEN_WIDTH / (props.numColumns * imageWidth),
-        y: SCREEN_WIDTH / (props.numColumns * imageHeight),
-      });
-      showModalAnimation();
-    } else {
-      console.log('closing image');
-    }
-  };
-
-  let singleTapRef = createRef<PanGestureHandler>();
-
-  let translationX = new Animated.Value(0);
-  let translationY = new Animated.Value(0);
 
   let translationYvsX = Animated.multiply(
     translationY,

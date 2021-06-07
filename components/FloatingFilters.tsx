@@ -52,25 +52,28 @@ const FloatingFilters: React.FC<Props> = (props) => {
   const opacity = useRef(new Animated.Value(0)).current;
   const [layoutHeight, setLayoutHeight] = useState<number>(0);
   const [filterItems, setFilterItems] = useState<any[]>([]);
+  const headerIndexesMonth = props.headerIndexes.filter(
+    (header) => header.sortCondition === props.sortCondition,
+  );
   useEffect(() => {
     setLayoutHeight(props.scrollRef?.current?.getContentDimension().height);
-  }, [props.scrollRef, props.scrollRef.current]);
+  }, [props.scrollRef]);
   props.layoutHeight.addListener(({value}) => {
     if (value !== layoutHeight) {
       setLayoutHeight(value);
     }
   });
 
-  const fadeOutIn = (value: number) => {
-    Animated.timing(opacity, {
-      toValue: value,
-      duration: 100,
-      useNativeDriver: true,
-    }).start();
-  };
   useEffect(() => {
+    const fadeOutIn = (value: number) => {
+      Animated.timing(opacity, {
+        toValue: value,
+        duration: 100,
+        useNativeDriver: true,
+      }).start();
+    };
     fadeOutIn(props.floatingFiltersOpacity);
-  }, [props.floatingFiltersOpacity]);
+  }, [opacity, props.floatingFiltersOpacity]);
 
   useEffect(() => {
     console.log('layoutHeight=' + layoutHeight);
@@ -82,11 +85,8 @@ const FloatingFilters: React.FC<Props> = (props) => {
         props.headerHeight,
       ),
     );
-  }, [layoutHeight]);
+  }, [headerIndexesMonth, layoutHeight, props.headerHeight, props.numColumns]);
 
-  const headerIndexesMonth = props.headerIndexes.filter(
-    (header) => header.sortCondition === props.sortCondition,
-  );
   return (
     <Animated.View
       style={[styles.MainView, {opacity: opacity, zIndex: opacity}]}>

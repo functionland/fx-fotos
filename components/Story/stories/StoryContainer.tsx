@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import ProgressView from './ProgressView';
 import StoryView from './StoryView';
 import {StoryContainerProps} from '../utils/interfaceHelper';
@@ -55,12 +55,26 @@ const StoryContainer = (props: StoryContainerProps) => {
     }),
   );
 
+  const onShowKeyboard = useCallback(() => {
+    if (isMounted) {
+      console.log(stopProgress);
+      setStopProgress(true);
+    }
+  }, [stopProgress]);
+
+  const onHideKeyboard = useCallback(() => {
+    if (isMounted) {
+      console.log(stopProgress);
+      setStopProgress(false);
+    }
+  }, [stopProgress]);
+
   useEffect(() => {
     if (isMounted) {
       // Alert.prompt("Called")
       setProgressIndex(progressIndex);
     }
-  }, [props.enableProgress]);
+  }, [progressIndex, props.enableProgress]);
 
   useEffect(() => {
     setProgressIndex(0);
@@ -74,7 +88,7 @@ const StoryContainer = (props: StoryContainerProps) => {
       listener1.remove();
       listener2.remove();
     };
-  }, []);
+  }, [onHideKeyboard, onShowKeyboard]);
 
   const close = (direction: number = 1) => {
     Animated.parallel([
@@ -100,20 +114,6 @@ const StoryContainer = (props: StoryContainerProps) => {
       }
     }, 300);
   };
-
-  function onShowKeyboard(e: any) {
-    if (isMounted) {
-      console.log(stopProgress);
-      setStopProgress(true);
-    }
-  }
-
-  function onHideKeyboard(e: any) {
-    if (isMounted) {
-      console.log(stopProgress);
-      setStopProgress(false);
-    }
-  }
 
   function onArrowClick(type: string) {
     if (isMounted) {

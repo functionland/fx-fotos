@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   ActivityIndicator,
   Animated,
@@ -7,7 +7,6 @@ import {
   SafeAreaView,
   ScrollView,
   StatusBar,
-  StyleSheet,
   Text,
   View,
 } from 'react-native';
@@ -16,7 +15,6 @@ import PhotosChunk from './PhotosChunk';
 import ThumbScroll from './ThumbScroll';
 import Highlights from './Highlights';
 import {
-  AutoScroll,
   BaseScrollView,
   DataProvider,
   LayoutProvider,
@@ -68,19 +66,21 @@ interface Props {
   sizeTransformScale: Animated.AnimatedInterpolation;
   isPinchAndZoom: boolean;
   scrollOffset: {[key: number]: number};
-  setScrollOffset: Function;
-  setLoadMore: Function;
+  setScrollOffset: React.Dispatch<React.SetStateAction<{[p: string]: number}>>;
+  setLoadMore: React.Dispatch<React.SetStateAction<number>>;
   focalY: Animated.Value;
   numberOfPointers: Animated.Value;
   modalShown: boolean;
-  setModalShown: Function;
-  setSinglePhotoIndex: Function;
-  setImagePosition: Function;
+  setModalShown: React.Dispatch<React.SetStateAction<boolean>>;
+  setSinglePhotoIndex: React.Dispatch<React.SetStateAction<number>>;
+  setImagePosition: React.Dispatch<
+    React.SetStateAction<{x: number; y: number}>
+  >;
   storiesHeight: number;
   stories: story[] | undefined;
-  setShowStory: Function;
+  setShowStory: React.Dispatch<React.SetStateAction<boolean>>;
   showStory: boolean;
-  setStory: Function;
+  setStory: React.Dispatch<React.SetStateAction<story | undefined>>;
   scrollY: Animated.Value;
   HEADER_HEIGHT: number;
 }
@@ -108,7 +108,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
   const scrollRef: any = useRef();
   let scrollRefExternal: any = useRef();
   const [lastScrollOffset, setLastScrollOffset] = useState<number>(0);
-  const [layoutHeight, setLayoutHeight] = useState<number>(99999999999999);
+  // const [layoutHeight, setLayoutHeight] = useState<number>(99999999999999);
 
   const [startScroll, setStartScroll] = useState<boolean>(false);
   const [endScroll, setEndScroll] = useState<boolean>(false);
@@ -123,7 +123,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
   const [floatingFiltersOpacity, setFloatingFiltersOpacity] =
     useState<number>(0);
 
-  const [currentImageTimestamp, setCurrentImageTimestamp] = useState<number>(0);
+  const [currentImageTimestamp] = useState<number>(0);
   const dragY = useRef(new Animated.Value(0)).current;
 
   const [showThumbScroll, setShowThumbScroll] = useState<boolean>(false);
@@ -136,7 +136,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
         props.photos.layout.length,
       ),
     );
-  }, [props.photos.layout]);
+  }, [dataProvider, props.photos.layout]);
 
   useEffect(() => {
     setLayoutProvider(
@@ -149,7 +149,13 @@ const RenderPhotos: React.FC<Props> = (props) => {
         props.HEADER_HEIGHT,
       ),
     );
-  }, [dataProvider]);
+  }, [
+    dataProvider,
+    props.HEADER_HEIGHT,
+    props.numColumns,
+    props.sortCondition,
+    props.storiesHeight,
+  ]);
 
   const renderFooter = () => {
     //Second view makes sure we don't unnecessarily change height of the list on this event. That might cause indicator to remain invisible
@@ -205,7 +211,6 @@ const RenderPhotos: React.FC<Props> = (props) => {
             />
           </SafeAreaView>
         );
-        break;
       default:
         return (
           <View style={{position: 'relative', zIndex: 1}}>
@@ -229,18 +234,18 @@ const RenderPhotos: React.FC<Props> = (props) => {
     }
   };
 
-  const scrollToLocation = (offset: number) => {
-    if (scrollRef) {
-      //scrollRef.current?.scrollToOffset(0, offset, true);
-      AutoScroll.scrollNow(scrollRef.current, 0, 0, 0, offset, 1)
-        .then(() => {
-          console.log('scroll done');
-        })
-        .catch((e) => console.log(e));
-    }
-  };
+  // const scrollToLocation = (offset: number) => {
+  //   if (scrollRef) {
+  //     //scrollRef.current?.scrollToOffset(0, offset, true);
+  //     AutoScroll.scrollNow(scrollRef.current, 0, 0, 0, offset, 1)
+  //       .then(() => {
+  //         console.log('scroll done');
+  //       })
+  //       .catch((e) => console.log(e));
+  //   }
+  // };
 
-  const _onMomentumScrollEnd = () => {
+  const _onMomentumScrollEnd = useCallback(() => {
     setTimeout(() => {
       let lastIndex = scrollRef?.current.findApproxFirstVisibleIndex();
       let lastOffset = scrollRef?.current.getCurrentScrollOffset();
@@ -258,73 +263,76 @@ const RenderPhotos: React.FC<Props> = (props) => {
       setLastScrollOffset(lastScrollOffset);
       setShowThumbScroll(false);
     }, 100);
-  };
-  const _onScrollEnd = () => {
-    console.log('scroll end called');
-    let sampleHeight = scrollRef?.current?.getContentDimension().height;
-    let lastOffset = scrollRef?.current.getCurrentScrollOffset();
-    let lastScrollOffset =
-      (lastOffset * (SCREEN_HEIGHT - indicatorHeight)) /
-      (sampleHeight - SCREEN_HEIGHT);
-    setLastScrollOffset(lastScrollOffset);
-  };
+  }, [props]);
+  // const _onScrollEnd = () => {
+  //   console.log('scroll end called');
+  //   let sampleHeight = scrollRef?.current?.getContentDimension().height;
+  //   let lastOffset = scrollRef?.current.getCurrentScrollOffset();
+  //   let lastScrollOffset =
+  //     (lastOffset * (SCREEN_HEIGHT - indicatorHeight)) /
+  //     (sampleHeight - SCREEN_HEIGHT);
+  //   setLastScrollOffset(lastScrollOffset);
+  // };
 
-  const scrollBarToViewSync = (value: number) => {
-    //console.log('value+lastScrollOffset='+(value+lastScrollOffset));
-    let sampleHeight = scrollRef?.current?.getContentDimension().height;
-    let ViewOffset =
-      ((value + lastScrollOffset) * (sampleHeight - SCREEN_HEIGHT)) /
-      (SCREEN_HEIGHT - indicatorHeight);
-    //console.log('value='+value);
-    //console.log('ViewOffset='+ViewOffset);
-    //console.log('sampleHeight='+sampleHeight);
-    //console.log('SCREEN_HEIGHT='+SCREEN_HEIGHT);
-    scrollRef.current.scrollToOffset(0, ViewOffset, false);
-    let currentImageIndex = scrollRef.current.findApproxFirstVisibleIndex();
-    let currentImage = props.photos.layout[currentImageIndex].value;
-    let currentTimeStamp = 0;
-    if (typeof currentImage === 'string') {
-      currentImage = props.photos.layout[currentImageIndex + 1]?.value;
-      if (currentImage && typeof currentImage === 'string') {
-        currentImage = props.photos.layout[currentImageIndex + 2]?.value;
-      }
-    }
-    if (currentImage && typeof currentImage !== 'string') {
-      currentTimeStamp = currentImage.modificationTime;
-    }
-    setCurrentImageTimestamp(currentTimeStamp);
-  };
+  // const scrollBarToViewSync = (value: number) => {
+  //   //console.log('value+lastScrollOffset='+(value+lastScrollOffset));
+  //   let sampleHeight = scrollRef?.current?.getContentDimension().height;
+  //   let ViewOffset =
+  //     ((value + lastScrollOffset) * (sampleHeight - SCREEN_HEIGHT)) /
+  //     (SCREEN_HEIGHT - indicatorHeight);
+  //   //console.log('value='+value);
+  //   //console.log('ViewOffset='+ViewOffset);
+  //   //console.log('sampleHeight='+sampleHeight);
+  //   //console.log('SCREEN_HEIGHT='+SCREEN_HEIGHT);
+  //   scrollRef.current.scrollToOffset(0, ViewOffset, false);
+  //   let currentImageIndex = scrollRef.current.findApproxFirstVisibleIndex();
+  //   let currentImage = props.photos.layout[currentImageIndex].value;
+  //   let currentTimeStamp = 0;
+  //   if (typeof currentImage === 'string') {
+  //     currentImage = props.photos.layout[currentImageIndex + 1]?.value;
+  //     if (currentImage && typeof currentImage === 'string') {
+  //       currentImage = props.photos.layout[currentImageIndex + 2]?.value;
+  //     }
+  //   }
+  //   if (currentImage && typeof currentImage !== 'string') {
+  //     currentTimeStamp = currentImage.modificationTime;
+  //   }
+  //   setCurrentImageTimestamp(currentTimeStamp);
+  // };
+
   dragY.removeAllListeners();
-  let animateId = dragY.addListener(({value}) => {
-    scrollBarToViewSync(value);
-  });
+  // let animateId = dragY.addListener(({value}) => {
+  //   scrollBarToViewSync(value);
+  // });
 
   useEffect(() => {
     setViewLoaded(true);
-  }, [scrollRef, scrollRef.current]);
+  }, [scrollRef]);
 
-  const adjustScrollPosition = (newOffset: {
-    [key: string]: 2 | 3 | 4 | number;
-  }) => {
-    let numColumns: number = props.numColumns;
-    if (viewLoaded && numColumns !== newOffset.in) {
-      scrollRef?.current?.scrollToIndex(newOffset.to, false);
-    }
-  };
+  const adjustScrollPosition = useCallback(
+    (newOffset: {[key: string]: 2 | 3 | 4 | number}) => {
+      let numColumns: number = props.numColumns;
+      if (viewLoaded && numColumns !== newOffset.in) {
+        scrollRef?.current?.scrollToIndex(newOffset.to, false);
+      }
+    },
+    [props.numColumns, viewLoaded],
+  );
+
   useEffect(() => {
     adjustScrollPosition(props.scrollOffset);
-  }, [props.scrollOffset]);
+  }, [adjustScrollPosition, props.scrollOffset]);
 
   useEffect(() => {
     if (endScroll === true) {
       _onMomentumScrollEnd();
     }
-  }, [endScroll]);
+  }, [_onMomentumScrollEnd, endScroll]);
 
   const _onScroll = (
-    rawEvent: ScrollEvent,
-    offsetX: number,
-    offsetY: number,
+    _rawEvent: ScrollEvent,
+    _offsetX: number,
+    _offsetY: number,
   ) => {
     //console.log(props.numColumns+'_'+rawEvent.nativeEvent.contentOffset.y);
     setShowThumbScroll(true);
@@ -471,10 +479,10 @@ const RenderPhotos: React.FC<Props> = (props) => {
     </Animated.View>
   );
 };
-const styles = StyleSheet.create({
-  header: {
-    fontSize: 18,
-    backgroundColor: '#fff',
-  },
-});
+// const styles = StyleSheet.create({
+//   header: {
+//     fontSize: 18,
+//     backgroundColor: '#fff',
+//   },
+// });
 export default RenderPhotos;

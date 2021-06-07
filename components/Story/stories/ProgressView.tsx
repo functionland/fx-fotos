@@ -6,15 +6,16 @@ import {FlatList, StyleSheet, View} from 'react-native';
 
 function ProgressView(props: ProgressViewProps) {
   const isMounted = useRef(false);
+  const [progressIndex, setProgressIndex] = useState(0);
+  const [listener, setListener] = useState<any>();
+
   useEffect(() => {
     isMounted.current = true;
     return () => {
       isMounted.current = false;
       clearTimeout(listener);
     };
-  }, []);
-  const [progressIndex, setProgressIndex] = useState(0);
-  const [listener, setListener] = useState<any>();
+  }, [listener]);
 
   useEffect(() => {
     if (isMounted) {
@@ -27,7 +28,7 @@ function ProgressView(props: ProgressViewProps) {
     if (isMounted) {
       setProgressIndex(progressIndex);
     }
-  }, [props.enableProgress]);
+  }, [progressIndex, props.enableProgress]);
 
   function changePosition() {
     if (isMounted) {

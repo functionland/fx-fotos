@@ -31,13 +31,13 @@ export interface StoryContainerProps extends CommonProps {
   replyView?: ReplyProps | undefined;
   footerComponent?: FunctionComponentElement<CommonProps> | undefined;
 
-  onComplete: Function;
+  onComplete: () => void;
   id?: string | undefined;
 }
 
 export interface ProgressViewProps extends CommonProps {
   images: Array<Asset>;
-  onChange: Function;
+  onChange: (position: number) => void;
   progressIndex: number;
   barStyle?: BarStyleProps | undefined;
   id?: string | undefined;
@@ -49,7 +49,7 @@ export interface ProgressItemProps extends CommonProps {
   progressIndex: number;
   currentIndex: number;
   // visible?: boolean | undefined,
-  onChangePosition: Function;
+  onChangePosition: () => void;
 }
 
 export interface StoryViewProps extends CommonProps {
@@ -59,7 +59,7 @@ export interface StoryViewProps extends CommonProps {
 }
 
 export interface ArrowViewProps extends CommonProps {
-  onArrowClick: Function;
+  onArrowClick: () => void;
 }
 
 export interface UserProps {
@@ -67,24 +67,24 @@ export interface UserProps {
   userName?: string | undefined;
   userMessage?: string | undefined;
   imageArrow?: ImageSourcePropType | undefined;
-  onImageClick?: Function | undefined;
+  onImageClick?: () => void | undefined;
 }
 
 export interface ReplyFooterProps {
   progressIndex: number;
-  onReplyTextChange: Function | undefined;
-  onReplyButtonClick: Function | undefined;
+  onReplyTextChange: () => void | undefined;
+  onReplyButtonClick: () => void | undefined;
 }
 
 export interface ReplyProps {
   isShowReply: boolean | undefined;
-  onReplyTextChange: Function | undefined;
-  onReplyButtonClick: Function | undefined;
+  onReplyTextChange: () => void | undefined;
+  onReplyButtonClick: () => void | undefined;
 }
 
 export interface ProgressiveImageProps {
   thumbnailSource: string;
   imgSource: string;
-  style?: ViewStyle | undefined;
+  style?: ImageStyle;
   props?: any;
 }

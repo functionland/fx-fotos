@@ -16,9 +16,9 @@ interface Props {
   numColumns: 2 | 3 | 4;
   text?: string | undefined;
   height: number;
-  setShowStory: Function;
+  setShowStory: (newState: boolean) => void;
   showStory: boolean;
-  setStory: Function;
+  setStory: (newStory: story) => void;
 }
 
 const Highlights: React.FC<Props> = (props) => {

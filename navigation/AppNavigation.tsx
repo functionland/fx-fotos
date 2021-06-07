@@ -16,13 +16,14 @@ const AppNavigation = () => {
   const [headerShown, setHeaderShown] = useState<boolean>(true);
   const HEADER_HEIGHT = 30;
 
-  const clampedScrollY = scrollAnim.interpolate({
-    inputRange: [HEADER_HEIGHT, HEADER_HEIGHT + 1],
-    outputRange: [0, 1],
-    extrapolateLeft: 'clamp',
-  });
-  const minusScrollY = Animated.multiply(clampedScrollY, -1);
-  const translateY = Animated.diffClamp(minusScrollY, -HEADER_HEIGHT, 0);
+  // @todo - remove unused code
+  // const clampedScrollY = scrollAnim.interpolate({
+  //   inputRange: [HEADER_HEIGHT, HEADER_HEIGHT + 1],
+  //   outputRange: [0, 1],
+  //   extrapolateLeft: 'clamp',
+  // });
+  // const minusScrollY = Animated.multiply(clampedScrollY, -1);
+  // const translateY = Animated.diffClamp(minusScrollY, -HEADER_HEIGHT, 0);
 
   return (
     <Animated.View style={[styles.View]}>
@@ -68,7 +69,7 @@ const AppNavigation = () => {
 interface Props {
   scrollAnim: Animated.Value;
   HEADER_HEIGHT: number;
-  setHeaderShown: Function;
+  setHeaderShown: React.Dispatch<React.SetStateAction<boolean>>;
   headerShown: boolean;
 }
 const HomeNavigation: React.FC<Props> = (mainProps) => {

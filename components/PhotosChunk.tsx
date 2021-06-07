@@ -31,9 +31,9 @@ interface Props {
   sortCondition: 'day' | 'month';
   index: number;
   modalShown: boolean;
-  setModalShown: Function;
-  setSinglePhotoIndex: Function;
-  setImagePosition: Function;
+  setModalShown: (newVal: boolean) => void;
+  setSinglePhotoIndex: (index: number) => void;
+  setImagePosition: (newPos: {x: number; y: number}) => void;
   headerHeight: number;
 }
 
@@ -48,7 +48,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
         opacity: 0,
       });
     }
-  }, [imageRef, isIOS]);
+  }, [imageRef]);
   const handleOnLoad = () => {
     if (isIOS && imageRef) {
       imageRef.setNativeProps({

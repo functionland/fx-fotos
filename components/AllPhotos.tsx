@@ -9,7 +9,7 @@ import {Asset} from 'expo-media-library';
 import {prepareLayout} from '../utils/functions';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
-const SCREEN_HEIGHT = Dimensions.get('window').height;
+// const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 interface Props {
   photos: Array<Asset>;
@@ -24,11 +24,11 @@ interface Props {
   numberOfPointers: Animated.Value;
   velocity: Animated.Value;
   isPinchAndZoom: boolean;
-  setLoadMore: Function;
+  setLoadMore: React.Dispatch<React.SetStateAction<number>>;
   storiesHeight: number;
   scrollAnim: Animated.Value;
   HEADER_HEIGHT: number;
-  setHeaderShown: Function;
+  setHeaderShown: (value: boolean) => void;
 }
 
 const AllPhotos: React.FC<Props> = (props) => {
@@ -86,6 +86,7 @@ const AllPhotos: React.FC<Props> = (props) => {
   const [medias, setMedias] = useState<Asset[]>([]);
   const [stories, setStories] = useState<story[]>([]);
   const [showStory, setShowStory] = useState<boolean>(false);
+  // eslint-disable-next-line no-shadow
   const [story, setStory] = useState<story | undefined>();
 
   useEffect(() => {
@@ -121,7 +122,12 @@ const AllPhotos: React.FC<Props> = (props) => {
       setMedias((oldOnlyMedia) => oldOnlyMedia.concat(onlyMedias));
       setStories((oldStories) => oldStories.concat(prepared.stories));
     }
-  }, [props.photos]);
+  }, [
+    medias.length,
+    preparedMedia.lastTimestamp,
+    preparedMedia.layout.length,
+    props.photos,
+  ]);
 
   useEffect(() => {
     if (isMounted) {
@@ -131,7 +137,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         props.setHeaderShown(true);
       }
     }
-  }, [modalShown, showStory]);
+  }, [modalShown, props, showStory]);
 
   return preparedMedia.layout.length > 0 ? (
     <View

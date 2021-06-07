@@ -1,4 +1,10 @@
-import React, {createRef, useEffect, useRef, useState} from 'react';
+import React, {
+  createRef,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import {
   Animated,
@@ -28,11 +34,11 @@ interface Props {
   shouldIndicatorHide: boolean;
   hideTimeout: number;
   showThumbScroll: boolean;
-  setShowThumbScroll: Function;
+  setShowThumbScroll: React.Dispatch<React.SetStateAction<boolean>>;
   scrollIndicatorContainerStyle: StyleProp<{}>;
   scrollIndicatorStyle: StyleProp<{}>;
   lastOffset: number;
-  setLastScrollOffset: Function;
+  setLastScrollOffset: (offset: number) => void;
   numColumns: 2 | 3 | 4;
   headerIndexes: headerIndex[];
   numberOfPointers: Animated.Value;
@@ -40,14 +46,14 @@ interface Props {
   velocityY: Animated.Value;
   headerHeight: number;
   scrollRef: any;
-  setStartScroll: Function;
+  setStartScroll: React.Dispatch<React.SetStateAction<boolean>>;
   startScroll: boolean;
-  setEndScroll: Function;
+  setEndScroll: React.Dispatch<React.SetStateAction<boolean>>;
   layoutHeight: Animated.Value;
   isDragging: Animated.Value;
   dragY: Animated.Value;
   floatingFiltersOpacity: number;
-  setFloatingFiltersOpacity: Function;
+  setFloatingFiltersOpacity: (opacity: number) => void;
   currentImageTimestamp: number;
 }
 const ThumbScroll: React.FC<Props> = (props) => {
@@ -62,23 +68,21 @@ const ThumbScroll: React.FC<Props> = (props) => {
     new Animated.Value(props.shouldIndicatorHide ? 0 : 1),
   );
 
-  const [isIndicatorHidden, setIsIndicatorHidden] = useState(
-    props.shouldIndicatorHide,
-  );
+  const [, setIsIndicatorHidden] = useState(props.shouldIndicatorHide);
 
   /*const transformY:Animated.AnimatedInterpolation = Animated.add(Animated.multiply(Animated.subtract(2, props.numberOfPointers) , props.scrollY), props.lastOffset).interpolate({
         inputRange: [0, fullSizeContentHeight],
         outputRange: [0, SCREEN_HEIGHT]  // 0 : 150, 0.5 : 75, 1 : 0
     });*/
-  const transformY: Animated.AnimatedInterpolation = props.scrollY;
+  // const transformY: Animated.AnimatedInterpolation = props.scrollY;
   //const transformY:Animated.AnimatedInterpolation = Animated.add(Animated.subtract(Animated.subtract(absoluteY, y), (StatusBar.currentHeight||0)),props.scrollY);
-  const runHideTimer = () => {
+  const runHideTimer = useCallback(() => {
     props.shouldIndicatorHide && setIsIndicatorHidden(true);
-  };
+  }, [props.shouldIndicatorHide]);
 
-  const showIndicator = () => {
+  const showIndicator = useCallback(() => {
     props.shouldIndicatorHide && setIsIndicatorHidden(false);
-  };
+  }, [props.shouldIndicatorHide]);
 
   const showFloatingFilters = () => {
     console.log('showFloatingFilters');
@@ -148,13 +152,9 @@ const ThumbScroll: React.FC<Props> = (props) => {
   useEffect(() => {
     //console.log('props.lastOffset='+props.lastOffset);
     props.dragY.setValue(0);
-  }, [props.lastOffset]);
+  }, [props.dragY, props.lastOffset]);
 
-  useEffect(() => {
-    startIndicatorShowHide();
-  }, [props.showThumbScroll]);
-
-  let startIndicatorShowHide = () => {
+  let startIndicatorShowHide = useCallback(() => {
     //Hide / show Animation effect
     if (props.shouldIndicatorHide) {
       props.showThumbScroll
@@ -173,7 +173,18 @@ const ThumbScroll: React.FC<Props> = (props) => {
             showIndicator();
           });
     }
-  };
+  }, [
+    fadeAnim,
+    props.hideTimeout,
+    props.shouldIndicatorHide,
+    props.showThumbScroll,
+    runHideTimer,
+    showIndicator,
+  ]);
+
+  useEffect(() => {
+    startIndicatorShowHide();
+  }, [props.showThumbScroll, startIndicatorShowHide]);
 
   return (
     <Animated.View

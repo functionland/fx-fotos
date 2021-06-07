@@ -16,17 +16,19 @@ interface Props {
   scale: Animated.Value;
   baseScale: Animated.AnimatedAddition;
   baseScale2: Animated.Value;
-  setPinchOrZoom: Function;
+  setPinchOrZoom: React.Dispatch<
+    React.SetStateAction<'pinch' | 'zoom' | undefined>
+  >;
   pinchOrZoom: 'pinch' | 'zoom' | undefined;
-  setSortCondition: Function;
-  setNumColumns: Function;
+  setSortCondition: React.Dispatch<React.SetStateAction<sortCondition>>;
+  setNumColumns: React.Dispatch<React.SetStateAction<2 | 3 | 4>>;
   numColumns: 2 | 3 | 4;
   sortCondition: sortCondition;
   focalX: Animated.Value;
   focalY: Animated.Value;
   numberOfPointers: Animated.Value;
   velocity: Animated.Value;
-  setIsPinchAndZoom: Function;
+  setIsPinchAndZoom: React.Dispatch<React.SetStateAction<boolean>>;
   isPinchAndZoom: boolean;
 }
 
