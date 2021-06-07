@@ -6,7 +6,6 @@ const ProgressiveImageView = ({
   thumbnailSource,
   imgSource,
   style,
-  props,
 }: ProgressiveImageProps) => {
   const thumbnailAnimated = new Animated.Value(0);
   const imageAnimated = new Animated.Value(0);
@@ -46,7 +45,7 @@ const ProgressiveImageView = ({
   );
 };
 
-// export default ProgressiveImageView;
+export default ProgressiveImageView;
 
 const styles = StyleSheet.create({
   imageOverlay: {

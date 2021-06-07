@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   Animated,
   Easing,
@@ -22,7 +22,7 @@ const ReplyFooterView = ({
   const [keyboardPadding, setKeyboardPadding] = useState(0);
   const [showReply, setShowReply] = useState(true);
 
-  const animationValue = new Animated.Value(0);
+  const animationValue = useRef(new Animated.Value(0)).current;
   const animatedStyle = {
     transform: [{translateY: animationValue}],
   };

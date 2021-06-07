@@ -72,8 +72,8 @@ export interface UserProps {
 
 export interface ReplyFooterProps {
   progressIndex: number;
-  onReplyTextChange: () => void | undefined;
-  onReplyButtonClick: () => void | undefined;
+  onReplyTextChange: (p1: string, p2: number) => void | undefined;
+  onReplyButtonClick: (p1: string, p2: number) => void | undefined;
 }
 
 export interface ReplyProps {

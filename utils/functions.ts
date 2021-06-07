@@ -1,4 +1,10 @@
-import {Asset, AssetsOptions, getAssetsAsync, MediaType, SortBy,} from 'expo-media-library';
+import {
+  Asset,
+  AssetsOptions,
+  getAssetsAsync,
+  MediaType,
+  SortBy,
+} from 'expo-media-library';
 import {
   changeSortConditionAndNumColumns,
   FlatSection,

@@ -111,8 +111,8 @@ const SingleMedia: React.FC<Props> = (props) => {
 
   let singleTapRef = createRef<PanGestureHandler>();
 
-  let translationX = new Animated.Value(0);
-  let translationY = new Animated.Value(0);
+  let translationX = useRef(new Animated.Value(0)).current;
+  let translationY = useRef(new Animated.Value(0)).current;
 
   const showModalAnimation = useCallback(
     (duration: number = 400) => {

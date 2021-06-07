@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {Animated, Dimensions, Text, View} from 'react-native';
-import {FlatSection, sortCondition, story} from '../types/interfaces';
+import {FlatSection, sortCondition, story as Story} from '../types/interfaces';
 import RenderPhotos from './RenderPhotos';
 import SingleMedia from './SingleMedia';
 import StoryHolder from './StoryHolder';
@@ -84,10 +84,10 @@ const AllPhotos: React.FC<Props> = (props) => {
     y: 0,
   });
   const [medias, setMedias] = useState<Asset[]>([]);
-  const [stories, setStories] = useState<story[]>([]);
+  const [stories, setStories] = useState<Story[]>([]);
   const [showStory, setShowStory] = useState<boolean>(false);
-  // eslint-disable-next-line no-shadow
-  const [story, setStory] = useState<story | undefined>();
+
+  const [story, setStory] = useState<Story | undefined>();
 
   useEffect(() => {
     console.log('photos updated, length=' + props.photos?.length);
