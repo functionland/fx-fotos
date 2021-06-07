@@ -24,24 +24,23 @@ const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
 class ExternalScrollView extends BaseScrollView {
-  private _scrollViewRef: any;
-  
 
   scrollTo(...args: any[]) {
-    if (this._scrollViewRef) { 
-      this._scrollViewRef?.scrollTo(...args);
+    if ((this.props as any).scrollRefExternal?.current) { 
+      (this.props as any).scrollRefExternal?.current?.scrollTo(...args);
     }
   }
   render() {
-    return <AnimatedScrollView {...this.props}
-    style={{zIndex:1}}
-     ref={(scrollView: any) => {this._scrollViewRef = scrollView;}}
-     scrollEventThrottle={1}
-     nestedScrollEnabled = {true}
-     onScroll={Animated.event([(this.props as any).animatedEvent], {listener: this.props.onScroll, useNativeDriver: true})}
-     >
-       {this.props.children}
-       </AnimatedScrollView>
+    return (
+      <AnimatedScrollView {...this.props}
+        style={{zIndex:1}}
+        ref={(scrollView: any) => {(this.props as any).scrollRefExternal.current = scrollView;}}
+        scrollEventThrottle={1}
+        nestedScrollEnabled = {true}
+        onScroll={Animated.event([(this.props as any).animatedEvent], {listener: this.props.onScroll, useNativeDriver: true})}
+      >
+        {this.props.children}
+      </AnimatedScrollView>);
   }
 }
 interface Props {
@@ -85,7 +84,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
   const [layoutProvider, setLayoutProvider] = useState<LayoutProvider>(LayoutUtil.getLayoutProvider(2, 'day', headerHeight, dataProvider, props.storiesHeight, props.HEADER_HEIGHT));
   const [viewLoaded, setViewLoaded] = useState<boolean>(false);
   const scrollRef:any = useRef();
-  const scrollRefExternal:any = useRef();
+  let scrollRefExternal:any = useRef();
   const [lastScrollOffset, setLastScrollOffset] = useState<number>(0);
   const [layoutHeight, setLayoutHeight] = useState<number>(99999999999999);
 
@@ -109,11 +108,9 @@ const RenderPhotos: React.FC<Props> = (props) => {
   useEffect(()=>{
     //setDataProvider(dataProvider.cloneWithRows(dataProvider.getAllData().concat(props.photos.layout),(dataProvider.getAllData().length>0?dataProvider.getAllData().length-1:undefined)));
     setDataProvider(dataProvider.cloneWithRows(props.photos.layout,props.photos.layout.length));
-    if(props.numColumns===2){console.log('props.photos.layout.length='+props.photos.layout.length);}
   },[props.photos.layout]);
 
   useEffect(()=>{
-    if(props.numColumns===2){console.log('re-layout');}
     setLayoutProvider((oldLayoutProvider:LayoutProvider)=>LayoutUtil.getLayoutProvider(props.numColumns, props.sortCondition, headerHeight, dataProvider, props.storiesHeight, props.HEADER_HEIGHT));
   },[dataProvider]);
 
@@ -341,6 +338,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
           ////ref: scrollRefExternal,
           onMomentumScrollEnd: _onMomentumScrollEnd,
           ////onScrollEndDrag: _onScrollEnd,
+          scrollRefExternal:scrollRefExternal,
           scrollEventThrottle:5,
           automaticallyAdjustContentInsets: false,
           showsVerticalScrollIndicator:false,
