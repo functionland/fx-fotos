@@ -1,5 +1,5 @@
 import {NavigationContainer} from '@react-navigation/native';
-import {createStackNavigator} from '@react-navigation/stack';
+import {createNativeStackNavigator} from 'react-native-screens/native-stack';
 import PermissionError from '../pages/PermissionError';
 import React, { useRef, useState } from 'react';
 import HomePage from '../pages/HomePage';
@@ -8,7 +8,7 @@ import Header from '../components/Header';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import { FontAwesome5 } from '@expo/vector-icons'; 
 
-const Stack = createStackNavigator();
+const Stack = createNativeStackNavigator();
 const Tab = createMaterialBottomTabNavigator();
 
 const AppNavigation = () => {
@@ -30,16 +30,17 @@ const AppNavigation = () => {
       <NavigationContainer>
         <Stack.Navigator
           screenOptions={{
+            headerCenter: () => <Header scrollAnim={scrollAnim} HEADER_HEIGHT={HEADER_HEIGHT} />,
+            //headerTitle: '',
             headerStyle: {
-              //backgroundColor: 'white',
+              backgroundColor: 'transparent',
             },
+            headerHideShadow:true,
             headerShown: headerShown,
-            headerTransparent:true,
-            //headerTintColor: '#fff',
+            headerTranslucent:true,
             headerTitleStyle: {
               fontWeight: 'bold',
             },
-            headerTitle: props => <Header scrollAnim={scrollAnim} HEADER_HEIGHT={HEADER_HEIGHT} {...props} />
           }}
         >
           <Stack.Screen

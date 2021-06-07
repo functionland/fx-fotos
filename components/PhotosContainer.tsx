@@ -19,17 +19,17 @@ const PhotosContainer: React.FC<Props> = (props) => {
   const SCREEN_WIDTH = useWindowDimensions().width;
   const SCREEN_HEIGHT = useWindowDimensions().height;
 
-  const initialPhotoNumber:number = 0;
+  const initialPhotoNumber:number = 500;
   const storiesHeight:number = 1.618*SCREEN_WIDTH/3;
 
   const [permission, setPermission] = useState<boolean>();
-  const [photos, setPhotos] = useState<Array<MediaLibrary.Asset>>();
+  const [photos, setPhotos] = useState<Array<MediaLibrary.Asset>>([]);
   const [mediaEndCursor, setMediaEndCursor] = useState<string>('');
   const [mediaHasNextPage, setMediaHasNextPage] = useState<boolean>(true);
   const [mediaTotalCount , setMediaTotalCount] = useState<number>(99999);
   const [storagePhotos, setStoragePhotos] = useState<
     Array<MediaLibrary.Asset>
-  >();
+  >([]);
   const navigation = useNavigation();
 
   let scale = useRef(new Animated.Value(1)).current;
@@ -55,19 +55,38 @@ const PhotosContainer: React.FC<Props> = (props) => {
   const [loadMore, setLoadMore] = useState<number>(0);
 
   //TODO: Change this function to the getPhotos in actions like in AllPhotos
+  async function getMedia(permission:boolean, photoNumber:number){
+    let hasNextPage = true;
+    let endCursor:string = '';
+    let totalCount = mediaTotalCount;
+    while(hasNextPage){
+      console.log('media fetch while');
+      setLoading(true);
+      await getStorageMedia(permission, photoNumber, endCursor)?.then(
+        (value) => {
+          if(value){
+            console.log('getStorageMedia');
+            hasNextPage = value.hasNextPage;
+            endCursor = value.endCursor;
+            totalCount = value.totalCount;
+            //setStoragePhotos(oldStoragePhotos => [...oldStoragePhotos,...value.assets]);
+            setStoragePhotos(value.assets);
+            setMediaEndCursor(endCursor);
+            setMediaHasNextPage(hasNextPage);
+            setMediaTotalCount(totalCount);
+            console.log({hasNextPage:hasNextPage,
+              endCursor:endCursor,
+              totalCount:totalCount});
+          }
+          setLoading(false);
+        },
+      ).catch(error => setLoading(false));
+    }
+  }
   useEffect(() => {
     if (permission && mediaHasNextPage && !loading) {
       navigation.navigate('HomePage');
-      setLoading(true);
-      getStorageMedia(permission, initialPhotoNumber)?.then(
-        (res: MediaItem) => {
-          setStoragePhotos(res.assets);
-          setMediaEndCursor(res.endCursor);
-          setMediaHasNextPage(res.hasNextPage);
-          setMediaTotalCount(res.totalCount);
-          setLoading(false);
-        },
-      ).catch(error => console.log(error));
+      getMedia(permission, initialPhotoNumber);
     } else {
       navigation.navigate('PermissionError');
     }
@@ -82,8 +101,7 @@ const PhotosContainer: React.FC<Props> = (props) => {
   useEffect(() => {
     let boxPhotos: Array<MediaLibrary.Asset> = getUserBoxMedia('');
     if (storagePhotos) {
-      let photos_i = boxPhotos.concat(storagePhotos);
-      setPhotos(photos_i);
+      setPhotos([...boxPhotos, ...storagePhotos]);
     }
   }, [storagePhotos]);
 

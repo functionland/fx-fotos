@@ -95,21 +95,24 @@ export const prepareLayout = (
   newMedias: Array<Asset>,
   sortConditions: Array<'day' | 'month'>,
   lastTimestamp: number = 0,
+  lastIndex: number,
 ) => {
-  let output:FlatSection = {layout:[], headerIndexes:[], stories: []};
+  let output:FlatSection = {layout:[], headerIndexes:[], stories: [], lastTimestamp: lastTimestamp};
   
     let layout: Array<layout> = [];
     let headerIndexes:Array<headerIndex> = [];
     let stories:story[] = [];
     let count = {'day':0, 'month':0};
-    layout.push({value:'story placeholder', sortCondition: '', index: -1});
+    if(lastTimestamp===0){
+      layout.push({value:'story placeholder', sortCondition: '', index: -1});
+    }
 
     let lastTimestampObj = timestampToDate(
       lastTimestamp,
       [...sortConditions, 'year'],
     );
     
-    let lastYear = {'day':'', 'month': ''};
+    let lastYear = {'day':(lastTimestampObj.year||''), 'month': (lastTimestampObj.year||'')};
 
     let counter1:{[key:number]:number} = {};
     let counter2:{[key:number]:number} = {};
@@ -201,15 +204,16 @@ export const prepareLayout = (
             lastYear[sortCondition_j] = mediaTimestampObj.year;
             yearStart[sortCondition_j] = lastYear[sortCondition_j];
           }
-          headerIndexes.push({header:mediaTimestampObj[sortCondition_j], index:layout.length-1, count: 0, yearStart: yearStart[sortCondition_j], sortCondition: sortCondition_j, timestamp: newMedias[i].modificationTime});
+          headerIndexes.push({header:mediaTimestampObj[sortCondition_j], index:layout.length-1+lastIndex, count: 0, yearStart: yearStart[sortCondition_j], sortCondition: sortCondition_j, timestamp: newMedias[i].modificationTime});
           count[sortCondition_j] = 0;
         }
         count[sortCondition_j] = count[sortCondition_j] + 1;
       }
 
-      layout.push({value:newMedias[i], sortCondition: '', index: i});
+      layout.push({value:newMedias[i], sortCondition: '', index: i+lastIndex});
 
     }
+    
 
     let lastHeaderIndex = {'day':-1, 'month':-1};
     let headerIndexLength = headerIndexes.length;
@@ -222,7 +226,11 @@ export const prepareLayout = (
     }
 
     stories = stories.filter(x=>x?.medias[0]?.uri);
-    output = {layout:layout, headerIndexes: headerIndexes, stories: stories};
+    let lastMediaTimestamp = 0;
+    if(newMedias && newMedias.length){
+      lastMediaTimestamp = newMedias[newMedias.length-1].modificationTime;
+    }
+    output = {layout:layout, headerIndexes: headerIndexes, stories: stories, lastTimestamp:lastMediaTimestamp};
   return output;
 }
 
@@ -261,7 +269,7 @@ export const timestampToDate = (
   return result;
 };
 
-export const getStorageMedia = (
+export const getStorageMedia = async (
   permission: boolean = false,
   limit: number = 99999999999999,
   after: string = '',
