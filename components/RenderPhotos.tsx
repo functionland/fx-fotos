@@ -82,6 +82,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
     return (typeof r1==='string')?(r1 !== r2):(r1.id !== r2.id);
   }));
   const [layoutProvider, setLayoutProvider] = useState<LayoutProvider>(LayoutUtil.getLayoutProvider(2, 'day', headerHeight, dataProvider, props.storiesHeight, props.HEADER_HEIGHT));
+  layoutProvider.shouldRefreshWithAnchoring = false;
   const [viewLoaded, setViewLoaded] = useState<boolean>(false);
   const scrollRef:any = useRef();
   let scrollRefExternal:any = useRef();
@@ -111,7 +112,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
   },[props.photos.layout]);
 
   useEffect(()=>{
-    setLayoutProvider((oldLayoutProvider:LayoutProvider)=>LayoutUtil.getLayoutProvider(props.numColumns, props.sortCondition, headerHeight, dataProvider, props.storiesHeight, props.HEADER_HEIGHT));
+    setLayoutProvider(LayoutUtil.getLayoutProvider(props.numColumns, props.sortCondition, headerHeight, dataProvider, props.storiesHeight, props.HEADER_HEIGHT));
   },[dataProvider]);
 
   const renderFooter = () => {
