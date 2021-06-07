@@ -9,7 +9,8 @@ import {
   View,
   FlatList,
   SafeAreaView,
-  ScrollView
+  ScrollView,
+  Systrace
 } from 'react-native';
 import { layout, FlatSection, ScrollEvent, story,  } from '../types/interfaces';
 import PhotosChunk from './PhotosChunk';
@@ -19,6 +20,7 @@ import { RecyclerListView, DataProvider, AutoScroll, BaseScrollView, LayoutProvi
 import { LayoutUtil } from '../utils/LayoutUtil';
 import FloatingFilters from './FloatingFilters';
 import { headerIndex } from '../.history/types/interfaces_20210604185657';
+
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -76,6 +78,16 @@ interface Props {
 }
 
 const RenderPhotos: React.FC<Props> = (props) => {
+  const enableProfiling = () => {
+    Systrace.setEnabled(true); // Call setEnabled to turn on the profiling.
+    Systrace.beginEvent('RenderPhotos_'+props.numColumns);
+    Systrace.counterEvent('RenderPhotos_'+props.numColumns, 10);
+  }
+  
+  const stopProfiling = () => {
+    Systrace.endEvent()
+  }
+
   const headerHeight = 20;
   const indicatorHeight = 50;
   const [dataProvider, setDataProvider] = useState<DataProvider>(new DataProvider((r1, r2) => {
