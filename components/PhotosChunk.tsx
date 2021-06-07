@@ -35,6 +35,7 @@ interface Props {
 const PhotosChunk: React.FC<Props> = (props) => {
   const SCREEN_WIDTH = useWindowDimensions().width;
   const [imageRef, setImageRef] = useState<Image | null>();
+  const [mediaSelected, setMediaSelected] = useState<boolean>(false);
   const tempScale = useRef(new Animated.Value(1)).current;
 
   useEffect(()=>{
