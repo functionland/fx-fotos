@@ -134,7 +134,7 @@ const StoryContainer = (props: StoryContainerProps) => {
   function onChange(position: number) {
     if (isMounted) {
       if (
-        (props.enableProgress != undefined ? props.enableProgress : true) &&
+        (props.enableProgress !== undefined ? props.enableProgress : true) &&
         !stopProgress
       ) {
         if (position < props.images.length) {
@@ -281,7 +281,7 @@ const StoryContainer = (props: StoryContainerProps) => {
               <View style={[styles.progressView, {width: SCREEN_WIDTH}]}>
                 <ProgressView
                   enableProgress={
-                    (props.enableProgress != undefined
+                    (props.enableProgress !== undefined
                       ? props.enableProgress
                       : true) && !stopProgress
                   }

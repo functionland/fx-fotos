@@ -27,6 +27,7 @@ const SLIDER_COLOR = '#009485';
 const BUFFERING_SHOW_DELAY = 200;
 // UI states
 let ControlStates;
+// eslint-disable-next-line no-shadow
 (function (ControlStates) {
   ControlStates.Shown = 'Show';
   ControlStates.Showing = 'Showing';
@@ -34,6 +35,7 @@ let ControlStates;
   ControlStates.Hiding = 'Hiding';
 })(ControlStates || (ControlStates = {}));
 let PlaybackStates;
+// eslint-disable-next-line no-shadow
 (function (PlaybackStates) {
   PlaybackStates.Loading = 'Loading';
   PlaybackStates.Playing = 'Playing';
@@ -43,12 +45,14 @@ let PlaybackStates;
   PlaybackStates.Ended = 'Ended';
 })(PlaybackStates || (PlaybackStates = {}));
 let SeekStates;
+// eslint-disable-next-line no-shadow
 (function (SeekStates) {
   SeekStates.NotSeeking = 'NotSeeking';
   SeekStates.Seeking = 'Seeking';
   SeekStates.Seeked = 'Seeked';
 })(SeekStates || (SeekStates = {}));
 let ErrorSeverity;
+// eslint-disable-next-line no-shadow
 (function (ErrorSeverity) {
   ErrorSeverity.Fatal = 'Fatal';
   ErrorSeverity.NonFatal = 'NonFatal';
@@ -88,7 +92,7 @@ const defaultProps = {
   // Callbacks
   errorCallback: (error) =>
     console.error('Error: ', error.message, error.type, error.obj),
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   playbackCallback: (callback) => {},
   switchToLandscape: () =>
     console.warn("Pass your logic to 'switchToLandscape' prop"),
@@ -357,6 +361,7 @@ const VideoPlayer = (props) => {
       if (controlsState === ControlStates.Hidden) {
         return;
       }
+      // eslint-disable-next-line no-shadow
       const shouldPlay = playbackState !== PlaybackStates.Playing;
       if (playbackInstance !== null) {
         await playbackInstance.setStatusAsync({shouldPlay});
@@ -475,7 +480,7 @@ const VideoPlayer = (props) => {
   }
   // Do not let the user override `ref`, `callback`, and `style`
   // @ts-ignore
-  const {videoRef, ref, style, onPlaybackStatusUpdate, source} = videoProps,
+  const {videoRef, ref, source} = videoProps,
     otherVideoProps = __rest(videoProps, [
       'videoRef',
       'ref',

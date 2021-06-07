@@ -256,6 +256,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
       //console.log(['momentum ended', {'in':props.numColumns, 'to':lastIndex}, lastOffset]);
 
       let sampleHeight = scrollRef?.current?.getContentDimension().height;
+      // eslint-disable-next-line no-shadow
       let lastScrollOffset =
         (lastOffset * (SCREEN_HEIGHT - indicatorHeight)) /
         (sampleHeight - SCREEN_HEIGHT);

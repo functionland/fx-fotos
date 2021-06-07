@@ -271,11 +271,10 @@ export const prepareLayout = (
   let headerIndexLength = headerIndexes.length;
   for (let j = 0; j < sortConditions.length; j++) {
     let sortCondition_j = sortConditions[j];
-    lastHeaderIndex[sortCondition_j] = [...headerIndexes]
-      .reverse()
-      .findIndex(
-        (headerIndex) => headerIndex.sortCondition === sortCondition_j,
-      );
+    lastHeaderIndex[sortCondition_j] = [...headerIndexes].reverse().findIndex(
+      // eslint-disable-next-line no-shadow
+      (headerIndex) => headerIndex.sortCondition === sortCondition_j,
+    );
     if (lastHeaderIndex[sortCondition_j] > -1) {
       headerIndexes[
         headerIndexLength - 1 - lastHeaderIndex[sortCondition_j]
