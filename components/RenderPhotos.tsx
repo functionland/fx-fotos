@@ -75,6 +75,8 @@ interface Props {
   setStory:Function;
   scrollY: Animated.Value;
   HEADER_HEIGHT: number;
+  onMediaLongTap: Function;
+  showSelectionCheckbox:boolean;
 }
 
 const RenderPhotos: React.FC<Props> = (props) => {
@@ -190,6 +192,8 @@ const RenderPhotos: React.FC<Props> = (props) => {
         setSinglePhotoIndex={props.setSinglePhotoIndex}
         setImagePosition={props.setImagePosition}
         headerHeight={headerHeight}
+        onMediaLongTap={props.onMediaLongTap}
+        showSelectionCheckbox={props.showSelectionCheckbox}
       />
     </View>);
     }

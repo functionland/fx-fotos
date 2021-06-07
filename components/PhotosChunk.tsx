@@ -27,6 +27,8 @@ interface Props {
   setSinglePhotoIndex: Function;
   setImagePosition: Function;
   headerHeight: number;
+  onMediaLongTap: Function;
+  showSelectionCheckbox: boolean;
 }
 
 
@@ -64,7 +66,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
       console.log('TAP state ACTIVE');
       let imageOffsetY = event.nativeEvent.absoluteY - event.nativeEvent.y;
       let imageOffsetX = event.nativeEvent.absoluteX - event.nativeEvent.x;
-console.log(props.index);
+
       props.setImagePosition({x:imageOffsetX, y:imageOffsetY});
       props.setSinglePhotoIndex(props.index);
       props.setModalShown(true);
@@ -87,7 +89,9 @@ console.log(props.index);
   }
   const _onLongTapHandlerStateChange = ( event:HandlerStateChangeEvent<TapGestureHandlerEventPayload> ) => {
     if (event.nativeEvent.state === State.ACTIVE && event.nativeEvent.oldState !== State.ACTIVE) {
-      console.log('long tap');
+      if(typeof props.photo.value !== 'string'){
+        props.onMediaLongTap(props.photo.value);
+      }
     }
   }
   const longTapRef = createRef<LongPressGestureHandler>();

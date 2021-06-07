@@ -4,6 +4,7 @@ import {sortCondition, FlatSection, story} from '../types/interfaces';
 import RenderPhotos from './RenderPhotos';
 import SingleMedia from './SingleMedia';
 import StoryHolder from './StoryHolder';
+import ActionBar from './ActionBar';
 
 import { Asset } from 'expo-media-library';
 import {prepareLayout,} from '../utils/functions';
@@ -76,7 +77,9 @@ const AllPhotos: React.FC<Props> = (props) => {
   const [medias, setMedias] = useState<Asset[]>([]);
   const [stories, setStories] = useState<story[]>([]);
   const [showStory, setShowStory] = useState<boolean>(false);
+  const [showActionBar, setShowActionBar] = useState<boolean>(false);
   const [story, setStory] = useState<story|undefined>();
+  const [selectedAssets, setSelectedAssets] = useState<Asset[]>([]);
 
   useEffect(()=>{
     if(isMounted && props.photos?.length){
@@ -99,13 +102,30 @@ const AllPhotos: React.FC<Props> = (props) => {
 
   useEffect(()=>{
     if(isMounted){
-      if(modalShown || showStory){
+      if(modalShown || showStory || showActionBar){
         props.setHeaderShown(false);
       }else{
         props.setHeaderShown(true);
       }
     }
-  },[modalShown, showStory]);
+  },[modalShown, showStory, showActionBar]);
+
+  useEffect(()=>{
+    if(selectedAssets.length && !showActionBar){
+      setShowActionBar(true);
+    }else if(showActionBar){
+      setShowActionBar(false);
+    }
+  },[selectedAssets]);
+
+  const onMediaLongTap = (selectedAsset:Asset) => {
+    let isAlreadySelected:number = selectedAssets.findIndex(x=>x.id === selectedAsset.id);
+    if(isAlreadySelected===-1){
+      setSelectedAssets(oldSelected=>[...oldSelected,selectedAsset]);
+    }else{
+      setSelectedAssets(oldSelected=>oldSelected.filter(x=>x.id !== selectedAsset.id));
+    }
+  }
   
   return (
     preparedMedia.layout.length>0?(
@@ -157,6 +177,8 @@ const AllPhotos: React.FC<Props> = (props) => {
         setStory={setStory}
         scrollY={scrollY2}
         HEADER_HEIGHT={props.HEADER_HEIGHT}
+        onMediaLongTap={onMediaLongTap}
+        showSelectionCheckbox={showActionBar}
       />
       <RenderPhotos
         photos={preparedMedia}
@@ -199,6 +221,8 @@ const AllPhotos: React.FC<Props> = (props) => {
         setStory={setStory}
         scrollY={scrollY3}
         HEADER_HEIGHT={props.HEADER_HEIGHT}
+        onMediaLongTap={onMediaLongTap}
+        showSelectionCheckbox={showActionBar}
       />
       <RenderPhotos
         photos={preparedMedia}
@@ -241,6 +265,8 @@ const AllPhotos: React.FC<Props> = (props) => {
         setStory={setStory}
         scrollY={scrollY4}
         HEADER_HEIGHT={props.HEADER_HEIGHT}
+        onMediaLongTap={onMediaLongTap}
+        showSelectionCheckbox={showActionBar}
       />
       <SingleMedia 
         modalShown={modalShown}
@@ -258,7 +284,10 @@ const AllPhotos: React.FC<Props> = (props) => {
         numColumns={props.numColumns}
         story={story}
       />
-      
+      <ActionBar
+        setShowActionBar={setShowActionBar}
+        showActionBar={showActionBar}
+      />
     </View>
     ):(
       <View><Text>No Photos</Text></View>
