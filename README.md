@@ -1,8 +1,9 @@
 ![](https://github.com/functionland/photos/blob/main/assets/images/logo.png)
 
-# Latest Update
+# Latest 2 Updates
 
 June-08-2021: Currently, RecyclerListView re-renders on each TAP, which is causing a huge calculation and slowness. Looking to find hte rootcause and prevent this.
+June-06-2021: Implemented media selection on long tap and action bar
 
 # BOX Photos development guide
 Note: Project is still in alpha phase and not production ready. We aim to release beta version by end of June 2021.
@@ -244,4 +245,4 @@ RenderPhotos --> PhotosChunk & ThumbScroll & Highlights & FloatingFilters
  * [ ] Connect with BOX, AWS and other cloud services to upload/download media
  * [ ] Search page to search by date/tags
  * [ ] Library page to show images by folder/Album
- * [ ] AI features to do on-device analsis for face recognition/object recognition
+ * [ ] AI features to do on-device analysis for face recognition/object recognition
