@@ -1,5 +1,9 @@
 ![](https://github.com/functionland/photos/blob/main/assets/images/logo.png)
 
+# Latest Update
+
+June-08-2021: Currently, RecyclerListView re-renders on each TAP, which is causing a huge calculation and slowness. Looking to find hte rootcause and prevent this.
+
 # BOX Photos development guide
 Note: Project is still in alpha phase and not production ready. We aim to release beta version by end of June 2021.
 
@@ -236,7 +240,7 @@ RenderPhotos --> PhotosChunk & ThumbScroll & Highlights & FloatingFilters
  * [x] Open each image/video in a Single image modal and scroll between images
  * [x] Show highlights
  * [x] Fast scroll/thumb scroll
- * [ ] Select and unselect each image to delete/edit/share
+ * [x] Select and unselect each image to delete/edit/share
  * [ ] Connect with BOX, AWS and other cloud services to upload/download media
  * [ ] Search page to search by date/tags
  * [ ] Library page to show images by folder/Album
