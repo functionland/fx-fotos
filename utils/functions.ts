@@ -104,7 +104,7 @@ export const prepareLayout = (
     let stories:story[] = [];
     let count = {'day':0, 'month':0};
     if(lastTimestamp===0){
-      layout.push({value:'story placeholder', sortCondition: '', index: -1});
+      layout.push({value:'story placeholder', sortCondition: '', index: -1, selected:false});
     }
 
     let lastTimestampObj = timestampToDate(
@@ -193,7 +193,7 @@ export const prepareLayout = (
         if(mediaTimestampObj[sortCondition_j] !== lastTimestampObj[sortCondition_j] || lastYear[sortCondition_j] !== mediaTimestampYear){
           lastTimestampObj[sortCondition_j] = mediaTimestampObj[sortCondition_j];
           
-          layout.push({value:mediaTimestampObj[sortCondition_j], sortCondition: sortCondition_j, index:-1});
+          layout.push({value:mediaTimestampObj[sortCondition_j], sortCondition: sortCondition_j, index:-1, selected:false});
           
           let headerIndexLength = headerIndexes.length;
           let lastHeaderIndex = [...headerIndexes].reverse().findIndex(headerIndex => headerIndex.sortCondition === sortCondition_j);
@@ -210,7 +210,7 @@ export const prepareLayout = (
         count[sortCondition_j] = count[sortCondition_j] + 1;
       }
 
-      layout.push({value:newMedias[i], sortCondition: '', index: i+lastIndex});
+      layout.push({value:newMedias[i], sortCondition: '', index: i+lastIndex, selected:false});
 
     }
     

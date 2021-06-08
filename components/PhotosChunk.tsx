@@ -1,9 +1,11 @@
 import {Asset} from 'expo-media-library';
 import React, {useEffect, useState, createRef, useRef} from 'react';
-import {Animated, Image, Text, StyleSheet, useWindowDimensions, View, Platform} from 'react-native';
+import { Animated, Image, Text, StyleSheet, useWindowDimensions, View, Platform, TextStyle } from 'react-native';
 import { layout } from '../types/interfaces';
 import { prettyTime } from '../utils/functions';
 import { MaterialIcons } from '@expo/vector-icons'; 
+import RoundCheckbox from './RoundCheckbox';
+
 
 import {
   LongPressGestureHandler,
@@ -29,13 +31,13 @@ interface Props {
   headerHeight: number;
   onMediaLongTap: Function;
   showSelectionCheckbox: boolean;
+  selectedAssets:Asset[]|undefined;
 }
 
 
 const PhotosChunk: React.FC<Props> = (props) => {
   const SCREEN_WIDTH = useWindowDimensions().width;
   const [imageRef, setImageRef] = useState<Image | null>();
-  const [mediaSelected, setMediaSelected] = useState<boolean>(false);
   const tempScale = useRef(new Animated.Value(1)).current;
 
   useEffect(()=>{
@@ -45,6 +47,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
       });
     }
   },[imageRef,isIOS]);
+
   const handleOnLoad = () => {
     if (isIOS && imageRef) {
       imageRef.setNativeProps({
@@ -64,13 +67,16 @@ const PhotosChunk: React.FC<Props> = (props) => {
       }).start();
     }
     if (event.nativeEvent.state === State.ACTIVE && event.nativeEvent.oldState !== State.ACTIVE) {
-      console.log('TAP state ACTIVE');
-      let imageOffsetY = event.nativeEvent.absoluteY - event.nativeEvent.y;
-      let imageOffsetX = event.nativeEvent.absoluteX - event.nativeEvent.x;
+      if(!props.showSelectionCheckbox){
+        let imageOffsetY = event.nativeEvent.absoluteY - event.nativeEvent.y;
+        let imageOffsetX = event.nativeEvent.absoluteX - event.nativeEvent.x;
 
-      props.setImagePosition({x:imageOffsetX, y:imageOffsetY});
-      props.setSinglePhotoIndex(props.index);
-      props.setModalShown(true);
+        props.setImagePosition({x:imageOffsetX, y:imageOffsetY});
+        props.setSinglePhotoIndex(props.index);
+        props.setModalShown(true);
+      }else{
+        props.onMediaLongTap(props.photo.value);
+      }
       Animated.timing(
         tempScale, {
           toValue: 1,
@@ -178,14 +184,28 @@ const PhotosChunk: React.FC<Props> = (props) => {
           onHandlerStateChange={_onLongTapHandlerStateChange}
           minDurationMs={800}
         >
-        <TapGestureHandler
-          ref={singleTapRef}
-          onHandlerStateChange={_onSingleTapHandlerStateChange}
-          numberOfTaps={1}
-        >
-            {createThumbnail(props.photo.value)}
+          <TapGestureHandler
+            ref={singleTapRef}
+            onHandlerStateChange={_onSingleTapHandlerStateChange}
+            numberOfTaps={1}
+          >
+              {createThumbnail(props.photo.value)}
           </TapGestureHandler>
         </LongPressGestureHandler>
+        <View style={
+          [
+            styles.checkBox, 
+            {
+              opacity:props.showSelectionCheckbox?1:0
+            }
+          ]
+        } >
+          <RoundCheckbox 
+            size={24}
+            checked={props.selectedAssets?.findIndex(x=>(typeof props.photo.value!=='string' && x.id===props.photo.value.id))===-1?false:true}
+            borderColor='whitesmoke'
+          />
+          </View>
         </Animated.View>
       );
     }
@@ -209,6 +229,15 @@ const styles = StyleSheet.create({
     right: 5,
     flex: 1,
     flexDirection:'row',
+  },
+  checkBox:{
+    zIndex:4,
+    position: 'absolute',
+    top:5,
+    left: 5,
+    flex: 1,
+    flexDirection:'row',
+    color: 'white',
   }
 });
 export default PhotosChunk;

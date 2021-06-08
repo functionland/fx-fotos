@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useRef} from 'react';
 import {Animated, Dimensions, View, Text} from 'react-native';
-import {sortCondition, FlatSection, story} from '../types/interfaces';
+import {sortCondition, FlatSection, story, layout} from '../types/interfaces';
 import RenderPhotos from './RenderPhotos';
 import SingleMedia from './SingleMedia';
 import StoryHolder from './StoryHolder';
@@ -80,6 +80,18 @@ const AllPhotos: React.FC<Props> = (props) => {
   const [showActionBar, setShowActionBar] = useState<boolean>(false);
   const [story, setStory] = useState<story|undefined>();
   const [selectedAssets, setSelectedAssets] = useState<Asset[]>([]);
+  const selectMedia = (media:Asset, selected:boolean) => {
+    let layout:layout[] = preparedMedia.layout;
+    let index = layout.findIndex(x=>(typeof x.value!=='string' && x.value.id===media.id));
+    layout[index] = {
+      ...layout[index],
+      selected: selected,
+    }
+    setPreparedMedia(oldPreparedMedia =>  ({
+      ...oldPreparedMedia,
+      'layout':layout
+    }));
+  }
 
   useEffect(()=>{
     if(isMounted && props.photos?.length){
@@ -113,17 +125,26 @@ const AllPhotos: React.FC<Props> = (props) => {
   useEffect(()=>{
     if(selectedAssets.length && !showActionBar){
       setShowActionBar(true);
-    }else if(showActionBar){
+    }else if(showActionBar && selectedAssets.length===0){
       setShowActionBar(false);
     }
   },[selectedAssets]);
 
-  const onMediaLongTap = (selectedAsset:Asset) => {
-    let isAlreadySelected:number = selectedAssets.findIndex(x=>x.id === selectedAsset.id);
-    if(isAlreadySelected===-1){
-      setSelectedAssets(oldSelected=>[...oldSelected,selectedAsset]);
+  const onMediaLongTap = (selectedAsset:Asset|undefined) => {
+    if(selectedAsset===undefined){
+      for(let i=0;i<selectedAssets.length;i++){
+        selectMedia(selectedAssets[i], false);
+      }
+      setSelectedAssets([]);
     }else{
-      setSelectedAssets(oldSelected=>oldSelected.filter(x=>x.id !== selectedAsset.id));
+      let isAlreadySelected:number = selectedAssets.findIndex(x=>x.id === selectedAsset.id);
+      if(isAlreadySelected===-1){
+        setSelectedAssets(oldSelected=>[...oldSelected,selectedAsset]);
+        selectMedia(selectedAsset, true);
+      }else{
+        setSelectedAssets(oldSelected=>oldSelected.filter(x=>x.id !== selectedAsset.id));
+        selectMedia(selectedAsset, false);
+      }
     }
   }
   
@@ -179,6 +200,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         HEADER_HEIGHT={props.HEADER_HEIGHT}
         onMediaLongTap={onMediaLongTap}
         showSelectionCheckbox={showActionBar}
+        selectedAssets={selectedAssets}
       />
       <RenderPhotos
         photos={preparedMedia}
@@ -223,6 +245,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         HEADER_HEIGHT={props.HEADER_HEIGHT}
         onMediaLongTap={onMediaLongTap}
         showSelectionCheckbox={showActionBar}
+        selectedAssets={selectedAssets}
       />
       <RenderPhotos
         photos={preparedMedia}
@@ -267,6 +290,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         HEADER_HEIGHT={props.HEADER_HEIGHT}
         onMediaLongTap={onMediaLongTap}
         showSelectionCheckbox={showActionBar}
+        selectedAssets={selectedAssets}
       />
       <SingleMedia 
         modalShown={modalShown}
