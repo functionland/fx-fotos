@@ -135,10 +135,13 @@ const RenderPhotos: React.FC<Props> = (props) => {
     setDataProvider(dataProvider.cloneWithRows(props.photos.layout,props.photos.layout.length));
   },[props.photos.layout]);
 
+<<<<<<< HEAD
   useEffect(()=>{
     setLayoutProvider(LayoutUtil.getLayoutProvider(props.numColumns, props.sortCondition, headerHeight, dataProvider, props.storiesHeight, props.HEADER_HEIGHT));
   },[dataProvider]);
 
+=======
+>>>>>>> parent of c5d63cb (Merge branch 'main' into husky-pre-commit)
   const renderFooter = () => {
     //Second view makes sure we don't unnecessarily change height of the list on this event. That might cause indicator to remain invisible
     //The empty view can be removed once you've fetched all the data

@@ -154,6 +154,7 @@ export const prepareLayout = (
       counter1[media.getMonth()] = counter1[media.getMonth()] + 1;
       if (!stories[0] || !stories[0].medias) {
         stories[0] = {medias: [], text: 'Recent'};
+<<<<<<< HEAD
       }
       if (
         counter1[media.getMonth()] <= 2 &&
@@ -162,6 +163,16 @@ export const prepareLayout = (
         stories[0].medias.push(newMedias[i]);
         highlightedMedia[newMedias[i].id] = true;
       }
+=======
+      }
+      if (
+        counter1[media.getMonth()] <= 2 &&
+        !highlightedMedia[newMedias[i].id]
+      ) {
+        stories[0].medias.push(newMedias[i]);
+        highlightedMedia[newMedias[i].id] = true;
+      }
+>>>>>>> parent of c5d63cb (Merge branch 'main' into husky-pre-commit)
     }
 
     //Current photos in the past years
