@@ -81,6 +81,14 @@ export interface Dimension {
   width: number;
 }
 
+<<<<<<< HEAD
+=======
+export interface layout {
+  value: Asset | string;
+  sortCondition: 'day' | 'month' | '';
+  index: number;
+}
+>>>>>>> parent of c5d63cb (Merge branch 'main' into husky-pre-commit)
 
 export interface layout {value:Asset|string; sortCondition:'day'|'month'|'', index: number, selected:boolean};
 
