@@ -101,7 +101,7 @@ export const prepareLayout = (
 ) => {
   let output:FlatSection = {layout:[], headerIndexes:[], stories: [], lastTimestamp: lastTimestamp};
   
-    let layout: Array<Layout> = [];
+    let layout: Array<layout> = [];
     let headerIndexes:Array<headerIndex> = [];
     let stories:story[] = [];
     let count = {'day':0, 'month':0};

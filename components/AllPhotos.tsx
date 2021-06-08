@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {Animated, Dimensions, Text, View} from 'react-native';
-import {FlatSection, layout, sortCondition, story as Story} from '../types/interfaces';
+import {FlatSection, sortCondition, story as Story} from '../types/interfaces';
 import RenderPhotos from './RenderPhotos';
 import SingleMedia from './SingleMedia';
 import StoryHolder from './StoryHolder';
