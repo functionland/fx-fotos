@@ -8,7 +8,6 @@ import {
   Text,
   useWindowDimensions,
   View,
-  StyleSheet,
 } from 'react-native';
 import {layout} from '../types/interfaces';
 import {prettyTime} from '../utils/functions';
