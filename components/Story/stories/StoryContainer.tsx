@@ -1,40 +1,30 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
-import ProgressView from './ProgressView';
-import StoryView from './StoryView';
-import {StoryContainerProps} from '../utils/interfaceHelper';
+import React, { useState, useRef, useEffect } from "react"
+import ProgressView from "./ProgressView"
+import StoryView from "./StoryView"
+import { StoryContainerProps } from "../utils/interfaceHelper"
+import { StyleSheet, View, SafeAreaView, Platform, Keyboard, Animated, KeyboardAvoidingView, useWindowDimensions } from "react-native"
+import { GREEN, LIGHT_GRAY_0, RED, TINT_GRAY, GRAY } from "../utils/colors"
+import ReplyFooterView from "./ReplyFooterView"
+import UserHeaderView from "./UserHeaderView"
+import {DEFAULT_DURATION} from '../utils/constant' ;
 import {
-  Animated,
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
-  StyleSheet,
-  useWindowDimensions,
-  View,
-} from 'react-native';
-import {TINT_GRAY} from '../utils/colors';
-import ReplyFooterView from './ReplyFooterView';
-import UserHeaderView from './UserHeaderView';
-import {DEFAULT_DURATION} from '../utils/constant';
-import {
-  HandlerStateChangeEvent,
+  TapGestureHandler,
   PanGestureHandler,
+  HandlerStateChangeEvent,
+  TapGestureHandlerEventPayload,
   PanGestureHandlerEventPayload,
   State,
-  TapGestureHandler,
-  TapGestureHandlerEventPayload,
 } from 'react-native-gesture-handler';
+import { ScaleFromCenterAndroid } from "@react-navigation/stack/lib/typescript/src/TransitionConfigs/TransitionPresets"
 
 const StoryContainer = (props: StoryContainerProps) => {
   const isMounted = useRef(false);
   useEffect(() => {
     isMounted.current = true;
-    return () => {
-      isMounted.current = false;
-    };
+    return () => {isMounted.current = false;}
   }, []);
 
-  const [progressIndex, setProgressIndex] = useState<number>(0);
+  const [progressIndex, setProgressIndex] = useState<number>(0)
   const [stopProgress, setStopProgress] = useState<boolean>(false);
   const SCREEN_WIDTH = useWindowDimensions().width;
   const SCREEN_HEIGHT = useWindowDimensions().height;
@@ -44,41 +34,21 @@ const StoryContainer = (props: StoryContainerProps) => {
   const opacity = useRef(new Animated.Value(1)).current;
   const scale = useRef(new Animated.Value(1)).current;
 
-  const translationYvsX = Animated.multiply(
-    translationY,
-    Animated.divide(
-      translationX,
-      Animated.add(translationY, 0.0000001),
-    ).interpolate({
-      inputRange: [-SCREEN_WIDTH, -1, -0.6, 0, 0.6, 1, SCREEN_WIDTH],
-      outputRange: [0, 0, 0, 1, 0, 0, 0],
-    }),
-  );
-
-  const onShowKeyboard = useCallback(() => {
-    if (isMounted) {
-      console.log(stopProgress);
-      setStopProgress(true);
-    }
-  }, [stopProgress]);
-
-  const onHideKeyboard = useCallback(() => {
-    if (isMounted) {
-      console.log(stopProgress);
-      setStopProgress(false);
-    }
-  }, [stopProgress]);
+  const translationYvsX = Animated.multiply(translationY, Animated.divide(translationX, Animated.add(translationY,0.0000001)).interpolate({
+    inputRange: [-SCREEN_WIDTH, -1, -0.60, 0, 0.60, 1, SCREEN_WIDTH],
+    outputRange: [0,             0,  0,    1, 0,    0, 0],
+  }))
 
   useEffect(() => {
-    if (isMounted) {
+    if(isMounted){
       // Alert.prompt("Called")
       setProgressIndex(progressIndex);
     }
-  }, [progressIndex, props.enableProgress]);
+  }, [props.enableProgress])
 
-  useEffect(() => {
+  useEffect(()=>{
     setProgressIndex(0);
-  }, [props.visible]);
+  },[props.visible])
 
   useEffect(() => {
     let listener1 = Keyboard.addListener('keyboardDidShow', onShowKeyboard);
@@ -88,12 +58,12 @@ const StoryContainer = (props: StoryContainerProps) => {
       listener1.remove();
       listener2.remove();
     };
-  }, [onHideKeyboard, onShowKeyboard]);
+  }, []);
 
-  const close = (direction: number = 1) => {
+  const close = (direction:number = 1) => {
     Animated.parallel([
       Animated.timing(translationY, {
-        toValue: direction * SCREEN_HEIGHT,
+        toValue: direction*SCREEN_HEIGHT,
         duration: 300,
         useNativeDriver: true,
       }),
@@ -108,37 +78,48 @@ const StoryContainer = (props: StoryContainerProps) => {
         useNativeDriver: true,
       }),
     ]).start();
-    setTimeout(() => {
-      if (isMounted) {
+    setTimeout(()=>{
+      if(isMounted){
         props.onComplete();
       }
-    }, 300);
-  };
+    },300);
+  }
+
+  function onShowKeyboard(e: any) {
+    if(isMounted){
+      console.log(stopProgress);
+      setStopProgress(true);
+    }
+  }
+
+  function onHideKeyboard(e: any) {
+    if(isMounted){
+      console.log(stopProgress);
+      setStopProgress(false);
+    }
+  }
 
   function onArrowClick(type: string) {
-    if (isMounted) {
+    if(isMounted){
       Keyboard.dismiss();
       switch (type) {
         case 'left':
-          onChange(progressIndex === 0 ? progressIndex : progressIndex - 1);
-          break;
+          onChange((progressIndex === 0 )? progressIndex : (progressIndex - 1))
+          break
 
         case 'right':
-          const size = props.imageStyle ? props.images.length - 1 : 0;
-          onChange(progressIndex === size ? progressIndex : progressIndex + 1);
-          break;
+          const size = props.imageStyle ? props.images.length - 1 : 0
+          onChange((progressIndex === size) ? progressIndex : (progressIndex + 1))
+          break
       }
     }
   }
 
   function onChange(position: number) {
-    if (isMounted) {
-      if (
-        (props.enableProgress !== undefined ? props.enableProgress : true) &&
-        !stopProgress
-      ) {
+    if(isMounted){
+      if ((props.enableProgress != undefined ? props.enableProgress : true) && !stopProgress) {
         if (position < props.images.length) {
-          setProgressIndex(position);
+          setProgressIndex(position)
         } else {
           close(1);
         }
@@ -146,160 +127,164 @@ const StoryContainer = (props: StoryContainerProps) => {
     }
   }
 
-  const _onTapHandlerStateChange = (
-    event: HandlerStateChangeEvent<TapGestureHandlerEventPayload>,
-  ) => {
-    if (isMounted) {
-      if (event.nativeEvent.state === State.BEGAN) {
+  const _onTapHandlerStateChange = ( event:HandlerStateChangeEvent<TapGestureHandlerEventPayload> ) => {
+    if(isMounted){
+      if(event.nativeEvent.state === State.BEGAN){
         //start Pause
         console.log('setStopProgress true');
         setStopProgress(true);
-      } else if (event.nativeEvent.state === State.END) {
+      }else if (event.nativeEvent.state === State.END){
         console.log('setStopProgress false');
         setStopProgress(false);
-        if (event.nativeEvent.absoluteX < SCREEN_WIDTH / 2) {
+        if(event.nativeEvent.absoluteX < SCREEN_WIDTH/2){
           //go to prev slide
           onArrowClick('left');
-        } else {
+        }else{
           //go to next slide
           onArrowClick('right');
         }
       }
     }
-  };
+  }
 
-  const _onPanHandlerStateChange = (
-    event: HandlerStateChangeEvent<PanGestureHandlerEventPayload>,
-  ) => {
-    if (isMounted) {
-      if (event.nativeEvent.state === State.END) {
+  const _onPanHandlerStateChange = ( event:HandlerStateChangeEvent<PanGestureHandlerEventPayload> ) => {
+    if(isMounted){
+      if (event.nativeEvent.state === State.END){
         //End pause
         console.log('setStopProgress false');
         setStopProgress(false);
-        if (
-          (event.nativeEvent.translationY / event.nativeEvent.translationX >
-            0.6 ||
-            event.nativeEvent.translationY / event.nativeEvent.translationX <
-              -0.6) &&
-          Math.abs(event.nativeEvent.translationY) > 50
-        ) {
-          if (event.nativeEvent.translationY > 0) {
+        if((event.nativeEvent.translationY/event.nativeEvent.translationX > 0.6 || event.nativeEvent.translationY/event.nativeEvent.translationX < -0.6) && Math.abs(event.nativeEvent.translationY)>50 ){
+          if(event.nativeEvent.translationY>0){
             close(1);
-          } else {
+          }else{
             close(-1);
           }
         }
       }
     }
-  };
+  }
 
   const _onPanGestureEvent = Animated.event(
-    [{nativeEvent: {translationX: translationX, translationY: translationY}}],
-    {useNativeDriver: true},
+    [{ nativeEvent: { translationX: translationX, translationY: translationY, } }],
+    { useNativeDriver: true }
   );
 
   return (
     <SafeAreaView>
-      {Platform.OS === 'ios' && (
-        <KeyboardAvoidingView behavior="padding">
-          <View>{props.visible ? getView() : <View />}</View>
-        </KeyboardAvoidingView>
-      )}
+      {
+        Platform.OS === 'ios' && (
+          <KeyboardAvoidingView behavior='padding' >
+            <View>
+              {props.visible ? getView() : <View></View>}
+            </View>
+          </KeyboardAvoidingView>
+        )
+      }
 
-      {Platform.OS === 'android' && (
-        <View>{props.visible ? getView() : <View />}</View>
-      )}
+      {
+        Platform.OS === 'android' && (
+          <View>
+            {props.visible ? getView() : <View></View>}
+          </View>
+        )
+      }
     </SafeAreaView>
-  );
+  )
 
   function getView() {
     return (
-      <TapGestureHandler onHandlerStateChange={_onTapHandlerStateChange}>
-        <Animated.View
-          style={[
-            props.containerStyle ? props.containerStyle : styles.parentView,
-            {
-              opacity: opacity,
-              transform: [
-                {
-                  translateY: translationYvsX,
-                },
-                {
-                  scale: scale,
-                },
-              ],
-            },
-          ]}>
-          <PanGestureHandler
-            onHandlerStateChange={_onPanHandlerStateChange}
-            onGestureEvent={_onPanGestureEvent}>
-            <Animated.View
-              style={[
-                props.containerStyle ? props.containerStyle : styles.parentView,
-              ]}>
-              <StoryView
-                images={props.images}
-                duration={props.duration ? props.duration : DEFAULT_DURATION}
-                progressIndex={progressIndex}
-                imageStyle={props.imageStyle}
-                id={props.id + '_StoryView'}
-              />
+    <TapGestureHandler
+      onHandlerStateChange={_onTapHandlerStateChange}
+    >
+      <Animated.View 
+        style={[
+          props.containerStyle ? props.containerStyle : styles.parentView,
+          {
+            opacity: opacity,
+            transform: [
+              {
+                translateY: translationYvsX
+              },
+              {
+                scale: scale,
+              }
+            ]
+          }
+        ]}
+      >
+        <PanGestureHandler
+          onHandlerStateChange={_onPanHandlerStateChange}
+          onGestureEvent={_onPanGestureEvent}
+        >
+        <Animated.View 
+          style={[props.containerStyle ? props.containerStyle : styles.parentView,]}
+        >
+          <StoryView
+            images={props.images}
+            duration={props.duration ? props.duration : DEFAULT_DURATION}
+            progressIndex={progressIndex}
+            imageStyle={props.imageStyle}
+            id={props.id+"_StoryView"}
+          />
 
-              <View style={[styles.customView, {width: SCREEN_WIDTH}]}>
-                <View style={[styles.topView, {width: SCREEN_WIDTH}]}>
-                  {props.userProfile && (
-                    <UserHeaderView
-                      userImage={props.userProfile?.userImage}
-                      userName={props.userProfile?.userName}
-                      userMessage={props.userProfile?.userMessage}
-                      imageArrow={props.userProfile?.imageArrow}
-                      onImageClick={() =>
-                        props.userProfile?.onImageClick &&
-                        props.userProfile?.onImageClick()
-                      }
-                    />
-                  )}
-                  {!props.userProfile && props.headerComponent}
-                </View>
+          <View style={[styles.customView, {width: SCREEN_WIDTH}]}>
+            <View style={[styles.topView, {width: SCREEN_WIDTH}]}>
 
-                <View style={styles.bottomView}>
-                  {props.replyView?.isShowReply && !props.footerComponent && (
-                    <ReplyFooterView
-                      progressIndex={progressIndex}
-                      onReplyTextChange={props.replyView?.onReplyTextChange}
-                      onReplyButtonClick={props.replyView?.onReplyButtonClick}
-                    />
-                  )}
-                  {!props.replyView?.isShowReply && props.footerComponent && (
-                    <View style={styles.bottomView}>
-                      {props.footerComponent}
-                    </View>
-                  )}
-                </View>
-              </View>
+              {
+                props.userProfile && (
+                  <UserHeaderView
+                    userImage={props.userProfile?.userImage}
+                    userName={props.userProfile?.userName}
+                    userMessage={props.userProfile?.userMessage}
+                    imageArrow={props.userProfile?.imageArrow}
+                    onImageClick={() => props.userProfile?.onImageClick && props.userProfile?.onImageClick()} />
+                )
+              }
+              {
+                !props.userProfile && (
+                  props.headerComponent
+                )
+              }
 
-              <View style={[styles.progressView, {width: SCREEN_WIDTH}]}>
-                <ProgressView
-                  enableProgress={
-                    (props.enableProgress !== undefined
-                      ? props.enableProgress
-                      : true) && !stopProgress
-                  }
-                  images={props.images}
-                  duration={props.duration ? props.duration : DEFAULT_DURATION}
-                  barStyle={props.barStyle}
-                  progressIndex={progressIndex}
-                  onChange={(position: number) => onChange(position)}
-                  id={props.id + '_ProgressView'}
-                />
-              </View>
-            </Animated.View>
-          </PanGestureHandler>
+            </View>
+
+            <View style={styles.bottomView}>
+              {
+                props.replyView?.isShowReply && !props.footerComponent && (
+                  <ReplyFooterView
+                    progressIndex={progressIndex}
+                    onReplyTextChange={props.replyView?.onReplyTextChange}
+                    onReplyButtonClick={props.replyView?.onReplyButtonClick} />
+                )
+              }
+              {
+                !props.replyView?.isShowReply && props.footerComponent && (
+                  <View style={styles.bottomView}>
+                    {props.footerComponent}
+                  </View>
+                )
+              }
+            </View>
+          </View>
+
+          <View style={[styles.progressView, {width: SCREEN_WIDTH}]}>
+            <ProgressView
+              enableProgress={(props.enableProgress != undefined ? props.enableProgress : true) && !stopProgress}
+              images={props.images}
+              duration={props.duration ? props.duration : DEFAULT_DURATION}
+              barStyle={props.barStyle}
+              progressIndex={progressIndex}
+              onChange={(position: number) => onChange(position)}
+              id={props.id+'_ProgressView'}
+            />
+          </View>
         </Animated.View>
-      </TapGestureHandler>
+        </PanGestureHandler>
+      </Animated.View>
+    </TapGestureHandler>
     );
   }
-};
+}
 
 export default StoryContainer;
 
@@ -319,7 +304,7 @@ const styles = StyleSheet.create({
   topView: {
     position: 'absolute',
     flexDirection: 'column',
-    paddingTop: '3%',
+    paddingTop: '3%',  
   },
   bottomView: {
     position: 'absolute',

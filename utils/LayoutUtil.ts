@@ -1,5 +1,6 @@
-import {DataProvider, LayoutProvider} from 'recyclerlistview';
-import {Dimensions} from 'react-native';
+import { LayoutProvider, DataProvider } from 'recyclerlistview';
+import { Dimensions, StatusBar } from 'react-native';
+import {layout, headerIndex} from '../types/interfaces';
 
 export class LayoutUtil {
   static getWindowWidth() {
@@ -15,53 +16,42 @@ export class LayoutUtil {
       () => {
         return 2; //Since we have just one view type
       },
-      (type, dim) => {
+      (type, dim, index) => {
         const windowWidth = LayoutUtil.getWindowWidth();
         const windowHeight = LayoutUtil.getWindowHeight();
         dim.width = windowWidth;
         dim.height = windowHeight;
-      },
+      }
     );
   }
-  static getLayoutProvider(
-    colNum: number,
-    groupBy: string,
-    headerHeight: number = 20,
-    dataProvider: DataProvider,
-    storiesHeight: number,
-    mainHeaderHeight: number,
-  ) {
-    let data = dataProvider.getAllData();
+  static getLayoutProvider(colNum:number, groupBy:string, headerHeight:number=20, dataProvider:DataProvider, storiesHeight:number, mainHeaderHeight:number) {
+    let data = dataProvider.getAllData();    
     return new LayoutProvider(
-      (index) => {
-        return index === 0 ? 'story' : 'image'; //Since we have just one view type
-      },
-      (type, dim, index) => {
-        const windowWidth = LayoutUtil.getWindowWidth();
-        if (type === 'story') {
-          dim.width = windowWidth;
-          dim.height = storiesHeight + 20 + 2 * mainHeaderHeight;
-        } else {
-          if (
-            data[index]?.sortCondition === groupBy ||
-            data[index]?.sortCondition === ''
-          ) {
-            //let isHeader = headerIndexes.findIndex(x=>x.index===index && x.sortCondition===groupBy);
-            let isHeader: boolean =
-              typeof data[index]?.value === 'string' ? true : false;
-            if (isHeader) {
+          (index) => {
+            return index===0?'story':'image'; //Since we have just one view type
+          },
+          (type, dim, index) => {
+            const windowWidth = LayoutUtil.getWindowWidth();
+            if(type==='story'){
               dim.width = windowWidth;
-              dim.height = headerHeight;
-            } else {
-              dim.width = windowWidth / colNum;
-              dim.height = windowWidth / colNum;
+              dim.height = storiesHeight+20+2*mainHeaderHeight;
+            }else{
+              if(data[index]?.sortCondition===groupBy || data[index]?.sortCondition===""){
+                //let isHeader = headerIndexes.findIndex(x=>x.index===index && x.sortCondition===groupBy);
+                let isHeader:boolean = (typeof data[index]?.value==='string'?true:false);
+                if(isHeader){
+                  dim.width = windowWidth;
+                  dim.height = headerHeight;
+                }else{
+                  dim.width = windowWidth / colNum;
+                  dim.height = windowWidth / colNum;
+                }
+              }else{
+                dim.width = 0;
+                dim.height = 0;
+              }
             }
-          } else {
-            dim.width = 0;
-            dim.height = 0;
           }
-        }
-      },
-    );
+        );
   }
 }
