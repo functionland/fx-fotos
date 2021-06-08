@@ -18,8 +18,9 @@ interface Props {
 
 
 const filterItem = (year:string, top: number) => {
+    
     if(year !== ''){
-        console.log('year='+year+', top='+top);
+        ////console.log('year='+year+', top='+top);
         return (
             <View style={[styles.FilterItem, {top: top}]} key={'Year_'+year}>
                 <Text style={styles.FilterText}>
@@ -45,6 +46,9 @@ const showFilterItems = (filters:headerIndex[], numColumns:number, layoutHeight:
 }
 
 const FloatingFilters: React.FC<Props> = (props) => {
+    useEffect(()=>{
+        console.log([Date.now()+': component FloatingFilters'+props.numColumns+' rendered']);
+    });
     const opacity = useRef(new Animated.Value(0)).current;
     const [layoutHeight, setLayoutHeight] = useState<number>(0);
     const [filterItems, setFilterItems] = useState<any[]>([]);
@@ -108,4 +112,8 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     }
 });
-export default FloatingFilters;
+function arePropsEqual(prevProps:Props, nextProps:Props) {
+    console.log('FloatingFilters memo condition:'+(prevProps.layoutHeight === nextProps.layoutHeight));
+    return prevProps.layoutHeight === nextProps.layoutHeight && prevProps.floatingFiltersOpacity===nextProps.floatingFiltersOpacity && prevProps.headerIndexes?.length===nextProps.headerIndexes?.length; 
+}
+export default React.memo(FloatingFilters, arePropsEqual);

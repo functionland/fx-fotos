@@ -8,10 +8,10 @@ const ProgressiveImageView = ({ thumbnailSource, imgSource, style, props }: Prog
   const thumbnailAnimated = new Animated.Value(0);
   const imageAnimated = new Animated.Value(0);
 
-  console.log(thumbnailSource)
+  ////console.log(thumbnailSource)
 
   const handleThumbnailLoad = () => {
-    console.log("handleThumbnailLoad Loaded")
+    ////console.log("handleThumbnailLoad Loaded")
     Animated.timing(thumbnailAnimated, {
       toValue: 1,
       useNativeDriver: false
@@ -19,7 +19,7 @@ const ProgressiveImageView = ({ thumbnailSource, imgSource, style, props }: Prog
   }
 
   const onImageLoad = () => {
-    console.log("OnImage Loaded")
+    ////console.log("OnImage Loaded")
     Animated.timing(imageAnimated, {
       toValue: 1,
       useNativeDriver: false
@@ -30,13 +30,13 @@ const ProgressiveImageView = ({ thumbnailSource, imgSource, style, props }: Prog
     <View style={styles.container}>
       <Animated.Image
         source={{ uri: thumbnailSource }}
-        style={[style, { opacity: thumbnailAnimated }]}
+        style={[{ opacity: thumbnailAnimated }]}
         onLoad={() => handleThumbnailLoad()}
         // blurRadius={1}
       />
       <Animated.Image
         source={{ uri: imgSource }}
-        style={[styles.imageOverlay, { opacity: imageAnimated }, style]}
+        style={[styles.imageOverlay, { opacity: imageAnimated },]}
         onLoad={() => onImageLoad()}
       />
     </View>

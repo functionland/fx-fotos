@@ -75,7 +75,7 @@ const Media: React.FC<Props> = (props) => {
       useEffect(()=>{
         if(video && props?.media?.duration && isMounted.current){
           if(props.state?.activeIndex===props.index && !props.state?.modalShown){
-            console.log('video unloaded');
+            ////console.log('video unloaded');
             video?.unloadAsync();
           }else if(props.state?.modalShown && props.state?.activeIndex===props.index){
             video.loadAsync({uri: props.media?.uri},{shouldPlay: true, positionMillis: 0});

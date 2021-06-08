@@ -1,4 +1,4 @@
-import React, {useState, createRef} from 'react';
+import React, {useState, createRef, useEffect} from 'react';
 import {Animated, Dimensions,View} from 'react-native';
 import {sortCondition} from '../types/interfaces';
 import {
@@ -34,6 +34,9 @@ interface Props {
 
 let _pinchOrZoom: 'pinch'|'zoom'|undefined = undefined;
 const PinchZoom: React.FC<Props> = (props) => {
+  useEffect(()=>{
+    console.log([Date.now()+': component PinchZoom'+props.numColumns+' rendered']);
+  });
   let pinchRef = createRef<PinchGestureHandler>();
   const [allowAnimation, setAllowAnimation] = useState<boolean>(true);
   let _onPinchGestureEvent = Animated.event(
@@ -59,7 +62,7 @@ const PinchZoom: React.FC<Props> = (props) => {
           duration: 50,
           useNativeDriver: true
         }).start(() => {
-          console.log('revert animation ended');
+          ////('revert animation ended');
           props.scale.setValue(1);
           props.setPinchOrZoom(undefined);
           setAllowAnimation(true);
@@ -84,7 +87,7 @@ const PinchZoom: React.FC<Props> = (props) => {
       _pinchOrZoom = undefined;
     }
 
-      console.log('animation end cycle');
+      ////console.log('animation end cycle');
       
         let _sortCondition = changeSortCondition(
           props.sortCondition,

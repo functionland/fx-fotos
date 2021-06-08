@@ -37,7 +37,7 @@ class ExternalScrollView extends BaseScrollView {
       <AnimatedScrollView {...this.props}
         style={{zIndex:1}}
         ref={(scrollView: any) => {(this.props as any).scrollRefExternal.current = scrollView;}}
-        scrollEventThrottle={1}
+        scrollEventThrottle={16}
         nestedScrollEnabled = {true}
         onScroll={Animated.event([(this.props as any).animatedEvent], {listener: this.props.onScroll, useNativeDriver: true})}
       >
@@ -81,23 +81,17 @@ interface Props {
 }
 
 const RenderPhotos: React.FC<Props> = (props) => {
-  const enableProfiling = () => {
-    Systrace.setEnabled(true); // Call setEnabled to turn on the profiling.
-    Systrace.beginEvent('RenderPhotos_'+props.numColumns);
-    Systrace.counterEvent('RenderPhotos_'+props.numColumns, 10);
-  }
-  
-  const stopProfiling = () => {
-    Systrace.endEvent()
-  }
 
   const headerHeight = 20;
   const indicatorHeight = 50;
   const [dataProvider, setDataProvider] = useState<DataProvider>(new DataProvider((r1, r2) => {
-    return (typeof r1==='string')?(r1 !== r2):((r1.index !== r2.index) || r1.selected !== r2.selected);
+    if((typeof r1.value==='string' && typeof r2.value==='string')?(r1 !== r2):((r1.index !== r2.index) || r1.selected !== r2.selected)){
+console.log(['re-rendering for',{r1:r1, r2:r2}]);
+    }
+    return (typeof r1.value==='string' && typeof r2.value==='string')?(r1.value !== r2.value):((r1.index !== r2.index) || r1.selected !== r2.selected);
   }));
-  const [layoutProvider, setLayoutProvider] = useState<LayoutProvider>(LayoutUtil.getLayoutProvider(2, 'day', headerHeight, dataProvider, props.storiesHeight, props.HEADER_HEIGHT));
-  layoutProvider.shouldRefreshWithAnchoring = false;
+  const [layoutProvider, setLayoutProvider] = useState<LayoutProvider>(LayoutUtil.getLayoutProvider(2, 'day', headerHeight, [], props.storiesHeight, props.HEADER_HEIGHT));
+  layoutProvider.shouldRefreshWithAnchoring = true;
   const [viewLoaded, setViewLoaded] = useState<boolean>(false);
   const scrollRef:any = useRef();
   let scrollRefExternal:any = useRef();
@@ -119,16 +113,23 @@ const RenderPhotos: React.FC<Props> = (props) => {
 
   const [showThumbScroll, setShowThumbScroll] = useState<boolean>(false);
 
-  
+  useEffect(()=>{
+    console.log([Date.now()+': component RenderPhotos'+props.numColumns+' rendered']);
+  });
 
   useEffect(()=>{
+    console.log(['component RenderPhotos mounted']);
+    return () => {console.log(['component RenderPhotos unmounted']);}
+  }, []);
+  useEffect(()=>{
+    console.log('photos.layout length changed');
+    if(dataProvider.getAllData().length !== props.photos.layout.length){
+    let data = props.photos.layout;
+    setLayoutProvider(LayoutUtil.getLayoutProvider(props.numColumns, props.sortCondition, headerHeight, data, props.storiesHeight, props.HEADER_HEIGHT));
     //setDataProvider(dataProvider.cloneWithRows(dataProvider.getAllData().concat(props.photos.layout),(dataProvider.getAllData().length>0?dataProvider.getAllData().length-1:undefined)));
-    setDataProvider(dataProvider.cloneWithRows(props.photos.layout,props.photos.layout.length));
-  },[props.photos.layout]);
-
-  useEffect(()=>{
-    setLayoutProvider(LayoutUtil.getLayoutProvider(props.numColumns, props.sortCondition, headerHeight, dataProvider, props.storiesHeight, props.HEADER_HEIGHT));
-  },[dataProvider]);
+    setDataProvider(dataProvider.cloneWithRows(props.photos.layout));
+    }
+  },[props.photos.layout.length]);
 
   useBackHandler(() => {
     if (props.showSelectionCheckbox) {
@@ -138,20 +139,8 @@ const RenderPhotos: React.FC<Props> = (props) => {
     // let the default thing happen
     return false
   })
-
-  const renderFooter = () => {
-    //Second view makes sure we don't unnecessarily change height of the list on this event. That might cause indicator to remain invisible
-    //The empty view can be removed once you've fetched all the data
-    return (false)
-      ? <ActivityIndicator
-          style={{ margin: 10 }}
-          size="large"
-          color={'black'}
-        />
-      : <></>;
-  };
   
-  const rowRenderer = (type:string | number, data:layout, index: number, extendedState:any) => {
+  const rowRenderer = (type:string | number, data:layout, index: number) => {
     switch(type){
       case 'story':
         return (
@@ -203,7 +192,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
         setImagePosition={props.setImagePosition}
         headerHeight={headerHeight}
         onMediaLongTap={props.onMediaLongTap}
-        showSelectionCheckbox={extendedState.showSelectionCheckbox}
+        showSelectionCheckbox={props.showSelectionCheckbox}
         selectedAssets={props.selectedAssets}
       />
     </View>);
@@ -215,7 +204,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
       if(scrollRef){
         //scrollRef.current?.scrollToOffset(0, offset, true);
         AutoScroll.scrollNow(scrollRef.current, 0, 0, 0, offset, 1).then(()=>{
-          console.log("scroll done");
+          ////console.log("scroll done");
         }).catch(e=>console.log(e));
       }
   }
@@ -228,17 +217,17 @@ const RenderPhotos: React.FC<Props> = (props) => {
         lastIndex = 0;
       }
       props.setScrollOffset({'in':props.numColumns, 'to':lastIndex});
-      //console.log(['momentum ended', {'in':props.numColumns, 'to':lastIndex}, lastOffset]);
+      ////console.log(['momentum ended', {'in':props.numColumns, 'to':lastIndex}, lastOffset]);
       
       let sampleHeight = scrollRef?.current?.getContentDimension().height;
       let lastScrollOffset = lastOffset*(SCREEN_HEIGHT-indicatorHeight)/(sampleHeight-SCREEN_HEIGHT);
-      //console.log('lastScrollOffset='+lastScrollOffset+', lastOffset='+lastOffset+', sampleHeight='+sampleHeight);
+      ////console.log('lastScrollOffset='+lastScrollOffset+', lastOffset='+lastOffset+', sampleHeight='+sampleHeight);
       setLastScrollOffset(lastScrollOffset);
       setShowThumbScroll(false);
     },100);
   }
   const _onScrollEnd = () => {
-    console.log('scroll end called');
+    ////console.log('scroll end called');
     let sampleHeight = scrollRef?.current?.getContentDimension().height;
     let lastOffset = scrollRef?.current.getCurrentScrollOffset();
     let lastScrollOffset = lastOffset*(SCREEN_HEIGHT-indicatorHeight)/(sampleHeight-SCREEN_HEIGHT);
@@ -352,23 +341,22 @@ const RenderPhotos: React.FC<Props> = (props) => {
           zIndex:1,
         }}
         contentContainerStyle={{ margin: 0 }}
-        onEndReached={() => props.setLoadMore(new Date().getTime())}
-        onEndReachedThreshold={0.4}
+        ////onEndReached={() => props.setLoadMore(new Date().getTime())}
+        ////onEndReachedThreshold={0.4}
         dataProvider={dataProvider}
         layoutProvider={layoutProvider}
         rowRenderer={rowRenderer}
-        renderFooter={renderFooter}
         scrollEnabled={!props.isPinchAndZoom}
         onScroll={_onScroll}
         key={"RecyclerListView_"+props.sortCondition + props.numColumns}
-        scrollEventThrottle={5}
+        scrollEventThrottle={16}
         extendedState={{showSelectionCheckbox:props.showSelectionCheckbox}}
         scrollViewProps={{
           ////ref: scrollRefExternal,
           onMomentumScrollEnd: _onMomentumScrollEnd,
           ////onScrollEndDrag: _onScrollEnd,
           scrollRefExternal:scrollRefExternal,
-          scrollEventThrottle:5,
+          scrollEventThrottle:16,
           automaticallyAdjustContentInsets: false,
           showsVerticalScrollIndicator:false,
           animatedEvent:{nativeEvent: {contentOffset: {y: props.scrollY}, contentSize: {height: layoutHeightAnimated}}},
@@ -438,4 +426,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
 });
-export default RenderPhotos;
+function arePropsEqual(prevProps:Props, nextProps:Props) {
+  console.log('RenderPhotos memo condition:'+(prevProps.photos?.layout?.length === nextProps.photos?.layout?.length));
+  return prevProps.photos?.layout?.length === nextProps.photos?.layout?.length && prevProps.zIndex === nextProps.zIndex; 
+}
+export default React.memo(RenderPhotos);

@@ -269,7 +269,7 @@ export const timestampToDate = (
   return result;
 };
 
-export const getStorageMedia = async (
+export const getStorageMedia = (
   permission: boolean = false,
   limit: number = 99999999999999,
   after: string = '',

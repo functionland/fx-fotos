@@ -87,14 +87,14 @@ const StoryContainer = (props: StoryContainerProps) => {
 
   function onShowKeyboard(e: any) {
     if(isMounted){
-      console.log(stopProgress);
+      ////console.log(stopProgress);
       setStopProgress(true);
     }
   }
 
   function onHideKeyboard(e: any) {
     if(isMounted){
-      console.log(stopProgress);
+      ////console.log(stopProgress);
       setStopProgress(false);
     }
   }
@@ -131,10 +131,10 @@ const StoryContainer = (props: StoryContainerProps) => {
     if(isMounted){
       if(event.nativeEvent.state === State.BEGAN){
         //start Pause
-        console.log('setStopProgress true');
+        ////console.log('setStopProgress true');
         setStopProgress(true);
       }else if (event.nativeEvent.state === State.END){
-        console.log('setStopProgress false');
+        ////console.log('setStopProgress false');
         setStopProgress(false);
         if(event.nativeEvent.absoluteX < SCREEN_WIDTH/2){
           //go to prev slide
@@ -151,7 +151,7 @@ const StoryContainer = (props: StoryContainerProps) => {
     if(isMounted){
       if (event.nativeEvent.state === State.END){
         //End pause
-        console.log('setStopProgress false');
+        ////console.log('setStopProgress false');
         setStopProgress(false);
         if((event.nativeEvent.translationY/event.nativeEvent.translationX > 0.6 || event.nativeEvent.translationY/event.nativeEvent.translationX < -0.6) && Math.abs(event.nativeEvent.translationY)>50 ){
           if(event.nativeEvent.translationY>0){

@@ -36,6 +36,7 @@ interface Props {
 
 
 const PhotosChunk: React.FC<Props> = (props) => {
+  
   const SCREEN_WIDTH = useWindowDimensions().width;
   const [imageRef, setImageRef] = useState<Image | null>();
   const tempScale = useRef(new Animated.Value(1)).current;
@@ -58,48 +59,49 @@ const PhotosChunk: React.FC<Props> = (props) => {
 
 
   const _onSingleTapHandlerStateChange = ( event:HandlerStateChangeEvent<TapGestureHandlerEventPayload> ) => {
-    if(event.nativeEvent.state === State.BEGAN){
-      console.log('TAP state BEGAN');
-      Animated.timing(tempScale, {
-        toValue: 0.8,
-        duration: 1000,
-        useNativeDriver: true,
-      }).start();
-    }
-    if (event.nativeEvent.state === State.ACTIVE && event.nativeEvent.oldState !== State.ACTIVE) {
-      if(!props.showSelectionCheckbox){
-        let imageOffsetY = event.nativeEvent.absoluteY - event.nativeEvent.y;
-        let imageOffsetX = event.nativeEvent.absoluteX - event.nativeEvent.x;
-
-        props.setImagePosition({x:imageOffsetX, y:imageOffsetY});
-        props.setSinglePhotoIndex(props.index);
-        props.setModalShown(true);
-      }else{
-        props.onMediaLongTap(props.photo.value);
+      if(event.nativeEvent.state === State.BEGAN){
+        ////console.log('TAP state BEGAN');
+        Animated.timing(tempScale, {
+          toValue: 0.8,
+          duration: 1000,
+          useNativeDriver: true,
+        }).start();
       }
-      Animated.timing(
-        tempScale, {
-          toValue: 1,
-          useNativeDriver: true,
+      if (event.nativeEvent.state === State.ACTIVE && event.nativeEvent.oldState !== State.ACTIVE) {
+        if(!props.showSelectionCheckbox){
+          let imageOffsetY = event.nativeEvent.absoluteY - event.nativeEvent.y;
+          let imageOffsetX = event.nativeEvent.absoluteX - event.nativeEvent.x;
+
+          props.setImagePosition({x:imageOffsetX, y:imageOffsetY});
+          props.setSinglePhotoIndex(props.index);
+          props.setModalShown(true);
+        }else{
+            props.onMediaLongTap(props.photo.value);
         }
-      ).stop();
-      tempScale.setValue(1);
-    }else if(event.nativeEvent.state === State.CANCELLED || event.nativeEvent.state === State.FAILED){
-      Animated.timing(
-        tempScale, {
-          toValue: 1,
-          useNativeDriver: true,
-        }
-      ).stop();
-      tempScale.setValue(1);
-    }
+        Animated.timing(
+          tempScale, {
+            toValue: 1,
+            useNativeDriver: true,
+          }
+        ).stop();
+        tempScale.setValue(1);
+      }else if(event.nativeEvent.state === State.CANCELLED || event.nativeEvent.state === State.FAILED){
+        Animated.timing(
+          tempScale, {
+            toValue: 1,
+            useNativeDriver: true,
+          }
+        ).stop();
+        tempScale.setValue(1);
+      }
   }
   const _onLongTapHandlerStateChange = ( event:HandlerStateChangeEvent<TapGestureHandlerEventPayload> ) => {
-    if (event.nativeEvent.state === State.ACTIVE && event.nativeEvent.oldState !== State.ACTIVE) {
-      if(typeof props.photo.value !== 'string'){
-        props.onMediaLongTap(props.photo.value);
+    
+      if (event.nativeEvent.state === State.ACTIVE && event.nativeEvent.oldState !== State.ACTIVE) {
+        if(typeof props.photo.value !== 'string'){
+            props.onMediaLongTap(props.photo.value);
+        }
       }
-    }
   }
   const longTapRef = createRef<LongPressGestureHandler>();
   const singleTapRef = createRef<TapGestureHandler>();
@@ -240,4 +242,7 @@ const styles = StyleSheet.create({
     color: 'white',
   }
 });
-export default PhotosChunk;
+function arePropsEqual(prevProps:Props, nextProps:Props) {
+  return prevProps.index === nextProps.index && prevProps.photo?.selected===nextProps.photo?.selected && prevProps.photo?.index===nextProps.photo?.index && prevProps.showSelectionCheckbox===nextProps.showSelectionCheckbox && prevProps.selectedAssets?.findIndex(x=>x===prevProps.photo?.value)===nextProps.selectedAssets?.findIndex(x=>x===nextProps.photo?.value); 
+}
+export default React.memo(PhotosChunk, arePropsEqual);

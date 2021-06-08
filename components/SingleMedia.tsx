@@ -47,6 +47,9 @@ interface Props {
 }
 
 const SingleMedia: React.FC<Props> = (props) => {
+  useEffect(()=>{
+    console.log([Date.now()+': component SingleMedia'+props.numColumns+' rendered']);
+  });
   const isMounted = useRef(false);
   useEffect(() => {
     isMounted.current = true;
@@ -146,7 +149,7 @@ const SingleMedia: React.FC<Props> = (props) => {
       
     });
     setTimeout(()=>{
-      console.log('setting modalShown to false')
+      ////console.log('setting modalShown to false')
       props.setModalShown(false);
       viewScale.setValue({x:0, y:0});
     }, duration/2)
@@ -197,7 +200,7 @@ const SingleMedia: React.FC<Props> = (props) => {
       viewScale.setValue({x:SCREEN_WIDTH/(props.numColumns*imageWidth), y:SCREEN_WIDTH/(props.numColumns*imageHeight)})
       showModalAnimation();
     }else{
-      console.log('closing image');
+      ////console.log('closing image');
     }
   }
 
@@ -223,7 +226,7 @@ const SingleMedia: React.FC<Props> = (props) => {
       }
     }else if (event.nativeEvent.oldState !== State.ACTIVE && event.nativeEvent.state === State.ACTIVE) {
       if( ((event.nativeEvent.velocityX/(event.nativeEvent.velocityY+1))>0.6) || ((event.nativeEvent.translationX/(event.nativeEvent.translationY+1))<-0.6) ){
-        console.log('scroll started');
+        ////console.log('scroll started');
         setScrollEnabled(true);
         let newIndex = -1;
         if(event.nativeEvent.velocityX > 0){
@@ -246,7 +249,7 @@ const SingleMedia: React.FC<Props> = (props) => {
 
   const _onLongTapHandlerStateChange = ( event:HandlerStateChangeEvent<TapGestureHandlerEventPayload> ) => {
     if (event.nativeEvent.oldState === State.ACTIVE && event.nativeEvent.state !== State.ACTIVE) {
-      console.log('long tap');
+      ////console.log('long tap');
     }
   }
 
@@ -417,5 +420,8 @@ const styles = StyleSheet.create({
     zIndex: -1
   }
 });
-
-export default SingleMedia;
+function arePropsEqual(prevProps:Props, nextProps:Props) {
+  console.log('FloatingFilters memo condition:'+(prevProps.singleMediaIndex === nextProps.singleMediaIndex));
+  return prevProps.singleMediaIndex === nextProps.singleMediaIndex; 
+}
+export default React.memo(SingleMedia, arePropsEqual);

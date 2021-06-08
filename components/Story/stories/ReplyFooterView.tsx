@@ -44,7 +44,7 @@ const ReplyFooterView = ({ progressIndex, onReplyButtonClick, onReplyTextChange 
         if (Platform.OS == 'ios') {
             let padding = e && (e.endCoordinates.height - e.startCoordinates.height) / 2
             padding = padding >= 51 ? padding : 51
-            console.log("onShowKeyboard => ", padding)
+            ////console.log("onShowKeyboard => ", padding)
             setKeyboardPadding(padding);
         }
     }

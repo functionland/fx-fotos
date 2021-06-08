@@ -33,20 +33,16 @@ interface Props {
 }
 
 const AllPhotos: React.FC<Props> = (props) => {
-  const enableProfiling = () => {
-    Systrace.setEnabled(true); // Call setEnabled to turn on the profiling.
-    Systrace.beginEvent('RenderPhotos_'+props.numColumns);
-    Systrace.counterEvent('RenderPhotos_'+props.numColumns, 10);
-  }
-  
-  const stopProfiling = () => {
-    Systrace.endEvent()
-  }
+
+  useEffect(()=>{
+    console.log([Date.now()+': component AllPhotos rendered']);
+  });
 
   const isMounted = useRef(false);
   useEffect(() => {
     isMounted.current = true;
-    return () => {isMounted.current = false;}
+    console.log(['component AllPhotos mounted']);
+    return () => {isMounted.current = false;console.log(['component AllPhotos unmounted']);}
   }, []);
 
   const scrollY2 = useRef(new Animated.Value(0)).current;
@@ -106,7 +102,7 @@ const AllPhotos: React.FC<Props> = (props) => {
   useEffect(()=>{
     if(isMounted && props.photos?.length){
       let prepared = prepareLayout(props.photos,['day', 'month'], preparedMedia.lastTimestamp, medias.length);
-      console.log('preparedMedia.layout:',{old:preparedMedia?.layout.length, added:prepared?.layout.length, header:prepared?.headerIndexes.length});
+      ////console.log('preparedMedia.layout:',{old:preparedMedia?.layout.length, added:prepared?.layout.length, header:prepared?.headerIndexes.length});
       setPreparedMedia(oldPreparedMedia =>  ({
         ...oldPreparedMedia,
         'layout':oldPreparedMedia.layout.concat(prepared.layout), 
@@ -328,5 +324,8 @@ const AllPhotos: React.FC<Props> = (props) => {
     )
   );
 };
-
-export default AllPhotos;
+function arePropsEqual(prevProps:Props, nextProps:Props) {
+  console.log('AllPhotos memo condition:'+(prevProps.photos.length === nextProps.photos.length));
+  return prevProps.photos.length === nextProps.photos.length; 
+}
+export default React.memo(AllPhotos);

@@ -20,7 +20,7 @@ class ProgressiveImage extends React.Component {
   imageAnimated = new Animated.Value(0);
 
   handleThumbnailLoad = () => {
-    console.log("Thumbnail Loaded")
+    ////console.log("Thumbnail Loaded")
     Animated.timing(this.thumbnailAnimated, {
       toValue: 1,
       useNativeDriver: true
@@ -28,7 +28,7 @@ class ProgressiveImage extends React.Component {
   }
 
   onImageLoad = () => {
-    console.log("Image Loaded")
+    ////console.log("Image Loaded")
     Animated.timing(this.imageAnimated, {
       toValue: 1,
       useNativeDriver: true

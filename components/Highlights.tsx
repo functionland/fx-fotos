@@ -45,7 +45,7 @@ const Highlights: React.FC<Props> = (props) => {
   const openHighlight = () => {
     props.setStory(props.story);
     props.setShowStory(true);
-    console.log('here');
+    ////console.log('here');
   }
 
   const _onTapHandlerStateChange = ( event:HandlerStateChangeEvent<TapGestureHandlerEventPayload> ) => {

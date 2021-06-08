@@ -43,6 +43,9 @@ interface Props {
     currentImageTimestamp: number;
 }
 const ThumbScroll: React.FC<Props> = (props) => {
+    useEffect(()=>{
+        console.log([Date.now()+': component ThumbScroll'+props.numColumns+' rendered']);
+    });
     //const AnimatedTouchable = Animated.createAnimatedComponent(TouchableWithoutFeedback);
     let panRef_glide = createRef<PanGestureHandler>();
     const absoluteY = useRef(new Animated.Value(0)).current;
@@ -73,7 +76,7 @@ const ThumbScroll: React.FC<Props> = (props) => {
     };
 
     const showFloatingFilters = () => {
-        console.log('showFloatingFilters');
+        ////console.log('showFloatingFilters');
         props.setFloatingFiltersOpacity(1);
     }
     const hideFloatingFilters = () => {
@@ -88,7 +91,7 @@ const ThumbScroll: React.FC<Props> = (props) => {
     const _onDragPanHandlerStateChange = (event:HandlerStateChangeEvent<PanGestureHandlerEventPayload>) => {
         //console.log(event.nativeEvent);
         if (event.nativeEvent.state === State.BEGAN && event.nativeEvent.oldState !== State.ACTIVE) {
-            console.log('glide touched');
+            ////console.log('glide touched');
             //props.isDragging.setValue(1);
             showFloatingFilters();
         }
@@ -235,5 +238,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     }
 });
-
-export default ThumbScroll;
+function arePropsEqual(prevProps:Props, nextProps:Props) {
+    console.log('ThumbScroll memo condition:'+(prevProps.layoutHeight === nextProps.layoutHeight));
+    return prevProps.layoutHeight === nextProps.layoutHeight && prevProps.floatingFiltersOpacity===nextProps.floatingFiltersOpacity && prevProps.showThumbScroll===nextProps.showThumbScroll; 
+}
+export default React.memo(ThumbScroll, arePropsEqual);

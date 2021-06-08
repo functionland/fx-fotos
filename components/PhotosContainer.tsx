@@ -55,17 +55,15 @@ const PhotosContainer: React.FC<Props> = (props) => {
   const [loadMore, setLoadMore] = useState<number>(0);
 
   //TODO: Change this function to the getPhotos in actions like in AllPhotos
-  async function getMedia(permission:boolean, photoNumber:number){
-    let hasNextPage = true;
-    let endCursor:string = '';
+  function getMedia(permission:boolean, photoNumber:number, hasNextPage:boolean=true, endCursor:string = ''){
     let totalCount = mediaTotalCount;
-    while(hasNextPage){
-      console.log('media fetch while');
+    if(hasNextPage){
+      ////console.log('media fetch while');
       setLoading(true);
-      await getStorageMedia(permission, photoNumber, endCursor)?.then(
+      getStorageMedia(permission, photoNumber, endCursor)?.then(
         (value) => {
           if(value){
-            console.log('getStorageMedia');
+            ////console.log('getStorageMedia');
             hasNextPage = value.hasNextPage;
             endCursor = value.endCursor;
             totalCount = value.totalCount;
@@ -74,25 +72,33 @@ const PhotosContainer: React.FC<Props> = (props) => {
             setMediaEndCursor(endCursor);
             setMediaHasNextPage(hasNextPage);
             setMediaTotalCount(totalCount);
+            getMedia(permission, photoNumber, hasNextPage, endCursor);
           }
-          setLoading(false);
+          
         },
       ).catch(error => setLoading(false));
+    }else{
+      setLoading(false);
     }
   }
   useEffect(() => {
-    if (permission && mediaHasNextPage && !loading) {
+    if (permission) {
       navigation.navigate('HomePage');
       getMedia(permission, initialPhotoNumber);
-    } else {
+    } else if(!permission) {
       navigation.navigate('PermissionError');
     }
   }, [permission]);
 
+  useEffect(()=>{
+    console.log([Date.now()+': component PhotosContainer rendered']);
+  });
   useEffect(() => {
+    console.log(['component PhotosContainer mounted']);
     storagePermission()
       .then((res) => setPermission(res))
       .catch((error) => {});
+      return () => {console.log(['component PhotosContainer unmounted']);}
   }, []);
 
   useEffect(() => {
