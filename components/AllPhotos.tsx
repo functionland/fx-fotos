@@ -4,6 +4,7 @@ import {sortCondition, FlatSection, story, layout} from '../types/interfaces';
 import RenderPhotos from './RenderPhotos';
 import SingleMedia from './SingleMedia';
 import StoryHolder from './StoryHolder';
+import ActionBar from './ActionBar';
 
 import { Asset } from 'expo-media-library';
 import {prepareLayout,} from '../utils/functions';
@@ -76,7 +77,6 @@ const AllPhotos: React.FC<Props> = (props) => {
   const [medias, setMedias] = useState<Asset[]>([]);
   const [stories, setStories] = useState<story[]>([]);
   const [showStory, setShowStory] = useState<boolean>(false);
-<<<<<<< HEAD
   const [showActionBar, setShowActionBar] = useState<boolean>(false);
   const [story, setStory] = useState<story|undefined>();
   const [selectedAssets, setSelectedAssets] = useState<Asset[]>([]);
@@ -98,26 +98,6 @@ const AllPhotos: React.FC<Props> = (props) => {
       let prepared = prepareLayout(props.photos,['day', 'month'], preparedMedia.lastTimestamp, medias.length);
       console.log('preparedMedia.layout:',{old:preparedMedia?.layout.length, added:prepared?.layout.length, header:prepared?.headerIndexes.length});
       setPreparedMedia(oldPreparedMedia =>  ({
-=======
-
-  const [story, setStory] = useState<Story | undefined>();
-
-  useEffect(() => {
-    console.log('photos updated, length=' + props.photos?.length);
-    if (isMounted && props.photos?.length) {
-      let prepared = prepareLayout(
-        props.photos,
-        ['day', 'month'],
-        preparedMedia.lastTimestamp,
-        medias.length,
-      );
-      console.log('preparedMedia.layout:', {
-        old: preparedMedia?.layout.length,
-        added: prepared?.layout.length,
-        header: prepared?.headerIndexes.length,
-      });
-      setPreparedMedia((oldPreparedMedia) => ({
->>>>>>> parent of c5d63cb (Merge branch 'main' into husky-pre-commit)
         ...oldPreparedMedia,
         'layout':oldPreparedMedia.layout.concat(prepared.layout), 
         'headerIndexes': oldPreparedMedia.headerIndexes.concat(prepared.headerIndexes), 
@@ -132,21 +112,14 @@ const AllPhotos: React.FC<Props> = (props) => {
     }
   },[props.photos]);
 
-<<<<<<< HEAD
   useEffect(()=>{
     if(isMounted){
       if(modalShown || showStory || showActionBar){
-=======
-  useEffect(() => {
-    if (isMounted) {
-      if (modalShown || showStory) {
->>>>>>> parent of c5d63cb (Merge branch 'main' into husky-pre-commit)
         props.setHeaderShown(false);
       }else{
         props.setHeaderShown(true);
       }
     }
-<<<<<<< HEAD
   },[modalShown, showStory, showActionBar]);
 
   useEffect(()=>{
@@ -177,11 +150,6 @@ const AllPhotos: React.FC<Props> = (props) => {
   
   return (
     preparedMedia.layout.length>0?(
-=======
-  }, [modalShown, props, showStory]);
-
-  return preparedMedia.layout.length > 0 ? (
->>>>>>> parent of c5d63cb (Merge branch 'main' into husky-pre-commit)
     <View
       style={{
         flex: 1,
@@ -230,6 +198,9 @@ const AllPhotos: React.FC<Props> = (props) => {
         setStory={setStory}
         scrollY={scrollY2}
         HEADER_HEIGHT={props.HEADER_HEIGHT}
+        onMediaLongTap={onMediaLongTap}
+        showSelectionCheckbox={showActionBar}
+        selectedAssets={selectedAssets}
       />
       <RenderPhotos
         photos={preparedMedia}
@@ -272,6 +243,9 @@ const AllPhotos: React.FC<Props> = (props) => {
         setStory={setStory}
         scrollY={scrollY3}
         HEADER_HEIGHT={props.HEADER_HEIGHT}
+        onMediaLongTap={onMediaLongTap}
+        showSelectionCheckbox={showActionBar}
+        selectedAssets={selectedAssets}
       />
       <RenderPhotos
         photos={preparedMedia}
@@ -314,6 +288,9 @@ const AllPhotos: React.FC<Props> = (props) => {
         setStory={setStory}
         scrollY={scrollY4}
         HEADER_HEIGHT={props.HEADER_HEIGHT}
+        onMediaLongTap={onMediaLongTap}
+        showSelectionCheckbox={showActionBar}
+        selectedAssets={selectedAssets}
       />
       <SingleMedia 
         modalShown={modalShown}
@@ -331,17 +308,10 @@ const AllPhotos: React.FC<Props> = (props) => {
         numColumns={props.numColumns}
         story={story}
       />
-<<<<<<< HEAD
       <ActionBar
         setShowActionBar={setShowActionBar}
         showActionBar={showActionBar}
       />
-=======
-    </View>
-  ) : (
-    <View>
-      <Text>No Photos</Text>
->>>>>>> parent of c5d63cb (Merge branch 'main' into husky-pre-commit)
     </View>
     ):(
       <View><Text>No Photos</Text></View>

@@ -5473,6 +5473,11 @@ rimraf@~2.2.6:
   resolved "https://registry.npmjs.org/rimraf/-/rimraf-2.2.8.tgz"
   integrity sha1-5Dm+Kq7jJzIZUnMPmaiSnk/FBYI=
 
+rn-round-checkbox@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/rn-round-checkbox/-/rn-round-checkbox-1.0.0.tgz#2e1ef696d2f5d088b7adca72248ec62ff5ee789d"
+  integrity sha512-Ej57Vo3L99efUMDDxne+uWqCyyuoWzb6Iqre/3jZ6C16gGe7fuNtRs8icS8BSCcPZRuZXAtR1iCEBks2Z89URA==
+
 rsvp@^4.8.4:
   version "4.8.5"
   resolved "https://registry.npmjs.org/rsvp/-/rsvp-4.8.5.tgz"

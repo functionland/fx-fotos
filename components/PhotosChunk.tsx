@@ -1,5 +1,4 @@
 import {Asset} from 'expo-media-library';
-<<<<<<< HEAD
 import React, {useEffect, useState, createRef, useRef} from 'react';
 import { Animated, Image, Text, StyleSheet, useWindowDimensions, View, Platform, TextStyle } from 'react-native';
 import { layout } from '../types/interfaces';
@@ -7,21 +6,6 @@ import { prettyTime } from '../utils/functions';
 import { MaterialIcons } from '@expo/vector-icons'; 
 import RoundCheckbox from './RoundCheckbox';
 
-=======
-import React, {createRef, useEffect, useRef, useState} from 'react';
-import {
-  Animated,
-  Image,
-  Platform,
-  StyleSheet,
-  Text,
-  useWindowDimensions,
-  View,
-} from 'react-native';
-import {layout} from '../types/interfaces';
-import {prettyTime} from '../utils/functions';
-import {MaterialIcons} from '@expo/vector-icons';
->>>>>>> parent of c5d63cb (Merge branch 'main' into husky-pre-commit)
 
 import {
   LongPressGestureHandler,
@@ -45,6 +29,9 @@ interface Props {
   setSinglePhotoIndex: Function;
   setImagePosition: Function;
   headerHeight: number;
+  onMediaLongTap: Function;
+  showSelectionCheckbox: boolean;
+  selectedAssets:Asset[]|undefined;
 }
 
 
@@ -59,12 +46,8 @@ const PhotosChunk: React.FC<Props> = (props) => {
         opacity: 0,
       });
     }
-<<<<<<< HEAD
   },[imageRef,isIOS]);
 
-=======
-  }, [imageRef]);
->>>>>>> parent of c5d63cb (Merge branch 'main' into husky-pre-commit)
   const handleOnLoad = () => {
     if (isIOS && imageRef) {
       imageRef.setNativeProps({
@@ -83,7 +66,6 @@ const PhotosChunk: React.FC<Props> = (props) => {
         useNativeDriver: true,
       }).start();
     }
-<<<<<<< HEAD
     if (event.nativeEvent.state === State.ACTIVE && event.nativeEvent.oldState !== State.ACTIVE) {
       if(!props.showSelectionCheckbox){
         let imageOffsetY = event.nativeEvent.absoluteY - event.nativeEvent.y;
@@ -101,23 +83,6 @@ const PhotosChunk: React.FC<Props> = (props) => {
           useNativeDriver: true,
         }
       ).stop();
-=======
-    if (
-      event.nativeEvent.state === State.ACTIVE &&
-      event.nativeEvent.oldState !== State.ACTIVE
-    ) {
-      console.log('TAP state ACTIVE');
-      let imageOffsetY = event.nativeEvent.absoluteY - event.nativeEvent.y;
-      let imageOffsetX = event.nativeEvent.absoluteX - event.nativeEvent.x;
-      console.log(props.index);
-      props.setImagePosition({x: imageOffsetX, y: imageOffsetY});
-      props.setSinglePhotoIndex(props.index);
-      props.setModalShown(true);
-      Animated.timing(tempScale, {
-        toValue: 1,
-        useNativeDriver: true,
-      }).stop();
->>>>>>> parent of c5d63cb (Merge branch 'main' into husky-pre-commit)
       tempScale.setValue(1);
     }else if(event.nativeEvent.state === State.CANCELLED || event.nativeEvent.state === State.FAILED){
       Animated.timing(
@@ -128,24 +93,12 @@ const PhotosChunk: React.FC<Props> = (props) => {
       ).stop();
       tempScale.setValue(1);
     }
-<<<<<<< HEAD
   }
   const _onLongTapHandlerStateChange = ( event:HandlerStateChangeEvent<TapGestureHandlerEventPayload> ) => {
     if (event.nativeEvent.state === State.ACTIVE && event.nativeEvent.oldState !== State.ACTIVE) {
       if(typeof props.photo.value !== 'string'){
         props.onMediaLongTap(props.photo.value);
       }
-=======
-  };
-  const _onLongTapHandlerStateChange = (
-    event: HandlerStateChangeEvent<TapGestureHandlerEventPayload>,
-  ) => {
-    if (
-      event.nativeEvent.state === State.ACTIVE &&
-      event.nativeEvent.oldState !== State.ACTIVE
-    ) {
-      console.log('long tap');
->>>>>>> parent of c5d63cb (Merge branch 'main' into husky-pre-commit)
     }
   }
   const longTapRef = createRef<LongPressGestureHandler>();
@@ -215,7 +168,6 @@ const PhotosChunk: React.FC<Props> = (props) => {
       )
     }else{
       return (
-<<<<<<< HEAD
         <Animated.View style={{
           zIndex:4, 
           flex: 1/props.numCol, 
@@ -254,31 +206,6 @@ const PhotosChunk: React.FC<Props> = (props) => {
             borderColor='whitesmoke'
           />
           </View>
-=======
-        <Animated.View
-          style={{
-            zIndex: 4,
-            flex: 1 / props.numCol,
-            width: SCREEN_WIDTH / props.numCol,
-            height: SCREEN_WIDTH / props.numCol,
-            transform: [
-              {
-                scale: tempScale,
-              },
-            ],
-          }}>
-          <LongPressGestureHandler
-            ref={longTapRef}
-            onHandlerStateChange={_onLongTapHandlerStateChange}
-            minDurationMs={800}>
-            <TapGestureHandler
-              ref={singleTapRef}
-              onHandlerStateChange={_onSingleTapHandlerStateChange}
-              numberOfTaps={1}>
-              {createThumbnail(props.photo.value)}
-            </TapGestureHandler>
-          </LongPressGestureHandler>
->>>>>>> parent of c5d63cb (Merge branch 'main' into husky-pre-commit)
         </Animated.View>
       );
     }
@@ -301,11 +228,16 @@ const styles = StyleSheet.create({
     top:5,
     right: 5,
     flex: 1,
-<<<<<<< HEAD
     flexDirection:'row',
-=======
-    flexDirection: 'row',
->>>>>>> parent of c5d63cb (Merge branch 'main' into husky-pre-commit)
   },
+  checkBox:{
+    zIndex:4,
+    position: 'absolute',
+    top:5,
+    left: 5,
+    flex: 1,
+    flexDirection:'row',
+    color: 'white',
+  }
 });
 export default PhotosChunk;

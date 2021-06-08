@@ -26,11 +26,13 @@
     "email": "shariati@directionx.ca"
   },
   "license": "SEE LICENSE IN FILE LICENSE",
-  "author": {
-    "name": "Ehsan Shariati Varnosfaderani",
-    "email": "shariati@directionx.ca",
-    "url": "https://www.linkedin.com/in/ehsanehsan/"
-  },
+  "contributors": [
+    {
+      "name": "Ehsan Shariati Varnosfaderani",
+      "email": "shariati@directionx.ca",
+      "url": "https://www.linkedin.com/in/ehsanehsan/"
+    }
+],
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
@@ -62,6 +64,7 @@
     "react-native-screens": "~3.0.0",
     "react-native-web": "~0.13.12",
     "recyclerlistview": "^3.0.5",
+    "rn-round-checkbox": "^1.0.0",
     "tslib": "^2.2.0",
     "with-default-props": "^0.2.1",
     "yarn": "^1.22.10"
