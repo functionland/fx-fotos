@@ -21,9 +21,6 @@ import {
 import {layout} from '../types/interfaces';
 import {prettyTime} from '../utils/functions';
 import {MaterialIcons} from '@expo/vector-icons';
-<<<<<<< HEAD
->>>>>>> parent of c5d63cb (Merge branch 'main' into husky-pre-commit)
-=======
 >>>>>>> parent of c5d63cb (Merge branch 'main' into husky-pre-commit)
 
 import {
@@ -63,12 +60,8 @@ const PhotosChunk: React.FC<Props> = (props) => {
       });
     }
 <<<<<<< HEAD
-<<<<<<< HEAD
   },[imageRef,isIOS]);
 
-=======
-  }, [imageRef]);
->>>>>>> parent of c5d63cb (Merge branch 'main' into husky-pre-commit)
 =======
   }, [imageRef]);
 >>>>>>> parent of c5d63cb (Merge branch 'main' into husky-pre-commit)
@@ -91,7 +84,6 @@ const PhotosChunk: React.FC<Props> = (props) => {
       }).start();
     }
 <<<<<<< HEAD
-<<<<<<< HEAD
     if (event.nativeEvent.state === State.ACTIVE && event.nativeEvent.oldState !== State.ACTIVE) {
       if(!props.showSelectionCheckbox){
         let imageOffsetY = event.nativeEvent.absoluteY - event.nativeEvent.y;
@@ -113,27 +105,6 @@ const PhotosChunk: React.FC<Props> = (props) => {
     if (
       event.nativeEvent.state === State.ACTIVE &&
       event.nativeEvent.oldState !== State.ACTIVE
-=======
-    if (
-      event.nativeEvent.state === State.ACTIVE &&
-      event.nativeEvent.oldState !== State.ACTIVE
-    ) {
-      console.log('TAP state ACTIVE');
-      let imageOffsetY = event.nativeEvent.absoluteY - event.nativeEvent.y;
-      let imageOffsetX = event.nativeEvent.absoluteX - event.nativeEvent.x;
-      console.log(props.index);
-      props.setImagePosition({x: imageOffsetX, y: imageOffsetY});
-      props.setSinglePhotoIndex(props.index);
-      props.setModalShown(true);
-      Animated.timing(tempScale, {
-        toValue: 1,
-        useNativeDriver: true,
-      }).stop();
-      tempScale.setValue(1);
-    } else if (
-      event.nativeEvent.state === State.CANCELLED ||
-      event.nativeEvent.state === State.FAILED
->>>>>>> parent of c5d63cb (Merge branch 'main' into husky-pre-commit)
     ) {
       console.log('TAP state ACTIVE');
       let imageOffsetY = event.nativeEvent.absoluteY - event.nativeEvent.y;
@@ -174,9 +145,6 @@ const PhotosChunk: React.FC<Props> = (props) => {
       event.nativeEvent.oldState !== State.ACTIVE
     ) {
       console.log('long tap');
-<<<<<<< HEAD
->>>>>>> parent of c5d63cb (Merge branch 'main' into husky-pre-commit)
-=======
 >>>>>>> parent of c5d63cb (Merge branch 'main' into husky-pre-commit)
     }
   }
@@ -248,7 +216,6 @@ const PhotosChunk: React.FC<Props> = (props) => {
     }else{
       return (
 <<<<<<< HEAD
-<<<<<<< HEAD
         <Animated.View style={{
           zIndex:4, 
           flex: 1/props.numCol, 
@@ -288,8 +255,6 @@ const PhotosChunk: React.FC<Props> = (props) => {
           />
           </View>
 =======
-=======
->>>>>>> parent of c5d63cb (Merge branch 'main' into husky-pre-commit)
         <Animated.View
           style={{
             zIndex: 4,
@@ -313,9 +278,6 @@ const PhotosChunk: React.FC<Props> = (props) => {
               {createThumbnail(props.photo.value)}
             </TapGestureHandler>
           </LongPressGestureHandler>
-<<<<<<< HEAD
->>>>>>> parent of c5d63cb (Merge branch 'main' into husky-pre-commit)
-=======
 >>>>>>> parent of c5d63cb (Merge branch 'main' into husky-pre-commit)
         </Animated.View>
       );
@@ -340,11 +302,8 @@ const styles = StyleSheet.create({
     right: 5,
     flex: 1,
 <<<<<<< HEAD
-<<<<<<< HEAD
     flexDirection:'row',
 =======
-=======
->>>>>>> parent of c5d63cb (Merge branch 'main' into husky-pre-commit)
     flexDirection: 'row',
 >>>>>>> parent of c5d63cb (Merge branch 'main' into husky-pre-commit)
   },

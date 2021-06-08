@@ -77,7 +77,6 @@ const AllPhotos: React.FC<Props> = (props) => {
   const [stories, setStories] = useState<story[]>([]);
   const [showStory, setShowStory] = useState<boolean>(false);
 <<<<<<< HEAD
-<<<<<<< HEAD
   const [showActionBar, setShowActionBar] = useState<boolean>(false);
   const [story, setStory] = useState<story|undefined>();
   const [selectedAssets, setSelectedAssets] = useState<Asset[]>([]);
@@ -100,8 +99,6 @@ const AllPhotos: React.FC<Props> = (props) => {
       console.log('preparedMedia.layout:',{old:preparedMedia?.layout.length, added:prepared?.layout.length, header:prepared?.headerIndexes.length});
       setPreparedMedia(oldPreparedMedia =>  ({
 =======
-=======
->>>>>>> parent of c5d63cb (Merge branch 'main' into husky-pre-commit)
 
   const [story, setStory] = useState<Story | undefined>();
 
@@ -133,7 +130,6 @@ const AllPhotos: React.FC<Props> = (props) => {
       setMedias(oldOnlyMedia=>oldOnlyMedia.concat(onlyMedias));
       setStories(oldStories=>oldStories.concat(prepared.stories));
     }
-<<<<<<< HEAD
   },[props.photos]);
 
 <<<<<<< HEAD
@@ -145,24 +141,11 @@ const AllPhotos: React.FC<Props> = (props) => {
     if (isMounted) {
       if (modalShown || showStory) {
 >>>>>>> parent of c5d63cb (Merge branch 'main' into husky-pre-commit)
-=======
-  }, [
-    medias.length,
-    preparedMedia.lastTimestamp,
-    preparedMedia.layout.length,
-    props.photos,
-  ]);
-
-  useEffect(() => {
-    if (isMounted) {
-      if (modalShown || showStory) {
->>>>>>> parent of c5d63cb (Merge branch 'main' into husky-pre-commit)
         props.setHeaderShown(false);
       }else{
         props.setHeaderShown(true);
       }
     }
-<<<<<<< HEAD
 <<<<<<< HEAD
   },[modalShown, showStory, showActionBar]);
 
@@ -194,11 +177,6 @@ const AllPhotos: React.FC<Props> = (props) => {
   
   return (
     preparedMedia.layout.length>0?(
-=======
-  }, [modalShown, props, showStory]);
-
-  return preparedMedia.layout.length > 0 ? (
->>>>>>> parent of c5d63cb (Merge branch 'main' into husky-pre-commit)
 =======
   }, [modalShown, props, showStory]);
 
@@ -354,14 +332,11 @@ const AllPhotos: React.FC<Props> = (props) => {
         story={story}
       />
 <<<<<<< HEAD
-<<<<<<< HEAD
       <ActionBar
         setShowActionBar={setShowActionBar}
         showActionBar={showActionBar}
       />
 =======
-=======
->>>>>>> parent of c5d63cb (Merge branch 'main' into husky-pre-commit)
     </View>
   ) : (
     <View>
