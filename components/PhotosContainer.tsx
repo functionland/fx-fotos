@@ -74,9 +74,6 @@ const PhotosContainer: React.FC<Props> = (props) => {
             setMediaEndCursor(endCursor);
             setMediaHasNextPage(hasNextPage);
             setMediaTotalCount(totalCount);
-            console.log({hasNextPage:hasNextPage,
-              endCursor:endCursor,
-              totalCount:totalCount});
           }
           setLoading(false);
         },
