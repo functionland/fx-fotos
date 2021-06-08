@@ -7,6 +7,7 @@ import {
   SafeAreaView,
   ScrollView,
   StatusBar,
+  Systrace,
   Text,
   View,
 } from 'react-native';
@@ -22,6 +23,8 @@ import {
 } from 'recyclerlistview';
 import {LayoutUtil} from '../utils/LayoutUtil';
 import FloatingFilters from './FloatingFilters';
+import { useBackHandler } from '@react-native-community/hooks'
+import { Asset } from 'expo-media-library';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -83,14 +86,27 @@ interface Props {
   setStory: React.Dispatch<React.SetStateAction<story | undefined>>;
   scrollY: Animated.Value;
   HEADER_HEIGHT: number;
+  onMediaLongTap: Function;
+  showSelectionCheckbox:boolean;
+  selectedAssets:Asset[]|undefined;
 }
 
 const RenderPhotos: React.FC<Props> = (props) => {
+  const enableProfiling = () => {
+    Systrace.setEnabled(true); // Call setEnabled to turn on the profiling.
+    Systrace.beginEvent('RenderPhotos_'+props.numColumns);
+    Systrace.counterEvent('RenderPhotos_'+props.numColumns, 10);
+  }
+  
+  const stopProfiling = () => {
+    Systrace.endEvent()
+  }
+
   const headerHeight = 20;
   const indicatorHeight = 50;
   const [dataProvider, setDataProvider] = useState<DataProvider>(
     new DataProvider((r1, r2) => {
-      return typeof r1 === 'string' ? r1 !== r2 : r1.id !== r2.id;
+      return typeof r1 === 'string' ? r1 !== r2 : ((r1.index !== r2.index) || r1.selected !== r2.selected);
     }),
   );
   const [layoutProvider, setLayoutProvider] = useState<LayoutProvider>(
@@ -157,6 +173,15 @@ const RenderPhotos: React.FC<Props> = (props) => {
     props.storiesHeight,
   ]);
 
+  useBackHandler(() => {
+    if (props.showSelectionCheckbox) {
+      props.onMediaLongTap(undefined);
+      return true
+    }
+    // let the default thing happen
+    return false
+  })
+
   const renderFooter = () => {
     //Second view makes sure we don't unnecessarily change height of the list on this event. That might cause indicator to remain invisible
     //The empty view can be removed once you've fetched all the data
@@ -167,7 +192,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
     );
   };
 
-  const rowRenderer = (type: string | number, data: layout, index: number) => {
+  const rowRenderer = (type: string | number, data: layout, index: number, extendedState: any) => {
     switch (type) {
       case 'story':
         return (
@@ -228,6 +253,9 @@ const RenderPhotos: React.FC<Props> = (props) => {
               setSinglePhotoIndex={props.setSinglePhotoIndex}
               setImagePosition={props.setImagePosition}
               headerHeight={headerHeight}
+              onMediaLongTap={props.onMediaLongTap}
+              showSelectionCheckbox={extendedState.showSelectionCheckbox}
+              selectedAssets={props.selectedAssets}
             />
           </View>
         );
@@ -406,6 +434,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
         onScroll={_onScroll}
         key={'RecyclerListView_' + props.sortCondition + props.numColumns}
         scrollEventThrottle={5}
+        extendedState={{showSelectionCheckbox:props.showSelectionCheckbox}}
         scrollViewProps={{
           ////ref: scrollRefExternal,
           onMomentumScrollEnd: _onMomentumScrollEnd,

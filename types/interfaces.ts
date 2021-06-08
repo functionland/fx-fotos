@@ -85,6 +85,7 @@ export interface layout {
   value: Asset | string;
   sortCondition: 'day' | 'month' | '';
   index: number;
+  selected:boolean;
 }
 
 export interface headerIndex {
