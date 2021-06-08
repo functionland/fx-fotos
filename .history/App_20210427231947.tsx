@@ -1,5 +1,5 @@
-import React, {useEffect} from 'react';
-import {SafeAreaView, StyleSheet} from 'react-native';
+import React from 'react';
+import {StyleSheet} from 'react-native';
 import {Provider} from 'react-redux';
 import AppNavigation from './navigation/AppNavigation';
 import store from './store/store';

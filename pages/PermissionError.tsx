@@ -1,4 +1,4 @@
-import {Text, View, Button} from 'react-native';
+import {Button, Text, View} from 'react-native';
 import React from 'react';
 import {storagePermission} from '../utils/permissions';
 import {useNavigation} from '@react-navigation/native';
@@ -8,24 +8,24 @@ const PermissionError = () => {
 
   const setPermission = () => {
     storagePermission()
-      .then((res) => {
+      .then(() => {
         navigation.navigate('HomePage');
       })
-      .catch((err) => {
+      .catch(() => {
         return;
       });
   };
 
   return (
-    <View>
+    <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
       <Text>Permission Error</Text>
       <Button
         onPress={() => {
           setPermission();
         }}
-        title='Allow Permission'
-        accessibilityLabel='Allow Permission'
-        />
+        title="Allow Permission"
+        accessibilityLabel="Allow Permission"
+      />
     </View>
   );
 };

@@ -1,13 +1,17 @@
-import {Asset, MediaType, AssetsOptions, SortBy, getAssetsAsync} from 'expo-media-library';
+import {
+  Asset,
+  AssetsOptions,
+  getAssetsAsync,
+  MediaType,
+  SortBy,
+} from 'expo-media-library';
 import {
   changeSortConditionAndNumColumns,
-  photoChunk,
-  sortCondition,
   FlatSection,
-  flatMedia,
   headerIndex,
-  layout,
-  story
+  layout as Layout,
+  sortCondition,
+  story,
 } from '../types/interfaces';
 
 /*
@@ -71,7 +75,7 @@ export const flattenDates = (
       headerIndexes.push({header:section.date.value,index:index});
       flatMedias.push(section.date);
     }
-    
+
     if(dataLength){
       flatMedias.splice(index+1, 0, ...section.data);
     }
@@ -84,12 +88,10 @@ export const flattenDates = (
   return result;
 }*/
 
-export const ipfsHash = (
-  media: Asset,
-) => {
-  let result:string = Math.random().toString(36).substring(7);
+export const ipfsHash = (_media: Asset) => {
+  let result: string = Math.random().toString(36).substring(7);
   return result;
-}
+};
 
 export const prepareLayout = (
   newMedias: Array<Asset>,
@@ -242,10 +244,12 @@ export const timestampToDate = (
   let month = date.getUTCMonth(); //months from 1-12
   let day = date.getUTCDate();
   let year = date.getUTCFullYear();
-  let result:{[key:string]:string} = {};
-  for(let i=0;i<conditions.length;i++){
+  let result: {[key: string]: string} = {};
+  for (let i = 0; i < conditions.length; i++) {
     if (conditions[i] === 'day') {
-      result.day = new Date(year, month, day).toString().split(year.toString())[0];
+      result.day = new Date(year, month, day)
+        .toString()
+        .split(year.toString())[0];
     } else if (conditions[i] === 'month') {
       const monthNames = [
         'January',
@@ -262,7 +266,7 @@ export const timestampToDate = (
         'December',
       ];
       result.month = monthNames[new Date(year, month).getMonth()];
-    }else if (conditions[i] === 'year') {
+    } else if (conditions[i] === 'year') {
       result.year = String(year);
     }
   }
@@ -275,28 +279,25 @@ export const getStorageMedia = async (
   after: string = '',
   createdBefore: Date | number | undefined = undefined,
   createdAfter: Date | number | undefined = undefined,
-  mediaType: Array<any> = [
-    MediaType.photo,
-    MediaType.video,
-  ],
+  mediaType: Array<any> = [MediaType.photo, MediaType.video],
 ) => {
   if (permission) {
     let mediaFilter: AssetsOptions = {
       mediaType: mediaType,
       sortBy: [SortBy.modificationTime],
     };
-    if(limit){
+    if (limit) {
       mediaFilter.first = limit;
-    }else{
+    } else {
       mediaFilter.first = 9999999999999999;
     }
-    if(after){
+    if (after) {
       mediaFilter.after = after;
     }
-    if(createdAfter){
+    if (createdAfter) {
       mediaFilter.createdAfter = createdAfter;
     }
-    if(createdBefore){
+    if (createdBefore) {
       mediaFilter.createdBefore = createdBefore;
     }
 
@@ -305,42 +306,56 @@ export const getStorageMedia = async (
   }
 };
 
-export const calcLayoutHeight = (numColumns:2|3|4, headerIndexes:Array<{header:string;index:number;count:number;yearStart:string}> , screenWidth:number, headerHeight:number) => {
-  return headerIndexes.reduce((total, elm)=>{return total+(Math.ceil(elm.count/numColumns)*(screenWidth/numColumns)+headerHeight);}, 0);
+export const calcLayoutHeight = (
+  numColumns: 2 | 3 | 4,
+  headerIndexes: Array<{
+    header: string;
+    index: number;
+    count: number;
+    yearStart: string;
+  }>,
+  screenWidth: number,
+  headerHeight: number,
+) => {
+  return headerIndexes.reduce((total, elm) => {
+    return (
+      total +
+      (Math.ceil(elm.count / numColumns) * (screenWidth / numColumns) +
+        headerHeight)
+    );
+  }, 0);
   /*let height:number = 0;
   for(let i=0;i<headerIndexes.length;i++){
     height = height + (Math.ceil(headerIndexes[i].count/numColumns)*(screenWidth/numColumns)+headerHeight)
   }
   return height;*/
-}
+};
 
 export const pow2abs = (a: number, b: number) => {
   return Math.pow(Math.abs(a - b), 2);
 };
 
-
-export const prettyTime = (seconds:number) => {
-    const format = (val:number) => {
-
-      return `0${Math.floor(val)}`.slice(-2);
-    }
-    const hours = seconds / 3600;
-    const minutes = (seconds % 3600) / 60;
-    if(hours > 1){
-      return [hours, minutes, seconds % 60].map(format).join(':');
-    }else if(minutes > 1){
-      return [minutes, seconds % 60].map(format).join(':');
-    }else{
-      return '0:'+[seconds % 60].map(format).join(':');
-    }
-}
+export const prettyTime = (seconds: number) => {
+  const format = (val: number) => {
+    return `0${Math.floor(val)}`.slice(-2);
+  };
+  const hours = seconds / 3600;
+  const minutes = (seconds % 3600) / 60;
+  if (hours > 1) {
+    return [hours, minutes, seconds % 60].map(format).join(':');
+  } else if (minutes > 1) {
+    return [minutes, seconds % 60].map(format).join(':');
+  } else {
+    return '0:' + [seconds % 60].map(format).join(':');
+  }
+};
 
 export const changeSortCondition: changeSortConditionAndNumColumns = (
   sortCondition_i: sortCondition,
   pinchOrZoom: 'pinch' | 'zoom' | undefined,
   numCols: 2 | 3 | 4,
 ) => {
-  let result:{sortCondition: sortCondition,numColumns:2|3|4} = {
+  let result: {sortCondition: sortCondition; numColumns: 2 | 3 | 4} = {
     sortCondition: 'day',
     numColumns: 2,
   };
@@ -372,24 +387,33 @@ export const changeSortCondition: changeSortConditionAndNumColumns = (
   return result;
 };
 
-export const calcImageDimension = (media:Asset|undefined, SCREEN_HEIGHT:number, SCREEN_WIDTH:number) => {
+export const calcImageDimension = (
+  media: Asset | undefined,
+  SCREEN_HEIGHT: number,
+  SCREEN_WIDTH: number,
+) => {
   let imageWidth_t = SCREEN_WIDTH;
   let imageHeight_t = SCREEN_HEIGHT;
-  if(media){
-    if(media.height > SCREEN_HEIGHT && media.width > SCREEN_WIDTH){
-      if(media.height/media.width > SCREEN_HEIGHT/SCREEN_WIDTH){
-        imageWidth_t = media.width * SCREEN_HEIGHT/(media.height==0?1:media.height);
-      }else{
-        imageHeight_t = SCREEN_WIDTH * media.height/(media.width==0?1:media.width);
+  if (media) {
+    if (media.height > SCREEN_HEIGHT && media.width > SCREEN_WIDTH) {
+      if (media.height / media.width > SCREEN_HEIGHT / SCREEN_WIDTH) {
+        imageWidth_t =
+          (media.width * SCREEN_HEIGHT) /
+          (media.height === 0 ? 1 : media.height);
+      } else {
+        imageHeight_t =
+          (SCREEN_WIDTH * media.height) / (media.width === 0 ? 1 : media.width);
       }
-    }else if(media.height > SCREEN_HEIGHT){
-      imageWidth_t = media.width * SCREEN_HEIGHT/(media.height==0?1:media.height);
-    }else if(media.width > SCREEN_WIDTH){
-      imageHeight_t = SCREEN_WIDTH * media.height/(media.width==0?1:media.width);
-    }else if(media.height <= SCREEN_HEIGHT && media.width <= SCREEN_WIDTH){
+    } else if (media.height > SCREEN_HEIGHT) {
+      imageWidth_t =
+        (media.width * SCREEN_HEIGHT) / (media.height === 0 ? 1 : media.height);
+    } else if (media.width > SCREEN_WIDTH) {
+      imageHeight_t =
+        (SCREEN_WIDTH * media.height) / (media.width === 0 ? 1 : media.width);
+    } else if (media.height <= SCREEN_HEIGHT && media.width <= SCREEN_WIDTH) {
       imageHeight_t = media.height;
-      imageWidth_t = media.width ;
-    }																												
+      imageWidth_t = media.width;
+    }
   }
-  return {height: imageHeight_t, width: imageWidth_t}
+  return {height: imageHeight_t, width: imageWidth_t};
 };

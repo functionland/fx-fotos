@@ -38,9 +38,23 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "eject": "expo eject"
+    "eject": "expo eject",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "tsc": "bash -c tsc --noEmit",
+    "ci": "yarn format && yarn lint && yarn tsc",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx}\"",
+    "prepare": "husky install",
+    "pre-commit": "lint-staged"
+  },
+  "lint-staged": {
+    "*.@(ts|tsx)": [
+      "yarn lint",
+      "yarn tsc",
+      "yarn format"
+    ]
   },
   "dependencies": {
+    "@expo/vector-icons": "^12.0.5",
     "@react-native-community/hooks": "^2.6.0",
     "@react-native-community/masked-view": "0.1.10",
     "@react-native-community/netinfo": "6.0.0",
@@ -71,8 +85,12 @@
   },
   "devDependencies": {
     "@babel/core": "^7.9.0",
+    "@react-native-community/eslint-config": "^2.0.0",
     "@types/react": "~16.9.35",
     "@types/react-native": "~0.63.2",
+    "eslint": "^7.28.0",
+    "husky": "^6.0.0",
+    "lint-staged": "^11.0.0",
     "typescript": "~4.0.0"
   },
   "private": true

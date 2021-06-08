@@ -1,5 +1,3 @@
-import React from 'react';
-
 export const initialState = {
   progress: 0,
   stopProgress: false,

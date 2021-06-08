@@ -1,32 +1,33 @@
-import { Asset } from 'expo-media-library';
-import React, {useEffect, useRef, useState, createRef} from 'react';
-import { View, useWindowDimensions, StyleSheet, Image, Text } from 'react-native';
-import {story, } from '../types/interfaces';
-import { useBackHandler } from '@react-native-community/hooks'
+import React, {createRef, useEffect, useRef} from 'react';
+import {Image, StyleSheet, Text, useWindowDimensions, View} from 'react-native';
+import {story} from '../types/interfaces';
+import {useBackHandler} from '@react-native-community/hooks';
 
 import {
-  TapGestureHandler,
   HandlerStateChangeEvent,
-  TapGestureHandlerEventPayload,
   State,
+  TapGestureHandler,
+  TapGestureHandlerEventPayload,
 } from 'react-native-gesture-handler';
 
 interface Props {
-  story:story;
+  story: story;
   duration: number;
-  numColumns: 2|3|4;
+  numColumns: 2 | 3 | 4;
   text?: string | undefined;
   height: number;
-  setShowStory: Function;
-  showStory:boolean;
-  setStory:Function;
+  setShowStory: (newState: boolean) => void;
+  showStory: boolean;
+  setStory: (newStory: story) => void;
 }
 
 const Highlights: React.FC<Props> = (props) => {
   const isMounted = useRef(false);
   useEffect(() => {
-      isMounted.current = true;
-      return () => {isMounted.current = false;}
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
   }, []);
 
   const SCREEN_WIDTH = useWindowDimensions().width;
@@ -34,75 +35,70 @@ const Highlights: React.FC<Props> = (props) => {
   const _tapRef = createRef<TapGestureHandler>();
 
   useBackHandler(() => {
-      if (props.showStory) {
-        props.setShowStory(false);
-        return true;
-      }
-      // let the default thing happen
-      return false;
+    if (props.showStory) {
+      props.setShowStory(false);
+      return true;
+    }
+    // let the default thing happen
+    return false;
   });
 
   const openHighlight = () => {
     props.setStory(props.story);
     props.setShowStory(true);
     console.log('here');
-  }
+  };
 
-  const _onTapHandlerStateChange = ( event:HandlerStateChangeEvent<TapGestureHandlerEventPayload> ) => {
-    if (event.nativeEvent.state === State.END){
-      if(props.story && props.story.medias){
+  const _onTapHandlerStateChange = (
+    event: HandlerStateChangeEvent<TapGestureHandlerEventPayload>,
+  ) => {
+    if (event.nativeEvent.state === State.END) {
+      if (props.story && props.story.medias) {
         openHighlight();
       }
     }
-  }
+  };
 
   return props.story ? (
     <TapGestureHandler
       maxDist={3}
       numberOfTaps={1}
       ref={_tapRef}
-      onHandlerStateChange={_onTapHandlerStateChange}
-    >
-      <View 
-        style= {[
-          styles.container, 
+      onHandlerStateChange={_onTapHandlerStateChange}>
+      <View
+        style={[
+          styles.container,
           {
-            width: props.height/1.618,
-            height: props.height
-          }
-        ]}
-      >
+            width: props.height / 1.618,
+            height: props.height,
+          },
+        ]}>
         <Image
-          style= {[
-            styles.media, 
+          style={[
+            styles.media,
             {
-              width: SCREEN_WIDTH/3,
-              height: 1.618*SCREEN_WIDTH/3
-            }
+              width: SCREEN_WIDTH / 3,
+              height: (1.618 * SCREEN_WIDTH) / 3,
+            },
           ]}
-          source={
-            {uri: props.story?.medias[0]?.uri}
-          }
+          source={{uri: props.story?.medias[0]?.uri}}
         />
         <View
           style={[
-            styles.mediaOverlay, {
-              width: SCREEN_WIDTH/3,
-              height: 1.618*SCREEN_WIDTH/3
-            }
+            styles.mediaOverlay,
+            {
+              width: SCREEN_WIDTH / 3,
+              height: (1.618 * SCREEN_WIDTH) / 3,
+            },
           ]}
-        >
-
-        </View>
+        />
         <View style={styles.textHolder}>
-          <Text style={styles.text}>
-            {props.story?.text}
-          </Text>
+          <Text style={styles.text}>{props.story?.text}</Text>
         </View>
       </View>
     </TapGestureHandler>
   ) : (
-    <Text></Text>
+    <Text />
   );
 };
 
@@ -124,18 +120,18 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     opacity: 0.3,
-    backgroundColor: 'black'
+    backgroundColor: 'black',
   },
   text: {
     textAlign: 'center',
     color: 'white',
     fontSize: 22,
     textShadowColor: 'black',
-    textShadowRadius: 4
+    textShadowRadius: 4,
   },
-  textHolder:{
+  textHolder: {
     height: 50,
-    width:'100%',
+    width: '100%',
     position: 'absolute',
     bottom: 0,
   },
@@ -143,7 +139,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     left: 0,
-    zIndex:5,
+    zIndex: 5,
     alignItems: 'center',
   },
 });
