@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef} from 'react';
-import {Animated, Dimensions, View, Text} from 'react-native';
+import {Animated, Dimensions, View, Systrace, Text} from 'react-native';
 import {sortCondition, FlatSection, story, layout} from '../types/interfaces';
 import RenderPhotos from './RenderPhotos';
 import SingleMedia from './SingleMedia';
@@ -33,6 +33,16 @@ interface Props {
 }
 
 const AllPhotos: React.FC<Props> = (props) => {
+  const enableProfiling = () => {
+    Systrace.setEnabled(true); // Call setEnabled to turn on the profiling.
+    Systrace.beginEvent('RenderPhotos_'+props.numColumns);
+    Systrace.counterEvent('RenderPhotos_'+props.numColumns, 10);
+  }
+  
+  const stopProfiling = () => {
+    Systrace.endEvent()
+  }
+
   const isMounted = useRef(false);
   useEffect(() => {
     isMounted.current = true;
