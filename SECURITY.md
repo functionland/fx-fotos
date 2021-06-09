@@ -10,4 +10,4 @@ Versions of photos project that are currently being supported with security upda
 
 ## Reporting a Vulnerability
 
-If you find a vulnerabiliy please open an issue and start the title with [Security]
+If you find a vulnerability please open an issue and start the title with [Security]

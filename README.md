@@ -30,14 +30,14 @@ We developed this project with the smoothness and features of popular gallery ap
 
 Checkout full demo video at: https://youtu.be/wDxaC1HF5PQ
 
-Or checkout indvidual fatures below:
+Or checkout individual features below:
 - Pinch/zoom to switch between modes: 
 - ![https://youtu.be/ioK0zkew--w](https://github.com/functionland/photos/blob/main/assets/demo/BOX_Photos_pinchzoom_to_switch_between_modes.gif)
 - Opening a single image in fullscreen mode: 
 - ![https://youtu.be/jPVqxPoNH9M](https://github.com/functionland/photos/blob/main/assets/demo/Single%20image%20modal%20scroll%20and%20zoom.gif)
 - Header animation(hide on scroll down and show on scroll up): 
 - ![https://youtu.be/qjfiukClHqQ](https://github.com/functionland/photos/blob/main/assets/demo/Header%20hide%20on%20scroll%20down%20and%20show%20on%20scroll%20up.gif)
-- Hightlights/Story: 
+- Highlights/Story: 
 - ![https://youtu.be/yEOnDtT3cX0](https://github.com/functionland/photos/blob/main/assets/demo/Highlights.gif)
 - Fast scroll/Thumb scroll feature: 
 - ![https://youtu.be/QsDzOGyj9cM](https://github.com/functionland/photos/blob/main/assets/demo/Fast%20scroll_thumb%20scroll.gif)
@@ -51,7 +51,7 @@ Or checkout indvidual fatures below:
 - [Packages](#packages)
 - [Pages structure](#pages-structure)
 - [Components structure](#components-structure)
-- [Components descripction](#components-descripction)
+- [Components description](#components-descripction)
 
 ### Installing Pre-requisites
 
@@ -121,10 +121,10 @@ expo start
 
 ## Packages
 
-- We used **expo Media Libary** for getting the data from user's phone.
+- We used **expo Media Library** for getting the data from user's phone.
 - We used a modified version of **expo-video-player** to play videos. It is available in our repo.
 - We used a modified version of **react-native-stories-view** for the story style view on top of gallery, which is available in our repo.
-- We used **RecycerListView** from FlipKart, as the scrollView for the photos.
+- We used **RecyclerListView** from FlipKart, as the scrollView for the photos.
 
 ## Pages structure
 
@@ -179,7 +179,7 @@ For now we have two pages in the app:
 
 ```
 
-## Components descripction
+## Components description
 
 The components are as what follows:
 ### PhotosContainer
@@ -187,17 +187,17 @@ The components are as what follows:
 - this component include the PinchZoom component and AllPhotos component
 ### PinchZoom
 **Purpose:** This component is responsible for all the animations for switching between different column modes, and actions we want to do when animations done.
-- This component is wraped around the AllPhotos component.
+- This component is wrapped around the AllPhotos component.
 - The component uses GestureHandlers to respond to pinch and pan gestures
 
 ### AllPhotos
-**Purpose:** This component is wraped the three RenderPhotos components and is responsible for lazy load the photos and feed the render photos with proper data.
+**Purpose:** This component is wrapped the three RenderPhotos components and is responsible for lazy load the photos and feed the render photos with proper data.
 -  The three different kind of RenderPhotos is the month view with 4 columns of photos, the day view with 3 columns of photos and the day view with 2 columns of photos.
 
 ### RenderPhotos
-**Purpose:** This component includes with the number of PhotosChunk components and one FlatList that wraped all the PhotosChunk components that we want to show the user. It is responsible to show the Photos(main) page of hte application.
+**Purpose:** This component includes with the number of PhotosChunk components and one FlatList that wrapped all the PhotosChunk components that we want to show the user. It is responsible to show the Photos(main) page of hte application.
 - This component also renders date headers.
-- It uses RecylerListView to show the scrollable grid of photos
+- It uses RecyclerListView to show the scrollable grid of photos
 
 ### PhotosChunk:
 **Purpose:** This component is responsible to show each block/Thumbnails in the gallery.
@@ -215,7 +215,7 @@ The components are as what follows:
 **Purpose:** This component is responsible to display photo or video when opened in full page. It is the component used in SingleMedia.
 
 ### SingleMedia:
-**Purpose:** This component is responsible to show modal with the content when imae or video is opened in full page. It uses Media to show the photo or video.
+**Purpose:** This component is responsible to show modal with the content when image or video is opened in full page. It uses Media to show the photo or video.
 
 ### StoryHolder:
 **Purpose:** This component is responsible to show each story/highlight in full screen when thumbnail is clicked on.
