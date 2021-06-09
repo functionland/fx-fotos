@@ -17,7 +17,8 @@ interface Props {
   imageHeight: number;
   imageWidth: number;
   media:Asset|undefined;
-  state: {modalShown:boolean;activeIndex: number;}|undefined;
+  state: {activeIndex: number;}|undefined;
+  modalShown: Animated.Value;
   index: number;
   setScrollEnabled: Function;
   pinchRef: React.RefObject<React.ComponentType<PinchGestureHandlerProps & React.RefAttributes<any>>>;
@@ -74,10 +75,10 @@ const Media: React.FC<Props> = (props) => {
       const [isMute, setIsMute] = useState<boolean>(false);
       useEffect(()=>{
         if(video && props?.media?.duration && isMounted.current){
-          if(props.state?.activeIndex===props.index && !props.state?.modalShown){
+          if(props.state?.activeIndex===props.index){
             ////console.log('video unloaded');
             video?.unloadAsync();
-          }else if(props.state?.modalShown && props.state?.activeIndex===props.index){
+          }else if(props.state?.activeIndex===props.index){
             video.loadAsync({uri: props.media?.uri},{shouldPlay: true, positionMillis: 0});
           }
         }
@@ -93,10 +94,10 @@ const Media: React.FC<Props> = (props) => {
                 showMuteButton={true}
                 mute={() =>setIsMute(true)}
                 unmute={() =>setIsMute(false)}
-                isMute={isMute || !(props.state?.activeIndex===props.index?true:false) || !props.state?.modalShown}
+                isMute={isMute || !(props.state?.activeIndex===props.index?true:false)}
                 videoProps={{
                   ref: (v: any) => (video = v),
-                  shouldPlay: (props.state?.activeIndex===props.index && props.state?.modalShown),
+                  shouldPlay: (props.state?.activeIndex===props.index),
                   isMuted: isMute,
                   resizeMode: Video.RESIZE_MODE_CONTAIN,
                   source: {
@@ -120,7 +121,7 @@ const Media: React.FC<Props> = (props) => {
                     height: props.imageHeight,
                     width: props.imageWidth,
                     transform: [
-                      { scale: (props.state?.modalShown && props.state?.activeIndex===props.index)?props.imageScale:1 },
+                      { scale: Animated.multiply(props.modalShown,(props.state?.activeIndex===props.index)?props.imageScale:1) },
                     ],
                   },
                 ]}
@@ -166,10 +167,10 @@ const Media: React.FC<Props> = (props) => {
                           {
                             width: SCREEN_WIDTH, 
                             height: SCREEN_HEIGHT,
-                            opacity: (props.state?.modalShown && props.state?.activeIndex===props.index)?1:(props.imageScale.interpolate({
+                            opacity: Animated.multiply(props.modalShown,(props.state?.activeIndex===props.index)?1:(props.imageScale.interpolate({
                               inputRange: [0, 0.99, 1, 1.01, 4],
                               outputRange: [0, 0, 1, 0, 0],
-                            }))
+                            })))
                           }
                         ]} 
                         collapsable={false}

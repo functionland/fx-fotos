@@ -14,6 +14,10 @@ const Tab = createMaterialBottomTabNavigator();
 const AppNavigation = () => {
   const scrollAnim = useRef(new Animated.Value(0)).current;
   const headerShown = useRef(new Animated.Value(1)).current;
+  const modalShown = useRef(new Animated.Value(0)).current;
+  const storyShown = useRef(new Animated.Value(0)).current;
+  const actionBarShown = useRef(new Animated.Value(0)).current;
+
   const HEADER_HEIGHT = 30;
 
   const clampedScrollY = scrollAnim.interpolate({

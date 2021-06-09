@@ -62,14 +62,14 @@ interface Props {
   setScrollOffset: Function;
   focalY: Animated.Value;
   numberOfPointers: Animated.Value;
-  modalShown: boolean;
-  setModalShown: Function;
+  modalShown: Animated.Value;
+  headerShown: Animated.Value;
   setSinglePhotoIndex: Function;
   setImagePosition: Function;
   storiesHeight: number;
   stories: story[]|undefined;
-  setShowStory: Function;
   showStory:boolean;
+  setShowStory: Function;
   setStory:Function;
   scrollY: Animated.Value;
   HEADER_HEIGHT: number;
@@ -184,7 +184,7 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
         index={data.index}
         sortCondition={props.sortCondition}
         modalShown={props.modalShown}
-        setModalShown={props.setModalShown}
+        headerShown={props.headerShown}
         setSinglePhotoIndex={props.setSinglePhotoIndex}
         setImagePosition={props.setImagePosition}
         headerHeight={headerHeight}

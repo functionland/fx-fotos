@@ -37,8 +37,8 @@ class ExternalScrollView extends BaseScrollView {
 }
 
 interface Props {
-  modalShown: boolean;
-  setModalShown: Function;
+  modalShown: Animated.Value;
+  headerShown: Animated.Value;
   medias: Asset[]|undefined;
   singleMediaIndex: number;
   setSinglePhotoIndex: Function;
@@ -56,6 +56,8 @@ const SingleMedia: React.FC<Props> = (props) => {
     return () => {isMounted.current = false;}
   }, []);
 
+  const isModalShown = useRef<number>(0);
+  
   const viewPosition = useRef(new Animated.ValueXY(props.imagePosition)).current;
 
   const SCREEN_WIDTH = useWindowDimensions().width;
@@ -77,8 +79,8 @@ const SingleMedia: React.FC<Props> = (props) => {
   }));
   const [layoutProvider, setLayoutProvider] = useState<any>(LayoutUtil.getSingleImageLayoutProvider());
   
-  const _baseImageScale = new Animated.Value(1);
-  const _pinchScale = new Animated.Value(1);
+  const _baseImageScale = useRef(new Animated.Value(1)).current;
+  const _pinchScale = useRef(new Animated.Value(1)).current;
   const imageScale:Animated.AnimatedInterpolation = Animated.multiply(_baseImageScale, _pinchScale).interpolate({
     inputRange: [0, 1, 4],
     outputRange: [1, 1, 4]
@@ -93,25 +95,36 @@ const SingleMedia: React.FC<Props> = (props) => {
   useEffect(()=>{
     if(isMounted.current){
       let imageDimensions = calcImageDimension(media, SCREEN_HEIGHT, SCREEN_WIDTH);
-      showHideModal(props.modalShown, imageDimensions.width, imageDimensions.height);
-      if(props.modalShown){
+      showHideModal(imageDimensions.width, imageDimensions.height);
+      if(props.singleMediaIndex>-1 && isModalShown.current===1){
         scrollRef?.current?.scrollToIndex(props.singleMediaIndex, false);
       }
     }
   },[media]);
 
-
+  
   useEffect(()=>{
-    if(props.medias && isMounted.current){
-      let newMedia:Asset = props.medias[props.singleMediaIndex];
-      if(newMedia && typeof newMedia !== 'string' && media !== newMedia){
-        setMedia(newMedia);
-      }else{
-        let imageDimensions = calcImageDimension(media, SCREEN_HEIGHT, SCREEN_WIDTH);
-        showHideModal(props.modalShown, imageDimensions.width, imageDimensions.height);
+  if(props.singleMediaIndex>-1){
+  props.modalShown.removeAllListeners();
+  props.modalShown.addListener(({value})=>{
+    console.log('modalShown changed to: '+value+', isModalShown.current='+isModalShown.current);
+    if(isModalShown.current !== value){
+      if(value===1){
+        if(props.medias && isMounted.current){
+          console.log('props.singleMediaIndex2='+props.singleMediaIndex);
+          let newMedia:Asset = props.medias[props.singleMediaIndex];
+          if(newMedia && typeof newMedia !== 'string' && media !== newMedia){
+            setMedia(newMedia);
+          }else{
+            let imageDimensions = calcImageDimension(media, SCREEN_HEIGHT, SCREEN_WIDTH);
+            showHideModal(imageDimensions.width, imageDimensions.height);
+          }
+        }
       }
     }
-  },[props.modalShown]);
+  });
+  }
+  },[props.singleMediaIndex])
 
   const hideModalAnimation = (duration:number=400) => {
     let imageDimensions = calcImageDimension(media, SCREEN_HEIGHT, SCREEN_WIDTH);
@@ -149,14 +162,15 @@ const SingleMedia: React.FC<Props> = (props) => {
       
     });
     setTimeout(()=>{
-      ////console.log('setting modalShown to false')
-      props.setModalShown(false);
+      props.modalShown.setValue(0);
+      props.setSinglePhotoIndex(-1);
+      props.headerShown.setValue(1);
+      isModalShown.current=0;
       viewScale.setValue({x:0, y:0});
     }, duration/2)
   }
   const showModalAnimation = (duration:number=400) => {
-    let imageDimensions = calcImageDimension(media, SCREEN_HEIGHT, SCREEN_WIDTH);
-    //console.log('in showModalAnimation:', {SCREEN_WIDTH:SCREEN_WIDTH, imageWidth:imageWidth, SCREEN_HEIGHT:SCREEN_HEIGHT, imageHeight:imageHeight, StatusBar: StatusBar.currentHeight});
+    console.log('in showModalAnimation:', {SCREEN_WIDTH:SCREEN_WIDTH, SCREEN_HEIGHT:SCREEN_HEIGHT, StatusBar: StatusBar.currentHeight});
     Animated.parallel([
       Animated.timing(viewPosition, {
         //toValue: { x: (SCREEN_WIDTH-imageDimensions.width)/2, y: (SCREEN_HEIGHT-imageDimensions.height+2*(StatusBar.currentHeight||0))/2 },
@@ -180,17 +194,18 @@ const SingleMedia: React.FC<Props> = (props) => {
         useNativeDriver: true,
       }),
     ]).start();
+    isModalShown.current=1;
   }
   useBackHandler(() => {
-    if (props.modalShown) {
+    if (isModalShown.current===1) {
       hideModalAnimation();
       return true
     }
     // let the default thing happen
     return false
   })
-  const showHideModal = (showModal:boolean, imageWidth:number, imageHeight:number) => {
-    if(showModal){
+  const showHideModal = (imageWidth:number, imageHeight:number) => {
+    if(isModalShown.current===0){
       let thumbnailPositionMinusSingleImagePosition = {
         x: props.imagePosition.x - (SCREEN_WIDTH/(props.numColumns*imageWidth))*(SCREEN_WIDTH - imageWidth)/2,
         y: props.imagePosition.y - (SCREEN_WIDTH/(props.numColumns*imageHeight))*(SCREEN_HEIGHT - imageHeight)/2
@@ -199,8 +214,6 @@ const SingleMedia: React.FC<Props> = (props) => {
 
       viewScale.setValue({x:SCREEN_WIDTH/(props.numColumns*imageWidth), y:SCREEN_WIDTH/(props.numColumns*imageHeight)})
       showModalAnimation();
-    }else{
-      ////console.log('closing image');
     }
   }
 
@@ -208,8 +221,8 @@ const SingleMedia: React.FC<Props> = (props) => {
   let singleTapRef = createRef<PanGestureHandler>();
   
  
-  let translationX = new Animated.Value(0);
-  let translationY = new Animated.Value(0);
+  const translationX = useRef(new Animated.Value(0)).current;
+  const translationY = useRef(new Animated.Value(0)).current;
 
   let translationYvsX = Animated.multiply(translationY, Animated.divide(translationX, Animated.add(translationY,0.0000001)).interpolate({
     inputRange: [-SCREEN_WIDTH, -1, -0.60, 0, 0.60, 1, SCREEN_WIDTH],
@@ -258,10 +271,10 @@ const SingleMedia: React.FC<Props> = (props) => {
   }
   
   return (
-    <View 
+    <Animated.View 
       style={{
-        zIndex:props.modalShown?1:0, 
-        opacity:props.modalShown?1:0,
+        zIndex:props.modalShown, 
+        opacity:props.modalShown,
         width:SCREEN_WIDTH, 
         height:SCREEN_HEIGHT,
         position:'absolute',
@@ -275,8 +288,8 @@ const SingleMedia: React.FC<Props> = (props) => {
             inputRange: [0, 0.3, 1],
             outputRange: [0, 1, 1],
           }),
-          width:props.modalShown?SCREEN_WIDTH:0,
-          height:props.modalShown?SCREEN_HEIGHT:0,
+          width:SCREEN_WIDTH,
+          height:SCREEN_HEIGHT,
           top: 0,
           left: 0,
           transform: [
@@ -285,6 +298,9 @@ const SingleMedia: React.FC<Props> = (props) => {
             },
             {
               translateX: viewPosition.x
+            },
+            {
+              scale: props.modalShown
             }
           ],
         }]}
@@ -362,7 +378,7 @@ const SingleMedia: React.FC<Props> = (props) => {
                     directionalLockEnabled: true,
                     scrollEnabled: true,
                   }}
-                  extendedState={{modalShown:props.modalShown, activeIndex: props.singleMediaIndex}}
+                  extendedState={{activeIndex: props.singleMediaIndex}}
                   style={{
                     width:SCREEN_WIDTH, 
                     height:SCREEN_HEIGHT,
@@ -373,6 +389,7 @@ const SingleMedia: React.FC<Props> = (props) => {
                       imageWidth={calcImageDimension(item, SCREEN_HEIGHT, SCREEN_WIDTH).width}
                       media={item}
                       state={extendedState}
+                      modalShown={props.modalShown}
                       index={index}
                       setScrollEnabled={setScrollEnabled}
                       pinchRef={pinchRef}
@@ -403,7 +420,7 @@ const SingleMedia: React.FC<Props> = (props) => {
       >
 
       </Animated.View>
-    </View>
+    </Animated.View>
   );
 };
 

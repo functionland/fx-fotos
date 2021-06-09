@@ -23,8 +23,8 @@ interface Props {
   scale: Animated.Value;
   sortCondition: 'day'|'month';
   index: number;
-  modalShown: boolean;
-  setModalShown: Function;
+  modalShown: Animated.Value;
+  headerShown: Animated.Value;
   setSinglePhotoIndex: Function;
   setImagePosition: Function;
   headerHeight: number;
@@ -73,7 +73,9 @@ const PhotosChunk: React.FC<Props> = (props) => {
 
           props.setImagePosition({x:imageOffsetX, y:imageOffsetY});
           props.setSinglePhotoIndex(props.index);
-          props.setModalShown(true);
+          console.log('Opening modal');
+          props.headerShown.setValue(0);
+          props.modalShown.setValue(1);
         }else{
             props.onMediaLongTap(props.photo.value);
         }

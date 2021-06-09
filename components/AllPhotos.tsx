@@ -68,12 +68,11 @@ const AllPhotos: React.FC<Props> = (props) => {
       props.scrollAnim.setValue(value);
     });
   }
-
+  const modalShown = useRef(new Animated.Value(0)).current;
  
 
   const [scrollOffset, setScrollOffset] = useState<{[key:string]:(2|3|4|number)}>({'in':0,'to':0});
   const [preparedMedia, setPreparedMedia] = useState<FlatSection>({layout:[],headerIndexes:[], stories:[], lastTimestamp:0});
-  const [modalShown, setModalShown] = useState<boolean>(false);
   const [singlePhotoIndex, setSinglePhotoIndex] = useState<number>(1);
   const [imagePosition, setImagePosition] = useState<{x:number;y:number}>({x:0,y:0});
   const [medias, setMedias] = useState<Asset[]>([]);
@@ -82,6 +81,7 @@ const AllPhotos: React.FC<Props> = (props) => {
   const [showActionBar, setShowActionBar] = useState<boolean>(false);
   const [story, setStory] = useState<story|undefined>();
   const [selectedAssets, setSelectedAssets] = useState<Asset[]>([]);
+  
   const selectMedia = (media:Asset, selected:boolean) => {
     let layout:layout[] = preparedMedia.layout;
     let index = layout.findIndex(x=>(typeof x.value!=='string' && x.value.id===media.id));
@@ -113,16 +113,6 @@ const AllPhotos: React.FC<Props> = (props) => {
       setStories(oldStories=>oldStories.concat(prepared.stories));
     }
   },[props.photos]);
-
-  useEffect(()=>{
-    if(isMounted){
-      if(modalShown || showStory || showActionBar){
-        props.headerShown.setValue(0)
-      }else{
-        props.headerShown.setValue(1);
-      }
-    }
-  },[modalShown, showStory, showActionBar]);
 
   useEffect(()=>{
     if(selectedAssets.length && !showActionBar){
@@ -188,7 +178,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         focalY={props.focalY}
         numberOfPointers={props.numberOfPointers}
         modalShown={modalShown}
-        setModalShown={setModalShown}
+        headerShown={props.headerShown}
         setSinglePhotoIndex={setSinglePhotoIndex}
         setImagePosition={setImagePosition}
         storiesHeight={props.storiesHeight}
@@ -231,7 +221,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         focalY={props.focalY}
         numberOfPointers={props.numberOfPointers}
         modalShown={modalShown}
-        setModalShown={setModalShown}
+        headerShown={props.headerShown}
         setSinglePhotoIndex={setSinglePhotoIndex}
         setImagePosition={setImagePosition}
         storiesHeight={props.storiesHeight}
@@ -274,14 +264,14 @@ const AllPhotos: React.FC<Props> = (props) => {
         focalY={props.focalY}
         numberOfPointers={props.numberOfPointers}
         modalShown={modalShown}
-        setModalShown={setModalShown}
+        headerShown={props.headerShown}
         setSinglePhotoIndex={setSinglePhotoIndex}
         setImagePosition={setImagePosition}
         storiesHeight={props.storiesHeight}
         stories={stories}
         showStory={showStory}
-        setShowStory={setShowStory}
         setStory={setStory}
+        setShowStory={setShowStory}
         scrollY={scrollY4}
         HEADER_HEIGHT={props.HEADER_HEIGHT}
         onMediaLongTap={onMediaLongTap}
@@ -290,7 +280,7 @@ const AllPhotos: React.FC<Props> = (props) => {
       />
       <SingleMedia 
         modalShown={modalShown}
-        setModalShown={setModalShown}
+        headerShown={props.headerShown}
         medias={medias}
         singleMediaIndex={singlePhotoIndex}
         setSinglePhotoIndex={setSinglePhotoIndex}
