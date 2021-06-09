@@ -1,13 +1,18 @@
 import React from 'react';
 import { SafeAreaView, StyleSheet, Animated, View, useWindowDimensions, StatusBar } from 'react-native';
 import PhotosContainer from '../components/PhotosContainer';
+import { useEffect } from 'react';
+
 interface Props {
   scrollAnim: Animated.Value;
   HEADER_HEIGHT: number;
-  setHeaderShown: Function;
+  headerShown: Animated.Value;
 }
 
 const HomePage: React.FC<Props> = (props) => {
+  useEffect(()=>{
+    console.log(Date.now()+': HomePage re-rendered');
+  })
   const SCREEN_WIDTH = useWindowDimensions().width;
   const SCREEN_HEIGHT = useWindowDimensions().height;
 
@@ -17,7 +22,7 @@ const HomePage: React.FC<Props> = (props) => {
         <PhotosContainer 
           scrollAnim={props.scrollAnim} 
           HEADER_HEIGHT={props.HEADER_HEIGHT} 
-          setHeaderShown={props.setHeaderShown}
+          headerShown={props.headerShown}
         />
       </View>
     </SafeAreaView>

@@ -12,7 +12,7 @@ import {sortCondition, MediaItem, } from '../types/interfaces';
 interface Props {
   scrollAnim: Animated.Value;
   HEADER_HEIGHT: number;
-  setHeaderShown: Function;
+  headerShown: Animated.Value;
 }
 
 const PhotosContainer: React.FC<Props> = (props) => {
@@ -24,16 +24,25 @@ const PhotosContainer: React.FC<Props> = (props) => {
 
   const [permission, setPermission] = useState<boolean>();
   const [photos, setPhotos] = useState<Array<MediaLibrary.Asset>>([]);
-  const [mediaEndCursor, setMediaEndCursor] = useState<string>('');
-  const [mediaHasNextPage, setMediaHasNextPage] = useState<boolean>(true);
-  const [mediaTotalCount , setMediaTotalCount] = useState<number>(99999);
+
   const [storagePhotos, setStoragePhotos] = useState<
     Array<MediaLibrary.Asset>
   >([]);
+ 
+  const [sortCondition_i, setSortCondition_i] = useState<sortCondition>('day');
+  const [numColumns, setNumColumns] = useState<2 | 3 | 4>(2);
+  const [isPinchAndZoom, setIsPinchAndZoom] = useState<boolean>(false);
+  
   const navigation = useNavigation();
 
-  let scale = useRef(new Animated.Value(1)).current;
-  let baseScale2 = useRef(new Animated.Value(0)).current;
+  const devicePhotos = useRef<Array<MediaLibrary.Asset>>([]);
+  const mediaTotalCount = useRef<number>(999999999);
+  const mediaHasNextPage = useRef<boolean>(true);
+  const mediaEndCursor = useRef<string>('');
+  const loading = useRef<boolean>(false);
+
+  const scale = useRef(new Animated.Value(1)).current;
+  const baseScale2 = useRef(new Animated.Value(0)).current;
   const baseScale: Animated.AnimatedAddition = useRef(Animated.add(baseScale2, scale.interpolate({
     inputRange: [0, 1, 4],
     outputRange: [1, 0, -1],
@@ -45,40 +54,28 @@ const PhotosContainer: React.FC<Props> = (props) => {
   const numberOfPointers = useRef(new Animated.Value(0)).current;
   const velocity = useRef(new Animated.Value(0)).current;
 
-  const [pinchOrZoom, setPinchOrZoom] = useState<
-    'pinch' | 'zoom' | undefined
-  >();
-  const [sortCondition_i, setSortCondition_i] = useState<sortCondition>('day');
-  const [numColumns, setNumColumns] = useState<2 | 3 | 4>(2);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [isPinchAndZoom, setIsPinchAndZoom] = useState<boolean>(false);
-  const [loadMore, setLoadMore] = useState<number>(0);
+  
+  
 
   //TODO: Change this function to the getPhotos in actions like in AllPhotos
-  function getMedia(permission:boolean, photoNumber:number, hasNextPage:boolean=true, endCursor:string = ''){
-    let totalCount = mediaTotalCount;
-    if(hasNextPage){
-      ////console.log('media fetch while');
-      setLoading(true);
-      getStorageMedia(permission, photoNumber, endCursor)?.then(
+  function getMedia(permission:boolean, photoNumber:number){
+    if(mediaHasNextPage.current){
+      console.log('media fetch loop');
+      loading.current = true;
+      getStorageMedia(permission, photoNumber, mediaEndCursor.current)?.then(
         (value) => {
           if(value){
-            ////console.log('getStorageMedia');
-            hasNextPage = value.hasNextPage;
-            endCursor = value.endCursor;
-            totalCount = value.totalCount;
-            //setStoragePhotos(oldStoragePhotos => [...oldStoragePhotos,...value.assets]);
+            mediaTotalCount.current = value.totalCount;
             setStoragePhotos(value.assets);
-            setMediaEndCursor(endCursor);
-            setMediaHasNextPage(hasNextPage);
-            setMediaTotalCount(totalCount);
-            getMedia(permission, photoNumber, hasNextPage, endCursor);
+            mediaEndCursor.current = value.endCursor;
+            mediaHasNextPage.current = value.hasNextPage;
+            getMedia(permission, photoNumber);
           }
           
         },
-      ).catch(error => setLoading(false));
+      ).catch(error => loading.current = false);
     }else{
-      setLoading(false);
+      loading.current = false;
     }
   }
   useEffect(() => {
@@ -119,8 +116,6 @@ const PhotosContainer: React.FC<Props> = (props) => {
       }}
     >
           <PinchZoom
-            setPinchOrZoom={setPinchOrZoom}
-            pinchOrZoom={pinchOrZoom}
             scale={scale}
             baseScale={baseScale}
             baseScale2={baseScale2}
@@ -136,23 +131,22 @@ const PhotosContainer: React.FC<Props> = (props) => {
             isPinchAndZoom={isPinchAndZoom}
           >
             <AllPhotos
-              pinchOrZoom={pinchOrZoom}
               scale={scale}
               baseScale={baseScale}
               photos={photos}
               sortCondition={sortCondition_i}
               numColumns={numColumns}
-              loading={loading}
+              loading={loading.current}
               focalX={focalX}
               focalY={focalY}
               numberOfPointers={numberOfPointers}
               velocity={velocity}
               isPinchAndZoom={isPinchAndZoom}
-              setLoadMore={setLoadMore}
+              setLoadMore={()=>{}}
               storiesHeight={storiesHeight}
               scrollAnim={props.scrollAnim}
               HEADER_HEIGHT={props.HEADER_HEIGHT}
-              setHeaderShown={props.setHeaderShown}
+              setHeaderShown={()=>{}}
             />
           </PinchZoom>
     </View>

@@ -1,4 +1,4 @@
-import React, {useState, createRef, useEffect} from 'react';
+import React, {useState, createRef, useEffect, useRef} from 'react';
 import {Animated, Dimensions,View} from 'react-native';
 import {sortCondition} from '../types/interfaces';
 import {
@@ -18,8 +18,6 @@ interface Props {
   scale: Animated.Value;
   baseScale: Animated.AnimatedAddition;
   baseScale2: Animated.Value;
-  setPinchOrZoom: Function;
-  pinchOrZoom:'pinch'|'zoom'|undefined;
   setSortCondition: Function;
   setNumColumns: Function;
   numColumns: 2 | 3 | 4;
@@ -32,8 +30,8 @@ interface Props {
   isPinchAndZoom: boolean;
 }
 
-let _pinchOrZoom: 'pinch'|'zoom'|undefined = undefined;
 const PinchZoom: React.FC<Props> = (props) => {
+  const _pinchOrZoom = useRef<'pinch' | 'zoom' | undefined>();
   useEffect(()=>{
     console.log([Date.now()+': component PinchZoom'+props.numColumns+' rendered']);
   });
@@ -64,7 +62,6 @@ const PinchZoom: React.FC<Props> = (props) => {
         }).start(() => {
           ////('revert animation ended');
           props.scale.setValue(1);
-          props.setPinchOrZoom(undefined);
           setAllowAnimation(true);
         });
       }
@@ -80,24 +77,23 @@ const PinchZoom: React.FC<Props> = (props) => {
     scale:number
   ) => {
     if(scale > 1){
-      _pinchOrZoom = 'pinch';
+      _pinchOrZoom.current = 'pinch';
     }else if(scale < 1){
-      _pinchOrZoom = 'zoom';
+      _pinchOrZoom.current = 'zoom';
     }else{
-      _pinchOrZoom = undefined;
+      _pinchOrZoom.current = undefined;
     }
 
       ////console.log('animation end cycle');
       
         let _sortCondition = changeSortCondition(
           props.sortCondition,
-          _pinchOrZoom,
+          _pinchOrZoom.current,
           props.numColumns,
         );
           
           props.setSortCondition(_sortCondition.sortCondition);
           props.setNumColumns(_sortCondition.numColumns);
-          props.setPinchOrZoom(undefined);
           props.scale.setValue(1);
           if(_sortCondition.numColumns===2){
             props.baseScale2.setValue(0);

@@ -20,7 +20,6 @@ interface Props {
   photo: layout;
   opacity: Animated.AnimatedInterpolation;
   numCol: 2 | 3 | 4;
-  loading: boolean;
   scale: Animated.Value;
   sortCondition: 'day'|'month';
   index: number;
@@ -36,7 +35,7 @@ interface Props {
 
 
 const PhotosChunk: React.FC<Props> = (props) => {
-  
+  const loading = false;
   const SCREEN_WIDTH = useWindowDimensions().width;
   const [imageRef, setImageRef] = useState<Image | null>();
   const tempScale = useRef(new Animated.Value(1)).current;
@@ -124,7 +123,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
               style={{
                 height: (SCREEN_WIDTH / props.numCol) - 2.5,
                 width: (SCREEN_WIDTH / props.numCol) - 2.5,
-                backgroundColor: props.loading ? 'grey' : 'white',
+                backgroundColor: loading ? 'grey' : 'white',
                 margin: 2.5,
                 zIndex: 4,
               }}
@@ -150,7 +149,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
               style={{
                 height: (SCREEN_WIDTH / props.numCol) - 2.5,
                 width: (SCREEN_WIDTH / props.numCol) - 2.5,
-                backgroundColor: props.loading ? 'grey' : 'white',
+                backgroundColor: loading ? 'grey' : 'white',
                 margin: 2.5,
                 zIndex:4,
               }}

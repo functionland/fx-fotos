@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useRef} from 'react';
+import React, {useEffect, useState, useRef, MutableRefObject} from 'react';
 import {Animated, Dimensions, View, Systrace, Text} from 'react-native';
 import {sortCondition, FlatSection, story, layout} from '../types/interfaces';
 import RenderPhotos from './RenderPhotos';
@@ -16,7 +16,6 @@ interface Props {
   photos: Array<Asset>;
   scale: Animated.Value;
   baseScale: Animated.AnimatedAddition;
-  pinchOrZoom: 'pinch' | 'zoom' | undefined;
   sortCondition: sortCondition;
   numColumns: 2 | 3 | 4;
   loading: boolean;

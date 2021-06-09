@@ -1,19 +1,19 @@
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from 'react-native-screens/native-stack';
 import PermissionError from '../pages/PermissionError';
-import React, { useRef, useState } from 'react';
+import React, { useRef, } from 'react';
 import HomePage from '../pages/HomePage';
 import {StyleSheet, Animated, View} from 'react-native';
 import Header from '../components/Header';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
-import { FontAwesome5 } from '@expo/vector-icons'; 
+import { FontAwesome5 } from '@expo/vector-icons';
 
 const Stack = createNativeStackNavigator();
 const Tab = createMaterialBottomTabNavigator();
 
 const AppNavigation = () => {
   const scrollAnim = useRef(new Animated.Value(0)).current;
-  const [headerShown, setHeaderShown] = useState<boolean>(true);
+  const headerShown = useRef(new Animated.Value(1)).current;
   const HEADER_HEIGHT = 30;
 
   const clampedScrollY = scrollAnim.interpolate({
@@ -31,12 +31,11 @@ const AppNavigation = () => {
         <Stack.Navigator
           screenOptions={{
             headerCenter: () => <Header scrollAnim={scrollAnim} HEADER_HEIGHT={HEADER_HEIGHT} />,
-            //headerTitle: '',
+            ////headerTitle: '',
             headerStyle: {
               backgroundColor: 'transparent',
             },
             headerHideShadow:true,
-            headerShown: headerShown,
             headerTranslucent:true,
             headerTitleStyle: {
               fontWeight: 'bold',
@@ -49,7 +48,7 @@ const AppNavigation = () => {
               
             }}
           >
-            {props => <HomeNavigation {...props} scrollAnim={scrollAnim} HEADER_HEIGHT={HEADER_HEIGHT} setHeaderShown={setHeaderShown} headerShown={headerShown} />}
+            {props => <HomeNavigation {...props} scrollAnim={scrollAnim} HEADER_HEIGHT={HEADER_HEIGHT} headerShown={headerShown} />}
           </Stack.Screen>
           <Stack.Screen
             name="PermissionError"
@@ -65,18 +64,27 @@ const AppNavigation = () => {
 interface Props {
   scrollAnim: Animated.Value;
   HEADER_HEIGHT: number;
-  setHeaderShown: Function;
-  headerShown: boolean;
+  headerShown: Animated.Value;
 }
 const HomeNavigation: React.FC<Props> = (mainProps) => {
   return (
-    <View style={[styles.View,{marginTop:0, }]}>
+    <Animated.View 
+      style={
+        [
+          styles.View,
+          {
+            marginTop:0, 
+          }
+        ]
+      }>
         <Tab.Navigator
           screenOptions={{
             tabBarColor: 'white',
           }}
           activeColor='#0a72ac'
           inactiveColor="#3e2465"
+          //TODO: Find a way to remove the need to ignore ts error
+          //@ts-ignore 
           barStyle={{ 
             backgroundColor: 'white',
             shadowOpacity: 1, 
@@ -86,7 +94,7 @@ const HomeNavigation: React.FC<Props> = (mainProps) => {
               width: 3,
               height: 3
             },
-            opacity:(mainProps.headerShown?1:0)
+            opacity: mainProps.headerShown,
           }}
         >
           <Tab.Screen
@@ -98,7 +106,7 @@ const HomeNavigation: React.FC<Props> = (mainProps) => {
               ),
             }}
           >
-            {props => <HomePage {...props} scrollAnim={mainProps.scrollAnim} HEADER_HEIGHT={mainProps.HEADER_HEIGHT} setHeaderShown={mainProps.setHeaderShown} />}
+            {props => <HomePage {...props} scrollAnim={mainProps.scrollAnim} HEADER_HEIGHT={mainProps.HEADER_HEIGHT} headerShown={mainProps.headerShown} />}
           </Tab.Screen>
           <Tab.Screen
             name="Search"
@@ -121,7 +129,7 @@ const HomeNavigation: React.FC<Props> = (mainProps) => {
             }}
           />
         </Tab.Navigator>
-    </View>
+    </Animated.View>
   );
 };
 

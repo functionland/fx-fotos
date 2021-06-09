@@ -1,4 +1,4 @@
-import React, {useEffect, createRef, useState, useRef} from 'react';
+import React, {useEffect, MutableRefObject, useState, useRef} from 'react';
 import {
   Animated,
   Dimensions,
@@ -181,7 +181,6 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
         photo={data}
         opacity={props.opacity}
         numCol={props.numColumns}
-        loading={props.loading}
         scale={props.scale}
         key={'PhotosChunk_col' + props.numColumns + '_id' + index}
         index={data.index}
