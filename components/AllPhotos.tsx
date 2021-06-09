@@ -16,14 +16,12 @@ interface Props {
   photos: Array<Asset>;
   scale: Animated.Value;
   baseScale: Animated.AnimatedAddition;
-  sortCondition: sortCondition;
   numColumns: 2 | 3 | 4;
   loading: boolean;
   focalX: Animated.Value;
   focalY: Animated.Value;
   numberOfPointers: Animated.Value;
   velocity: Animated.Value;
-  isPinchAndZoom: boolean;
   setLoadMore: Function;
   storiesHeight: number;
   scrollAnim: Animated.Value;
@@ -186,7 +184,6 @@ const AllPhotos: React.FC<Props> = (props) => {
         sortCondition="day"
         zIndex={(props.numColumns === 2)?1:0}
         scale={props.scale}
-        isPinchAndZoom={props.isPinchAndZoom}
         scrollOffset={scrollOffset}
         setScrollOffset={setScrollOffset}
         setLoadMore={props.setLoadMore}
@@ -231,7 +228,6 @@ const AllPhotos: React.FC<Props> = (props) => {
         sortCondition="day"
         zIndex={(props.numColumns === 3)?1:0}
         scale={props.scale}
-        isPinchAndZoom={props.isPinchAndZoom}
         scrollOffset={scrollOffset}
         setScrollOffset={setScrollOffset}
         setLoadMore={props.setLoadMore}
@@ -276,7 +272,6 @@ const AllPhotos: React.FC<Props> = (props) => {
         sortCondition="month"
         zIndex={(props.numColumns === 4)?1:0}
         scale={props.scale}
-        isPinchAndZoom={props.isPinchAndZoom}
         scrollOffset={scrollOffset}
         setScrollOffset={setScrollOffset}
         setLoadMore={props.setLoadMore}
@@ -310,7 +305,6 @@ const AllPhotos: React.FC<Props> = (props) => {
         duration={1500}
         showStory={showStory}
         setShowStory={setShowStory}
-        numColumns={props.numColumns}
         story={story}
       />
       <ActionBar

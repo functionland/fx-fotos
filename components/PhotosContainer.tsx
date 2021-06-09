@@ -7,7 +7,6 @@ import {getStorageMedia} from '../utils/functions';
 import {storagePermission} from '../utils/permissions';
 import AllPhotos from './AllPhotos';
 import PinchZoom from './PinchZoom';
-import {sortCondition, MediaItem, } from '../types/interfaces';
 
 interface Props {
   scrollAnim: Animated.Value;
@@ -29,9 +28,7 @@ const PhotosContainer: React.FC<Props> = (props) => {
     Array<MediaLibrary.Asset>
   >([]);
  
-  const [sortCondition_i, setSortCondition_i] = useState<sortCondition>('day');
   const [numColumns, setNumColumns] = useState<2 | 3 | 4>(2);
-  const [isPinchAndZoom, setIsPinchAndZoom] = useState<boolean>(false);
   
   const navigation = useNavigation();
 
@@ -119,29 +116,23 @@ const PhotosContainer: React.FC<Props> = (props) => {
             scale={scale}
             baseScale={baseScale}
             baseScale2={baseScale2}
-            setSortCondition={setSortCondition_i}
             setNumColumns={setNumColumns}
-            sortCondition={sortCondition_i}
             numColumns={numColumns}
             focalX={focalX}
             focalY={focalY}
             numberOfPointers={numberOfPointers}
             velocity={velocity}
-            setIsPinchAndZoom={setIsPinchAndZoom}
-            isPinchAndZoom={isPinchAndZoom}
           >
             <AllPhotos
               scale={scale}
               baseScale={baseScale}
               photos={photos}
-              sortCondition={sortCondition_i}
               numColumns={numColumns}
               loading={loading.current}
               focalX={focalX}
               focalY={focalY}
               numberOfPointers={numberOfPointers}
               velocity={velocity}
-              isPinchAndZoom={isPinchAndZoom}
               setLoadMore={()=>{}}
               storiesHeight={storiesHeight}
               scrollAnim={props.scrollAnim}

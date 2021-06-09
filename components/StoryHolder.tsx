@@ -16,7 +16,6 @@ interface Props {
   duration: number;
   showStory: boolean;
   setShowStory: Function;
-  numColumns:2|3|4;
 }
 
 const StoryHolder: React.FC<Props> = (props) => {
@@ -59,7 +58,7 @@ const StoryHolder: React.FC<Props> = (props) => {
         visible={props.showStory}
         enableProgress={true}
         images={props.story.medias}
-        id={"Story_"+props.numColumns}
+        id={"Story_"+Math.random()}
         duration={5}
         containerStyle={{
           width: '100%',

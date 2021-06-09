@@ -18,20 +18,17 @@ interface Props {
   scale: Animated.Value;
   baseScale: Animated.AnimatedAddition;
   baseScale2: Animated.Value;
-  setSortCondition: Function;
   setNumColumns: Function;
   numColumns: 2 | 3 | 4;
-  sortCondition: sortCondition;
   focalX: Animated.Value;
   focalY: Animated.Value;
   numberOfPointers: Animated.Value;
   velocity: Animated.Value;
-  setIsPinchAndZoom: Function;
-  isPinchAndZoom: boolean;
 }
 
 const PinchZoom: React.FC<Props> = (props) => {
   const _pinchOrZoom = useRef<'pinch' | 'zoom' | undefined>();
+  const sortCondition = useRef<sortCondition>('day');
   useEffect(()=>{
     console.log([Date.now()+': component PinchZoom'+props.numColumns+' rendered']);
   });
@@ -66,11 +63,6 @@ const PinchZoom: React.FC<Props> = (props) => {
         });
       }
     }
-    /*if(event.nativeEvent.numberOfPointers > 1 && !props.isPinchAndZoom){
-      props.setIsPinchAndZoom(true);
-    }else if(props.isPinchAndZoom && event.nativeEvent.numberOfPointers == 1){
-      props.setIsPinchAndZoom(false);
-    }*/
   };
 
   const animationTransition = (
@@ -87,12 +79,12 @@ const PinchZoom: React.FC<Props> = (props) => {
       ////console.log('animation end cycle');
       
         let _sortCondition = changeSortCondition(
-          props.sortCondition,
+          sortCondition.current,
           _pinchOrZoom.current,
           props.numColumns,
         );
           
-          props.setSortCondition(_sortCondition.sortCondition);
+        sortCondition.current = _sortCondition.sortCondition;
           props.setNumColumns(_sortCondition.numColumns);
           props.scale.setValue(1);
           if(_sortCondition.numColumns===2){
@@ -103,7 +95,6 @@ const PinchZoom: React.FC<Props> = (props) => {
             props.baseScale2.setValue(2);
           }
           setAllowAnimation(true);
-          props.setIsPinchAndZoom(false);
   };
 
   return (

@@ -58,7 +58,6 @@ interface Props {
   zIndex: number;
   scale: Animated.Value;
   sizeTransformScale: Animated.AnimatedInterpolation;
-  isPinchAndZoom: boolean;
   scrollOffset:{[key:number]:number};
   setScrollOffset: Function;
   setLoadMore: Function;
@@ -345,7 +344,6 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
         dataProvider={dataProvider}
         layoutProvider={layoutProvider}
         rowRenderer={rowRenderer}
-        scrollEnabled={!props.isPinchAndZoom}
         onScroll={_onScroll}
         key={"RecyclerListView_"+props.sortCondition + props.numColumns}
         scrollEventThrottle={16}
