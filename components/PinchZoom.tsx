@@ -10,6 +10,9 @@ import {
   PinchGestureHandlerEventPayload,
   HandlerStateChangeEvent,
 } from 'react-native-gesture-handler';
+import {
+  useRecoilState,
+} from 'recoil';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -29,11 +32,12 @@ interface Props {
 const PinchZoom: React.FC<Props> = (props) => {
   const _pinchOrZoom = useRef<'pinch' | 'zoom' | undefined>();
   const sortCondition = useRef<sortCondition>('day');
+
   useEffect(()=>{
     console.log([Date.now()+': component PinchZoom'+props.numColumns+' rendered']);
   });
   let pinchRef = createRef<PinchGestureHandler>();
-  const [allowAnimation, setAllowAnimation] = useState<boolean>(true);
+  
   let _onPinchGestureEvent = Animated.event(
     [{ nativeEvent: { scale: props.scale, focalX:props.focalX, focalY:props.focalY, numberOfPointers:props.numberOfPointers, velocity:props.velocity } }],
     { useNativeDriver: true }
@@ -42,7 +46,6 @@ const PinchZoom: React.FC<Props> = (props) => {
     if (event.nativeEvent.oldState === State.ACTIVE && event.nativeEvent.state !== State.ACTIVE) {
       let scale:number = event.nativeEvent.scale;
       if((scale > 1.3 && props.numColumns>2) || (scale < 0.8 && props.numColumns<4)){
-        setAllowAnimation(false);
         Animated.timing(props.scale, {
           toValue: scale>1?4:0,
           duration: 250,
@@ -59,7 +62,6 @@ const PinchZoom: React.FC<Props> = (props) => {
         }).start(() => {
           ////('revert animation ended');
           props.scale.setValue(1);
-          setAllowAnimation(true);
         });
       }
     }
@@ -94,14 +96,12 @@ const PinchZoom: React.FC<Props> = (props) => {
           }else if(_sortCondition.numColumns===4){
             props.baseScale2.setValue(2);
           }
-          setAllowAnimation(true);
   };
 
   return (
 
     <PinchGestureHandler
     ref={pinchRef}
-    enabled={allowAnimation}
     onGestureEvent={_onPinchGestureEvent}
     onHandlerStateChange={_onPinchHandlerStateChange}
     >

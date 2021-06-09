@@ -22,11 +22,10 @@ interface Props {
   focalY: Animated.Value;
   numberOfPointers: Animated.Value;
   velocity: Animated.Value;
-  setLoadMore: Function;
   storiesHeight: number;
   scrollAnim: Animated.Value;
   HEADER_HEIGHT: number;
-  setHeaderShown: Function;
+  headerShown: Animated.Value;
 }
 
 const AllPhotos: React.FC<Props> = (props) => {
@@ -118,9 +117,9 @@ const AllPhotos: React.FC<Props> = (props) => {
   useEffect(()=>{
     if(isMounted){
       if(modalShown || showStory || showActionBar){
-        props.setHeaderShown(false);
+        props.headerShown.setValue(0)
       }else{
-        props.setHeaderShown(true);
+        props.headerShown.setValue(1);
       }
     }
   },[modalShown, showStory, showActionBar]);
@@ -186,7 +185,6 @@ const AllPhotos: React.FC<Props> = (props) => {
         scale={props.scale}
         scrollOffset={scrollOffset}
         setScrollOffset={setScrollOffset}
-        setLoadMore={props.setLoadMore}
         focalY={props.focalY}
         numberOfPointers={props.numberOfPointers}
         modalShown={modalShown}
@@ -230,7 +228,6 @@ const AllPhotos: React.FC<Props> = (props) => {
         scale={props.scale}
         scrollOffset={scrollOffset}
         setScrollOffset={setScrollOffset}
-        setLoadMore={props.setLoadMore}
         focalY={props.focalY}
         numberOfPointers={props.numberOfPointers}
         modalShown={modalShown}
@@ -274,7 +271,6 @@ const AllPhotos: React.FC<Props> = (props) => {
         scale={props.scale}
         scrollOffset={scrollOffset}
         setScrollOffset={setScrollOffset}
-        setLoadMore={props.setLoadMore}
         focalY={props.focalY}
         numberOfPointers={props.numberOfPointers}
         modalShown={modalShown}

@@ -7,12 +7,19 @@ import {getStorageMedia} from '../utils/functions';
 import {storagePermission} from '../utils/permissions';
 import AllPhotos from './AllPhotos';
 import PinchZoom from './PinchZoom';
-
+import {
+  atom,
+} from 'recoil';
 interface Props {
   scrollAnim: Animated.Value;
   HEADER_HEIGHT: number;
   headerShown: Animated.Value;
 }
+
+const numColumnsState = atom<2|3|4>({
+  key: 'numColumnsState',
+  default: 2,
+});
 
 const PhotosContainer: React.FC<Props> = (props) => {
   const SCREEN_WIDTH = useWindowDimensions().width;
@@ -133,11 +140,10 @@ const PhotosContainer: React.FC<Props> = (props) => {
               focalY={focalY}
               numberOfPointers={numberOfPointers}
               velocity={velocity}
-              setLoadMore={()=>{}}
               storiesHeight={storiesHeight}
               scrollAnim={props.scrollAnim}
               HEADER_HEIGHT={props.HEADER_HEIGHT}
-              setHeaderShown={()=>{}}
+              headerShown={props.headerShown}
             />
           </PinchZoom>
     </View>

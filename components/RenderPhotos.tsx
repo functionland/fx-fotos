@@ -60,7 +60,6 @@ interface Props {
   sizeTransformScale: Animated.AnimatedInterpolation;
   scrollOffset:{[key:number]:number};
   setScrollOffset: Function;
-  setLoadMore: Function;
   focalY: Animated.Value;
   numberOfPointers: Animated.Value;
   modalShown: boolean;

@@ -30,7 +30,7 @@ const AppNavigation = () => {
       <NavigationContainer>
         <Stack.Navigator
           screenOptions={{
-            headerCenter: () => <Header scrollAnim={scrollAnim} HEADER_HEIGHT={HEADER_HEIGHT} />,
+            headerCenter: () => <Header scrollAnim={scrollAnim} HEADER_HEIGHT={HEADER_HEIGHT} headerShown={headerShown} />,
             ////headerTitle: '',
             headerStyle: {
               backgroundColor: 'transparent',

@@ -11,6 +11,7 @@ import {
 interface Props {
     scrollAnim: Animated.Value;
     HEADER_HEIGHT: number;
+    headerShown: Animated.Value;
 }
 
 const Header: React.FC<Props> = (props) => {
@@ -38,7 +39,8 @@ const Header: React.FC<Props> = (props) => {
                     {
                         translateY: translateY,
                     }
-                ]
+                ],
+                opacity: props.headerShown
             }]}>
                     <View style={styles.item}></View>
                     <View style={[styles.item, ]}>
