@@ -22,6 +22,11 @@ import FloatingFilters from './FloatingFilters';
 import { useBackHandler } from '@react-native-community/hooks'
 import { Asset } from 'expo-media-library';
 
+import {
+  useRecoilState,
+} from 'recoil';
+import {storiesState} from '../states';
+
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
@@ -65,7 +70,6 @@ interface Props {
   headerShown: Animated.Value;
   setImagePosition: Function;
   storiesHeight: number;
-  stories: story[]|undefined;
   showStory:Animated.Value;
   scrollY: Animated.Value;
   HEADER_HEIGHT: number;
@@ -75,7 +79,7 @@ interface Props {
 }
 
 const RenderPhotos: React.FC<Props> = (props) => {
-
+  const [stories, setStories] = useRecoilState(storiesState);
   const headerHeight = 20;
   const indicatorHeight = 50;
   const [dataProvider, setDataProvider] = useState<DataProvider>(new DataProvider((r1, r2) => {
@@ -140,7 +144,7 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
         return (
           <SafeAreaView  style={{position:'relative', zIndex:1,marginTop:2*props.HEADER_HEIGHT}}>
             <FlatList 
-              data={props.stories}
+              data={stories}
               horizontal={true}
               keyExtractor={(item:story, index:number) => 'StoryItem_'+index+'_'+item.text}
               getItemLayout={(data, index) => {

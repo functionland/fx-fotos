@@ -11,7 +11,7 @@ import {prepareLayout,} from '../utils/functions';
 import {
   useRecoilState,
 } from 'recoil';
-import {storiesState, preparedMediaState,} from '../states';
+import {preparedMediaState,} from '../states';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -33,7 +33,6 @@ interface Props {
 }
 
 const AllPhotos: React.FC<Props> = (props) => {
-  const [stories, setStories] = useRecoilState(storiesState);
   const [preparedMedia, setPreparedMedia] = useRecoilState(preparedMediaState);
 
   useEffect(()=>{
@@ -142,10 +141,9 @@ const AllPhotos: React.FC<Props> = (props) => {
         scrollY={props.scrollY2}
         HEADER_HEIGHT={props.HEADER_HEIGHT}
         onMediaLongTap={onMediaLongTap}
-        setImagePosition={setImagePosition}
-        
-        stories={stories}
         showStory={showStory}
+        setImagePosition={setImagePosition}
+
         showSelectionCheckbox={showActionBar}
         selectedAssets={selectedAssets}
       />
@@ -185,7 +183,6 @@ const AllPhotos: React.FC<Props> = (props) => {
         headerShown={props.headerShown}
         setImagePosition={setImagePosition}
         storiesHeight={props.storiesHeight}
-        stories={stories}
         showStory={showStory}
         scrollY={props.scrollY3}
         HEADER_HEIGHT={props.HEADER_HEIGHT}
@@ -229,7 +226,6 @@ const AllPhotos: React.FC<Props> = (props) => {
         headerShown={props.headerShown}
         setImagePosition={setImagePosition}
         storiesHeight={props.storiesHeight}
-        stories={stories}
         showStory={showStory}
         scrollY={props.scrollY4}
         HEADER_HEIGHT={props.HEADER_HEIGHT}
