@@ -56,7 +56,6 @@ const AllPhotos: React.FC<Props> = (props) => {
   const [imagePosition, setImagePosition] = useState<{x:number;y:number}>({x:0,y:0});
 
   const [showActionBar, setShowActionBar] = useState<boolean>(false);
-  const [story, setStory] = useState<story|undefined>();
   const [selectedAssets, setSelectedAssets] = useState<Asset[]>([]);
   
   const selectMedia = (media:Asset, selected:boolean) => {
@@ -147,7 +146,6 @@ const AllPhotos: React.FC<Props> = (props) => {
         storiesHeight={props.storiesHeight}
         stories={stories}
         showStory={showStory}
-        setStory={setStory}
         scrollY={props.scrollY2}
         HEADER_HEIGHT={props.HEADER_HEIGHT}
         onMediaLongTap={onMediaLongTap}
@@ -194,7 +192,6 @@ const AllPhotos: React.FC<Props> = (props) => {
         storiesHeight={props.storiesHeight}
         stories={stories}
         showStory={showStory}
-        setStory={setStory}
         scrollY={props.scrollY3}
         HEADER_HEIGHT={props.HEADER_HEIGHT}
         onMediaLongTap={onMediaLongTap}
@@ -241,7 +238,6 @@ const AllPhotos: React.FC<Props> = (props) => {
         storiesHeight={props.storiesHeight}
         stories={stories}
         showStory={showStory}
-        setStory={setStory}
         scrollY={props.scrollY4}
         HEADER_HEIGHT={props.HEADER_HEIGHT}
         onMediaLongTap={onMediaLongTap}
@@ -260,7 +256,6 @@ const AllPhotos: React.FC<Props> = (props) => {
         duration={1500}
         showStory={showStory}
         headerShown={props.headerShown}
-        story={story}
       />
       <ActionBar
         setShowActionBar={setShowActionBar}

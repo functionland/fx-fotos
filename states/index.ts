@@ -26,3 +26,8 @@ export const storiesState = atom<story[]>({
     key: 'storiesState',
     default: [],
 });
+
+export const storyState = atom<story|undefined>({
+    key: 'storyState',
+    default: undefined,
+});

@@ -69,7 +69,6 @@ interface Props {
   storiesHeight: number;
   stories: story[]|undefined;
   showStory:Animated.Value;
-  setStory:Function;
   scrollY: Animated.Value;
   HEADER_HEIGHT: number;
   onMediaLongTap: Function;
@@ -163,7 +162,6 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
                   height={props.storiesHeight}
                   showStory={props.showStory}
                   headerShown={props.headerShown}
-                  setStory={props.setStory}
                 />
                 </View>
               )}

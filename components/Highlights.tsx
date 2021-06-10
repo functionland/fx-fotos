@@ -11,6 +11,11 @@ import {
   State,
 } from 'react-native-gesture-handler';
 
+import {
+  useRecoilState,
+} from 'recoil';
+import {storyState} from '../states';
+
 interface Props {
   story:story;
   duration: number;
@@ -19,10 +24,11 @@ interface Props {
   height: number;
   showStory:Animated.Value;
   headerShown: Animated.Value;
-  setStory:Function;
 }
 
 const Highlights: React.FC<Props> = (props) => {
+  const [story, setStory] = useRecoilState(storyState);
+
   const isMounted = useRef(false);
   useEffect(() => {
       isMounted.current = true;
@@ -39,7 +45,7 @@ const Highlights: React.FC<Props> = (props) => {
   const _tapRef = createRef<TapGestureHandler>();
 
   const openHighlight = () => {
-    props.setStory(props.story);
+    setStory(props.story);
     console.log('opening highlight');
     props.showStory.setValue(1);
     props.headerShown.setValue(0);

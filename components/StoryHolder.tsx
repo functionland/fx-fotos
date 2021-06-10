@@ -9,15 +9,20 @@ import {
   BAR_ACTIVE_COLOR,
   BAR_INACTIVE_COLOR,
 } from './Story/utils/colors';
+import {
+  useRecoilState,
+} from 'recoil';
+import {storyState} from '../states';
 
 interface Props {
-  story:story|undefined;
   duration: number;
   showStory: Animated.Value;
   headerShown: Animated.Value;
 }
 
 const StoryHolder: React.FC<Props> = (props) => {
+  const [story, setStory] = useRecoilState(storyState);
+
   const close = () => {
     props.showStory.setValue(0);
     props.headerShown.setValue(1);
@@ -45,7 +50,7 @@ const StoryHolder: React.FC<Props> = (props) => {
     }
   });
 
-  return props.story ? (
+  return story ? (
     <Animated.View style={
       {
         flex: 1, 
@@ -69,7 +74,7 @@ const StoryHolder: React.FC<Props> = (props) => {
       <StoryContainer
         visible={props.showStory}
         enableProgress={true}
-        images={props.story?.medias}
+        images={story?.medias}
         id={"Story_"+Math.random()}
         duration={props.duration}
         containerStyle={{
@@ -79,7 +84,7 @@ const StoryHolder: React.FC<Props> = (props) => {
         }}
         // Inbuilt User Information in header
         userProfile={{
-            userName: timestampToDate(props.story?.medias[0]?.modificationTime,['day']).day,
+            userName: timestampToDate(story?.medias[0]?.modificationTime,['day']).day,
         }}
         // Custom Header component option
 
