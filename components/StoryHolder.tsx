@@ -1,5 +1,5 @@
 import { Asset } from 'expo-media-library';
-import React, {useEffect, useRef, useState, createRef} from 'react';
+import React, {useEffect, useRef,} from 'react';
 import { View, Animated, useWindowDimensions, StyleSheet, } from 'react-native';
 import StoryContainer from './Story/stories/StoryContainer';
 import {story, } from '../types/interfaces';

@@ -3,6 +3,7 @@ import { GREEN, GRAY, LIGHT_GRAY, LIGHT_GREEN, BAR_INACTIVE_COLOR, WHITE, BAR_AC
 import { ProgressItemProps } from "../utils/interfaceHelper";
 import { progressReducer, initialState, PROGRESS } from "./ProgressReducer";
 import { View, StyleSheet, Animated, useWindowDimensions } from "react-native";
+import { DEFAULT_DURATION } from "../utils/constant";
 
 const OFFSET = 100
 const BAR_WIDTH = 100
@@ -75,7 +76,7 @@ function ProgressItem(props: ProgressItemProps) {
       clearTimeout(listener.current);
       listener.current = (setTimeout(() => {
           dispatch({ type: PROGRESS, payload: progress + 1 });
-      }, props.duration));
+      }, (props.duration||DEFAULT_DURATION)/500));
   }
 
   function blockProgress() {
