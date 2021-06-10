@@ -36,7 +36,6 @@ const StoryContainer = (props: StoryContainerProps) => {
 
   const [progressIndex, setProgressIndex] = useState<number>(0)
   const [stopProgress, setStopProgress] = useState<boolean>(false);
-  const [visible, setVisible] = useState<boolean>(false);
 
 
   const SCREEN_WIDTH = useWindowDimensions().width;
@@ -70,7 +69,6 @@ const StoryContainer = (props: StoryContainerProps) => {
       }else{
         setProgressIndex(0);
         console.log('story is visible');
-        setVisible(true);
         setStopProgress(false);
         console.log('setting BackHandler');
         backHandler.current = BackHandler.addEventListener(

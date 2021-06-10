@@ -71,7 +71,7 @@ const StoryHolder: React.FC<Props> = (props) => {
         enableProgress={true}
         images={props.story?.medias}
         id={"Story_"+Math.random()}
-        duration={5}
+        duration={props.duration}
         containerStyle={{
           width: '100%',
           height: '100%',
