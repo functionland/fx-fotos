@@ -11,7 +11,7 @@ import {prepareLayout,} from '../utils/functions';
 import {
   useRecoilState,
 } from 'recoil';
-import {storiesState, preparedMediaState, mediasState} from '../states';
+import {storiesState, preparedMediaState,} from '../states';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -33,7 +33,6 @@ interface Props {
 }
 
 const AllPhotos: React.FC<Props> = (props) => {
-  const [medias, setMedias] = useRecoilState(mediasState);
   const [stories, setStories] = useRecoilState(storiesState);
   const [preparedMedia, setPreparedMedia] = useRecoilState(preparedMediaState);
 
@@ -52,7 +51,6 @@ const AllPhotos: React.FC<Props> = (props) => {
   const showStory = useRef(new Animated.Value(0)).current;
 
   const [scrollOffset, setScrollOffset] = useState<{[key:string]:(2|3|4|number)}>({'in':0,'to':0});
-  const [singlePhotoIndex, setSinglePhotoIndex] = useState<number>(1);
   const [imagePosition, setImagePosition] = useState<{x:number;y:number}>({x:0,y:0});
 
   const [showActionBar, setShowActionBar] = useState<boolean>(false);
@@ -126,7 +124,6 @@ const AllPhotos: React.FC<Props> = (props) => {
             outputRange: [2.2, 1, 0.66667],
           })
         }
-        date={new Date()}
         sortCondition="day"
         zIndex={props.baseScale.interpolate({
           inputRange: [-1, 0, 0.99, 1],
@@ -141,14 +138,14 @@ const AllPhotos: React.FC<Props> = (props) => {
         numberOfPointers={props.numberOfPointers}
         modalShown={modalShown}
         headerShown={props.headerShown}
-        setSinglePhotoIndex={setSinglePhotoIndex}
-        setImagePosition={setImagePosition}
         storiesHeight={props.storiesHeight}
-        stories={stories}
-        showStory={showStory}
         scrollY={props.scrollY2}
         HEADER_HEIGHT={props.HEADER_HEIGHT}
         onMediaLongTap={onMediaLongTap}
+        setImagePosition={setImagePosition}
+        
+        stories={stories}
+        showStory={showStory}
         showSelectionCheckbox={showActionBar}
         selectedAssets={selectedAssets}
       />
@@ -172,7 +169,6 @@ const AllPhotos: React.FC<Props> = (props) => {
             outputRange: [1.5, 1, 0.75],
           })
         }
-        date={new Date()}
         sortCondition="day"
         zIndex={props.baseScale.interpolate({
           inputRange: [0, 0.99, 1, 1.99, 2],
@@ -187,7 +183,6 @@ const AllPhotos: React.FC<Props> = (props) => {
         numberOfPointers={props.numberOfPointers}
         modalShown={modalShown}
         headerShown={props.headerShown}
-        setSinglePhotoIndex={setSinglePhotoIndex}
         setImagePosition={setImagePosition}
         storiesHeight={props.storiesHeight}
         stories={stories}
@@ -218,7 +213,6 @@ const AllPhotos: React.FC<Props> = (props) => {
             outputRange: [1.3333, 1, 0.8],
           })
         }
-        date={new Date()}
         sortCondition="month"
         zIndex={props.baseScale.interpolate({
           inputRange: [1, 1.99, 2, 2.99, 3],
@@ -233,7 +227,6 @@ const AllPhotos: React.FC<Props> = (props) => {
         numberOfPointers={props.numberOfPointers}
         modalShown={modalShown}
         headerShown={props.headerShown}
-        setSinglePhotoIndex={setSinglePhotoIndex}
         setImagePosition={setImagePosition}
         storiesHeight={props.storiesHeight}
         stories={stories}
@@ -247,9 +240,6 @@ const AllPhotos: React.FC<Props> = (props) => {
       <SingleMedia 
         modalShown={modalShown}
         headerShown={props.headerShown}
-        medias={medias}
-        singleMediaIndex={singlePhotoIndex}
-        setSinglePhotoIndex={setSinglePhotoIndex}
         imagePosition={imagePosition}
       />
       <StoryHolder 

@@ -52,7 +52,6 @@ interface Props {
   minWidth: number;
   numColumns: 2 | 3 | 4;
   opacity: Animated.AnimatedInterpolation;
-  date: Date;
   loading: boolean;
   sortCondition: 'day' | 'month';
   zIndex: Animated.AnimatedInterpolation;
@@ -64,7 +63,6 @@ interface Props {
   numberOfPointers: Animated.Value;
   modalShown: Animated.Value;
   headerShown: Animated.Value;
-  setSinglePhotoIndex: Function;
   setImagePosition: Function;
   storiesHeight: number;
   stories: story[]|undefined;
@@ -182,7 +180,6 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
         sortCondition={props.sortCondition}
         modalShown={props.modalShown}
         headerShown={props.headerShown}
-        setSinglePhotoIndex={props.setSinglePhotoIndex}
         setImagePosition={props.setImagePosition}
         headerHeight={headerHeight}
         onMediaLongTap={props.onMediaLongTap}

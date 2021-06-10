@@ -20,7 +20,7 @@ import {
 import {
   useRecoilState,
 } from 'recoil';
-import {numColumnsState} from '../states';
+import {numColumnsState, mediasState, singlePhotoIndexState} from '../states';
 
 class ExternalScrollView extends BaseScrollView {
   private _scrollViewRef: any;
@@ -43,14 +43,13 @@ class ExternalScrollView extends BaseScrollView {
 interface Props {
   modalShown: Animated.Value;
   headerShown: Animated.Value;
-  medias: Asset[]|undefined;
-  singleMediaIndex: number;
-  setSinglePhotoIndex: Function;
   imagePosition: {x:number, y:number};
 }
 
 const SingleMedia: React.FC<Props> = (props) => {
+  const [medias, setMedias] = useRecoilState(mediasState);
   const [numColumns, setNumColumns] = useRecoilState(numColumnsState);
+  const [singlePhotoIndex, setSinglePhotoIndex] = useRecoilState(singlePhotoIndexState);
   useEffect(()=>{
     console.log([Date.now()+': component SingleMedia'+numColumns+' rendered']);
   });
@@ -90,32 +89,32 @@ const SingleMedia: React.FC<Props> = (props) => {
   });
 
   useEffect(()=>{
-    if(props.medias && isMounted.current){
-      setDataProvider(dataProvider.cloneWithRows(props.medias));
+    if(medias && isMounted.current){
+      setDataProvider(dataProvider.cloneWithRows(medias));
     }
-  }, [props.medias]);
+  }, [medias]);
 
   useEffect(()=>{
     if(isMounted.current){
       let imageDimensions = calcImageDimension(media, SCREEN_HEIGHT, SCREEN_WIDTH);
       showHideModal(imageDimensions.width, imageDimensions.height);
-      if(props.singleMediaIndex>-1 && isModalShown.current===1){
-        scrollRef?.current?.scrollToIndex(props.singleMediaIndex, false);
+      if(singlePhotoIndex>-1 && isModalShown.current===1){
+        scrollRef?.current?.scrollToIndex(singlePhotoIndex, false);
       }
     }
   },[media]);
 
   
   useEffect(()=>{
-  if(props.singleMediaIndex>-1){
+  if(singlePhotoIndex>-1){
   props.modalShown.removeAllListeners();
   props.modalShown.addListener(({value})=>{
     console.log('modalShown changed to: '+value+', isModalShown.current='+isModalShown.current);
     if(isModalShown.current !== value){
       if(value===1){
-        if(props.medias && isMounted.current){
-          console.log('props.singleMediaIndex2='+props.singleMediaIndex);
-          let newMedia:Asset = props.medias[props.singleMediaIndex];
+        if(medias && isMounted.current){
+          console.log('singlePhotoIndex2='+singlePhotoIndex);
+          let newMedia:Asset = medias[singlePhotoIndex];
           if(newMedia && typeof newMedia !== 'string' && media !== newMedia){
             setMedia(newMedia);
           }else{
@@ -127,7 +126,7 @@ const SingleMedia: React.FC<Props> = (props) => {
     }
   });
   }
-  },[props.singleMediaIndex])
+  },[singlePhotoIndex])
 
   const hideModalAnimation = (duration:number=400) => {
     let imageDimensions = calcImageDimension(media, SCREEN_HEIGHT, SCREEN_WIDTH);
@@ -166,7 +165,7 @@ const SingleMedia: React.FC<Props> = (props) => {
     });
     setTimeout(()=>{
       props.modalShown.setValue(0);
-      props.setSinglePhotoIndex(-1);
+      setSinglePhotoIndex(-1);
       props.headerShown.setValue(1);
       isModalShown.current=0;
       viewScale.setValue({x:0, y:0});
@@ -246,9 +245,9 @@ const SingleMedia: React.FC<Props> = (props) => {
         setScrollEnabled(true);
         let newIndex = -1;
         if(event.nativeEvent.velocityX > 0){
-          newIndex = props.singleMediaIndex - 1;
+          newIndex = singlePhotoIndex - 1;
         }else if(event.nativeEvent.velocityX < 0){
-          newIndex = props.singleMediaIndex + 1;
+          newIndex = singlePhotoIndex + 1;
         }
         if(newIndex > -1 && scrollRef){
           //scrollRef?.current?.scrollToOffset(100,0,true);
@@ -270,7 +269,7 @@ const SingleMedia: React.FC<Props> = (props) => {
   }
 
   const _onVisibleIndicesChanged = (indexes:number[])=> {
-    props.setSinglePhotoIndex(indexes[0]);
+    setSinglePhotoIndex(indexes[0]);
   }
   
   return (
@@ -370,7 +369,7 @@ const SingleMedia: React.FC<Props> = (props) => {
                   dataProvider={dataProvider}
                   layoutProvider={layoutProvider}
                   renderAheadOffset={1}
-                  initialRenderIndex={props.singleMediaIndex}
+                  initialRenderIndex={singlePhotoIndex}
                   onVisibleIndicesChanged={_onVisibleIndicesChanged}
                   waitFor={[pinchRef]}
                   scrollViewProps={{
@@ -381,7 +380,7 @@ const SingleMedia: React.FC<Props> = (props) => {
                     directionalLockEnabled: true,
                     scrollEnabled: true,
                   }}
-                  extendedState={{activeIndex: props.singleMediaIndex}}
+                  extendedState={{activeIndex: singlePhotoIndex}}
                   style={{
                     width:SCREEN_WIDTH, 
                     height:SCREEN_HEIGHT,
@@ -440,8 +439,5 @@ const styles = StyleSheet.create({
     zIndex: -1
   }
 });
-function arePropsEqual(prevProps:Props, nextProps:Props) {
-  console.log('FloatingFilters memo condition:'+(prevProps.singleMediaIndex === nextProps.singleMediaIndex));
-  return prevProps.singleMediaIndex === nextProps.singleMediaIndex; 
-}
-export default React.memo(SingleMedia, arePropsEqual);
+
+export default React.memo(SingleMedia);

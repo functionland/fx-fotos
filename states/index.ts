@@ -31,3 +31,8 @@ export const storyState = atom<story|undefined>({
     key: 'storyState',
     default: undefined,
 });
+
+export const singlePhotoIndexState = atom<number>({
+    key: 'singlePhotoIndexState',
+    default: 1,
+});

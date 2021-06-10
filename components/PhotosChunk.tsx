@@ -15,6 +15,11 @@ import {
   State,
 } from 'react-native-gesture-handler';
 
+import {
+  useRecoilState,
+} from 'recoil';
+import {singlePhotoIndexState} from '../states';
+
 const isIOS = Platform.OS === 'ios';
 interface Props {
   photo: layout;
@@ -25,7 +30,6 @@ interface Props {
   index: number;
   modalShown: Animated.Value;
   headerShown: Animated.Value;
-  setSinglePhotoIndex: Function;
   setImagePosition: Function;
   headerHeight: number;
   onMediaLongTap: Function;
@@ -35,6 +39,8 @@ interface Props {
 
 
 const PhotosChunk: React.FC<Props> = (props) => {
+  const [singlePhotoIndex, setSinglePhotoIndex] = useRecoilState(singlePhotoIndexState);
+
   const loading = false;
   const SCREEN_WIDTH = useWindowDimensions().width;
   const [imageRef, setImageRef] = useState<Image | null>();
@@ -72,7 +78,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
           let imageOffsetX = event.nativeEvent.absoluteX - event.nativeEvent.x;
 
           props.setImagePosition({x:imageOffsetX, y:imageOffsetY});
-          props.setSinglePhotoIndex(props.index);
+          setSinglePhotoIndex(props.index);
           console.log('Opening modal');
           props.headerShown.setValue(0);
           props.modalShown.setValue(1);
