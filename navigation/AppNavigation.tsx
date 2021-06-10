@@ -12,7 +12,18 @@ const Stack = createNativeStackNavigator();
 const Tab = createMaterialBottomTabNavigator();
 
 const AppNavigation = () => {
-  const scrollAnim = useRef(new Animated.Value(0)).current;
+  const scrollY2 = useRef(new Animated.Value(0)).current;
+  const scrollY3 = useRef(new Animated.Value(0)).current;
+  const scrollY4 = useRef(new Animated.Value(0)).current;
+  const scale = useRef(new Animated.Value(1)).current;
+  const baseScale2 = useRef(new Animated.Value(0)).current;
+  const baseScale: Animated.AnimatedAddition = useRef(Animated.add(baseScale2, scale.interpolate({
+    inputRange: [0, 1, 4],
+    outputRange: [1, 0, -1],
+  }))).current;
+
+  const scrollAnim = Animated.add(scrollY2, Animated.add(scrollY3, scrollY4));
+
   const headerShown = useRef(new Animated.Value(1)).current;
   const modalShown = useRef(new Animated.Value(0)).current;
   const storyShown = useRef(new Animated.Value(0)).current;
@@ -52,7 +63,16 @@ const AppNavigation = () => {
               
             }}
           >
-            {props => <HomeNavigation {...props} scrollAnim={scrollAnim} HEADER_HEIGHT={HEADER_HEIGHT} headerShown={headerShown} />}
+            {props => <HomeNavigation {...props} 
+              scrollY2={scrollY2} 
+              scrollY3={scrollY3} 
+              scrollY4={scrollY4} 
+              scale={scale} 
+              baseScale={baseScale} 
+              baseScale2={baseScale2} 
+              HEADER_HEIGHT={HEADER_HEIGHT} 
+              headerShown={headerShown} 
+            />}
           </Stack.Screen>
           <Stack.Screen
             name="PermissionError"
@@ -66,7 +86,12 @@ const AppNavigation = () => {
 };
 
 interface Props {
-  scrollAnim: Animated.Value;
+  scrollY2: Animated.Value;
+  scrollY3: Animated.Value;
+  scrollY4: Animated.Value;
+  scale: Animated.Value;
+  baseScale: Animated.AnimatedAddition;
+  baseScale2: Animated.Value;
   HEADER_HEIGHT: number;
   headerShown: Animated.Value;
 }
@@ -110,7 +135,16 @@ const HomeNavigation: React.FC<Props> = (mainProps) => {
               ),
             }}
           >
-            {props => <HomePage {...props} scrollAnim={mainProps.scrollAnim} HEADER_HEIGHT={mainProps.HEADER_HEIGHT} headerShown={mainProps.headerShown} />}
+            {props => <HomePage {...props} 
+              scrollY2={mainProps.scrollY2} 
+              scrollY3={mainProps.scrollY3} 
+              scrollY4={mainProps.scrollY4} 
+              scale={mainProps.scale} 
+              baseScale={mainProps.baseScale} 
+              baseScale2={mainProps.baseScale2} 
+              HEADER_HEIGHT={mainProps.HEADER_HEIGHT} 
+              headerShown={mainProps.headerShown} 
+            />}
           </Tab.Screen>
           <Tab.Screen
             name="Search"

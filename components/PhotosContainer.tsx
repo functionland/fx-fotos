@@ -7,19 +7,23 @@ import {getStorageMedia} from '../utils/functions';
 import {storagePermission} from '../utils/permissions';
 import AllPhotos from './AllPhotos';
 import PinchZoom from './PinchZoom';
+import {prepareLayout,} from '../utils/functions';
 import {
-  atom,
+  useRecoilState,
 } from 'recoil';
+import {photosState, numColumnsState, storiesState, preparedMediaState, mediasState} from '../states';
 interface Props {
-  scrollAnim: Animated.Value;
+  scrollY2: Animated.Value;
+  scrollY3: Animated.Value;
+  scrollY4: Animated.Value;
+  scale: Animated.Value;
+  baseScale: Animated.AnimatedAddition;
+  baseScale2: Animated.Value;
   HEADER_HEIGHT: number;
   headerShown: Animated.Value;
 }
 
-const numColumnsState = atom<2|3|4>({
-  key: 'numColumnsState',
-  default: 2,
-});
+
 
 const PhotosContainer: React.FC<Props> = (props) => {
   const SCREEN_WIDTH = useWindowDimensions().width;
@@ -29,13 +33,16 @@ const PhotosContainer: React.FC<Props> = (props) => {
   const storiesHeight:number = 1.618*SCREEN_WIDTH/3;
 
   const [permission, setPermission] = useState<boolean>();
-  const [photos, setPhotos] = useState<Array<MediaLibrary.Asset>>([]);
+  const [photos, setPhotos] = useRecoilState(photosState);
 
   const [storagePhotos, setStoragePhotos] = useState<
     Array<MediaLibrary.Asset>
   >([]);
  
-  const [numColumns, setNumColumns] = useState<2 | 3 | 4>(2);
+  const [medias, setMedias] = useRecoilState(mediasState);
+  const [stories, setStories] = useRecoilState(storiesState);
+  const [preparedMedia, setPreparedMedia] = useRecoilState(preparedMediaState);
+
   
   const navigation = useNavigation();
 
@@ -45,12 +52,7 @@ const PhotosContainer: React.FC<Props> = (props) => {
   const mediaEndCursor = useRef<string>('');
   const loading = useRef<boolean>(false);
 
-  const scale = useRef(new Animated.Value(1)).current;
-  const baseScale2 = useRef(new Animated.Value(0)).current;
-  const baseScale: Animated.AnimatedAddition = useRef(Animated.add(baseScale2, scale.interpolate({
-    inputRange: [0, 1, 4],
-    outputRange: [1, 0, -1],
-  }))).current;
+  
 
   const scrollIndicator = useRef(new Animated.Value(0)).current;
   const focalX = useRef(new Animated.Value(0)).current;
@@ -109,6 +111,25 @@ const PhotosContainer: React.FC<Props> = (props) => {
     }
   }, [storagePhotos]);
 
+  useEffect(()=>{
+    if(photos?.length){
+      let prepared = prepareLayout(photos,['day', 'month'], preparedMedia.lastTimestamp, medias.length);
+      ////console.log('preparedMedia.layout:',{old:preparedMedia?.layout.length, added:prepared?.layout.length, header:prepared?.headerIndexes.length});
+      setPreparedMedia(oldPreparedMedia =>  ({
+        ...oldPreparedMedia,
+        'layout':oldPreparedMedia.layout.concat(prepared.layout), 
+        'headerIndexes': oldPreparedMedia.headerIndexes.concat(prepared.headerIndexes), 
+        'stories': oldPreparedMedia.stories.concat(prepared.stories),
+        'lastTimestamp': prepared.lastTimestamp
+      }));
+      //setPreparedMedia(prepared);
+      
+      let onlyMedias:any[] = prepared.layout.filter(item => typeof item.value !== 'string').map((item)=>{return item.value});
+      setMedias(oldOnlyMedia=>oldOnlyMedia.concat(onlyMedias));
+      setStories(oldStories=>oldStories.concat(prepared.stories));
+    }
+  },[photos]);
+
   return photos ? (
     <View
       style={{
@@ -120,28 +141,25 @@ const PhotosContainer: React.FC<Props> = (props) => {
       }}
     >
           <PinchZoom
-            scale={scale}
-            baseScale={baseScale}
-            baseScale2={baseScale2}
-            setNumColumns={setNumColumns}
-            numColumns={numColumns}
+            scale={props.scale}
+            baseScale2={props.baseScale2}
             focalX={focalX}
             focalY={focalY}
             numberOfPointers={numberOfPointers}
             velocity={velocity}
           >
             <AllPhotos
-              scale={scale}
-              baseScale={baseScale}
-              photos={photos}
-              numColumns={numColumns}
+              scale={props.scale}
+              baseScale={props.baseScale}
+              scrollY2={props.scrollY2} 
+              scrollY3={props.scrollY3} 
+              scrollY4={props.scrollY4}
               loading={loading.current}
               focalX={focalX}
               focalY={focalY}
               numberOfPointers={numberOfPointers}
               velocity={velocity}
               storiesHeight={storiesHeight}
-              scrollAnim={props.scrollAnim}
               HEADER_HEIGHT={props.HEADER_HEIGHT}
               headerShown={props.headerShown}
             />

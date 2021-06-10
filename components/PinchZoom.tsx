@@ -13,16 +13,13 @@ import {
 import {
   useRecoilState,
 } from 'recoil';
-
+import {numColumnsState} from '../states';
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 interface Props {
   scale: Animated.Value;
-  baseScale: Animated.AnimatedAddition;
   baseScale2: Animated.Value;
-  setNumColumns: Function;
-  numColumns: 2 | 3 | 4;
   focalX: Animated.Value;
   focalY: Animated.Value;
   numberOfPointers: Animated.Value;
@@ -30,11 +27,13 @@ interface Props {
 }
 
 const PinchZoom: React.FC<Props> = (props) => {
+  const [numColumns, setNumColumns] = useRecoilState(numColumnsState);
+
   const _pinchOrZoom = useRef<'pinch' | 'zoom' | undefined>();
   const sortCondition = useRef<sortCondition>('day');
 
   useEffect(()=>{
-    console.log([Date.now()+': component PinchZoom'+props.numColumns+' rendered']);
+    console.log([Date.now()+': component PinchZoom'+numColumns+' rendered']);
   });
   let pinchRef = createRef<PinchGestureHandler>();
   
@@ -45,7 +44,7 @@ const PinchZoom: React.FC<Props> = (props) => {
   let _onPinchHandlerStateChange = (event:HandlerStateChangeEvent<PinchGestureHandlerEventPayload>) => {
     if (event.nativeEvent.oldState === State.ACTIVE && event.nativeEvent.state !== State.ACTIVE) {
       let scale:number = event.nativeEvent.scale;
-      if((scale > 1.3 && props.numColumns>2) || (scale < 0.8 && props.numColumns<4)){
+      if((scale > 1.3 && numColumns>2) || (scale < 0.8 && numColumns<4)){
         Animated.timing(props.scale, {
           toValue: scale>1?4:0,
           duration: 250,
@@ -83,11 +82,11 @@ const PinchZoom: React.FC<Props> = (props) => {
         let _sortCondition = changeSortCondition(
           sortCondition.current,
           _pinchOrZoom.current,
-          props.numColumns,
+          numColumns,
         );
           
         sortCondition.current = _sortCondition.sortCondition;
-          props.setNumColumns(_sortCondition.numColumns);
+          setNumColumns(_sortCondition.numColumns);
           props.scale.setValue(1);
           if(_sortCondition.numColumns===2){
             props.baseScale2.setValue(0);

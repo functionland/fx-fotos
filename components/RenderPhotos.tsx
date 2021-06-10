@@ -55,7 +55,7 @@ interface Props {
   date: Date;
   loading: boolean;
   sortCondition: 'day' | 'month';
-  zIndex: number;
+  zIndex: Animated.AnimatedInterpolation;
   scale: Animated.Value;
   sizeTransformScale: Animated.AnimatedInterpolation;
   scrollOffset:{[key:number]:number};

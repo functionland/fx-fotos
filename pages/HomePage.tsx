@@ -1,10 +1,14 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { SafeAreaView, StyleSheet, Animated, View, useWindowDimensions, StatusBar } from 'react-native';
 import PhotosContainer from '../components/PhotosContainer';
-import { useEffect } from 'react';
 
 interface Props {
-  scrollAnim: Animated.Value;
+  scrollY2: Animated.Value;
+  scrollY3: Animated.Value;
+  scrollY4: Animated.Value;
+  scale: Animated.Value;
+  baseScale: Animated.AnimatedAddition;
+  baseScale2: Animated.Value;
   HEADER_HEIGHT: number;
   headerShown: Animated.Value;
 }
@@ -20,7 +24,12 @@ const HomePage: React.FC<Props> = (props) => {
     <SafeAreaView style={styles.SafeAreaView}>
       <View style={[styles.View, {width: SCREEN_WIDTH, zIndex:1, marginTop:(StatusBar.currentHeight||0)}]}>
         <PhotosContainer 
-          scrollAnim={props.scrollAnim} 
+          scrollY2={props.scrollY2} 
+          scrollY3={props.scrollY3} 
+          scrollY4={props.scrollY4} 
+          scale={props.scale} 
+          baseScale={props.baseScale} 
+          baseScale2={props.baseScale2} 
           HEADER_HEIGHT={props.HEADER_HEIGHT} 
           headerShown={props.headerShown}
         />

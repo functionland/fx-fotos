@@ -1,4 +1,4 @@
-import React, {useEffect, createRef} from 'react';
+import React, {useRef, createRef} from 'react';
 import { Animated, View, useWindowDimensions, StyleSheet, Image, Text, StatusBar, SafeAreaView } from 'react-native';
 import {
     PanGestureHandler,
@@ -9,7 +9,7 @@ import {
 
 
 interface Props {
-    scrollAnim: Animated.Value;
+    scrollAnim: Animated.AnimatedAddition;
     HEADER_HEIGHT: number;
     headerShown: Animated.Value;
 }
@@ -27,7 +27,7 @@ const Header: React.FC<Props> = (props) => {
     extrapolateLeft: 'clamp',
     });
     const minusScrollY = Animated.multiply(clampedScrollY, -1);
-    const translateY = Animated.diffClamp(minusScrollY, -props.HEADER_HEIGHT-(StatusBar.currentHeight||0), 0);
+    const translateY = useRef(Animated.diffClamp(minusScrollY, -props.HEADER_HEIGHT-(StatusBar.currentHeight||0), 0)).current;
 
     return (
         <SafeAreaView>
