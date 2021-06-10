@@ -68,8 +68,7 @@ interface Props {
   setImagePosition: Function;
   storiesHeight: number;
   stories: story[]|undefined;
-  showStory:boolean;
-  setShowStory: Function;
+  showStory:Animated.Value;
   setStory:Function;
   scrollY: Animated.Value;
   HEADER_HEIGHT: number;
@@ -163,7 +162,7 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
                   numColumns={props.numColumns}
                   height={props.storiesHeight}
                   showStory={props.showStory}
-                  setShowStory={props.setShowStory}
+                  headerShown={props.headerShown}
                   setStory={props.setStory}
                 />
                 </View>

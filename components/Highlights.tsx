@@ -1,6 +1,6 @@
 import { Asset } from 'expo-media-library';
 import React, {useEffect, useRef, useState, createRef} from 'react';
-import { View, useWindowDimensions, StyleSheet, Image, Text } from 'react-native';
+import { View, useWindowDimensions, StyleSheet, Image, Text, Animated } from 'react-native';
 import {story, } from '../types/interfaces';
 import { useBackHandler } from '@react-native-community/hooks'
 
@@ -17,8 +17,8 @@ interface Props {
   numColumns: 2|3|4;
   text?: string | undefined;
   height: number;
-  setShowStory: Function;
-  showStory:boolean;
+  showStory:Animated.Value;
+  headerShown: Animated.Value;
   setStory:Function;
 }
 
@@ -29,22 +29,20 @@ const Highlights: React.FC<Props> = (props) => {
       return () => {isMounted.current = false;}
   }, []);
 
+  useEffect(()=>{
+    
+    console.log(props.story);
+  },[props.story])
+
   const SCREEN_WIDTH = useWindowDimensions().width;
 
   const _tapRef = createRef<TapGestureHandler>();
 
-  useBackHandler(() => {
-      if (props.showStory) {
-        props.setShowStory(false);
-        return true;
-      }
-      // let the default thing happen
-      return false;
-  });
-
   const openHighlight = () => {
     props.setStory(props.story);
-    props.setShowStory(true);
+    console.log('opening highlight');
+    props.showStory.setValue(1);
+    props.headerShown.setValue(0);
     ////console.log('here');
   }
 

@@ -69,7 +69,7 @@ const AllPhotos: React.FC<Props> = (props) => {
     });
   }
   const modalShown = useRef(new Animated.Value(0)).current;
- 
+  const showStory = useRef(new Animated.Value(0)).current;
 
   const [scrollOffset, setScrollOffset] = useState<{[key:string]:(2|3|4|number)}>({'in':0,'to':0});
   const [preparedMedia, setPreparedMedia] = useState<FlatSection>({layout:[],headerIndexes:[], stories:[], lastTimestamp:0});
@@ -77,7 +77,6 @@ const AllPhotos: React.FC<Props> = (props) => {
   const [imagePosition, setImagePosition] = useState<{x:number;y:number}>({x:0,y:0});
   const [medias, setMedias] = useState<Asset[]>([]);
   const [stories, setStories] = useState<story[]>([]);
-  const [showStory, setShowStory] = useState<boolean>(false);
   const [showActionBar, setShowActionBar] = useState<boolean>(false);
   const [story, setStory] = useState<story|undefined>();
   const [selectedAssets, setSelectedAssets] = useState<Asset[]>([]);
@@ -184,7 +183,6 @@ const AllPhotos: React.FC<Props> = (props) => {
         storiesHeight={props.storiesHeight}
         stories={stories}
         showStory={showStory}
-        setShowStory={setShowStory}
         setStory={setStory}
         scrollY={scrollY2}
         HEADER_HEIGHT={props.HEADER_HEIGHT}
@@ -227,7 +225,6 @@ const AllPhotos: React.FC<Props> = (props) => {
         storiesHeight={props.storiesHeight}
         stories={stories}
         showStory={showStory}
-        setShowStory={setShowStory}
         setStory={setStory}
         scrollY={scrollY3}
         HEADER_HEIGHT={props.HEADER_HEIGHT}
@@ -271,7 +268,6 @@ const AllPhotos: React.FC<Props> = (props) => {
         stories={stories}
         showStory={showStory}
         setStory={setStory}
-        setShowStory={setShowStory}
         scrollY={scrollY4}
         HEADER_HEIGHT={props.HEADER_HEIGHT}
         onMediaLongTap={onMediaLongTap}
@@ -290,7 +286,7 @@ const AllPhotos: React.FC<Props> = (props) => {
       <StoryHolder 
         duration={1500}
         showStory={showStory}
-        setShowStory={setShowStory}
+        headerShown={props.headerShown}
         story={story}
       />
       <ActionBar

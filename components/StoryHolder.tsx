@@ -1,9 +1,8 @@
 import { Asset } from 'expo-media-library';
 import React, {useEffect, useRef, useState, createRef} from 'react';
-import { View, SafeAreaView, useWindowDimensions, StyleSheet, Image } from 'react-native';
+import { View, Animated, useWindowDimensions, StyleSheet, } from 'react-native';
 import StoryContainer from './Story/stories/StoryContainer';
 import {story, } from '../types/interfaces';
-import { useBackHandler } from '@react-native-community/hooks';
 import { timestampToDate } from '../utils/functions';
 
 import {
@@ -12,52 +11,65 @@ import {
 } from './Story/utils/colors';
 
 interface Props {
-    story:story|undefined;
+  story:story|undefined;
   duration: number;
-  showStory: boolean;
-  setShowStory: Function;
+  showStory: Animated.Value;
+  headerShown: Animated.Value;
 }
 
 const StoryHolder: React.FC<Props> = (props) => {
+  const close = () => {
+    props.showStory.setValue(0);
+    props.headerShown.setValue(1);
+  }
   const isMounted = useRef(false);
   useEffect(() => {
       isMounted.current = true;
-      return () => {isMounted.current = false;}
+      return () => {
+        isMounted.current = false;
+        props.showStory.removeAllListeners();
+      }
   }, []);
-
 
   const SCREEN_WIDTH = useWindowDimensions().width;
   const SCREEN_HEIGHT = useWindowDimensions().height;
 
-  useBackHandler(() => {
-      if (props.showStory) {
-        props.setShowStory(false);
-        return true;
-      }
-      // let the default thing happen
-      return false;
+  const storyShown = useRef<number>(0);
+
+  props.showStory.removeAllListeners();
+  props.showStory.addListener(({value})=>{
+    console.log('updated value '+value);
+    if(storyShown.current !== value){
+      storyShown.current = value;
+      console.log('updated value '+value);
+    }
   });
 
   return props.story ? (
-    <View style={
+    <Animated.View style={
       {
         flex: 1, 
         flexDirection: 'column', 
         position: 'absolute', 
         top:0, 
         left:0, 
-        opacity:props.showStory?1:0,
-        width:props.showStory?SCREEN_WIDTH:0,
-        height:props.showStory?SCREEN_HEIGHT:0,
-        zIndex:5,
+        opacity:props.showStory,
+        width:SCREEN_WIDTH,
+        height:SCREEN_HEIGHT,
+        zIndex:Animated.multiply(5, props.showStory),
         backgroundColor:'black',
+        transform:[
+          {
+            scale: props.showStory
+          }
+        ]
       }
     }>
       {/* Individual Story View component */}
       <StoryContainer
         visible={props.showStory}
         enableProgress={true}
-        images={props.story.medias}
+        images={props.story?.medias}
         id={"Story_"+Math.random()}
         duration={5}
         containerStyle={{
@@ -85,9 +97,11 @@ const StoryHolder: React.FC<Props> = (props) => {
         }}
 
         //Callback when status view completes
-        onComplete={() => props.setShowStory(false)}
+        onComplete={() => {
+          close();
+        }}
       />
-    </View>
+    </Animated.View>
   ) : (
     <></>
   );

@@ -2,23 +2,23 @@ import React, { useEffect, useState, useRef, useReducer } from "react";
 import { GREEN, GRAY, LIGHT_GRAY, LIGHT_GREEN, BAR_INACTIVE_COLOR, WHITE, BAR_ACTIVE_COLOR, } from "../utils/colors";
 import { ProgressItemProps } from "../utils/interfaceHelper";
 import { progressReducer, initialState, PROGRESS } from "./ProgressReducer";
-import { View, StyleSheet, Dimensions } from "react-native";
-
-var isValid = true
-var isBlock = false
+import { View, StyleSheet, Animated, useWindowDimensions } from "react-native";
 
 const OFFSET = 100
 const BAR_WIDTH = 100
 const BAR_HEIGHT = 7
 
 function ProgressItem(props: ProgressItemProps) {
-  const isMounted = useRef(false);
+  const isMounted = useRef<boolean>(false);
+  const listener = useRef<any>();
+  const isBlock = useRef<boolean>(false);
+  const isValid = useRef<boolean>(true);
+  const SCREEN_WIDTH = useWindowDimensions().width;
+
   useEffect(() => {
     isMounted.current = true;
-    return () => {isMounted.current = false;clearTimeout(listener);}
+    return () => {isMounted.current = false;clearTimeout(listener.current);}
   }, []);
-  // const [refreshProgress, setRefreshProgress] = useState(true)
-  // const [progress, setProgress] = useState(0)
 
   var [state, dispatch] = useReducer(progressReducer, initialState);
   var { progress } = state;
@@ -27,36 +27,33 @@ function ProgressItem(props: ProgressItemProps) {
   const barInActiveColor = props.barStyle && props.barStyle.barInActiveColor ? props.barStyle.barInActiveColor : BAR_INACTIVE_COLOR
   const barWidth = props.barStyle && props.barStyle.barWidth ? props.barStyle.barWidth : BAR_WIDTH
   const barHeight = props.barStyle && props.barStyle.barHeight ? props.barStyle.barHeight : BAR_HEIGHT
-  const [listener, setListener] = useState<any>();
+
   React.useEffect(() => {
-    if(isMounted){
       if (props.enableProgress) {
         if (progress >= 0 && progress < OFFSET) {
           if (progress == OFFSET - 2) {
-            isValid = true
+            isValid.current = true
           }
-          if (!isBlock && isMounted) {
+          if (!isBlock.current) {
             startProgress()
           } else {
-            isBlock = false
+            isBlock.current = false
             dispatch({ type: PROGRESS, payload: progress + 1 })
           }
         } else {
-          if (isValid) {
-            clearTimeout(listener)
-            isValid = false
+          if (isValid.current) {
+            clearTimeout(listener.current)
+            isValid.current = false
             props.onChangePosition()
           }
         }
       } else {
         blockProgress()
       }
-    }
   }, [progress, props.enableProgress])
 
   React.useEffect(() => {
-    if(isMounted){
-      clearTimeout(listener);
+      clearTimeout(listener.current);
       if (props.enableProgress) {
         // This if condition is critical at it blocks the multiple callbacks for other position in row
         if (props.currentIndex === props.progressIndex) {
@@ -65,34 +62,25 @@ function ProgressItem(props: ProgressItemProps) {
             dispatch({ type: PROGRESS, payload: 0 });
             ////console.log("Progress Change => === ", props.progressIndex);
           } else {
-            isValid = false;
+            isValid.current = false;
             dispatch({ type: PROGRESS, payload: 0 });
           }
         }
       } else {
         blockProgress();
       }
-    }
   }, [props.progressIndex])
 
   function startProgress() {
-    if(isMounted){
-      clearTimeout(listener);
-      setListener(setTimeout(() => {
-        if(isMounted){
-          // setProgress(progress + 1)
+      clearTimeout(listener.current);
+      listener.current = (setTimeout(() => {
           dispatch({ type: PROGRESS, payload: progress + 1 });
-        }else{
-          clearTimeout(listener);
-        }
       }, props.duration));
-    }
   }
 
   function blockProgress() {
-    clearTimeout(listener)
-    isValid = false
-    isBlock = true
+    clearTimeout(listener.current)
+    isBlock.current = true
   }
 
   return (
@@ -100,19 +88,34 @@ function ProgressItem(props: ProgressItemProps) {
       style={[
         styles.mainParent,
         {
-          minWidth: `${barWidth / props.size - 1}%`,
+          minWidth: (barWidth / props.size - 1)*(SCREEN_WIDTH-5)/100,
           backgroundColor: barInActiveColor,
         }
       ]}>
 
       {props.currentIndex === props.progressIndex && (
-        <View
+        <Animated.View
           style={[
             styles.childActive,
             {
-              width: `${progress}%`,
+              width: (barWidth / props.size - 1)*(SCREEN_WIDTH-5)/100,
               height: barHeight,
               backgroundColor: barActiveColor,
+              transform:[
+                {
+                  scaleX: Animated.divide(progress,100)
+                },
+                {
+                  translateX: Animated.divide(
+                    Animated.subtract(
+                    Animated.multiply(
+                        Animated.divide(progress,100),(barWidth/props.size - 1)*(SCREEN_WIDTH-5)/100)
+                    ,(barWidth/props.size - 1)*(SCREEN_WIDTH-5)/100
+                    )
+                  ,Animated.multiply(2,Animated.add(Animated.divide(progress,100), 0.000001)))
+
+                }
+              ]
             }]}
         />
       )}

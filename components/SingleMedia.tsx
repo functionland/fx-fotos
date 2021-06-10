@@ -53,7 +53,7 @@ const SingleMedia: React.FC<Props> = (props) => {
   const isMounted = useRef(false);
   useEffect(() => {
     isMounted.current = true;
-    return () => {isMounted.current = false;}
+    return () => {isMounted.current = false;props.modalShown.removeAllListeners();}
   }, []);
 
   const isModalShown = useRef<number>(0);
