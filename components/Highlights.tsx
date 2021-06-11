@@ -10,6 +10,8 @@ import {
   TapGestureHandlerEventPayload,
   State,
 } from 'react-native-gesture-handler';
+import {default as Reanimated,} from 'react-native-reanimated';
+
 
 import {
   useRecoilState,
@@ -23,7 +25,7 @@ interface Props {
   text?: string | undefined;
   height: number;
   showStory:Animated.Value;
-  headerShown: Animated.Value;
+  headerShown:Reanimated.SharedValue<number>;
 }
 
 const Highlights: React.FC<Props> = (props) => {
@@ -48,7 +50,7 @@ const Highlights: React.FC<Props> = (props) => {
     setStory(props.story);
     console.log('opening highlight');
     props.showStory.setValue(1);
-    props.headerShown.setValue(0);
+    props.headerShown.value = 0;
     ////console.log('here');
   }
 

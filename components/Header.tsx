@@ -13,7 +13,7 @@ interface Props {
     scrollY3: Reanimated.SharedValue<number>;
     scrollY4: Reanimated.SharedValue<number>;
     HEADER_HEIGHT: number;
-    headerShown: Animated.Value;
+    headerShown: Reanimated.SharedValue<number>;
 }
 
 const Header: React.FC<Props> = (props) => {
@@ -40,7 +40,8 @@ const Header: React.FC<Props> = (props) => {
         return {
             transform: [{
                 translateY: translateY.value,
-            }]
+            }],
+             opacity: props.headerShown.value
           };
     });
     return (
@@ -48,7 +49,6 @@ const Header: React.FC<Props> = (props) => {
             style={[styles.main, animatedStyle, {
                 height: props.HEADER_HEIGHT+2*(StatusBar.currentHeight || 0),
                 width: 400,
-                //opacity: props.headerShown
             }]}>
                     <View style={styles.item}></View>
                     <View style={[styles.item, ]}>

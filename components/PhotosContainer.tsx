@@ -21,7 +21,7 @@ interface Props {
   baseScale: Animated.AnimatedAddition;
   baseScale2: Animated.Value;
   HEADER_HEIGHT: number;
-  headerShown: Animated.Value;
+  headerShown: Reanimated.SharedValue<number>;
 }
 
 

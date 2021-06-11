@@ -3,14 +3,15 @@ import {createNativeStackNavigator} from 'react-native-screens/native-stack';
 import PermissionError from '../pages/PermissionError';
 import React, { useRef, } from 'react';
 import HomePage from '../pages/HomePage';
-import {StyleSheet, Animated, View} from 'react-native';
+import {StyleSheet, Animated, View, TouchableOpacity, Text} from 'react-native';
 import Header from '../components/Header';
-import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
+import { createBottomTabNavigator,BottomTabBarProps,BottomTabBarOptions } from '@react-navigation/bottom-tabs';
+//import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import { FontAwesome5 } from '@expo/vector-icons';
-import {default as Reanimated, useSharedValue,} from 'react-native-reanimated';
+import {default as Reanimated, useSharedValue, useAnimatedStyle, } from 'react-native-reanimated';
 
 const Stack = createNativeStackNavigator();
-const Tab = createMaterialBottomTabNavigator();
+const Tab = createBottomTabNavigator();
 
 const AppNavigation = () => {
   const scrollY2 = useSharedValue(0);
@@ -24,7 +25,7 @@ const AppNavigation = () => {
     outputRange: [1, 0, -1],
   }))).current;
 
-  const headerShown = useRef(new Animated.Value(1)).current;
+  const headerShown = useSharedValue(1);
 
   const HEADER_HEIGHT = 30;
   return (
@@ -81,9 +82,87 @@ interface Props {
   baseScale: Animated.AnimatedAddition;
   baseScale2: Animated.Value;
   HEADER_HEIGHT: number;
-  headerShown: Animated.Value;
+  headerShown: Reanimated.SharedValue<number>;
 }
 const HomeNavigation: React.FC<Props> = (mainProps) => {
+  const animatedStyle = useAnimatedStyle(()=>{
+    return {
+         opacity: mainProps.headerShown.value,
+         height: mainProps.headerShown.value==0?0:60
+      };
+  });
+  const TabBar = ({state, descriptors, navigation}: BottomTabBarProps<BottomTabBarOptions>) => {
+    return (
+      <Reanimated.View style={[animatedStyle,
+        { 
+          flexDirection: 'row',
+          backgroundColor:"white",
+          borderRadius:0,
+          justifyContent:"center",
+          alignItems:"center",
+          shadowRadius: 2,
+          shadowColor:'#000000',
+          elevation: 4,
+          shadowOffset: {
+            width: 0,
+            height: -3,
+          },
+        }
+      ]}>
+        {state.routes.map((route:any, index:any) => {
+          const { options } = descriptors[route.key];
+          const label =
+            options.tabBarLabel !== undefined
+              ? options.tabBarLabel
+              : options.title !== undefined
+              ? options.title
+              : route.name;
+
+              const icon =
+              options.tabBarIcon !== undefined
+                ? options.tabBarIcon
+                : null
+  
+          const isFocused = state.index === index;
+  
+          const onPress = () => {
+            const event = navigation.emit({
+              type: 'tabPress',
+              target: route.key,
+              canPreventDefault: true,
+            });
+  
+            if (!isFocused && !event.defaultPrevented) {
+              navigation.navigate(route.name);
+            }
+          };
+  
+          const onLongPress = () => {
+            navigation.emit({
+              type: 'tabLongPress',
+              target: route.key,
+            });
+          };
+  
+          return (
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel={options.tabBarAccessibilityLabel}
+              testID={options.tabBarTestID}
+              onPress={onPress}
+              onLongPress={onLongPress}
+              style={{ flex: 1, alignItems:"center" }}
+            >
+              <View>{icon?icon({focused:isFocused,color:isFocused ? '#0a72ac' : '#3e2465',size:18}):<></>}</View>
+              <Text style={{ color: isFocused ? '#0a72ac' : '#3e2465' }}>
+                {label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </Reanimated.View>
+    );
+  }
   return (
     <Animated.View 
       style={
@@ -94,32 +173,15 @@ const HomeNavigation: React.FC<Props> = (mainProps) => {
           }
         ]
       }>
-        <Tab.Navigator
-          screenOptions={{
-            tabBarColor: 'white',
-          }}
-          activeColor='#0a72ac'
-          inactiveColor="#3e2465"
-          //TODO: Find a way to remove the need to ignore ts error
-          //@ts-ignore 
-          barStyle={{ 
-            backgroundColor: 'white',
-            shadowOpacity: 1, 
-            shadowColor: 'black', 
-            shadowRadius: 30,
-            shadowOffset: {
-              width: 3,
-              height: 3
-            },
-            opacity: mainProps.headerShown,
-          }}
+        <Tab.Navigator 
+          tabBar={props => <TabBar {...props} />}
         >
           <Tab.Screen
             name="Photos"
             options={{
               tabBarLabel: 'Photos',
-              tabBarIcon: ({ color }) => (
-                <FontAwesome5 name="photo-video" color={color} size={24} />
+              tabBarIcon: ({ color, size }) => (
+                <FontAwesome5 name="photo-video" color={color} size={size} />
               ),
             }}
           >
@@ -139,8 +201,8 @@ const HomeNavigation: React.FC<Props> = (mainProps) => {
             component={Search}
             options={{
               tabBarLabel: 'Search',
-              tabBarIcon: ({ color }) => (
-                <FontAwesome5 name="search" size={24} color={color} />
+              tabBarIcon: ({ color, size }) => (
+                <FontAwesome5 name="search" size={size} color={color} />
               ),
             }}
           />
@@ -149,8 +211,8 @@ const HomeNavigation: React.FC<Props> = (mainProps) => {
             component={Library}
             options={{
               tabBarLabel: 'Library',
-              tabBarIcon: ({ color }) => (
-                <FontAwesome5 name="list-alt" size={24} color={color} />
+              tabBarIcon: ({ color, size }) => (
+                <FontAwesome5 name="list-alt" size={size} color={color} />
               ),
             }}
           />

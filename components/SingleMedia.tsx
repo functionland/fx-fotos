@@ -21,6 +21,7 @@ import {
   useRecoilState,
 } from 'recoil';
 import {numColumnsState, mediasState, singlePhotoIndexState} from '../states';
+import {default as Reanimated,} from 'react-native-reanimated';
 
 class ExternalScrollView extends BaseScrollView {
   private _scrollViewRef: any;
@@ -42,7 +43,7 @@ class ExternalScrollView extends BaseScrollView {
 
 interface Props {
   modalShown: Animated.Value;
-  headerShown: Animated.Value;
+  headerShown: Reanimated.SharedValue<number>;
   imagePosition: {x:number, y:number};
 }
 
@@ -166,7 +167,7 @@ const SingleMedia: React.FC<Props> = (props) => {
     setTimeout(()=>{
       props.modalShown.setValue(0);
       setSinglePhotoIndex(-1);
-      props.headerShown.setValue(1);
+      props.headerShown.value = 1;
       isModalShown.current=0;
       viewScale.setValue({x:0, y:0});
     }, duration/2)

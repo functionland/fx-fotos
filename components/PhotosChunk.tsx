@@ -14,6 +14,7 @@ import {
   TapGestureHandlerEventPayload,
   State,
 } from 'react-native-gesture-handler';
+import {default as Reanimated,} from 'react-native-reanimated';
 
 import {
   useRecoilState,
@@ -29,7 +30,7 @@ interface Props {
   sortCondition: 'day'|'month';
   index: number;
   modalShown: Animated.Value;
-  headerShown: Animated.Value;
+  headerShown: Reanimated.SharedValue<number>;
   setImagePosition: Function;
   headerHeight: number;
   onMediaLongTap: Function;
@@ -80,7 +81,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
           props.setImagePosition({x:imageOffsetX, y:imageOffsetY});
           setSinglePhotoIndex(props.index);
           console.log('Opening modal');
-          props.headerShown.setValue(0);
+          props.headerShown.value  = 0;
           props.modalShown.setValue(1);
         }else{
             props.onMediaLongTap(props.photo.value);

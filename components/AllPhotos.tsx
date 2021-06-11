@@ -30,7 +30,7 @@ interface Props {
   velocity: Animated.Value;
   storiesHeight: number;
   HEADER_HEIGHT: number;
-  headerShown: Animated.Value;
+  headerShown: Reanimated.SharedValue<number>;
 }
 
 const AllPhotos: React.FC<Props> = (props) => {

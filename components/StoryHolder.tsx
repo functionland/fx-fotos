@@ -13,11 +13,11 @@ import {
   useRecoilState,
 } from 'recoil';
 import {storyState} from '../states';
-
+import {default as Reanimated,} from 'react-native-reanimated';
 interface Props {
   duration: number;
   showStory: Animated.Value;
-  headerShown: Animated.Value;
+  headerShown: Reanimated.SharedValue<number>;
 }
 
 const StoryHolder: React.FC<Props> = (props) => {
@@ -25,7 +25,7 @@ const StoryHolder: React.FC<Props> = (props) => {
 
   const close = () => {
     props.showStory.setValue(0);
-    props.headerShown.setValue(1);
+    props.headerShown.value = 1;
   }
   const isMounted = useRef(false);
   useEffect(() => {

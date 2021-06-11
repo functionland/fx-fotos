@@ -36,20 +36,20 @@ const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
 class ExternalScrollView extends BaseScrollView {
   scrollTo(...args: any[]) {
     //if ((this.props as any).scrollRefExternal?.current) { 
-      //(this.props as any).scrollRefExternal?.current?.scrollTo(...args);
+      (this.props as any).scrollRefExternal?.current?.scrollTo(...args);
       //reanimatedScrollTo((this.props as any).scrollRefExternal, 0, args[0].y, true);
-      (this.props as any).scroll.value = args[0].y;
+      //(this.props as any).scroll.value = args[0].y;
     //}
   }
   render() {
     return (
       <Reanimated.ScrollView {...this.props}
         style={{zIndex:1}}
-        //ref={(this.props as any).scrollRefExternal}
+        ref={(this.props as any).scrollRefExternal}
         scrollEventThrottle={16}
         nestedScrollEnabled = {true}
-        onScroll={(this.props as any)._onScrollExternal}
-        //onScroll={Animated.event([], {listener: this.props.onScroll, useNativeDriver: true})}
+        //onScroll={(this.props as any)._onScrollExternal}
+        //onScroll={Reanimated.event([(this.props as any).animatedEvent], {listener: this.props.onScroll, useNativeDriver: true})}
       >
         {this.props.children}
       </Reanimated.ScrollView>
@@ -73,7 +73,7 @@ interface Props {
   focalY: Animated.Value;
   numberOfPointers: Animated.Value;
   modalShown: Animated.Value;
-  headerShown: Animated.Value;
+  headerShown: Reanimated.SharedValue<number>;
   setImagePosition: Function;
   storiesHeight: number;
   showStory:Animated.Value;
@@ -101,6 +101,7 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
   const scrollRefExternal = useAnimatedRef<Reanimated.ScrollView>();
   const scroll = useSharedValue(0);
   useDerivedValue(() => {
+    console.log('reanimatedScrollTo '+scroll.value);
     reanimatedScrollTo(scrollRefExternal, 0, scroll.value, false);
   });
  
@@ -296,7 +297,7 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
     console.log('original onscroll')
     setShowThumbScroll(true);
   }
-
+  const test = new Reanimated.Value(0);
   const scrollHandlerReanimated = useAnimatedScrollHandler({
     onScroll: (e) => {
       //position.value = e.contentOffset.x;
@@ -305,10 +306,10 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
     },
     
     onEndDrag: (e) => {
-      //scrollToNearestItem(e.contentOffset.x);
+      console.log('onEndDrag');
     },
     onMomentumEnd: (e) => {
-      console.log('drag ended');
+      console.log('onMomentumEnd');
     },
   });
   const AnimatedRecyclerListView = Reanimated.createAnimatedComponent(RecyclerListView);
@@ -350,7 +351,7 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
         ],
       }}
     >
-      <AnimatedRecyclerListView
+      <RecyclerListView
         ref={scrollRef}
         externalScrollView={ExternalScrollView}
         style={{
@@ -379,11 +380,22 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
           //onMomentumScrollEnd: _onMomentumScrollEnd,
           ////onScrollEndDrag: _onScrollEnd,
           scrollRefExternal:scrollRefExternal,
-          scroll:scroll,
           //scrollEventThrottle:16,
           //automaticallyAdjustContentInsets: false,
           //showsVerticalScrollIndicator:false,
-          _onScrollExternal:scrollHandlerReanimated
+          _onScrollExternal:scrollHandlerReanimated,
+          //animatedEvent:{nativeEvent: {contentOffset: {y: props.scrollY}, contentSize: {height: layoutHeightAnimated}}},
+          animatedEvent:{nativeEvent: {contentOffset:  {y: (y: any) =>
+            Reanimated.block([
+
+              Reanimated.call(
+                [y],
+                ([y]) => (props.scrollY = y)
+              )
+            ])
+          }
+        },
+        },
         }}
       />
       
