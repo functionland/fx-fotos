@@ -21,6 +21,8 @@ import { LayoutUtil } from '../utils/LayoutUtil';
 import FloatingFilters from './FloatingFilters';
 import { useBackHandler } from '@react-native-community/hooks'
 import { Asset } from 'expo-media-library';
+import {default as Reanimated, useSharedValue, useAnimatedRef, useDerivedValue, scrollTo as reanimatedScrollTo, useAnimatedScrollHandler} from 'react-native-reanimated';
+
 
 import {
   useRecoilState,
@@ -30,24 +32,28 @@ import {storiesState} from '../states';
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
-class ExternalScrollView extends BaseScrollView {
 
+class ExternalScrollView extends BaseScrollView {
   scrollTo(...args: any[]) {
-    if ((this.props as any).scrollRefExternal?.current) { 
-      (this.props as any).scrollRefExternal?.current?.scrollTo(...args);
-    }
+    //if ((this.props as any).scrollRefExternal?.current) { 
+      //(this.props as any).scrollRefExternal?.current?.scrollTo(...args);
+      //reanimatedScrollTo((this.props as any).scrollRefExternal, 0, args[0].y, true);
+      (this.props as any).scroll.value = args[0].y;
+    //}
   }
   render() {
     return (
-      <AnimatedScrollView {...this.props}
+      <Reanimated.ScrollView {...this.props}
         style={{zIndex:1}}
-        ref={(scrollView: any) => {(this.props as any).scrollRefExternal.current = scrollView;}}
+        //ref={(this.props as any).scrollRefExternal}
         scrollEventThrottle={16}
         nestedScrollEnabled = {true}
-        onScroll={Animated.event([(this.props as any).animatedEvent], {listener: this.props.onScroll, useNativeDriver: true})}
+        onScroll={(this.props as any)._onScrollExternal}
+        //onScroll={Animated.event([], {listener: this.props.onScroll, useNativeDriver: true})}
       >
         {this.props.children}
-      </AnimatedScrollView>);
+      </Reanimated.ScrollView>
+    );
   }
 }
 interface Props {
@@ -71,7 +77,7 @@ interface Props {
   setImagePosition: Function;
   storiesHeight: number;
   showStory:Animated.Value;
-  scrollY: Animated.Value;
+  scrollY: Reanimated.SharedValue<number>;
   HEADER_HEIGHT: number;
   onMediaLongTap: Function;
   showSelectionCheckbox:boolean;
@@ -92,7 +98,12 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
   layoutProvider.shouldRefreshWithAnchoring = true;
   const [viewLoaded, setViewLoaded] = useState<boolean>(false);
   const scrollRef:any = useRef();
-  let scrollRefExternal:any = useRef();
+  const scrollRefExternal = useAnimatedRef<Reanimated.ScrollView>();
+  const scroll = useSharedValue(0);
+  useDerivedValue(() => {
+    reanimatedScrollTo(scrollRefExternal, 0, scroll.value, false);
+  });
+ 
   const [lastScrollOffset, setLastScrollOffset] = useState<number>(0);
   const [layoutHeight, setLayoutHeight] = useState<number>(99999999999999);
 
@@ -103,7 +114,7 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
 
   const isDragging = useRef(new Animated.Value(2)).current; //2:is scrolling using screen slide, 1: is scrolling using thumb scroll
   const velocityY = useRef(new Animated.Value(0)).current;
-  const layoutHeightAnimated = useRef(new Animated.Value(9999999999999)).current;
+  const layoutHeightAnimated = useSharedValue(99999999);
   const [floatingFiltersOpacity, setFloatingFiltersOpacity] = useState<number>(0);
 
   const [currentImageTimestamp, setCurrentImageTimestamp] = useState<number>(0);
@@ -114,6 +125,9 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
   useEffect(()=>{
     console.log([Date.now()+': component RenderPhotos'+props.numColumns+' rendered']);
   });
+
+
+  //scrollRefExternal?.current?.scrollTo({x:0,y:100});
 
   useEffect(()=>{
     console.log(['component RenderPhotos mounted']);
@@ -279,9 +293,25 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
 
   const _onScroll = (rawEvent: ScrollEvent, offsetX: number, offsetY: number) => {
     //console.log(props.numColumns+'_'+rawEvent.nativeEvent.contentOffset.y);
+    console.log('original onscroll')
     setShowThumbScroll(true);
   }
-  
+
+  const scrollHandlerReanimated = useAnimatedScrollHandler({
+    onScroll: (e) => {
+      //position.value = e.contentOffset.x;
+      props.scrollY.value = e.contentOffset.y;
+      layoutHeightAnimated.value = e.contentSize.height;
+    },
+    
+    onEndDrag: (e) => {
+      //scrollToNearestItem(e.contentOffset.x);
+    },
+    onMomentumEnd: (e) => {
+      console.log('drag ended');
+    },
+  });
+  const AnimatedRecyclerListView = Reanimated.createAnimatedComponent(RecyclerListView);
   return props.photos.layout ? (
     <Animated.View
       // eslint-disable-next-line react-native/no-inline-styles
@@ -320,7 +350,7 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
         ],
       }}
     >
-      <RecyclerListView
+      <AnimatedRecyclerListView
         ref={scrollRef}
         externalScrollView={ExternalScrollView}
         style={{
@@ -335,25 +365,25 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
           left: 0,
           zIndex:1,
         }}
-        contentContainerStyle={{ margin: 0 }}
         ////onEndReached={() => props.setLoadMore(new Date().getTime())}
         ////onEndReachedThreshold={0.4}
         dataProvider={dataProvider}
         layoutProvider={layoutProvider}
         rowRenderer={rowRenderer}
-        onScroll={_onScroll}
+        //onScroll={scrollHandlerReanimated}
         key={"RecyclerListView_"+props.sortCondition + props.numColumns}
-        scrollEventThrottle={16}
         extendedState={{showSelectionCheckbox:props.showSelectionCheckbox}}
         scrollViewProps={{
-          ////ref: scrollRefExternal,
-          onMomentumScrollEnd: _onMomentumScrollEnd,
+          //ref: scrollRefExternal,
+          
+          //onMomentumScrollEnd: _onMomentumScrollEnd,
           ////onScrollEndDrag: _onScrollEnd,
           scrollRefExternal:scrollRefExternal,
-          scrollEventThrottle:16,
-          automaticallyAdjustContentInsets: false,
-          showsVerticalScrollIndicator:false,
-          animatedEvent:{nativeEvent: {contentOffset: {y: props.scrollY}, contentSize: {height: layoutHeightAnimated}}},
+          scroll:scroll,
+          //scrollEventThrottle:16,
+          //automaticallyAdjustContentInsets: false,
+          //showsVerticalScrollIndicator:false,
+          _onScrollExternal:scrollHandlerReanimated
         }}
       />
       
@@ -422,6 +452,6 @@ const styles = StyleSheet.create({
 });
 function arePropsEqual(prevProps:Props, nextProps:Props) {
   console.log('RenderPhotos memo condition:'+(prevProps.photos?.layout?.length === nextProps.photos?.layout?.length));
-  return prevProps.photos?.layout?.length === nextProps.photos?.layout?.length && prevProps.zIndex === nextProps.zIndex; 
+  return prevProps.photos?.layout?.length === nextProps.photos?.layout?.length; 
 }
 export default React.memo(RenderPhotos);

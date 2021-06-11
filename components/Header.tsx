@@ -1,4 +1,4 @@
-import React, {useRef, createRef} from 'react';
+import React, {useEffect, useRef} from 'react';
 import { Animated, View, useWindowDimensions, StyleSheet, Image, Text, StatusBar, SafeAreaView } from 'react-native';
 import {
     PanGestureHandler,
@@ -6,41 +6,49 @@ import {
     PanGestureHandlerEventPayload,
     State,
   } from 'react-native-gesture-handler';
-
+  import {default as Reanimated, useAnimatedStyle, useSharedValue, Extrapolate} from 'react-native-reanimated';
 
 interface Props {
-    scrollAnim: Animated.AnimatedAddition;
+    scrollY2: Reanimated.SharedValue<number>;
+    scrollY3: Reanimated.SharedValue<number>;
+    scrollY4: Reanimated.SharedValue<number>;
     HEADER_HEIGHT: number;
     headerShown: Animated.Value;
 }
 
 const Header: React.FC<Props> = (props) => {
-    const panRef = createRef<PanGestureHandler>();
-    const translationY = new Animated.Value(0);
-
-    const SCREEN_WIDTH = useWindowDimensions().width;
-    const SCREEN_HEIGHT = useWindowDimensions().height;
+    useEffect(()=>{
+        console.log('HEADER mounted');
+    })
+    const minusScrollYPrevRef = useSharedValue(0);
+    const translateY = useSharedValue(0);
     
-    const clampedScrollY = props.scrollAnim.interpolate({
-    inputRange: [props.HEADER_HEIGHT, props.HEADER_HEIGHT + 1],
-    outputRange: [0, 1],
-    extrapolateLeft: 'clamp',
+    const animatedStyle = useAnimatedStyle(()=>{
+        const clamp = (num:number, min:number, max:number) => {
+            return num <= min 
+              ? min 
+              : num >= max 
+                ? max 
+                : num
+          }
+        const animScroll = (props.scrollY2.value+props.scrollY3.value+props.scrollY4.value);
+        const clampedScrollY = Reanimated.interpolate(animScroll, [props.HEADER_HEIGHT, props.HEADER_HEIGHT + 1], [0, 1], Extrapolate.CLAMP);
+        const minusScrollY = -1*clampedScrollY;
+        //const translateY = Reanimated.diffClamp(minusScrollY, -props.HEADER_HEIGHT, 0);
+        translateY.value = clamp(translateY.value + (minusScrollY-minusScrollYPrevRef.value), -props.HEADER_HEIGHT, 0)
+        minusScrollYPrevRef.value = minusScrollY;
+        return {
+            transform: [{
+                translateY: translateY.value,
+            }]
+          };
     });
-    const minusScrollY = Animated.multiply(clampedScrollY, -1);
-    const translateY = useRef(Animated.diffClamp(minusScrollY, -props.HEADER_HEIGHT-(StatusBar.currentHeight||0), 0)).current;
-
     return (
-        <SafeAreaView>
-            <Animated.View 
-            style={[styles.main, {
+            <Reanimated.View 
+            style={[styles.main, animatedStyle, {
                 height: props.HEADER_HEIGHT+2*(StatusBar.currentHeight || 0),
                 width: 400,
-                transform: [
-                    {
-                        translateY: translateY,
-                    }
-                ],
-                opacity: props.headerShown
+                //opacity: props.headerShown
             }]}>
                     <View style={styles.item}></View>
                     <View style={[styles.item, ]}>
@@ -50,8 +58,7 @@ const Header: React.FC<Props> = (props) => {
                         />
                     </View>
                     <View style={styles.item}></View>
-            </Animated.View>
-        </SafeAreaView>
+            </Reanimated.View>
     )
 }
 const styles = StyleSheet.create({

@@ -1,11 +1,12 @@
 import React, {useEffect} from 'react';
 import { SafeAreaView, StyleSheet, Animated, View, useWindowDimensions, StatusBar } from 'react-native';
 import PhotosContainer from '../components/PhotosContainer';
+import {default as Reanimated,} from 'react-native-reanimated';
 
 interface Props {
-  scrollY2: Animated.Value;
-  scrollY3: Animated.Value;
-  scrollY4: Animated.Value;
+  scrollY2: Reanimated.SharedValue<number>
+  scrollY3: Reanimated.SharedValue<number>
+  scrollY4: Reanimated.SharedValue<number>
   scale: Animated.Value;
   baseScale: Animated.AnimatedAddition;
   baseScale2: Animated.Value;

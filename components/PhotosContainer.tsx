@@ -12,10 +12,11 @@ import {
   useRecoilState,
 } from 'recoil';
 import {photosState, numColumnsState, storiesState, preparedMediaState, mediasState} from '../states';
+import {default as Reanimated,} from 'react-native-reanimated';
 interface Props {
-  scrollY2: Animated.Value;
-  scrollY3: Animated.Value;
-  scrollY4: Animated.Value;
+  scrollY2: Reanimated.SharedValue<number>
+  scrollY3: Reanimated.SharedValue<number>
+  scrollY4: Reanimated.SharedValue<number>
   scale: Animated.Value;
   baseScale: Animated.AnimatedAddition;
   baseScale2: Animated.Value;

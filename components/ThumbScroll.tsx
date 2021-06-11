@@ -11,6 +11,8 @@ import {
     PanGestureHandlerEventPayload,
     HandlerStateChangeEvent,
   } from 'react-native-gesture-handler';
+  import {default as Reanimated, useAnimatedStyle, Extrapolate} from 'react-native-reanimated';
+
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
@@ -28,14 +30,14 @@ interface Props {
     numColumns:2|3|4;
     headerIndexes:headerIndex[];
     numberOfPointers:Animated.Value;
-    scrollY:Animated.Value;
+    scrollY:Reanimated.SharedValue<number>;
     velocityY:Animated.Value;
     headerHeight:number;
     scrollRef:any;
     setStartScroll:Function;
     startScroll:boolean;
     setEndScroll: Function;
-    layoutHeight: Animated.Value;
+    layoutHeight: Reanimated.SharedValue<number>;
     isDragging:Animated.Value;
     dragY:Animated.Value;
     floatingFiltersOpacity: number;
@@ -61,12 +63,6 @@ const ThumbScroll: React.FC<Props> = (props) => {
         props.shouldIndicatorHide,
     );
 
-    /*const transformY:Animated.AnimatedInterpolation = Animated.add(Animated.multiply(Animated.subtract(2, props.numberOfPointers) , props.scrollY), props.lastOffset).interpolate({
-        inputRange: [0, fullSizeContentHeight],
-        outputRange: [0, SCREEN_HEIGHT]  // 0 : 150, 0.5 : 75, 1 : 0
-    });*/
-    const transformY:Animated.AnimatedInterpolation = props.scrollY;
-    //const transformY:Animated.AnimatedInterpolation = Animated.add(Animated.subtract(Animated.subtract(absoluteY, y), (StatusBar.currentHeight||0)),props.scrollY);
     const runHideTimer = () => {
         props.shouldIndicatorHide && setIsIndicatorHidden(true);
     };
@@ -110,7 +106,6 @@ const ThumbScroll: React.FC<Props> = (props) => {
             //props.dragY.setOffset(temp);
             
             props.setLastScrollOffset(temp);
-            //props.scrollY.setOffset(temp);
         }
     };
 
@@ -144,6 +139,17 @@ const ThumbScroll: React.FC<Props> = (props) => {
         }
     }
 
+    const animatedStyle = useAnimatedStyle(()=>{
+        return {
+            transform: [{
+                translateY: Reanimated.interpolate((props.scrollY.value* ((SCREEN_HEIGHT-props.indicatorHeight)/(props.layoutHeight.value-SCREEN_HEIGHT))),
+                    [0, SCREEN_HEIGHT-props.indicatorHeight],
+                    [0, SCREEN_HEIGHT-props.indicatorHeight],
+                    Extrapolate.CLAMP,
+                ),
+            }]
+          };
+    })
     
     return (
                         <Animated.View style={[styles.scrollIndicatorContainer,  {height: props.indicatorHeight,}]}>
@@ -154,25 +160,18 @@ const ThumbScroll: React.FC<Props> = (props) => {
                                 maxPointers={1}
                                 minPointers={1}
                                 shouldCancelWhenOutside={false}
-                                //hitSlop={{ right: 0, width:140 }}
+                                ////hitSlop={{ right: 0, width:140 }}
                                 avgTouches={false}
                                 enableTrackpadTwoFingerGesture={false}
                             >
-                            <Animated.View 
+                            <Reanimated.View 
                                 style={[
                                     styles.scrollIndicator,
+                                    animatedStyle,
                                     { 
                                         height: props.indicatorHeight,
                                         zIndex:5,
-                                        transform: [{
-                                            translateY: Animated.multiply(props.scrollY, Animated.divide((SCREEN_HEIGHT-props.indicatorHeight), Animated.subtract(props.layoutHeight, SCREEN_HEIGHT))).interpolate({
-                                                inputRange: [0, SCREEN_HEIGHT-props.indicatorHeight],
-                                                outputRange: [0, SCREEN_HEIGHT-props.indicatorHeight],
-                                                extrapolateRight: 'clamp',
-                                                extrapolateLeft: 'clamp',
-                                            }),
-                                        }],
-                                        opacity: fadeAnim,
+                                        //opacity: fadeAnim,
                                     },
                                     props.scrollIndicatorStyle,
                                 ]}
@@ -189,7 +188,7 @@ const ThumbScroll: React.FC<Props> = (props) => {
                                     </Animated.View>
                                 
                                 </View>
-                            </Animated.View>
+                            </Reanimated.View>
                             </PanGestureHandler>
                         </Animated.View>
 
@@ -239,7 +238,7 @@ const styles = StyleSheet.create({
     }
 });
 function arePropsEqual(prevProps:Props, nextProps:Props) {
-    console.log('ThumbScroll memo condition:'+(prevProps.layoutHeight === nextProps.layoutHeight));
-    return prevProps.layoutHeight === nextProps.layoutHeight && prevProps.floatingFiltersOpacity===nextProps.floatingFiltersOpacity && prevProps.showThumbScroll===nextProps.showThumbScroll; 
+    console.log('ThumbScroll memo condition:');
+    return prevProps.floatingFiltersOpacity===nextProps.floatingFiltersOpacity && prevProps.showThumbScroll===nextProps.showThumbScroll; 
 }
 export default React.memo(ThumbScroll, arePropsEqual);

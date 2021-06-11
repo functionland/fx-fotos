@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 
 import { Dimensions, StyleSheet, Animated, StyleProp, Image , Text, View } from 'react-native';
 import { headerIndex } from '../types/interfaces';
+import {default as Reanimated,} from 'react-native-reanimated';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -13,7 +14,7 @@ interface Props {
     sortCondition: 'day' | 'month';
     scrollRef: any;
     headerHeight: number;
-    layoutHeight: Animated.Value;
+    layoutHeight: Reanimated.SharedValue<number>;
 }
 
 
@@ -50,16 +51,6 @@ const FloatingFilters: React.FC<Props> = (props) => {
         console.log([Date.now()+': component FloatingFilters'+props.numColumns+' rendered']);
     });
     const opacity = useRef(new Animated.Value(0)).current;
-    const [layoutHeight, setLayoutHeight] = useState<number>(0);
-    const [filterItems, setFilterItems] = useState<any[]>([]);
-    useEffect(()=>{
-        setLayoutHeight(props.scrollRef?.current?.getContentDimension().height);
-    },[props.scrollRef, props.scrollRef.current]);
-    props.layoutHeight.addListener(({value})=>{
-        if(value !== layoutHeight){
-            setLayoutHeight(value);
-        }
-    });
 
     const fadeOutIn = (value:number) => {
         Animated.timing(opacity, {
@@ -72,16 +63,11 @@ const FloatingFilters: React.FC<Props> = (props) => {
         fadeOutIn(props.floatingFiltersOpacity);
     },[props.floatingFiltersOpacity]);
 
-    useEffect(()=>{
-        console.log('layoutHeight='+layoutHeight);
-        setFilterItems(showFilterItems(headerIndexesMonth, props.numColumns, layoutHeight, props.headerHeight));
-    },[layoutHeight]);
-
     const headerIndexesMonth = props.headerIndexes.filter(header => header.sortCondition===props.sortCondition);
     return (
         <Animated.View style={[styles.MainView, {opacity: opacity, zIndex: opacity}]}>
             {
-                filterItems
+                showFilterItems(headerIndexesMonth, props.numColumns, props.layoutHeight.value, props.headerHeight)
             }
         </Animated.View>
     );
@@ -113,7 +99,7 @@ const styles = StyleSheet.create({
     }
 });
 function arePropsEqual(prevProps:Props, nextProps:Props) {
-    console.log('FloatingFilters memo condition:'+(prevProps.layoutHeight === nextProps.layoutHeight));
-    return prevProps.layoutHeight === nextProps.layoutHeight && prevProps.floatingFiltersOpacity===nextProps.floatingFiltersOpacity && prevProps.headerIndexes?.length===nextProps.headerIndexes?.length; 
+    console.log('FloatingFilters memo condition:');
+    return prevProps.floatingFiltersOpacity===nextProps.floatingFiltersOpacity && prevProps.headerIndexes?.length===nextProps.headerIndexes?.length; 
 }
 export default React.memo(FloatingFilters, arePropsEqual);

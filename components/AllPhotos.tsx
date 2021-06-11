@@ -12,6 +12,7 @@ import {
   useRecoilState,
 } from 'recoil';
 import {preparedMediaState,} from '../states';
+import {default as Reanimated,} from 'react-native-reanimated';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -19,9 +20,9 @@ const SCREEN_HEIGHT = Dimensions.get('window').height;
 interface Props {
   scale: Animated.Value;
   baseScale: Animated.AnimatedAddition;
-  scrollY2: Animated.Value;
-  scrollY3: Animated.Value;
-  scrollY4: Animated.Value;
+  scrollY2: Reanimated.SharedValue<number>
+  scrollY3: Reanimated.SharedValue<number>
+  scrollY4: Reanimated.SharedValue<number>
   loading: boolean;
   focalX: Animated.Value;
   focalY: Animated.Value;

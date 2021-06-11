@@ -7,14 +7,16 @@ import {StyleSheet, Animated, View} from 'react-native';
 import Header from '../components/Header';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import { FontAwesome5 } from '@expo/vector-icons';
+import {default as Reanimated, useSharedValue,} from 'react-native-reanimated';
 
 const Stack = createNativeStackNavigator();
 const Tab = createMaterialBottomTabNavigator();
 
 const AppNavigation = () => {
-  const scrollY2 = useRef(new Animated.Value(0)).current;
-  const scrollY3 = useRef(new Animated.Value(0)).current;
-  const scrollY4 = useRef(new Animated.Value(0)).current;
+  const scrollY2 = useSharedValue(0);
+  const scrollY3 = useSharedValue(0);
+  const scrollY4 = useSharedValue(0);
+
   const scale = useRef(new Animated.Value(1)).current;
   const baseScale2 = useRef(new Animated.Value(0)).current;
   const baseScale: Animated.AnimatedAddition = useRef(Animated.add(baseScale2, scale.interpolate({
@@ -22,30 +24,16 @@ const AppNavigation = () => {
     outputRange: [1, 0, -1],
   }))).current;
 
-  const scrollAnim = Animated.add(scrollY2, Animated.add(scrollY3, scrollY4));
-
   const headerShown = useRef(new Animated.Value(1)).current;
-  const modalShown = useRef(new Animated.Value(0)).current;
-  const storyShown = useRef(new Animated.Value(0)).current;
-  const actionBarShown = useRef(new Animated.Value(0)).current;
 
   const HEADER_HEIGHT = 30;
-
-  const clampedScrollY = scrollAnim.interpolate({
-    inputRange: [HEADER_HEIGHT, HEADER_HEIGHT + 1],
-    outputRange: [0, 1],
-    extrapolateLeft: 'clamp',
-    });
-    const minusScrollY = Animated.multiply(clampedScrollY, -1);
-    const translateY = Animated.diffClamp(minusScrollY, -HEADER_HEIGHT, 0);
-
   return (
-    <Animated.View style={[styles.View, 
+    <Reanimated.View style={[styles.View, 
     ]}>
       <NavigationContainer>
         <Stack.Navigator
           screenOptions={{
-            headerCenter: () => <Header scrollAnim={scrollAnim} HEADER_HEIGHT={HEADER_HEIGHT} headerShown={headerShown} />,
+            headerCenter: () => <Header scrollY2={scrollY2} scrollY3={scrollY3} scrollY4={scrollY4} HEADER_HEIGHT={HEADER_HEIGHT} headerShown={headerShown} />,
             ////headerTitle: '',
             headerStyle: {
               backgroundColor: 'transparent',
@@ -81,14 +69,14 @@ const AppNavigation = () => {
           />
         </Stack.Navigator>
       </NavigationContainer>
-    </Animated.View>
+    </Reanimated.View>
   );
 };
 
 interface Props {
-  scrollY2: Animated.Value;
-  scrollY3: Animated.Value;
-  scrollY4: Animated.Value;
+  scrollY2: Reanimated.SharedValue<number>;
+  scrollY3: Reanimated.SharedValue<number>;
+  scrollY4: Reanimated.SharedValue<number>;
   scale: Animated.Value;
   baseScale: Animated.AnimatedAddition;
   baseScale2: Animated.Value;
