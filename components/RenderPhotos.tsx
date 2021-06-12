@@ -117,6 +117,20 @@ const RenderPhotos: React.FC<Props> = (props) => {
   const [showThumbScroll, setShowThumbScroll] = useState<boolean>(false);
   const opacity = props.scale.value;
   const animatedStyle = Reanimated.useAnimatedStyle(()=>{
+    const scale = (props.numColumns===props.numColumnsAnimated.value)?Reanimated.interpolate(
+      props.scale.value,
+      [0,1,4],
+      [props.numColumns/(props.numColumns+1),1,(props.numColumns)/(props.numColumns-1)]
+    ):((props.numColumns===props.numColumnsAnimated.value+1)?Reanimated.interpolate(
+      props.scale.value,
+      [0,1,4],
+      [1,(props.numColumns)/(props.numColumns-1),(props.numColumns)/(props.numColumns-1)]
+    ):((props.numColumns===props.numColumnsAnimated.value-1)?Reanimated.interpolate(
+      props.scale.value,
+      [0,1,4],
+      [(props.numColumns)/(props.numColumns+1),(props.numColumns)/(props.numColumns+1),1]
+    ):1));
+    
     return {
          opacity: (props.numColumnsAnimated.value===props.numColumns)?(Reanimated.interpolate(
             props.scale.value,
@@ -134,28 +148,24 @@ const RenderPhotos: React.FC<Props> = (props) => {
          zIndex:(props.numColumnsAnimated.value===props.numColumns)?1:0,
          transform: [
           {
-            scale: Reanimated.interpolate(
-              props.scale.value,
-              [0, 1, 4],
-              [(props.numColumnsAnimated.value/props.numColumnsAnimated.value-1), 1, (props.numColumnsAnimated.value/props.numColumnsAnimated.value+1)]
-           ),
+            scale: scale,
           },
           {
             translateX: (
               (
                 (
-                  props.scale.value*SCREEN_WIDTH)- 
+                  scale*SCREEN_WIDTH)- 
                 SCREEN_WIDTH)
-              / (2*props.scale.value))
+              / (2*scale))
           },
           {
             translateY: (
               (
                 (
-                  props.scale.value*(SCREEN_HEIGHT-(StatusBar.currentHeight || 0))
+                  scale*(SCREEN_HEIGHT-(StatusBar.currentHeight || 0))
                 ) - (SCREEN_HEIGHT-(StatusBar.currentHeight || 0))
               )
-              / (2*props.scale.value))
+              / (2*scale))
           }
         ],
       };
