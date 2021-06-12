@@ -9,10 +9,9 @@ const SCREEN_WIDTH = Dimensions.get('window').width;
 
 interface Props {
     headerIndexes:headerIndex[];
-    floatingFiltersOpacity: number;
+    floatingFiltersOpacity: Reanimated.SharedValue<number>;
     numColumns: 2 | 3 | 4;
     sortCondition: 'day' | 'month';
-    scrollRef: any;
     headerHeight: number;
     layoutHeight: Reanimated.SharedValue<number>;
 }
@@ -51,17 +50,6 @@ const FloatingFilters: React.FC<Props> = (props) => {
         console.log([Date.now()+': component FloatingFilters'+props.numColumns+' rendered']);
     });
     const opacity = useRef(new Animated.Value(0)).current;
-
-    const fadeOutIn = (value:number) => {
-        Animated.timing(opacity, {
-            toValue: value,
-            duration: 100,
-            useNativeDriver: true,
-          }).start();
-    };
-    useEffect(() => {
-        fadeOutIn(props.floatingFiltersOpacity);
-    },[props.floatingFiltersOpacity]);
 
     const headerIndexesMonth = props.headerIndexes.filter(header => header.sortCondition===props.sortCondition);
     return (

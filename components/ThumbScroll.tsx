@@ -10,8 +10,9 @@ import {
     State,
     PanGestureHandlerEventPayload,
     HandlerStateChangeEvent,
+    PanGestureHandlerGestureEvent,
   } from 'react-native-gesture-handler';
-  import {default as Reanimated, useAnimatedStyle, Extrapolate} from 'react-native-reanimated';
+  import { default as Reanimated, useAnimatedStyle, Extrapolate, useAnimatedGestureHandler, useSharedValue } from 'react-native-reanimated';
 
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -21,142 +22,79 @@ interface Props {
     flexibleIndicator:boolean;
     shouldIndicatorHide:boolean;
     hideTimeout:number;
-    showThumbScroll:boolean;
-    setShowThumbScroll:Function;
+    opacity:Reanimated.SharedValue<number>;
+    showFloatingFilters: Reanimated.SharedValue<number>;
     scrollIndicatorContainerStyle:StyleProp<{}>;
     scrollIndicatorStyle:StyleProp<{}>;
-    lastOffset:number;
-    setLastScrollOffset:Function;
     numColumns:2|3|4;
-    headerIndexes:headerIndex[];
-    numberOfPointers:Animated.Value;
+    dragY:Reanimated.SharedValue<number>;
     scrollY:Reanimated.SharedValue<number>;
-    velocityY:Animated.Value;
     headerHeight:number;
-    scrollRef:any;
-    setStartScroll:Function;
-    startScroll:boolean;
-    setEndScroll: Function;
     layoutHeight: Reanimated.SharedValue<number>;
-    isDragging:Animated.Value;
-    dragY:Animated.Value;
-    floatingFiltersOpacity: number;
-    setFloatingFiltersOpacity: Function;
     currentImageTimestamp: number;
 }
 const ThumbScroll: React.FC<Props> = (props) => {
     useEffect(()=>{
         console.log([Date.now()+': component ThumbScroll'+props.numColumns+' rendered']);
     });
-    //const AnimatedTouchable = Animated.createAnimatedComponent(TouchableWithoutFeedback);
-    let panRef_glide = createRef<PanGestureHandler>();
-    const absoluteY = useRef(new Animated.Value(0)).current;
-    const y = useRef(new Animated.Value(0)).current;
-    
-    let numberOfPointers = useRef(new Animated.Value(1)).current;
 
-    const [fadeAnim] = useState(
-        new Animated.Value(props.shouldIndicatorHide ? 0 : 1),
-    );
+    let panRef_glide = createRef<PanGestureHandler>();    
 
-    const [isIndicatorHidden, setIsIndicatorHidden] = useState(
-        props.shouldIndicatorHide,
-    );
-
-    const runHideTimer = () => {
-        props.shouldIndicatorHide && setIsIndicatorHidden(true);
-    };
-
-    const showIndicator = () => {
-        props.shouldIndicatorHide && setIsIndicatorHidden(false);
-    };
-
-    const showFloatingFilters = () => {
-        ////console.log('showFloatingFilters');
-        props.setFloatingFiltersOpacity(1);
-    }
-    const hideFloatingFilters = () => {
-        console.log('hideFloatingFilters');
-        props.setFloatingFiltersOpacity(0);
-    }
-
-    const _onDragPanGestureEvent = Animated.event(
-        [{ nativeEvent: { translationY:props.dragY, velocityY: props.velocityY,absoluteY: absoluteY, y: y, numberOfPointers:numberOfPointers} }],
-        { useNativeDriver: true }
-      );
-    const _onDragPanHandlerStateChange = (event:HandlerStateChangeEvent<PanGestureHandlerEventPayload>) => {
-        //console.log(event.nativeEvent);
-        if (event.nativeEvent.state === State.BEGAN && event.nativeEvent.oldState !== State.ACTIVE) {
-            ////console.log('glide touched');
-            //props.isDragging.setValue(1);
-            showFloatingFilters();
-        }
-        if(event.nativeEvent.state === State.CANCELLED || event.nativeEvent.state === State.FAILED || event.nativeEvent.state === State.END){
-            hideFloatingFilters();
-            props.setShowThumbScroll(false);
-        }
-        if (event.nativeEvent.state !== State.ACTIVE && event.nativeEvent.oldState === State.ACTIVE) {
-            hideFloatingFilters();
-            props.isDragging.setValue(2);
-            let temp = props.lastOffset + event.nativeEvent.translationY;
-            if(temp<0){temp=0;}
-            if(temp>SCREEN_HEIGHT){temp=SCREEN_HEIGHT;}
-            //console.log('temp='+temp);
-            
-            //props.dragY.setOffset(temp);
-            
-            props.setLastScrollOffset(temp);
-        }
-    };
-
-    useEffect(()=> {
-        //console.log('props.lastOffset='+props.lastOffset);
-        props.dragY.setValue(0);
-    },[props.lastOffset]);
-
-    useEffect(()=>{
-        startIndicatorShowHide();
-    },[props.showThumbScroll])
-
-    let startIndicatorShowHide = () =>{
-        //Hide / show Animation effect
-        if (props.shouldIndicatorHide) {
-            props.showThumbScroll
-                ? Animated.timing(fadeAnim, {
-                      toValue: 1,
-                      duration: props.hideTimeout,
-                      useNativeDriver: true,
-                  }).start(()=>{
-                    runHideTimer();
-                  })
-                : Animated.timing(fadeAnim, {
-                      toValue: 0,
-                      duration: props.hideTimeout,
-                      useNativeDriver: true,
-                  }).start(()=>{
-                    showIndicator();
-                  });
-        }
-    }
+    const prevScrollY = useSharedValue(0);
+    const _onPanGestureEvent = useAnimatedGestureHandler<PanGestureHandlerGestureEvent, {}>({
+        onStart: (_, ctx) => {
+          props.opacity.value = 1;
+          props.showFloatingFilters.value = 1;
+          prevScrollY.value = props.scrollY.value;
+        },
+        onActive: (event, ctx) => {
+            console.log([(prevScrollY.value) , (event.translationY*(props.layoutHeight.value-SCREEN_HEIGHT)/(SCREEN_HEIGHT-props.indicatorHeight)), event.translationY, ((props.layoutHeight.value-SCREEN_HEIGHT)/(SCREEN_HEIGHT-props.indicatorHeight)),props.layoutHeight.value,SCREEN_HEIGHT,props.indicatorHeight]);
+          props.dragY.value = (prevScrollY.value) + (event.translationY*(props.layoutHeight.value-SCREEN_HEIGHT)/(SCREEN_HEIGHT-props.indicatorHeight));
+        },
+        onEnd: (event) => {
+            props.opacity.value = Reanimated.withDelay(3000, Reanimated.withTiming(0, {duration:1000}));
+            props.showFloatingFilters.value = Reanimated.withTiming(0, {duration:1000});
+        },
+        onCancel: () => {
+            props.opacity.value = Reanimated.withDelay(3000, Reanimated.withTiming(0, {duration:1000}));
+            props.showFloatingFilters.value = Reanimated.withTiming(0, {duration:1000});
+        },
+        onFail: () => {
+            props.opacity.value = Reanimated.withDelay(3000, Reanimated.withTiming(0, {duration:1000}));
+            props.showFloatingFilters.value = Reanimated.withTiming(0, {duration:1000});
+        },
+        onFinish: () => {
+            props.opacity.value = Reanimated.withDelay(3000, Reanimated.withTiming(0, {duration:1000}));
+            props.showFloatingFilters.value = Reanimated.withTiming(0, {duration:1000});
+        },
+    });
 
     const animatedStyle = useAnimatedStyle(()=>{
         return {
-            transform: [{
-                translateY: Reanimated.interpolate((props.scrollY.value* ((SCREEN_HEIGHT-props.indicatorHeight)/(props.layoutHeight.value-SCREEN_HEIGHT))),
-                    [0, SCREEN_HEIGHT-props.indicatorHeight],
-                    [0, SCREEN_HEIGHT-props.indicatorHeight],
-                    Extrapolate.CLAMP,
-                ),
-            }]
+            transform: [
+                {
+                    translateY: Reanimated.interpolate((props.scrollY.value* ((SCREEN_HEIGHT-props.indicatorHeight)/(props.layoutHeight.value-SCREEN_HEIGHT))),
+                        [0, SCREEN_HEIGHT-props.indicatorHeight],
+                        [0, SCREEN_HEIGHT-props.indicatorHeight],
+                        Extrapolate.CLAMP,
+                    ),
+                }
+            ],
+            opacity: props.opacity.value,
           };
-    })
+    });
     
+    const filtersAnimatedStyle = useAnimatedStyle(()=>{
+        return {
+            opacity: props.showFloatingFilters.value,
+          };
+    });
+
     return (
-                        <Animated.View style={[styles.scrollIndicatorContainer,  {height: props.indicatorHeight,}]}>
+                        <Reanimated.View style={[styles.scrollIndicatorContainer,  {height: props.indicatorHeight,}]}>
                             <PanGestureHandler
                                 ref={panRef_glide}
-                                onGestureEvent={_onDragPanGestureEvent}
-                                onHandlerStateChange={_onDragPanHandlerStateChange}
+                                onGestureEvent={_onPanGestureEvent}
                                 maxPointers={1}
                                 minPointers={1}
                                 shouldCancelWhenOutside={false}
@@ -183,14 +121,14 @@ const ThumbScroll: React.FC<Props> = (props) => {
                                         resizeMethod='resize'
                                         resizeMode='stretch'
                                     />
-                                    <Animated.View style={[styles.scrollBarText, {opacity: props.floatingFiltersOpacity}]}>
+                                    <Reanimated.View style={[styles.scrollBarText, filtersAnimatedStyle]}>
                                         <Text style={{color: 'grey'}}>{timestampToDate(props.currentImageTimestamp, ['month']).month}</Text>
-                                    </Animated.View>
+                                    </Reanimated.View>
                                 
                                 </View>
                             </Reanimated.View>
                             </PanGestureHandler>
-                        </Animated.View>
+                        </Reanimated.View>
 
     );
 };
@@ -237,8 +175,5 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     }
 });
-function arePropsEqual(prevProps:Props, nextProps:Props) {
-    console.log('ThumbScroll memo condition:');
-    return prevProps.floatingFiltersOpacity===nextProps.floatingFiltersOpacity && prevProps.showThumbScroll===nextProps.showThumbScroll; 
-}
-export default React.memo(ThumbScroll, arePropsEqual);
+
+export default React.memo(ThumbScroll);
