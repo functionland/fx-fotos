@@ -2,9 +2,9 @@
 
 # Latest 2 Updates
 
-June-10-2021: Changing state management to recoil + removing some unnecessary states and switching to useRef to improve performance
+June-12-2021: I am switching the animations to reanimated and switching states to recoil. So far performance issue has been resoled for parts that are moved. This is being done in branch: "reanimatd-recyclerlistview"
 
-June-08-2021: Currently, RecyclerListView re-renders on each TAP, which is causing a huge calculation and slowness. Looking to find hte rootcause and prevent this.
+June-10-2021: Changing state management to recoil + removing some unnecessary states and switching to useRef to improve performance
 
 # BOX Photos development guide
 Note: Project is still in alpha phase and not production ready. We aim to release beta version by end of June 2021.
