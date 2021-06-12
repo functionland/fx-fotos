@@ -49,8 +49,10 @@ const AllPhotos: React.FC<Props> = (props) => {
  
   const modalShown = useRef(new Animated.Value(0)).current;
   const showStory = useRef(new Animated.Value(0)).current;
+  const scrollIndex2 = useRef(new Animated.Value(0)).current;
+  const scrollIndex3 = useRef(new Animated.Value(0)).current;
+  const scrollIndex4 = useRef(new Animated.Value(0)).current;
 
-  const [scrollOffset, setScrollOffset] = useState<{[key:string]:(2|3|4|number)}>({'in':0,'to':0});
   const [imagePosition, setImagePosition] = useState<{x:number;y:number}>({x:0,y:0});
 
   const [showActionBar, setShowActionBar] = useState<boolean>(false);
@@ -132,8 +134,9 @@ const AllPhotos: React.FC<Props> = (props) => {
           extrapolateRight: 'clamp'
         })}
         scale={props.scale}
-        scrollOffset={scrollOffset}
-        setScrollOffset={setScrollOffset}
+        scrollIndex2={scrollIndex2}
+        scrollIndex3={scrollIndex3}
+        scrollIndex4={scrollIndex4}
         focalY={props.focalY}
         numberOfPointers={props.numberOfPointers}
         modalShown={modalShown}
@@ -176,8 +179,9 @@ const AllPhotos: React.FC<Props> = (props) => {
           extrapolateRight: 'clamp'
         })}
         scale={props.scale}
-        scrollOffset={scrollOffset}
-        setScrollOffset={setScrollOffset}
+        scrollIndex2={scrollIndex2}
+        scrollIndex3={scrollIndex3}
+        scrollIndex4={scrollIndex4}
         focalY={props.focalY}
         numberOfPointers={props.numberOfPointers}
         modalShown={modalShown}
@@ -219,8 +223,9 @@ const AllPhotos: React.FC<Props> = (props) => {
           extrapolateRight: 'clamp'
         })}
         scale={props.scale}
-        scrollOffset={scrollOffset}
-        setScrollOffset={setScrollOffset}
+        scrollIndex2={scrollIndex2}
+        scrollIndex3={scrollIndex3}
+        scrollIndex4={scrollIndex4}
         focalY={props.focalY}
         numberOfPointers={props.numberOfPointers}
         modalShown={modalShown}

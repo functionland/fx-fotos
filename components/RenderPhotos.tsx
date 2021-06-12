@@ -31,7 +31,6 @@ import {storiesState} from '../states';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
-const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
 
 class ExternalScrollView extends BaseScrollView {
   scrollTo(...args: any[]) {
@@ -68,8 +67,9 @@ interface Props {
   zIndex: Animated.AnimatedInterpolation;
   scale: Animated.Value;
   sizeTransformScale: Animated.AnimatedInterpolation;
-  scrollOffset:{[key:number]:number};
-  setScrollOffset: Function;
+  scrollIndex2:Animated.Value;
+  scrollIndex3:Animated.Value;
+  scrollIndex4:Animated.Value;
   focalY: Animated.Value;
   numberOfPointers: Animated.Value;
   modalShown: Animated.Value;
@@ -132,7 +132,12 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
 
   useEffect(()=>{
     console.log(['component RenderPhotos mounted']);
-    return () => {console.log(['component RenderPhotos unmounted']);}
+    return () => {
+      console.log(['component RenderPhotos unmounted']);
+      props.scrollIndex2.removeAllListeners();
+      props.scrollIndex3.removeAllListeners();
+      props.scrollIndex4.removeAllListeners();
+    }
   }, []);
   useEffect(()=>{
     console.log('photos.layout length changed');
@@ -219,23 +224,40 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
       }
   }
 
-  const _onMomentumScrollEnd = () => {
-    setTimeout(()=>{
-      let lastIndex = scrollRef?.current.findApproxFirstVisibleIndex();
-      let lastOffset = scrollRef?.current.getCurrentScrollOffset();
-      if(lastOffset===0){
-        lastIndex = 0;
-      }
-      props.setScrollOffset({'in':props.numColumns, 'to':lastIndex});
-      ////console.log(['momentum ended', {'in':props.numColumns, 'to':lastIndex}, lastOffset]);
-      
-      let sampleHeight = scrollRef?.current?.getContentDimension().height;
-      let lastScrollOffset = lastOffset*(SCREEN_HEIGHT-indicatorHeight)/(sampleHeight-SCREEN_HEIGHT);
-      ////console.log('lastScrollOffset='+lastScrollOffset+', lastOffset='+lastOffset+', sampleHeight='+sampleHeight);
-      setLastScrollOffset(lastScrollOffset);
-      setShowThumbScroll(false);
-    },100);
+  useEffect(()=>{
+    console.log('props. numColumn='+props.numColumns);
+  if(props.numColumns===2){
+    props.scrollIndex4.removeAllListeners();
+    props.scrollIndex4.addListener(({value})=>{
+      scrollRef?.current?.scrollToIndex(value, false);
+    });
+  }else if(props.numColumns===3){
+    props.scrollIndex2.removeAllListeners();
+    props.scrollIndex2.addListener(({value})=>{
+      alert('here');
+      console.log('scrollIndex2 changed in numColumns 3 to '+value);
+      scrollRef?.current?.scrollToIndex(value, false);
+    });
+  }else if(props.numColumns===4){
+    
   }
+  },[props.numColumns, scrollRef?.current]);
+
+  const _onMomentumScrollEnd = () => {
+      let lastIndex = scrollRef?.current.findApproxFirstVisibleIndex();
+      if(props.numColumns===2){
+        console.log('last index is '+lastIndex);
+        props.scrollIndex2.setValue(lastIndex);
+      }else if(props.numColumns===3){
+        props.scrollIndex3.setValue(lastIndex);
+      }else if(props.numColumns===4){
+        props.scrollIndex4.setValue(lastIndex);
+      }
+      ////console.log(['momentum ended', {'in':props.numColumns, 'to':lastIndex}, lastOffset]);
+      ////console.log('lastScrollOffset='+lastScrollOffset+', lastOffset='+lastOffset+', sampleHeight='+sampleHeight);
+      setShowThumbScroll(false);
+  }
+  
   const _onScrollEnd = () => {
     ////console.log('scroll end called');
     let sampleHeight = scrollRef?.current?.getContentDimension().height;
@@ -282,22 +304,16 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
       scrollRef?.current?.scrollToIndex(newOffset.to, false);
     }
   }
-  useEffect(()=>{
+  /*useEffect(()=>{
     adjustScrollPosition(props.scrollOffset);
-  },[props.scrollOffset]);
-
-  useEffect(()=>{
-    if(endScroll === true){
-      _onMomentumScrollEnd();
-    }
-  },[endScroll]);
+  },[props.scrollOffset]);*/
 
   const _onScroll = (rawEvent: ScrollEvent, offsetX: number, offsetY: number) => {
     //console.log(props.numColumns+'_'+rawEvent.nativeEvent.contentOffset.y);
     console.log('original onscroll')
     setShowThumbScroll(true);
   }
-  const test = new Reanimated.Value(0);
+
   const scrollHandlerReanimated = useAnimatedScrollHandler({
     onScroll: (e) => {
       //position.value = e.contentOffset.x;
@@ -309,7 +325,8 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
       console.log('onEndDrag');
     },
     onMomentumEnd: (e) => {
-      console.log('onMomentumEnd');
+      Reanimated.runOnJS(_onMomentumScrollEnd)();
+      //let lastIndex = scrollRef?.current?.findApproxFirstVisibleIndex();
     },
   });
   const AnimatedRecyclerListView = Reanimated.createAnimatedComponent(RecyclerListView);
@@ -462,8 +479,5 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
 });
-function arePropsEqual(prevProps:Props, nextProps:Props) {
-  console.log('RenderPhotos memo condition:'+(prevProps.photos?.layout?.length === nextProps.photos?.layout?.length));
-  return prevProps.photos?.layout?.length === nextProps.photos?.layout?.length; 
-}
+
 export default React.memo(RenderPhotos);
