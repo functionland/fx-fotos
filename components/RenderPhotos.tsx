@@ -57,16 +57,13 @@ class ExternalScrollView extends BaseScrollView {
 }
 interface Props {
   photos: FlatSection;
-  margin: Animated.AnimatedInterpolation;
   maxWidth: number;
   minWidth: number;
   numColumns: 2 | 3 | 4;
-  opacity: Animated.AnimatedInterpolation;
   loading: boolean;
   sortCondition: 'day' | 'month';
-  zIndex: Animated.AnimatedInterpolation;
-  scale: Animated.Value;
-  sizeTransformScale: Animated.AnimatedInterpolation;
+  scale: Reanimated.SharedValue<number>;
+  numColumnsAnimated: Reanimated.SharedValue<number>;
   scrollIndex2:Animated.Value;
   scrollIndex3:Animated.Value;
   scrollIndex4:Animated.Value;
@@ -89,9 +86,6 @@ const RenderPhotos: React.FC<Props> = (props) => {
   const headerHeight = 20;
   const indicatorHeight = 50;
   const [dataProvider, setDataProvider] = useState<DataProvider>(new DataProvider((r1, r2) => {
-    if((typeof r1.value==='string' && typeof r2.value==='string')?(r1 !== r2):((r1.index !== r2.index) || r1.selected !== r2.selected)){
-console.log(['re-rendering for',{r1:r1, r2:r2}]);
-    }
     return (typeof r1.value==='string' && typeof r2.value==='string')?(r1.value !== r2.value):((r1.index !== r2.index) || r1.selected !== r2.selected);
   }));
   const [layoutProvider, setLayoutProvider] = useState<LayoutProvider>(LayoutUtil.getLayoutProvider(2, 'day', headerHeight, [], props.storiesHeight, props.HEADER_HEIGHT));
@@ -100,14 +94,13 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
   const scrollRef:any = useRef();
   const scrollRefExternal = useAnimatedRef<Reanimated.ScrollView>();
   const scroll = useSharedValue(0);
+
   useDerivedValue(() => {
     console.log('reanimatedScrollTo '+scroll.value);
     reanimatedScrollTo(scrollRefExternal, 0, scroll.value, false);
   });
  
   const [lastScrollOffset, setLastScrollOffset] = useState<number>(0);
-  const [layoutHeight, setLayoutHeight] = useState<number>(99999999999999);
-
   const [startScroll, setStartScroll] = useState<boolean>(false);
   const [endScroll, setEndScroll] = useState<boolean>(false);
   const startScrollRef = useRef(startScroll);
@@ -122,6 +115,51 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
   const dragY = useRef(new Animated.Value(0)).current;
 
   const [showThumbScroll, setShowThumbScroll] = useState<boolean>(false);
+  const opacity = props.scale.value;
+  const animatedStyle = Reanimated.useAnimatedStyle(()=>{
+    return {
+         opacity: (props.numColumnsAnimated.value===props.numColumns)?(Reanimated.interpolate(
+            props.scale.value,
+            [0,1,4],
+            [0,1,0]
+         )):(props.numColumnsAnimated.value===(props.numColumns-1)?(Reanimated.interpolate(
+              props.scale.value,
+              [0, 1, 4],
+              [1, 0, 0]
+          )):(props.numColumnsAnimated.value===(props.numColumns+1)?(Reanimated.interpolate(
+              props.scale.value,
+              [0, 1, 4],
+              [0, 0, 1]
+            )):(0))),
+         zIndex:(props.numColumnsAnimated.value===props.numColumns)?1:0,
+         transform: [
+          {
+            scale: Reanimated.interpolate(
+              props.scale.value,
+              [0, 1, 4],
+              [(props.numColumnsAnimated.value/props.numColumnsAnimated.value-1), 1, (props.numColumnsAnimated.value/props.numColumnsAnimated.value+1)]
+           ),
+          },
+          {
+            translateX: (
+              (
+                (
+                  props.scale.value*SCREEN_WIDTH)- 
+                SCREEN_WIDTH)
+              / (2*props.scale.value))
+          },
+          {
+            translateY: (
+              (
+                (
+                  props.scale.value*(SCREEN_HEIGHT-(StatusBar.currentHeight || 0))
+                ) - (SCREEN_HEIGHT-(StatusBar.currentHeight || 0))
+              )
+              / (2*props.scale.value))
+          }
+        ],
+      };
+});
 
   useEffect(()=>{
     console.log([Date.now()+': component RenderPhotos'+props.numColumns+' rendered']);
@@ -134,9 +172,6 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
     console.log(['component RenderPhotos mounted']);
     return () => {
       console.log(['component RenderPhotos unmounted']);
-      props.scrollIndex2.removeAllListeners();
-      props.scrollIndex3.removeAllListeners();
-      props.scrollIndex4.removeAllListeners();
     }
   }, []);
   useEffect(()=>{
@@ -196,9 +231,7 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
     <View style={{position:'relative', zIndex:1}}>
       <PhotosChunk
         photo={data}
-        opacity={props.opacity}
         numCol={props.numColumns}
-        scale={props.scale}
         key={'PhotosChunk_col' + props.numColumns + '_id' + index}
         index={data.index}
         sortCondition={props.sortCondition}
@@ -234,7 +267,6 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
   }else if(props.numColumns===3){
     props.scrollIndex2.removeAllListeners();
     props.scrollIndex2.addListener(({value})=>{
-      alert('here');
       console.log('scrollIndex2 changed in numColumns 3 to '+value);
       scrollRef?.current?.scrollToIndex(value, false);
     });
@@ -331,9 +363,9 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
   });
   const AnimatedRecyclerListView = Reanimated.createAnimatedComponent(RecyclerListView);
   return props.photos.layout ? (
-    <Animated.View
+    <Reanimated.View
       // eslint-disable-next-line react-native/no-inline-styles
-      style={{
+      style={[animatedStyle, {
         flex: 1,
         width: SCREEN_WIDTH,
         height: SCREEN_HEIGHT,
@@ -342,31 +374,7 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
         bottom: 0,
         right: 0,
         left: 0,
-        opacity: props.opacity,
-        zIndex: props.zIndex,
-        transform: [
-          {
-            scale: props.sizeTransformScale
-          },
-          {
-            translateX: Animated.divide(
-              Animated.subtract(
-                Animated.multiply(
-                  props.sizeTransformScale,SCREEN_WIDTH), 
-                SCREEN_WIDTH)
-              , Animated.multiply(2,props.sizeTransformScale))
-          },
-          {
-            translateY: Animated.divide(
-              Animated.subtract(
-                Animated.multiply(
-                  props.sizeTransformScale,(SCREEN_HEIGHT-(StatusBar.currentHeight || 0))
-                ), (SCREEN_HEIGHT-(StatusBar.currentHeight || 0))
-              )
-              , Animated.multiply(2,props.sizeTransformScale))
-          }
-        ],
-      }}
+      }]}
     >
       <RecyclerListView
         ref={scrollRef}
@@ -453,7 +461,7 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
         headerHeight={headerHeight}
         layoutHeight={layoutHeightAnimated}
       />
-    </Animated.View>
+    </Reanimated.View>
   ) : (
     <Animated.View
       // eslint-disable-next-line react-native/no-inline-styles
@@ -467,7 +475,6 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
         marginTop: StatusBar.currentHeight || 0,
         right: 0,
         left: 0,
-        opacity: props.opacity,
       }}>
       <Text>Loading...</Text>
     </Animated.View>

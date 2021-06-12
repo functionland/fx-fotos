@@ -4,12 +4,11 @@ import PhotosContainer from '../components/PhotosContainer';
 import {default as Reanimated,} from 'react-native-reanimated';
 
 interface Props {
-  scrollY2: Reanimated.SharedValue<number>
-  scrollY3: Reanimated.SharedValue<number>
-  scrollY4: Reanimated.SharedValue<number>
-  scale: Animated.Value;
-  baseScale: Animated.AnimatedAddition;
-  baseScale2: Animated.Value;
+  scrollY2: Reanimated.SharedValue<number>;
+  scrollY3: Reanimated.SharedValue<number>;
+  scrollY4: Reanimated.SharedValue<number>;
+  scale: Reanimated.SharedValue<number>;
+  numColumnsAnimated: Reanimated.SharedValue<number>;
   HEADER_HEIGHT: number;
   headerShown: Reanimated.SharedValue<number>;
 }
@@ -29,8 +28,7 @@ const HomePage: React.FC<Props> = (props) => {
           scrollY3={props.scrollY3} 
           scrollY4={props.scrollY4} 
           scale={props.scale} 
-          baseScale={props.baseScale} 
-          baseScale2={props.baseScale2} 
+          numColumnsAnimated={props.numColumnsAnimated} 
           HEADER_HEIGHT={props.HEADER_HEIGHT} 
           headerShown={props.headerShown}
         />

@@ -24,9 +24,7 @@ import {singlePhotoIndexState} from '../states';
 const isIOS = Platform.OS === 'ios';
 interface Props {
   photo: layout;
-  opacity: Animated.AnimatedInterpolation;
   numCol: 2 | 3 | 4;
-  scale: Animated.Value;
   sortCondition: 'day'|'month';
   index: number;
   modalShown: Animated.Value;

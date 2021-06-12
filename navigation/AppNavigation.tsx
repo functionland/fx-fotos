@@ -18,12 +18,9 @@ const AppNavigation = () => {
   const scrollY3 = useSharedValue(0);
   const scrollY4 = useSharedValue(0);
 
-  const scale = useRef(new Animated.Value(1)).current;
-  const baseScale2 = useRef(new Animated.Value(0)).current;
-  const baseScale: Animated.AnimatedAddition = useRef(Animated.add(baseScale2, scale.interpolate({
-    inputRange: [0, 1, 4],
-    outputRange: [1, 0, -1],
-  }))).current;
+  const scale = useSharedValue(1);
+  const numColumnsAnimated = useSharedValue(2);
+ 
 
   const headerShown = useSharedValue(1);
 
@@ -57,8 +54,7 @@ const AppNavigation = () => {
               scrollY3={scrollY3} 
               scrollY4={scrollY4} 
               scale={scale} 
-              baseScale={baseScale} 
-              baseScale2={baseScale2} 
+              numColumnsAnimated={numColumnsAnimated} 
               HEADER_HEIGHT={HEADER_HEIGHT} 
               headerShown={headerShown} 
             />}
@@ -78,9 +74,8 @@ interface Props {
   scrollY2: Reanimated.SharedValue<number>;
   scrollY3: Reanimated.SharedValue<number>;
   scrollY4: Reanimated.SharedValue<number>;
-  scale: Animated.Value;
-  baseScale: Animated.AnimatedAddition;
-  baseScale2: Animated.Value;
+  scale: Reanimated.SharedValue<number>;
+  numColumnsAnimated: Reanimated.SharedValue<number>;
   HEADER_HEIGHT: number;
   headerShown: Reanimated.SharedValue<number>;
 }
@@ -190,8 +185,7 @@ const HomeNavigation: React.FC<Props> = (mainProps) => {
               scrollY3={mainProps.scrollY3} 
               scrollY4={mainProps.scrollY4} 
               scale={mainProps.scale} 
-              baseScale={mainProps.baseScale} 
-              baseScale2={mainProps.baseScale2} 
+              numColumnsAnimated={mainProps.numColumnsAnimated} 
               HEADER_HEIGHT={mainProps.HEADER_HEIGHT} 
               headerShown={mainProps.headerShown} 
             />}

@@ -18,8 +18,8 @@ const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 interface Props {
-  scale: Animated.Value;
-  baseScale: Animated.AnimatedAddition;
+  scale: Reanimated.SharedValue<number>;
+  numColumnsAnimated: Reanimated.SharedValue<number>;
   scrollY2: Reanimated.SharedValue<number>
   scrollY3: Reanimated.SharedValue<number>
   scrollY4: Reanimated.SharedValue<number>
@@ -109,31 +109,12 @@ const AllPhotos: React.FC<Props> = (props) => {
       <RenderPhotos
         photos={preparedMedia}
         loading={props.loading}
-        margin={props.baseScale.interpolate({
-          inputRange: [0, 1, 3],
-          outputRange: [0, 0, 0],
-        })}
         maxWidth={SCREEN_WIDTH*2}
         minWidth={SCREEN_WIDTH/2}
         numColumns={2}
-        opacity={props.baseScale.interpolate({
-          inputRange: [-1, 0, 1],
-          outputRange: [0, 1, 0],
-        })}
-        sizeTransformScale={
-          props.baseScale.interpolate({
-            inputRange: [-1, 0, 1],
-            outputRange: [2.2, 1, 0.66667],
-          })
-        }
         sortCondition="day"
-        zIndex={props.baseScale.interpolate({
-          inputRange: [-1, 0, 0.99, 1],
-          outputRange: [1, 1, 1, 0],
-          extrapolateLeft: 'clamp',
-          extrapolateRight: 'clamp'
-        })}
         scale={props.scale}
+        numColumnsAnimated={props.numColumnsAnimated}
         scrollIndex2={scrollIndex2}
         scrollIndex3={scrollIndex3}
         scrollIndex4={scrollIndex4}
@@ -154,30 +135,11 @@ const AllPhotos: React.FC<Props> = (props) => {
       <RenderPhotos
         photos={preparedMedia}
         loading={props.loading}
-        margin={props.baseScale.interpolate({
-          inputRange: [0, 1, 3],
-          outputRange: [0, 0, 0],
-        })}
         maxWidth={SCREEN_WIDTH*2}
         minWidth={SCREEN_WIDTH/2}
         numColumns={3}
-        opacity={props.baseScale.interpolate({
-          inputRange: [0, 1, 2],
-          outputRange: [0, 1, 0],
-        })}
-        sizeTransformScale={
-          props.baseScale.interpolate({
-            inputRange: [0, 1, 2],
-            outputRange: [1.5, 1, 0.75],
-          })
-        }
         sortCondition="day"
-        zIndex={props.baseScale.interpolate({
-          inputRange: [0, 0.99, 1, 1.99, 2],
-          outputRange: [0, 0, 1, 1, 0],
-          extrapolateLeft: 'clamp',
-          extrapolateRight: 'clamp'
-        })}
+        numColumnsAnimated={props.numColumnsAnimated}
         scale={props.scale}
         scrollIndex2={scrollIndex2}
         scrollIndex3={scrollIndex3}
@@ -198,30 +160,11 @@ const AllPhotos: React.FC<Props> = (props) => {
       <RenderPhotos
         photos={preparedMedia}
         loading={props.loading}
-        margin={props.baseScale.interpolate({
-          inputRange: [0, 1, 3],
-          outputRange: [0, 0, 0],
-        })}
         maxWidth={SCREEN_WIDTH*2}
         minWidth={SCREEN_WIDTH/2}
         numColumns={4}
-        opacity={props.baseScale.interpolate({
-          inputRange: [1, 2, 3],
-          outputRange: [0, 1, 0],
-        })}
-        sizeTransformScale={
-          props.baseScale.interpolate({
-            inputRange: [1, 2, 3],
-            outputRange: [1.3333, 1, 0.8],
-          })
-        }
         sortCondition="month"
-        zIndex={props.baseScale.interpolate({
-          inputRange: [1, 1.99, 2, 2.99, 3],
-          outputRange: [0, 0, 1, 1, 1],
-          extrapolateLeft: 'clamp',
-          extrapolateRight: 'clamp'
-        })}
+        numColumnsAnimated={props.numColumnsAnimated}
         scale={props.scale}
         scrollIndex2={scrollIndex2}
         scrollIndex3={scrollIndex3}

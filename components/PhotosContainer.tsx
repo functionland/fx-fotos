@@ -14,12 +14,11 @@ import {
 import {photosState, numColumnsState, storiesState, preparedMediaState, mediasState} from '../states';
 import {default as Reanimated,} from 'react-native-reanimated';
 interface Props {
-  scrollY2: Reanimated.SharedValue<number>
-  scrollY3: Reanimated.SharedValue<number>
-  scrollY4: Reanimated.SharedValue<number>
-  scale: Animated.Value;
-  baseScale: Animated.AnimatedAddition;
-  baseScale2: Animated.Value;
+  scrollY2: Reanimated.SharedValue<number>;
+  scrollY3: Reanimated.SharedValue<number>;
+  scrollY4: Reanimated.SharedValue<number>;
+  scale: Reanimated.SharedValue<number>;
+  numColumnsAnimated: Reanimated.SharedValue<number>;
   HEADER_HEIGHT: number;
   headerShown: Reanimated.SharedValue<number>;
 }
@@ -143,7 +142,7 @@ const PhotosContainer: React.FC<Props> = (props) => {
     >
           <PinchZoom
             scale={props.scale}
-            baseScale2={props.baseScale2}
+            numColumnsAnimated={props.numColumnsAnimated}
             focalX={focalX}
             focalY={focalY}
             numberOfPointers={numberOfPointers}
@@ -151,7 +150,7 @@ const PhotosContainer: React.FC<Props> = (props) => {
           >
             <AllPhotos
               scale={props.scale}
-              baseScale={props.baseScale}
+              numColumnsAnimated={props.numColumnsAnimated}
               scrollY2={props.scrollY2} 
               scrollY3={props.scrollY3} 
               scrollY4={props.scrollY4}
