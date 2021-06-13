@@ -20,6 +20,7 @@ interface Props {
   scale: Reanimated.SharedValue<number>;
   numColumnsAnimated: Reanimated.SharedValue<number>;
   HEADER_HEIGHT: number;
+  FOOTER_HEIGHT: number;
   headerShown: Reanimated.SharedValue<number>;
 }
 
@@ -161,6 +162,7 @@ const PhotosContainer: React.FC<Props> = (props) => {
               velocity={velocity}
               storiesHeight={storiesHeight}
               HEADER_HEIGHT={props.HEADER_HEIGHT}
+              FOOTER_HEIGHT={props.FOOTER_HEIGHT}
               headerShown={props.headerShown}
             />
           </PinchZoom>

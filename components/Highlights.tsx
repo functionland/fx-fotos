@@ -37,11 +37,6 @@ const Highlights: React.FC<Props> = (props) => {
       return () => {isMounted.current = false;}
   }, []);
 
-  useEffect(()=>{
-    
-    console.log(props.story);
-  },[props.story])
-
   const SCREEN_WIDTH = useWindowDimensions().width;
 
   const _tapRef = createRef<TapGestureHandler>();

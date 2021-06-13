@@ -10,13 +10,14 @@ interface Props {
   scale: Reanimated.SharedValue<number>;
   numColumnsAnimated: Reanimated.SharedValue<number>;
   HEADER_HEIGHT: number;
+  FOOTER_HEIGHT: number;
   headerShown: Reanimated.SharedValue<number>;
 }
 
 const HomePage: React.FC<Props> = (props) => {
   useEffect(()=>{
     console.log(Date.now()+': HomePage re-rendered');
-  })
+  });
   const SCREEN_WIDTH = useWindowDimensions().width;
   const SCREEN_HEIGHT = useWindowDimensions().height;
 
@@ -30,6 +31,7 @@ const HomePage: React.FC<Props> = (props) => {
           scale={props.scale} 
           numColumnsAnimated={props.numColumnsAnimated} 
           HEADER_HEIGHT={props.HEADER_HEIGHT} 
+          FOOTER_HEIGHT={props.FOOTER_HEIGHT}
           headerShown={props.headerShown}
         />
       </View>

@@ -1,21 +1,16 @@
-import React, { useState, useEffect, createRef, useRef } from 'react';
+import React, { useEffect, createRef, } from 'react';
 
-import { Dimensions, StyleSheet, Animated, StyleProp, Image , Text, View } from 'react-native';
+import { StyleSheet, useWindowDimensions, StyleProp, Image , Text, View } from 'react-native';
 import { scrollImage } from '../assets/images';
 import { headerIndex } from '../types/interfaces';
 import { timestampToDate } from '../utils/functions';
 
 import {
     PanGestureHandler,
-    State,
-    PanGestureHandlerEventPayload,
-    HandlerStateChangeEvent,
     PanGestureHandlerGestureEvent,
   } from 'react-native-gesture-handler';
   import { default as Reanimated, useAnimatedStyle, Extrapolate, useAnimatedGestureHandler, useSharedValue } from 'react-native-reanimated';
 
-
-const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 interface Props {
     indicatorHeight:number;
@@ -30,10 +25,15 @@ interface Props {
     dragY:Reanimated.SharedValue<number>;
     scrollY:Reanimated.SharedValue<number>;
     headerHeight:number;
+    HEADER_HEIGHT: number;
+    FOOTER_HEIGHT: number;
     layoutHeight: Reanimated.SharedValue<number>;
     currentImageTimestamp: number;
 }
 const ThumbScroll: React.FC<Props> = (props) => {
+    const SCREEN_HEIGHT = useWindowDimensions().height;
+    const visibleHeight = (SCREEN_HEIGHT-props.indicatorHeight-props.HEADER_HEIGHT-props.FOOTER_HEIGHT);
+
     useEffect(()=>{
         console.log([Date.now()+': component ThumbScroll'+props.numColumns+' rendered']);
     });
@@ -48,8 +48,7 @@ const ThumbScroll: React.FC<Props> = (props) => {
           prevScrollY.value = props.scrollY.value;
         },
         onActive: (event, ctx) => {
-            console.log([(prevScrollY.value) , (event.translationY*(props.layoutHeight.value-SCREEN_HEIGHT)/(SCREEN_HEIGHT-props.indicatorHeight)), event.translationY, ((props.layoutHeight.value-SCREEN_HEIGHT)/(SCREEN_HEIGHT-props.indicatorHeight)),props.layoutHeight.value,SCREEN_HEIGHT,props.indicatorHeight]);
-          props.dragY.value = (prevScrollY.value) + (event.translationY*(props.layoutHeight.value-SCREEN_HEIGHT)/(SCREEN_HEIGHT-props.indicatorHeight));
+          props.dragY.value = (prevScrollY.value) + (event.translationY*(props.layoutHeight.value-SCREEN_HEIGHT)/(visibleHeight));
         },
         onEnd: (event) => {
             props.opacity.value = Reanimated.withDelay(3000, Reanimated.withTiming(0, {duration:1000}));
@@ -73,15 +72,15 @@ const ThumbScroll: React.FC<Props> = (props) => {
         return {
             transform: [
                 {
-                    translateY: Reanimated.interpolate((props.scrollY.value* ((SCREEN_HEIGHT-props.indicatorHeight)/(props.layoutHeight.value-SCREEN_HEIGHT))),
-                        [0, SCREEN_HEIGHT-props.indicatorHeight],
-                        [0, SCREEN_HEIGHT-props.indicatorHeight],
+                    translateY: Reanimated.interpolate((props.scrollY.value* (visibleHeight/(props.layoutHeight.value-visibleHeight))),
+                        [props.HEADER_HEIGHT, visibleHeight],
+                        [props.HEADER_HEIGHT, visibleHeight+props.HEADER_HEIGHT],
                         Extrapolate.CLAMP,
                     ),
                 }
             ],
             opacity: props.opacity.value,
-          };
+        };
     });
     
     const filtersAnimatedStyle = useAnimatedStyle(()=>{
@@ -109,7 +108,6 @@ const ThumbScroll: React.FC<Props> = (props) => {
                                     { 
                                         height: props.indicatorHeight,
                                         zIndex:5,
-                                        //opacity: fadeAnim,
                                     },
                                     props.scrollIndicatorStyle,
                                 ]}

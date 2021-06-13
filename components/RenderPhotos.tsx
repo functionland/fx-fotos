@@ -76,6 +76,7 @@ interface Props {
   showStory:Animated.Value;
   scrollY: Reanimated.SharedValue<number>;
   HEADER_HEIGHT: number;
+  FOOTER_HEIGHT: number;
   onMediaLongTap: Function;
   showSelectionCheckbox:boolean;
   selectedAssets:Asset[]|undefined;
@@ -419,6 +420,8 @@ const RenderPhotos: React.FC<Props> = (props) => {
         dragY={dragY}
         numColumns={props.numColumns}
         headerHeight={headerHeight}
+        FOOTER_HEIGHT={props.FOOTER_HEIGHT}
+        HEADER_HEIGHT={props.HEADER_HEIGHT}
         scrollY={props.scrollY}
         scrollIndicatorContainerStyle={{}}
         scrollIndicatorStyle={{}}
@@ -431,6 +434,9 @@ const RenderPhotos: React.FC<Props> = (props) => {
         numColumns={props.numColumns}
         sortCondition={props.sortCondition}
         headerHeight={headerHeight}
+        FOOTER_HEIGHT={props.FOOTER_HEIGHT}
+        HEADER_HEIGHT={props.HEADER_HEIGHT}
+        indicatorHeight={indicatorHeight}
         layoutHeight={layoutHeightAnimated}
       />
     </Reanimated.View>

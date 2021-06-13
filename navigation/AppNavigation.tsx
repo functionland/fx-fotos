@@ -3,9 +3,9 @@ import {createNativeStackNavigator} from 'react-native-screens/native-stack';
 import PermissionError from '../pages/PermissionError';
 import React, { useRef, } from 'react';
 import HomePage from '../pages/HomePage';
-import {StyleSheet, Animated, View, TouchableOpacity, Text} from 'react-native';
+import { StyleSheet, Animated, View, TouchableOpacity, Text, StatusBar } from 'react-native';
 import Header from '../components/Header';
-import { createBottomTabNavigator,BottomTabBarProps,BottomTabBarOptions } from '@react-navigation/bottom-tabs';
+import { createBottomTabNavigator,BottomTabBarProps,BottomTabBarOptions,  } from '@react-navigation/bottom-tabs';
 //import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import { FontAwesome5 } from '@expo/vector-icons';
 import {default as Reanimated, useSharedValue, useAnimatedStyle, } from 'react-native-reanimated';
@@ -25,6 +25,8 @@ const AppNavigation = () => {
   const headerShown = useSharedValue(1);
 
   const HEADER_HEIGHT = 30;
+  const FOOTER_HEIGHT = 60;
+  
   return (
     <Reanimated.View style={[styles.View, 
     ]}>
@@ -56,6 +58,7 @@ const AppNavigation = () => {
               scale={scale} 
               numColumnsAnimated={numColumnsAnimated} 
               HEADER_HEIGHT={HEADER_HEIGHT} 
+              FOOTER_HEIGHT={FOOTER_HEIGHT}
               headerShown={headerShown} 
             />}
           </Stack.Screen>
@@ -77,13 +80,14 @@ interface Props {
   scale: Reanimated.SharedValue<number>;
   numColumnsAnimated: Reanimated.SharedValue<number>;
   HEADER_HEIGHT: number;
+  FOOTER_HEIGHT: number;
   headerShown: Reanimated.SharedValue<number>;
 }
 const HomeNavigation: React.FC<Props> = (mainProps) => {
   const animatedStyle = useAnimatedStyle(()=>{
     return {
          opacity: mainProps.headerShown.value,
-         height: mainProps.headerShown.value==0?0:60
+         height: mainProps.headerShown.value==0?0:mainProps.FOOTER_HEIGHT
       };
   });
   const TabBar = ({state, descriptors, navigation}: BottomTabBarProps<BottomTabBarOptions>) => {
@@ -186,7 +190,8 @@ const HomeNavigation: React.FC<Props> = (mainProps) => {
               scrollY4={mainProps.scrollY4} 
               scale={mainProps.scale} 
               numColumnsAnimated={mainProps.numColumnsAnimated} 
-              HEADER_HEIGHT={mainProps.HEADER_HEIGHT} 
+              HEADER_HEIGHT={mainProps.HEADER_HEIGHT + (StatusBar.currentHeight||0)} 
+              FOOTER_HEIGHT={mainProps.FOOTER_HEIGHT}
               headerShown={mainProps.headerShown} 
             />}
           </Tab.Screen>

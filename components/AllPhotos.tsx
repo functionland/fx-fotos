@@ -30,6 +30,7 @@ interface Props {
   velocity: Animated.Value;
   storiesHeight: number;
   HEADER_HEIGHT: number;
+  FOOTER_HEIGHT: number;
   headerShown: Reanimated.SharedValue<number>;
 }
 
@@ -125,6 +126,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         storiesHeight={props.storiesHeight}
         scrollY={props.scrollY2}
         HEADER_HEIGHT={props.HEADER_HEIGHT}
+        FOOTER_HEIGHT={props.FOOTER_HEIGHT}
         onMediaLongTap={onMediaLongTap}
         showStory={showStory}
         setImagePosition={setImagePosition}
@@ -153,6 +155,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         showStory={showStory}
         scrollY={props.scrollY3}
         HEADER_HEIGHT={props.HEADER_HEIGHT}
+        FOOTER_HEIGHT={props.FOOTER_HEIGHT}
         onMediaLongTap={onMediaLongTap}
         showSelectionCheckbox={showActionBar}
         selectedAssets={selectedAssets}
@@ -178,6 +181,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         showStory={showStory}
         scrollY={props.scrollY4}
         HEADER_HEIGHT={props.HEADER_HEIGHT}
+        FOOTER_HEIGHT={props.FOOTER_HEIGHT}
         onMediaLongTap={onMediaLongTap}
         showSelectionCheckbox={showActionBar}
         selectedAssets={selectedAssets}
