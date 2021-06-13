@@ -36,3 +36,8 @@ export const singlePhotoIndexState = atom<number>({
     key: 'singlePhotoIndexState',
     default: 1,
 });
+
+export const imagePositionState = atom<{x:number;y:number}>({
+    key: 'imagePositionState',
+    default: {x:0,y:0},
+});

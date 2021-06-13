@@ -71,7 +71,6 @@ interface Props {
   numberOfPointers: Animated.Value;
   modalShown: Animated.Value;
   headerShown: Reanimated.SharedValue<number>;
-  setImagePosition: Function;
   storiesHeight: number;
   showStory:Animated.Value;
   scrollY: Reanimated.SharedValue<number>;
@@ -242,7 +241,6 @@ const RenderPhotos: React.FC<Props> = (props) => {
         sortCondition={props.sortCondition}
         modalShown={props.modalShown}
         headerShown={props.headerShown}
-        setImagePosition={props.setImagePosition}
         headerHeight={headerHeight}
         onMediaLongTap={props.onMediaLongTap}
         showSelectionCheckbox={props.showSelectionCheckbox}

@@ -54,8 +54,6 @@ const AllPhotos: React.FC<Props> = (props) => {
   const scrollIndex3 = useRef(new Animated.Value(0)).current;
   const scrollIndex4 = useRef(new Animated.Value(0)).current;
 
-  const [imagePosition, setImagePosition] = useState<{x:number;y:number}>({x:0,y:0});
-
   const [showActionBar, setShowActionBar] = useState<boolean>(false);
   const [selectedAssets, setSelectedAssets] = useState<Asset[]>([]);
   
@@ -129,7 +127,6 @@ const AllPhotos: React.FC<Props> = (props) => {
         FOOTER_HEIGHT={props.FOOTER_HEIGHT}
         onMediaLongTap={onMediaLongTap}
         showStory={showStory}
-        setImagePosition={setImagePosition}
 
         showSelectionCheckbox={showActionBar}
         selectedAssets={selectedAssets}
@@ -150,7 +147,6 @@ const AllPhotos: React.FC<Props> = (props) => {
         numberOfPointers={props.numberOfPointers}
         modalShown={modalShown}
         headerShown={props.headerShown}
-        setImagePosition={setImagePosition}
         storiesHeight={props.storiesHeight}
         showStory={showStory}
         scrollY={props.scrollY3}
@@ -176,7 +172,6 @@ const AllPhotos: React.FC<Props> = (props) => {
         numberOfPointers={props.numberOfPointers}
         modalShown={modalShown}
         headerShown={props.headerShown}
-        setImagePosition={setImagePosition}
         storiesHeight={props.storiesHeight}
         showStory={showStory}
         scrollY={props.scrollY4}
@@ -189,7 +184,6 @@ const AllPhotos: React.FC<Props> = (props) => {
       <SingleMedia 
         modalShown={modalShown}
         headerShown={props.headerShown}
-        imagePosition={imagePosition}
       />
       <StoryHolder 
         duration={1500}

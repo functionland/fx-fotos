@@ -20,7 +20,7 @@ import {
 import {
   useRecoilState,
 } from 'recoil';
-import {numColumnsState, mediasState, singlePhotoIndexState} from '../states';
+import {numColumnsState, mediasState, singlePhotoIndexState, imagePositionState} from '../states';
 import {default as Reanimated,} from 'react-native-reanimated';
 
 class ExternalScrollView extends BaseScrollView {
@@ -36,7 +36,7 @@ class ExternalScrollView extends BaseScrollView {
     style={{zIndex:1}}
      ref={(scrollView: any) => {this._scrollViewRef = scrollView;}}
      waitFor={(this.props as any).waitFor}
-     scrollEventThrottle={1}
+     scrollEventThrottle={16}
      />
   }
 }
@@ -44,13 +44,13 @@ class ExternalScrollView extends BaseScrollView {
 interface Props {
   modalShown: Animated.Value;
   headerShown: Reanimated.SharedValue<number>;
-  imagePosition: {x:number, y:number};
 }
 
 const SingleMedia: React.FC<Props> = (props) => {
   const [medias, setMedias] = useRecoilState(mediasState);
   const [numColumns, setNumColumns] = useRecoilState(numColumnsState);
   const [singlePhotoIndex, setSinglePhotoIndex] = useRecoilState(singlePhotoIndexState);
+  const [imagePosition, setImagePosition] = useRecoilState(imagePositionState);
   useEffect(()=>{
     console.log([Date.now()+': component SingleMedia'+numColumns+' rendered']);
   });
@@ -62,7 +62,7 @@ const SingleMedia: React.FC<Props> = (props) => {
 
   const isModalShown = useRef<number>(0);
   
-  const viewPosition = useRef(new Animated.ValueXY(props.imagePosition)).current;
+  const viewPosition = useRef(new Animated.ValueXY(imagePosition)).current;
 
   const SCREEN_WIDTH = useWindowDimensions().width;
   const SCREEN_HEIGHT = useWindowDimensions().height;
@@ -97,6 +97,7 @@ const SingleMedia: React.FC<Props> = (props) => {
 
   useEffect(()=>{
     if(isMounted.current){
+      console.log(media);
       let imageDimensions = calcImageDimension(media, SCREEN_HEIGHT, SCREEN_WIDTH);
       showHideModal(imageDimensions.width, imageDimensions.height);
       if(singlePhotoIndex>-1 && isModalShown.current===1){
@@ -132,8 +133,8 @@ const SingleMedia: React.FC<Props> = (props) => {
   const hideModalAnimation = (duration:number=400) => {
     let imageDimensions = calcImageDimension(media, SCREEN_HEIGHT, SCREEN_WIDTH);
     let thumbnailPositionMinusSingleImagePosition = {
-      x: props.imagePosition.x - (SCREEN_WIDTH/(numColumns*imageDimensions.width))*(SCREEN_WIDTH - imageDimensions.width)/2,
-      y: props.imagePosition.y - (SCREEN_WIDTH/(numColumns*imageDimensions.height))*(SCREEN_HEIGHT - imageDimensions.height)/2
+      x: imagePosition.x - (SCREEN_WIDTH/(numColumns*imageDimensions.width))*(SCREEN_WIDTH - imageDimensions.width)/2,
+      y: imagePosition.y - (SCREEN_WIDTH/(numColumns*imageDimensions.height))*(SCREEN_HEIGHT - imageDimensions.height)/2
     };
     Animated.parallel([
       Animated.timing(viewPosition, {
@@ -210,8 +211,8 @@ const SingleMedia: React.FC<Props> = (props) => {
   const showHideModal = (imageWidth:number, imageHeight:number) => {
     if(isModalShown.current===0){
       let thumbnailPositionMinusSingleImagePosition = {
-        x: props.imagePosition.x - (SCREEN_WIDTH/(numColumns*imageWidth))*(SCREEN_WIDTH - imageWidth)/2,
-        y: props.imagePosition.y - (SCREEN_WIDTH/(numColumns*imageHeight))*(SCREEN_HEIGHT - imageHeight)/2
+        x: imagePosition.x - (SCREEN_WIDTH/(numColumns*imageWidth))*(SCREEN_WIDTH - imageWidth)/2,
+        y: imagePosition.y - (SCREEN_WIDTH/(numColumns*imageHeight))*(SCREEN_HEIGHT - imageHeight)/2
       };
       viewPosition.setValue(thumbnailPositionMinusSingleImagePosition);
 

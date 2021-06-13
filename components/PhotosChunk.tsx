@@ -19,7 +19,7 @@ import {default as Reanimated,} from 'react-native-reanimated';
 import {
   useRecoilState,
 } from 'recoil';
-import {singlePhotoIndexState} from '../states';
+import {singlePhotoIndexState, imagePositionState} from '../states';
 
 const isIOS = Platform.OS === 'ios';
 interface Props {
@@ -29,7 +29,6 @@ interface Props {
   index: number;
   modalShown: Animated.Value;
   headerShown: Reanimated.SharedValue<number>;
-  setImagePosition: Function;
   headerHeight: number;
   onMediaLongTap: Function;
   showSelectionCheckbox: boolean;
@@ -39,6 +38,7 @@ interface Props {
 
 const PhotosChunk: React.FC<Props> = (props) => {
   const [singlePhotoIndex, setSinglePhotoIndex] = useRecoilState(singlePhotoIndexState);
+  const [imagePosition, setImagePosition] = useRecoilState(imagePositionState);
 
   const loading = false;
   const SCREEN_WIDTH = useWindowDimensions().width;
@@ -76,7 +76,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
           let imageOffsetY = event.nativeEvent.absoluteY - event.nativeEvent.y;
           let imageOffsetX = event.nativeEvent.absoluteX - event.nativeEvent.x;
 
-          props.setImagePosition({x:imageOffsetX, y:imageOffsetY});
+          setImagePosition({x:imageOffsetX, y:imageOffsetY});
           setSinglePhotoIndex(props.index);
           console.log('Opening modal');
           props.headerShown.value  = 0;
