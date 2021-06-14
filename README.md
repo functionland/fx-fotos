@@ -2,9 +2,9 @@
 
 # Latest 2 Updates
 
-June-14-2021: Changed most states to reanimated values, which resulted in a performant, zero-delay app! no frame drops in UI or JS anymore!
+**June-14-2021:** Changed most states to reanimated values, which resulted in a performant, zero-delay app! no frame drops in UI or JS anymore!
 
-June-12-2021: I am switching the animations to reanimated and switching states to recoil. So far performance issue has been resoled for parts that are moved. This is being done in branch: "reanimatd-recyclerlistview"
+**June-12-2021:** I am switching the animations to reanimated and switching states to recoil. So far performance issue has been resoled for parts that are moved. This is being done in branch: "reanimatd-recyclerlistview"
 
 # BOX Photos development guide
 Note: Project is still in alpha phase and not production ready. We aim to release beta version by end of June 2021.
