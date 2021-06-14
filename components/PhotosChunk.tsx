@@ -12,14 +12,17 @@ import {
   TapGestureHandler,
   HandlerStateChangeEvent,
   TapGestureHandlerEventPayload,
+  TapGestureHandlerGestureEvent,
+  LongPressGestureHandlerGestureEvent,
   State,
 } from 'react-native-gesture-handler';
-import {default as Reanimated,} from 'react-native-reanimated';
+import { default as Reanimated, useAnimatedGestureHandler, useSharedValue } from 'react-native-reanimated';
 
 import {
   useRecoilState,
 } from 'recoil';
 import {singlePhotoIndexState, imagePositionState} from '../states';
+import { OnMove } from '../.history/components/ImageModal/types_20210517211851';
 
 const isIOS = Platform.OS === 'ios';
 interface Props {
@@ -27,80 +30,108 @@ interface Props {
   numCol: 2 | 3 | 4;
   sortCondition: 'day'|'month';
   index: number;
-  modalShown: Animated.Value;
+  modalShown: Reanimated.SharedValue<number>;
   headerShown: Reanimated.SharedValue<number>;
   headerHeight: number;
   onMediaLongTap: Function;
+  animatedImagePositionX: Reanimated.SharedValue<number>;
+  animatedImagePositionY: Reanimated.SharedValue<number>;
+  animatedSingleMediaIndex: Reanimated.SharedValue<number>;
+  singleImageWidth: Reanimated.SharedValue<number>;
+  singleImageHeight: Reanimated.SharedValue<number>;
   showSelectionCheckbox: boolean;
   selectedAssets:Asset[]|undefined;
+  imageWidth: number;
+  imageHeight: number;
 }
 
 
 const PhotosChunk: React.FC<Props> = (props) => {
-  const [singlePhotoIndex, setSinglePhotoIndex] = useRecoilState(singlePhotoIndexState);
-  const [imagePosition, setImagePosition] = useRecoilState(imagePositionState);
-
   const loading = false;
   const SCREEN_WIDTH = useWindowDimensions().width;
-  const [imageRef, setImageRef] = useState<Image | null>();
-  const tempScale = useRef(new Animated.Value(1)).current;
+  const SCREEN_HEIGHT = useWindowDimensions().height;
+  const imageRef = useRef<Image | null | undefined>();
+  const animatedTempScale = useSharedValue(1);
 
-  useEffect(()=>{
-    if (isIOS && imageRef) {
-      imageRef.setNativeProps({
-        opacity: 0,
-      });
-    }
-  },[imageRef,isIOS]);
 
   const handleOnLoad = () => {
     if (isIOS && imageRef) {
-      imageRef.setNativeProps({
+      imageRef.current?.setNativeProps({
         opacity: 1,
       });
     }
   };
 
-
-  const _onSingleTapHandlerStateChange = ( event:HandlerStateChangeEvent<TapGestureHandlerEventPayload> ) => {
-      if(event.nativeEvent.state === State.BEGAN){
-        ////console.log('TAP state BEGAN');
-        Animated.timing(tempScale, {
-          toValue: 0.8,
-          duration: 1000,
-          useNativeDriver: true,
-        }).start();
-      }
-      if (event.nativeEvent.state === State.ACTIVE && event.nativeEvent.oldState !== State.ACTIVE) {
-        if(!props.showSelectionCheckbox){
-          let imageOffsetY = event.nativeEvent.absoluteY - event.nativeEvent.y;
-          let imageOffsetX = event.nativeEvent.absoluteX - event.nativeEvent.x;
-
-          setImagePosition({x:imageOffsetX, y:imageOffsetY});
-          setSinglePhotoIndex(props.index);
-          console.log('Opening modal');
-          props.headerShown.value  = 0;
-          props.modalShown.setValue(1);
+  const _onTapGestureEvent = useAnimatedGestureHandler<TapGestureHandlerGestureEvent, {}>({
+    onStart: (event)=>{
+      console.log('onStart');
+      animatedTempScale.value = Reanimated.withTiming(0.8,{duration:1000})
+    },
+    onActive: (event)=>{
+      console.log('onActive');
+      if(!props.showSelectionCheckbox){
+        props.animatedImagePositionY.value = event.absoluteY - event.y;
+        props.animatedImagePositionX.value = event.absoluteX - event.x;
+        props.animatedSingleMediaIndex.value = props.index;
+        const ratio = props.imageHeight/props.imageWidth;
+        const screenRatio = SCREEN_HEIGHT/SCREEN_WIDTH;
+        let height = SCREEN_HEIGHT;
+        let width = SCREEN_WIDTH;
+        if(ratio > screenRatio){
+          width = SCREEN_HEIGHT/screenRatio;
         }else{
-            props.onMediaLongTap(props.photo.value);
+          height = SCREEN_WIDTH*screenRatio;
         }
-        Animated.timing(
-          tempScale, {
-            toValue: 1,
-            useNativeDriver: true,
-          }
-        ).stop();
-        tempScale.setValue(1);
-      }else if(event.nativeEvent.state === State.CANCELLED || event.nativeEvent.state === State.FAILED){
-        Animated.timing(
-          tempScale, {
-            toValue: 1,
-            useNativeDriver: true,
-          }
-        ).stop();
-        tempScale.setValue(1);
+        props.singleImageHeight.value = height;
+        props.singleImageWidth.value = width;
+        console.log('Opening modal');
+        
+        props.headerShown.value = 0;
+        props.modalShown.value = 1;
+      }else{
+          //props.onMediaLongTap(props.photo.value);
       }
-  }
+      animatedTempScale.value = Reanimated.withTiming(1,{duration:10})
+    },
+    onCancel:()=>{
+      console.log('onCancel');
+      animatedTempScale.value = Reanimated.withTiming(1,{duration:10})
+    },
+    onEnd:()=>{
+      console.log('onEnd');
+      animatedTempScale.value = Reanimated.withTiming(1,{duration:10})
+    },
+    onFail:()=>{
+      console.log('onFail');
+      animatedTempScale.value = Reanimated.withTiming(1,{duration:10})
+    },
+    onFinish:()=>{
+      console.log('onFinish');
+      animatedTempScale.value = Reanimated.withTiming(1,{duration:10})
+    },
+  });
+
+  const _onLongGestureEvent = useAnimatedGestureHandler<LongPressGestureHandlerGestureEvent, {}>({
+    onStart: (event)=>{
+      console.log('onLongStart');
+      animatedTempScale.value = Reanimated.withTiming(0.8,{duration:1000})
+    },
+    onActive: (event)=>{
+      console.log('onLongActive');
+    },
+    onCancel: ()=>{
+      console.log('onLongCancel');
+    },
+    onFail:()=>{
+      console.log('onLongFail:when scroll before finish');
+    },
+    onEnd:()=>{
+      console.log('onLongEnd:when long');
+    },
+    onFinish:()=>{
+      console.log('onLongFinish:when scroll, tap or long');
+    }
+  })
   const _onLongTapHandlerStateChange = ( event:HandlerStateChangeEvent<TapGestureHandlerEventPayload> ) => {
     
       if (event.nativeEvent.state === State.ACTIVE && event.nativeEvent.oldState !== State.ACTIVE) {
@@ -111,19 +142,19 @@ const PhotosChunk: React.FC<Props> = (props) => {
   }
   const longTapRef = createRef<LongPressGestureHandler>();
   const singleTapRef = createRef<TapGestureHandler>();
+  const animatedStyle = Reanimated.useAnimatedStyle(()=>{
+    return {
+        opacity: animatedTempScale.value,
+    };
+  });
 
   const createThumbnail = (media:Asset) => {
     if(media.duration > 0){
       return (
-        <View
-          style={{
-            height: (SCREEN_WIDTH / props.numCol),
-            width: (SCREEN_WIDTH / props.numCol),
-          }}
-        >
-          <Animated.Image
-              ref={(ref: React.SetStateAction<Image | null | undefined>) => {
-                setImageRef(ref);
+        <>
+          <Image
+              ref={(ref:any) => {
+                imageRef.current = ref;
               }}
               source={{uri: media.uri}}
               // eslint-disable-next-line react-native/no-inline-styles
@@ -143,13 +174,13 @@ const PhotosChunk: React.FC<Props> = (props) => {
             <Text style={styles.durationText}>{prettyTime(media.duration)}</Text>
             <MaterialIcons name="play-circle-filled" size={20} color="white" />
           </View>
-        </View>
+        </>
       );
     }else{
       return (
-        <Animated.Image
-              ref={(ref: React.SetStateAction<Image | null | undefined>) => {
-                setImageRef(ref);
+        <Image
+              ref={(ref:any) => {
+                imageRef.current = ref;
               }}
               source={{uri: media.uri}}
               // eslint-disable-next-line react-native/no-inline-styles
@@ -176,29 +207,36 @@ const PhotosChunk: React.FC<Props> = (props) => {
       )
     }else{
       return (
-        <Animated.View style={{
+        <Reanimated.View style={[{
           zIndex:4, 
-          flex: 1/props.numCol, 
           width: SCREEN_WIDTH/props.numCol,
           height: SCREEN_WIDTH/props.numCol,
-          transform: [
-            {
-              scale: tempScale
-            }
-          ]
-        }}>
+        }, animatedStyle]}>
         <LongPressGestureHandler
-        ref={longTapRef}
-          onHandlerStateChange={_onLongTapHandlerStateChange}
-          minDurationMs={800}
+          ref={longTapRef}
+          onGestureEvent={_onLongGestureEvent}
+          minDurationMs={600}
         >
-          <TapGestureHandler
-            ref={singleTapRef}
-            onHandlerStateChange={_onSingleTapHandlerStateChange}
-            numberOfTaps={1}
-          >
-              {createThumbnail(props.photo.value)}
-          </TapGestureHandler>
+          <Reanimated.View 
+            style={{
+              width: SCREEN_WIDTH/props.numCol,
+              height: SCREEN_WIDTH/props.numCol,
+              zIndex:5
+            }}>
+            <TapGestureHandler
+              ref={singleTapRef}
+              onGestureEvent={_onTapGestureEvent}
+            >
+              <Reanimated.View
+                style={{
+                  height: (SCREEN_WIDTH / props.numCol),
+                  width: (SCREEN_WIDTH / props.numCol),
+                }}
+              >
+                 {createThumbnail(props.photo.value)}
+              </Reanimated.View>
+            </TapGestureHandler>
+          </Reanimated.View>
         </LongPressGestureHandler>
         <View style={
           [
@@ -214,7 +252,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
             borderColor='whitesmoke'
           />
           </View>
-        </Animated.View>
+        </Reanimated.View>
       );
     }
   }else{

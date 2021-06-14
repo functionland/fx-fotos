@@ -12,7 +12,7 @@ import {
   useRecoilState,
 } from 'recoil';
 import {preparedMediaState,} from '../states';
-import {default as Reanimated,} from 'react-native-reanimated';
+import { default as Reanimated, useSharedValue } from 'react-native-reanimated';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
@@ -48,11 +48,17 @@ const AllPhotos: React.FC<Props> = (props) => {
     return () => {isMounted.current = false;console.log(['component AllPhotos unmounted']);}
   }, []);
  
-  const modalShown = useRef(new Animated.Value(0)).current;
   const showStory = useRef(new Animated.Value(0)).current;
   const scrollIndex2 = useRef(new Animated.Value(0)).current;
   const scrollIndex3 = useRef(new Animated.Value(0)).current;
   const scrollIndex4 = useRef(new Animated.Value(0)).current;
+
+  const modalShown = useSharedValue(0);
+  const animatedImagePositionX = useSharedValue(0);
+  const animatedImagePositionY = useSharedValue(0);
+  const animatedSingleMediaIndex = useSharedValue(-1);
+  const singleImageWidth = useSharedValue(SCREEN_WIDTH);
+  const singleImageHeight = useSharedValue(SCREEN_HEIGHT);
 
   const [showActionBar, setShowActionBar] = useState<boolean>(false);
   const [selectedAssets, setSelectedAssets] = useState<Asset[]>([]);
@@ -127,7 +133,11 @@ const AllPhotos: React.FC<Props> = (props) => {
         FOOTER_HEIGHT={props.FOOTER_HEIGHT}
         onMediaLongTap={onMediaLongTap}
         showStory={showStory}
-
+        animatedImagePositionX={animatedImagePositionX}
+        animatedImagePositionY={animatedImagePositionY}
+        animatedSingleMediaIndex={animatedSingleMediaIndex}
+        singleImageWidth={singleImageWidth}
+        singleImageHeight={singleImageHeight}
         showSelectionCheckbox={showActionBar}
         selectedAssets={selectedAssets}
       />
@@ -153,6 +163,11 @@ const AllPhotos: React.FC<Props> = (props) => {
         HEADER_HEIGHT={props.HEADER_HEIGHT}
         FOOTER_HEIGHT={props.FOOTER_HEIGHT}
         onMediaLongTap={onMediaLongTap}
+        animatedImagePositionX={animatedImagePositionX}
+        animatedImagePositionY={animatedImagePositionY}
+        animatedSingleMediaIndex={animatedSingleMediaIndex}
+        singleImageWidth={singleImageWidth}
+        singleImageHeight={singleImageHeight}
         showSelectionCheckbox={showActionBar}
         selectedAssets={selectedAssets}
       />
@@ -178,12 +193,23 @@ const AllPhotos: React.FC<Props> = (props) => {
         HEADER_HEIGHT={props.HEADER_HEIGHT}
         FOOTER_HEIGHT={props.FOOTER_HEIGHT}
         onMediaLongTap={onMediaLongTap}
+        animatedImagePositionX={animatedImagePositionX}
+        animatedImagePositionY={animatedImagePositionY}
+        animatedSingleMediaIndex={animatedSingleMediaIndex}
+        singleImageWidth={singleImageWidth}
+        singleImageHeight={singleImageHeight}
         showSelectionCheckbox={showActionBar}
         selectedAssets={selectedAssets}
       />
       <SingleMedia 
         modalShown={modalShown}
         headerShown={props.headerShown}
+        animatedImagePositionX={animatedImagePositionX}
+        animatedImagePositionY={animatedImagePositionY}
+        animatedSingleMediaIndex={animatedSingleMediaIndex}
+        singleImageWidth={singleImageWidth}
+        singleImageHeight={singleImageHeight}
+        numColumnsAnimated={props.numColumnsAnimated}
       />
       <StoryHolder 
         duration={1500}

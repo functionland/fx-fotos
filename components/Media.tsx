@@ -7,30 +7,32 @@ import {
   TapGestureHandler,
   PinchGestureHandler,
   HandlerStateChangeEvent,
-  PinchGestureHandlerEventPayload,
-  TapGestureHandlerEventPayload,
+  PinchGestureHandlerGestureEvent,
+  TapGestureHandlerGestureEvent,
   State,
   PinchGestureHandlerProps
 } from 'react-native-gesture-handler';
+import { default as Reanimated, useAnimatedGestureHandler, useAnimatedStyle } from 'react-native-reanimated';
+
 
 interface Props {
   imageHeight: number;
   imageWidth: number;
   media:Asset|undefined;
-  state: {activeIndex: number;}|undefined;
-  modalShown: Animated.Value;
+  modalShown: Reanimated.SharedValue<number>;
   index: number;
-  setScrollEnabled: Function;
   pinchRef: React.RefObject<React.ComponentType<PinchGestureHandlerProps & React.RefAttributes<any>>>;
-  imageScale:Animated.AnimatedInterpolation;
-  _baseImageScale: Animated.Value;
-  _pinchScale: Animated.Value;
+  _baseImageScale: Reanimated.SharedValue<number>;
+  _pinchScale: Reanimated.SharedValue<number>;
+  animatedSingleMediaIndex: Reanimated.SharedValue<number>;
 }
 
 const Media: React.FC<Props> = (props) => {
   const SCREEN_WIDTH = useWindowDimensions().width;
   const SCREEN_HEIGHT = useWindowDimensions().height;
-
+const state={
+  activeIndex: -1
+}
   
   let doubleTapRef = createRef<TapGestureHandler>();
   
@@ -44,45 +46,54 @@ const Media: React.FC<Props> = (props) => {
 
 
 
-  const _onPinchGestureEvent = Animated.event(
-    [{ nativeEvent: { scale: props._pinchScale } }],
-    { useNativeDriver: true }
-  );
-  const _onPinchHandlerStateChange = ( event:HandlerStateChangeEvent<PinchGestureHandlerEventPayload> ) => {
-    if(event.nativeEvent.numberOfPointers > 1 && isMounted.current){
-      //props.setScrollEnabled(false);
-    }
-    if (event.nativeEvent.oldState === State.ACTIVE && isMounted.current) {
-      _lastScale *= event.nativeEvent.scale;
-      props._baseImageScale.setValue(_lastScale);
-      props._pinchScale.setValue(1);
-    }
-  }
+  const _onPinchGestureEvent = useAnimatedGestureHandler<PinchGestureHandlerGestureEvent, {}>({
+    onActive: (event) => {
 
-  const _onDoubleTapHandlerStateChange = ( event:HandlerStateChangeEvent<TapGestureHandlerEventPayload> ) => {
-    if (event.nativeEvent.oldState === State.ACTIVE && event.nativeEvent.state !== State.ACTIVE && isMounted.current) {
-      if(_lastScale > 1){
-        _lastScale = 1;
-        props._baseImageScale.setValue(_lastScale);
-      }else{
-        _lastScale *= 2;
-        props._baseImageScale.setValue(_lastScale);
-      }
+    },
+    onFinish: (event) => {
+
+    },
+    onEnd: (event)=>{
+
+    },
+    onCancel: (event) => {
+
     }
-  }
+  });
+
+  const _onDoubleTapHandlerStateChange = useAnimatedGestureHandler<TapGestureHandlerGestureEvent, {}>({
+    onStart: (event)=>{
+      console.log('onStart');
+    },
+  });
 
       let video:any;
       const [isMute, setIsMute] = useState<boolean>(false);
       useEffect(()=>{
         if(video && props?.media?.duration && isMounted.current){
-          if(props.state?.activeIndex===props.index){
+          if(state?.activeIndex===props.index){
             ////console.log('video unloaded');
             video?.unloadAsync();
-          }else if(props.state?.activeIndex===props.index){
+          }else if(state?.activeIndex===props.index){
             video.loadAsync({uri: props.media?.uri},{shouldPlay: true, positionMillis: 0});
           }
         }
-      }, [props.index, props.state?.activeIndex, props.state]);
+      }, [props.index, state?.activeIndex, state]);
+
+      const animatedImageStyle = Reanimated.useAnimatedStyle(()=>{
+        const imageScale = Reanimated.interpolate((props._baseImageScale.value* props._pinchScale.value),
+          [0, 1, 4],
+          [1, 1, 4]
+        );
+        let scale = props.modalShown.value*((props.animatedSingleMediaIndex.value===props.index)?imageScale:1);
+        return {
+          transform: [
+            {
+              scale: scale,
+            }
+          ]
+        }
+      });
 
       const buildMedia = (media:Asset|undefined) => {
         if(media){
@@ -94,10 +105,10 @@ const Media: React.FC<Props> = (props) => {
                 showMuteButton={true}
                 mute={() =>setIsMute(true)}
                 unmute={() =>setIsMute(false)}
-                isMute={isMute || !(props.state?.activeIndex===props.index?true:false)}
+                isMute={isMute || !(state?.activeIndex===props.index?true:false)}
                 videoProps={{
                   ref: (v: any) => (video = v),
-                  shouldPlay: (props.state?.activeIndex===props.index),
+                  shouldPlay: (state?.activeIndex===props.index),
                   isMuted: isMute,
                   resizeMode: Video.RESIZE_MODE_CONTAIN,
                   source: {
@@ -114,15 +125,13 @@ const Media: React.FC<Props> = (props) => {
             );
           }else{
             return (
-              <Animated.Image
+              <Reanimated.Image
                 style={[
                   styles.pinchableImage,
+                  animatedImageStyle,
                   {
                     height: props.imageHeight,
                     width: props.imageWidth,
-                    transform: [
-                      { scale: Animated.multiply(props.modalShown,(props.state?.activeIndex===props.index)?props.imageScale:1) },
-                    ],
                   },
                 ]}
                 source={{uri: media?.uri}}
@@ -136,8 +145,22 @@ const Media: React.FC<Props> = (props) => {
         }
       }
 
+      const animatedViewStyle = Reanimated.useAnimatedStyle(()=>{
+        const imageScale = Reanimated.interpolate((props._baseImageScale.value* props._pinchScale.value),
+          [0, 1, 4],
+          [1, 1, 4]
+        );
+        return {
+          opacity: (props.modalShown.value*((props.animatedSingleMediaIndex.value===props.index)?1:(Reanimated.interpolate(
+            imageScale,
+            [0, 0.99, 1, 1.01, 4],
+            [0, 0, 1, 0, 0],
+          ))))
+        }
+      });
+
       return (
-        <Animated.View
+        <Reanimated.View
           style={{
             marginLeft: (SCREEN_WIDTH-props.imageWidth)/2,
             marginTop: (SCREEN_HEIGHT-props.imageHeight)/2,
@@ -147,10 +170,10 @@ const Media: React.FC<Props> = (props) => {
         >
                 <TapGestureHandler
                   ref={doubleTapRef}
-                  onHandlerStateChange={_onDoubleTapHandlerStateChange}
+                  onGestureEvent={_onDoubleTapHandlerStateChange}
                   numberOfTaps={2}
                 >
-                  <Animated.View 
+                  <Reanimated.View 
                     style={[styles.wrapper, 
                       {
                         width: SCREEN_WIDTH, 
@@ -160,27 +183,23 @@ const Media: React.FC<Props> = (props) => {
                     <PinchGestureHandler
                       ref={props.pinchRef}
                       onGestureEvent={_onPinchGestureEvent}
-                      onHandlerStateChange={_onPinchHandlerStateChange}
                     >
-                      <Animated.View 
+                      <Reanimated.View 
                         style={[styles.container, 
+                          animatedViewStyle,
                           {
                             width: SCREEN_WIDTH, 
                             height: SCREEN_HEIGHT,
-                            opacity: Animated.multiply(props.modalShown,(props.state?.activeIndex===props.index)?1:(props.imageScale.interpolate({
-                              inputRange: [0, 0.99, 1, 1.01, 4],
-                              outputRange: [0, 0, 1, 0, 0],
-                            })))
                           }
                         ]} 
                         collapsable={false}
                       >
                         {buildMedia(props.media)}
-                      </Animated.View>
+                      </Reanimated.View>
                     </PinchGestureHandler>
-                  </Animated.View>
+                  </Reanimated.View>
                 </TapGestureHandler>
-              </Animated.View>
+              </Reanimated.View>
       );
     
   

@@ -69,7 +69,7 @@ interface Props {
   scrollIndex4:Animated.Value;
   focalY: Animated.Value;
   numberOfPointers: Animated.Value;
-  modalShown: Animated.Value;
+  modalShown: Reanimated.SharedValue<number>;
   headerShown: Reanimated.SharedValue<number>;
   storiesHeight: number;
   showStory:Animated.Value;
@@ -79,6 +79,11 @@ interface Props {
   onMediaLongTap: Function;
   showSelectionCheckbox:boolean;
   selectedAssets:Asset[]|undefined;
+  animatedImagePositionX: Reanimated.SharedValue<number>;
+  animatedImagePositionY: Reanimated.SharedValue<number>;
+  animatedSingleMediaIndex: Reanimated.SharedValue<number>;
+  singleImageWidth: Reanimated.SharedValue<number>;
+  singleImageHeight: Reanimated.SharedValue<number>;
 }
 
 const RenderPhotos: React.FC<Props> = (props) => {
@@ -232,7 +237,6 @@ const RenderPhotos: React.FC<Props> = (props) => {
       break;
       default:
     return (
-    <View style={{position:'relative', zIndex:1}}>
       <PhotosChunk
         photo={data}
         numCol={props.numColumns}
@@ -245,8 +249,15 @@ const RenderPhotos: React.FC<Props> = (props) => {
         onMediaLongTap={props.onMediaLongTap}
         showSelectionCheckbox={props.showSelectionCheckbox}
         selectedAssets={props.selectedAssets}
+        animatedImagePositionX={props.animatedImagePositionX}
+        animatedImagePositionY={props.animatedImagePositionY}
+        animatedSingleMediaIndex={props.animatedSingleMediaIndex}
+        singleImageWidth={props.singleImageWidth}
+        singleImageHeight={props.singleImageHeight}
+        imageWidth={(typeof data.value !== 'string')?data.value.width:0}
+        imageHeight={(typeof data.value !== 'string')?data.value.height:0}
       />
-    </View>);
+    );
     }
   };
 
