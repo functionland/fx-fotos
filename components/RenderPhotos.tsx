@@ -22,7 +22,7 @@ import FloatingFilters from './FloatingFilters';
 import { useBackHandler } from '@react-native-community/hooks'
 import { Asset } from 'expo-media-library';
 import {default as Reanimated, useSharedValue, useAnimatedRef, useDerivedValue, scrollTo as reanimatedScrollTo, useAnimatedScrollHandler} from 'react-native-reanimated';
-
+import { timestampToDate } from '../utils/functions';
 
 import {
   useRecoilState,
@@ -102,9 +102,8 @@ const RenderPhotos: React.FC<Props> = (props) => {
   const showThumbScroll = useSharedValue(0);
   const showFloatingFilters = useSharedValue(0);
 
-  useDerivedValue(() => {
-    reanimatedScrollTo(scrollRefExternal, 0, dragY.value, false);
-  });
+  const animatedTimeStampString = useSharedValue('');
+
  
   const [lastScrollOffset, setLastScrollOffset] = useState<number>(0);
   const [startScroll, setStartScroll] = useState<boolean>(false);
@@ -279,8 +278,24 @@ const RenderPhotos: React.FC<Props> = (props) => {
   }
   },[props.numColumns, scrollRef?.current]);
 
+  
   const _onMomentumScrollEnd = () => {
-      let lastIndex = scrollRef?.current.findApproxFirstVisibleIndex();
+    let currentTimeStamp = 0;
+      let lastIndex = (scrollRef?.current?.findApproxFirstVisibleIndex() || 0);
+      let currentImage = props.photos.layout[lastIndex].value;
+
+      if(typeof currentImage === 'string'){
+        currentImage = props.photos.layout[lastIndex+1]?.value;
+        if(currentImage && typeof currentImage === 'string'){
+          currentImage = props.photos.layout[lastIndex+2]?.value;
+        }
+      }
+      if(currentImage && typeof currentImage !== 'string'){
+        currentTimeStamp = currentImage.modificationTime;
+      }
+      let currentTimeStampString = timestampToDate(currentTimeStamp, ['month']).month;
+      animatedTimeStampString.value = currentTimeStampString;
+
       if(props.numColumns===2){
         console.log('last index is '+lastIndex);
         props.scrollIndex2.setValue(lastIndex);
@@ -293,9 +308,15 @@ const RenderPhotos: React.FC<Props> = (props) => {
       ////console.log('lastScrollOffset='+lastScrollOffset+', lastOffset='+lastOffset+', sampleHeight='+sampleHeight);
       showThumbScroll.value = Reanimated.withDelay(3000, Reanimated.withTiming(0));
   }
+  useDerivedValue(() => {
+    let approximateIndex = Math.ceil(dragY.value/props.numColumns);
+    
+    //animatedTimeStampString.value = approximateIndex.toString();
+    reanimatedScrollTo(scrollRefExternal, 0, dragY.value, false);
+  });
   
   const _onScrollEnd = () => {
-    ////console.log('scroll end called');
+    console.log('scroll end called');
     let sampleHeight = scrollRef?.current?.getContentDimension().height;
     let lastOffset = scrollRef?.current.getCurrentScrollOffset();
     let lastScrollOffset = lastOffset*(SCREEN_HEIGHT-indicatorHeight)/(sampleHeight-SCREEN_HEIGHT);
@@ -435,7 +456,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
         scrollIndicatorContainerStyle={{}}
         scrollIndicatorStyle={{}}
         layoutHeight={layoutHeightAnimated}
-        currentImageTimestamp={currentImageTimestamp}
+        currentImageTimestamp={animatedTimeStampString}
       />
       <FloatingFilters
         headerIndexes={props.photos.headerIndexes}

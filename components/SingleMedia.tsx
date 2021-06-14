@@ -16,7 +16,7 @@ import {
   State,
   ScrollView,
   PinchGestureHandler,
-  TapGestureHandlerGestureEvent,
+  NativeViewGestureHandler,
   PanGestureHandlerGestureEvent,
 } from 'react-native-gesture-handler';
 import {
@@ -39,7 +39,7 @@ class ExternalScrollView extends BaseScrollView {
         style={{zIndex:1}}
         ref={(this.props as any).scrollRefExternal}
         scrollEventThrottle={16}
-        nestedScrollEnabled = {true}
+        //nestedScrollEnabled = {true}
         //waitFor={(this.props as any).waitFor}
         ////onScroll={(this.props as any)._onScrollExternal}
         ////onScroll={Reanimated.event([(this.props as any).animatedEvent], {listener: this.props.onScroll, useNativeDriver: true})}
@@ -206,7 +206,8 @@ const SingleMedia: React.FC<Props> = (props) => {
     }
   }, [props.modalShown]);
 
-  let singleTapRef = createRef<PanGestureHandler>();
+  const singleTapRef = createRef<PanGestureHandler>();
+  const nativeViewRef = createRef<PanGestureHandler>();
 
   const _onPanGestureEvent = useAnimatedGestureHandler<PanGestureHandlerGestureEvent, {}>({
     onStart: (event)=> {
@@ -366,10 +367,14 @@ const SingleMedia: React.FC<Props> = (props) => {
               enabled={true}
               maxPointers={1}
               ref={singleTapRef}
-              simultaneousHandlers={scrollRef}
+              simultaneousHandlers={[nativeViewRef]}
               onGestureEvent={_onPanGestureEvent}
             >
-              <Reanimated.View style={{width:SCREEN_WIDTH, height:SCREEN_HEIGHT}}>
+              <Reanimated.View style={{width: SCREEN_WIDTH, height: SCREEN_HEIGHT}}>
+              <NativeViewGestureHandler
+                ref={nativeViewRef}
+                simultaneousHandlers={singleTapRef}
+              >
                 <RecyclerListView
                   ref={scrollRef}
                   externalScrollView={ExternalScrollView}
@@ -405,6 +410,7 @@ const SingleMedia: React.FC<Props> = (props) => {
                     />
                   )}
                 />
+              </NativeViewGestureHandler>
               </Reanimated.View>
             </PanGestureHandler>
           </Reanimated.View>

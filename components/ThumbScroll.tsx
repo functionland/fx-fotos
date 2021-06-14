@@ -1,6 +1,7 @@
 import React, { useEffect, createRef, } from 'react';
 
 import { StyleSheet, useWindowDimensions, StyleProp, Image , Text, View } from 'react-native';
+import { ReText } from 'react-native-redash';
 import { scrollImage } from '../assets/images';
 import { headerIndex } from '../types/interfaces';
 import { timestampToDate } from '../utils/functions';
@@ -10,7 +11,6 @@ import {
     PanGestureHandlerGestureEvent,
   } from 'react-native-gesture-handler';
   import { default as Reanimated, useAnimatedStyle, Extrapolate, useAnimatedGestureHandler, useSharedValue } from 'react-native-reanimated';
-
 
 interface Props {
     indicatorHeight:number;
@@ -28,27 +28,27 @@ interface Props {
     HEADER_HEIGHT: number;
     FOOTER_HEIGHT: number;
     layoutHeight: Reanimated.SharedValue<number>;
-    currentImageTimestamp: number;
+    currentImageTimestamp: Reanimated.SharedValue<string>
 }
 const ThumbScroll: React.FC<Props> = (props) => {
+    Reanimated.addWhitelistedNativeProps({ text: true });
     const SCREEN_HEIGHT = useWindowDimensions().height;
     const visibleHeight = (SCREEN_HEIGHT-props.indicatorHeight-props.HEADER_HEIGHT-props.FOOTER_HEIGHT);
-
+    
     useEffect(()=>{
         console.log([Date.now()+': component ThumbScroll'+props.numColumns+' rendered']);
     });
 
     let panRef_glide = createRef<PanGestureHandler>();    
 
-    const prevScrollY = useSharedValue(0);
-    const _onPanGestureEvent = useAnimatedGestureHandler<PanGestureHandlerGestureEvent, {}>({
+    const _onPanGestureEvent = useAnimatedGestureHandler<PanGestureHandlerGestureEvent, {prevScrollY:number}>({
         onStart: (_, ctx) => {
           props.opacity.value = 1;
           props.showFloatingFilters.value = 1;
-          prevScrollY.value = props.scrollY.value;
+          ctx.prevScrollY = props.scrollY.value;
         },
         onActive: (event, ctx) => {
-          props.dragY.value = (prevScrollY.value) + (event.translationY*(props.layoutHeight.value-SCREEN_HEIGHT)/(visibleHeight));
+          props.dragY.value = (ctx.prevScrollY) + (event.translationY*(props.layoutHeight.value-SCREEN_HEIGHT)/(visibleHeight));
         },
         onEnd: (event) => {
             props.opacity.value = Reanimated.withDelay(3000, Reanimated.withTiming(0, {duration:1000}));
@@ -120,7 +120,10 @@ const ThumbScroll: React.FC<Props> = (props) => {
                                         resizeMode='stretch'
                                     />
                                     <Reanimated.View style={[styles.scrollBarText, filtersAnimatedStyle]}>
-                                        <Text style={{color: 'grey'}}>{timestampToDate(props.currentImageTimestamp, ['month']).month}</Text>
+                                        <ReText 
+                                            style={{color: 'grey'}}
+                                            text={props.currentImageTimestamp}
+                                        />
                                     </Reanimated.View>
                                 
                                 </View>
