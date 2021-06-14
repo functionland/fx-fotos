@@ -1,5 +1,5 @@
 import React, { useState, useEffect, createRef, useRef } from 'react';
-import {useWindowDimensions , Animated, StyleSheet, View, StatusBar, } from 'react-native';
+import {useWindowDimensions , Animated, StyleSheet, BackHandler, StatusBar, } from 'react-native';
 import { useBackHandler } from '@react-native-community/hooks'
 import Media from './Media';
 import { Asset } from 'expo-media-library';
@@ -23,7 +23,7 @@ import {
   useRecoilState,
 } from 'recoil';
 import {numColumnsState, mediasState, singlePhotoIndexState, imagePositionState} from '../states';
-import {default as Reanimated, useAnimatedReaction, useAnimatedGestureHandler, useSharedValue, useAnimatedRef, useDerivedValue, scrollTo as reanimatedScrollTo, Extrapolate} from 'react-native-reanimated';
+import {default as Reanimated, useAnimatedReaction, useAnimatedGestureHandler, useSharedValue, useAnimatedRef, useDerivedValue, scrollTo as reanimatedScrollTo, call, useCode} from 'react-native-reanimated';
 
 class ExternalScrollView extends BaseScrollView {
   scrollTo(...args: any[]) {
@@ -63,14 +63,14 @@ interface Props {
 
 const SingleMedia: React.FC<Props> = (props) => {
   const [medias, setMedias] = useRecoilState(mediasState);
-
+  const backHandler = useRef<any>();
   useEffect(()=>{
     console.log([Date.now()+': component SingleMedia rendered']);
   });
   const isMounted = useRef(false);
   useEffect(() => {
     isMounted.current = true;
-    return () => {isMounted.current = false;}
+    return () => {isMounted.current = false;backHandler.current?.remove();}
   }, []);
 
   const SCREEN_WIDTH = useWindowDimensions().width;
@@ -106,7 +106,7 @@ const SingleMedia: React.FC<Props> = (props) => {
     //viewScaleY.value = (isModalOpen.value===0?1:0)*(SCREEN_WIDTH/(props.numColumnsAnimated.value*props.singleImageHeight.value)) + isModalOpen.value;
   },[props.animatedImagePositionY,props.numColumnsAnimated,props.singleImageHeight]);
 
-
+  
   const isModalOpen = useDerivedValue(() => {
     if(props.modalShown.value){
       return Reanimated.withDelay(1, 
@@ -114,6 +114,7 @@ const SingleMedia: React.FC<Props> = (props) => {
         duration: 0,
       }));
     }else{
+      
       translationX.value = Reanimated.withTiming(0, {
         duration: duration,
       });
@@ -128,7 +129,31 @@ const SingleMedia: React.FC<Props> = (props) => {
   }, [
     props.modalShown, 
   ]);
-
+  const _setBackHandler = () => {
+    backHandler.current = BackHandler.addEventListener(
+      "hardwareBackPress",
+      ()=>{
+        props.modalShown.value = 0;
+        return true;
+      }
+    );
+  }
+  const _removeBackHandler = () => {
+    backHandler.current?.remove();
+  }
+  useAnimatedReaction(() => {
+    return isModalOpen.value;
+  }, (result, previous) => {
+    if (result !== previous) {
+      if(result){
+        console.log('setting BackHandler');
+        Reanimated.runOnJS(_setBackHandler)();
+      }else{
+        Reanimated.runOnJS(_removeBackHandler)();
+      }
+      console.log(result);
+    }
+  }, [isModalOpen]);
   const positionX = useSharedValue(0);
   const positionY = useSharedValue(0);
 
