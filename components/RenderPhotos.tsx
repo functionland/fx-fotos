@@ -95,7 +95,6 @@ const RenderPhotos: React.FC<Props> = (props) => {
   }));
   const [layoutProvider, setLayoutProvider] = useState<LayoutProvider>(LayoutUtil.getLayoutProvider(2, 'day', headerHeight, [], props.storiesHeight, props.HEADER_HEIGHT));
   layoutProvider.shouldRefreshWithAnchoring = true;
-  const [viewLoaded, setViewLoaded] = useState<boolean>(false);
   const scrollRef:any = useRef();
   const scrollRefExternal = useAnimatedRef<Reanimated.ScrollView>();
   const dragY = useSharedValue(0);
@@ -103,12 +102,6 @@ const RenderPhotos: React.FC<Props> = (props) => {
   const showFloatingFilters = useSharedValue(0);
 
   const animatedTimeStampString = useSharedValue('');
-
- 
-  const [lastScrollOffset, setLastScrollOffset] = useState<number>(0);
-  const [startScroll, setStartScroll] = useState<boolean>(false);
-  const startScrollRef = useRef(startScroll);
-  startScrollRef.current = startScroll;
 
   const layoutHeightAnimated = useSharedValue(99999999);
 
@@ -305,7 +298,6 @@ const RenderPhotos: React.FC<Props> = (props) => {
         props.scrollIndex4.setValue(lastIndex);
       }
       ////console.log(['momentum ended', {'in':props.numColumns, 'to':lastIndex}, lastOffset]);
-      ////console.log('lastScrollOffset='+lastScrollOffset+', lastOffset='+lastOffset+', sampleHeight='+sampleHeight);
       showThumbScroll.value = Reanimated.withDelay(3000, Reanimated.withTiming(0));
   }
   useDerivedValue(() => {
@@ -314,24 +306,13 @@ const RenderPhotos: React.FC<Props> = (props) => {
     //animatedTimeStampString.value = approximateIndex.toString();
     reanimatedScrollTo(scrollRefExternal, 0, dragY.value, false);
   });
-  
-  const _onScrollEnd = () => {
-    console.log('scroll end called');
-    let sampleHeight = scrollRef?.current?.getContentDimension().height;
-    let lastOffset = scrollRef?.current.getCurrentScrollOffset();
-    let lastScrollOffset = lastOffset*(SCREEN_HEIGHT-indicatorHeight)/(sampleHeight-SCREEN_HEIGHT);
-    setLastScrollOffset(lastScrollOffset);
-  }
 
   const scrollBarToViewSync = (value:number)=> {
-    //console.log('value+lastScrollOffset='+(value+lastScrollOffset));
     let sampleHeight = scrollRef?.current?.getContentDimension().height;
-    let ViewOffset = ((value+lastScrollOffset)*(sampleHeight-SCREEN_HEIGHT))/(SCREEN_HEIGHT-indicatorHeight);
     //console.log('value='+value);
     //console.log('ViewOffset='+ViewOffset);
     //console.log('sampleHeight='+sampleHeight);
     //console.log('SCREEN_HEIGHT='+SCREEN_HEIGHT);
-    scrollRef.current.scrollToOffset(0, ViewOffset, false );
     let currentImageIndex = scrollRef.current.findApproxFirstVisibleIndex();
     let currentImage = props.photos.layout[currentImageIndex].value;
     let currentTimeStamp = 0;
@@ -346,17 +327,9 @@ const RenderPhotos: React.FC<Props> = (props) => {
     }
     setCurrentImageTimestamp(currentTimeStamp);
   }
- 
-  useEffect(()=>{
-      setViewLoaded(true);
-  },[scrollRef, scrollRef.current]);
 
-  const adjustScrollPosition = (newOffset:{[key:string]:(2|3|4|number)}) => {
-    let numColumns:number = props.numColumns;
-    if( viewLoaded && numColumns !== newOffset.in){
-      scrollRef?.current?.scrollToIndex(newOffset.to, false);
-    }
-  }
+
+
   /*useEffect(()=>{
     adjustScrollPosition(props.scrollOffset);
   },[props.scrollOffset]);*/
