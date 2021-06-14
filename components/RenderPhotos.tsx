@@ -1,4 +1,4 @@
-import React, {useEffect, createRef, useState, useRef} from 'react';
+import React, {useEffect, MutableRefObject, useState, useRef} from 'react';
 import {
   Animated,
   Dimensions,
@@ -21,105 +21,166 @@ import { LayoutUtil } from '../utils/LayoutUtil';
 import FloatingFilters from './FloatingFilters';
 import { useBackHandler } from '@react-native-community/hooks'
 import { Asset } from 'expo-media-library';
+import {default as Reanimated, useSharedValue, useAnimatedRef, useDerivedValue, scrollTo as reanimatedScrollTo, useAnimatedScrollHandler} from 'react-native-reanimated';
+import { timestampToDate } from '../utils/functions';
+
+import {
+  useRecoilState,
+} from 'recoil';
+import {storiesState} from '../states';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
-const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
-class ExternalScrollView extends BaseScrollView {
 
+class ExternalScrollView extends BaseScrollView {
   scrollTo(...args: any[]) {
-    if ((this.props as any).scrollRefExternal?.current) { 
+    //if ((this.props as any).scrollRefExternal?.current) { 
       (this.props as any).scrollRefExternal?.current?.scrollTo(...args);
-    }
+      //reanimatedScrollTo((this.props as any).scrollRefExternal, 0, args[0].y, true);
+      //(this.props as any).scroll.value = args[0].y;
+    //}
   }
   render() {
     return (
-      <AnimatedScrollView {...this.props}
+      <Reanimated.ScrollView {...this.props}
         style={{zIndex:1}}
-        ref={(scrollView: any) => {(this.props as any).scrollRefExternal.current = scrollView;}}
+        ref={(this.props as any).scrollRefExternal}
         scrollEventThrottle={16}
         nestedScrollEnabled = {true}
-        onScroll={Animated.event([(this.props as any).animatedEvent], {listener: this.props.onScroll, useNativeDriver: true})}
+        //onScroll={(this.props as any)._onScrollExternal}
+        //onScroll={Reanimated.event([(this.props as any).animatedEvent], {listener: this.props.onScroll, useNativeDriver: true})}
       >
         {this.props.children}
-      </AnimatedScrollView>);
+      </Reanimated.ScrollView>
+    );
   }
 }
 interface Props {
   photos: FlatSection;
-  margin: Animated.AnimatedInterpolation;
   maxWidth: number;
   minWidth: number;
   numColumns: 2 | 3 | 4;
-  opacity: Animated.AnimatedInterpolation;
-  date: Date;
   loading: boolean;
   sortCondition: 'day' | 'month';
-  zIndex: number;
-  scale: Animated.Value;
-  sizeTransformScale: Animated.AnimatedInterpolation;
-  isPinchAndZoom: boolean;
-  scrollOffset:{[key:number]:number};
-  setScrollOffset: Function;
-  setLoadMore: Function;
+  scale: Reanimated.SharedValue<number>;
+  numColumnsAnimated: Reanimated.SharedValue<number>;
+  scrollIndex2:Animated.Value;
+  scrollIndex3:Animated.Value;
+  scrollIndex4:Animated.Value;
   focalY: Animated.Value;
   numberOfPointers: Animated.Value;
-  modalShown: boolean;
-  setModalShown: Function;
-  setSinglePhotoIndex: Function;
-  setImagePosition: Function;
+  modalShown: Reanimated.SharedValue<number>;
+  headerShown: Reanimated.SharedValue<number>;
   storiesHeight: number;
-  stories: story[]|undefined;
-  setShowStory: Function;
-  showStory:boolean;
-  setStory:Function;
-  scrollY: Animated.Value;
+  showStory:Animated.Value;
+  scrollY: Reanimated.SharedValue<number>;
   HEADER_HEIGHT: number;
+  FOOTER_HEIGHT: number;
   onMediaLongTap: Function;
   showSelectionCheckbox:boolean;
   selectedAssets:Asset[]|undefined;
+  animatedImagePositionX: Reanimated.SharedValue<number>;
+  animatedImagePositionY: Reanimated.SharedValue<number>;
+  animatedSingleMediaIndex: Reanimated.SharedValue<number>;
+  singleImageWidth: Reanimated.SharedValue<number>;
+  singleImageHeight: Reanimated.SharedValue<number>;
 }
 
 const RenderPhotos: React.FC<Props> = (props) => {
-
+  const [stories, setStories] = useRecoilState(storiesState);
   const headerHeight = 20;
   const indicatorHeight = 50;
   const [dataProvider, setDataProvider] = useState<DataProvider>(new DataProvider((r1, r2) => {
-    if((typeof r1.value==='string' && typeof r2.value==='string')?(r1 !== r2):((r1.index !== r2.index) || r1.selected !== r2.selected)){
-console.log(['re-rendering for',{r1:r1, r2:r2}]);
-    }
     return (typeof r1.value==='string' && typeof r2.value==='string')?(r1.value !== r2.value):((r1.index !== r2.index) || r1.selected !== r2.selected);
   }));
   const [layoutProvider, setLayoutProvider] = useState<LayoutProvider>(LayoutUtil.getLayoutProvider(2, 'day', headerHeight, [], props.storiesHeight, props.HEADER_HEIGHT));
   layoutProvider.shouldRefreshWithAnchoring = true;
   const [viewLoaded, setViewLoaded] = useState<boolean>(false);
   const scrollRef:any = useRef();
-  let scrollRefExternal:any = useRef();
-  const [lastScrollOffset, setLastScrollOffset] = useState<number>(0);
-  const [layoutHeight, setLayoutHeight] = useState<number>(99999999999999);
+  const scrollRefExternal = useAnimatedRef<Reanimated.ScrollView>();
+  const dragY = useSharedValue(0);
+  const showThumbScroll = useSharedValue(0);
+  const showFloatingFilters = useSharedValue(0);
 
+  const animatedTimeStampString = useSharedValue('');
+
+ 
+  const [lastScrollOffset, setLastScrollOffset] = useState<number>(0);
   const [startScroll, setStartScroll] = useState<boolean>(false);
-  const [endScroll, setEndScroll] = useState<boolean>(false);
   const startScrollRef = useRef(startScroll);
   startScrollRef.current = startScroll;
 
-  const isDragging = useRef(new Animated.Value(2)).current; //2:is scrolling using screen slide, 1: is scrolling using thumb scroll
-  const velocityY = useRef(new Animated.Value(0)).current;
-  const layoutHeightAnimated = useRef(new Animated.Value(9999999999999)).current;
-  const [floatingFiltersOpacity, setFloatingFiltersOpacity] = useState<number>(0);
+  const layoutHeightAnimated = useSharedValue(99999999);
 
   const [currentImageTimestamp, setCurrentImageTimestamp] = useState<number>(0);
-  const dragY = useRef(new Animated.Value(0)).current;
 
-  const [showThumbScroll, setShowThumbScroll] = useState<boolean>(false);
+  const animatedStyle = Reanimated.useAnimatedStyle(()=>{
+    const scale = (props.numColumns===props.numColumnsAnimated.value)?Reanimated.interpolate(
+      props.scale.value,
+      [0,1,4],
+      [props.numColumns/(props.numColumns+1),1,(props.numColumns)/(props.numColumns-1)]
+    ):((props.numColumns===props.numColumnsAnimated.value+1)?Reanimated.interpolate(
+      props.scale.value,
+      [0,1,4],
+      [1,(props.numColumns)/(props.numColumns-1),(props.numColumns)/(props.numColumns-1)]
+    ):((props.numColumns===props.numColumnsAnimated.value-1)?Reanimated.interpolate(
+      props.scale.value,
+      [0,1,4],
+      [(props.numColumns)/(props.numColumns+1),(props.numColumns)/(props.numColumns+1),1]
+    ):1));
+    
+    return {
+         opacity: (props.numColumnsAnimated.value===props.numColumns)?(Reanimated.interpolate(
+            props.scale.value,
+            [0,1,4],
+            [0,1,0]
+         )):(props.numColumnsAnimated.value===(props.numColumns-1)?(Reanimated.interpolate(
+              props.scale.value,
+              [0, 1, 4],
+              [1, 0, 0]
+          )):(props.numColumnsAnimated.value===(props.numColumns+1)?(Reanimated.interpolate(
+              props.scale.value,
+              [0, 1, 4],
+              [0, 0, 1]
+            )):(0))),
+         zIndex:(props.numColumnsAnimated.value===props.numColumns)?1:0,
+         transform: [
+          {
+            scale: scale,
+          },
+          {
+            translateX: (
+              (
+                (
+                  scale*SCREEN_WIDTH)- 
+                SCREEN_WIDTH)
+              / (2*scale))
+          },
+          {
+            translateY: (
+              (
+                (
+                  scale*(SCREEN_HEIGHT-(StatusBar.currentHeight || 0))
+                ) - (SCREEN_HEIGHT-(StatusBar.currentHeight || 0))
+              )
+              / (2*scale))
+          }
+        ],
+      };
+});
 
   useEffect(()=>{
     console.log([Date.now()+': component RenderPhotos'+props.numColumns+' rendered']);
   });
 
+
+  //scrollRefExternal?.current?.scrollTo({x:0,y:100});
+
   useEffect(()=>{
     console.log(['component RenderPhotos mounted']);
-    return () => {console.log(['component RenderPhotos unmounted']);}
+    return () => {
+      console.log(['component RenderPhotos unmounted']);
+    }
   }, []);
   useEffect(()=>{
     console.log('photos.layout length changed');
@@ -146,7 +207,7 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
         return (
           <SafeAreaView  style={{position:'relative', zIndex:1,marginTop:2*props.HEADER_HEIGHT}}>
             <FlatList 
-              data={props.stories}
+              data={stories}
               horizontal={true}
               keyExtractor={(item:story, index:number) => 'StoryItem_'+index+'_'+item.text}
               getItemLayout={(data, index) => {
@@ -165,8 +226,7 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
                   numColumns={props.numColumns}
                   height={props.storiesHeight}
                   showStory={props.showStory}
-                  setShowStory={props.setShowStory}
-                  setStory={props.setStory}
+                  headerShown={props.headerShown}
                 />
                 </View>
               )}
@@ -176,58 +236,87 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
       break;
       default:
     return (
-    <View style={{position:'relative', zIndex:1}}>
       <PhotosChunk
         photo={data}
-        opacity={props.opacity}
         numCol={props.numColumns}
-        loading={props.loading}
-        scale={props.scale}
         key={'PhotosChunk_col' + props.numColumns + '_id' + index}
         index={data.index}
         sortCondition={props.sortCondition}
         modalShown={props.modalShown}
-        setModalShown={props.setModalShown}
-        setSinglePhotoIndex={props.setSinglePhotoIndex}
-        setImagePosition={props.setImagePosition}
+        headerShown={props.headerShown}
         headerHeight={headerHeight}
         onMediaLongTap={props.onMediaLongTap}
         showSelectionCheckbox={props.showSelectionCheckbox}
         selectedAssets={props.selectedAssets}
+        animatedImagePositionX={props.animatedImagePositionX}
+        animatedImagePositionY={props.animatedImagePositionY}
+        animatedSingleMediaIndex={props.animatedSingleMediaIndex}
+        singleImageWidth={props.singleImageWidth}
+        singleImageHeight={props.singleImageHeight}
+        imageWidth={(typeof data.value !== 'string')?data.value.width:0}
+        imageHeight={(typeof data.value !== 'string')?data.value.height:0}
       />
-    </View>);
+    );
     }
   };
 
-  
-  const scrollToLocation = (offset:number) => {
-      if(scrollRef){
-        //scrollRef.current?.scrollToOffset(0, offset, true);
-        AutoScroll.scrollNow(scrollRef.current, 0, 0, 0, offset, 1).then(()=>{
-          ////console.log("scroll done");
-        }).catch(e=>console.log(e));
-      }
+  useEffect(()=>{
+    console.log('props. numColumn='+props.numColumns);
+  if(props.numColumns===2){
+    props.scrollIndex4.removeAllListeners();
+    props.scrollIndex4.addListener(({value})=>{
+      scrollRef?.current?.scrollToIndex(value, false);
+    });
+  }else if(props.numColumns===3){
+    props.scrollIndex2.removeAllListeners();
+    props.scrollIndex2.addListener(({value})=>{
+      console.log('scrollIndex2 changed in numColumns 3 to '+value);
+      scrollRef?.current?.scrollToIndex(value, false);
+    });
+  }else if(props.numColumns===4){
+    
   }
+  },[props.numColumns, scrollRef?.current]);
 
+  
   const _onMomentumScrollEnd = () => {
-    setTimeout(()=>{
-      let lastIndex = scrollRef?.current.findApproxFirstVisibleIndex();
-      let lastOffset = scrollRef?.current.getCurrentScrollOffset();
-      if(lastOffset===0){
-        lastIndex = 0;
+    let currentTimeStamp = 0;
+      let lastIndex = (scrollRef?.current?.findApproxFirstVisibleIndex() || 0);
+      let currentImage = props.photos.layout[lastIndex].value;
+
+      if(typeof currentImage === 'string'){
+        currentImage = props.photos.layout[lastIndex+1]?.value;
+        if(currentImage && typeof currentImage === 'string'){
+          currentImage = props.photos.layout[lastIndex+2]?.value;
+        }
       }
-      props.setScrollOffset({'in':props.numColumns, 'to':lastIndex});
+      if(currentImage && typeof currentImage !== 'string'){
+        currentTimeStamp = currentImage.modificationTime;
+      }
+      let currentTimeStampString = timestampToDate(currentTimeStamp, ['month']).month;
+      animatedTimeStampString.value = currentTimeStampString;
+
+      if(props.numColumns===2){
+        console.log('last index is '+lastIndex);
+        props.scrollIndex2.setValue(lastIndex);
+      }else if(props.numColumns===3){
+        props.scrollIndex3.setValue(lastIndex);
+      }else if(props.numColumns===4){
+        props.scrollIndex4.setValue(lastIndex);
+      }
       ////console.log(['momentum ended', {'in':props.numColumns, 'to':lastIndex}, lastOffset]);
-      
-      let sampleHeight = scrollRef?.current?.getContentDimension().height;
-      let lastScrollOffset = lastOffset*(SCREEN_HEIGHT-indicatorHeight)/(sampleHeight-SCREEN_HEIGHT);
       ////console.log('lastScrollOffset='+lastScrollOffset+', lastOffset='+lastOffset+', sampleHeight='+sampleHeight);
-      setLastScrollOffset(lastScrollOffset);
-      setShowThumbScroll(false);
-    },100);
+      showThumbScroll.value = Reanimated.withDelay(3000, Reanimated.withTiming(0));
   }
+  useDerivedValue(() => {
+    let approximateIndex = Math.ceil(dragY.value/props.numColumns);
+    
+    //animatedTimeStampString.value = approximateIndex.toString();
+    reanimatedScrollTo(scrollRefExternal, 0, dragY.value, false);
+  });
+  
   const _onScrollEnd = () => {
-    ////console.log('scroll end called');
+    console.log('scroll end called');
     let sampleHeight = scrollRef?.current?.getContentDimension().height;
     let lastOffset = scrollRef?.current.getCurrentScrollOffset();
     let lastScrollOffset = lastOffset*(SCREEN_HEIGHT-indicatorHeight)/(sampleHeight-SCREEN_HEIGHT);
@@ -257,10 +346,6 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
     }
     setCurrentImageTimestamp(currentTimeStamp);
   }
-  dragY.removeAllListeners();
-  let animateId = dragY.addListener(({ value }) => {
-    scrollBarToViewSync(value);
-  });
  
   useEffect(()=>{
       setViewLoaded(true);
@@ -272,25 +357,31 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
       scrollRef?.current?.scrollToIndex(newOffset.to, false);
     }
   }
-  useEffect(()=>{
+  /*useEffect(()=>{
     adjustScrollPosition(props.scrollOffset);
-  },[props.scrollOffset]);
+  },[props.scrollOffset]);*/
 
-  useEffect(()=>{
-    if(endScroll === true){
-      _onMomentumScrollEnd();
-    }
-  },[endScroll]);
-
-  const _onScroll = (rawEvent: ScrollEvent, offsetX: number, offsetY: number) => {
-    //console.log(props.numColumns+'_'+rawEvent.nativeEvent.contentOffset.y);
-    setShowThumbScroll(true);
-  }
-  
+  const scrollHandlerReanimated = useAnimatedScrollHandler({
+    onScroll: (e) => {
+      //position.value = e.contentOffset.x;
+      props.scrollY.value = e.contentOffset.y;
+      layoutHeightAnimated.value = e.contentSize.height;
+      showThumbScroll.value = 1;
+    },
+    
+    onEndDrag: (e) => {
+      console.log('onEndDrag');
+    },
+    onMomentumEnd: (e) => {
+      Reanimated.runOnJS(_onMomentumScrollEnd)();
+      //let lastIndex = scrollRef?.current?.findApproxFirstVisibleIndex();
+    },
+  });
+  const AnimatedRecyclerListView = Reanimated.createAnimatedComponent(RecyclerListView);
   return props.photos.layout ? (
-    <Animated.View
+    <Reanimated.View
       // eslint-disable-next-line react-native/no-inline-styles
-      style={{
+      style={[animatedStyle, {
         flex: 1,
         width: SCREEN_WIDTH,
         height: SCREEN_HEIGHT,
@@ -299,31 +390,7 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
         bottom: 0,
         right: 0,
         left: 0,
-        opacity: props.opacity,
-        zIndex: props.zIndex,
-        transform: [
-          {
-            scale: props.sizeTransformScale
-          },
-          {
-            translateX: Animated.divide(
-              Animated.subtract(
-                Animated.multiply(
-                  props.sizeTransformScale,SCREEN_WIDTH), 
-                SCREEN_WIDTH)
-              , Animated.multiply(2,props.sizeTransformScale))
-          },
-          {
-            translateY: Animated.divide(
-              Animated.subtract(
-                Animated.multiply(
-                  props.sizeTransformScale,(SCREEN_HEIGHT-(StatusBar.currentHeight || 0))
-                ), (SCREEN_HEIGHT-(StatusBar.currentHeight || 0))
-              )
-              , Animated.multiply(2,props.sizeTransformScale))
-          }
-        ],
-      }}
+      }]}
     >
       <RecyclerListView
         ref={scrollRef}
@@ -340,26 +407,36 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
           left: 0,
           zIndex:1,
         }}
-        contentContainerStyle={{ margin: 0 }}
         ////onEndReached={() => props.setLoadMore(new Date().getTime())}
         ////onEndReachedThreshold={0.4}
         dataProvider={dataProvider}
         layoutProvider={layoutProvider}
         rowRenderer={rowRenderer}
-        scrollEnabled={!props.isPinchAndZoom}
-        onScroll={_onScroll}
+        //onScroll={scrollHandlerReanimated}
         key={"RecyclerListView_"+props.sortCondition + props.numColumns}
-        scrollEventThrottle={16}
         extendedState={{showSelectionCheckbox:props.showSelectionCheckbox}}
         scrollViewProps={{
-          ////ref: scrollRefExternal,
-          onMomentumScrollEnd: _onMomentumScrollEnd,
+          //ref: scrollRefExternal,
+          
+          //onMomentumScrollEnd: _onMomentumScrollEnd,
           ////onScrollEndDrag: _onScrollEnd,
           scrollRefExternal:scrollRefExternal,
-          scrollEventThrottle:16,
-          automaticallyAdjustContentInsets: false,
-          showsVerticalScrollIndicator:false,
-          animatedEvent:{nativeEvent: {contentOffset: {y: props.scrollY}, contentSize: {height: layoutHeightAnimated}}},
+          //scrollEventThrottle:16,
+          //automaticallyAdjustContentInsets: false,
+          //showsVerticalScrollIndicator:false,
+          _onScrollExternal:scrollHandlerReanimated,
+          //animatedEvent:{nativeEvent: {contentOffset: {y: props.scrollY}, contentSize: {height: layoutHeightAnimated}}},
+          animatedEvent:{nativeEvent: {contentOffset:  {y: (y: any) =>
+            Reanimated.block([
+
+              Reanimated.call(
+                [y],
+                ([y]) => {}
+              )
+            ])
+          }
+        },
+        },
         }}
       />
       
@@ -367,40 +444,32 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
         indicatorHeight={indicatorHeight}
         flexibleIndicator={false}
         shouldIndicatorHide={true}
-        showThumbScroll={showThumbScroll}
-        setShowThumbScroll={setShowThumbScroll}
+        opacity={showThumbScroll}
+        showFloatingFilters={showFloatingFilters}
         hideTimeout={500}
-        lastOffset={lastScrollOffset}
-        setLastScrollOffset={setLastScrollOffset}
+        dragY={dragY}
         numColumns={props.numColumns}
-        headerIndexes={props.photos.headerIndexes}
-        numberOfPointers={props.numberOfPointers}
         headerHeight={headerHeight}
+        FOOTER_HEIGHT={props.FOOTER_HEIGHT}
+        HEADER_HEIGHT={props.HEADER_HEIGHT}
         scrollY={props.scrollY}
-        velocityY={velocityY}
-        scrollRef={scrollRef}
-        setStartScroll={setStartScroll}
-        setEndScroll={setEndScroll}
-        startScroll={startScroll}
         scrollIndicatorContainerStyle={{}}
         scrollIndicatorStyle={{}}
         layoutHeight={layoutHeightAnimated}
-        isDragging={isDragging}
-        dragY={dragY}
-        floatingFiltersOpacity = {floatingFiltersOpacity}
-        setFloatingFiltersOpacity = {setFloatingFiltersOpacity}
-        currentImageTimestamp={currentImageTimestamp}
+        currentImageTimestamp={animatedTimeStampString}
       />
       <FloatingFilters
         headerIndexes={props.photos.headerIndexes}
-        floatingFiltersOpacity={floatingFiltersOpacity}
+        floatingFiltersOpacity={showFloatingFilters}
         numColumns={props.numColumns}
         sortCondition={props.sortCondition}
-        scrollRef={scrollRef}
         headerHeight={headerHeight}
+        FOOTER_HEIGHT={props.FOOTER_HEIGHT}
+        HEADER_HEIGHT={props.HEADER_HEIGHT}
+        indicatorHeight={indicatorHeight}
         layoutHeight={layoutHeightAnimated}
       />
-    </Animated.View>
+    </Reanimated.View>
   ) : (
     <Animated.View
       // eslint-disable-next-line react-native/no-inline-styles
@@ -414,7 +483,6 @@ console.log(['re-rendering for',{r1:r1, r2:r2}]);
         marginTop: StatusBar.currentHeight || 0,
         right: 0,
         left: 0,
-        opacity: props.opacity,
       }}>
       <Text>Loading...</Text>
     </Animated.View>
@@ -426,8 +494,5 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
 });
-function arePropsEqual(prevProps:Props, nextProps:Props) {
-  console.log('RenderPhotos memo condition:'+(prevProps.photos?.layout?.length === nextProps.photos?.layout?.length));
-  return prevProps.photos?.layout?.length === nextProps.photos?.layout?.length && prevProps.zIndex === nextProps.zIndex; 
-}
+
 export default React.memo(RenderPhotos);

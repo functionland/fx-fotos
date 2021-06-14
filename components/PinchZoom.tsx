@@ -1,124 +1,135 @@
-import React, {useState, createRef, useEffect} from 'react';
-import {Animated, Dimensions,View} from 'react-native';
+import React, {createRef, useEffect, useRef} from 'react';
+import {Animated, Dimensions} from 'react-native';
 import {sortCondition} from '../types/interfaces';
 import {
   changeSortCondition,
 } from '../utils/functions';
 import {
   PinchGestureHandler,
-  State,
-  PinchGestureHandlerEventPayload,
-  HandlerStateChangeEvent,
+  PinchGestureHandlerGestureEvent,
 } from 'react-native-gesture-handler';
+import {
+  useRecoilState,
+} from 'recoil';
+import {numColumnsState} from '../states';
+import {
+  default as Reanimated, 
+  useAnimatedGestureHandler,
+  Easing,
+} from 'react-native-reanimated';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 interface Props {
-  scale: Animated.Value;
-  baseScale: Animated.AnimatedAddition;
-  baseScale2: Animated.Value;
-  setPinchOrZoom: Function;
-  pinchOrZoom:'pinch'|'zoom'|undefined;
-  setSortCondition: Function;
-  setNumColumns: Function;
-  numColumns: 2 | 3 | 4;
-  sortCondition: sortCondition;
+  scale: Reanimated.SharedValue<number>;
+  numColumnsAnimated: Reanimated.SharedValue<number>
   focalX: Animated.Value;
   focalY: Animated.Value;
   numberOfPointers: Animated.Value;
   velocity: Animated.Value;
-  setIsPinchAndZoom: Function;
-  isPinchAndZoom: boolean;
 }
 
-let _pinchOrZoom: 'pinch'|'zoom'|undefined = undefined;
 const PinchZoom: React.FC<Props> = (props) => {
+  const [numColumns, setNumColumns] = useRecoilState(numColumnsState);
+
+  const _pinchOrZoom = useRef<'pinch' | 'zoom' | undefined>();
+  const sortCondition = useRef<sortCondition>('day');
+
   useEffect(()=>{
-    console.log([Date.now()+': component PinchZoom'+props.numColumns+' rendered']);
+    console.log([Date.now()+': component PinchZoom'+numColumns+' rendered']);
   });
   let pinchRef = createRef<PinchGestureHandler>();
-  const [allowAnimation, setAllowAnimation] = useState<boolean>(true);
-  let _onPinchGestureEvent = Animated.event(
-    [{ nativeEvent: { scale: props.scale, focalX:props.focalX, focalY:props.focalY, numberOfPointers:props.numberOfPointers, velocity:props.velocity } }],
-    { useNativeDriver: true }
-  );
-  let _onPinchHandlerStateChange = (event:HandlerStateChangeEvent<PinchGestureHandlerEventPayload>) => {
-    if (event.nativeEvent.oldState === State.ACTIVE && event.nativeEvent.state !== State.ACTIVE) {
-      let scale:number = event.nativeEvent.scale;
-      if((scale > 1.3 && props.numColumns>2) || (scale < 0.8 && props.numColumns<4)){
-        setAllowAnimation(false);
-        Animated.timing(props.scale, {
-          toValue: scale>1?4:0,
-          duration: 250,
-          useNativeDriver: true
-        }).start(() => {
-          animationTransition(scale);
-        });
-
-      }else if(scale !== 1){
-        Animated.timing(props.scale, {
-          toValue: 1,
-          duration: 50,
-          useNativeDriver: true
-        }).start(() => {
-          ////('revert animation ended');
-          props.scale.setValue(1);
-          props.setPinchOrZoom(undefined);
-          setAllowAnimation(true);
-        });
+  
+  const _onPinchGestureEvent = useAnimatedGestureHandler<PinchGestureHandlerGestureEvent, {}>({
+    onStart: (_, ctx) => {
+      
+    },
+    onActive: (event, ctx) => {
+      props.scale.value = event.scale;
+    },
+    onEnd: (event) => {
+      if((event.scale > 1.3 && props.numColumnsAnimated.value>2)||(event.scale < 0.8 && props.numColumnsAnimated.value < 4)){
+        props.scale.value = Reanimated.withTiming(
+          event.scale>1?4:0, 
+          {
+            duration: 250,
+            easing: Easing.bezier(0.25, 0.1, 0.25, 1),
+          }, 
+          ()=>{
+            if(props.numColumnsAnimated.value===2){
+              if(event.scale<1){
+                //setNumColumns(3);
+                props.numColumnsAnimated.value=3;
+                console.log('changing columns to 3');
+                props.scale.value = 1;
+              }
+            }else if(props.numColumnsAnimated.value===3){
+              if(event.scale<1){
+                //setNumColumns(4);
+                props.numColumnsAnimated.value=4;
+                props.scale.value = 1;
+                console.log('changing columns to 4')
+              }else{
+                //setNumColumns(2);
+                props.numColumnsAnimated.value=2;
+                props.scale.value = 1;
+                console.log('changing columns to 2')
+              }
+            }else if(props.numColumnsAnimated.value===4){
+              if(event.scale>1){
+                //setNumColumns(3);
+                props.numColumnsAnimated.value=3;
+                props.scale.value = 1;
+                console.log('changing columns to 3')
+              }
+            }
+          }
+        )
+      }else if(event.scale !== 1){
+        props.scale.value = Reanimated.withTiming(
+          1, 
+          {
+            duration: 50,
+            easing: Easing.bezier(0.25, 0.1, 0.25, 1),
+          }, 
+          ()=>{
+            props.scale.value = 1;
+          }
+        )
       }
-    }
-    /*if(event.nativeEvent.numberOfPointers > 1 && !props.isPinchAndZoom){
-      props.setIsPinchAndZoom(true);
-    }else if(props.isPinchAndZoom && event.nativeEvent.numberOfPointers == 1){
-      props.setIsPinchAndZoom(false);
-    }*/
-  };
+    },
+  });
 
   const animationTransition = (
     scale:number
   ) => {
     if(scale > 1){
-      _pinchOrZoom = 'pinch';
+      _pinchOrZoom.current = 'pinch';
     }else if(scale < 1){
-      _pinchOrZoom = 'zoom';
+      _pinchOrZoom.current = 'zoom';
     }else{
-      _pinchOrZoom = undefined;
+      _pinchOrZoom.current = undefined;
     }
-
       ////console.log('animation end cycle');
-      
-        let _sortCondition = changeSortCondition(
-          props.sortCondition,
-          _pinchOrZoom,
-          props.numColumns,
-        );
-          
-          props.setSortCondition(_sortCondition.sortCondition);
-          props.setNumColumns(_sortCondition.numColumns);
-          props.setPinchOrZoom(undefined);
-          props.scale.setValue(1);
-          if(_sortCondition.numColumns===2){
-            props.baseScale2.setValue(0);
-          }else if(_sortCondition.numColumns===3){
-            props.baseScale2.setValue(1);
-          }else if(_sortCondition.numColumns===4){
-            props.baseScale2.setValue(2);
-          }
-          setAllowAnimation(true);
-          props.setIsPinchAndZoom(false);
+    let _sortCondition = changeSortCondition(
+      sortCondition.current,
+      _pinchOrZoom.current,
+      numColumns,
+    );
+            
+    sortCondition.current = _sortCondition.sortCondition;
+    setNumColumns(_sortCondition.numColumns);
+    props.scale.value = 1;
   };
 
   return (
 
     <PinchGestureHandler
     ref={pinchRef}
-    enabled={allowAnimation}
     onGestureEvent={_onPinchGestureEvent}
-    onHandlerStateChange={_onPinchHandlerStateChange}
     >
-      <Animated.View
+      <Reanimated.View
         style={{
           width: SCREEN_WIDTH,
           height: SCREEN_HEIGHT,
@@ -126,7 +137,7 @@ const PinchZoom: React.FC<Props> = (props) => {
         }}
       >
         {props.children}
-      </Animated.View>
+      </Reanimated.View>
     </PinchGestureHandler>
 
   );

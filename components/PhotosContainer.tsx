@@ -7,13 +7,24 @@ import {getStorageMedia} from '../utils/functions';
 import {storagePermission} from '../utils/permissions';
 import AllPhotos from './AllPhotos';
 import PinchZoom from './PinchZoom';
-import {sortCondition, MediaItem, } from '../types/interfaces';
-
+import {prepareLayout,} from '../utils/functions';
+import {
+  useRecoilState,
+} from 'recoil';
+import {photosState, numColumnsState, storiesState, preparedMediaState, mediasState} from '../states';
+import {default as Reanimated,} from 'react-native-reanimated';
 interface Props {
-  scrollAnim: Animated.Value;
+  scrollY2: Reanimated.SharedValue<number>;
+  scrollY3: Reanimated.SharedValue<number>;
+  scrollY4: Reanimated.SharedValue<number>;
+  scale: Reanimated.SharedValue<number>;
+  numColumnsAnimated: Reanimated.SharedValue<number>;
   HEADER_HEIGHT: number;
-  setHeaderShown: Function;
+  FOOTER_HEIGHT: number;
+  headerShown: Reanimated.SharedValue<number>;
 }
+
+
 
 const PhotosContainer: React.FC<Props> = (props) => {
   const SCREEN_WIDTH = useWindowDimensions().width;
@@ -23,21 +34,26 @@ const PhotosContainer: React.FC<Props> = (props) => {
   const storiesHeight:number = 1.618*SCREEN_WIDTH/3;
 
   const [permission, setPermission] = useState<boolean>();
-  const [photos, setPhotos] = useState<Array<MediaLibrary.Asset>>([]);
-  const [mediaEndCursor, setMediaEndCursor] = useState<string>('');
-  const [mediaHasNextPage, setMediaHasNextPage] = useState<boolean>(true);
-  const [mediaTotalCount , setMediaTotalCount] = useState<number>(99999);
+  const [photos, setPhotos] = useRecoilState(photosState);
+
   const [storagePhotos, setStoragePhotos] = useState<
     Array<MediaLibrary.Asset>
   >([]);
+ 
+  const [medias, setMedias] = useRecoilState(mediasState);
+  const [stories, setStories] = useRecoilState(storiesState);
+  const [preparedMedia, setPreparedMedia] = useRecoilState(preparedMediaState);
+
+  
   const navigation = useNavigation();
 
-  let scale = useRef(new Animated.Value(1)).current;
-  let baseScale2 = useRef(new Animated.Value(0)).current;
-  const baseScale: Animated.AnimatedAddition = useRef(Animated.add(baseScale2, scale.interpolate({
-    inputRange: [0, 1, 4],
-    outputRange: [1, 0, -1],
-  }))).current;
+  const devicePhotos = useRef<Array<MediaLibrary.Asset>>([]);
+  const mediaTotalCount = useRef<number>(999999999);
+  const mediaHasNextPage = useRef<boolean>(true);
+  const mediaEndCursor = useRef<string>('');
+  const loading = useRef<boolean>(false);
+
+  
 
   const scrollIndicator = useRef(new Animated.Value(0)).current;
   const focalX = useRef(new Animated.Value(0)).current;
@@ -45,40 +61,28 @@ const PhotosContainer: React.FC<Props> = (props) => {
   const numberOfPointers = useRef(new Animated.Value(0)).current;
   const velocity = useRef(new Animated.Value(0)).current;
 
-  const [pinchOrZoom, setPinchOrZoom] = useState<
-    'pinch' | 'zoom' | undefined
-  >();
-  const [sortCondition_i, setSortCondition_i] = useState<sortCondition>('day');
-  const [numColumns, setNumColumns] = useState<2 | 3 | 4>(2);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [isPinchAndZoom, setIsPinchAndZoom] = useState<boolean>(false);
-  const [loadMore, setLoadMore] = useState<number>(0);
+  
+  
 
   //TODO: Change this function to the getPhotos in actions like in AllPhotos
-  function getMedia(permission:boolean, photoNumber:number, hasNextPage:boolean=true, endCursor:string = ''){
-    let totalCount = mediaTotalCount;
-    if(hasNextPage){
-      ////console.log('media fetch while');
-      setLoading(true);
-      getStorageMedia(permission, photoNumber, endCursor)?.then(
+  function getMedia(permission:boolean, photoNumber:number){
+    if(mediaHasNextPage.current){
+      console.log('media fetch loop');
+      loading.current = true;
+      getStorageMedia(permission, photoNumber, mediaEndCursor.current)?.then(
         (value) => {
           if(value){
-            ////console.log('getStorageMedia');
-            hasNextPage = value.hasNextPage;
-            endCursor = value.endCursor;
-            totalCount = value.totalCount;
-            //setStoragePhotos(oldStoragePhotos => [...oldStoragePhotos,...value.assets]);
+            mediaTotalCount.current = value.totalCount;
             setStoragePhotos(value.assets);
-            setMediaEndCursor(endCursor);
-            setMediaHasNextPage(hasNextPage);
-            setMediaTotalCount(totalCount);
-            getMedia(permission, photoNumber, hasNextPage, endCursor);
+            mediaEndCursor.current = value.endCursor;
+            mediaHasNextPage.current = value.hasNextPage;
+            getMedia(permission, photoNumber);
           }
           
         },
-      ).catch(error => setLoading(false));
+      ).catch(error => loading.current = false);
     }else{
-      setLoading(false);
+      loading.current = false;
     }
   }
   useEffect(() => {
@@ -108,6 +112,25 @@ const PhotosContainer: React.FC<Props> = (props) => {
     }
   }, [storagePhotos]);
 
+  useEffect(()=>{
+    if(photos?.length){
+      let prepared = prepareLayout(photos,['day', 'month'], preparedMedia.lastTimestamp, medias.length);
+      ////console.log('preparedMedia.layout:',{old:preparedMedia?.layout.length, added:prepared?.layout.length, header:prepared?.headerIndexes.length});
+      setPreparedMedia(oldPreparedMedia =>  ({
+        ...oldPreparedMedia,
+        'layout':oldPreparedMedia.layout.concat(prepared.layout), 
+        'headerIndexes': oldPreparedMedia.headerIndexes.concat(prepared.headerIndexes), 
+        'stories': oldPreparedMedia.stories.concat(prepared.stories),
+        'lastTimestamp': prepared.lastTimestamp
+      }));
+      //setPreparedMedia(prepared);
+      
+      let onlyMedias:any[] = prepared.layout.filter(item => typeof item.value !== 'string').map((item)=>{return item.value});
+      setMedias(oldOnlyMedia=>oldOnlyMedia.concat(onlyMedias));
+      setStories(oldStories=>oldStories.concat(prepared.stories));
+    }
+  },[photos]);
+
   return photos ? (
     <View
       style={{
@@ -119,40 +142,28 @@ const PhotosContainer: React.FC<Props> = (props) => {
       }}
     >
           <PinchZoom
-            setPinchOrZoom={setPinchOrZoom}
-            pinchOrZoom={pinchOrZoom}
-            scale={scale}
-            baseScale={baseScale}
-            baseScale2={baseScale2}
-            setSortCondition={setSortCondition_i}
-            setNumColumns={setNumColumns}
-            sortCondition={sortCondition_i}
-            numColumns={numColumns}
+            scale={props.scale}
+            numColumnsAnimated={props.numColumnsAnimated}
             focalX={focalX}
             focalY={focalY}
             numberOfPointers={numberOfPointers}
             velocity={velocity}
-            setIsPinchAndZoom={setIsPinchAndZoom}
-            isPinchAndZoom={isPinchAndZoom}
           >
             <AllPhotos
-              pinchOrZoom={pinchOrZoom}
-              scale={scale}
-              baseScale={baseScale}
-              photos={photos}
-              sortCondition={sortCondition_i}
-              numColumns={numColumns}
-              loading={loading}
+              scale={props.scale}
+              numColumnsAnimated={props.numColumnsAnimated}
+              scrollY2={props.scrollY2} 
+              scrollY3={props.scrollY3} 
+              scrollY4={props.scrollY4}
+              loading={loading.current}
               focalX={focalX}
               focalY={focalY}
               numberOfPointers={numberOfPointers}
               velocity={velocity}
-              isPinchAndZoom={isPinchAndZoom}
-              setLoadMore={setLoadMore}
               storiesHeight={storiesHeight}
-              scrollAnim={props.scrollAnim}
               HEADER_HEIGHT={props.HEADER_HEIGHT}
-              setHeaderShown={props.setHeaderShown}
+              FOOTER_HEIGHT={props.FOOTER_HEIGHT}
+              headerShown={props.headerShown}
             />
           </PinchZoom>
     </View>

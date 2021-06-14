@@ -1,13 +1,23 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { SafeAreaView, StyleSheet, Animated, View, useWindowDimensions, StatusBar } from 'react-native';
 import PhotosContainer from '../components/PhotosContainer';
+import {default as Reanimated,} from 'react-native-reanimated';
+
 interface Props {
-  scrollAnim: Animated.Value;
+  scrollY2: Reanimated.SharedValue<number>;
+  scrollY3: Reanimated.SharedValue<number>;
+  scrollY4: Reanimated.SharedValue<number>;
+  scale: Reanimated.SharedValue<number>;
+  numColumnsAnimated: Reanimated.SharedValue<number>;
   HEADER_HEIGHT: number;
-  setHeaderShown: Function;
+  FOOTER_HEIGHT: number;
+  headerShown: Reanimated.SharedValue<number>;
 }
 
 const HomePage: React.FC<Props> = (props) => {
+  useEffect(()=>{
+    console.log(Date.now()+': HomePage re-rendered');
+  });
   const SCREEN_WIDTH = useWindowDimensions().width;
   const SCREEN_HEIGHT = useWindowDimensions().height;
 
@@ -15,9 +25,14 @@ const HomePage: React.FC<Props> = (props) => {
     <SafeAreaView style={styles.SafeAreaView}>
       <View style={[styles.View, {width: SCREEN_WIDTH, zIndex:1, marginTop:(StatusBar.currentHeight||0)}]}>
         <PhotosContainer 
-          scrollAnim={props.scrollAnim} 
+          scrollY2={props.scrollY2} 
+          scrollY3={props.scrollY3} 
+          scrollY4={props.scrollY4} 
+          scale={props.scale} 
+          numColumnsAnimated={props.numColumnsAnimated} 
           HEADER_HEIGHT={props.HEADER_HEIGHT} 
-          setHeaderShown={props.setHeaderShown}
+          FOOTER_HEIGHT={props.FOOTER_HEIGHT}
+          headerShown={props.headerShown}
         />
       </View>
     </SafeAreaView>

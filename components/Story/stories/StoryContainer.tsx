@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react"
 import ProgressView from "./ProgressView"
 import StoryView from "./StoryView"
 import { StoryContainerProps } from "../utils/interfaceHelper"
-import { StyleSheet, View, SafeAreaView, Platform, Keyboard, Animated, KeyboardAvoidingView, useWindowDimensions } from "react-native"
+import { StyleSheet, View, SafeAreaView, Platform, Keyboard, Animated, KeyboardAvoidingView, useWindowDimensions, BackHandler } from "react-native"
 import { GREEN, LIGHT_GRAY_0, RED, TINT_GRAY, GRAY } from "../utils/colors"
 import ReplyFooterView from "./ReplyFooterView"
 import UserHeaderView from "./UserHeaderView"
@@ -18,26 +18,39 @@ import {
 import { ScaleFromCenterAndroid } from "@react-navigation/stack/lib/typescript/src/TransitionConfigs/TransitionPresets"
 
 const StoryContainer = (props: StoryContainerProps) => {
+  const backHandler = useRef<any>();
   const isMounted = useRef(false);
   useEffect(() => {
     isMounted.current = true;
-    return () => {isMounted.current = false;}
+    let listener1 = Keyboard.addListener('keyboardDidShow', onShowKeyboard);
+    let listener2 = Keyboard.addListener('keyboardDidHide', onHideKeyboard);
+    console.log('StoryContainer mounted');
+    return () => {
+      isMounted.current = false;
+      props.visible.removeAllListeners();
+      listener1.remove();
+      listener2.remove();
+      backHandler.current?.remove();
+    }
   }, []);
 
   const [progressIndex, setProgressIndex] = useState<number>(0)
   const [stopProgress, setStopProgress] = useState<boolean>(false);
+
+
   const SCREEN_WIDTH = useWindowDimensions().width;
   const SCREEN_HEIGHT = useWindowDimensions().height;
 
-  const translationX = new Animated.Value(0);
+  const translationX = useRef(new Animated.Value(0)).current;
   const translationY = useRef(new Animated.Value(0)).current;
   const opacity = useRef(new Animated.Value(1)).current;
   const scale = useRef(new Animated.Value(1)).current;
 
-  const translationYvsX = Animated.multiply(translationY, Animated.divide(translationX, Animated.add(translationY,0.0000001)).interpolate({
+  const translationYvsX = useRef(Animated.multiply(translationY, Animated.divide(translationX, Animated.add(translationY,0.0000001)).interpolate({
     inputRange: [-SCREEN_WIDTH, -1, -0.60, 0, 0.60, 1, SCREEN_WIDTH],
     outputRange: [0,             0,  0,    1, 0,    0, 0],
-  }))
+  }))).current;
+  const storyShown = useRef<number>(0);
 
   useEffect(() => {
     if(isMounted){
@@ -46,21 +59,33 @@ const StoryContainer = (props: StoryContainerProps) => {
     }
   }, [props.enableProgress])
 
-  useEffect(()=>{
-    setProgressIndex(0);
-  },[props.visible])
-
-  useEffect(() => {
-    let listener1 = Keyboard.addListener('keyboardDidShow', onShowKeyboard);
-    let listener2 = Keyboard.addListener('keyboardDidHide', onHideKeyboard);
-
-    return () => {
-      listener1.remove();
-      listener2.remove();
-    };
-  }, []);
+  props.visible.removeAllListeners();
+  props.visible.addListener(({value})=>{
+    if(storyShown.current !== value){
+      storyShown.current = value;
+      if(value===0){
+        console.log('story not visible');
+        close(1);
+      }else{
+        setProgressIndex(0);
+        console.log('story is visible');
+        setStopProgress(false);
+        console.log('setting BackHandler');
+        backHandler.current = BackHandler.addEventListener(
+          "hardwareBackPress",
+          ()=>{
+            close(1);
+            return true;
+          }
+        );
+      }
+    }
+  });
 
   const close = (direction:number = 1) => {
+    console.log('closing story');
+    setStopProgress(true);
+    setProgressIndex(0);
     Animated.parallel([
       Animated.timing(translationY, {
         toValue: direction*SCREEN_HEIGHT,
@@ -77,14 +102,19 @@ const StoryContainer = (props: StoryContainerProps) => {
         duration: 300,
         useNativeDriver: true,
       }),
-    ]).start();
+    ]).start(()=>{
+      backHandler.current?.remove();
+    });
     setTimeout(()=>{
       if(isMounted){
         props.onComplete();
+        translationY.setValue(0);
+        scale.setValue(1);
+        opacity.setValue(1);
       }
     },300);
   }
-
+  
   function onShowKeyboard(e: any) {
     if(isMounted){
       ////console.log(stopProgress);
@@ -168,14 +198,14 @@ const StoryContainer = (props: StoryContainerProps) => {
     [{ nativeEvent: { translationX: translationX, translationY: translationY, } }],
     { useNativeDriver: true }
   );
-
+  
   return (
     <SafeAreaView>
       {
         Platform.OS === 'ios' && (
           <KeyboardAvoidingView behavior='padding' >
             <View>
-              {props.visible ? getView() : <View></View>}
+              {getView()}
             </View>
           </KeyboardAvoidingView>
         )
@@ -184,7 +214,7 @@ const StoryContainer = (props: StoryContainerProps) => {
       {
         Platform.OS === 'android' && (
           <View>
-            {props.visible ? getView() : <View></View>}
+            {getView()}
           </View>
         )
       }

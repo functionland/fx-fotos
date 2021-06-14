@@ -1,6 +1,6 @@
 import { Asset } from 'expo-media-library';
 import React, {useEffect, useRef, useState, createRef} from 'react';
-import { View, useWindowDimensions, StyleSheet, Image, Text } from 'react-native';
+import { View, useWindowDimensions, StyleSheet, Image, Text, Animated } from 'react-native';
 import {story, } from '../types/interfaces';
 import { useBackHandler } from '@react-native-community/hooks'
 
@@ -10,6 +10,13 @@ import {
   TapGestureHandlerEventPayload,
   State,
 } from 'react-native-gesture-handler';
+import {default as Reanimated,} from 'react-native-reanimated';
+
+
+import {
+  useRecoilState,
+} from 'recoil';
+import {storyState} from '../states';
 
 interface Props {
   story:story;
@@ -17,12 +24,13 @@ interface Props {
   numColumns: 2|3|4;
   text?: string | undefined;
   height: number;
-  setShowStory: Function;
-  showStory:boolean;
-  setStory:Function;
+  showStory:Animated.Value;
+  headerShown:Reanimated.SharedValue<number>;
 }
 
 const Highlights: React.FC<Props> = (props) => {
+  const [story, setStory] = useRecoilState(storyState);
+
   const isMounted = useRef(false);
   useEffect(() => {
       isMounted.current = true;
@@ -33,18 +41,11 @@ const Highlights: React.FC<Props> = (props) => {
 
   const _tapRef = createRef<TapGestureHandler>();
 
-  useBackHandler(() => {
-      if (props.showStory) {
-        props.setShowStory(false);
-        return true;
-      }
-      // let the default thing happen
-      return false;
-  });
-
   const openHighlight = () => {
-    props.setStory(props.story);
-    props.setShowStory(true);
+    setStory(props.story);
+    console.log('opening highlight');
+    props.showStory.setValue(1);
+    props.headerShown.value = 0;
     ////console.log('here');
   }
 
