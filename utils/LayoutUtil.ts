@@ -41,7 +41,7 @@ export class LayoutUtil {
         const windowWidth = LayoutUtil.getWindowWidth();
         if (type === 'story') {
           dim.width = windowWidth;
-          dim.height = storiesHeight + 20 + 2 * mainHeaderHeight;
+          dim.height = storiesHeight + 20 + 1 * mainHeaderHeight;
         } else {
           if (
             data[index]?.sortCondition === groupBy ||
