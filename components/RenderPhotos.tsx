@@ -198,7 +198,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
     switch(type){
       case 'story':
         return (
-          <SafeAreaView  style={{position:'relative', zIndex:1,marginTop:2*props.HEADER_HEIGHT}}>
+          <SafeAreaView  style={{position:'relative', zIndex:1,marginTop:props.HEADER_HEIGHT}}>
             <FlatList 
               data={stories}
               horizontal={true}
@@ -212,7 +212,11 @@ const RenderPhotos: React.FC<Props> = (props) => {
               }}
               showsHorizontalScrollIndicator={false}
               renderItem={( {item} ) => (
-                <View style={{width:15+props.storiesHeight/1.618,height:props.storiesHeight+25}}>
+                <View 
+                  style={{
+                    width:15+props.storiesHeight/1.618,
+                    height:props.storiesHeight+25,
+                  }}>
                 <Highlights
                   story={item}
                   duration={1500}
