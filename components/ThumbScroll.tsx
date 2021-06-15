@@ -73,7 +73,7 @@ const ThumbScroll: React.FC<Props> = (props) => {
             transform: [
                 {
                     translateY: Reanimated.interpolate((props.scrollY.value* (visibleHeight/(props.layoutHeight.value-visibleHeight))),
-                        [props.HEADER_HEIGHT, visibleHeight],
+                        [0, visibleHeight],
                         [props.HEADER_HEIGHT, visibleHeight+props.HEADER_HEIGHT],
                         Extrapolate.CLAMP,
                     ),
