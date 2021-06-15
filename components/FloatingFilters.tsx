@@ -65,7 +65,7 @@ const FilterItem: React.FC<FilterItemProps> = (props) => {
                         right: SCREEN_WIDTH/2 - 75,
                     }
                 ]} 
-                key={'View_Year_'+props.year+'_'+new Date()+"_"+props.numColumns}
+                key={'View_Year_'+props.year+'_'+new Date()+"_"+props.index}
             >
                 <Text style={styles.FilterText}>
                     { props.year }
