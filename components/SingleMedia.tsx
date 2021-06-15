@@ -467,4 +467,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default React.memo(SingleMedia);
+export default SingleMedia;

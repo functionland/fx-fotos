@@ -227,4 +227,4 @@ const AllPhotos: React.FC<Props> = (props) => {
   );
 };
 
-export default React.memo(AllPhotos);
+export default AllPhotos;

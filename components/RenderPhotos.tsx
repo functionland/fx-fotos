@@ -170,9 +170,39 @@ const RenderPhotos: React.FC<Props> = (props) => {
   //scrollRefExternal?.current?.scrollTo({x:0,y:100});
 
   useEffect(()=>{
-    console.log(['component RenderPhotos mounted']);
+    console.log(['component RenderPhotos mounted '+props.numColumns]);
+
+    if(props.numColumns===3 || props.numColumns===4){
+      //props.scrollIndex2.removeAllListeners();
+      props.scrollIndex2.addListener(({value})=>{
+        scrollRef?.current?.scrollToIndex(value, false);
+      });
+    }
+
+    if(props.numColumns===2 || props.numColumns===3){
+      //props.scrollIndex4.removeAllListeners();
+      props.scrollIndex4.addListener(({value})=>{
+        scrollRef?.current?.scrollToIndex(value, false);
+      });
+    }
+
+    if(props.numColumns===2 || props.numColumns===4){
+      //props.scrollIndex3.removeAllListeners();
+      props.scrollIndex3.addListener(({value})=>{
+        scrollRef?.current?.scrollToIndex(value, false);
+      });
+    }
     return () => {
       console.log(['component RenderPhotos unmounted']);
+      if(props.numColumns===2 || props.numColumns ===3){
+        props.scrollIndex4.removeAllListeners();
+      }
+      if(props.numColumns===3 || props.numColumns ===4){
+        props.scrollIndex2.removeAllListeners();
+      }
+      if(props.numColumns===2 || props.numColumns ===4){
+        props.scrollIndex3.removeAllListeners();
+      }
     }
   }, []);
   useEffect(()=>{
@@ -180,6 +210,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
     if(dataProvider.getAllData().length !== props.photos.layout.length){
     let data = props.photos.layout;
     setLayoutProvider(LayoutUtil.getLayoutProvider(props.numColumns, props.sortCondition, headerHeight, data, props.storiesHeight, props.HEADER_HEIGHT));
+    
     //setDataProvider(dataProvider.cloneWithRows(dataProvider.getAllData().concat(props.photos.layout),(dataProvider.getAllData().length>0?dataProvider.getAllData().length-1:undefined)));
     setDataProvider(dataProvider.cloneWithRows(props.photos.layout));
     }
@@ -258,19 +289,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
   };
 
   useEffect(()=>{
-  if(props.numColumns===2){
-    props.scrollIndex4.removeAllListeners();
-    props.scrollIndex4.addListener(({value})=>{
-      scrollRef?.current?.scrollToIndex(value, false);
-    });
-  }else if(props.numColumns===3){
-    props.scrollIndex2.removeAllListeners();
-    props.scrollIndex2.addListener(({value})=>{
-      scrollRef?.current?.scrollToIndex(value, false);
-    });
-  }else if(props.numColumns===4){
     
-  }
   },[props.numColumns, scrollRef?.current]);
 
   
@@ -469,4 +488,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default React.memo(RenderPhotos);
+export default RenderPhotos;

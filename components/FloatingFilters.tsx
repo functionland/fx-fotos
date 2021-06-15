@@ -94,7 +94,7 @@ const Filter: React.FC<FilterProps> = (props) => {
                         FOOTER_HEIGHT={props.FOOTER_HEIGHT}
                         HEADER_HEIGHT={props.HEADER_HEIGHT}
                         indicatorHeight={props.indicatorHeight}
-                        key={'Year_'+filterItem.yearStart+'_'+new Date()+"_"+props.numColumns}
+                        key={'Year_'+filterItem.yearStart+'_'+new Date()+"_"+props.numColumns+"_"+Math.random()}
                     />);
                 sum = sum + Math.ceil(filterItem.count/props.numColumns)*(SCREEN_WIDTH/props.numColumns);
                 return filterItem_t;
@@ -158,4 +158,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default React.memo(FloatingFilters);
+export default FloatingFilters;

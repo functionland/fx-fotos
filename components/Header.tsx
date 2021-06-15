@@ -98,4 +98,4 @@ const styles = StyleSheet.create({
     }
   });
 
-export default Header;
+export default React.memo(Header);

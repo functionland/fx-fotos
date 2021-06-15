@@ -51,4 +51,4 @@ const styles = StyleSheet.create({
     left: 0
   }
 });
-export default HomePage;
+export default React.memo(HomePage);

@@ -187,7 +187,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
               style={{
                 height: (SCREEN_WIDTH / props.numCol) - 2.5,
                 width: (SCREEN_WIDTH / props.numCol) - 2.5,
-                backgroundColor: loading ? 'grey' : 'white',
+                backgroundColor: 'grey',
                 margin: 2.5,
                 zIndex:4,
               }}
@@ -286,7 +286,5 @@ const styles = StyleSheet.create({
     color: 'white',
   }
 });
-function arePropsEqual(prevProps:Props, nextProps:Props) {
-  return prevProps.index === nextProps.index && prevProps.photo?.selected===nextProps.photo?.selected && prevProps.photo?.index===nextProps.photo?.index && prevProps.showSelectionCheckbox===nextProps.showSelectionCheckbox && prevProps.selectedAssets?.findIndex(x=>x===prevProps.photo?.value)===nextProps.selectedAssets?.findIndex(x=>x===nextProps.photo?.value); 
-}
-export default React.memo(PhotosChunk, arePropsEqual);
+
+export default PhotosChunk;

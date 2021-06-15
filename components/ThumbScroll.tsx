@@ -177,4 +177,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default React.memo(ThumbScroll);
+export default ThumbScroll;
