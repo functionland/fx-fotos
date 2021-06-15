@@ -44,7 +44,6 @@ const Header: React.FC<Props> = (props) => {
                     [-props.HEADER_HEIGHT*2, 0],
                     Extrapolate.CLAMP
                 );
-                console.log([translateY.value, result, previous]);
             }
         }, [animScroll]);
 

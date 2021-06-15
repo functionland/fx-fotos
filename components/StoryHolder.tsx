@@ -43,10 +43,8 @@ const StoryHolder: React.FC<Props> = (props) => {
 
   props.showStory.removeAllListeners();
   props.showStory.addListener(({value})=>{
-    console.log('updated value '+value);
     if(storyShown.current !== value){
       storyShown.current = value;
-      console.log('updated value '+value);
     }
   });
 

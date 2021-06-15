@@ -258,7 +258,6 @@ const RenderPhotos: React.FC<Props> = (props) => {
   };
 
   useEffect(()=>{
-    console.log('props. numColumn='+props.numColumns);
   if(props.numColumns===2){
     props.scrollIndex4.removeAllListeners();
     props.scrollIndex4.addListener(({value})=>{
@@ -267,7 +266,6 @@ const RenderPhotos: React.FC<Props> = (props) => {
   }else if(props.numColumns===3){
     props.scrollIndex2.removeAllListeners();
     props.scrollIndex2.addListener(({value})=>{
-      console.log('scrollIndex2 changed in numColumns 3 to '+value);
       scrollRef?.current?.scrollToIndex(value, false);
     });
   }else if(props.numColumns===4){
@@ -294,7 +292,6 @@ const RenderPhotos: React.FC<Props> = (props) => {
       animatedTimeStampString.value = currentTimeStampString;
 
       if(props.numColumns===2){
-        console.log('last index is '+lastIndex);
         props.scrollIndex2.setValue(lastIndex);
       }else if(props.numColumns===3){
         props.scrollIndex3.setValue(lastIndex);

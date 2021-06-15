@@ -56,7 +56,17 @@ const FilterItem: React.FC<FilterItemProps> = (props) => {
     });
     if(props.year !== ''){
         return (
-            <Reanimated.View style={[styles.FilterItem, animatedStyle, {borderRadius: SCREEN_WIDTH, right: SCREEN_WIDTH/2 - 75,}]} key={'Year_'+props.year}>
+            <Reanimated.View 
+                style={[
+                    styles.FilterItem, 
+                    animatedStyle, 
+                    {
+                        borderRadius: SCREEN_WIDTH, 
+                        right: SCREEN_WIDTH/2 - 75,
+                    }
+                ]} 
+                key={'View_Year_'+props.year+'_'+new Date()+"_"+props.numColumns}
+            >
                 <Text style={styles.FilterText}>
                     { props.year }
                 </Text>
@@ -84,11 +94,8 @@ const Filter: React.FC<FilterProps> = (props) => {
                         FOOTER_HEIGHT={props.FOOTER_HEIGHT}
                         HEADER_HEIGHT={props.HEADER_HEIGHT}
                         indicatorHeight={props.indicatorHeight}
+                        key={'Year_'+filterItem.yearStart+'_'+new Date()+"_"+props.numColumns}
                     />);
-
-                    if(filterItem.yearStart!==''){
-                        console.log(['yoohoo at '+sum,filterItem]);
-                    }
                 sum = sum + Math.ceil(filterItem.count/props.numColumns)*(SCREEN_WIDTH/props.numColumns);
                 return filterItem_t;
             })

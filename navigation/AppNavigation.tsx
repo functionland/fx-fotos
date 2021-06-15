@@ -151,6 +151,7 @@ const HomeNavigation: React.FC<Props> = (mainProps) => {
               onPress={onPress}
               onLongPress={onLongPress}
               style={{ flex: 1, alignItems:"center" }}
+              key={"TabTouchable_"+label+"_"+new Date()}
             >
               <View>{icon?icon({focused:isFocused,color:isFocused ? '#0a72ac' : '#3e2465',size:18}):<></>}</View>
               <Text style={{ color: isFocused ? '#0a72ac' : '#3e2465' }}>
@@ -173,10 +174,11 @@ const HomeNavigation: React.FC<Props> = (mainProps) => {
         ]
       }>
         <Tab.Navigator 
-          tabBar={props => <TabBar {...props} />}
+          tabBar={props => <TabBar {...props} key='mainTabBar' />}
         >
           <Tab.Screen
             name="Photos"
+            key="TabScreen_Photos"
             options={{
               tabBarLabel: 'Photos',
               tabBarIcon: ({ color, size }) => (
@@ -197,6 +199,7 @@ const HomeNavigation: React.FC<Props> = (mainProps) => {
           </Tab.Screen>
           <Tab.Screen
             name="Search"
+            key="TabScreen_Search"
             component={Search}
             options={{
               tabBarLabel: 'Search',
@@ -207,6 +210,7 @@ const HomeNavigation: React.FC<Props> = (mainProps) => {
           />
           <Tab.Screen
             name="Library"
+            key="TabScreen_Library"
             component={Library}
             options={{
               tabBarLabel: 'Library',

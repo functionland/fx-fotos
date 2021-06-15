@@ -151,7 +151,6 @@ const SingleMedia: React.FC<Props> = (props) => {
       }else{
         Reanimated.runOnJS(_removeBackHandler)();
       }
-      console.log(result);
     }
   }, [isModalOpen]);
   const positionX = useSharedValue(0);
