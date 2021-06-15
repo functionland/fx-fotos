@@ -1,12 +1,18 @@
-import React, {useEffect, useRef} from 'react';
-import { Animated, View, useWindowDimensions, StyleSheet, Image, Text, StatusBar, SafeAreaView } from 'react-native';
+import React, {useEffect, } from 'react';
+import { 
+    View, 
+    StyleSheet, 
+    Image, 
+    StatusBar 
+} from 'react-native';
 import {
-    PanGestureHandler,
-    HandlerStateChangeEvent,
-    PanGestureHandlerEventPayload,
-    State,
-  } from 'react-native-gesture-handler';
-  import {default as Reanimated, useAnimatedStyle, useSharedValue, Extrapolate} from 'react-native-reanimated';
+    default as Reanimated, 
+    useAnimatedStyle, 
+    useSharedValue, 
+    Extrapolate, 
+    useAnimatedReaction, 
+    useDerivedValue,
+} from 'react-native-reanimated';
 
 interface Props {
     scrollY2: Reanimated.SharedValue<number>;
@@ -20,23 +26,29 @@ const Header: React.FC<Props> = (props) => {
     useEffect(()=>{
         console.log('HEADER mounted');
     })
-    const minusScrollYPrevRef = useSharedValue(0);
+    const translateY_t = useSharedValue(0);
     const translateY = useSharedValue(0);
     
+    const animScroll = useSharedValue<number>(0);
+    useDerivedValue(() => {
+        animScroll.value = (props.scrollY2.value+props.scrollY3.value+props.scrollY4.value);
+    }, [props.scrollY2, props.scrollY3, props.scrollY4]);
+    useAnimatedReaction(() => {
+            return animScroll.value;
+        }, (result, previous) => {
+            if (result !== previous) {
+                const diff =  (previous||0) - result;
+                translateY.value = Reanimated.interpolate(
+                    translateY.value+diff,
+                    [-props.HEADER_HEIGHT*2, 0],
+                    [-props.HEADER_HEIGHT*2, 0],
+                    Extrapolate.CLAMP
+                );
+                console.log([translateY.value, result, previous]);
+            }
+        }, [animScroll]);
+
     const animatedStyle = useAnimatedStyle(()=>{
-        const clamp = (num:number, min:number, max:number) => {
-            return num <= min 
-              ? min 
-              : num >= max 
-                ? max 
-                : num
-          }
-        const animScroll = (props.scrollY2.value+props.scrollY3.value+props.scrollY4.value);
-        const clampedScrollY = Reanimated.interpolate(animScroll, [props.HEADER_HEIGHT, props.HEADER_HEIGHT + 1], [0, 1], Extrapolate.CLAMP);
-        const minusScrollY = -1*clampedScrollY;
-        //const translateY = Reanimated.diffClamp(minusScrollY, -props.HEADER_HEIGHT, 0);
-        translateY.value = clamp(translateY.value + (minusScrollY-minusScrollYPrevRef.value), -props.HEADER_HEIGHT, 0)
-        minusScrollYPrevRef.value = minusScrollY;
         return {
             transform: [{
                 translateY: translateY.value,
