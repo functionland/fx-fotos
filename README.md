@@ -125,6 +125,10 @@ expo start
 - We used a modified version of **expo-video-player** to play videos. It is available in our repo.
 - We used a modified version of **react-native-stories-view** for the story style view on top of gallery, which is available in our repo.
 - We used **RecyclerListView** from FlipKart, as the scrollView for the photos.
+- We used **react-native-reanimated** for animations.
+- We used **Recoil** for state management.
+- We used **react-native-gesture-handler** for gesture handling.
+- We used **@react-navigation/bottom-tabs** and **@react-navigation/native** for navigation.
 
 ## Pages structure
 
@@ -235,6 +239,10 @@ AllPhotos --> StoryHolder --> StoryContainer --> StoryComponent
 AllPhotos --> SingleMedia --> Media
 RenderPhotos --> PhotosChunk & ThumbScroll & Highlights & FloatingFilters
 ```
+
+## How to contribute?
+
+Just pick any issue from the issues tab or create your own and do a pull request! **We appreciate all the help you can do, even if it is renaming one variable to a better name.**
 
 ## Road map
  
