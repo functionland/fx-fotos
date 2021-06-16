@@ -12,7 +12,7 @@ import {
   State,
   PinchGestureHandlerProps
 } from 'react-native-gesture-handler';
-import { default as Reanimated, useAnimatedGestureHandler, useAnimatedStyle } from 'react-native-reanimated';
+import { default as Reanimated, useAnimatedGestureHandler, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 
 
 interface Props {
@@ -22,21 +22,21 @@ interface Props {
   modalShown: Reanimated.SharedValue<number>;
   index: number;
   pinchRef: React.RefObject<React.ComponentType<PinchGestureHandlerProps & React.RefAttributes<any>>>;
-  _baseImageScale: Reanimated.SharedValue<number>;
-  _pinchScale: Reanimated.SharedValue<number>;
+  imageScale: Reanimated.SharedValue<number>;
   animatedSingleMediaIndex: Reanimated.SharedValue<number>;
 }
 
 const Media: React.FC<Props> = (props) => {
   const SCREEN_WIDTH = useWindowDimensions().width;
   const SCREEN_HEIGHT = useWindowDimensions().height;
-const state={
-  activeIndex: -1
-}
+  const state={
+    activeIndex: -1
+  }
   
-  let doubleTapRef = createRef<TapGestureHandler>();
+  const doubleTapRef = createRef<TapGestureHandler>();
   
-  let _lastScale:number = 1;
+  const translateX = useSharedValue(0);
+  const translateY = useSharedValue(0);
 
   const isMounted = useRef(false);
   useEffect(() => {
@@ -44,14 +44,42 @@ const state={
       return () => {isMounted.current = false;}
   }, []);
 
-
-
-  const _onPinchGestureEvent = useAnimatedGestureHandler<PinchGestureHandlerGestureEvent, {}>({
-    onActive: (event) => {
-
+  const _onPinchGestureEvent = useAnimatedGestureHandler<PinchGestureHandlerGestureEvent, {x: number; y: number; scale: number;}>({
+    onStart: (_event, ctx) => {
+      ctx.x = translateX.value; 
+      ctx.y = translateY.value;
+      ctx.scale = props.imageScale.value;
+    },
+    onActive: (event, ctx) => {
+      console.log([event.focalX, event.focalY]);
+      props.imageScale.value = Reanimated.interpolate(ctx.scale*event.scale,
+        [0, 1, 4],
+        [1, 1, 4]
+      );
+      
+      if(event.scale!==1){
+        translateX.value = ctx.x + (
+          (
+            (
+              event.scale*(SCREEN_WIDTH-event.focalX*2)
+            ) - (SCREEN_WIDTH-event.focalX*2)
+          )
+          / (2*event.scale)) ;
+        translateY.value =  ctx.y + (
+          (
+            (
+              event.scale*(SCREEN_HEIGHT-event.focalY*2)
+            ) - (SCREEN_HEIGHT-event.focalY*2)
+          )
+          / (2*event.scale)) ;
+      }
+      //console.log([imageScale.value, translateX.value, translateY.value, event.focalX, event.focalY]);
     },
     onFinish: (event) => {
-
+      if(props.imageScale.value ===1){
+        translateX.value = 0;
+        translateY.value = 0;
+      }
     },
     onEnd: (event)=>{
 
@@ -61,10 +89,36 @@ const state={
     }
   });
 
-  const _onDoubleTapHandlerStateChange = useAnimatedGestureHandler<TapGestureHandlerGestureEvent, {}>({
-    onStart: (event)=>{
+  const _onDoubleTapHandlerStateChange = useAnimatedGestureHandler<TapGestureHandlerGestureEvent, {x: number; y: number; scale: number;}>({
+    onStart: (event, ctx)=>{
       console.log('onStart');
+      ctx.x = translateX.value; 
+      ctx.y = translateY.value;
+      ctx.scale = props.imageScale.value;
     },
+    onActive: (event, ctx)=>{
+      if(props.imageScale.value<2.25){
+        props.imageScale.value = ctx.scale * 1.5;
+        translateX.value =  ctx.x + (
+          (
+            (
+              1.5*(SCREEN_WIDTH-event.x)
+            ) - (SCREEN_WIDTH-event.x)
+          )
+          / (2*1.5));
+        translateY.value =  ctx.y + (
+          (
+            (
+              1.5*(SCREEN_HEIGHT-event.y)
+            ) - (SCREEN_HEIGHT-event.y)
+          )
+          / (2*1.5));
+      }else{
+        props.imageScale.value = 1;
+        translateX.value = 0;
+        translateY.value = 0;
+      }
+    }
   });
 
       let video:any;
@@ -81,15 +135,18 @@ const state={
       }, [props.index, state?.activeIndex, state]);
 
       const animatedImageStyle = Reanimated.useAnimatedStyle(()=>{
-        const imageScale = Reanimated.interpolate((props._baseImageScale.value* props._pinchScale.value),
-          [0, 1, 4],
-          [1, 1, 4]
-        );
-        let scale = props.modalShown.value*((props.animatedSingleMediaIndex.value===props.index)?imageScale:1);
+        
+        let scale = props.modalShown.value*((props.animatedSingleMediaIndex.value===props.index)?props.imageScale.value:1);
         return {
           transform: [
             {
               scale: scale,
+            },
+            {
+             translateX: translateX.value
+            },
+            {
+              translateY: translateY.value
             }
           ]
         }
@@ -146,13 +203,9 @@ const state={
       }
 
       const animatedViewStyle = Reanimated.useAnimatedStyle(()=>{
-        const imageScale = Reanimated.interpolate((props._baseImageScale.value* props._pinchScale.value),
-          [0, 1, 4],
-          [1, 1, 4]
-        );
         return {
           opacity: (props.modalShown.value*((props.animatedSingleMediaIndex.value===props.index)?1:(Reanimated.interpolate(
-            imageScale,
+            props.imageScale.value,
             [0, 0.99, 1, 1.01, 4],
             [0, 0, 1, 0, 0],
           ))))

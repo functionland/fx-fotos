@@ -207,8 +207,7 @@ const SingleMedia: React.FC<Props> = (props) => {
   ]);
   
 
-  const _baseImageScale = useSharedValue(1);
-  const _pinchScale = useSharedValue(1);
+  const imageScale = useSharedValue(1);
 
   useDerivedValue(() => {
     reanimatedScrollTo(scrollRefExternal, SCREEN_WIDTH * props.animatedSingleMediaIndex.value, 0, false);
@@ -428,8 +427,7 @@ const SingleMedia: React.FC<Props> = (props) => {
                       modalShown={isModalOpen}
                       index={index}
                       pinchRef={pinchRef}
-                      _baseImageScale={_baseImageScale}
-                      _pinchScale={_pinchScale}
+                      imageScale={imageScale}
                       animatedSingleMediaIndex={props.animatedSingleMediaIndex}
                     />
                   )}

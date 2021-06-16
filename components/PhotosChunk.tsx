@@ -132,14 +132,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
       console.log('onLongFinish:when scroll, tap or long');
     }
   })
-  const _onLongTapHandlerStateChange = ( event:HandlerStateChangeEvent<TapGestureHandlerEventPayload> ) => {
-    
-      if (event.nativeEvent.state === State.ACTIVE && event.nativeEvent.oldState !== State.ACTIVE) {
-        if(typeof props.photo.value !== 'string'){
-            props.onMediaLongTap(props.photo.value);
-        }
-      }
-  }
+
   const longTapRef = createRef<LongPressGestureHandler>();
   const singleTapRef = createRef<TapGestureHandler>();
   const animatedStyle = Reanimated.useAnimatedStyle(()=>{
