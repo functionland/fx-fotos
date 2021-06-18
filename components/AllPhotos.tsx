@@ -35,6 +35,7 @@ interface Props {
 }
 
 const AllPhotos: React.FC<Props> = (props) => {
+  const selectedAssets:Reanimated.SharedValue<number[]> = useSharedValue([]);
   const [preparedMedia, setPreparedMedia] = useRecoilState(preparedMediaState);
 
   useEffect(()=>{
@@ -61,7 +62,6 @@ const AllPhotos: React.FC<Props> = (props) => {
   const singleImageHeight = useSharedValue(SCREEN_HEIGHT);
 
   const [showActionBar, setShowActionBar] = useState<boolean>(false);
-  const [selectedAssets, setSelectedAssets] = useState<Asset[]>([]);
   
   const selectMedia = (media:Asset, selected:boolean) => {
     let layout:layout[] = preparedMedia.layout;
@@ -77,30 +77,14 @@ const AllPhotos: React.FC<Props> = (props) => {
   }
 
   useEffect(()=>{
-    if(selectedAssets.length && !showActionBar){
+    /*if(selectedAssets.length && !showActionBar){
       setShowActionBar(true);
     }else if(showActionBar && selectedAssets.length===0){
       setShowActionBar(false);
-    }
+    }*/
   },[selectedAssets]);
 
-  const onMediaLongTap = (selectedAsset:Asset|undefined) => {
-    if(selectedAsset===undefined){
-      for(let i=0;i<selectedAssets.length;i++){
-        selectMedia(selectedAssets[i], false);
-      }
-      setSelectedAssets([]);
-    }else{
-      let isAlreadySelected:number = selectedAssets.findIndex(x=>x.id === selectedAsset.id);
-      if(isAlreadySelected===-1){
-        setSelectedAssets(oldSelected=>[...oldSelected,selectedAsset]);
-        selectMedia(selectedAsset, true);
-      }else{
-        setSelectedAssets(oldSelected=>oldSelected.filter(x=>x.id !== selectedAsset.id));
-        selectMedia(selectedAsset, false);
-      }
-    }
-  }
+
   
   return (
     preparedMedia.layout.length>0?(
@@ -131,7 +115,6 @@ const AllPhotos: React.FC<Props> = (props) => {
         scrollY={props.scrollY2}
         HEADER_HEIGHT={props.HEADER_HEIGHT}
         FOOTER_HEIGHT={props.FOOTER_HEIGHT}
-        onMediaLongTap={onMediaLongTap}
         showStory={showStory}
         animatedImagePositionX={animatedImagePositionX}
         animatedImagePositionY={animatedImagePositionY}
@@ -162,7 +145,6 @@ const AllPhotos: React.FC<Props> = (props) => {
         scrollY={props.scrollY3}
         HEADER_HEIGHT={props.HEADER_HEIGHT}
         FOOTER_HEIGHT={props.FOOTER_HEIGHT}
-        onMediaLongTap={onMediaLongTap}
         animatedImagePositionX={animatedImagePositionX}
         animatedImagePositionY={animatedImagePositionY}
         animatedSingleMediaIndex={animatedSingleMediaIndex}
@@ -192,7 +174,6 @@ const AllPhotos: React.FC<Props> = (props) => {
         scrollY={props.scrollY4}
         HEADER_HEIGHT={props.HEADER_HEIGHT}
         FOOTER_HEIGHT={props.FOOTER_HEIGHT}
-        onMediaLongTap={onMediaLongTap}
         animatedImagePositionX={animatedImagePositionX}
         animatedImagePositionY={animatedImagePositionY}
         animatedSingleMediaIndex={animatedSingleMediaIndex}

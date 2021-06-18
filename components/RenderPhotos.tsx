@@ -23,6 +23,7 @@ import { useBackHandler } from '@react-native-community/hooks'
 import { Asset } from 'expo-media-library';
 import {default as Reanimated, useSharedValue, useAnimatedRef, useDerivedValue, scrollTo as reanimatedScrollTo, useAnimatedScrollHandler} from 'react-native-reanimated';
 import { timestampToDate } from '../utils/functions';
+import {Path} from "react-native-redash";
 
 import {
   useRecoilState,
@@ -76,9 +77,8 @@ interface Props {
   scrollY: Reanimated.SharedValue<number>;
   HEADER_HEIGHT: number;
   FOOTER_HEIGHT: number;
-  onMediaLongTap: Function;
   showSelectionCheckbox:boolean;
-  selectedAssets:Asset[]|undefined;
+  selectedAssets:Reanimated.SharedValue<number[]>;
   animatedImagePositionX: Reanimated.SharedValue<number>;
   animatedImagePositionY: Reanimated.SharedValue<number>;
   animatedSingleMediaIndex: Reanimated.SharedValue<number>;
@@ -218,7 +218,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
 
   useBackHandler(() => {
     if (props.showSelectionCheckbox) {
-      props.onMediaLongTap(undefined);
+      
       return true
     }
     // let the default thing happen
@@ -273,7 +273,6 @@ const RenderPhotos: React.FC<Props> = (props) => {
         modalShown={props.modalShown}
         headerShown={props.headerShown}
         headerHeight={headerHeight}
-        onMediaLongTap={props.onMediaLongTap}
         showSelectionCheckbox={props.showSelectionCheckbox}
         selectedAssets={props.selectedAssets}
         animatedImagePositionX={props.animatedImagePositionX}

@@ -1,28 +1,18 @@
 import {Asset} from 'expo-media-library';
-import React, {useEffect, useState, createRef, useRef} from 'react';
-import { Animated, Image, Text, StyleSheet, useWindowDimensions, View, Platform, TextStyle } from 'react-native';
+import React, {createRef, useRef} from 'react';
+import { Image, Text, StyleSheet, useWindowDimensions, View, Platform } from 'react-native';
 import { layout } from '../types/interfaces';
 import { prettyTime } from '../utils/functions';
 import { MaterialIcons } from '@expo/vector-icons'; 
 import RoundCheckbox from './RoundCheckbox';
 
-
 import {
   LongPressGestureHandler,
   TapGestureHandler,
-  HandlerStateChangeEvent,
-  TapGestureHandlerEventPayload,
   TapGestureHandlerGestureEvent,
   LongPressGestureHandlerGestureEvent,
-  State,
 } from 'react-native-gesture-handler';
 import { default as Reanimated, useAnimatedGestureHandler, useSharedValue } from 'react-native-reanimated';
-
-import {
-  useRecoilState,
-} from 'recoil';
-import {singlePhotoIndexState, imagePositionState} from '../states';
-import { OnMove } from '../.history/components/ImageModal/types_20210517211851';
 
 const isIOS = Platform.OS === 'ios';
 interface Props {
@@ -33,14 +23,13 @@ interface Props {
   modalShown: Reanimated.SharedValue<number>;
   headerShown: Reanimated.SharedValue<number>;
   headerHeight: number;
-  onMediaLongTap: Function;
   animatedImagePositionX: Reanimated.SharedValue<number>;
   animatedImagePositionY: Reanimated.SharedValue<number>;
   animatedSingleMediaIndex: Reanimated.SharedValue<number>;
   singleImageWidth: Reanimated.SharedValue<number>;
   singleImageHeight: Reanimated.SharedValue<number>;
   showSelectionCheckbox: boolean;
-  selectedAssets:Asset[]|undefined;
+  selectedAssets: Reanimated.SharedValue<number[]>
   imageWidth: number;
   imageHeight: number;
 }
@@ -52,7 +41,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
   const SCREEN_HEIGHT = useWindowDimensions().height;
   const imageRef = useRef<Image | null | undefined>();
   const animatedTempScale = useSharedValue(1);
-
+  const selectedOpacity = useSharedValue(0);
 
   const handleOnLoad = () => {
     if (isIOS && imageRef) {
@@ -118,6 +107,15 @@ const PhotosChunk: React.FC<Props> = (props) => {
     },
     onActive: (event)=>{
       console.log('onLongActive');
+      let index = props.selectedAssets.value.findIndex(x=>x===props.index);
+      if(index > -1){
+        props.selectedAssets.value.splice(index, 1);
+        selectedOpacity.value = 0;
+      }else{
+        props.selectedAssets.value.push(props.index);
+        selectedOpacity.value = 1;
+      }
+      console.log(props.selectedAssets.value);
     },
     onCancel: ()=>{
       console.log('onLongCancel');
@@ -130,6 +128,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
     },
     onFinish:()=>{
       console.log('onLongFinish:when scroll, tap or long');
+      
     }
   })
 
@@ -140,6 +139,13 @@ const PhotosChunk: React.FC<Props> = (props) => {
         opacity: animatedTempScale.value,
     };
   });
+
+  const checkboxAnimatedStyle = Reanimated.useAnimatedStyle(()=>{
+    console.log('props.selectedAssets='+props.selectedAssets.value.length)
+    return {
+        opacity: (props.selectedAssets.value.length||selectedOpacity)>0?1:0,
+    };
+  },[props.selectedAssets, selectedOpacity]);
 
   const createThumbnail = (media:Asset) => {
     if(media.duration > 0){
@@ -231,20 +237,22 @@ const PhotosChunk: React.FC<Props> = (props) => {
             </TapGestureHandler>
           </Reanimated.View>
         </LongPressGestureHandler>
-        <View style={
+        <Reanimated.View style={
           [
             styles.checkBox, 
-            {
-              opacity:props.showSelectionCheckbox?1:0
-            }
+            checkboxAnimatedStyle
           ]
         } >
           <RoundCheckbox 
             size={24}
-            checked={props.selectedAssets?.findIndex(x=>(typeof props.photo.value!=='string' && x.id===props.photo.value.id))===-1?false:true}
+            checked={selectedOpacity}
             borderColor='whitesmoke'
+            icon='check'
+            backgroundColor='#007AFF'
+            iconColor='white'
+            onValueChange={() => {}}
           />
-          </View>
+          </Reanimated.View>
         </Reanimated.View>
       );
     }
@@ -270,7 +278,7 @@ const styles = StyleSheet.create({
     flexDirection:'row',
   },
   checkBox:{
-    zIndex:4,
+    zIndex:5,
     position: 'absolute',
     top:5,
     left: 5,
