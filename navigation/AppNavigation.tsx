@@ -1,7 +1,7 @@
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from 'react-native-screens/native-stack';
 import PermissionError from '../pages/PermissionError';
-import React, { useRef, } from 'react';
+import React, { useState, } from 'react';
 import HomePage from '../pages/HomePage';
 import { StyleSheet, Animated, View, TouchableOpacity, Text, StatusBar } from 'react-native';
 import Header from '../components/Header';
@@ -20,9 +20,18 @@ const AppNavigation = () => {
 
   const scale = useSharedValue(1);
   const numColumnsAnimated = useSharedValue(2);
- 
+  const [showHeader, setShowHeader] = useState<boolean|undefined>(true);
 
   const headerShown = useSharedValue(1);
+  Reanimated.useDerivedValue(()=>{
+    console.log('headerShown changed to '+headerShown.value);
+    if(headerShown.value===0){
+      Reanimated.runOnJS(setShowHeader)(false);
+    }else{
+      Reanimated.runOnJS(setShowHeader)(true);
+    }
+  }, [headerShown])
+
 
   const HEADER_HEIGHT = 30;
   const FOOTER_HEIGHT = 60;
@@ -39,6 +48,7 @@ const AppNavigation = () => {
               backgroundColor: 'transparent',
             },
             headerHideShadow:true,
+            headerShown:showHeader,
             headerTranslucent:true,
             headerTitleStyle: {
               fontWeight: 'bold',

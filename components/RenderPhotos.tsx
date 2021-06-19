@@ -23,6 +23,7 @@ import { useBackHandler } from '@react-native-community/hooks'
 import { Asset } from 'expo-media-library';
 import {default as Reanimated, useSharedValue, useAnimatedRef, useDerivedValue, scrollTo as reanimatedScrollTo, useAnimatedScrollHandler} from 'react-native-reanimated';
 import { timestampToDate } from '../utils/functions';
+import {Path} from "react-native-redash";
 
 import {
   useRecoilState,
@@ -76,14 +77,14 @@ interface Props {
   scrollY: Reanimated.SharedValue<number>;
   HEADER_HEIGHT: number;
   FOOTER_HEIGHT: number;
-  onMediaLongTap: Function;
-  showSelectionCheckbox:boolean;
-  selectedAssets:Asset[]|undefined;
+  selectedAssets:Reanimated.SharedValue<number[]>;
   animatedImagePositionX: Reanimated.SharedValue<number>;
   animatedImagePositionY: Reanimated.SharedValue<number>;
   animatedSingleMediaIndex: Reanimated.SharedValue<number>;
   singleImageWidth: Reanimated.SharedValue<number>;
   singleImageHeight: Reanimated.SharedValue<number>;
+  lastSelectedAssetIndex: Reanimated.SharedValue<number>;
+  lastSelectedAssetAction: Reanimated.SharedValue<number>;
 }
 
 const RenderPhotos: React.FC<Props> = (props) => {
@@ -217,10 +218,10 @@ const RenderPhotos: React.FC<Props> = (props) => {
   },[props.photos.layout.length]);
 
   useBackHandler(() => {
-    if (props.showSelectionCheckbox) {
-      props.onMediaLongTap(undefined);
+    /*if (props.showSelectionCheckbox) {
+      
       return true
-    }
+    }*/
     // let the default thing happen
     return false
   })
@@ -273,9 +274,9 @@ const RenderPhotos: React.FC<Props> = (props) => {
         modalShown={props.modalShown}
         headerShown={props.headerShown}
         headerHeight={headerHeight}
-        onMediaLongTap={props.onMediaLongTap}
-        showSelectionCheckbox={props.showSelectionCheckbox}
         selectedAssets={props.selectedAssets}
+        lastSelectedAssetIndex={props.lastSelectedAssetIndex}
+        lastSelectedAssetAction={props.lastSelectedAssetAction}
         animatedImagePositionX={props.animatedImagePositionX}
         animatedImagePositionY={props.animatedImagePositionY}
         animatedSingleMediaIndex={props.animatedSingleMediaIndex}
@@ -407,7 +408,6 @@ const RenderPhotos: React.FC<Props> = (props) => {
         rowRenderer={rowRenderer}
         //onScroll={scrollHandlerReanimated}
         key={"RecyclerListView_"+props.sortCondition + props.numColumns}
-        extendedState={{showSelectionCheckbox:props.showSelectionCheckbox}}
         scrollViewProps={{
           //ref: scrollRefExternal,
           

@@ -1,28 +1,18 @@
 import {Asset} from 'expo-media-library';
-import React, {useEffect, useState, createRef, useRef} from 'react';
-import { Animated, Image, Text, StyleSheet, useWindowDimensions, View, Platform, TextStyle } from 'react-native';
+import React, {createRef, useRef} from 'react';
+import { Image, Text, StyleSheet, useWindowDimensions, View, Platform } from 'react-native';
 import { layout } from '../types/interfaces';
 import { prettyTime } from '../utils/functions';
 import { MaterialIcons } from '@expo/vector-icons'; 
 import RoundCheckbox from './RoundCheckbox';
 
-
 import {
   LongPressGestureHandler,
   TapGestureHandler,
-  HandlerStateChangeEvent,
-  TapGestureHandlerEventPayload,
   TapGestureHandlerGestureEvent,
   LongPressGestureHandlerGestureEvent,
-  State,
 } from 'react-native-gesture-handler';
 import { default as Reanimated, useAnimatedGestureHandler, useSharedValue } from 'react-native-reanimated';
-
-import {
-  useRecoilState,
-} from 'recoil';
-import {singlePhotoIndexState, imagePositionState} from '../states';
-import { OnMove } from '../.history/components/ImageModal/types_20210517211851';
 
 const isIOS = Platform.OS === 'ios';
 interface Props {
@@ -33,16 +23,16 @@ interface Props {
   modalShown: Reanimated.SharedValue<number>;
   headerShown: Reanimated.SharedValue<number>;
   headerHeight: number;
-  onMediaLongTap: Function;
   animatedImagePositionX: Reanimated.SharedValue<number>;
   animatedImagePositionY: Reanimated.SharedValue<number>;
   animatedSingleMediaIndex: Reanimated.SharedValue<number>;
   singleImageWidth: Reanimated.SharedValue<number>;
   singleImageHeight: Reanimated.SharedValue<number>;
-  showSelectionCheckbox: boolean;
-  selectedAssets:Asset[]|undefined;
+  selectedAssets: Reanimated.SharedValue<number[]>
   imageWidth: number;
   imageHeight: number;
+  lastSelectedAssetIndex: Reanimated.SharedValue<number>;
+  lastSelectedAssetAction: Reanimated.SharedValue<number>;
 }
 
 
@@ -53,6 +43,13 @@ const PhotosChunk: React.FC<Props> = (props) => {
   const imageRef = useRef<Image | null | undefined>();
   const animatedTempScale = useSharedValue(1);
 
+  const opacityT = useSharedValue(0);
+
+  const selectedOpacity = Reanimated.useDerivedValue(() => {
+    let index = props.selectedAssets.value.findIndex(x=>x===props.index);
+    //we need to add a dummy condition on the props.lastSelectedAssetAction.value and props.lastSelectedAssetIndex.value so that useDerivedValue does not ignore updating
+    return (index>-1 && props.lastSelectedAssetIndex.value>-1 && props.lastSelectedAssetAction.value>-1)?1:0;
+  }, [props.lastSelectedAssetAction, props.lastSelectedAssetIndex]);
 
   const handleOnLoad = () => {
     if (isIOS && imageRef) {
@@ -69,7 +66,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
     },
     onActive: (event)=>{
       console.log('onActive');
-      if(!props.showSelectionCheckbox){
+      if(props.selectedAssets.value.length===0){
         props.animatedImagePositionY.value = event.absoluteY - event.y;
         props.animatedImagePositionX.value = event.absoluteX - event.x;
         props.animatedSingleMediaIndex.value = props.index;
@@ -89,7 +86,16 @@ const PhotosChunk: React.FC<Props> = (props) => {
         props.headerShown.value = 0;
         props.modalShown.value = 1;
       }else{
-          //props.onMediaLongTap(props.photo.value);
+        let index = props.selectedAssets.value.findIndex(x=>x===props.index);
+        props.lastSelectedAssetIndex.value = props.index;
+        if(index > -1){
+          props.selectedAssets.value.splice(index, 1);
+          props.lastSelectedAssetAction.value = 0;
+
+        }else{
+          props.selectedAssets.value.push(props.index);
+          props.lastSelectedAssetAction.value = 1;
+        }
       }
       animatedTempScale.value = Reanimated.withTiming(1,{duration:10})
     },
@@ -118,6 +124,15 @@ const PhotosChunk: React.FC<Props> = (props) => {
     },
     onActive: (event)=>{
       console.log('onLongActive');
+      let index = props.selectedAssets.value.findIndex(x=>x===props.index);
+      props.lastSelectedAssetIndex.value = props.index;
+      if(index > -1){
+        props.selectedAssets.value.splice(index, 1);
+        props.lastSelectedAssetAction.value = 0;
+      }else{
+        props.selectedAssets.value.push(props.index);
+        props.lastSelectedAssetAction.value = 1;
+      }
     },
     onCancel: ()=>{
       console.log('onLongCancel');
@@ -130,6 +145,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
     },
     onFinish:()=>{
       console.log('onLongFinish:when scroll, tap or long');
+      
     }
   })
 
@@ -140,6 +156,12 @@ const PhotosChunk: React.FC<Props> = (props) => {
         opacity: animatedTempScale.value,
     };
   });
+
+  const checkboxAnimatedStyle = Reanimated.useAnimatedStyle(()=>{
+    return {
+        opacity: selectedOpacity.value,
+    };
+  },[selectedOpacity]);
 
   const createThumbnail = (media:Asset) => {
     if(media.duration > 0){
@@ -208,7 +230,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
         <LongPressGestureHandler
           ref={longTapRef}
           onGestureEvent={_onLongGestureEvent}
-          minDurationMs={600}
+          minDurationMs={400}
         >
           <Reanimated.View 
             style={{
@@ -231,20 +253,22 @@ const PhotosChunk: React.FC<Props> = (props) => {
             </TapGestureHandler>
           </Reanimated.View>
         </LongPressGestureHandler>
-        <View style={
+        <Reanimated.View style={
           [
             styles.checkBox, 
-            {
-              opacity:props.showSelectionCheckbox?1:0
-            }
+            checkboxAnimatedStyle
           ]
         } >
           <RoundCheckbox 
             size={24}
-            checked={props.selectedAssets?.findIndex(x=>(typeof props.photo.value!=='string' && x.id===props.photo.value.id))===-1?false:true}
+            checked={selectedOpacity}
             borderColor='whitesmoke'
+            icon='check'
+            backgroundColor='#007AFF'
+            iconColor='white'
+            onValueChange={() => {}}
           />
-          </View>
+          </Reanimated.View>
         </Reanimated.View>
       );
     }
@@ -270,7 +294,7 @@ const styles = StyleSheet.create({
     flexDirection:'row',
   },
   checkBox:{
-    zIndex:4,
+    zIndex:5,
     position: 'absolute',
     top:5,
     left: 5,

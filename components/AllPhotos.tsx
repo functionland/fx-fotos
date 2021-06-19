@@ -35,6 +35,13 @@ interface Props {
 }
 
 const AllPhotos: React.FC<Props> = (props) => {
+  const selectedAssets:Reanimated.SharedValue<number[]> = useSharedValue([]);
+  // Since animated arrays are not natively supported and updates do not propagate, we need to ad
+  // the two below natively supported numbers to detect changes in the array
+  // and change them whenever selectedAssets change and useDerivedValue on those to detect changes
+  const lastSelectedAssetIndex = useSharedValue(0);
+  const lastSelectedAssetAction = useSharedValue(0); //0:unselect, 1:select
+
   const [preparedMedia, setPreparedMedia] = useRecoilState(preparedMediaState);
 
   useEffect(()=>{
@@ -59,9 +66,21 @@ const AllPhotos: React.FC<Props> = (props) => {
   const animatedSingleMediaIndex = useSharedValue(-1);
   const singleImageWidth = useSharedValue(SCREEN_WIDTH);
   const singleImageHeight = useSharedValue(SCREEN_HEIGHT);
+  const actionBarOpacity = useSharedValue(0);
 
-  const [showActionBar, setShowActionBar] = useState<boolean>(false);
-  const [selectedAssets, setSelectedAssets] = useState<Asset[]>([]);
+  Reanimated.useAnimatedReaction(() => {
+    return (selectedAssets.value.length>0 && lastSelectedAssetIndex.value>-1 && lastSelectedAssetAction.value>-1)?1:0;
+  }, (result, previous) => {
+    if (result !== previous) {
+      actionBarOpacity.value = result;
+      if(result>0){
+        props.headerShown.value = 0;
+      }else{
+        props.headerShown.value = 1;
+      }
+    }
+  }, [lastSelectedAssetIndex,lastSelectedAssetAction, modalShown]);
+
   
   const selectMedia = (media:Asset, selected:boolean) => {
     let layout:layout[] = preparedMedia.layout;
@@ -76,31 +95,7 @@ const AllPhotos: React.FC<Props> = (props) => {
     }));
   }
 
-  useEffect(()=>{
-    if(selectedAssets.length && !showActionBar){
-      setShowActionBar(true);
-    }else if(showActionBar && selectedAssets.length===0){
-      setShowActionBar(false);
-    }
-  },[selectedAssets]);
 
-  const onMediaLongTap = (selectedAsset:Asset|undefined) => {
-    if(selectedAsset===undefined){
-      for(let i=0;i<selectedAssets.length;i++){
-        selectMedia(selectedAssets[i], false);
-      }
-      setSelectedAssets([]);
-    }else{
-      let isAlreadySelected:number = selectedAssets.findIndex(x=>x.id === selectedAsset.id);
-      if(isAlreadySelected===-1){
-        setSelectedAssets(oldSelected=>[...oldSelected,selectedAsset]);
-        selectMedia(selectedAsset, true);
-      }else{
-        setSelectedAssets(oldSelected=>oldSelected.filter(x=>x.id !== selectedAsset.id));
-        selectMedia(selectedAsset, false);
-      }
-    }
-  }
   
   return (
     preparedMedia.layout.length>0?(
@@ -131,15 +126,15 @@ const AllPhotos: React.FC<Props> = (props) => {
         scrollY={props.scrollY2}
         HEADER_HEIGHT={props.HEADER_HEIGHT}
         FOOTER_HEIGHT={props.FOOTER_HEIGHT}
-        onMediaLongTap={onMediaLongTap}
         showStory={showStory}
         animatedImagePositionX={animatedImagePositionX}
         animatedImagePositionY={animatedImagePositionY}
         animatedSingleMediaIndex={animatedSingleMediaIndex}
         singleImageWidth={singleImageWidth}
         singleImageHeight={singleImageHeight}
-        showSelectionCheckbox={showActionBar}
         selectedAssets={selectedAssets}
+        lastSelectedAssetIndex={lastSelectedAssetIndex}
+        lastSelectedAssetAction={lastSelectedAssetAction}
       />
       <RenderPhotos
         photos={preparedMedia}
@@ -162,14 +157,14 @@ const AllPhotos: React.FC<Props> = (props) => {
         scrollY={props.scrollY3}
         HEADER_HEIGHT={props.HEADER_HEIGHT}
         FOOTER_HEIGHT={props.FOOTER_HEIGHT}
-        onMediaLongTap={onMediaLongTap}
         animatedImagePositionX={animatedImagePositionX}
         animatedImagePositionY={animatedImagePositionY}
         animatedSingleMediaIndex={animatedSingleMediaIndex}
         singleImageWidth={singleImageWidth}
         singleImageHeight={singleImageHeight}
-        showSelectionCheckbox={showActionBar}
         selectedAssets={selectedAssets}
+        lastSelectedAssetIndex={lastSelectedAssetIndex}
+        lastSelectedAssetAction={lastSelectedAssetAction}
       />
       <RenderPhotos
         photos={preparedMedia}
@@ -192,14 +187,14 @@ const AllPhotos: React.FC<Props> = (props) => {
         scrollY={props.scrollY4}
         HEADER_HEIGHT={props.HEADER_HEIGHT}
         FOOTER_HEIGHT={props.FOOTER_HEIGHT}
-        onMediaLongTap={onMediaLongTap}
         animatedImagePositionX={animatedImagePositionX}
         animatedImagePositionY={animatedImagePositionY}
         animatedSingleMediaIndex={animatedSingleMediaIndex}
         singleImageWidth={singleImageWidth}
         singleImageHeight={singleImageHeight}
-        showSelectionCheckbox={showActionBar}
         selectedAssets={selectedAssets}
+        lastSelectedAssetIndex={lastSelectedAssetIndex}
+        lastSelectedAssetAction={lastSelectedAssetAction}
       />
       <SingleMedia 
         modalShown={modalShown}
@@ -217,8 +212,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         headerShown={props.headerShown}
       />
       <ActionBar
-        setShowActionBar={setShowActionBar}
-        showActionBar={showActionBar}
+        actionBarOpacity={actionBarOpacity}
       />
     </View>
     ):(
