@@ -28,10 +28,11 @@ interface Props {
   animatedSingleMediaIndex: Reanimated.SharedValue<number>;
   singleImageWidth: Reanimated.SharedValue<number>;
   singleImageHeight: Reanimated.SharedValue<number>;
-  showSelectionCheckbox: boolean;
   selectedAssets: Reanimated.SharedValue<number[]>
   imageWidth: number;
   imageHeight: number;
+  lastSelectedAssetIndex: Reanimated.SharedValue<number>;
+  lastSelectedAssetAction: Reanimated.SharedValue<number>;
 }
 
 
@@ -46,8 +47,9 @@ const PhotosChunk: React.FC<Props> = (props) => {
 
   const selectedOpacity = Reanimated.useDerivedValue(() => {
     let index = props.selectedAssets.value.findIndex(x=>x===props.index);
-    return (index>-1||opacityT.value)?1:0;
-  }, [props.selectedAssets, opacityT]);
+    //we need to add a dummy condition on the props.lastSelectedAssetAction.value and props.lastSelectedAssetIndex.value so that useDerivedValue does not ignore updating
+    return (index>-1 && props.lastSelectedAssetIndex.value>-1 && props.lastSelectedAssetAction.value>-1)?1:0;
+  }, [props.lastSelectedAssetAction, props.lastSelectedAssetIndex]);
 
   const handleOnLoad = () => {
     if (isIOS && imageRef) {
@@ -85,12 +87,14 @@ const PhotosChunk: React.FC<Props> = (props) => {
         props.modalShown.value = 1;
       }else{
         let index = props.selectedAssets.value.findIndex(x=>x===props.index);
+        props.lastSelectedAssetIndex.value = props.index;
         if(index > -1){
           props.selectedAssets.value.splice(index, 1);
-          opacityT.value = 0;
+          props.lastSelectedAssetAction.value = 0;
+
         }else{
           props.selectedAssets.value.push(props.index);
-          opacityT.value = 1;
+          props.lastSelectedAssetAction.value = 1;
         }
       }
       animatedTempScale.value = Reanimated.withTiming(1,{duration:10})
@@ -121,14 +125,14 @@ const PhotosChunk: React.FC<Props> = (props) => {
     onActive: (event)=>{
       console.log('onLongActive');
       let index = props.selectedAssets.value.findIndex(x=>x===props.index);
+      props.lastSelectedAssetIndex.value = props.index;
       if(index > -1){
         props.selectedAssets.value.splice(index, 1);
-        opacityT.value = 0;
+        props.lastSelectedAssetAction.value = 0;
       }else{
         props.selectedAssets.value.push(props.index);
-        opacityT.value = 1;
+        props.lastSelectedAssetAction.value = 1;
       }
-      console.log(props.selectedAssets.value);
     },
     onCancel: ()=>{
       console.log('onLongCancel');
