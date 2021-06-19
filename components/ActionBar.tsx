@@ -25,12 +25,12 @@ const ActionBar: React.FC<Props> = (props) => {
   return (
     <Reanimated.View style={[styles.actionBar, animatedStyle]}>
         <Appbar.Header style={[styles.actionBar]}>
-        <Appbar.BackAction onPress={_goBack} />
-        <Appbar.Content title="" subtitle="" />
-        <Appbar.Action color="#007AFF" icon="share-variant" onPress={_handleShare} style={[styles.actionBarIcon]} />
-        <Appbar.Action color="#007AFF" icon="plus" onPress={_handleAddToAlbum} style={[styles.actionBarIcon]} />
-        <Appbar.Action color="#007AFF" icon="trash-can-outline" onPress={_handleDelete} style={[styles.actionBarIcon]} />
-        <Appbar.Action color="#007AFF" icon="dots-vertical" onPress={_handleMore} style={[styles.actionBarIcon]} />
+          <Appbar.BackAction onPress={_goBack} />
+          <Appbar.Content title="" subtitle="" />
+          <Appbar.Action color="#007AFF" icon="share-variant" onPress={_handleShare} style={[styles.actionBarIcon]} />
+          <Appbar.Action color="#007AFF" icon="plus" onPress={_handleAddToAlbum} style={[styles.actionBarIcon]} />
+          <Appbar.Action color="#007AFF" icon="trash-can-outline" onPress={_handleDelete} style={[styles.actionBarIcon]} />
+          <Appbar.Action color="#007AFF" icon="dots-vertical" onPress={_handleMore} style={[styles.actionBarIcon]} />
         </Appbar.Header>
     </Reanimated.View>
   );

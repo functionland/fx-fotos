@@ -226,6 +226,8 @@ const SingleMedia: React.FC<Props> = (props) => {
   }, (result, previous) => {
     if (result === 0 && result !== previous) {
       props.headerShown.value = 1;
+    }else if(result === 1 && result !== previous){
+      props.headerShown.value = 0;
     }
   }, [props.modalShown]);
 

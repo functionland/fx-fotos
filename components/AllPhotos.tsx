@@ -66,16 +66,20 @@ const AllPhotos: React.FC<Props> = (props) => {
   const animatedSingleMediaIndex = useSharedValue(-1);
   const singleImageWidth = useSharedValue(SCREEN_WIDTH);
   const singleImageHeight = useSharedValue(SCREEN_HEIGHT);
+  const actionBarOpacity = useSharedValue(0);
 
-  const actionBarOpacity = Reanimated.useDerivedValue(() => {
-    //we need to add a dummy condition on the props.lastSelectedAssetAction.value and props.lastSelectedAssetIndex.value so that useDerivedValue does not ignore updating
-    if(selectedAssets.value.length>0){
-      props.headerShown.value = 0;
-    }else{
-      props.headerShown.value = 1;
-    }
+  Reanimated.useAnimatedReaction(() => {
     return (selectedAssets.value.length>0 && lastSelectedAssetIndex.value>-1 && lastSelectedAssetAction.value>-1)?1:0;
-  }, [lastSelectedAssetIndex,lastSelectedAssetAction]);
+  }, (result, previous) => {
+    if (result !== previous) {
+      actionBarOpacity.value = result;
+      if(result>0){
+        props.headerShown.value = 0;
+      }else{
+        props.headerShown.value = 1;
+      }
+    }
+  }, [lastSelectedAssetIndex,lastSelectedAssetAction, modalShown]);
 
   
   const selectMedia = (media:Asset, selected:boolean) => {

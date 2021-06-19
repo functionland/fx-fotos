@@ -13,7 +13,8 @@ import {
   useRecoilState,
 } from 'recoil';
 import {storyState} from '../states';
-import {default as Reanimated,} from 'react-native-reanimated';
+import { default as Reanimated } from 'react-native-reanimated';
+
 interface Props {
   duration: number;
   showStory: Animated.Value;
@@ -32,21 +33,11 @@ const StoryHolder: React.FC<Props> = (props) => {
       isMounted.current = true;
       return () => {
         isMounted.current = false;
-        props.showStory.removeAllListeners();
       }
   }, []);
 
   const SCREEN_WIDTH = useWindowDimensions().width;
   const SCREEN_HEIGHT = useWindowDimensions().height;
-
-  const storyShown = useRef<number>(0);
-
-  props.showStory.removeAllListeners();
-  props.showStory.addListener(({value})=>{
-    if(storyShown.current !== value){
-      storyShown.current = value;
-    }
-  });
 
   return story ? (
     <Animated.View style={
