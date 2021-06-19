@@ -12,7 +12,7 @@ interface Props {
   backgroundColor: string;
   iconColor: string;
   borderColor: string;
-  checked: Reanimated.SharedValue<number>;
+  checked: Reanimated.SharedValue<0 | 1>;
 }
 
 const RoundCheckbox: React.FC<Props> = (props) => {
@@ -46,7 +46,7 @@ const RoundCheckbox: React.FC<Props> = (props) => {
           opacity: Reanimated.interpolate(
             props.checked.value,
             [0, 0.9],
-            [0, 1]
+            [1, 0]
           ),
       };
     });
@@ -58,7 +58,7 @@ const RoundCheckbox: React.FC<Props> = (props) => {
     };
 
     const _onPress = () => {
-      props.onValueChange(!props.checked.value);
+      //props.onValueChange(!props.checked.value);
     };
 
     return (

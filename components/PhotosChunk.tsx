@@ -41,7 +41,13 @@ const PhotosChunk: React.FC<Props> = (props) => {
   const SCREEN_HEIGHT = useWindowDimensions().height;
   const imageRef = useRef<Image | null | undefined>();
   const animatedTempScale = useSharedValue(1);
-  const selectedOpacity = useSharedValue(0);
+
+  const opacityT = useSharedValue(0);
+
+  const selectedOpacity = Reanimated.useDerivedValue(() => {
+    let index = props.selectedAssets.value.findIndex(x=>x===props.index);
+    return (index>-1||opacityT.value)?1:0;
+  }, [props.selectedAssets, opacityT]);
 
   const handleOnLoad = () => {
     if (isIOS && imageRef) {
@@ -58,7 +64,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
     },
     onActive: (event)=>{
       console.log('onActive');
-      if(!props.showSelectionCheckbox){
+      if(props.selectedAssets.value.length===0){
         props.animatedImagePositionY.value = event.absoluteY - event.y;
         props.animatedImagePositionX.value = event.absoluteX - event.x;
         props.animatedSingleMediaIndex.value = props.index;
@@ -78,7 +84,14 @@ const PhotosChunk: React.FC<Props> = (props) => {
         props.headerShown.value = 0;
         props.modalShown.value = 1;
       }else{
-          //props.onMediaLongTap(props.photo.value);
+        let index = props.selectedAssets.value.findIndex(x=>x===props.index);
+        if(index > -1){
+          props.selectedAssets.value.splice(index, 1);
+          opacityT.value = 0;
+        }else{
+          props.selectedAssets.value.push(props.index);
+          opacityT.value = 1;
+        }
       }
       animatedTempScale.value = Reanimated.withTiming(1,{duration:10})
     },
@@ -110,10 +123,10 @@ const PhotosChunk: React.FC<Props> = (props) => {
       let index = props.selectedAssets.value.findIndex(x=>x===props.index);
       if(index > -1){
         props.selectedAssets.value.splice(index, 1);
-        selectedOpacity.value = 0;
+        opacityT.value = 0;
       }else{
         props.selectedAssets.value.push(props.index);
-        selectedOpacity.value = 1;
+        opacityT.value = 1;
       }
       console.log(props.selectedAssets.value);
     },
@@ -141,11 +154,10 @@ const PhotosChunk: React.FC<Props> = (props) => {
   });
 
   const checkboxAnimatedStyle = Reanimated.useAnimatedStyle(()=>{
-    console.log('props.selectedAssets='+props.selectedAssets.value.length)
     return {
-        opacity: (props.selectedAssets.value.length||selectedOpacity)>0?1:0,
+        opacity: selectedOpacity.value,
     };
-  },[props.selectedAssets, selectedOpacity]);
+  },[selectedOpacity]);
 
   const createThumbnail = (media:Asset) => {
     if(media.duration > 0){
@@ -214,7 +226,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
         <LongPressGestureHandler
           ref={longTapRef}
           onGestureEvent={_onLongGestureEvent}
-          minDurationMs={600}
+          minDurationMs={400}
         >
           <Reanimated.View 
             style={{
