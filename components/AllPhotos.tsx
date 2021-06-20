@@ -68,16 +68,22 @@ const AllPhotos: React.FC<Props> = (props) => {
   const singleImageHeight = useSharedValue(SCREEN_HEIGHT);
   const actionBarOpacity = useSharedValue(0);
 
+  const selectedAssetsRef = useRef<number[]>([]);
+  const _setSelectedValueRef = (selected:number[]) => {
+    selectedAssetsRef.current = selected;
+  }
+
   Reanimated.useAnimatedReaction(() => {
-    return (selectedAssets.value.length>0 && lastSelectedAssetIndex.value>-1 && lastSelectedAssetAction.value>-1)?1:0;
+    return (selectedAssets.value.length*7 + lastSelectedAssetIndex.value*3 + lastSelectedAssetAction.value*1);
   }, (result, previous) => {
     if (result !== previous) {
       actionBarOpacity.value = result;
-      if(result>0){
+      if(selectedAssets.value.length>0){
         props.headerShown.value = 0;
       }else{
         props.headerShown.value = 1;
       }
+      Reanimated.runOnJS(_setSelectedValueRef)(selectedAssets.value);
     }
   }, [lastSelectedAssetIndex,lastSelectedAssetAction, modalShown]);
 
@@ -95,9 +101,17 @@ const AllPhotos: React.FC<Props> = (props) => {
     }));
   }
 
-  const _goBack = () => console.log('Went back');
+  const _goBack = () => {
+    console.log('Went back');
+    selectedAssets.value = [];
+    lastSelectedAssetIndex.value = -1;
+    lastSelectedAssetAction.value = 0;
+  }
 
-  const _handleDelete = () => console.log('Deleting');
+  const _handleDelete = () => {
+    console.log('Deleting');
+    console.log(selectedAssetsRef.current);
+  }
 
   const _handleShare = () => console.log('Sharing');
 
