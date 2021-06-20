@@ -1,5 +1,5 @@
 import { LayoutProvider } from 'recyclerlistview';
-import { Dimensions, StatusBar } from 'react-native';
+import { Dimensions } from 'react-native';
 import {layout, headerIndex} from '../types/interfaces';
 
 export class LayoutUtil {
@@ -24,7 +24,14 @@ export class LayoutUtil {
       }
     );
   }
-  static getLayoutProvider(colNum:number, groupBy:string, headerIndexes:headerIndex[], headerHeight:number=20, data:layout[], storiesHeight:number, mainHeaderHeight:number) {
+  static getLayoutProvider(
+                          colNum:number, 
+                          groupBy:string, 
+                          headerIndexes:headerIndex[], 
+                          headerHeight:number=20, 
+                          data:layout[], 
+                          storiesHeight:number, 
+                          mainHeaderHeight:number) {
         return new LayoutProvider(
           (index) => {
             return index===0?'story':'image'; //Since we have just one view type

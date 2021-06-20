@@ -1,5 +1,3 @@
-import { StyleProp } from 'react-native';
-
 export interface OnMove {
   type: string;
   positionX: number;

@@ -1,7 +1,21 @@
 import { __rest } from "tslib";
 import { Audio, Video } from 'expo-av';
-import { Animated, Dimensions, Text, TouchableOpacity, TouchableWithoutFeedback, View, } from 'react-native';
-import { FullscreenEnterIcon, FullscreenExitIcon, PauseIcon, PlayIcon, ReplayIcon, Spinner, MuteIcon, UnmuteIcon } from './assets/icons';
+import { 
+    Animated, 
+    Dimensions, 
+    Text, 
+    TouchableOpacity, 
+    TouchableWithoutFeedback, 
+    View } from 'react-native';
+import { 
+    FullscreenEnterIcon, 
+    FullscreenExitIcon, 
+    PauseIcon, 
+    PlayIcon, 
+    ReplayIcon, 
+    Spinner, 
+    MuteIcon, 
+    UnmuteIcon } from './assets/icons';
 import { useNetInfo } from '@react-native-community/netinfo';
 import { withDefaultProps } from 'with-default-props';
 import React, { useEffect, useState, useRef } from 'react';
@@ -71,7 +85,7 @@ const defaultProps = {
     // Callbacks
     errorCallback: (error) => console.error('Error: ', error.message, error.type, error.obj),
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    playbackCallback: (callback) => { },
+    playbackCallback: () => { },
     switchToLandscape: () => console.warn(`Pass your logic to 'switchToLandscape' prop`),
     switchToPortrait: () => console.warn(`Pass your logic to 'switchToPortrait' prop`),
     mute: () => console.warn(`Pass your logic to 'mute' prop`),
@@ -143,7 +157,16 @@ const VideoPlayer = (props) => {
         if (playbackState !== newPlaybackState) {
             const { debug } = props;
             debug &&
-                console.info('[playback]', playbackState, ' -> ', newPlaybackState, ' [seek] ', seekState, ' [shouldPlay] ', shouldPlay);
+                console.info(
+                    '[playback]', 
+                    playbackState, 
+                    ' -> ', 
+                    newPlaybackState, 
+                    ' [seek] ', 
+                    seekState, 
+                    ' [shouldPlay] ', 
+                    shouldPlay
+                    );
             setPlaybackState(newPlaybackState);
             setLastPlaybackStateUpdate(Date.now());
         }
@@ -152,7 +175,16 @@ const VideoPlayer = (props) => {
         if(!isMounted.current){return;}
         const { debug } = props;
         debug &&
-            console.info('[seek]', seekState, ' -> ', newSeekState, ' [playback] ', playbackState, ' [shouldPlay] ', shouldPlay);
+            console.info(
+                '[seek]', 
+                seekState, 
+                ' -> ', 
+                newSeekState, 
+                ' [playback] ', 
+                playbackState, 
+                ' [shouldPlay] ', 
+                shouldPlay
+                );
         setSeekState(newSeekState);
         // Don't keep the controls timer running when the state is seeking
         if (newSeekState === SeekStates.Seeking) {
@@ -366,7 +398,33 @@ const VideoPlayer = (props) => {
         }
         controlsTimer = setTimeout(() => onTimerDone(), hideControlsTimerDuration);
     };
-    const { playIcon: VideoPlayIcon, pauseIcon: VideoPauseIcon, spinner: VideoSpinner, fullscreenEnterIcon: VideoFullscreenEnterIcon, fullscreenExitIcon: VideoFullscreenExitIcon, muteIcon: VideoMuteIcon, unmuteIcon: VideoUnmuteIcon,replayIcon: VideoReplayIcon, switchToLandscape, switchToPortrait, mute, unmute, inFullscreen, isMute, sliderColor, disableSlider, thumbImage, iosTrackImage, showFullscreenButton, showMuteButton, textStyle, videoProps, videoBackground, width, height, } = props;
+    const { 
+        playIcon: VideoPlayIcon, 
+        pauseIcon: VideoPauseIcon, 
+        spinner: VideoSpinner, 
+        fullscreenEnterIcon: VideoFullscreenEnterIcon, 
+        fullscreenExitIcon: VideoFullscreenExitIcon, 
+        muteIcon: VideoMuteIcon, 
+        unmuteIcon: VideoUnmuteIcon,
+        replayIcon: VideoReplayIcon, 
+                    switchToLandscape, 
+                    switchToPortrait, 
+                    mute, 
+                    unmute, 
+                    inFullscreen, 
+                    isMute, 
+                    sliderColor, 
+                    disableSlider, 
+                    thumbImage, 
+                    iosTrackImage, 
+                    showFullscreenButton, 
+                    showMuteButton, 
+                    textStyle, 
+                    videoProps, 
+                    videoBackground, 
+                    width, 
+                    height, 
+    } = props;
     const centeredContentWidth = 60;
     const screenRatio = width / height;
     let videoHeight = height;
@@ -377,10 +435,19 @@ const VideoPlayer = (props) => {
     }
     // Do not let the user override `ref`, `callback`, and `style`
     // @ts-ignore
-    const { videoRef, ref, style, onPlaybackStatusUpdate, source } = videoProps, otherVideoProps = __rest(videoProps, ["videoRef", "ref", "style", "onPlaybackStatusUpdate", "source"]);
+    const { 
+        videoRef, 
+        ref, 
+        source 
+    } = videoProps, 
+        otherVideoProps = 
+        __rest(videoProps, ["videoRef", "ref", "style", "onPlaybackStatusUpdate", "source"]);
     const Control = (_a) => {
-        var { callback, center, children, transparent = false } = _a, otherProps = __rest(_a, ["callback", "center", "children", "transparent"]);
-        return (<TouchableOpacity {...otherProps} hitSlop={{ top: 20, left: 20, bottom: 20, right: 20 }} onPress={() => {
+        var { callback, center, children, transparent = false } = _a, otherProps = 
+        __rest(_a, ["callback", "center", "children", "transparent"]);
+        return (<TouchableOpacity {...otherProps} 
+                hitSlop={{ top: 20, left: 20, bottom: 20, right: 20 }} 
+                onPress={() => {
                 resetControlsTimer();
                 callback();
             }}>
@@ -454,7 +521,9 @@ const VideoPlayer = (props) => {
 
         {/* Play/pause buttons */}
         {seekState !== SeekStates.Seeking &&
-            (playbackState === PlaybackStates.Playing || playbackState === PlaybackStates.Paused) && (<CenteredView pointerEvents={controlsState === ControlStates.Hidden ? 'none' : 'auto'} 
+            (playbackState === PlaybackStates.Playing 
+            || playbackState === PlaybackStates.Paused) 
+            && (<CenteredView pointerEvents={controlsState === ControlStates.Hidden ? 'none' : 'auto'} 
         // @ts-ignore
         style={{ opacity: controlsOpacity }}>
               <Control center={true} callback={togglePlay}>
@@ -494,7 +563,16 @@ const VideoPlayer = (props) => {
 
           {/* Seek bar */}
           {!disableSlider && (<TouchableWithoutFeedback onLayout={onSliderLayout} onPress={onSeekBarTap}>
-              <Slider style={{ marginRight: 10, marginLeft: 10, flex: 1 }} thumbTintColor={sliderColor} minimumTrackTintColor={sliderColor} trackImage={iosTrackImage} thumbImage={thumbImage} value={getSeekSliderPosition()} onValueChange={onSeekSliderValueChange} onSlidingComplete={onSeekSliderSlidingComplete} disabled={playbackState === PlaybackStates.Loading ||
+              <Slider 
+                    style={{ marginRight: 10, marginLeft: 10, flex: 1 }} 
+                    thumbTintColor={sliderColor} 
+                    minimumTrackTintColor={sliderColor} 
+                    trackImage={iosTrackImage} 
+                    thumbImage={thumbImage} 
+                    value={getSeekSliderPosition()} 
+                    onValueChange={onSeekSliderValueChange} 
+                    onSlidingComplete={onSeekSliderSlidingComplete} 
+                    disabled={playbackState === PlaybackStates.Loading ||
                 playbackState === PlaybackStates.Ended ||
                 playbackState === PlaybackStates.Error ||
                 controlsState !== ControlStates.Shown}/>

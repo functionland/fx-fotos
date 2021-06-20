@@ -1,9 +1,7 @@
 import React, {useState, createRef} from 'react';
-import {Animated, Dimensions,View} from 'react-native';
+import {Animated, Dimensions} from 'react-native';
 import {sortCondition} from '../types/interfaces';
-import {
-  changeSortCondition,
-} from '../utils/functions';
+import {changeSortCondition} from '../utils/functions';
 import {
   PinchGestureHandler,
   State,

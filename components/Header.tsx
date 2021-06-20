@@ -1,12 +1,5 @@
-import React, {useEffect, createRef} from 'react';
-import { Animated, View, useWindowDimensions, StyleSheet, Image, Text, StatusBar, SafeAreaView } from 'react-native';
-import {
-    PanGestureHandler,
-    HandlerStateChangeEvent,
-    PanGestureHandlerEventPayload,
-    State,
-  } from 'react-native-gesture-handler';
-
+import React from 'react';
+import { Animated, View, StyleSheet, Image, StatusBar, SafeAreaView } from 'react-native';
 
 interface Props {
     scrollAnim: Animated.Value;
@@ -14,11 +7,8 @@ interface Props {
 }
 
 const Header: React.FC<Props> = (props) => {
-    const panRef = createRef<PanGestureHandler>();
     const translationY = new Animated.Value(0);
 
-    const SCREEN_WIDTH = useWindowDimensions().width;
-    const SCREEN_HEIGHT = useWindowDimensions().height;
     
     const clampedScrollY = props.scrollAnim.interpolate({
     inputRange: [props.HEADER_HEIGHT, props.HEADER_HEIGHT + 1],

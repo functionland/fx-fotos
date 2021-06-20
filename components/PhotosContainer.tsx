@@ -8,7 +8,6 @@ import {storagePermission} from '../utils/permissions';
 import AllPhotos from './AllPhotos';
 import PinchZoom from './PinchZoom';
 import {sortCondition, MediaItem, } from '../types/interfaces';
-
 interface Props {
   scrollAnim: Animated.Value;
   HEADER_HEIGHT: number;
@@ -17,16 +16,15 @@ interface Props {
 
 const PhotosContainer: React.FC<Props> = (props) => {
   const SCREEN_WIDTH = useWindowDimensions().width;
-  const SCREEN_HEIGHT = useWindowDimensions().height;
 
   const initialPhotoNumber:number = 0;
   const storiesHeight:number = 1.618*SCREEN_WIDTH/3;
 
   const [permission, setPermission] = useState<boolean>();
   const [photos, setPhotos] = useState<Array<MediaLibrary.Asset>>();
-  const [mediaEndCursor, setMediaEndCursor] = useState<string>('');
+  const [setMediaEndCursor] = useState<string>('');
   const [mediaHasNextPage, setMediaHasNextPage] = useState<boolean>(true);
-  const [mediaTotalCount , setMediaTotalCount] = useState<number>(99999);
+  const [setMediaTotalCount] = useState<number>(99999);
   const [storagePhotos, setStoragePhotos] = useState<
     Array<MediaLibrary.Asset>
   >();
@@ -39,7 +37,6 @@ const PhotosContainer: React.FC<Props> = (props) => {
     outputRange: [1, 0, -1],
   }))).current;
 
-  const scrollIndicator = useRef(new Animated.Value(0)).current;
   const focalX = useRef(new Animated.Value(0)).current;
   const focalY = useRef(new Animated.Value(0)).current;
   const numberOfPointers = useRef(new Animated.Value(0)).current;
@@ -52,7 +49,7 @@ const PhotosContainer: React.FC<Props> = (props) => {
   const [numColumns, setNumColumns] = useState<2 | 3 | 4>(2);
   const [loading, setLoading] = useState<boolean>(false);
   const [isPinchAndZoom, setIsPinchAndZoom] = useState<boolean>(false);
-  const [loadMore, setLoadMore] = useState<number>(0);
+  const [setLoadMore] = useState<number>(0);
 
   //TODO: Change this function to the getPhotos in actions like in AllPhotos
   useEffect(() => {

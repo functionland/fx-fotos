@@ -1,6 +1,5 @@
-import { Asset } from 'expo-media-library';
-import React, {useEffect, useRef, useState, createRef} from 'react';
-import { View, SafeAreaView, useWindowDimensions, StyleSheet, Image } from 'react-native';
+import React, {useEffect, useRef} from 'react';
+import { View, useWindowDimensions, StyleSheet } from 'react-native';
 import StoryContainer from './Story/stories/StoryContainer';
 import {story, } from '../types/interfaces';
 import { useBackHandler } from '@react-native-community/hooks';

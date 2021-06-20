@@ -1,10 +1,8 @@
 import {Asset, MediaType, AssetsOptions, SortBy, getAssetsAsync} from 'expo-media-library';
 import {
   changeSortConditionAndNumColumns,
-  photoChunk,
   sortCondition,
   FlatSection,
-  flatMedia,
   headerIndex,
   layout,
   story
@@ -187,13 +185,17 @@ export const prepareLayout = (
       //Creating media and headerIndex
       for(let j=0;j<sortConditions.length;j++){
         let sortCondition_j = sortConditions[j];
-        if(mediaTimestampObj[sortCondition_j] !== lastTimestampObj[sortCondition_j] || lastYear[sortCondition_j] !== mediaTimestampYear){
+        if(mediaTimestampObj[sortCondition_j] 
+          !== lastTimestampObj[sortCondition_j] 
+          || lastYear[sortCondition_j] 
+          !== mediaTimestampYear){
           lastTimestampObj[sortCondition_j] = mediaTimestampObj[sortCondition_j];
           
           layout.push({value:mediaTimestampObj[sortCondition_j], sortCondition: sortCondition_j, index:-1});
           
           let headerIndexLength = headerIndexes.length;
-          let lastHeaderIndex = [...headerIndexes].reverse().findIndex(headerIndex => headerIndex.sortCondition === sortCondition_j);
+          let lastHeaderIndex = 
+          [...headerIndexes].reverse().findIndex(headerIndex => headerIndex.sortCondition === sortCondition_j);
           if(lastHeaderIndex>-1){
             headerIndexes[headerIndexLength -1 -lastHeaderIndex].count = count[sortCondition_j];
           }
@@ -201,7 +203,14 @@ export const prepareLayout = (
             lastYear[sortCondition_j] = mediaTimestampObj.year;
             yearStart[sortCondition_j] = lastYear[sortCondition_j];
           }
-          headerIndexes.push({header:mediaTimestampObj[sortCondition_j], index:layout.length-1, count: 0, yearStart: yearStart[sortCondition_j], sortCondition: sortCondition_j, timestamp: newMedias[i].modificationTime});
+          headerIndexes.push({header:mediaTimestampObj[sortCondition_j], 
+                              index:layout.length-1, 
+                              count: 0, 
+                              yearStart: 
+                              yearStart[sortCondition_j], 
+                              sortCondition: sortCondition_j, 
+                              timestamp: newMedias[i].modificationTime}
+                            );
           count[sortCondition_j] = 0;
         }
         count[sortCondition_j] = count[sortCondition_j] + 1;
@@ -215,7 +224,8 @@ export const prepareLayout = (
     let headerIndexLength = headerIndexes.length;
     for(let j=0;j<sortConditions.length;j++){
       let sortCondition_j = sortConditions[j];
-      lastHeaderIndex[sortCondition_j] = [...headerIndexes].reverse().findIndex(headerIndex => headerIndex.sortCondition === sortCondition_j);
+      lastHeaderIndex[sortCondition_j] = 
+      [...headerIndexes].reverse().findIndex(headerIndex => headerIndex.sortCondition === sortCondition_j);
       if(lastHeaderIndex[sortCondition_j]>-1){
         headerIndexes[headerIndexLength -1 -lastHeaderIndex[sortCondition_j]].count = count[sortCondition_j];
       }
@@ -297,8 +307,13 @@ export const getStorageMedia = (
   }
 };
 
-export const calcLayoutHeight = (numColumns:2|3|4, headerIndexes:Array<{header:string;index:number;count:number;yearStart:string}> , screenWidth:number, headerHeight:number) => {
-  return headerIndexes.reduce((total, elm)=>{return total+(Math.ceil(elm.count/numColumns)*(screenWidth/numColumns)+headerHeight);}, 0);
+export const calcLayoutHeight = (
+                                numColumns:2|3|4, 
+                                headerIndexes:Array<{header:string;index:number;count:number;yearStart:string}> , 
+                                screenWidth:number, 
+                                headerHeight:number) => {
+  return headerIndexes.reduce((total, elm)=>{
+    return total+(Math.ceil(elm.count/numColumns)*(screenWidth/numColumns)+headerHeight);}, 0);
   /*let height:number = 0;
   for(let i=0;i<headerIndexes.length;i++){
     height = height + (Math.ceil(headerIndexes[i].count/numColumns)*(screenWidth/numColumns)+headerHeight)

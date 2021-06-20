@@ -2,19 +2,13 @@ import * as React from 'react';
 
 import {
   Animated,
-  CameraRoll,
-  Dimensions,
   I18nManager,
   Image,
-  PanResponder,
-  Platform,
   Text,
   TouchableHighlight,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  View,
-  ViewStyle
-} from 'react-native';
+  View} from 'react-native';
 import ImageZoom from 'react-native-image-pan-zoom';
 import styles from './image-viewer.style';
 import { IImageInfo, IImageSize, Props, State } from './image-viewer.type';
@@ -648,7 +642,10 @@ export default class ImageViewer extends React.Component<Props, State> {
       <View style={this.styles.menuContainer}>
         <View style={this.styles.menuShadow} />
         <View style={this.styles.menuContent}>
-          <TouchableHighlight underlayColor="#F2F2F2" onPress={()=>{console.log('pressed')}} style={this.styles.operateContainer}>
+          <TouchableHighlight 
+          underlayColor="#F2F2F2" 
+          onPress={()=>{console.log('pressed')}} 
+          style={this.styles.operateContainer}>
             <Text style={this.styles.operateText}>{this.props.menuContext.saveToLocal}</Text>
           </TouchableHighlight>
           <TouchableHighlight

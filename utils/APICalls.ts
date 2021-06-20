@@ -9,7 +9,7 @@ export const getUserInfo = (username: string, password: string) => {
   return user;
 };
 
-export const getUserBoxMedia = (userToken: string) => {
+export const getUserBoxMedia = () => {
   console.log('Box Media Fetched');
   let boxMedia:Array<MediaLibrary.Asset> = [];
   return boxMedia;

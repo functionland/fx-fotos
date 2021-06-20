@@ -18,7 +18,6 @@ import {
 
 import { OnTap, OnMove, ImageStyle } from '../types';
 
-const LONG_PRESS_TIME = 800;
 const DOUBLE_CLICK_INTERVAL = 250;
 const MAX_OVERFLOW = 100;
 const MIN_SCALE = 0.6;
@@ -123,7 +122,7 @@ export default class ImageDetail extends React.Component<Props> {
 
   constructor(props: Props) {
     super(props);
-    const { onLongPress, onDoubleTap, swipeToDismiss, onTap, responderRelease } = props;
+    const { onDoubleTap, swipeToDismiss, responderRelease } = props;
     this._imagePanResponder = PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onPanResponderTerminationRequest: () => false,

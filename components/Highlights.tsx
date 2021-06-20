@@ -1,5 +1,4 @@
-import { Asset } from 'expo-media-library';
-import React, {useEffect, useRef, useState, createRef} from 'react';
+import React, {useEffect, useRef, createRef} from 'react';
 import { View, useWindowDimensions, StyleSheet, Image, Text } from 'react-native';
 import {story, } from '../types/interfaces';
 import { useBackHandler } from '@react-native-community/hooks'
@@ -10,7 +9,6 @@ import {
   TapGestureHandlerEventPayload,
   State,
 } from 'react-native-gesture-handler';
-
 interface Props {
   story:story;
   duration: number;

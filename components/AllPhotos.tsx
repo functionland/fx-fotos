@@ -9,7 +9,6 @@ import { Asset } from 'expo-media-library';
 import {prepareLayout,} from '../utils/functions';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
-const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 interface Props {
   photos: Array<Asset>;

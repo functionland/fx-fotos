@@ -61,9 +61,8 @@ const SingleMedia: React.FC<Props> = (props) => {
   const pinchRef = createRef<PinchGestureHandler>();
 
   const [media, setMedia] = useState<Asset|undefined>(undefined);
-  const [scrollEnabled, setScrollEnabled] = useState<boolean>(true);
-  const [activeIndex, setActiveIndex] = useState<number>(-1);
-  const [panGestureEnabled, setPanGestureEnabled] = useState<boolean>(true);
+  const [setScrollEnabled] = useState<boolean>(true);
+  const [panGestureEnabled] = useState<boolean>(true);
 
   const viewScale = useRef(new Animated.ValueXY({x:0,y:0})).current;
   const modalOpacity = useRef(new Animated.Value(0)).current;
@@ -72,7 +71,7 @@ const SingleMedia: React.FC<Props> = (props) => {
   const [dataProvider, setDataProvider] = useState<DataProvider>(new DataProvider((r1, r2) => {
     return r1 !== r2;
   }));
-  const [layoutProvider, setLayoutProvider] = useState<any>(LayoutUtil.getSingleImageLayoutProvider());
+  const [layoutProvider] = useState<any>(LayoutUtil.getSingleImageLayoutProvider());
   
   const _baseImageScale = new Animated.Value(1);
   const _pinchScale = new Animated.Value(1);
@@ -216,13 +215,18 @@ const SingleMedia: React.FC<Props> = (props) => {
   
   const _onPanHandlerStateChange = ( event:HandlerStateChangeEvent<PanGestureHandlerEventPayload> ) => {
     if (event.nativeEvent.oldState === State.ACTIVE && event.nativeEvent.state !== State.ACTIVE) {
-      if( (event.nativeEvent.translationY > 50 || event.nativeEvent.translationY < -50) && (((event.nativeEvent.translationX/(event.nativeEvent.translationY+1))>0 && (event.nativeEvent.translationX/(event.nativeEvent.translationY+1))<0.6) || ((event.nativeEvent.translationX/(event.nativeEvent.translationY+1))<0 && (event.nativeEvent.translationX/(event.nativeEvent.translationY+1))>-0.6))){
+      if( (event.nativeEvent.translationY > 50 || event.nativeEvent.translationY < -50) 
+      && (((event.nativeEvent.translationX/(event.nativeEvent.translationY+1))>0 
+      && (event.nativeEvent.translationX/(event.nativeEvent.translationY+1))<0.6) 
+      || ((event.nativeEvent.translationX/(event.nativeEvent.translationY+1))<0 
+      && (event.nativeEvent.translationX/(event.nativeEvent.translationY+1))>-0.6))){
         hideModalAnimation();
       }else if(event.nativeEvent.translationY <= 50 && event.nativeEvent.translationY >= -50){
         showModalAnimation();
       }
     }else if (event.nativeEvent.oldState !== State.ACTIVE && event.nativeEvent.state === State.ACTIVE) {
-      if( ((event.nativeEvent.velocityX/(event.nativeEvent.velocityY+1))>0.6) || ((event.nativeEvent.translationX/(event.nativeEvent.translationY+1))<-0.6) ){
+      if( ((event.nativeEvent.velocityX/(event.nativeEvent.velocityY+1))>0.6) 
+      || ((event.nativeEvent.translationX/(event.nativeEvent.translationY+1))<-0.6) ){
         console.log('scroll started');
         setScrollEnabled(true);
         let newIndex = -1;

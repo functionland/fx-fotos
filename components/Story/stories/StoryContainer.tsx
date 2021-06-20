@@ -2,8 +2,16 @@ import React, { useState, useRef, useEffect } from "react"
 import ProgressView from "./ProgressView"
 import StoryView from "./StoryView"
 import { StoryContainerProps } from "../utils/interfaceHelper"
-import { StyleSheet, View, SafeAreaView, Platform, Keyboard, Animated, KeyboardAvoidingView, useWindowDimensions } from "react-native"
-import { GREEN, LIGHT_GRAY_0, RED, TINT_GRAY, GRAY } from "../utils/colors"
+import { 
+  StyleSheet, 
+  View, 
+  SafeAreaView, 
+  Platform, 
+  Keyboard, 
+  Animated, 
+  KeyboardAvoidingView, 
+  useWindowDimensions } from "react-native"
+import { TINT_GRAY } from "../utils/colors"
 import ReplyFooterView from "./ReplyFooterView"
 import UserHeaderView from "./UserHeaderView"
 import {DEFAULT_DURATION} from '../utils/constant' ;
@@ -15,7 +23,6 @@ import {
   PanGestureHandlerEventPayload,
   State,
 } from 'react-native-gesture-handler';
-import { ScaleFromCenterAndroid } from "@react-navigation/stack/lib/typescript/src/TransitionConfigs/TransitionPresets"
 
 const StoryContainer = (props: StoryContainerProps) => {
   const isMounted = useRef(false);
@@ -34,7 +41,10 @@ const StoryContainer = (props: StoryContainerProps) => {
   const opacity = useRef(new Animated.Value(1)).current;
   const scale = useRef(new Animated.Value(1)).current;
 
-  const translationYvsX = Animated.multiply(translationY, Animated.divide(translationX, Animated.add(translationY,0.0000001)).interpolate({
+  const translationYvsX = Animated.multiply(
+    translationY, 
+    Animated.divide(translationX, Animated.add(translationY,0.0000001))
+    .interpolate({
     inputRange: [-SCREEN_WIDTH, -1, -0.60, 0, 0.60, 1, SCREEN_WIDTH],
     outputRange: [0,             0,  0,    1, 0,    0, 0],
   }))
@@ -153,7 +163,10 @@ const StoryContainer = (props: StoryContainerProps) => {
         //End pause
         console.log('setStopProgress false');
         setStopProgress(false);
-        if((event.nativeEvent.translationY/event.nativeEvent.translationX > 0.6 || event.nativeEvent.translationY/event.nativeEvent.translationX < -0.6) && Math.abs(event.nativeEvent.translationY)>50 ){
+        if((event.nativeEvent.translationY/event.nativeEvent.translationX > 0.6 
+          || event.nativeEvent.translationY/event.nativeEvent.translationX < -0.6) 
+          && Math.abs(event.nativeEvent.translationY)>50 )
+          {
           if(event.nativeEvent.translationY>0){
             close(1);
           }else{

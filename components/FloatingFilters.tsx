@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-import { Dimensions, StyleSheet, Animated, StyleProp, Image , Text, View } from 'react-native';
+import { Dimensions, StyleSheet, Animated, Text, View } from 'react-native';
 import { headerIndex } from '../types/interfaces';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height;

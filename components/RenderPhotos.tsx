@@ -1,4 +1,4 @@
-import React, {useEffect, createRef, useState, useRef} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import {
   Animated,
   Dimensions,
@@ -81,12 +81,19 @@ const RenderPhotos: React.FC<Props> = (props) => {
   const [dataProvider, setDataProvider] = useState<DataProvider>(new DataProvider((r1, r2) => {
     return r1 !== r2;
   }));
-  const [layoutProvider, setLayoutProvider] = useState<any>(LayoutUtil.getLayoutProvider(2, 'day', props.photos.headerIndexes, headerHeight, props.photos.layout, props.storiesHeight, props.HEADER_HEIGHT));
+  const [layoutProvider, setLayoutProvider] = useState<any>(LayoutUtil.getLayoutProvider(
+    2, 
+    'day', 
+    props.photos.headerIndexes, 
+    headerHeight, 
+    props.photos.layout, 
+    props.storiesHeight, 
+    props.HEADER_HEIGHT)
+    );
   const [viewLoaded, setViewLoaded] = useState<boolean>(false);
   const scrollRef:any = useRef();
-  const scrollRefExternal:any = useRef();
   const [lastScrollOffset, setLastScrollOffset] = useState<number>(0);
-  const [layoutHeight, setLayoutHeight] = useState<number>(99999999999999);
+  const [layoutHeight] = useState<number>(99999999999999);
 
   const [startScroll, setStartScroll] = useState<boolean>(false);
   const [endScroll, setEndScroll] = useState<boolean>(false);
@@ -109,8 +116,16 @@ const RenderPhotos: React.FC<Props> = (props) => {
   },[props.photos]);
 
   useEffect(()=>{
-    setLayoutProvider(LayoutUtil.getLayoutProvider(props.numColumns, props.sortCondition, props.photos.headerIndexes, headerHeight, props.photos.layout, props.storiesHeight, props.HEADER_HEIGHT));
-  },[props.numColumns, props.sortCondition]);
+    setLayoutProvider(LayoutUtil.getLayoutProvider(
+      props.numColumns, 
+      props.sortCondition, 
+      props.photos.headerIndexes, 
+      headerHeight, 
+      props.photos.layout, 
+      props.storiesHeight, 
+      props.HEADER_HEIGHT));
+  },[props.numColumns, props.sortCondition]
+  );
 
   const renderFooter = () => {
     //Second view makes sure we don't unnecessarily change height of the list on this event. That might cause indicator to remain invisible
@@ -401,10 +416,4 @@ const RenderPhotos: React.FC<Props> = (props) => {
     </Animated.View>
   );
 };
-const styles = StyleSheet.create({
-  header: {
-    fontSize: 18,
-    backgroundColor: '#fff',
-  },
-});
 export default RenderPhotos;

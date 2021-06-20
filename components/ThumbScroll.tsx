@@ -144,52 +144,56 @@ const ThumbScroll: React.FC<Props> = (props) => {
 
     
     return (
-                        <Animated.View style={[styles.scrollIndicatorContainer,  {height: props.indicatorHeight,}]}>
-                            <PanGestureHandler
-                                ref={panRef_glide}
-                                onGestureEvent={_onDragPanGestureEvent}
-                                onHandlerStateChange={_onDragPanHandlerStateChange}
-                                maxPointers={1}
-                                minPointers={1}
-                                shouldCancelWhenOutside={false}
-                                //hitSlop={{ right: 0, width:140 }}
-                                avgTouches={false}
-                                enableTrackpadTwoFingerGesture={false}
-                            >
-                            <Animated.View 
-                                style={[
-                                    styles.scrollIndicator,
-                                    { 
-                                        height: props.indicatorHeight,
-                                        zIndex:5,
-                                        transform: [{
-                                            translateY: Animated.multiply(props.scrollY, Animated.divide((SCREEN_HEIGHT-props.indicatorHeight), Animated.subtract(props.layoutHeight, SCREEN_HEIGHT))).interpolate({
-                                                inputRange: [0, SCREEN_HEIGHT-props.indicatorHeight],
-                                                outputRange: [0, SCREEN_HEIGHT-props.indicatorHeight],
-                                                extrapolateRight: 'clamp',
-                                                extrapolateLeft: 'clamp',
-                                            }),
-                                        }],
-                                        opacity: fadeAnim,
-                                    },
-                                    props.scrollIndicatorStyle,
-                                ]}
-                            >
-                                <View style={styles.scrollBar}>
-                                    <Image
-                                        source={ scrollImage} 
-                                        style={[styles.image]} 
-                                        resizeMethod='resize'
-                                        resizeMode='stretch'
-                                    />
-                                    <Animated.View style={[styles.scrollBarText, {opacity: props.floatingFiltersOpacity}]}>
-                                        <Text style={{color: 'grey'}}>{timestampToDate(props.currentImageTimestamp, ['month']).month}</Text>
-                                    </Animated.View>
-                                
-                                </View>
-                            </Animated.View>
-                            </PanGestureHandler>
-                        </Animated.View>
+        <Animated.View style={[styles.scrollIndicatorContainer,  {height: props.indicatorHeight,}]}>
+            <PanGestureHandler
+                ref={panRef_glide}
+                onGestureEvent={_onDragPanGestureEvent}
+                onHandlerStateChange={_onDragPanHandlerStateChange}
+                maxPointers={1}
+                minPointers={1}
+                shouldCancelWhenOutside={false}
+                //hitSlop={{ right: 0, width:140 }}
+                avgTouches={false}
+                enableTrackpadTwoFingerGesture={false}
+            >
+            <Animated.View 
+                style={[
+                    styles.scrollIndicator,
+                    { 
+                        height: props.indicatorHeight,
+                        zIndex:5,
+                        transform: [{
+                            translateY: Animated.multiply(
+                                props.scrollY, 
+                                Animated.divide((SCREEN_HEIGHT-props.indicatorHeight), 
+                                Animated.subtract(props.layoutHeight, SCREEN_HEIGHT))
+                                ).interpolate({
+                                inputRange: [0, SCREEN_HEIGHT-props.indicatorHeight],
+                                outputRange: [0, SCREEN_HEIGHT-props.indicatorHeight],
+                                extrapolateRight: 'clamp',
+                                extrapolateLeft: 'clamp',
+                            }),
+                        }],
+                        opacity: fadeAnim,
+                    },
+                    props.scrollIndicatorStyle,
+                ]}
+            >
+                <View style={styles.scrollBar}>
+                    <Image
+                        source={ scrollImage} 
+                        style={[styles.image]} 
+                        resizeMethod='resize'
+                        resizeMode='stretch'
+                    />
+                    <Animated.View style={[styles.scrollBarText, {opacity: props.floatingFiltersOpacity}]}>
+                        <Text style={{color: 'grey'}}>{timestampToDate(props.currentImageTimestamp, ['month']).month}</Text>
+                    </Animated.View>
+                
+                </View>
+            </Animated.View>
+            </PanGestureHandler>
+        </Animated.View>
 
     );
 };

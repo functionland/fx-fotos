@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {Dimensions, Image } from 'react-native';
-import { Asset } from 'expo-media-library';
 import ImageZoom from 'react-native-image-pan-zoom';
 import { ImageSource } from "../@types";
 

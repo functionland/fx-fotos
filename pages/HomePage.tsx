@@ -9,7 +9,6 @@ interface Props {
 
 const HomePage: React.FC<Props> = (props) => {
   const SCREEN_WIDTH = useWindowDimensions().width;
-  const SCREEN_HEIGHT = useWindowDimensions().height;
 
   return (
     <SafeAreaView style={styles.SafeAreaView}>

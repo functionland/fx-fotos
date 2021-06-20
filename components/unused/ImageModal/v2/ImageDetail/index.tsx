@@ -371,7 +371,6 @@ export default class ImageDetail extends React.Component<Props> {
         const moveDistance = Math.sqrt(
           gestureState.dx * gestureState.dx + gestureState.dy * gestureState.dy,
         );
-        const { locationX, locationY, pageX, pageY } = evt.nativeEvent;
 
         if (evt.nativeEvent.changedTouches.length === 1 && moveDistance < CLICK_DISTANCE) {
           

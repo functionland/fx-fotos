@@ -1,6 +1,6 @@
-import React, { useEffect, useState, CSSProperties } from "react";
+import React, { useState } from "react";
 import { StoryViewProps } from "../utils/interfaceHelper";
-import { View, Image, StyleSheet, Text, SafeAreaView, Dimensions } from "react-native"; 
+import { View, StyleSheet, SafeAreaView, Dimensions } from "react-native"; 
 import ProgressiveImage from "./ProgressiveImage"; 
 
 function StoryView(props: StoryViewProps) {
