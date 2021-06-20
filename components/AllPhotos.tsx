@@ -74,14 +74,15 @@ const AllPhotos: React.FC<Props> = (props) => {
   }
 
   Reanimated.useAnimatedReaction(() => {
-    return (selectedAssets.value.length*7 + lastSelectedAssetIndex.value*3 + lastSelectedAssetAction.value*1);
+    return ([selectedAssets.value.length, lastSelectedAssetIndex.value, lastSelectedAssetAction.value]);
   }, (result, previous) => {
     if (result !== previous) {
-      actionBarOpacity.value = result;
       if(selectedAssets.value.length>0){
         props.headerShown.value = 0;
+        actionBarOpacity.value = 1;
       }else{
         props.headerShown.value = 1;
+        actionBarOpacity.value = 0;
       }
       Reanimated.runOnJS(_setSelectedValueRef)(selectedAssets.value);
     }
