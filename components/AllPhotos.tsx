@@ -95,6 +95,16 @@ const AllPhotos: React.FC<Props> = (props) => {
     }));
   }
 
+  const _goBack = () => console.log('Went back');
+
+  const _handleDelete = () => console.log('Deleting');
+
+  const _handleShare = () => console.log('Sharing');
+
+  const _handleAddToAlbum = () => console.log('Adding');
+
+  const _handleMore = () => console.log('Shown more');
+
 
   
   return (
@@ -213,6 +223,28 @@ const AllPhotos: React.FC<Props> = (props) => {
       />
       <ActionBar
         actionBarOpacity={actionBarOpacity}
+        backAction={_goBack}
+        actions={[
+          {
+            icon: "share-variant",
+            onPress: _handleShare,
+            color: "#007AFF",
+            name: "share"
+          },
+          {
+            icon: "plus",
+            onPress: _handleAddToAlbum,
+            color: "#007AFF",
+            name: "add"
+          },
+          {
+            icon: "trash-can-outline",
+            onPress: _handleDelete,
+            color: "#007AFF",
+            name: "delete"
+          }
+        ]}
+        moreActions={[]}
       />
     </View>
     ):(
