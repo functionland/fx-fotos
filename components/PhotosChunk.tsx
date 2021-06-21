@@ -28,10 +28,10 @@ interface Props {
   animatedSingleMediaIndex: Reanimated.SharedValue<number>;
   singleImageWidth: Reanimated.SharedValue<number>;
   singleImageHeight: Reanimated.SharedValue<number>;
-  selectedAssets: Reanimated.SharedValue<number[]>
+  selectedAssets: Reanimated.SharedValue<string[]>
   imageWidth: number;
   imageHeight: number;
-  lastSelectedAssetIndex: Reanimated.SharedValue<number>;
+  lastSelectedAssetId: Reanimated.SharedValue<string>;
   lastSelectedAssetAction: Reanimated.SharedValue<number>;
 }
 
@@ -46,10 +46,10 @@ const PhotosChunk: React.FC<Props> = (props) => {
   const opacityT = useSharedValue(0);
 
   const selectedOpacity = Reanimated.useDerivedValue(() => {
-    let index = props.selectedAssets.value.findIndex(x=>x===props.index);
+    let index = props.selectedAssets.value.findIndex(x=>x===props.photo.id);
     //we need to add a dummy condition on the props.lastSelectedAssetAction.value and props.lastSelectedAssetIndex.value so that useDerivedValue does not ignore updating
-    return (index>-1 && props.lastSelectedAssetIndex.value>-1 && props.lastSelectedAssetAction.value>-1)?1:0;
-  }, [props.lastSelectedAssetAction, props.lastSelectedAssetIndex]);
+    return (index>-1 && props.lastSelectedAssetId.value!=='' && props.lastSelectedAssetAction.value>-1)?1:0;
+  }, [props.lastSelectedAssetAction, props.lastSelectedAssetId]);
 
   const handleOnLoad = () => {
     if (isIOS && imageRef) {
@@ -86,14 +86,14 @@ const PhotosChunk: React.FC<Props> = (props) => {
         props.headerShown.value = 0;
         props.modalShown.value = 1;
       }else{
-        let index = props.selectedAssets.value.findIndex(x=>x===props.index);
-        props.lastSelectedAssetIndex.value = props.index;
+        let index = props.selectedAssets.value.findIndex(x=>x===props.photo.id);
+        props.lastSelectedAssetId.value = props.photo.id;
         if(index > -1){
           props.selectedAssets.value.splice(index, 1);
           props.lastSelectedAssetAction.value = 0;
 
         }else{
-          props.selectedAssets.value.push(props.index);
+          props.selectedAssets.value.push(props.photo.id);
           props.lastSelectedAssetAction.value = 1;
         }
       }
@@ -124,13 +124,13 @@ const PhotosChunk: React.FC<Props> = (props) => {
     },
     onActive: (event)=>{
       console.log('onLongActive');
-      let index = props.selectedAssets.value.findIndex(x=>x===props.index);
-      props.lastSelectedAssetIndex.value = props.index;
+      let index = props.selectedAssets.value.findIndex(x=>x===props.photo.id);
+      props.lastSelectedAssetId.value = props.photo.id;
       if(index > -1){
         props.selectedAssets.value.splice(index, 1);
         props.lastSelectedAssetAction.value = 0;
       }else{
-        props.selectedAssets.value.push(props.index);
+        props.selectedAssets.value.push(props.photo.id);
         props.lastSelectedAssetAction.value = 1;
       }
     },
@@ -213,7 +213,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
     }
   }
   
-  if(props.photo.sortCondition === props.sortCondition || props.photo.sortCondition === ""){
+  if((props.photo.sortCondition === props.sortCondition || props.photo.sortCondition === "") && (props.photo.deleted !== true)){
     if(typeof props.photo.value === 'string'){
       return (
         <View style={{flex: 1, width: SCREEN_WIDTH,}}>

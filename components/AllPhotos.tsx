@@ -35,11 +35,11 @@ interface Props {
 }
 
 const AllPhotos: React.FC<Props> = (props) => {
-  const selectedAssets:Reanimated.SharedValue<number[]> = useSharedValue([]);
+  const selectedAssets:Reanimated.SharedValue<string[]> = useSharedValue([]);
   // Since animated arrays are not natively supported and updates do not propagate, we need to ad
   // the two below natively supported numbers to detect changes in the array
   // and change them whenever selectedAssets change and useDerivedValue on those to detect changes
-  const lastSelectedAssetIndex = useSharedValue(0);
+  const lastSelectedAssetId = useSharedValue('');
   const lastSelectedAssetAction = useSharedValue(0); //0:unselect, 1:select
 
   const [preparedMedia, setPreparedMedia] = useRecoilState(preparedMediaState);
@@ -68,13 +68,13 @@ const AllPhotos: React.FC<Props> = (props) => {
   const singleImageHeight = useSharedValue(SCREEN_HEIGHT);
   const actionBarOpacity = useSharedValue(0);
 
-  const selectedAssetsRef = useRef<number[]>([]);
-  const _setSelectedValueRef = (selected:number[]) => {
+  const selectedAssetsRef = useRef<string[]>([]);
+  const _setSelectedValueRef = (selected:string[]) => {
     selectedAssetsRef.current = selected;
   }
 
   Reanimated.useAnimatedReaction(() => {
-    return ([selectedAssets.value.length, lastSelectedAssetIndex.value, lastSelectedAssetAction.value]);
+    return ([selectedAssets.value.length, lastSelectedAssetId.value, lastSelectedAssetAction.value]);
   }, (result, previous) => {
     if (result !== previous) {
       if(selectedAssets.value.length>0){
@@ -86,32 +86,34 @@ const AllPhotos: React.FC<Props> = (props) => {
       }
       Reanimated.runOnJS(_setSelectedValueRef)(selectedAssets.value);
     }
-  }, [lastSelectedAssetIndex,lastSelectedAssetAction, modalShown]);
+  }, [lastSelectedAssetId,lastSelectedAssetAction, modalShown]);
 
-  
-  const selectMedia = (media:Asset, selected:boolean) => {
-    let layout:layout[] = preparedMedia.layout;
-    let index = layout.findIndex(x=>(typeof x.value!=='string' && x.value.id===media.id));
-    layout[index] = {
-      ...layout[index],
-      selected: selected,
-    }
-    setPreparedMedia(oldPreparedMedia =>  ({
-      ...oldPreparedMedia,
-      'layout':layout
-    }));
-  }
 
   const _goBack = () => {
     console.log('Went back');
     selectedAssets.value = [];
-    lastSelectedAssetIndex.value = -1;
+    lastSelectedAssetId.value = '';
     lastSelectedAssetAction.value = 0;
   }
 
   const _handleDelete = () => {
     console.log('Deleting');
     console.log(selectedAssetsRef.current);
+    let layout:layout[] = [...preparedMedia.layout];
+    for(let i=0; i<selectedAssetsRef.current.length;i++){
+      let index = layout.findIndex(x=>(x.id===selectedAssetsRef.current[i]));
+      layout[index] = {
+        ...layout[index],
+        deleted: true,
+        sortCondition: "deleted",
+      }
+      //layout.splice(index, 1);
+    }
+    setPreparedMedia(oldPreparedMedia =>  ({
+      ...oldPreparedMedia,
+      'layout':layout
+    }));
+    _goBack();
   }
 
   const _handleShare = () => console.log('Sharing');
@@ -158,7 +160,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         singleImageWidth={singleImageWidth}
         singleImageHeight={singleImageHeight}
         selectedAssets={selectedAssets}
-        lastSelectedAssetIndex={lastSelectedAssetIndex}
+        lastSelectedAssetId={lastSelectedAssetId}
         lastSelectedAssetAction={lastSelectedAssetAction}
       />
       <RenderPhotos
@@ -188,7 +190,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         singleImageWidth={singleImageWidth}
         singleImageHeight={singleImageHeight}
         selectedAssets={selectedAssets}
-        lastSelectedAssetIndex={lastSelectedAssetIndex}
+        lastSelectedAssetId={lastSelectedAssetId}
         lastSelectedAssetAction={lastSelectedAssetAction}
       />
       <RenderPhotos
@@ -218,7 +220,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         singleImageWidth={singleImageWidth}
         singleImageHeight={singleImageHeight}
         selectedAssets={selectedAssets}
-        lastSelectedAssetIndex={lastSelectedAssetIndex}
+        lastSelectedAssetId={lastSelectedAssetId}
         lastSelectedAssetAction={lastSelectedAssetAction}
       />
       <SingleMedia 
