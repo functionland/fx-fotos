@@ -33,17 +33,17 @@ interface Props {
   imageHeight: number;
   lastSelectedAssetId: Reanimated.SharedValue<string>;
   lastSelectedAssetAction: Reanimated.SharedValue<number>;
+  SCREEN_HEIGHT: number;
+  SCREEN_WIDTH: number;
 }
 
 
 const PhotosChunk: React.FC<Props> = (props) => {
   const loading = false;
-  const SCREEN_WIDTH = useWindowDimensions().width;
-  const SCREEN_HEIGHT = useWindowDimensions().height;
+  const SCREEN_WIDTH = props.SCREEN_WIDTH;
+  const SCREEN_HEIGHT = props.SCREEN_WIDTH;
   const imageRef = useRef<Image | null | undefined>();
   const animatedTempScale = useSharedValue(1);
-
-  const opacityT = useSharedValue(0);
 
   const selectedOpacity = Reanimated.useDerivedValue(() => {
     let index = props.selectedAssets.value.findIndex(x=>x===props.photo.id);

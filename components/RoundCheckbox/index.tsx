@@ -51,12 +51,6 @@ const RoundCheckbox: React.FC<Props> = (props) => {
       };
     });
 
-    const bothStyles = {
-      width: size,
-      height: size,
-      borderRadius: size / 2,
-    };
-
     const _onPress = () => {
       //props.onValueChange(!props.checked.value);
     };

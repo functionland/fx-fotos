@@ -86,6 +86,7 @@ class ExternalScrollView extends BaseScrollView {
         ref={(this.props as any).scrollRefExternal}
         scrollEventThrottle={16}
         nestedScrollEnabled = {true}
+        removeClippedSubviews={true}
         //onScroll={(this.props as any)._onScrollExternal}
         //onScroll={Reanimated.event([(this.props as any).animatedEvent], {listener: this.props.onScroll, useNativeDriver: true})}
       >
@@ -325,6 +326,8 @@ const RenderPhotos: React.FC<Props> = (props) => {
         singleImageHeight={props.singleImageHeight}
         imageWidth={(typeof data.value !== 'string')?data.value.width:0}
         imageHeight={(typeof data.value !== 'string')?data.value.height:0}
+        SCREEN_HEIGHT={SCREEN_HEIGHT}
+        SCREEN_WIDTH={SCREEN_WIDTH}
       />
     );
     }
