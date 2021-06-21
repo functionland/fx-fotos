@@ -1,21 +1,16 @@
 import React, {useEffect, useState, useRef, MutableRefObject} from 'react';
-import {Animated, Dimensions, View, Systrace, Text} from 'react-native';
+import {Animated, View, useWindowDimensions, Text} from 'react-native';
 import {FlatSection, story, layout} from '../types/interfaces';
 import RenderPhotos from './RenderPhotos';
 import SingleMedia from './SingleMedia';
 import StoryHolder from './StoryHolder';
 import ActionBar from './ActionBar';
 
-import { Asset } from 'expo-media-library';
-import {prepareLayout,} from '../utils/functions';
 import {
   useRecoilState,
 } from 'recoil';
 import {preparedMediaState,} from '../states';
 import { default as Reanimated, useSharedValue } from 'react-native-reanimated';
-
-const SCREEN_WIDTH = Dimensions.get('window').width;
-const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 interface Props {
   scale: Reanimated.SharedValue<number>;
@@ -32,6 +27,8 @@ interface Props {
   HEADER_HEIGHT: number;
   FOOTER_HEIGHT: number;
   headerShown: Reanimated.SharedValue<number>;
+  SCREEN_HEIGHT: number;
+  SCREEN_WIDTH: number;
 }
 
 const AllPhotos: React.FC<Props> = (props) => {
@@ -64,8 +61,8 @@ const AllPhotos: React.FC<Props> = (props) => {
   const animatedImagePositionX = useSharedValue(0);
   const animatedImagePositionY = useSharedValue(0);
   const animatedSingleMediaIndex = useSharedValue(-1);
-  const singleImageWidth = useSharedValue(SCREEN_WIDTH);
-  const singleImageHeight = useSharedValue(SCREEN_HEIGHT);
+  const singleImageWidth = useSharedValue(props.SCREEN_WIDTH);
+  const singleImageHeight = useSharedValue(props.SCREEN_HEIGHT);
   const actionBarOpacity = useSharedValue(0);
 
   const selectedAssetsRef = useRef<string[]>([]);
@@ -129,15 +126,15 @@ const AllPhotos: React.FC<Props> = (props) => {
     <View
       style={{
         flex: 1,
-        width: SCREEN_WIDTH,
+        width: props.SCREEN_WIDTH,
         position: 'relative',
       }}
     >
       <RenderPhotos
         photos={preparedMedia}
         loading={props.loading}
-        maxWidth={SCREEN_WIDTH*2}
-        minWidth={SCREEN_WIDTH/2}
+        maxWidth={props.SCREEN_WIDTH*2}
+        minWidth={props.SCREEN_WIDTH/2}
         numColumns={2}
         sortCondition="day"
         scale={props.scale}
@@ -162,12 +159,14 @@ const AllPhotos: React.FC<Props> = (props) => {
         selectedAssets={selectedAssets}
         lastSelectedAssetId={lastSelectedAssetId}
         lastSelectedAssetAction={lastSelectedAssetAction}
+        SCREEN_HEIGHT={props.SCREEN_HEIGHT}
+        SCREEN_WIDTH={props.SCREEN_WIDTH}
       />
       <RenderPhotos
         photos={preparedMedia}
         loading={props.loading}
-        maxWidth={SCREEN_WIDTH*2}
-        minWidth={SCREEN_WIDTH/2}
+        maxWidth={props.SCREEN_WIDTH*2}
+        minWidth={props.SCREEN_WIDTH/2}
         numColumns={3}
         sortCondition="day"
         numColumnsAnimated={props.numColumnsAnimated}
@@ -192,12 +191,14 @@ const AllPhotos: React.FC<Props> = (props) => {
         selectedAssets={selectedAssets}
         lastSelectedAssetId={lastSelectedAssetId}
         lastSelectedAssetAction={lastSelectedAssetAction}
+        SCREEN_HEIGHT={props.SCREEN_HEIGHT}
+        SCREEN_WIDTH={props.SCREEN_WIDTH}
       />
       <RenderPhotos
         photos={preparedMedia}
         loading={props.loading}
-        maxWidth={SCREEN_WIDTH*2}
-        minWidth={SCREEN_WIDTH/2}
+        maxWidth={props.SCREEN_WIDTH*2}
+        minWidth={props.SCREEN_WIDTH/2}
         numColumns={4}
         sortCondition="month"
         numColumnsAnimated={props.numColumnsAnimated}
@@ -222,6 +223,8 @@ const AllPhotos: React.FC<Props> = (props) => {
         selectedAssets={selectedAssets}
         lastSelectedAssetId={lastSelectedAssetId}
         lastSelectedAssetAction={lastSelectedAssetAction}
+        SCREEN_HEIGHT={props.SCREEN_HEIGHT}
+        SCREEN_WIDTH={props.SCREEN_WIDTH}
       />
       <SingleMedia 
         modalShown={modalShown}

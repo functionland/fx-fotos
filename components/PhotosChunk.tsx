@@ -40,8 +40,6 @@ interface Props {
 
 const PhotosChunk: React.FC<Props> = (props) => {
   const loading = false;
-  const SCREEN_WIDTH = props.SCREEN_WIDTH;
-  const SCREEN_HEIGHT = props.SCREEN_WIDTH;
   const imageRef = useRef<Image | null | undefined>();
   const animatedTempScale = useSharedValue(1);
 
@@ -71,13 +69,13 @@ const PhotosChunk: React.FC<Props> = (props) => {
         props.animatedImagePositionX.value = event.absoluteX - event.x;
         props.animatedSingleMediaIndex.value = props.index;
         const ratio = props.imageHeight/props.imageWidth;
-        const screenRatio = SCREEN_HEIGHT/SCREEN_WIDTH;
-        let height = SCREEN_HEIGHT;
-        let width = SCREEN_WIDTH;
+        const screenRatio = props.SCREEN_HEIGHT/props.SCREEN_WIDTH;
+        let height = props.SCREEN_HEIGHT;
+        let width = props.SCREEN_WIDTH;
         if(ratio > screenRatio){
-          width = SCREEN_HEIGHT/screenRatio;
+          width = props.SCREEN_HEIGHT/screenRatio;
         }else{
-          height = SCREEN_WIDTH*screenRatio;
+          height = props.SCREEN_WIDTH*screenRatio;
         }
         props.singleImageHeight.value = height;
         props.singleImageWidth.value = width;
@@ -174,8 +172,8 @@ const PhotosChunk: React.FC<Props> = (props) => {
               source={{uri: media.uri}}
               // eslint-disable-next-line react-native/no-inline-styles
               style={{
-                height: (SCREEN_WIDTH / props.numCol) - 2.5,
-                width: (SCREEN_WIDTH / props.numCol) - 2.5,
+                height: (props.SCREEN_WIDTH / props.numCol) - 2.5,
+                width: (props.SCREEN_WIDTH / props.numCol) - 2.5,
                 backgroundColor: loading ? 'grey' : 'white',
                 margin: 2.5,
                 zIndex: 4,
@@ -200,8 +198,8 @@ const PhotosChunk: React.FC<Props> = (props) => {
               source={{uri: media.uri}}
               // eslint-disable-next-line react-native/no-inline-styles
               style={{
-                height: (SCREEN_WIDTH / props.numCol) - 2.5,
-                width: (SCREEN_WIDTH / props.numCol) - 2.5,
+                height: (props.SCREEN_WIDTH / props.numCol) - 2.5,
+                width: (props.SCREEN_WIDTH / props.numCol) - 2.5,
                 backgroundColor: 'grey',
                 margin: 2.5,
                 zIndex:4,
@@ -216,7 +214,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
   if((props.photo.sortCondition === props.sortCondition || props.photo.sortCondition === "") && (props.photo.deleted !== true)){
     if(typeof props.photo.value === 'string'){
       return (
-        <View style={{flex: 1, width: SCREEN_WIDTH,}}>
+        <View style={{flex: 1, width: props.SCREEN_WIDTH,}}>
           <Text>{props.photo.value}</Text>
         </View>
       )
@@ -224,8 +222,8 @@ const PhotosChunk: React.FC<Props> = (props) => {
       return (
         <Reanimated.View style={[{
           zIndex:4, 
-          width: SCREEN_WIDTH/props.numCol,
-          height: SCREEN_WIDTH/props.numCol,
+          width: props.SCREEN_WIDTH/props.numCol,
+          height: props.SCREEN_WIDTH/props.numCol,
         }, animatedStyle]}>
         <LongPressGestureHandler
           ref={longTapRef}
@@ -234,8 +232,8 @@ const PhotosChunk: React.FC<Props> = (props) => {
         >
           <Reanimated.View 
             style={{
-              width: SCREEN_WIDTH/props.numCol,
-              height: SCREEN_WIDTH/props.numCol,
+              width: props.SCREEN_WIDTH/props.numCol,
+              height: props.SCREEN_WIDTH/props.numCol,
               zIndex:5
             }}>
             <TapGestureHandler
@@ -244,8 +242,8 @@ const PhotosChunk: React.FC<Props> = (props) => {
             >
               <Reanimated.View
                 style={{
-                  height: (SCREEN_WIDTH / props.numCol),
-                  width: (SCREEN_WIDTH / props.numCol),
+                  height: (props.SCREEN_WIDTH / props.numCol),
+                  width: (props.SCREEN_WIDTH / props.numCol),
                 }}
               >
                  {createThumbnail(props.photo.value)}

@@ -34,9 +34,6 @@ import {
   layoutProviderState,
 } from '../states';
 
-const SCREEN_WIDTH = Dimensions.get('window').width;
-const SCREEN_HEIGHT = Dimensions.get('window').height;
-
 class ItemAnimator implements BaseItemAnimator {
   animateWillMount(atX:number, atY:number, itemIndex:number) {
     console.log(['animateWillMount',atX, atY, itemIndex]);
@@ -124,6 +121,8 @@ interface Props {
   singleImageHeight: Reanimated.SharedValue<number>;
   lastSelectedAssetId: Reanimated.SharedValue<string>;
   lastSelectedAssetAction: Reanimated.SharedValue<number>;
+  SCREEN_HEIGHT: number;
+  SCREEN_WIDTH: number;
 }
 
 const RenderPhotos: React.FC<Props> = (props) => {
@@ -188,16 +187,16 @@ const RenderPhotos: React.FC<Props> = (props) => {
             translateX: (
               (
                 (
-                  scale*SCREEN_WIDTH)- 
-                SCREEN_WIDTH)
+                  scale*props.SCREEN_WIDTH)- 
+                  props.SCREEN_WIDTH)
               / (2*scale))
           },
           {
             translateY: (
               (
                 (
-                  scale*(SCREEN_HEIGHT-(StatusBar.currentHeight || 0))
-                ) - (SCREEN_HEIGHT-(StatusBar.currentHeight || 0))
+                  scale*(props.SCREEN_HEIGHT-(StatusBar.currentHeight || 0))
+                ) - (props.SCREEN_HEIGHT-(StatusBar.currentHeight || 0))
               )
               / (2*scale))
           }
@@ -326,8 +325,8 @@ const RenderPhotos: React.FC<Props> = (props) => {
         singleImageHeight={props.singleImageHeight}
         imageWidth={(typeof data.value !== 'string')?data.value.width:0}
         imageHeight={(typeof data.value !== 'string')?data.value.height:0}
-        SCREEN_HEIGHT={SCREEN_HEIGHT}
-        SCREEN_WIDTH={SCREEN_WIDTH}
+        SCREEN_HEIGHT={props.SCREEN_HEIGHT}
+        SCREEN_WIDTH={props.SCREEN_WIDTH}
       />
     );
     }
@@ -417,8 +416,8 @@ const RenderPhotos: React.FC<Props> = (props) => {
       // eslint-disable-next-line react-native/no-inline-styles
       style={[animatedStyle, {
         flex: 1,
-        width: SCREEN_WIDTH,
-        height: SCREEN_HEIGHT,
+        width: props.SCREEN_WIDTH,
+        height: props.SCREEN_HEIGHT,
         position: 'absolute',
         top: 0,
         bottom: 0,
@@ -431,8 +430,8 @@ const RenderPhotos: React.FC<Props> = (props) => {
         externalScrollView={ExternalScrollView}
         style={{
           flex: 1,
-          width: SCREEN_WIDTH,
-          height: SCREEN_HEIGHT,
+          width: props.SCREEN_WIDTH,
+          height: props.SCREEN_HEIGHT,
           position: 'absolute',
           top: 0,
           bottom: 0,
@@ -509,8 +508,8 @@ const RenderPhotos: React.FC<Props> = (props) => {
       // eslint-disable-next-line react-native/no-inline-styles
       style={{
         flex: 1,
-        width: SCREEN_WIDTH,
-        height: SCREEN_HEIGHT,
+        width: props.SCREEN_WIDTH,
+        height: props.SCREEN_HEIGHT,
         position: 'absolute',
         top: 0,
         bottom: 0,

@@ -164,6 +164,8 @@ const PhotosContainer: React.FC<Props> = (props) => {
               HEADER_HEIGHT={props.HEADER_HEIGHT}
               FOOTER_HEIGHT={props.FOOTER_HEIGHT}
               headerShown={props.headerShown}
+              SCREEN_HEIGHT={SCREEN_HEIGHT}
+              SCREEN_WIDTH={SCREEN_WIDTH}
             />
           </PinchZoom>
     </View>
