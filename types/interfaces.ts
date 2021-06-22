@@ -82,6 +82,6 @@ export interface Dimension {
 }
 
 
-export interface layout {value:Asset|string; sortCondition:'day'|'month'|'', index: number, selected:boolean};
+export interface layout {value:Asset|string; sortCondition:'day'|'month'|''|'deleted', index: number, deleted:boolean, id:string};
 
 export interface headerIndex {header:string;index:number;count:number;yearStart:string; sortCondition:'day'|'month'; timestamp: number;};

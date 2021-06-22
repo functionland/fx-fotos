@@ -1,7 +1,7 @@
 import * as MediaLibrary from 'expo-media-library';
 import {useNavigation} from '@react-navigation/native';
 import React, {useEffect, useRef, useState} from 'react';
-import {Animated, View, useWindowDimensions, } from 'react-native';
+import {Animated, View, useWindowDimensions, Platform, UIManager, LayoutAnimation} from 'react-native';
 import {getUserBoxMedia} from '../utils/APICalls';
 import {getStorageMedia} from '../utils/functions';
 import {storagePermission} from '../utils/permissions';
@@ -11,7 +11,7 @@ import {prepareLayout,} from '../utils/functions';
 import {
   useRecoilState,
 } from 'recoil';
-import {photosState, numColumnsState, storiesState, preparedMediaState, mediasState} from '../states';
+import {photosState, dataProviderState, storiesState, preparedMediaState, mediasState} from '../states';
 import {default as Reanimated,} from 'react-native-reanimated';
 interface Props {
   scrollY2: Reanimated.SharedValue<number>;
@@ -24,13 +24,18 @@ interface Props {
   headerShown: Reanimated.SharedValue<number>;
 }
 
-
+if (
+  Platform.OS === "android" &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 const PhotosContainer: React.FC<Props> = (props) => {
   const SCREEN_WIDTH = useWindowDimensions().width;
   const SCREEN_HEIGHT = useWindowDimensions().height;
 
-  const initialPhotoNumber:number = 5000;
+  const initialPhotoNumber:number = 50000;
   const storiesHeight:number = 1.618*SCREEN_WIDTH/3;
 
   const [permission, setPermission] = useState<boolean>();
@@ -112,6 +117,8 @@ const PhotosContainer: React.FC<Props> = (props) => {
     }
   }, [storagePhotos]);
 
+  
+  const [dataProvider, setDataProvider] = useRecoilState(dataProviderState);
   useEffect(()=>{
     if(photos?.length){
       let prepared = prepareLayout(photos,['day', 'month'], preparedMedia.lastTimestamp, medias.length);
@@ -123,6 +130,11 @@ const PhotosContainer: React.FC<Props> = (props) => {
         'stories': oldPreparedMedia.stories.concat(prepared.stories),
         'lastTimestamp': prepared.lastTimestamp
       }));
+      const getStableId = (index:number) => {
+        return [...preparedMedia.layout, ...prepared.layout][index].id;
+      }
+      setDataProvider(dataProvider.cloneWithRows(dataProvider.getAllData().concat(prepared.layout)));
+
       //setPreparedMedia(prepared);
       
       let onlyMedias:any[] = prepared.layout.filter(item => typeof item.value !== 'string').map((item)=>{return item.value});
@@ -130,6 +142,19 @@ const PhotosContainer: React.FC<Props> = (props) => {
       setStories(oldStories=>oldStories.concat(prepared.stories));
     }
   },[photos]);
+  const removeElements = (elementIndex:string[]) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setDataProvider(dataProvider.cloneWithRows(
+      dataProvider.getAllData().map(
+        (x, index)=>{
+          if(elementIndex.includes(x.id)){
+            return {...x, deleted:true, sortCondition: "deleted"}
+          }
+          return x;
+        }
+      )
+    ));
+  }
 
   return photos ? (
     <View
@@ -150,6 +175,7 @@ const PhotosContainer: React.FC<Props> = (props) => {
             velocity={velocity}
           >
             <AllPhotos
+              removeElements={removeElements}
               scale={props.scale}
               numColumnsAnimated={props.numColumnsAnimated}
               scrollY2={props.scrollY2} 
@@ -164,6 +190,8 @@ const PhotosContainer: React.FC<Props> = (props) => {
               HEADER_HEIGHT={props.HEADER_HEIGHT}
               FOOTER_HEIGHT={props.FOOTER_HEIGHT}
               headerShown={props.headerShown}
+              SCREEN_HEIGHT={SCREEN_HEIGHT}
+              SCREEN_WIDTH={SCREEN_WIDTH}
             />
           </PinchZoom>
     </View>

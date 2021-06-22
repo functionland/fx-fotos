@@ -1,23 +1,19 @@
 import React, {useEffect, useState, useRef, MutableRefObject} from 'react';
-import {Animated, Dimensions, View, Systrace, Text} from 'react-native';
+import {Animated, View, useWindowDimensions, Text} from 'react-native';
 import {FlatSection, story, layout} from '../types/interfaces';
 import RenderPhotos from './RenderPhotos';
 import SingleMedia from './SingleMedia';
 import StoryHolder from './StoryHolder';
 import ActionBar from './ActionBar';
 
-import { Asset } from 'expo-media-library';
-import {prepareLayout,} from '../utils/functions';
 import {
   useRecoilState,
 } from 'recoil';
 import {preparedMediaState,} from '../states';
 import { default as Reanimated, useSharedValue } from 'react-native-reanimated';
 
-const SCREEN_WIDTH = Dimensions.get('window').width;
-const SCREEN_HEIGHT = Dimensions.get('window').height;
-
 interface Props {
+  removeElements: Function;
   scale: Reanimated.SharedValue<number>;
   numColumnsAnimated: Reanimated.SharedValue<number>;
   scrollY2: Reanimated.SharedValue<number>
@@ -32,14 +28,16 @@ interface Props {
   HEADER_HEIGHT: number;
   FOOTER_HEIGHT: number;
   headerShown: Reanimated.SharedValue<number>;
+  SCREEN_HEIGHT: number;
+  SCREEN_WIDTH: number;
 }
 
 const AllPhotos: React.FC<Props> = (props) => {
-  const selectedAssets:Reanimated.SharedValue<number[]> = useSharedValue([]);
+  const selectedAssets:Reanimated.SharedValue<string[]> = useSharedValue([]);
   // Since animated arrays are not natively supported and updates do not propagate, we need to ad
   // the two below natively supported numbers to detect changes in the array
   // and change them whenever selectedAssets change and useDerivedValue on those to detect changes
-  const lastSelectedAssetIndex = useSharedValue(0);
+  const lastSelectedAssetId = useSharedValue('');
   const lastSelectedAssetAction = useSharedValue(0); //0:unselect, 1:select
 
   const [preparedMedia, setPreparedMedia] = useRecoilState(preparedMediaState);
@@ -64,17 +62,17 @@ const AllPhotos: React.FC<Props> = (props) => {
   const animatedImagePositionX = useSharedValue(0);
   const animatedImagePositionY = useSharedValue(0);
   const animatedSingleMediaIndex = useSharedValue(-1);
-  const singleImageWidth = useSharedValue(SCREEN_WIDTH);
-  const singleImageHeight = useSharedValue(SCREEN_HEIGHT);
+  const singleImageWidth = useSharedValue(props.SCREEN_WIDTH);
+  const singleImageHeight = useSharedValue(props.SCREEN_HEIGHT);
   const actionBarOpacity = useSharedValue(0);
 
-  const selectedAssetsRef = useRef<number[]>([]);
-  const _setSelectedValueRef = (selected:number[]) => {
+  const selectedAssetsRef = useRef<string[]>([]);
+  const _setSelectedValueRef = (selected:string[]) => {
     selectedAssetsRef.current = selected;
   }
 
   Reanimated.useAnimatedReaction(() => {
-    return ([selectedAssets.value.length, lastSelectedAssetIndex.value, lastSelectedAssetAction.value]);
+    return ([selectedAssets.value.length, lastSelectedAssetId.value, lastSelectedAssetAction.value]);
   }, (result, previous) => {
     if (result !== previous) {
       if(selectedAssets.value.length>0){
@@ -86,32 +84,21 @@ const AllPhotos: React.FC<Props> = (props) => {
       }
       Reanimated.runOnJS(_setSelectedValueRef)(selectedAssets.value);
     }
-  }, [lastSelectedAssetIndex,lastSelectedAssetAction, modalShown]);
+  }, [lastSelectedAssetId,lastSelectedAssetAction, modalShown]);
 
-  
-  const selectMedia = (media:Asset, selected:boolean) => {
-    let layout:layout[] = preparedMedia.layout;
-    let index = layout.findIndex(x=>(typeof x.value!=='string' && x.value.id===media.id));
-    layout[index] = {
-      ...layout[index],
-      selected: selected,
-    }
-    setPreparedMedia(oldPreparedMedia =>  ({
-      ...oldPreparedMedia,
-      'layout':layout
-    }));
-  }
 
   const _goBack = () => {
     console.log('Went back');
     selectedAssets.value = [];
-    lastSelectedAssetIndex.value = -1;
+    lastSelectedAssetId.value = '';
     lastSelectedAssetAction.value = 0;
   }
 
   const _handleDelete = () => {
     console.log('Deleting');
     console.log(selectedAssetsRef.current);
+    props.removeElements(selectedAssetsRef.current);
+    _goBack();
   }
 
   const _handleShare = () => console.log('Sharing');
@@ -127,15 +114,15 @@ const AllPhotos: React.FC<Props> = (props) => {
     <View
       style={{
         flex: 1,
-        width: SCREEN_WIDTH,
+        width: props.SCREEN_WIDTH,
         position: 'relative',
       }}
     >
       <RenderPhotos
         photos={preparedMedia}
         loading={props.loading}
-        maxWidth={SCREEN_WIDTH*2}
-        minWidth={SCREEN_WIDTH/2}
+        maxWidth={props.SCREEN_WIDTH*2}
+        minWidth={props.SCREEN_WIDTH/2}
         numColumns={2}
         sortCondition="day"
         scale={props.scale}
@@ -158,14 +145,16 @@ const AllPhotos: React.FC<Props> = (props) => {
         singleImageWidth={singleImageWidth}
         singleImageHeight={singleImageHeight}
         selectedAssets={selectedAssets}
-        lastSelectedAssetIndex={lastSelectedAssetIndex}
+        lastSelectedAssetId={lastSelectedAssetId}
         lastSelectedAssetAction={lastSelectedAssetAction}
+        SCREEN_HEIGHT={props.SCREEN_HEIGHT}
+        SCREEN_WIDTH={props.SCREEN_WIDTH}
       />
       <RenderPhotos
         photos={preparedMedia}
         loading={props.loading}
-        maxWidth={SCREEN_WIDTH*2}
-        minWidth={SCREEN_WIDTH/2}
+        maxWidth={props.SCREEN_WIDTH*2}
+        minWidth={props.SCREEN_WIDTH/2}
         numColumns={3}
         sortCondition="day"
         numColumnsAnimated={props.numColumnsAnimated}
@@ -188,14 +177,16 @@ const AllPhotos: React.FC<Props> = (props) => {
         singleImageWidth={singleImageWidth}
         singleImageHeight={singleImageHeight}
         selectedAssets={selectedAssets}
-        lastSelectedAssetIndex={lastSelectedAssetIndex}
+        lastSelectedAssetId={lastSelectedAssetId}
         lastSelectedAssetAction={lastSelectedAssetAction}
+        SCREEN_HEIGHT={props.SCREEN_HEIGHT}
+        SCREEN_WIDTH={props.SCREEN_WIDTH}
       />
       <RenderPhotos
         photos={preparedMedia}
         loading={props.loading}
-        maxWidth={SCREEN_WIDTH*2}
-        minWidth={SCREEN_WIDTH/2}
+        maxWidth={props.SCREEN_WIDTH*2}
+        minWidth={props.SCREEN_WIDTH/2}
         numColumns={4}
         sortCondition="month"
         numColumnsAnimated={props.numColumnsAnimated}
@@ -218,8 +209,10 @@ const AllPhotos: React.FC<Props> = (props) => {
         singleImageWidth={singleImageWidth}
         singleImageHeight={singleImageHeight}
         selectedAssets={selectedAssets}
-        lastSelectedAssetIndex={lastSelectedAssetIndex}
+        lastSelectedAssetId={lastSelectedAssetId}
         lastSelectedAssetAction={lastSelectedAssetAction}
+        SCREEN_HEIGHT={props.SCREEN_HEIGHT}
+        SCREEN_WIDTH={props.SCREEN_WIDTH}
       />
       <SingleMedia 
         modalShown={modalShown}

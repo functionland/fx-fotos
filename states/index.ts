@@ -1,6 +1,8 @@
 import {atom, selector} from 'recoil'
 import {Asset} from 'expo-media-library';
 import {FlatSection, story} from '../types/interfaces';
+import { DataProvider, LayoutProvider } from 'recyclerlistview';
+import { LayoutUtil } from '../utils/LayoutUtil';
 
 export const photosState = atom<Array<Asset>>({
     key: 'photosState',
@@ -41,3 +43,11 @@ export const imagePositionState = atom<{x:number;y:number}>({
     key: 'imagePositionState',
     default: {x:0,y:0},
 });
+
+export const dataProviderState = atom<DataProvider>({
+    key: 'dataProviderState',
+    default: new DataProvider((r1, r2) => {
+        return (typeof r1.value==='string' && typeof r2.value==='string')?(r1.value !== r2.value):((r1.index !== r2.index)||(r1.deleted!==r2.deleted));
+      }),
+});
+

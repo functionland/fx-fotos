@@ -28,11 +28,12 @@ export class LayoutUtil {
     colNum: number,
     groupBy: string,
     headerHeight: number = 20,
-    data: Layout[],
+    dataProvider: DataProvider,
     storiesHeight: number,
     mainHeaderHeight: number,
   ) {
     console.log('layoutProvider');
+    const data = dataProvider?.getAllData() || [];
     return new LayoutProvider(
       (index) => {
         return index === 0 ? 'story' : 'image'; //Since we have just one view type
