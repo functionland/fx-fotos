@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Animated, View, TouchableWithoutFeedback, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons'; 
 
@@ -18,7 +18,16 @@ const RoundCheckbox: React.FC<Props> = (props) => {
 
     const { size, backgroundColor, borderColor, icon, iconColor } = props;
     const iconSize = size * 1.3;
-
+    const opacityTiming = useRef(new Animated.Value(0)).current;
+    useEffect(()=>{
+      Animated.timing(opacityTiming, 
+        {
+          toValue: props.checked,
+          duration: 300,
+          useNativeDriver: true
+        }
+      ).start();
+    }, [opacityTiming]);
     const _onPress = () => {
       //props.onValueChange(!props.checked.value);
     };
@@ -34,7 +43,7 @@ const RoundCheckbox: React.FC<Props> = (props) => {
                 width: size,
                 height: size,
                 borderRadius: size / 2,
-                opacity: props.checked.interpolate({
+                opacity: opacityTiming.interpolate({
                   inputRange: [0, 0.9],
                   outputRange: [1, 0],
                   }
@@ -51,10 +60,10 @@ const RoundCheckbox: React.FC<Props> = (props) => {
                 width: size,
                 height: size,
                 borderRadius: size / 2,
-                opacity: props.checked,
+                opacity: opacityTiming,
                 transform: [
                   {
-                    scale: props.checked
+                    scale: opacityTiming
                   }
                 ]
               },

@@ -45,12 +45,19 @@ const PhotosChunk: React.FC<Props> = (props) => {
   const selectedOpacity = useRef(new Animated.Value(0)).current;
   const animatedTempScale = useRef(new Animated.Value(1)).current;
   const setAnimatedVal = (val:number) => {
-    Animated.timing(selectedOpacity, {
-      toValue: val,
-      duration: 300,
-      useNativeDriver: true
-    }).start();
+    selectedOpacity.setValue(val);
   }
+
+  const selectionScale = useRef(new Animated.Value(1)).current;
+
+  Animated.timing(selectionScale, {
+    toValue: selectedOpacity.interpolate({
+      inputRange: [0, 1],
+      outputRange: [1, 0.9],
+    }),
+    duration: 300,
+    useNativeDriver: true,
+  }).start();
 
   Reanimated.useDerivedValue(() => {
     let index = props.selectedAssets.value.findIndex(x=>x===props.photo.id);
@@ -256,7 +263,12 @@ const PhotosChunk: React.FC<Props> = (props) => {
           zIndex:4, 
           width: props.SCREEN_WIDTH/props.numCol,
           height: props.SCREEN_WIDTH/props.numCol,
-          opacity: animatedTempScale
+          opacity: animatedTempScale,
+          transform: [
+            {
+              scale: selectionScale
+            }
+          ]
         }]}>
         <LongPressGestureHandler
           ref={longTapRef}
@@ -329,8 +341,8 @@ const styles = StyleSheet.create({
   checkBox:{
     zIndex:5,
     position: 'absolute',
-    top:5,
-    left: 5,
+    top:-5,
+    left: -5,
     flex: 1,
     flexDirection:'row',
     color: 'white',
