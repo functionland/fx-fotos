@@ -1,8 +1,6 @@
 import * as React from 'react';
-import PropTypes from 'prop-types';
 import { Animated, View, TouchableWithoutFeedback, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons'; 
-import { default as Reanimated, useSharedValue } from 'react-native-reanimated';
 
 const hitSlop = { top: 8, bottom: 8, left: 8, right: 8 };
 interface Props {
@@ -12,7 +10,7 @@ interface Props {
   backgroundColor: string;
   iconColor: string;
   borderColor: string;
-  checked: Reanimated.SharedValue<0 | 1>;
+  checked: Animated.Value;
 }
 
 const RoundCheckbox: React.FC<Props> = (props) => {
@@ -20,36 +18,6 @@ const RoundCheckbox: React.FC<Props> = (props) => {
 
     const { size, backgroundColor, borderColor, icon, iconColor } = props;
     const iconSize = size * 1.3;
-    const animatedStyle = Reanimated.useAnimatedStyle(()=>{
-      return {
-          opacity: Reanimated.withTiming(
-            props.checked.value,
-            {
-              duration: 300
-            }
-          ),
-          transform: [
-            {
-              scale: Reanimated.withTiming(
-                props.checked.value,
-                {
-                  duration: 300
-                }
-              )
-            }
-          ]
-      };
-    });
-  
-    const animatedStyle2 = Reanimated.useAnimatedStyle(()=>{
-      return {
-          opacity: Reanimated.interpolate(
-            props.checked.value,
-            [0, 0.9],
-            [1, 0]
-          ),
-      };
-    });
 
     const _onPress = () => {
       //props.onValueChange(!props.checked.value);
@@ -58,7 +26,7 @@ const RoundCheckbox: React.FC<Props> = (props) => {
     return (
       <TouchableWithoutFeedback hitSlop={hitSlop} onPress={_onPress}>
         <View style={styles.parentWrapper} shouldRasterizeIOS={true}>
-          <Reanimated.View
+          <Animated.View
             style={[
               {
                 borderColor,
@@ -66,12 +34,16 @@ const RoundCheckbox: React.FC<Props> = (props) => {
                 width: size,
                 height: size,
                 borderRadius: size / 2,
+                opacity: props.checked.interpolate({
+                  inputRange: [0, 0.9],
+                  outputRange: [1, 0],
+                  }
+                )
               },
               styles.commonWrapperStyles,
-              animatedStyle2
             ]}
           />
-          <Reanimated.View style={
+          <Animated.View style={
             [
               {
                 backgroundColor: backgroundColor,
@@ -79,8 +51,14 @@ const RoundCheckbox: React.FC<Props> = (props) => {
                 width: size,
                 height: size,
                 borderRadius: size / 2,
+                opacity: props.checked,
+                transform: [
+                  {
+                    scale: props.checked
+                  }
+                ]
               },
-              styles.checkedStyles, styles.commonWrapperStyles, animatedStyle
+              styles.checkedStyles, styles.commonWrapperStyles, 
             ]}>
             <MaterialIcons
               name={icon}
@@ -93,7 +71,7 @@ const RoundCheckbox: React.FC<Props> = (props) => {
                 textAlignVertical:'center'
               }}
             />
-          </Reanimated.View>
+          </Animated.View>
         </View>
       </TouchableWithoutFeedback>
     );

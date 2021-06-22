@@ -1,6 +1,6 @@
 import {Asset} from 'expo-media-library';
 import React, {createRef, useRef} from 'react';
-import { Image, Text, StyleSheet, useWindowDimensions, View, Platform } from 'react-native';
+import { Image, Text, StyleSheet, Animated, View, Platform } from 'react-native';
 import { layout } from '../types/interfaces';
 import { prettyTime } from '../utils/functions';
 import { MaterialIcons } from '@expo/vector-icons'; 
@@ -41,12 +41,23 @@ interface Props {
 const PhotosChunk: React.FC<Props> = (props) => {
   const loading = false;
   const imageRef = useRef<Image | null | undefined>();
-  const animatedTempScale = useSharedValue(1);
 
-  const selectedOpacity = Reanimated.useDerivedValue(() => {
+  const selectedOpacity = useRef(new Animated.Value(0)).current;
+  const animatedTempScale = useRef(new Animated.Value(1)).current;
+  const setAnimatedVal = (val:number) => {
+    Animated.timing(selectedOpacity, {
+      toValue: val,
+      duration: 300,
+      useNativeDriver: true
+    }).start();
+  }
+
+  Reanimated.useDerivedValue(() => {
     let index = props.selectedAssets.value.findIndex(x=>x===props.photo.id);
     //we need to add a dummy condition on the props.lastSelectedAssetAction.value and props.lastSelectedAssetIndex.value so that useDerivedValue does not ignore updating
-    return (index>-1 && props.lastSelectedAssetId.value!=='' && props.lastSelectedAssetAction.value>-1)?1:0;
+    let result = ((index>-1 && props.lastSelectedAssetId.value!=='' && props.lastSelectedAssetAction.value>-1)?1:0);
+    Reanimated.runOnJS(setAnimatedVal)(result||0);
+
   }, [props.lastSelectedAssetAction, props.lastSelectedAssetId]);
 
   const handleOnLoad = () => {
@@ -60,7 +71,11 @@ const PhotosChunk: React.FC<Props> = (props) => {
   const _onTapGestureEvent = useAnimatedGestureHandler<TapGestureHandlerGestureEvent, {}>({
     onStart: (event)=>{
       console.log('onStart');
-      animatedTempScale.value = Reanimated.withTiming(0.8,{duration:1000})
+      /*Animated.timing(animatedTempScale, {
+        duration: 1000,
+        toValue: 0.8,
+        useNativeDriver: true
+      }).start();*/
     },
     onActive: (event)=>{
       console.log('onActive');
@@ -95,39 +110,67 @@ const PhotosChunk: React.FC<Props> = (props) => {
           props.lastSelectedAssetAction.value = 1;
         }
       }
-      animatedTempScale.value = Reanimated.withTiming(1,{duration:10})
+
+      /*Animated.timing(animatedTempScale, {
+        duration: 10,
+        toValue: 1,
+        useNativeDriver: true
+      }).start();*/
     },
     onCancel:()=>{
       console.log('onCancel');
-      animatedTempScale.value = Reanimated.withTiming(1,{duration:10})
+      /*Animated.timing(animatedTempScale, {
+        duration: 10,
+        toValue: 1,
+        useNativeDriver: true
+      }).start();*/
     },
     onEnd:()=>{
       console.log('onEnd');
-      animatedTempScale.value = Reanimated.withTiming(1,{duration:10})
+      /*Animated.timing(animatedTempScale, {
+        duration: 10,
+        toValue: 1,
+        useNativeDriver: true
+      }).start();*/
     },
     onFail:()=>{
       console.log('onFail');
-      animatedTempScale.value = Reanimated.withTiming(1,{duration:10})
+      /*Animated.timing(animatedTempScale, {
+        duration: 10,
+        toValue: 1,
+        useNativeDriver: true
+      }).start();*/
     },
     onFinish:()=>{
       console.log('onFinish');
-      animatedTempScale.value = Reanimated.withTiming(1,{duration:10})
+      /*Animated.timing(animatedTempScale, {
+        duration: 10,
+        toValue: 1,
+        useNativeDriver: true
+      }).start();*/
     },
   });
 
   const _onLongGestureEvent = useAnimatedGestureHandler<LongPressGestureHandlerGestureEvent, {}>({
     onStart: (event)=>{
       console.log('onLongStart');
-      animatedTempScale.value = Reanimated.withTiming(0.8,{duration:1000})
+
+      /*Animated.timing(animatedTempScale, {
+        duration: 1000,
+        toValue: 0.8,
+        useNativeDriver: true
+      }).start();*/
     },
     onActive: (event)=>{
       console.log('onLongActive');
       let index = props.selectedAssets.value.findIndex(x=>x===props.photo.id);
       props.lastSelectedAssetId.value = props.photo.id;
       if(index > -1){
-        props.selectedAssets.value.splice(index, 1);
-        props.lastSelectedAssetAction.value = 0;
+        //console.log('removed '+index);
+        //props.selectedAssets.value.splice(index, 1);
+        //props.lastSelectedAssetAction.value = 0;
       }else{
+        console.log('added '+index);
         props.selectedAssets.value.push(props.photo.id);
         props.lastSelectedAssetAction.value = 1;
       }
@@ -149,17 +192,6 @@ const PhotosChunk: React.FC<Props> = (props) => {
 
   const longTapRef = createRef<LongPressGestureHandler>();
   const singleTapRef = createRef<TapGestureHandler>();
-  const animatedStyle = Reanimated.useAnimatedStyle(()=>{
-    return {
-        opacity: animatedTempScale.value,
-    };
-  });
-
-  const checkboxAnimatedStyle = Reanimated.useAnimatedStyle(()=>{
-    return {
-        opacity: selectedOpacity.value,
-    };
-  },[selectedOpacity]);
 
   const createThumbnail = (media:Asset) => {
     if(media.duration > 0){
@@ -220,11 +252,12 @@ const PhotosChunk: React.FC<Props> = (props) => {
       )
     }else{
       return (
-        <Reanimated.View style={[{
+        <Animated.View style={[{
           zIndex:4, 
           width: props.SCREEN_WIDTH/props.numCol,
           height: props.SCREEN_WIDTH/props.numCol,
-        }, animatedStyle]}>
+          opacity: animatedTempScale
+        }]}>
         <LongPressGestureHandler
           ref={longTapRef}
           onGestureEvent={_onLongGestureEvent}
@@ -251,10 +284,12 @@ const PhotosChunk: React.FC<Props> = (props) => {
             </TapGestureHandler>
           </Reanimated.View>
         </LongPressGestureHandler>
-        <Reanimated.View style={
+        <Animated.View style={
           [
             styles.checkBox, 
-            checkboxAnimatedStyle
+            {
+              opacity: selectedOpacity
+            }
           ]
         } >
           <RoundCheckbox 
@@ -266,8 +301,8 @@ const PhotosChunk: React.FC<Props> = (props) => {
             iconColor='white'
             onValueChange={() => {}}
           />
-          </Reanimated.View>
-        </Reanimated.View>
+          </Animated.View>
+        </Animated.View>
       );
     }
   }else{
