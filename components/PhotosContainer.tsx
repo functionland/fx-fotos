@@ -1,7 +1,7 @@
 import * as MediaLibrary from 'expo-media-library';
 import {useNavigation} from '@react-navigation/native';
 import React, {useEffect, useRef, useState} from 'react';
-import {Animated, View, useWindowDimensions, } from 'react-native';
+import {Animated, View, useWindowDimensions, Platform, UIManager, LayoutAnimation} from 'react-native';
 import {getUserBoxMedia} from '../utils/APICalls';
 import {getStorageMedia} from '../utils/functions';
 import {storagePermission} from '../utils/permissions';
@@ -24,7 +24,12 @@ interface Props {
   headerShown: Reanimated.SharedValue<number>;
 }
 
-
+if (
+  Platform.OS === "android" &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 const PhotosContainer: React.FC<Props> = (props) => {
   const SCREEN_WIDTH = useWindowDimensions().width;
@@ -138,6 +143,7 @@ const PhotosContainer: React.FC<Props> = (props) => {
     }
   },[photos]);
   const removeElements = (elementIndex:string[]) => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setDataProvider(dataProvider.cloneWithRows(
       dataProvider.getAllData().map(
         (x, index)=>{
