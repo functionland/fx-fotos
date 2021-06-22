@@ -13,6 +13,7 @@ import {preparedMediaState,} from '../states';
 import { default as Reanimated, useSharedValue } from 'react-native-reanimated';
 
 interface Props {
+  removeElements: Function;
   scale: Reanimated.SharedValue<number>;
   numColumnsAnimated: Reanimated.SharedValue<number>;
   scrollY2: Reanimated.SharedValue<number>
@@ -96,20 +97,7 @@ const AllPhotos: React.FC<Props> = (props) => {
   const _handleDelete = () => {
     console.log('Deleting');
     console.log(selectedAssetsRef.current);
-    let layout:layout[] = [...preparedMedia.layout];
-    for(let i=0; i<selectedAssetsRef.current.length;i++){
-      let index = layout.findIndex(x=>(x.id===selectedAssetsRef.current[i]));
-      layout[index] = {
-        ...layout[index],
-        deleted: true,
-        sortCondition: "deleted",
-      }
-      //layout.splice(index, 1);
-    }
-    setPreparedMedia(oldPreparedMedia =>  ({
-      ...oldPreparedMedia,
-      'layout':layout
-    }));
+    props.removeElements(selectedAssetsRef.current);
     _goBack();
   }
 

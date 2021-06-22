@@ -11,7 +11,7 @@ import {prepareLayout,} from '../utils/functions';
 import {
   useRecoilState,
 } from 'recoil';
-import {photosState, numColumnsState, storiesState, preparedMediaState, mediasState} from '../states';
+import {photosState, dataProviderState, storiesState, preparedMediaState, mediasState} from '../states';
 import {default as Reanimated,} from 'react-native-reanimated';
 interface Props {
   scrollY2: Reanimated.SharedValue<number>;
@@ -112,6 +112,8 @@ const PhotosContainer: React.FC<Props> = (props) => {
     }
   }, [storagePhotos]);
 
+  
+  const [dataProvider, setDataProvider] = useRecoilState(dataProviderState);
   useEffect(()=>{
     if(photos?.length){
       let prepared = prepareLayout(photos,['day', 'month'], preparedMedia.lastTimestamp, medias.length);
@@ -123,6 +125,11 @@ const PhotosContainer: React.FC<Props> = (props) => {
         'stories': oldPreparedMedia.stories.concat(prepared.stories),
         'lastTimestamp': prepared.lastTimestamp
       }));
+      const getStableId = (index:number) => {
+        return [...preparedMedia.layout, ...prepared.layout][index].id;
+      }
+      setDataProvider(dataProvider.cloneWithRows(dataProvider.getAllData().concat(prepared.layout)));
+
       //setPreparedMedia(prepared);
       
       let onlyMedias:any[] = prepared.layout.filter(item => typeof item.value !== 'string').map((item)=>{return item.value});
@@ -130,6 +137,18 @@ const PhotosContainer: React.FC<Props> = (props) => {
       setStories(oldStories=>oldStories.concat(prepared.stories));
     }
   },[photos]);
+  const removeElements = (elementIndex:string[]) => {
+    setDataProvider(dataProvider.cloneWithRows(
+      dataProvider.getAllData().map(
+        (x, index)=>{
+          if(elementIndex.includes(x.id)){
+            return {...x, deleted:true, sortCondition: "deleted"}
+          }
+          return x;
+        }
+      )
+    ));
+  }
 
   return photos ? (
     <View
@@ -150,6 +169,7 @@ const PhotosContainer: React.FC<Props> = (props) => {
             velocity={velocity}
           >
             <AllPhotos
+              removeElements={removeElements}
               scale={props.scale}
               numColumnsAnimated={props.numColumnsAnimated}
               scrollY2={props.scrollY2} 

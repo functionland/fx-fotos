@@ -31,7 +31,6 @@ import {
 import {
   storiesState,
   dataProviderState, 
-  layoutProviderState,
 } from '../states';
 
 class ItemAnimator implements BaseItemAnimator {
@@ -84,6 +83,7 @@ class ExternalScrollView extends BaseScrollView {
         scrollEventThrottle={16}
         nestedScrollEnabled = {true}
         removeClippedSubviews={true}
+        showsVerticalScrollIndicator={false}
         //onScroll={(this.props as any)._onScrollExternal}
         //onScroll={Reanimated.event([(this.props as any).animatedEvent], {listener: this.props.onScroll, useNativeDriver: true})}
       >
@@ -129,13 +129,9 @@ const RenderPhotos: React.FC<Props> = (props) => {
   const [stories, setStories] = useRecoilState(storiesState);
   const headerHeight = 20;
   const indicatorHeight = 50;
-  const getStableId = (index:number) => {
-    return props.photos.layout[index].id;
-  }
-  const [dataProvider, setDataProvider] = useState<DataProvider>(new DataProvider((r1, r2) => {
-    return (typeof r1.value==='string' && typeof r2.value==='string')?(r1.value !== r2.value):(r1.index !== r2.index);
-  }, getStableId));
-  const [layoutProvider, setLayoutProvider] = useState<LayoutProvider>(LayoutUtil.getLayoutProvider(2, 'day', headerHeight, [], props.storiesHeight, props.HEADER_HEIGHT));
+
+  const [dataProvider, setDataProvider] = useRecoilState(dataProviderState);
+  const [layoutProvider, setLayoutProvider] = useState<LayoutProvider>(LayoutUtil.getLayoutProvider(props.numColumns, props.sortCondition, headerHeight, dataProvider, props.storiesHeight, props.HEADER_HEIGHT));
   layoutProvider.shouldRefreshWithAnchoring = true;
   const scrollRef:any = useRef();
   const scrollRefExternal = useAnimatedRef<Reanimated.ScrollView>();
@@ -251,12 +247,9 @@ const RenderPhotos: React.FC<Props> = (props) => {
     console.log('photos.layout length changed');
     //if(dataProvider.getAllData().length !== props.photos.layout.length){
     let data = props.photos.layout;
-    setLayoutProvider(LayoutUtil.getLayoutProvider(props.numColumns, props.sortCondition, headerHeight, data, props.storiesHeight, props.HEADER_HEIGHT));
-    
-    //setDataProvider(dataProvider.cloneWithRows(dataProvider.getAllData().concat(props.photos.layout),(dataProvider.getAllData().length>0?dataProvider.getAllData().length-1:undefined)));
-    setDataProvider(dataProvider.cloneWithRows(props.photos.layout));
+    setLayoutProvider(LayoutUtil.getLayoutProvider(props.numColumns, props.sortCondition, headerHeight, dataProvider, props.storiesHeight, props.HEADER_HEIGHT));
     //}
-  },[props.photos.layout]);
+  },[dataProvider]);
 
   useBackHandler(() => {
     /*if (props.showSelectionCheckbox) {
