@@ -1,6 +1,11 @@
 import {DataProvider, LayoutProvider} from 'recyclerlistview';
 import {Dimensions} from 'react-native';
-import { layout as Layout} from '../types/interfaces';
+import {
+  useRecoilState,
+} from 'recoil';
+import {
+  dataProviderState, 
+} from '../states';
 
 export class LayoutUtil {
   static getWindowWidth() {
@@ -28,11 +33,11 @@ export class LayoutUtil {
     colNum: number,
     groupBy: string,
     headerHeight: number = 20,
-    dataProvider: DataProvider,
     storiesHeight: number,
     mainHeaderHeight: number,
   ) {
     console.log('layoutProvider');
+    const [dataProvider, setDataProvider] = useRecoilState(dataProviderState);
     const data = dataProvider?.getAllData() || [];
     return new LayoutProvider(
       (index) => {
@@ -44,9 +49,9 @@ export class LayoutUtil {
           dim.width = windowWidth;
           dim.height = storiesHeight + 20 + 1 * mainHeaderHeight;
         } else {
-          if (
-            data[index]?.sortCondition === groupBy ||
-            data[index]?.sortCondition === ''
+          if ( (data[index]?.deleted === false) &&
+            (data[index]?.sortCondition === groupBy ||
+            data[index]?.sortCondition === '')
           ) {
             //let isHeader = headerIndexes.findIndex(x=>x.index===index && x.sortCondition===groupBy);
             let isHeader: boolean =

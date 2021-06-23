@@ -131,7 +131,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
   const indicatorHeight = 50;
 
   const [dataProvider, setDataProvider] = useRecoilState(dataProviderState);
-  const [layoutProvider, setLayoutProvider] = useState<LayoutProvider>(LayoutUtil.getLayoutProvider(props.numColumns, props.sortCondition, headerHeight, dataProvider, props.storiesHeight, props.HEADER_HEIGHT));
+  const [layoutProvider, setLayoutProvider] = useState<LayoutProvider>(LayoutUtil.getLayoutProvider(props.numColumns, props.sortCondition, headerHeight, props.storiesHeight, props.HEADER_HEIGHT));
   layoutProvider.shouldRefreshWithAnchoring = true;
   const scrollRef:any = useRef();
   const scrollRefExternal = useAnimatedRef<Reanimated.ScrollView>();
@@ -247,7 +247,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
     console.log('photos.layout length changed');
     //if(dataProvider.getAllData().length !== props.photos.layout.length){
     let data = props.photos.layout;
-    setLayoutProvider(LayoutUtil.getLayoutProvider(props.numColumns, props.sortCondition, headerHeight, dataProvider, props.storiesHeight, props.HEADER_HEIGHT));
+    //setLayoutProvider(LayoutUtil.getLayoutProvider(props.numColumns, props.sortCondition, headerHeight, dataProvider, props.storiesHeight, props.HEADER_HEIGHT));
     //}
   },[dataProvider]);
 
