@@ -358,7 +358,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
     
     //animatedTimeStampString.value = approximateIndex.toString();
     reanimatedScrollTo(scrollRefExternal, 0, props.dragY.value, false);
-  });
+  }, [props.dragY]);
 
   const scrollBarToViewSync = (value:number)=> {
     let sampleHeight = scrollRef?.current?.getContentDimension().height;
@@ -394,7 +394,6 @@ const RenderPhotos: React.FC<Props> = (props) => {
       layoutHeightAnimated.value = e.contentSize.height;
       showThumbScroll.value = 1;
     },
-    
     onEndDrag: (e) => {
       console.log('onEndDrag');
     },
