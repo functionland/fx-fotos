@@ -121,6 +121,7 @@ interface Props {
   singleImageHeight: Reanimated.SharedValue<number>;
   lastSelectedAssetId: Reanimated.SharedValue<string>;
   lastSelectedAssetAction: Reanimated.SharedValue<number>;
+  dragY: Reanimated.SharedValue<number>;
   SCREEN_HEIGHT: number;
   SCREEN_WIDTH: number;
 }
@@ -135,7 +136,6 @@ const RenderPhotos: React.FC<Props> = (props) => {
   layoutProvider.shouldRefreshWithAnchoring = true;
   const scrollRef:any = useRef();
   const scrollRefExternal = useAnimatedRef<Reanimated.ScrollView>();
-  const dragY = useSharedValue(0);
   const showThumbScroll = useSharedValue(0);
   const showFloatingFilters = useSharedValue(0);
 
@@ -354,10 +354,10 @@ const RenderPhotos: React.FC<Props> = (props) => {
       showThumbScroll.value = Reanimated.withDelay(3000, Reanimated.withTiming(0));
   }
   useDerivedValue(() => {
-    let approximateIndex = Math.ceil(dragY.value/props.numColumns);
+    let approximateIndex = Math.ceil(props.dragY.value/props.numColumns);
     
     //animatedTimeStampString.value = approximateIndex.toString();
-    reanimatedScrollTo(scrollRefExternal, 0, dragY.value, false);
+    reanimatedScrollTo(scrollRefExternal, 0, props.dragY.value, false);
   });
 
   const scrollBarToViewSync = (value:number)=> {
@@ -473,7 +473,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
         opacity={showThumbScroll}
         showFloatingFilters={showFloatingFilters}
         hideTimeout={500}
-        dragY={dragY}
+        dragY={props.dragY}
         numColumns={props.numColumns}
         headerHeight={headerHeight}
         FOOTER_HEIGHT={props.FOOTER_HEIGHT}

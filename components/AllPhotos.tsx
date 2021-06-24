@@ -58,6 +58,8 @@ const AllPhotos: React.FC<Props> = (props) => {
   const scrollIndex3 = useRef(new Animated.Value(0)).current;
   const scrollIndex4 = useRef(new Animated.Value(0)).current;
 
+
+  const dragY = useSharedValue(0);
   const modalShown = useSharedValue(0);
   const animatedImagePositionX = useSharedValue(0);
   const animatedImagePositionY = useSharedValue(0);
@@ -147,6 +149,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         selectedAssets={selectedAssets}
         lastSelectedAssetId={lastSelectedAssetId}
         lastSelectedAssetAction={lastSelectedAssetAction}
+        dragY={dragY}
         SCREEN_HEIGHT={props.SCREEN_HEIGHT}
         SCREEN_WIDTH={props.SCREEN_WIDTH}
       />
@@ -179,6 +182,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         selectedAssets={selectedAssets}
         lastSelectedAssetId={lastSelectedAssetId}
         lastSelectedAssetAction={lastSelectedAssetAction}
+        dragY={dragY}
         SCREEN_HEIGHT={props.SCREEN_HEIGHT}
         SCREEN_WIDTH={props.SCREEN_WIDTH}
       />
@@ -211,6 +215,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         selectedAssets={selectedAssets}
         lastSelectedAssetId={lastSelectedAssetId}
         lastSelectedAssetAction={lastSelectedAssetAction}
+        dragY={dragY}
         SCREEN_HEIGHT={props.SCREEN_HEIGHT}
         SCREEN_WIDTH={props.SCREEN_WIDTH}
       />
