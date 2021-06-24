@@ -101,5 +101,7 @@ const styles = StyleSheet.create({
     left: 0,
   }
 });
-
-export default RoundCheckbox;
+const isEqual = (prevProps:Props, nextProps:Props) => {
+  return true;
+}
+export default React.memo(RoundCheckbox, isEqual);

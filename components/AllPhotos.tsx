@@ -265,5 +265,7 @@ const AllPhotos: React.FC<Props> = (props) => {
     )
   );
 };
-
-export default AllPhotos;
+const isEqual = (prevProps:Props, nextProps:Props) => {
+  return (prevProps.storiesHeight === nextProps.storiesHeight && prevProps.removeElements === nextProps.removeElements);
+}
+export default React.memo(AllPhotos, isEqual);

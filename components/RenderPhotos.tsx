@@ -23,7 +23,7 @@ import { useBackHandler } from '@react-native-community/hooks'
 import { Asset } from 'expo-media-library';
 import {default as Reanimated, useSharedValue, useAnimatedRef, useDerivedValue, scrollTo as reanimatedScrollTo, useAnimatedScrollHandler} from 'react-native-reanimated';
 import { timestampToDate } from '../utils/functions';
-import {Path} from "react-native-redash";
+import RCL from './RCL';
 
 import {
   useRecoilState,
@@ -33,7 +33,11 @@ import {
   dataProviderState, 
 } from '../states';
 
-class ItemAnimator implements BaseItemAnimator {
+class ItemAnimator extends React.Component implements BaseItemAnimator {
+  constructor(props:any) {
+    super(props);
+  }
+
   animateWillMount(atX:number, atY:number, itemIndex:number) {
     console.log(['animateWillMount',atX, atY, itemIndex]);
     //This method is called before the componentWillMount of the list item in the rowrenderer
@@ -47,15 +51,15 @@ class ItemAnimator implements BaseItemAnimator {
     //No return
   }
   animateWillUpdate(fromX:number, fromY:number, toX:number, toY:number, itemRef:any, itemIndex:number): void {
-    console.log(['animateWillUpdate',fromX, fromY, toX, toY, itemRef, itemIndex]);
+    console.log(['animateWillUpdate',fromX, fromY, toX, toY, itemIndex]);
     //This method is called before the componentWillUpdate of the list item in the rowrenderer. If the list item is not re-rendered,
     //It is not triggered. Fill in your logic.
     // A simple example can be using a native layout animation shown below - Custom animations can be implemented as required.
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    //LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     //No return
   }
   animateShift(fromX:number, fromY:number, toX:number, toY:number, itemRef:any, itemIndex:number): boolean {
-    console.log(['animateShift',fromX, fromY, toX, toY, itemRef, itemIndex]);
+    console.log(['animateShift',fromX, fromY, toX, toY, itemIndex]);
     //This method is called if the the props have not changed, but the view has shifted by a certain amount along either x or y axes.
     //Note that, this method is not triggered if the props or size has changed and the animateWillUpdate will be triggered in that case.
     //Return value is used as the return value of shouldComponentUpdate, therefore will trigger a view re-render if true.
@@ -131,7 +135,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
   const headerHeight = 20;
   const indicatorHeight = 50;
 
-  const [dataProvider, setDataProvider] = useRecoilState(dataProviderState);
+  const [dataProvider] = useRecoilState(dataProviderState);
   const [layoutProvider, setLayoutProvider] = useState<LayoutProvider>(LayoutUtil.getLayoutProvider(props.numColumns, props.sortCondition, headerHeight, props.storiesHeight, props.HEADER_HEIGHT));
   layoutProvider.shouldRefreshWithAnchoring = true;
   const scrollRef:any = useRef();
@@ -301,10 +305,8 @@ const RenderPhotos: React.FC<Props> = (props) => {
     return (
       <PhotosChunk
         photo={data}
-        numCol={props.numColumns}
         key={'PhotosChunk_col' + props.numColumns + '_id' + index}
         index={data.index}
-        sortCondition={props.sortCondition}
         modalShown={props.modalShown}
         headerShown={props.headerShown}
         headerHeight={headerHeight}
@@ -402,7 +404,9 @@ const RenderPhotos: React.FC<Props> = (props) => {
       //let lastIndex = scrollRef?.current?.findApproxFirstVisibleIndex();
     },
   });
-  const AnimatedRecyclerListView = Reanimated.createAnimatedComponent(RecyclerListView);
+  
+  const itemAnimator = new ItemAnimator({test:'test'});
+
   return props.photos.layout ? (
     <Reanimated.View
       // eslint-disable-next-line react-native/no-inline-styles
@@ -417,52 +421,17 @@ const RenderPhotos: React.FC<Props> = (props) => {
         left: 0,
       }]}
     >
-      <RecyclerListView
-        ref={scrollRef}
+      <RCL
+        scrollRef={scrollRef}
         externalScrollView={ExternalScrollView}
-        style={{
-          flex: 1,
-          width: props.SCREEN_WIDTH,
-          height: props.SCREEN_HEIGHT,
-          position: 'absolute',
-          top: 0,
-          bottom: 0,
-          marginTop: 0,
-          right: 0,
-          left: 0,
-          zIndex:1,
-        }}
-        optimizeForInsertDeleteAnimations={true}
-        ////onEndReached={() => props.setLoadMore(new Date().getTime())}
-        ////onEndReachedThreshold={0.4}
-        dataProvider={dataProvider}
+        itemAnimator={itemAnimator}
+        SCREEN_WIDTH= {props.SCREEN_WIDTH}
+        SCREEN_HEIGHT= {props.SCREEN_HEIGHT}
         layoutProvider={layoutProvider}
         rowRenderer={rowRenderer}
-        //onScroll={scrollHandlerReanimated}
-        key={"RecyclerListView_"+props.sortCondition + props.numColumns}
-        scrollViewProps={{
-          //ref: scrollRefExternal,
-          
-          //onMomentumScrollEnd: _onMomentumScrollEnd,
-          ////onScrollEndDrag: _onScrollEnd,
-          scrollRefExternal:scrollRefExternal,
-          //scrollEventThrottle:16,
-          //automaticallyAdjustContentInsets: false,
-          //showsVerticalScrollIndicator:false,
-          _onScrollExternal:scrollHandlerReanimated,
-          //animatedEvent:{nativeEvent: {contentOffset: {y: props.scrollY}, contentSize: {height: layoutHeightAnimated}}},
-          animatedEvent:{nativeEvent: {contentOffset:  {y: (y: any) =>
-            Reanimated.block([
-
-              Reanimated.call(
-                [y],
-                ([y]) => {}
-              )
-            ])
-          }
-        },
-        },
-        }}
+        scrollRefExternal={scrollRefExternal}
+        scrollHandlerReanimated={scrollHandlerReanimated}
+        key={"RCL_"+props.sortCondition + props.numColumns}
       />
       
       <ThumbScroll
@@ -473,7 +442,6 @@ const RenderPhotos: React.FC<Props> = (props) => {
         showFloatingFilters={showFloatingFilters}
         hideTimeout={500}
         dragY={props.dragY}
-        numColumns={props.numColumns}
         headerHeight={headerHeight}
         FOOTER_HEIGHT={props.FOOTER_HEIGHT}
         HEADER_HEIGHT={props.HEADER_HEIGHT}
@@ -520,4 +488,8 @@ const styles = StyleSheet.create({
   },
 });
 
-export default RenderPhotos;
+const isEqual = (prevProps:Props, nextProps:Props) => {
+  return (prevProps.photos.layout.length === nextProps.photos.layout.length);
+}
+
+export default React.memo(RenderPhotos, isEqual);

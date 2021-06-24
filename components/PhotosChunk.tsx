@@ -17,8 +17,6 @@ import { default as Reanimated, useAnimatedGestureHandler, useSharedValue } from
 const isIOS = Platform.OS === 'ios';
 interface Props {
   photo: layout;
-  numCol: 2 | 3 | 4;
-  sortCondition: 'day'|'month';
   index: number;
   modalShown: Reanimated.SharedValue<number>;
   headerShown: Reanimated.SharedValue<number>;
@@ -211,8 +209,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
               source={{uri: media.uri}}
               // eslint-disable-next-line react-native/no-inline-styles
               style={{
-                height: (props.SCREEN_WIDTH / props.numCol) - 2.5,
-                width: (props.SCREEN_WIDTH / props.numCol) - 2.5,
+                flex: 1,
                 backgroundColor: loading ? 'grey' : 'white',
                 margin: 2.5,
                 zIndex: 4,
@@ -237,8 +234,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
               source={{uri: media.uri}}
               // eslint-disable-next-line react-native/no-inline-styles
               style={{
-                height: (props.SCREEN_WIDTH / props.numCol) - 2.5,
-                width: (props.SCREEN_WIDTH / props.numCol) - 2.5,
+                flex: 1,
                 backgroundColor: 'grey',
                 margin: 2.5,
                 zIndex:4,
@@ -250,7 +246,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
     }
   }
   
-  if((props.photo.sortCondition === props.sortCondition || props.photo.sortCondition === "") && (props.photo.deleted !== true)){
+  if(true){
     if(typeof props.photo.value === 'string'){
       return (
         <View style={{flex: 1, width: props.SCREEN_WIDTH,}}>
@@ -261,8 +257,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
       return (
         <Animated.View style={[{
           zIndex:4, 
-          width: props.SCREEN_WIDTH/props.numCol,
-          height: props.SCREEN_WIDTH/props.numCol,
+          flex: 1,
           opacity: animatedTempScale,
           transform: [
             {
@@ -277,8 +272,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
         >
           <Reanimated.View 
             style={{
-              width: props.SCREEN_WIDTH/props.numCol,
-              height: props.SCREEN_WIDTH/props.numCol,
+              flex: 1,
               zIndex:5
             }}>
             <TapGestureHandler
@@ -287,8 +281,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
             >
               <Reanimated.View
                 style={{
-                  height: (props.SCREEN_WIDTH / props.numCol),
-                  width: (props.SCREEN_WIDTH / props.numCol),
+                  flex: 1,
                 }}
               >
                  {createThumbnail(props.photo.value)}
@@ -349,4 +342,7 @@ const styles = StyleSheet.create({
   }
 });
 
-export default PhotosChunk;
+const isEqual = (prevProps:Props, nextProps:Props) => {
+  return (prevProps.photo.id === nextProps.photo.id && prevProps.index===nextProps.index);
+}
+export default React.memo(PhotosChunk, isEqual);
