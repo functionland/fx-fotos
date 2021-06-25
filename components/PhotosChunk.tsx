@@ -38,7 +38,6 @@ interface Props {
 
 const PhotosChunk: React.FC<Props> = (props) => {
   const loading = false;
-  const imageRef = useRef<Image | null | undefined>();
 
   const selectedOpacity = useRef(new Animated.Value(0)).current;
   const animatedTempScale = useRef(new Animated.Value(1)).current;
@@ -64,14 +63,6 @@ const PhotosChunk: React.FC<Props> = (props) => {
     Reanimated.runOnJS(setAnimatedVal)(result||0);
 
   }, [props.lastSelectedAssetAction, props.lastSelectedAssetId]);
-
-  const handleOnLoad = () => {
-    if (isIOS && imageRef) {
-      imageRef.current?.setNativeProps({
-        opacity: 1,
-      });
-    }
-  };
 
   const _onTapGestureEvent = useAnimatedGestureHandler<TapGestureHandlerGestureEvent, {}>({
     onStart: (event)=>{
@@ -203,9 +194,6 @@ const PhotosChunk: React.FC<Props> = (props) => {
       return (
         <>
           <Image
-              ref={(ref:any) => {
-                imageRef.current = ref;
-              }}
               source={{uri: media.uri}}
               // eslint-disable-next-line react-native/no-inline-styles
               style={{
@@ -214,7 +202,6 @@ const PhotosChunk: React.FC<Props> = (props) => {
                 margin: 2.5,
                 zIndex: 4,
               }}
-              onLoad={handleOnLoad}
           />
           <View 
             style={styles.videoText}
@@ -227,9 +214,6 @@ const PhotosChunk: React.FC<Props> = (props) => {
     }else{
       return (
         <Image
-              ref={(ref:any) => {
-                imageRef.current = ref;
-              }}
               source={{uri: media.uri}}
               // eslint-disable-next-line react-native/no-inline-styles
               style={{
@@ -238,7 +222,6 @@ const PhotosChunk: React.FC<Props> = (props) => {
                 margin: 2.5,
                 zIndex:4,
               }}
-              onLoad={handleOnLoad}
         />
       );
     }

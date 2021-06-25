@@ -264,7 +264,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
     return false
   })
   
-  const rowRenderer = (type:string | number, data:layout, index: number) => {
+  const rowRenderer = React.useCallback((type:string | number, data:layout, index: number) => {
     if(data.sortCondition !== '' && data.sortCondition !== props.sortCondition){
       return (<></>)
     }
@@ -327,7 +327,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
       />
     );
     }
-  };
+  },[props.photos?.layout?.length]);
 
   
   const _onMomentumScrollEnd = () => {
