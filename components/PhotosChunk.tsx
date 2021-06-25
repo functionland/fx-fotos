@@ -214,7 +214,6 @@ const PhotosChunk: React.FC<Props> = (props) => {
                 margin: 2.5,
                 zIndex: 4,
               }}
-              key={media.uri}
               onLoad={handleOnLoad}
           />
           <View 
@@ -239,7 +238,6 @@ const PhotosChunk: React.FC<Props> = (props) => {
                 margin: 2.5,
                 zIndex:4,
               }}
-              key={media.uri}
               onLoad={handleOnLoad}
         />
       );

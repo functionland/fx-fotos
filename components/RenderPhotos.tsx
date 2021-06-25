@@ -265,6 +265,9 @@ const RenderPhotos: React.FC<Props> = (props) => {
   })
   
   const rowRenderer = (type:string | number, data:layout, index: number) => {
+    if(data.sortCondition !== '' && data.sortCondition !== props.sortCondition){
+      return (<></>)
+    }
     switch(type){
       case 'story':
         return (
@@ -305,7 +308,6 @@ const RenderPhotos: React.FC<Props> = (props) => {
     return (
       <PhotosChunk
         photo={data}
-        key={'PhotosChunk_col' + props.numColumns + '_id' + index}
         index={data.index}
         modalShown={props.modalShown}
         headerShown={props.headerShown}

@@ -26,8 +26,9 @@ import {
     return (
       <RecyclerListView
         ref={props.scrollRef}
+        //renderAheadOffset={2*props.SCREEN_HEIGHT}
         externalScrollView={props.externalScrollView}
-        itemAnimator={props.itemAnimator}
+        //itemAnimator={props.itemAnimator}
         style={{
           flex: 1,
           width: props.SCREEN_WIDTH,
