@@ -47,7 +47,7 @@ export const imagePositionState = atom<{x:number;y:number}>({
 export const dataProviderState = atom<DataProvider>({
     key: 'dataProviderState',
     default: new DataProvider((r1, r2) => {
-        return (typeof r1.value==='string' && typeof r2.value==='string')?(r1.value !== r2.value):((r1.index !== r2.index)||(r1.deleted!==r2.deleted));
+        return ((r1.id !== r2.id) || (r1.deleted!==r2.deleted));
       }),
 });
 

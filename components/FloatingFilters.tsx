@@ -158,4 +158,8 @@ const styles = StyleSheet.create({
     }
 });
 
-export default FloatingFilters;
+const isEqual = (prevProps:Props, nextProps:Props) => {
+    return (prevProps.indicatorHeight === nextProps.indicatorHeight && prevProps.numColumns === nextProps.numColumns);
+}
+
+export default React.memo(FloatingFilters, isEqual);

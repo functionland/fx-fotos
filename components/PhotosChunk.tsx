@@ -1,6 +1,6 @@
 import {Asset} from 'expo-media-library';
-import React, {createRef, useRef} from 'react';
-import { Image, Text, StyleSheet, Animated, View, Platform } from 'react-native';
+import React, {createRef, useRef, useEffect} from 'react';
+import { Image, Text, StyleSheet, Animated, View } from 'react-native';
 import { layout } from '../types/interfaces';
 import { prettyTime } from '../utils/functions';
 import { MaterialIcons } from '@expo/vector-icons'; 
@@ -12,13 +12,10 @@ import {
   TapGestureHandlerGestureEvent,
   LongPressGestureHandlerGestureEvent,
 } from 'react-native-gesture-handler';
-import { default as Reanimated, useAnimatedGestureHandler, useSharedValue } from 'react-native-reanimated';
+import { default as Reanimated, useAnimatedGestureHandler } from 'react-native-reanimated';
 
-const isIOS = Platform.OS === 'ios';
 interface Props {
   photo: layout;
-  numCol: 2 | 3 | 4;
-  sortCondition: 'day'|'month';
   index: number;
   modalShown: Reanimated.SharedValue<number>;
   headerShown: Reanimated.SharedValue<number>;
@@ -35,17 +32,21 @@ interface Props {
   lastSelectedAssetAction: Reanimated.SharedValue<number>;
   SCREEN_HEIGHT: number;
   SCREEN_WIDTH: number;
+  selectedAssetsRef:React.MutableRefObject<string[]>;
+  clearSelection: Animated.Value;
 }
 
 
 const PhotosChunk: React.FC<Props> = (props) => {
   const loading = false;
-  const imageRef = useRef<Image | null | undefined>();
+  const longTapRef = createRef<LongPressGestureHandler>();
+  const singleTapRef = createRef<TapGestureHandler>();
 
-  const selectedOpacity = useRef(new Animated.Value(0)).current;
+  const selected = useRef(new Animated.Value(0)).current;
+  const selectedOpacity = useRef(Animated.multiply(selected, props.clearSelection)).current;
   const animatedTempScale = useRef(new Animated.Value(1)).current;
   const setAnimatedVal = (val:number) => {
-    selectedOpacity.setValue(val);
+    selected.setValue(val);
   }
 
   const selectionScale = useRef(new Animated.Value(1)).current;
@@ -59,31 +60,16 @@ const PhotosChunk: React.FC<Props> = (props) => {
     useNativeDriver: true,
   }).start();
 
-  Reanimated.useDerivedValue(() => {
-    let index = props.selectedAssets.value.findIndex(x=>x===props.photo.id);
-    //we need to add a dummy condition on the props.lastSelectedAssetAction.value and props.lastSelectedAssetIndex.value so that useDerivedValue does not ignore updating
-    let result = ((index>-1 && props.lastSelectedAssetId.value!=='' && props.lastSelectedAssetAction.value>-1)?1:0);
-    Reanimated.runOnJS(setAnimatedVal)(result||0);
-
-  }, [props.lastSelectedAssetAction, props.lastSelectedAssetId]);
-
-  const handleOnLoad = () => {
-    if (isIOS && imageRef) {
-      imageRef.current?.setNativeProps({
-        opacity: 1,
-      });
+  useEffect(()=>{
+    let index = props.selectedAssetsRef.current.findIndex(x=>x===props.photo.id);
+    if(index>-1){
+      setAnimatedVal(1);
+    }else{
+      setAnimatedVal(0);
     }
-  };
+  },[props.photo.id])
 
   const _onTapGestureEvent = useAnimatedGestureHandler<TapGestureHandlerGestureEvent, {}>({
-    onStart: (event)=>{
-      console.log('onStart');
-      /*Animated.timing(animatedTempScale, {
-        duration: 1000,
-        toValue: 0.8,
-        useNativeDriver: true
-      }).start();*/
-    },
     onActive: (event)=>{
       console.log('onActive');
       if(props.selectedAssets.value.length===0){
@@ -111,10 +97,11 @@ const PhotosChunk: React.FC<Props> = (props) => {
         if(index > -1){
           props.selectedAssets.value.splice(index, 1);
           props.lastSelectedAssetAction.value = 0;
-
+          Reanimated.runOnJS(setAnimatedVal)(0);
         }else{
           props.selectedAssets.value.push(props.photo.id);
           props.lastSelectedAssetAction.value = 1;
+          Reanimated.runOnJS(setAnimatedVal)(1);
         }
       }
 
@@ -124,101 +111,40 @@ const PhotosChunk: React.FC<Props> = (props) => {
         useNativeDriver: true
       }).start();*/
     },
-    onCancel:()=>{
-      console.log('onCancel');
-      /*Animated.timing(animatedTempScale, {
-        duration: 10,
-        toValue: 1,
-        useNativeDriver: true
-      }).start();*/
-    },
-    onEnd:()=>{
-      console.log('onEnd');
-      /*Animated.timing(animatedTempScale, {
-        duration: 10,
-        toValue: 1,
-        useNativeDriver: true
-      }).start();*/
-    },
-    onFail:()=>{
-      console.log('onFail');
-      /*Animated.timing(animatedTempScale, {
-        duration: 10,
-        toValue: 1,
-        useNativeDriver: true
-      }).start();*/
-    },
-    onFinish:()=>{
-      console.log('onFinish');
-      /*Animated.timing(animatedTempScale, {
-        duration: 10,
-        toValue: 1,
-        useNativeDriver: true
-      }).start();*/
-    },
   });
 
   const _onLongGestureEvent = useAnimatedGestureHandler<LongPressGestureHandlerGestureEvent, {}>({
-    onStart: (event)=>{
-      console.log('onLongStart');
-
-      /*Animated.timing(animatedTempScale, {
-        duration: 1000,
-        toValue: 0.8,
-        useNativeDriver: true
-      }).start();*/
-    },
     onActive: (event)=>{
       console.log('onLongActive');
       let index = props.selectedAssets.value.findIndex(x=>x===props.photo.id);
       props.lastSelectedAssetId.value = props.photo.id;
       if(index > -1){
         //console.log('removed '+index);
-        //props.selectedAssets.value.splice(index, 1);
-        //props.lastSelectedAssetAction.value = 0;
+        props.selectedAssets.value.splice(index, 1);
+        props.lastSelectedAssetAction.value = 0;
+        Reanimated.runOnJS(setAnimatedVal)(0);
       }else{
         console.log('added '+index);
         props.selectedAssets.value.push(props.photo.id);
         props.lastSelectedAssetAction.value = 1;
+        Reanimated.runOnJS(setAnimatedVal)(1);
       }
     },
-    onCancel: ()=>{
-      console.log('onLongCancel');
-    },
-    onFail:()=>{
-      console.log('onLongFail:when scroll before finish');
-    },
-    onEnd:()=>{
-      console.log('onLongEnd:when long');
-    },
-    onFinish:()=>{
-      console.log('onLongFinish:when scroll, tap or long');
-      
-    }
-  })
-
-  const longTapRef = createRef<LongPressGestureHandler>();
-  const singleTapRef = createRef<TapGestureHandler>();
+  });
 
   const createThumbnail = (media:Asset) => {
     if(media.duration > 0){
       return (
         <>
           <Image
-              ref={(ref:any) => {
-                imageRef.current = ref;
-              }}
               source={{uri: media.uri}}
               // eslint-disable-next-line react-native/no-inline-styles
               style={{
-                height: (props.SCREEN_WIDTH / props.numCol) - 2.5,
-                width: (props.SCREEN_WIDTH / props.numCol) - 2.5,
+                flex: 1,
                 backgroundColor: loading ? 'grey' : 'white',
                 margin: 2.5,
                 zIndex: 4,
               }}
-              key={media.uri}
-              onLoad={handleOnLoad}
           />
           <View 
             style={styles.videoText}
@@ -231,26 +157,19 @@ const PhotosChunk: React.FC<Props> = (props) => {
     }else{
       return (
         <Image
-              ref={(ref:any) => {
-                imageRef.current = ref;
-              }}
               source={{uri: media.uri}}
               // eslint-disable-next-line react-native/no-inline-styles
               style={{
-                height: (props.SCREEN_WIDTH / props.numCol) - 2.5,
-                width: (props.SCREEN_WIDTH / props.numCol) - 2.5,
+                flex: 1,
                 backgroundColor: 'grey',
                 margin: 2.5,
                 zIndex:4,
               }}
-              key={media.uri}
-              onLoad={handleOnLoad}
         />
       );
     }
   }
   
-  if((props.photo.sortCondition === props.sortCondition || props.photo.sortCondition === "") && (props.photo.deleted !== true)){
     if(typeof props.photo.value === 'string'){
       return (
         <View style={{flex: 1, width: props.SCREEN_WIDTH,}}>
@@ -261,8 +180,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
       return (
         <Animated.View style={[{
           zIndex:4, 
-          width: props.SCREEN_WIDTH/props.numCol,
-          height: props.SCREEN_WIDTH/props.numCol,
+          flex: 1,
           opacity: animatedTempScale,
           transform: [
             {
@@ -277,8 +195,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
         >
           <Reanimated.View 
             style={{
-              width: props.SCREEN_WIDTH/props.numCol,
-              height: props.SCREEN_WIDTH/props.numCol,
+              flex: 1,
               zIndex:5
             }}>
             <TapGestureHandler
@@ -287,8 +204,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
             >
               <Reanimated.View
                 style={{
-                  height: (props.SCREEN_WIDTH / props.numCol),
-                  width: (props.SCREEN_WIDTH / props.numCol),
+                  flex: 1,
                 }}
               >
                  {createThumbnail(props.photo.value)}
@@ -317,11 +233,6 @@ const PhotosChunk: React.FC<Props> = (props) => {
         </Animated.View>
       );
     }
-  }else{
-    return (
-      <View style={{height:0, width:0}}></View>
-    )
-  }
 };
 const styles = StyleSheet.create({
   durationText:{
@@ -349,4 +260,7 @@ const styles = StyleSheet.create({
   }
 });
 
-export default PhotosChunk;
+const isEqual = (prevProps:Props, nextProps:Props) => {
+  return (prevProps.photo.id === nextProps.photo.id && prevProps.index===nextProps.index);
+}
+export default React.memo(PhotosChunk, isEqual);

@@ -21,7 +21,6 @@ interface Props {
     showFloatingFilters: Reanimated.SharedValue<number>;
     scrollIndicatorContainerStyle:StyleProp<{}>;
     scrollIndicatorStyle:StyleProp<{}>;
-    numColumns:2|3|4;
     dragY:Reanimated.SharedValue<number>;
     scrollY:Reanimated.SharedValue<number>;
     headerHeight:number;
@@ -36,7 +35,7 @@ const ThumbScroll: React.FC<Props> = (props) => {
     const visibleHeight = (SCREEN_HEIGHT-props.indicatorHeight-props.HEADER_HEIGHT-props.FOOTER_HEIGHT);
     
     useEffect(()=>{
-        console.log([Date.now()+': component ThumbScroll'+props.numColumns+' rendered']);
+        console.log([Date.now()+': component ThumbScroll rendered']);
     });
 
     let panRef_glide = createRef<PanGestureHandler>();    
@@ -177,4 +176,8 @@ const styles = StyleSheet.create({
     }
 });
 
-export default ThumbScroll;
+const isEqual = (prevProps:Props, nextProps:Props) => {
+    return (prevProps.indicatorHeight === nextProps.indicatorHeight);
+}
+
+export default React.memo(ThumbScroll, isEqual);

@@ -199,5 +199,7 @@ const PhotosContainer: React.FC<Props> = (props) => {
     <></>
   );
 };
-
-export default PhotosContainer;
+const isEqual = (prevProps:Props, nextProps:Props) => {
+  return (prevProps.HEADER_HEIGHT === nextProps.HEADER_HEIGHT);
+}
+export default React.memo(PhotosContainer, isEqual);

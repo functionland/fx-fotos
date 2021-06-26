@@ -23,7 +23,7 @@ import { useBackHandler } from '@react-native-community/hooks'
 import { Asset } from 'expo-media-library';
 import {default as Reanimated, useSharedValue, useAnimatedRef, useDerivedValue, scrollTo as reanimatedScrollTo, useAnimatedScrollHandler} from 'react-native-reanimated';
 import { timestampToDate } from '../utils/functions';
-import {Path} from "react-native-redash";
+import RCL from './RCL';
 
 import {
   useRecoilState,
@@ -33,7 +33,11 @@ import {
   dataProviderState, 
 } from '../states';
 
-class ItemAnimator implements BaseItemAnimator {
+class ItemAnimator extends React.Component implements BaseItemAnimator {
+  constructor(props:any) {
+    super(props);
+  }
+
   animateWillMount(atX:number, atY:number, itemIndex:number) {
     console.log(['animateWillMount',atX, atY, itemIndex]);
     //This method is called before the componentWillMount of the list item in the rowrenderer
@@ -47,15 +51,15 @@ class ItemAnimator implements BaseItemAnimator {
     //No return
   }
   animateWillUpdate(fromX:number, fromY:number, toX:number, toY:number, itemRef:any, itemIndex:number): void {
-    console.log(['animateWillUpdate',fromX, fromY, toX, toY, itemRef, itemIndex]);
+    console.log(['animateWillUpdate',fromX, fromY, toX, toY, itemIndex]);
     //This method is called before the componentWillUpdate of the list item in the rowrenderer. If the list item is not re-rendered,
     //It is not triggered. Fill in your logic.
     // A simple example can be using a native layout animation shown below - Custom animations can be implemented as required.
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    //LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     //No return
   }
   animateShift(fromX:number, fromY:number, toX:number, toY:number, itemRef:any, itemIndex:number): boolean {
-    console.log(['animateShift',fromX, fromY, toX, toY, itemRef, itemIndex]);
+    console.log(['animateShift',fromX, fromY, toX, toY, itemIndex]);
     //This method is called if the the props have not changed, but the view has shifted by a certain amount along either x or y axes.
     //Note that, this method is not triggered if the props or size has changed and the animateWillUpdate will be triggered in that case.
     //Return value is used as the return value of shouldComponentUpdate, therefore will trigger a view re-render if true.
@@ -121,6 +125,7 @@ interface Props {
   singleImageHeight: Reanimated.SharedValue<number>;
   lastSelectedAssetId: Reanimated.SharedValue<string>;
   lastSelectedAssetAction: Reanimated.SharedValue<number>;
+  dragY: Reanimated.SharedValue<number>;
   SCREEN_HEIGHT: number;
   SCREEN_WIDTH: number;
 }
@@ -130,12 +135,11 @@ const RenderPhotos: React.FC<Props> = (props) => {
   const headerHeight = 20;
   const indicatorHeight = 50;
 
-  const [dataProvider, setDataProvider] = useRecoilState(dataProviderState);
+  const [dataProvider] = useRecoilState(dataProviderState);
   const [layoutProvider, setLayoutProvider] = useState<LayoutProvider>(LayoutUtil.getLayoutProvider(props.numColumns, props.sortCondition, headerHeight, props.storiesHeight, props.HEADER_HEIGHT));
   layoutProvider.shouldRefreshWithAnchoring = true;
   const scrollRef:any = useRef();
   const scrollRefExternal = useAnimatedRef<Reanimated.ScrollView>();
-  const dragY = useSharedValue(0);
   const showThumbScroll = useSharedValue(0);
   const showFloatingFilters = useSharedValue(0);
 
@@ -204,6 +208,29 @@ const RenderPhotos: React.FC<Props> = (props) => {
     console.log([Date.now()+': component RenderPhotos'+props.numColumns+' rendered']);
   });
 
+  const clearSelection = useRef(new Animated.Value(0)).current;
+  const selectedAssetsRef = useRef<string[]>([]);
+  const setSelectedAssetsRef = (selected:string[]) => {
+    selectedAssetsRef.current = selected;
+  }
+  const setClearSelection = (clear:number) => {
+    clearSelection.setValue(clear);
+  }
+
+  Reanimated.useDerivedValue(() => {
+    //we need to add a dummy condition on the props.lastSelectedAssetAction.value and props.lastSelectedAssetIndex.value so that useDerivedValue does not ignore updating
+    if(props.lastSelectedAssetAction.value>-1 && props.lastSelectedAssetId.value!=='Thisisjustadummytext'){
+      Reanimated.runOnJS(setSelectedAssetsRef)(props.selectedAssets.value);
+      if(props.selectedAssets.value.length){
+        Reanimated.runOnJS(setClearSelection)(1);
+      }else{
+        console.log('erasing selection');
+        Reanimated.runOnJS(setClearSelection)(0);
+      }
+      //selectedAssetsRef.current = props.selectedAssets.value;
+    }
+
+  }, [props.lastSelectedAssetAction, props.lastSelectedAssetId]);
 
   //scrollRefExternal?.current?.scrollTo({x:0,y:100});
 
@@ -260,7 +287,10 @@ const RenderPhotos: React.FC<Props> = (props) => {
     return false
   })
   
-  const rowRenderer = (type:string | number, data:layout, index: number) => {
+  const rowRenderer = React.useCallback((type:string | number, data:layout, index: number) => {
+    if(data.sortCondition !== '' && data.sortCondition !== props.sortCondition){
+      return (<></>)
+    }
     switch(type){
       case 'story':
         return (
@@ -301,10 +331,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
     return (
       <PhotosChunk
         photo={data}
-        numCol={props.numColumns}
-        key={'PhotosChunk_col' + props.numColumns + '_id' + index}
         index={data.index}
-        sortCondition={props.sortCondition}
         modalShown={props.modalShown}
         headerShown={props.headerShown}
         headerHeight={headerHeight}
@@ -320,10 +347,12 @@ const RenderPhotos: React.FC<Props> = (props) => {
         imageHeight={(typeof data.value !== 'string')?data.value.height:0}
         SCREEN_HEIGHT={props.SCREEN_HEIGHT}
         SCREEN_WIDTH={props.SCREEN_WIDTH}
+        selectedAssetsRef={selectedAssetsRef}
+        clearSelection={clearSelection}
       />
     );
     }
-  };
+  },[props.photos?.layout?.length]);
 
   
   const _onMomentumScrollEnd = () => {
@@ -354,11 +383,11 @@ const RenderPhotos: React.FC<Props> = (props) => {
       showThumbScroll.value = Reanimated.withDelay(3000, Reanimated.withTiming(0));
   }
   useDerivedValue(() => {
-    let approximateIndex = Math.ceil(dragY.value/props.numColumns);
+    let approximateIndex = Math.ceil(props.dragY.value/props.numColumns);
     
     //animatedTimeStampString.value = approximateIndex.toString();
-    reanimatedScrollTo(scrollRefExternal, 0, dragY.value, false);
-  });
+    reanimatedScrollTo(scrollRefExternal, 0, props.dragY.value, false);
+  }, [props.dragY]);
 
   const scrollBarToViewSync = (value:number)=> {
     let sampleHeight = scrollRef?.current?.getContentDimension().height;
@@ -394,7 +423,6 @@ const RenderPhotos: React.FC<Props> = (props) => {
       layoutHeightAnimated.value = e.contentSize.height;
       showThumbScroll.value = 1;
     },
-    
     onEndDrag: (e) => {
       console.log('onEndDrag');
     },
@@ -403,7 +431,9 @@ const RenderPhotos: React.FC<Props> = (props) => {
       //let lastIndex = scrollRef?.current?.findApproxFirstVisibleIndex();
     },
   });
-  const AnimatedRecyclerListView = Reanimated.createAnimatedComponent(RecyclerListView);
+  
+  const itemAnimator = new ItemAnimator({test:'test'});
+
   return props.photos.layout ? (
     <Reanimated.View
       // eslint-disable-next-line react-native/no-inline-styles
@@ -418,52 +448,17 @@ const RenderPhotos: React.FC<Props> = (props) => {
         left: 0,
       }]}
     >
-      <RecyclerListView
-        ref={scrollRef}
+      <RCL
+        scrollRef={scrollRef}
         externalScrollView={ExternalScrollView}
-        style={{
-          flex: 1,
-          width: props.SCREEN_WIDTH,
-          height: props.SCREEN_HEIGHT,
-          position: 'absolute',
-          top: 0,
-          bottom: 0,
-          marginTop: 0,
-          right: 0,
-          left: 0,
-          zIndex:1,
-        }}
-        optimizeForInsertDeleteAnimations={true}
-        ////onEndReached={() => props.setLoadMore(new Date().getTime())}
-        ////onEndReachedThreshold={0.4}
-        dataProvider={dataProvider}
+        itemAnimator={itemAnimator}
+        SCREEN_WIDTH= {props.SCREEN_WIDTH}
+        SCREEN_HEIGHT= {props.SCREEN_HEIGHT}
         layoutProvider={layoutProvider}
         rowRenderer={rowRenderer}
-        //onScroll={scrollHandlerReanimated}
-        key={"RecyclerListView_"+props.sortCondition + props.numColumns}
-        scrollViewProps={{
-          //ref: scrollRefExternal,
-          
-          //onMomentumScrollEnd: _onMomentumScrollEnd,
-          ////onScrollEndDrag: _onScrollEnd,
-          scrollRefExternal:scrollRefExternal,
-          //scrollEventThrottle:16,
-          //automaticallyAdjustContentInsets: false,
-          //showsVerticalScrollIndicator:false,
-          _onScrollExternal:scrollHandlerReanimated,
-          //animatedEvent:{nativeEvent: {contentOffset: {y: props.scrollY}, contentSize: {height: layoutHeightAnimated}}},
-          animatedEvent:{nativeEvent: {contentOffset:  {y: (y: any) =>
-            Reanimated.block([
-
-              Reanimated.call(
-                [y],
-                ([y]) => {}
-              )
-            ])
-          }
-        },
-        },
-        }}
+        scrollRefExternal={scrollRefExternal}
+        scrollHandlerReanimated={scrollHandlerReanimated}
+        key={"RCL_"+props.sortCondition + props.numColumns}
       />
       
       <ThumbScroll
@@ -473,8 +468,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
         opacity={showThumbScroll}
         showFloatingFilters={showFloatingFilters}
         hideTimeout={500}
-        dragY={dragY}
-        numColumns={props.numColumns}
+        dragY={props.dragY}
         headerHeight={headerHeight}
         FOOTER_HEIGHT={props.FOOTER_HEIGHT}
         HEADER_HEIGHT={props.HEADER_HEIGHT}
@@ -521,4 +515,8 @@ const styles = StyleSheet.create({
   },
 });
 
-export default RenderPhotos;
+const isEqual = (prevProps:Props, nextProps:Props) => {
+  return (prevProps.photos.layout.length === nextProps.photos.layout.length);
+}
+
+export default React.memo(RenderPhotos, isEqual);
