@@ -2,9 +2,10 @@
 
 # Latest 2 Updates
 
+**June-26-2021:** Further enhanced PhotosChunk loading speed by removing more animations from it.
+
 **June-22-2021:** Further enhanced performance by moving PHotosChunk logic to Animated instead of re-animated
 
-**June-19-2021:** Changed image selection and action bar to reanimated instead of states!
 
 # BOX Photos development guide
 Note: Project is still in alpha phase and not production ready. We aim to release beta version by end of June 2021.
