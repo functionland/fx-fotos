@@ -236,6 +236,9 @@ const AllPhotos: React.FC<Props> = (props) => {
       />
       <ActionBar
         actionBarOpacity={actionBarOpacity}
+        selectedAssets={selectedAssets}
+        lastSelectedAssetId={lastSelectedAssetId}
+        lastSelectedAssetAction={lastSelectedAssetAction}
         backAction={_goBack}
         actions={[
           {
