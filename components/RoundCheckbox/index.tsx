@@ -10,7 +10,7 @@ interface Props {
   backgroundColor: string;
   iconColor: string;
   borderColor: string;
-  checked: Animated.Value;
+  checked: Animated.AnimatedMultiplication;
 }
 
 const RoundCheckbox: React.FC<Props> = (props) => {

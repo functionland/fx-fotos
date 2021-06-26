@@ -1,5 +1,5 @@
 import {Asset} from 'expo-media-library';
-import React, {createRef, useRef} from 'react';
+import React, {createRef, useRef, useEffect} from 'react';
 import { Image, Text, StyleSheet, Animated, View, Platform } from 'react-native';
 import { layout } from '../types/interfaces';
 import { prettyTime } from '../utils/functions';
@@ -33,16 +33,19 @@ interface Props {
   lastSelectedAssetAction: Reanimated.SharedValue<number>;
   SCREEN_HEIGHT: number;
   SCREEN_WIDTH: number;
+  selectedAssetsRef:React.MutableRefObject<string[]>;
+  clearSelection: Animated.Value;
 }
 
 
 const PhotosChunk: React.FC<Props> = (props) => {
   const loading = false;
 
-  const selectedOpacity = useRef(new Animated.Value(0)).current;
+  const selected = useRef(new Animated.Value(0)).current;
+  const selectedOpacity = useRef(Animated.multiply(selected, props.clearSelection)).current;
   const animatedTempScale = useRef(new Animated.Value(1)).current;
   const setAnimatedVal = (val:number) => {
-    selectedOpacity.setValue(val);
+    selected.setValue(val);
   }
 
   const selectionScale = useRef(new Animated.Value(1)).current;
@@ -56,13 +59,13 @@ const PhotosChunk: React.FC<Props> = (props) => {
     useNativeDriver: true,
   }).start();
 
-  Reanimated.useDerivedValue(() => {
-    let index = props.selectedAssets.value.findIndex(x=>x===props.photo.id);
-    //we need to add a dummy condition on the props.lastSelectedAssetAction.value and props.lastSelectedAssetIndex.value so that useDerivedValue does not ignore updating
-    let result = ((index>-1 && props.lastSelectedAssetId.value!=='' && props.lastSelectedAssetAction.value>-1)?1:0);
-    Reanimated.runOnJS(setAnimatedVal)(result||0);
-
-  }, [props.lastSelectedAssetAction, props.lastSelectedAssetId]);
+  useEffect(()=>{
+    let index = props.selectedAssetsRef.current.findIndex(x=>x===props.photo.id);
+    if(index>-1){
+      setAnimatedVal(1);
+    }
+    console.log(props.selectedAssetsRef.current);
+  },[props.photo.id])
 
   const _onTapGestureEvent = useAnimatedGestureHandler<TapGestureHandlerGestureEvent, {}>({
     onStart: (event)=>{
@@ -100,10 +103,11 @@ const PhotosChunk: React.FC<Props> = (props) => {
         if(index > -1){
           props.selectedAssets.value.splice(index, 1);
           props.lastSelectedAssetAction.value = 0;
-
+          Reanimated.runOnJS(setAnimatedVal)(0);
         }else{
           props.selectedAssets.value.push(props.photo.id);
           props.lastSelectedAssetAction.value = 1;
+          Reanimated.runOnJS(setAnimatedVal)(1);
         }
       }
 
@@ -169,6 +173,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
         console.log('added '+index);
         props.selectedAssets.value.push(props.photo.id);
         props.lastSelectedAssetAction.value = 1;
+        Reanimated.runOnJS(setAnimatedVal)(1);
       }
     },
     onCancel: ()=>{

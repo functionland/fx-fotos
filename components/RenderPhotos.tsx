@@ -208,6 +208,29 @@ const RenderPhotos: React.FC<Props> = (props) => {
     console.log([Date.now()+': component RenderPhotos'+props.numColumns+' rendered']);
   });
 
+  const clearSelection = useRef(new Animated.Value(0)).current;
+  const selectedAssetsRef = useRef<string[]>([]);
+  const setSelectedAssetsRef = (selected:string[]) => {
+    selectedAssetsRef.current = selected;
+  }
+  const setClearSelection = (clear:number) => {
+    clearSelection.setValue(clear);
+  }
+
+  Reanimated.useDerivedValue(() => {
+    //we need to add a dummy condition on the props.lastSelectedAssetAction.value and props.lastSelectedAssetIndex.value so that useDerivedValue does not ignore updating
+    if(props.lastSelectedAssetAction.value>-1 && props.lastSelectedAssetId.value!=='Thisisjustadummytext'){
+      Reanimated.runOnJS(setSelectedAssetsRef)(props.selectedAssets.value);
+      if(props.selectedAssets.value.length){
+        Reanimated.runOnJS(setClearSelection)(1);
+      }else{
+        console.log('erasing selection');
+        Reanimated.runOnJS(setClearSelection)(0);
+      }
+      //selectedAssetsRef.current = props.selectedAssets.value;
+    }
+
+  }, [props.lastSelectedAssetAction, props.lastSelectedAssetId]);
 
   //scrollRefExternal?.current?.scrollTo({x:0,y:100});
 
@@ -324,6 +347,8 @@ const RenderPhotos: React.FC<Props> = (props) => {
         imageHeight={(typeof data.value !== 'string')?data.value.height:0}
         SCREEN_HEIGHT={props.SCREEN_HEIGHT}
         SCREEN_WIDTH={props.SCREEN_WIDTH}
+        selectedAssetsRef={selectedAssetsRef}
+        clearSelection={clearSelection}
       />
     );
     }
