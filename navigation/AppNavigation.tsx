@@ -70,6 +70,7 @@ const AppNavigation = () => {
               HEADER_HEIGHT={HEADER_HEIGHT} 
               FOOTER_HEIGHT={FOOTER_HEIGHT}
               headerShown={headerShown} 
+              showHeader={showHeader}
             />}
           </Stack.Screen>
           <Stack.Screen
@@ -92,18 +93,15 @@ interface Props {
   HEADER_HEIGHT: number;
   FOOTER_HEIGHT: number;
   headerShown: Reanimated.SharedValue<number>;
+  showHeader: boolean|undefined;
 }
 const HomeNavigation: React.FC<Props> = (mainProps) => {
-  const animatedStyle = useAnimatedStyle(()=>{
-    return {
-         opacity: mainProps.headerShown.value,
-         height: mainProps.headerShown.value==0?0:mainProps.FOOTER_HEIGHT
-      };
-  });
   const TabBar = ({state, descriptors, navigation}: BottomTabBarProps<BottomTabBarOptions>) => {
     return (
-      <Reanimated.View style={[animatedStyle,
+      <View style={[
         { 
+          opacity: mainProps.showHeader?1:0,
+          height: mainProps.showHeader?mainProps.FOOTER_HEIGHT:0,
           flexDirection: 'row',
           backgroundColor:"white",
           borderRadius:0,
@@ -170,7 +168,7 @@ const HomeNavigation: React.FC<Props> = (mainProps) => {
             </TouchableOpacity>
           );
         })}
-      </Reanimated.View>
+      </View>
     );
   }
   return (

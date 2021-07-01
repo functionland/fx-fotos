@@ -5,6 +5,7 @@ import RenderPhotos from './RenderPhotos';
 import SingleMedia from './SingleMedia';
 import StoryHolder from './StoryHolder';
 import ActionBar from './ActionBar';
+import { ImageEditor } from './ImageEditor/ImageEditor'
 
 import {
   useRecoilState,
@@ -262,6 +263,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         ]}
         moreActions={[]}
       />
+      
     </View>
     ):(
       <View><Text>No Photos</Text></View>

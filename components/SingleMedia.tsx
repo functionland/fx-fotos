@@ -1,11 +1,12 @@
 import React, { useState, useEffect, createRef, useRef } from 'react';
-import {useWindowDimensions , Animated, StyleSheet, BackHandler, StatusBar, } from 'react-native';
+import {useWindowDimensions , Animated, StyleSheet, BackHandler, View, } from 'react-native';
 import { useBackHandler } from '@react-native-community/hooks'
 import Media from './Media';
 import { Asset } from 'expo-media-library';
 import { RecyclerListView, DataProvider, BaseScrollView, } from 'recyclerlistview';
 import { LayoutUtil } from '../utils/LayoutUtil';
 import { calcImageDimension } from '../utils/functions';
+import SingleMediaTopActions from './SingleMediaTopActions';
 
 import {
   LongPressGestureHandler,
@@ -78,6 +79,7 @@ const SingleMedia: React.FC<Props> = (props) => {
 
   const pinchRef = createRef<PinchGestureHandler>();
   const duration = 250;
+  const hideActions = useSharedValue(0);
 
   const scrollRef:any = useRef();
   const scrollRefExternal = useAnimatedRef<Reanimated.ScrollView>();
@@ -105,7 +107,6 @@ const SingleMedia: React.FC<Props> = (props) => {
     //positionY.value = (isModalOpen.value*(SCREEN_HEIGHT-props.singleImageHeight.value)/2) + (isModalOpen.value===0?1:0)*(thumbnailPositionMinusSingleImagePositionY.value);
     //viewScaleY.value = (isModalOpen.value===0?1:0)*(SCREEN_WIDTH/(props.numColumnsAnimated.value*props.singleImageHeight.value)) + isModalOpen.value;
   },[props.animatedImagePositionY,props.numColumnsAnimated,props.singleImageHeight]);
-
   
   const isModalOpen = useDerivedValue(() => {
     if(props.modalShown.value){
@@ -129,6 +130,7 @@ const SingleMedia: React.FC<Props> = (props) => {
   }, [
     props.modalShown, 
   ]);
+
   const _setBackHandler = () => {
     backHandler.current = BackHandler.addEventListener(
       "hardwareBackPress",
@@ -164,6 +166,7 @@ const SingleMedia: React.FC<Props> = (props) => {
       positionY.value = thumbnailPositionMinusSingleImagePositionY.value;
     }
   }, [thumbnailPositionMinusSingleImagePositionX, thumbnailPositionMinusSingleImagePositionY]);
+  
   useDerivedValue(() => {
     positionX.value = Reanimated.withTiming((props.modalShown.value===0?1:0)*(thumbnailPositionMinusSingleImagePositionX.value) + (props.modalShown.value*(SCREEN_WIDTH-props.singleImageWidth.value)/2), {
       duration: duration,
@@ -173,6 +176,7 @@ const SingleMedia: React.FC<Props> = (props) => {
     thumbnailPositionMinusSingleImagePositionX,
     isModalOpen
   ]);
+  
   useDerivedValue(() => {
     positionY.value = Reanimated.withTiming((props.modalShown.value===0?1:0)*(thumbnailPositionMinusSingleImagePositionY.value) + (props.modalShown.value*(SCREEN_HEIGHT-props.singleImageHeight.value)/2), {
       duration: duration,
@@ -183,28 +187,8 @@ const SingleMedia: React.FC<Props> = (props) => {
     isModalOpen
   ]);
 
-  const viewScaleX = useDerivedValue(() => {
-    return Reanimated.withTiming((props.modalShown.value===0?1:0)*(SCREEN_WIDTH/(props.numColumnsAnimated.value*props.singleImageWidth.value)) + props.modalShown.value, {
-      duration: duration,
-    });
-  }, [
-    props.modalShown, 
-  ]);
-  const viewScaleY = useDerivedValue(() => {
-    return Reanimated.withTiming((props.modalShown.value===0?1:0)*(SCREEN_WIDTH/(props.numColumnsAnimated.value*props.singleImageHeight.value)) + props.modalShown.value, {
-      duration: duration,
-    });
-  }, [
-    props.modalShown, 
-  ]);
-
-  const opacity = useDerivedValue(() => {
-    return Reanimated.withTiming(props.modalShown.value, {
-      duration: duration,
-    });
-  }, [
-    props.modalShown, 
-  ]);
+  
+  const opacity = useSharedValue(0);
   
 
   const imageScale = useSharedValue(1);
@@ -218,32 +202,70 @@ const SingleMedia: React.FC<Props> = (props) => {
       setDataProvider(dataProvider.cloneWithRows(medias));
     }
   }, [medias]);
-
   
+  const viewScaleX = useSharedValue((SCREEN_WIDTH/(props.numColumnsAnimated.value*props.singleImageWidth.value)));
+  const viewScaleY = useSharedValue((SCREEN_WIDTH/(props.numColumnsAnimated.value*props.singleImageHeight.value)));
 
+  const changeModalState = (result:number) => {
+    /*props.modalShown.value = result;
+    viewScaleY.value = Reanimated.withTiming((result===0?1:0)*(SCREEN_WIDTH/(props.numColumnsAnimated.value*props.singleImageHeight.value)) + result, {
+      duration: duration,
+    });
+    viewScaleX.value = Reanimated.withTiming((result===0?1:0)*(SCREEN_WIDTH/(props.numColumnsAnimated.value*props.singleImageWidth.value)) + result, {
+      duration: duration,
+    });
+    opacity.value = Reanimated.withTiming(result, {
+      duration: duration,
+    });
+    if (result === 0 ) {
+      props.headerShown.value = 1;
+    }else if(result === 1 ){
+      props.headerShown.value = 0;
+    }*/
+  }
   useAnimatedReaction(() => {
     return props.modalShown.value;
   }, (result, previous) => {
-    if (result === 0 && result !== previous) {
-      props.headerShown.value = 1;
-    }else if(result === 1 && result !== previous){
-      props.headerShown.value = 0;
+    if(result !== previous){
+      console.log('modalShown animation started');
+      viewScaleY.value = Reanimated.withTiming((result===0?1:0)*(SCREEN_WIDTH/(props.numColumnsAnimated.value*props.singleImageHeight.value)) + result, {
+        duration: duration,
+      });
+      viewScaleX.value = Reanimated.withTiming((result===0?1:0)*(SCREEN_WIDTH/(props.numColumnsAnimated.value*props.singleImageWidth.value)) + result, {
+        duration: duration,
+      });
+      opacity.value = Reanimated.withTiming(result, {
+        duration: duration,
+      });
+      if (result === 0 ) {
+        props.headerShown.value = 1;
+      }else if(result === 1 ){
+        props.headerShown.value = 0;
+      }
     }
   }, [props.modalShown]);
 
   const singleTapRef = createRef<PanGestureHandler>();
   const nativeViewRef = createRef<PanGestureHandler>();
 
-  const _onPanGestureEvent = useAnimatedGestureHandler<PanGestureHandlerGestureEvent, {}>({
-    onStart: (event)=> {
+  const _onPanGestureEvent = useAnimatedGestureHandler<PanGestureHandlerGestureEvent, {failOrEnd:boolean;}>({
+    onStart: (event, ctx)=> {
       console.log('SingleMedia onStart');
+      ctx.failOrEnd = false;
     },
     onActive: (event) => {
       translationX.value = event.translationX;
       translationY.value = event.translationY;
     },
-    onFinish: (event) => {
+    onFinish: (event, ctx) => {
       console.log('SingleMedia onFinish');
+      if(!ctx.failOrEnd){
+        if(hideActions.value===0){
+          hideActions.value = 1;
+        }else{
+          hideActions.value = 0;
+        }
+      }
       const translationYvsX = event.translationY*Reanimated.interpolate(
         (event.translationX/ (event.translationY+0.0000001)),
         [-SCREEN_WIDTH, -1, -0.60, 0, 0.60, 1, SCREEN_WIDTH],
@@ -256,14 +278,16 @@ const SingleMedia: React.FC<Props> = (props) => {
         translationY.value = Reanimated.withTiming(0,{duration:50});
       }
     },
-    onEnd: (event)=>{
+    onEnd: (event, ctx)=>{
       console.log('SingleMedia onEnd');
+      ctx.failOrEnd = true;
     },
     onCancel: (event) => {
       console.log('SingleMedia onCancel');
     },
-    onFail: (event) => {
+    onFail: (event, ctx) => {
       console.log('SingleMedia onFail');
+      ctx.failOrEnd = true;
     },
   });
 
@@ -279,6 +303,15 @@ const SingleMedia: React.FC<Props> = (props) => {
       zIndex: isModalOpen.value,
     }
   });
+  const topActionsAnimatedStyle = Reanimated.useAnimatedStyle(()=> {
+    return {
+      transform: [
+        {
+          translateY: Reanimated.withTiming(hideActions.value * -50, {duration:100})
+        }
+      ]
+    }
+  })
   const subAnimatedStyle = Reanimated.useAnimatedStyle(()=>{
     
     return {
@@ -356,6 +389,13 @@ const SingleMedia: React.FC<Props> = (props) => {
     }
   });
 
+  const _handleAddToAlbum = () => console.log('Adding');
+  const _goBack = () => {
+    console.log('Went back');
+    props.modalShown.value = 0;
+  }
+  const _handleEdit = () => console.log('edit');
+
   return (
     <Reanimated.View 
       style={[{
@@ -374,6 +414,7 @@ const SingleMedia: React.FC<Props> = (props) => {
           left: 0,
         }]}
       >
+        
       <Reanimated.View 
         style={[ recyclerAnimatedStyle, {
           position: 'relative',
@@ -449,6 +490,36 @@ const SingleMedia: React.FC<Props> = (props) => {
       >
 
       </Reanimated.View>
+      <Reanimated.View style={[{zIndex:15,width:SCREEN_WIDTH,height:30,position:'absolute',left:0, top:0}, topActionsAnimatedStyle]}>
+      <SingleMediaTopActions
+          actionBarOpacity={props.modalShown}
+          leftActions={[
+            {
+              icon: "keyboard-backspace",
+              onPress: _goBack,
+              color: "white",
+              name: "back",
+            },
+            
+          ]}
+          rightActions={[
+            {
+              icon: "image-edit-outline",
+              onPress: _handleEdit,
+              color: "white",
+              name: "edit",
+            },
+            {
+              icon: "plus",
+              onPress: _handleAddToAlbum,
+              color: "white",
+              name: "add",
+            },
+            
+          ]}
+          moreActions={[]}
+        />
+        </Reanimated.View>
     </Reanimated.View>
   );
 };

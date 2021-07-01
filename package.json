@@ -52,6 +52,8 @@
     "add": "^2.0.6",
     "expo": "~41.0.1",
     "expo-av": "~9.1.2",
+    "expo-gl": "^10.3.0",
+    "expo-image-editor": "^1.5.1",
     "expo-image-manipulator": "^9.1.0",
     "expo-media-library": "~12.0.2",
     "expo-status-bar": "~1.0.4",
