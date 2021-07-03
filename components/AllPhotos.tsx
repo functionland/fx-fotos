@@ -262,6 +262,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         ]}
         moreActions={[]}
       />
+      
     </View>
     ):(
       <View><Text>No Photos</Text></View>

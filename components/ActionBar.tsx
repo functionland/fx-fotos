@@ -17,6 +17,7 @@ const ActionBar: React.FC<Props> = (props) => {
   const animatedStyle = Reanimated.useAnimatedStyle(()=>{
     return {
         opacity: props.actionBarOpacity.value,
+        top: props.actionBarOpacity.value?0:-200
     };
   },[props.actionBarOpacity]);
 
