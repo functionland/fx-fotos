@@ -252,7 +252,12 @@ Just pick any issue from the issues tab or create your own and do a pull request
  * [x] Show highlights
  * [x] Fast scroll/thumb scroll
  * [x] Select and unselect each image to delete/edit/share
- * [ ] Connect with BOX, AWS and other cloud services to upload/download media
+ * [ ] Connect with Dfinity
+ * [ ] Auto-upload photos to backend
+ * [ ] Connect with BOX
+ * [ ] Connect with Filecoin
+ * [ ] Connect with AWS
+ * [ ] Automatic Migration tool from Google Photos
  * [ ] Search page to search by date/tags
  * [ ] Library page to show images by folder/Album
  * [ ] AI features to do on-device analysis for face recognition/object recognition
