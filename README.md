@@ -2,9 +2,9 @@
 
 # Latest 2 Updates
 
-**June-26-2021:** Further enhanced PhotosChunk loading speed by removing more animations from it.
+**July-03-2021:** Added image dit feature based on https://github.com/thomas-coldwell/expo-image-editor
 
-**June-22-2021:** Further enhanced performance by moving PHotosChunk logic to Animated instead of re-animated
+**June-29-2021:** Welcoming Dfinity to project sponsors
 
 
 # BOX Photos development guide
