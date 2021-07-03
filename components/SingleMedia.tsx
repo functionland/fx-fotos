@@ -5,7 +5,7 @@ import Media from './Media';
 import { Asset } from 'expo-media-library';
 import { RecyclerListView, DataProvider, BaseScrollView, } from 'recyclerlistview';
 import { LayoutUtil } from '../utils/LayoutUtil';
-import { calcImageDimension } from '../utils/functions';
+import { calcImageDimension, saveImage } from '../utils/functions';
 import SingleMediaTopActions from './SingleMediaTopActions';
 import { ImageEditor } from "./ImageEditor/ImageEditor";
 
@@ -26,6 +26,7 @@ import {
 } from 'recoil';
 import {numColumnsState, mediasState, singlePhotoIndexState, imagePositionState} from '../states';
 import {default as Reanimated, useAnimatedReaction, useAnimatedGestureHandler, useSharedValue, useAnimatedRef, useDerivedValue, scrollTo as reanimatedScrollTo, call, useCode} from 'react-native-reanimated';
+import * as MediaLibrary from 'expo-media-library';
 
 class ExternalScrollView extends BaseScrollView {
   scrollTo(...args: any[]) {
@@ -551,7 +552,11 @@ const SingleMedia: React.FC<Props> = (props) => {
             }}
             onEditingComplete={(result:any) => {
               console.log(result);
-              setEditorVisible(false)
+              setEditorVisible(false);
+              const asset = saveImage(result).then((data)=>{
+                console.log(data);
+              }).catch((e)=>console.log(e));
+              
             }}
             mode="full"
           />

@@ -1,4 +1,4 @@
-import {Asset, MediaType, AssetsOptions, SortBy, getAssetsAsync} from 'expo-media-library';
+import * as MediaLibrary from 'expo-media-library';
 import {
   changeSortConditionAndNumColumns,
   photoChunk,
@@ -85,14 +85,14 @@ export const flattenDates = (
 }*/
 
 export const ipfsHash = (
-  media: Asset,
+  media: MediaLibrary.Asset,
 ) => {
   let result:string = Math.random().toString(36).substring(7);
   return result;
 }
 
 export const prepareLayout = (
-  newMedias: Array<Asset>,
+  newMedias: Array<MediaLibrary.Asset>,
   sortConditions: Array<'day' | 'month'>,
   lastTimestamp: number = 0,
   lastIndex: number,
@@ -276,14 +276,14 @@ export const getStorageMedia = (
   createdBefore: Date | number | undefined = undefined,
   createdAfter: Date | number | undefined = undefined,
   mediaType: Array<any> = [
-    MediaType.photo,
-    MediaType.video,
+    MediaLibrary.MediaType.photo,
+    MediaLibrary.MediaType.video,
   ],
 ) => {
   if (permission) {
-    let mediaFilter: AssetsOptions = {
+    let mediaFilter: MediaLibrary.AssetsOptions = {
       mediaType: mediaType,
-      sortBy: [SortBy.modificationTime],
+      sortBy: [MediaLibrary.SortBy.modificationTime],
     };
     if(limit){
       mediaFilter.first = limit;
@@ -300,7 +300,7 @@ export const getStorageMedia = (
       mediaFilter.createdBefore = createdBefore;
     }
 
-    let media = getAssetsAsync(mediaFilter);
+    let media = MediaLibrary.getAssetsAsync(mediaFilter);
     return media;
   }
 };
@@ -372,7 +372,7 @@ export const changeSortCondition: changeSortConditionAndNumColumns = (
   return result;
 };
 
-export const calcImageDimension = (media:Asset|undefined, SCREEN_HEIGHT:number, SCREEN_WIDTH:number) => {
+export const calcImageDimension = (media:MediaLibrary.Asset|undefined, SCREEN_HEIGHT:number, SCREEN_WIDTH:number) => {
   let imageWidth_t = SCREEN_WIDTH;
   let imageHeight_t = SCREEN_HEIGHT;
   if(media){
@@ -393,3 +393,8 @@ export const calcImageDimension = (media:Asset|undefined, SCREEN_HEIGHT:number, 
   }
   return {height: imageHeight_t, width: imageWidth_t}
 };
+
+export const saveImage = async(result:any) => {
+  const asset = await MediaLibrary.createAssetAsync(result.uri);
+  return asset;
+}
