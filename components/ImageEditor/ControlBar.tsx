@@ -5,7 +5,7 @@ import { useRecoilState } from "recoil";
 import { editingModeState, imageDataState, processingState } from "./Store";
 import { IconButton } from "./components/IconButton";
 import { useContext } from "react";
-import { EditorContext } from "expo-image-editor";
+import { EditorContext } from "./ImageEditor";
 import { useEffect } from "react";
 import { usePerformCrop } from "./customHooks/usePerformCrop";
 

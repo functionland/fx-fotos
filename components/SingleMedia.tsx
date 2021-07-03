@@ -7,6 +7,7 @@ import { RecyclerListView, DataProvider, BaseScrollView, } from 'recyclerlistvie
 import { LayoutUtil } from '../utils/LayoutUtil';
 import { calcImageDimension } from '../utils/functions';
 import SingleMediaTopActions from './SingleMediaTopActions';
+import { ImageEditor } from "./ImageEditor/ImageEditor";
 
 import {
   LongPressGestureHandler,
@@ -91,6 +92,10 @@ const SingleMedia: React.FC<Props> = (props) => {
   const translationX = useSharedValue(0);
   const translationY = useSharedValue(0);
 
+  const [editorVisible, setEditorVisible] = useState<boolean>(false);
+  const [imageUri, setImageUri] = useState<string>();
+
+  const imageUriRef = useRef<string>();
   const thumbnailPositionMinusSingleImagePositionX = useDerivedValue(() => {
     return props.animatedImagePositionX.value - Math.abs((SCREEN_WIDTH/(props.numColumnsAnimated.value*props.singleImageWidth.value))*(SCREEN_WIDTH - props.singleImageWidth.value)/2);
     //thumbnailPositionMinusSingleImagePositionY.value = props.animatedImagePositionY.value - (SCREEN_WIDTH/(props.numColumnsAnimated.value*props.singleImageHeight.value))*(SCREEN_WIDTH - props.singleImageHeight.value)/2;
@@ -394,7 +399,11 @@ const SingleMedia: React.FC<Props> = (props) => {
     console.log('Went back');
     props.modalShown.value = 0;
   }
-  const _handleEdit = () => console.log('edit');
+  const _handleEdit = () => {
+    console.log('edit'+imageUriRef.current);
+    setImageUri(imageUriRef.current);
+    setEditorVisible(true);
+  }
 
   return (
     <Reanimated.View 
@@ -448,7 +457,8 @@ const SingleMedia: React.FC<Props> = (props) => {
                   dataProvider={dataProvider}
                   layoutProvider={layoutProvider}
                   renderAheadOffset={1}
-                  waitFor={[pinchRef]}
+                  //waitFor={[pinchRef]}
+                  onVisibleIndicesChanged={(indexes)=>{if(indexes.length===1){imageUriRef.current = medias[indexes[0]].uri;}}}
                   scrollViewProps={{
                     scrollRefExternal:scrollRefExternal,
                     disableIntervalMomentum: true,
@@ -488,10 +498,9 @@ const SingleMedia: React.FC<Props> = (props) => {
           width: SCREEN_WIDTH,
         }]}
       >
-
       </Reanimated.View>
       <Reanimated.View style={[{zIndex:15,width:SCREEN_WIDTH,height:30,position:'absolute',left:0, top:0}, topActionsAnimatedStyle]}>
-      <SingleMediaTopActions
+        <SingleMediaTopActions
           actionBarOpacity={props.modalShown}
           leftActions={[
             {
@@ -519,7 +528,35 @@ const SingleMedia: React.FC<Props> = (props) => {
           ]}
           moreActions={[]}
         />
-        </Reanimated.View>
+      </Reanimated.View>
+      <Reanimated.View style={{
+          position: 'absolute',
+          top:0,
+          left: 0,
+          marginTop: 0,
+          paddingTop: 0,
+          transform:[
+            {scale:0}
+          ]
+      }}>
+          <ImageEditor
+            visible={editorVisible}
+            onCloseEditor={() => {setEditorVisible(false)}}
+            imageUri={imageUri}
+            fixedCropAspectRatio={16 / 9}
+            lockAspectRatio={false}
+            minimumCropDimensions={{
+              width: 100,
+              height: 100,
+            }}
+            onEditingComplete={(result:any) => {
+              console.log(result);
+              setEditorVisible(false)
+            }}
+            mode="full"
+          />
+      </Reanimated.View>
+
     </Reanimated.View>
   );
 };

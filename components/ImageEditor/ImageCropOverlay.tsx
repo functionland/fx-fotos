@@ -10,7 +10,7 @@ import {
   State,
 } from "react-native-gesture-handler";
 import { useContext } from "react";
-import { EditorContext } from "expo-image-editor";
+import { EditorContext } from "./ImageEditor";
 
 const horizontalSections = ["top", "middle", "bottom"];
 const verticalSections = ["left", "middle", "right"];

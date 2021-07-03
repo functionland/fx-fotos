@@ -39,7 +39,7 @@ export const usePerformCrop = () => {
         { crop: croppingBounds },
       ]);
       // Check if on web - currently there is a weird bug where it will keep
-      // the canvas from ImageManipualtor at originX + width and so we'll just crop
+      // the canvas from ImageManipulator at originX + width and so we'll just crop
       // the result again for now if on web - TODO write github issue!
       if (Platform.OS === "web") {
         const webCorrection = await ImageManipulator.manipulateAsync(

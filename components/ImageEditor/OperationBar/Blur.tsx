@@ -13,10 +13,10 @@ import {
 import { Slider } from "@miblanchard/react-native-slider";
 import { Asset } from "expo-asset";
 import { GLView } from "expo-gl";
-import * as ImageManinpulator from "expo-image-manipulator";
+import * as ImageManipulator from "expo-image-manipulator";
 import * as FileSystem from "expo-file-system";
 import _, { debounce, throttle } from "lodash";
-import { EditorContext } from "expo-image-editor";
+import { EditorContext } from "../ImageEditor";
 
 const vertShader = `
 precision highp float;
@@ -47,14 +47,14 @@ void main () {
   // Get the color of the fragment pixel
   vec4 color = texture2D(texture, vec2(uv.x, uv.y));
   color *= gauss(sigma, 0.0);
-  // Loop over the neightbouring pixels
+  // Loop over the neighboring pixels
   for (int i = -30; i <= 30; i++) {
     // Make sure we don't include the main pixel which we already sampled!
     if (i != 0) {
       // Check we are on an index that doesn't exceed the blur radius specified
       if (i >= -radius && i <= radius) {
         float index = float(i);
-        // Caclulate the current pixel index
+        // Calculate the current pixel index
         float pixelIndex = 0.0;
         if (pass == 0) {
           pixelIndex = (uv.y) * height;
@@ -62,10 +62,10 @@ void main () {
         else {
           pixelIndex = uv.x * width;
         }
-        // Get the neighbouring pixel index
+        // Get the neighboring pixel index
         float offset = index * pixelFrequency;
         pixelIndex += offset;
-        // Normalise the new index back into the 0.0 to 1.0 range
+        // Normalize the new index back into the 0.0 to 1.0 range
         if (pass == 0) {
           pixelIndex /= height;
         }
@@ -81,7 +81,7 @@ void main () {
         }
         // Get gaussian amplitude
         float g = gauss(sigma, index);
-        // Get the color of neighbouring pixel
+        // Get the color of neighboring pixel
         vec4 previousColor = vec4(0.0, 0.0, 0.0, 0.0);
         if (pass == 0) {
           previousColor = texture2D(texture, vec2(uv.x, pixelIndex)) * g;
@@ -124,16 +124,16 @@ export function Blur() {
     if (gl) {
       gl.drawArrays(gl.TRIANGLES, 0, 6);
       const output = await GLView.takeSnapshotAsync(gl);
-      // Do any addtional platform processing of the result and set it as the
+      // Do any additional platform processing of the result and set it as the
       // new image data
       if (Platform.OS === "web") {
         const fileReaderInstance = new FileReader();
         fileReaderInstance.readAsDataURL(output.uri as any);
         fileReaderInstance.onload = async () => {
           const base64data = fileReaderInstance.result;
-          const flippedOutput = await ImageManinpulator.manipulateAsync(
+          const flippedOutput = await ImageManipulator.manipulateAsync(
             base64data as string,
-            [{ flip: ImageManinpulator.FlipType.Vertical }]
+            [{ flip: ImageManipulator.FlipType.Vertical }]
           );
           setImageData({
             uri: flippedOutput.uri,
@@ -142,9 +142,9 @@ export function Blur() {
           });
         };
       } else {
-        const flippedOutput = await ImageManinpulator.manipulateAsync(
+        const flippedOutput = await ImageManipulator.manipulateAsync(
           output.uri as string,
-          [{ flip: ImageManinpulator.FlipType.Vertical }]
+          [{ flip: ImageManipulator.FlipType.Vertical }]
         );
         setImageData({
           uri: flippedOutput.uri as string,
@@ -156,7 +156,7 @@ export function Blur() {
       // Reset back to operation selection mode
       setProcessing(false);
       setGLContext(null);
-      // Small timeout so it can set processing state to flase BEFORE
+      // Small timeout so it can set processing state to false BEFORE
       // Blur component is unmounted...
       setTimeout(() => {
         setEditingMode("operation-select");
@@ -204,7 +204,7 @@ export function Blur() {
               // Attach both the vertex and frag shader to the program
               gl.attachShader(program, vert);
               gl.attachShader(program, frag);
-              // Link the program - ensures that vetex and frag shaders are compatible
+              // Link the program - ensures that vert and frag shaders are compatible
               // with each other
               gl.linkProgram(program);
               // Tell GL we ant to now use this program
@@ -340,7 +340,7 @@ export function Blur() {
   }, [blur, glContext, glProgram]);
 
   const throttleSliderBlur = React.useRef<(value: number) => void>(
-    throttle((value) => setBlur(value), 50, { leading: true })
+    throttle((value:any) => setBlur(value), 50, { leading: true })
   ).current;
 
   React.useEffect(() => {
@@ -356,7 +356,7 @@ export function Blur() {
       <View style={[styles.row, { justifyContent: "center" }]}>
         <Slider
           value={sliderValue}
-          onValueChange={(value) => {
+          onValueChange={(value:any) => {
             setSliderValue(value[0]);
             if (throttleBlur) {
               throttleSliderBlur(Math.round(value[0]));

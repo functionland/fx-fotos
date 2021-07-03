@@ -1,5 +1,5 @@
 import { ExpoWebGLRenderingContext } from "expo-gl";
-import { EditingOperations } from "expo-image-editor";
+import { EditingOperations } from "./ImageEditor";
 import { atom } from "recoil";
 
 export interface ImageData {

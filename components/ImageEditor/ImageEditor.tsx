@@ -1,5 +1,5 @@
 import * as React from "react";
-import { StyleSheet, View, StatusBar, Platform } from "react-native";
+import { StyleSheet, View, StatusBar, Platform, Text } from "react-native";
 import { ControlBar } from "./ControlBar";
 import { EditingWindow } from "./EditingWindow";
 import * as ImageManipulator from "expo-image-manipulator";
@@ -9,7 +9,6 @@ import {
   processingState,
   imageDataState,
   editingModeState,
-  readyState,
   ImageDimensions,
 } from "./Store";
 import { OperationBar } from "./OperationBar/OperationBar";
@@ -77,7 +76,6 @@ function ImageEditorCore(props: ImageEditorProps) {
   } = props;
 
   const [imageData, setImageData] = useRecoilState(imageDataState);
-  const [ready, setReady] = useRecoilState(readyState);
   const [processing, setProcessing] = useRecoilState(processingState);
   const [editingMode, setEditingMode] = useRecoilState(editingModeState);
 
@@ -86,7 +84,6 @@ function ImageEditorCore(props: ImageEditorProps) {
     const initialise = async () => {
       if (props.imageUri) {
         const enableEditor = () => {
-          setReady(true);
           // Set no-scroll to on
           noScroll.on();
         };
@@ -129,7 +126,7 @@ function ImageEditorCore(props: ImageEditorProps) {
     // Reset the state of things and only render the UI
     // when this state has been initialised
     if (!props.visible) {
-      setReady(false);
+      
     }
     // Check if ther mode is set to crop only if this is the case then set the editingMode
     // to crop
@@ -152,19 +149,19 @@ function ImageEditorCore(props: ImageEditorProps) {
         onEditingComplete: props.onEditingComplete,
       }}
     >
-      <StatusBar hidden={props.visible} />
+
       <UniversalModal
         visible={props.visible}
         presentationStyle="fullScreen"
         statusBarTranslucent
       >
-        {ready ? (
+        {props.imageUri!=='' ? (
           <View style={styles.container}>
             <ControlBar />
             <EditingWindow />
             {mode === "full" && <OperationBar />}
           </View>
-        ) : null}
+        ) :<View><Text>Loading...</Text></View>}
         {processing ? <Processing /> : null}
       </UniversalModal>
     </EditorContext.Provider>

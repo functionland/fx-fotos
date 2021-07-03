@@ -58,7 +58,7 @@ const Header: React.FC<Props> = (props) => {
     return (
             <Reanimated.View 
             style={[styles.main, animatedStyle, {
-                height: props.HEADER_HEIGHT+2*(StatusBar.currentHeight || 0),
+                height: props.HEADER_HEIGHT+(StatusBar.currentHeight || 0),
                 width: 400,
             }]}>
                     <View style={styles.item}></View>
@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
         position: 'relative',
         top: 0,
         left: 0,
-        marginTop: -1*(StatusBar.currentHeight || 0),
+        marginTop: 0,
         backgroundColor: 'white',
         alignSelf: 'flex-start',
         marginLeft: -15

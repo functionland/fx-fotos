@@ -163,7 +163,7 @@ const PhotosContainer: React.FC<Props> = (props) => {
         flexDirection:'column',
         width: SCREEN_WIDTH,
         position: 'relative',
-        zIndex:10
+        zIndex:10,
       }}
     >
           <PinchZoom
