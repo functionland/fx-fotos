@@ -2,7 +2,7 @@
 
 # Latest 2 Updates
 
-**July-03-2021:** Added image dit feature based on https://github.com/thomas-coldwell/expo-image-editor
+**July-03-2021:** Added image edit feature based on https://github.com/thomas-coldwell/expo-image-editor
 
 **June-29-2021:** Welcoming Dfinity to project sponsors
 
