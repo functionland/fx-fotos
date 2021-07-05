@@ -10,7 +10,14 @@ import {
     PanGestureHandler,
     PanGestureHandlerGestureEvent,
   } from 'react-native-gesture-handler';
-  import { default as Reanimated, useAnimatedStyle, Extrapolate, useAnimatedGestureHandler, useSharedValue } from 'react-native-reanimated';
+  import { default as Reanimated, 
+    useAnimatedStyle, 
+    Extrapolate, 
+    useAnimatedGestureHandler, 
+    withDelay,
+    withTiming,
+    interpolate,
+ } from 'react-native-reanimated';
 
 interface Props {
     indicatorHeight:number;
@@ -50,20 +57,20 @@ const ThumbScroll: React.FC<Props> = (props) => {
           props.dragY.value = (ctx.prevScrollY) + (event.translationY*(props.layoutHeight.value-SCREEN_HEIGHT)/(visibleHeight));
         },
         onEnd: (event) => {
-            props.opacity.value = Reanimated.withDelay(3000, Reanimated.withTiming(0, {duration:1000}));
-            props.showFloatingFilters.value = Reanimated.withTiming(0, {duration:1000});
+            props.opacity.value = withDelay(3000, withTiming(0, {duration:1000}));
+            props.showFloatingFilters.value = withTiming(0, {duration:1000});
         },
         onCancel: () => {
-            props.opacity.value = Reanimated.withDelay(3000, Reanimated.withTiming(0, {duration:1000}));
-            props.showFloatingFilters.value = Reanimated.withTiming(0, {duration:1000});
+            props.opacity.value = withDelay(3000, withTiming(0, {duration:1000}));
+            props.showFloatingFilters.value = withTiming(0, {duration:1000});
         },
         onFail: () => {
-            props.opacity.value = Reanimated.withDelay(3000, Reanimated.withTiming(0, {duration:1000}));
-            props.showFloatingFilters.value = Reanimated.withTiming(0, {duration:1000});
+            props.opacity.value = withDelay(3000, withTiming(0, {duration:1000}));
+            props.showFloatingFilters.value = withTiming(0, {duration:1000});
         },
         onFinish: () => {
-            props.opacity.value = Reanimated.withDelay(3000, Reanimated.withTiming(0, {duration:1000}));
-            props.showFloatingFilters.value = Reanimated.withTiming(0, {duration:1000});
+            props.opacity.value = withDelay(3000, withTiming(0, {duration:1000}));
+            props.showFloatingFilters.value = withTiming(0, {duration:1000});
         },
     });
 
@@ -71,7 +78,7 @@ const ThumbScroll: React.FC<Props> = (props) => {
         return {
             transform: [
                 {
-                    translateY: Reanimated.interpolate((props.scrollY.value* (visibleHeight/(props.layoutHeight.value-visibleHeight))),
+                    translateY: interpolate((props.scrollY.value* (visibleHeight/(props.layoutHeight.value-visibleHeight))),
                         [0, visibleHeight],
                         [props.HEADER_HEIGHT, visibleHeight+props.HEADER_HEIGHT],
                         Extrapolate.CLAMP,

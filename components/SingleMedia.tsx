@@ -25,7 +25,17 @@ import {
   useRecoilState,
 } from 'recoil';
 import {numColumnsState, mediasState, singlePhotoIndexState, imagePositionState} from '../states';
-import {default as Reanimated, useAnimatedReaction, useAnimatedGestureHandler, useSharedValue, useAnimatedRef, useDerivedValue, scrollTo as reanimatedScrollTo, call, useCode} from 'react-native-reanimated';
+import {default as Reanimated, 
+  useAnimatedReaction, 
+  useAnimatedGestureHandler, 
+  useSharedValue, 
+  useAnimatedRef, useDerivedValue, scrollTo as reanimatedScrollTo, 
+  withTiming, 
+  withDelay,
+  useAnimatedStyle,
+  runOnJS,
+  interpolate,
+} from 'react-native-reanimated';
 import * as MediaLibrary from 'expo-media-library';
 
 class ExternalScrollView extends BaseScrollView {
@@ -116,20 +126,20 @@ const SingleMedia: React.FC<Props> = (props) => {
   
   const isModalOpen = useDerivedValue(() => {
     if(props.modalShown.value){
-      return Reanimated.withDelay(1, 
-        Reanimated.withTiming(props.modalShown.value, {
+      return withDelay(1, 
+        withTiming(props.modalShown.value, {
         duration: 0,
       }));
     }else{
       
-      translationX.value = Reanimated.withTiming(0, {
+      translationX.value = withTiming(0, {
         duration: duration,
       });
-      translationY.value = Reanimated.withTiming(0, {
+      translationY.value = withTiming(0, {
         duration: duration,
       });
-      return Reanimated.withDelay(duration, 
-        Reanimated.withTiming(props.modalShown.value, {
+      return withDelay(duration, 
+        withTiming(props.modalShown.value, {
         duration: 0,
       }));
     }
@@ -155,9 +165,9 @@ const SingleMedia: React.FC<Props> = (props) => {
     if (result !== previous) {
       if(result){
         console.log('setting BackHandler');
-        Reanimated.runOnJS(_setBackHandler)();
+        runOnJS(_setBackHandler)();
       }else{
-        Reanimated.runOnJS(_removeBackHandler)();
+        runOnJS(_removeBackHandler)();
       }
     }
   }, [isModalOpen]);
@@ -174,7 +184,7 @@ const SingleMedia: React.FC<Props> = (props) => {
   }, [thumbnailPositionMinusSingleImagePositionX, thumbnailPositionMinusSingleImagePositionY]);
   
   useDerivedValue(() => {
-    positionX.value = Reanimated.withTiming((props.modalShown.value===0?1:0)*(thumbnailPositionMinusSingleImagePositionX.value) + (props.modalShown.value*(SCREEN_WIDTH-props.singleImageWidth.value)/2), {
+    positionX.value = withTiming((props.modalShown.value===0?1:0)*(thumbnailPositionMinusSingleImagePositionX.value) + (props.modalShown.value*(SCREEN_WIDTH-props.singleImageWidth.value)/2), {
       duration: duration,
     });
   }, [
@@ -184,7 +194,7 @@ const SingleMedia: React.FC<Props> = (props) => {
   ]);
   
   useDerivedValue(() => {
-    positionY.value = Reanimated.withTiming((props.modalShown.value===0?1:0)*(thumbnailPositionMinusSingleImagePositionY.value) + (props.modalShown.value*(SCREEN_HEIGHT-props.singleImageHeight.value)/2), {
+    positionY.value = withTiming((props.modalShown.value===0?1:0)*(thumbnailPositionMinusSingleImagePositionY.value) + (props.modalShown.value*(SCREEN_HEIGHT-props.singleImageHeight.value)/2), {
       duration: duration,
     });
   }, [
@@ -214,13 +224,13 @@ const SingleMedia: React.FC<Props> = (props) => {
 
   const changeModalState = (result:number) => {
     /*props.modalShown.value = result;
-    viewScaleY.value = Reanimated.withTiming((result===0?1:0)*(SCREEN_WIDTH/(props.numColumnsAnimated.value*props.singleImageHeight.value)) + result, {
+    viewScaleY.value = withTiming((result===0?1:0)*(SCREEN_WIDTH/(props.numColumnsAnimated.value*props.singleImageHeight.value)) + result, {
       duration: duration,
     });
-    viewScaleX.value = Reanimated.withTiming((result===0?1:0)*(SCREEN_WIDTH/(props.numColumnsAnimated.value*props.singleImageWidth.value)) + result, {
+    viewScaleX.value = withTiming((result===0?1:0)*(SCREEN_WIDTH/(props.numColumnsAnimated.value*props.singleImageWidth.value)) + result, {
       duration: duration,
     });
-    opacity.value = Reanimated.withTiming(result, {
+    opacity.value = withTiming(result, {
       duration: duration,
     });
     if (result === 0 ) {
@@ -234,13 +244,13 @@ const SingleMedia: React.FC<Props> = (props) => {
   }, (result, previous) => {
     if(result !== previous){
       console.log('modalShown animation started');
-      viewScaleY.value = Reanimated.withTiming((result===0?1:0)*(SCREEN_WIDTH/(props.numColumnsAnimated.value*props.singleImageHeight.value)) + result, {
+      viewScaleY.value = withTiming((result===0?1:0)*(SCREEN_WIDTH/(props.numColumnsAnimated.value*props.singleImageHeight.value)) + result, {
         duration: duration,
       });
-      viewScaleX.value = Reanimated.withTiming((result===0?1:0)*(SCREEN_WIDTH/(props.numColumnsAnimated.value*props.singleImageWidth.value)) + result, {
+      viewScaleX.value = withTiming((result===0?1:0)*(SCREEN_WIDTH/(props.numColumnsAnimated.value*props.singleImageWidth.value)) + result, {
         duration: duration,
       });
-      opacity.value = Reanimated.withTiming(result, {
+      opacity.value = withTiming(result, {
         duration: duration,
       });
       if (result === 0 ) {
@@ -272,7 +282,7 @@ const SingleMedia: React.FC<Props> = (props) => {
           hideActions.value = 0;
         }
       }
-      const translationYvsX = event.translationY*Reanimated.interpolate(
+      const translationYvsX = event.translationY*interpolate(
         (event.translationX/ (event.translationY+0.0000001)),
         [-SCREEN_WIDTH, -1, -0.60, 0, 0.60, 1, SCREEN_WIDTH],
         [0,             0,  0,    1, 0,    0, 0],
@@ -281,7 +291,7 @@ const SingleMedia: React.FC<Props> = (props) => {
         props.modalShown.value = 0;
         
       }else{
-        translationY.value = Reanimated.withTiming(0,{duration:50});
+        translationY.value = withTiming(0,{duration:50});
       }
     },
     onEnd: (event, ctx)=>{
@@ -303,22 +313,22 @@ const SingleMedia: React.FC<Props> = (props) => {
     }
   }
 
-  const mainAnimatedStyle = Reanimated.useAnimatedStyle(()=>{
+  const mainAnimatedStyle = useAnimatedStyle(()=>{
     return {
       opacity: isModalOpen.value,
       zIndex: isModalOpen.value,
     }
   });
-  const topActionsAnimatedStyle = Reanimated.useAnimatedStyle(()=> {
+  const topActionsAnimatedStyle = useAnimatedStyle(()=> {
     return {
       transform: [
         {
-          translateY: Reanimated.withTiming(hideActions.value * -50, {duration:100})
+          translateY: withTiming(hideActions.value * -50, {duration:100})
         }
       ]
     }
   })
-  const subAnimatedStyle = Reanimated.useAnimatedStyle(()=>{
+  const subAnimatedStyle = useAnimatedStyle(()=>{
     
     return {
       opacity: opacity.value,
@@ -332,8 +342,8 @@ const SingleMedia: React.FC<Props> = (props) => {
       ]
     }
   });
-  const recyclerAnimatedStyle = Reanimated.useAnimatedStyle(()=>{
-    const translationYvsX = translationY.value*Reanimated.interpolate(
+  const recyclerAnimatedStyle = useAnimatedStyle(()=>{
+    const translationYvsX = translationY.value*interpolate(
       (translationX.value/ (translationY.value+0.0000001)),
       [-SCREEN_WIDTH, -1, -0.60, 0, 0.60, 1, SCREEN_WIDTH],
       [0,             0,  0,    1, 0,    0, 0],
@@ -341,7 +351,7 @@ const SingleMedia: React.FC<Props> = (props) => {
     return {
       transform:[
         {
-          scale: Reanimated.interpolate(translationYvsX,
+          scale: interpolate(translationYvsX,
             [-SCREEN_HEIGHT, -100, 0, 100, SCREEN_HEIGHT],
             [0.9, 0.9, 1, 0.9, 0.9],
           ),
@@ -376,15 +386,15 @@ const SingleMedia: React.FC<Props> = (props) => {
       ]
     }
   });
-  const backdropAnimatedStyle = Reanimated.useAnimatedStyle(()=>{
-    const translationYvsX = translationY.value*Reanimated.interpolate(
+  const backdropAnimatedStyle = useAnimatedStyle(()=>{
+    const translationYvsX = translationY.value*interpolate(
       (translationX.value/ (translationY.value+0.0000001)),
       [-SCREEN_WIDTH, -1, -0.60, 0, 0.60, 1, SCREEN_WIDTH],
       [0,             0,  0,    1, 0,    0, 0],
     );
     return {
-      opacity: props.modalShown.value*isModalOpen.value*Reanimated.interpolate(
-        viewScaleX.value* Reanimated.interpolate(
+      opacity: props.modalShown.value*isModalOpen.value*interpolate(
+        viewScaleX.value* interpolate(
           translationYvsX,
           [-100, 0, 100],
           [0, 1, 0],

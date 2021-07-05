@@ -8,7 +8,7 @@ import Header from '../components/Header';
 import { createBottomTabNavigator,BottomTabBarProps,BottomTabBarOptions,  } from '@react-navigation/bottom-tabs';
 //import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import { FontAwesome5 } from '@expo/vector-icons';
-import {default as Reanimated, useSharedValue, useAnimatedStyle, } from 'react-native-reanimated';
+import {default as Reanimated, useSharedValue, useDerivedValue, runOnJS } from 'react-native-reanimated';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -23,12 +23,13 @@ const AppNavigation = () => {
   const [showHeader, setShowHeader] = useState<boolean|undefined>(true);
 
   const headerShown = useSharedValue(1);
-  Reanimated.useDerivedValue(()=>{
+  
+  useDerivedValue(()=>{
     console.log('headerShown changed to '+headerShown.value);
     if(headerShown.value===0){
-      Reanimated.runOnJS(setShowHeader)(false);
+      runOnJS(setShowHeader)(false);
     }else{
-      Reanimated.runOnJS(setShowHeader)(true);
+      runOnJS(setShowHeader)(true);
     }
   }, [headerShown])
 

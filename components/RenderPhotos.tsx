@@ -21,7 +21,18 @@ import { LayoutUtil } from '../utils/LayoutUtil';
 import FloatingFilters from './FloatingFilters';
 import { useBackHandler } from '@react-native-community/hooks'
 import { Asset } from 'expo-media-library';
-import {default as Reanimated, useSharedValue, useAnimatedRef, useDerivedValue, scrollTo as reanimatedScrollTo, useAnimatedScrollHandler} from 'react-native-reanimated';
+import {default as Reanimated, 
+  useSharedValue, 
+  useAnimatedRef, 
+  useDerivedValue, 
+  scrollTo as reanimatedScrollTo, 
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  interpolate,
+  runOnJS,
+  withDelay,
+  withTiming,
+} from 'react-native-reanimated';
 import { timestampToDate } from '../utils/functions';
 import RCL from './RCL';
 
@@ -149,31 +160,31 @@ const RenderPhotos: React.FC<Props> = (props) => {
 
   const [currentImageTimestamp, setCurrentImageTimestamp] = useState<number>(0);
 
-  const animatedStyle = Reanimated.useAnimatedStyle(()=>{
-    const scale = (props.numColumns===props.numColumnsAnimated.value)?Reanimated.interpolate(
+  const animatedStyle = useAnimatedStyle(()=>{
+    const scale = (props.numColumns===props.numColumnsAnimated.value)?interpolate(
       props.scale.value,
       [0,1,4],
       [props.numColumns/(props.numColumns+1),1,(props.numColumns)/(props.numColumns-1)]
-    ):((props.numColumns===props.numColumnsAnimated.value+1)?Reanimated.interpolate(
+    ):((props.numColumns===props.numColumnsAnimated.value+1)?interpolate(
       props.scale.value,
       [0,1,4],
       [1,(props.numColumns)/(props.numColumns-1),(props.numColumns)/(props.numColumns-1)]
-    ):((props.numColumns===props.numColumnsAnimated.value-1)?Reanimated.interpolate(
+    ):((props.numColumns===props.numColumnsAnimated.value-1)?interpolate(
       props.scale.value,
       [0,1,4],
       [(props.numColumns)/(props.numColumns+1),(props.numColumns)/(props.numColumns+1),1]
     ):1));
     
     return {
-         opacity: (props.numColumnsAnimated.value===props.numColumns)?(Reanimated.interpolate(
+         opacity: (props.numColumnsAnimated.value===props.numColumns)?(interpolate(
             props.scale.value,
             [0,1,4],
             [0,1,0]
-         )):(props.numColumnsAnimated.value===(props.numColumns-1)?(Reanimated.interpolate(
+         )):(props.numColumnsAnimated.value===(props.numColumns-1)?(interpolate(
               props.scale.value,
               [0, 1, 4],
               [1, 0, 0]
-          )):(props.numColumnsAnimated.value===(props.numColumns+1)?(Reanimated.interpolate(
+          )):(props.numColumnsAnimated.value===(props.numColumns+1)?(interpolate(
               props.scale.value,
               [0, 1, 4],
               [0, 0, 1]
@@ -217,15 +228,15 @@ const RenderPhotos: React.FC<Props> = (props) => {
     clearSelection.setValue(clear);
   }
 
-  Reanimated.useDerivedValue(() => {
+  useDerivedValue(() => {
     //we need to add a dummy condition on the props.lastSelectedAssetAction.value and props.lastSelectedAssetIndex.value so that useDerivedValue does not ignore updating
     if(props.lastSelectedAssetAction.value>-1 && props.lastSelectedAssetId.value!=='Thisisjustadummytext'){
-      Reanimated.runOnJS(setSelectedAssetsRef)(props.selectedAssets.value);
+      runOnJS(setSelectedAssetsRef)(props.selectedAssets.value);
       if(props.selectedAssets.value.length){
-        Reanimated.runOnJS(setClearSelection)(1);
+        runOnJS(setClearSelection)(1);
       }else{
         console.log('erasing selection');
-        Reanimated.runOnJS(setClearSelection)(0);
+        runOnJS(setClearSelection)(0);
       }
       //selectedAssetsRef.current = props.selectedAssets.value;
     }
@@ -380,7 +391,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
         props.scrollIndex4.setValue(lastIndex);
       }
       ////console.log(['momentum ended', {'in':props.numColumns, 'to':lastIndex}, lastOffset]);
-      showThumbScroll.value = Reanimated.withDelay(3000, Reanimated.withTiming(0));
+      showThumbScroll.value = withDelay(3000, withTiming(0));
   }
   useDerivedValue(() => {
     let approximateIndex = Math.ceil(props.dragY.value/props.numColumns);
@@ -427,7 +438,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
       console.log('onEndDrag');
     },
     onMomentumEnd: (e) => {
-      Reanimated.runOnJS(_onMomentumScrollEnd)();
+      runOnJS(_onMomentumScrollEnd)();
       //let lastIndex = scrollRef?.current?.findApproxFirstVisibleIndex();
     },
   });

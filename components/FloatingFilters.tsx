@@ -2,7 +2,7 @@ import React, { FC, useEffect, useRef } from 'react';
 
 import { Dimensions, StyleSheet, StatusBar, StyleProp, useWindowDimensions , Text, View } from 'react-native';
 import { headerIndex } from '../types/interfaces';
-import {default as Reanimated, call, useCode} from 'react-native-reanimated';
+import {default as Reanimated, useAnimatedStyle,} from 'react-native-reanimated';
 
 const statusBarHeight = StatusBar.currentHeight||0;
 interface Props {
@@ -45,7 +45,7 @@ const FilterItem: React.FC<FilterItemProps> = (props) => {
     const SCREEN_WIDTH = useWindowDimensions().width;
     const visibleHeight = (SCREEN_HEIGHT-props.indicatorHeight-props.HEADER_HEIGHT-props.FOOTER_HEIGHT);
 
-    const animatedStyle = Reanimated.useAnimatedStyle(()=>{
+    const animatedStyle = useAnimatedStyle(()=>{
         return {
             transform: [
                 {
@@ -112,7 +112,7 @@ const FloatingFilters: React.FC<Props> = (props) => {
         console.log([Date.now()+': component FloatingFilters'+props.numColumns+' rendered']);
     });
     
-    const animatedStyle = Reanimated.useAnimatedStyle(()=>{
+    const animatedStyle = useAnimatedStyle(()=>{
         return {
             opacity: props.floatingFiltersOpacity.value,
             zIndex: props.floatingFiltersOpacity.value,

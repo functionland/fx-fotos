@@ -16,6 +16,7 @@ import {
   default as Reanimated, 
   useAnimatedGestureHandler,
   Easing,
+  withTiming,
 } from 'react-native-reanimated';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -50,7 +51,7 @@ const PinchZoom: React.FC<Props> = (props) => {
     },
     onEnd: (event) => {
       if((event.scale > 1.3 && props.numColumnsAnimated.value>2)||(event.scale < 0.8 && props.numColumnsAnimated.value < 4)){
-        props.scale.value = Reanimated.withTiming(
+        props.scale.value = withTiming(
           event.scale>1?4:0, 
           {
             duration: 250,
@@ -87,7 +88,7 @@ const PinchZoom: React.FC<Props> = (props) => {
           }
         )
       }else if(event.scale !== 1){
-        props.scale.value = Reanimated.withTiming(
+        props.scale.value = withTiming(
           1, 
           {
             duration: 50,

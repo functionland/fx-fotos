@@ -13,6 +13,7 @@ import {
     Extrapolate, 
     useAnimatedReaction, 
     useDerivedValue,
+    interpolate,
 } from 'react-native-reanimated';
 import Menu, { MenuItem, MenuDivider } from 'react-native-material-menu';
 import * as Auth from './Auth';
@@ -55,7 +56,7 @@ const Header: React.FC<Props> = (props) => {
         }, (result, previous) => {
             if (result !== previous) {
                 const diff =  (previous||0) - result;
-                translateY.value = Reanimated.interpolate(
+                translateY.value = interpolate(
                     translateY.value+diff,
                     [-props.HEADER_HEIGHT*2, 0],
                     [-props.HEADER_HEIGHT*2, 0],

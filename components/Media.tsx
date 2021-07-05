@@ -12,7 +12,7 @@ import {
   State,
   PinchGestureHandlerProps
 } from 'react-native-gesture-handler';
-import { default as Reanimated, useAnimatedGestureHandler, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
+import { default as Reanimated, useAnimatedGestureHandler, interpolate, useSharedValue, useAnimatedStyle } from 'react-native-reanimated';
 
 
 interface Props {
@@ -52,7 +52,7 @@ const Media: React.FC<Props> = (props) => {
     },
     onActive: (event, ctx) => {
       console.log([event.focalX, event.focalY]);
-      props.imageScale.value = Reanimated.interpolate(ctx.scale*event.scale,
+      props.imageScale.value = interpolate(ctx.scale*event.scale,
         [0, 1, 4],
         [1, 1, 4]
       );
@@ -134,7 +134,7 @@ const Media: React.FC<Props> = (props) => {
         }
       }, [props.index, state?.activeIndex, state]);
 
-      const animatedImageStyle = Reanimated.useAnimatedStyle(()=>{
+      const animatedImageStyle = useAnimatedStyle(()=>{
         
         let scale = props.modalShown.value*((props.animatedSingleMediaIndex.value===props.index)?props.imageScale.value:1);
         return {
@@ -202,9 +202,9 @@ const Media: React.FC<Props> = (props) => {
         }
       }
 
-      const animatedViewStyle = Reanimated.useAnimatedStyle(()=>{
+      const animatedViewStyle = useAnimatedStyle(()=>{
         return {
-          opacity: (props.modalShown.value*((props.animatedSingleMediaIndex.value===props.index)?1:(Reanimated.interpolate(
+          opacity: (props.modalShown.value*((props.animatedSingleMediaIndex.value===props.index)?1:(interpolate(
             props.imageScale.value,
             [0, 0.99, 1, 1.01, 4],
             [0, 0, 1, 0, 0],

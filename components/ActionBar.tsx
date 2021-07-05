@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Appbar } from 'react-native-paper';
 import { View, StyleSheet } from 'react-native';
-import { default as Reanimated, useSharedValue } from 'react-native-reanimated';
+import { default as Reanimated, useSharedValue, useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
 import { ReText } from 'react-native-redash';
 
 interface Props {
@@ -14,7 +14,7 @@ interface Props {
   lastSelectedAssetAction: Reanimated.SharedValue<number>;
   }
 const ActionBar: React.FC<Props> = (props) => {
-  const animatedStyle = Reanimated.useAnimatedStyle(()=>{
+  const animatedStyle = useAnimatedStyle(()=>{
     return {
         opacity: props.actionBarOpacity.value,
         top: props.actionBarOpacity.value?0:-200
@@ -22,7 +22,7 @@ const ActionBar: React.FC<Props> = (props) => {
   },[props.actionBarOpacity]);
 
   const numberSelected = useSharedValue('');
-  Reanimated.useDerivedValue(() => {
+  useDerivedValue(() => {
     //we need to add a dummy condition on the props.lastSelectedAssetAction.value and props.lastSelectedAssetIndex.value so that useDerivedValue does not ignore updating
     if(props.lastSelectedAssetAction.value>-1 && props.lastSelectedAssetId.value!=='Thisisjustadummytext'){
       if(props.selectedAssets.value.length){
