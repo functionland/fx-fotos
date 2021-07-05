@@ -43,7 +43,6 @@
   "dependencies": {
     "@dfinity/agent": "^0.9.1",
     "@dfinity/auth-client": "^0.9.1",
-    "@dfinity/authentication": "^0.9.1",
     "@dfinity/identity": "^0.9.1",
     "@expo/react-native-action-sheet": "^3.9.0",
     "@miblanchard/react-native-slider": "^1.5.0",

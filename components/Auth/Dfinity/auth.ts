@@ -1,7 +1,6 @@
 import 'text-encoding-polyfill';
 import { Actor, HttpAgent, } from "@dfinity/agent";
 import { DelegationIdentity } from "@dfinity/identity";
-import { default as r } from '@dfinity/authentication'
 import { AuthClient } from "@dfinity/auth-client";
 
 export const login = async() => {
