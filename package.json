@@ -41,6 +41,9 @@
     "eject": "expo eject"
   },
   "dependencies": {
+    "@dfinity/agent": "^0.9.1",
+    "@dfinity/candid": "^0.9.1",
+    "@dfinity/principal": "^0.9.1",
     "@expo/react-native-action-sheet": "^3.9.0",
     "@miblanchard/react-native-slider": "^1.5.0",
     "@react-native-community/hooks": "^2.6.0",
@@ -51,6 +54,7 @@
     "@react-navigation/native": "^5.9.4",
     "@react-navigation/stack": "^5.14.4",
     "add": "^2.0.6",
+    "big-integer": "^1.6.48",
     "eslint": "^7.30.0",
     "expo": "^42.0.0",
     "expo-av": "~9.2.3",
@@ -79,6 +83,7 @@
     "recoil": "^0.3.1",
     "recyclerlistview": "^3.0.5",
     "rn-round-checkbox": "^1.0.0",
+    "text-encoding": "^0.7.0",
     "tslib": "^2.2.0",
     "with-default-props": "^0.2.1",
     "yarn": "^1.22.10"
