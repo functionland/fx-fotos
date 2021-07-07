@@ -44,6 +44,8 @@ Or checkout individual features below:
 - ![https://youtu.be/QsDzOGyj9cM](https://github.com/functionland/photos/blob/main/assets/demo/Fast%20scroll_thumb%20scroll.gif))
 - Image Edit feature
 - ![https://youtu.be/SDyCdE_aUso](https://github.com/functionland/photos/blob/0c52d3a1d73f3bfe045d939eef324270b1cd7f73/assets/demo/imageEdit.gif)
+- Image select feature
+- ![https://youtu.be/3IXIoBLGY_4](https://github.com/functionland/photos/blob/cc57d970dc50598c7949831a64c5d8647a85ef81/assets/demo/select.gif)
 
 ## table of content
 
