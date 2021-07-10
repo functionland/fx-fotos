@@ -2,9 +2,9 @@
 
 # Latest 2 Updates
 
-**July-03-2021:** Added image edit feature based on https://github.com/thomas-coldwell/expo-image-editor
+**July-10-2021:** Integrated Dfinity's Internet Identity
 
-**June-29-2021:** Welcoming Dfinity to project sponsors
+**July-03-2021:** Added image edit feature based on https://github.com/thomas-coldwell/expo-image-editor
 
 
 # BOX Photos development guide
