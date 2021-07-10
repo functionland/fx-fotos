@@ -3,7 +3,8 @@ import {
     View, 
     StyleSheet, 
     Image, 
-    StatusBar 
+    StatusBar,
+    Pressable
 } from 'react-native';
 import {
     default as Reanimated, 
@@ -12,7 +13,10 @@ import {
     Extrapolate, 
     useAnimatedReaction, 
     useDerivedValue,
+    interpolate,
 } from 'react-native-reanimated';
+import Menu, { MenuItem, MenuDivider } from 'react-native-material-menu';
+import * as Auth from './Auth';
 
 interface Props {
     scrollY2: Reanimated.SharedValue<number>;
@@ -20,6 +24,7 @@ interface Props {
     scrollY4: Reanimated.SharedValue<number>;
     HEADER_HEIGHT: number;
     headerShown: Reanimated.SharedValue<number>;
+    navigation: any;
 }
 
 const Header: React.FC<Props> = (props) => {
@@ -28,6 +33,20 @@ const Header: React.FC<Props> = (props) => {
     })
     const translateY_t = useSharedValue(0);
     const translateY = useSharedValue(0);
+
+    let _menu: { hide: () => void; show: () => void; } | null = null;
+
+    const setMenuRef = (ref: any) => {
+        _menu = ref;
+    };
+
+    const hideMenu = () => {
+        _menu?.hide();
+    };
+
+    const showMenu = () => {
+        _menu?.show();
+    };
     
     const animScroll = useSharedValue<number>(0);
     useDerivedValue(() => {
@@ -38,7 +57,7 @@ const Header: React.FC<Props> = (props) => {
         }, (result, previous) => {
             if (result !== previous) {
                 const diff =  (previous||0) - result;
-                translateY.value = Reanimated.interpolate(
+                translateY.value = interpolate(
                     translateY.value+diff,
                     [-props.HEADER_HEIGHT*2, 0],
                     [-props.HEADER_HEIGHT*2, 0],
@@ -68,7 +87,39 @@ const Header: React.FC<Props> = (props) => {
                             style={[styles.image,{bottom:props.HEADER_HEIGHT/2}]}
                         />
                     </View>
-                    <View style={styles.item}></View>
+                    <View style={styles.item}>
+                        <Menu
+                            ref={setMenuRef}
+                            button={<Pressable style={[styles.profilePic]} onPress={showMenu}>
+
+                            </Pressable>}
+                        >
+                            {
+                                Auth.authProviders.map(x => (
+                                    <MenuItem 
+                                        onPress={
+                                            ()=>{
+                                                if(x.link){
+                                                    props.navigation.navigate('Browser', {
+                                                        title: x.name, 
+                                                        link: x.link
+                                                    })
+                                                }else{
+                                                    x.action();
+                                                }
+                                                hideMenu();
+                                            }
+                                        } 
+                                        key={x.key}>
+                                            {x.name}
+                                        </MenuItem>
+                                    )
+                                )
+                            }
+                            
+                        </Menu>
+                        
+                    </View>
             </Reanimated.View>
     )
 }
@@ -95,6 +146,14 @@ const styles = StyleSheet.create({
         position: 'absolute',
         alignSelf:'center',
         //backgroundColor: 'blue'
+    },
+    profilePic: {
+        borderRadius: 35,
+        width:35,
+        height: 35,
+        backgroundColor: 'grey',
+        alignSelf:'center',
+        marginTop: '10%'
     }
   });
 

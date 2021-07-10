@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Appbar } from 'react-native-paper';
 import { View, StyleSheet, Pressable } from 'react-native';
-import { default as Reanimated, useSharedValue } from 'react-native-reanimated';
+import { default as Reanimated, useAnimatedStyle } from 'react-native-reanimated';
 import { MaterialCommunityIcons } from '@expo/vector-icons'; 
 
 interface Props {
@@ -11,7 +11,7 @@ interface Props {
   moreActions:Array<{icon:string;color:string;onPress:Function;name: string;}>;
   }
 const SingleMediaTopActions: React.FC<Props> = (props) => {
-  const animatedStyle = Reanimated.useAnimatedStyle(()=>{
+  const animatedStyle = useAnimatedStyle(()=>{
     return {
         opacity: props.actionBarOpacity.value,
         top: props.actionBarOpacity.value?0:-200,

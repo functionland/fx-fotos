@@ -25,10 +25,13 @@
         "backgroundColor": "#FFFFFF"
       },
       "package": "land.fx.BoxPhotos",
-	  "versionCode": 4
+      "versionCode": 4
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "expo-dev-client"
+    ]
   }
 }

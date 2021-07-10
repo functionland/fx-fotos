@@ -10,7 +10,7 @@ import {
   useRecoilState,
 } from 'recoil';
 import {preparedMediaState,} from '../states';
-import { default as Reanimated, useSharedValue } from 'react-native-reanimated';
+import { default as Reanimated, useSharedValue, useAnimatedReaction, runOnJS, } from 'react-native-reanimated';
 
 interface Props {
   removeElements: Function;
@@ -73,7 +73,7 @@ const AllPhotos: React.FC<Props> = (props) => {
     selectedAssetsRef.current = selected;
   }
 
-  Reanimated.useAnimatedReaction(() => {
+  useAnimatedReaction(() => {
     return ([selectedAssets.value.length, lastSelectedAssetId.value, lastSelectedAssetAction.value]);
   }, (result, previous) => {
     if (result !== previous) {
@@ -84,7 +84,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         props.headerShown.value = 1;
         actionBarOpacity.value = 0;
       }
-      Reanimated.runOnJS(_setSelectedValueRef)(selectedAssets.value);
+      runOnJS(_setSelectedValueRef)(selectedAssets.value);
     }
   }, [lastSelectedAssetId,lastSelectedAssetAction, modalShown]);
 

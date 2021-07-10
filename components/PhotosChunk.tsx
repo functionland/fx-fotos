@@ -5,6 +5,7 @@ import { layout } from '../types/interfaces';
 import { prettyTime } from '../utils/functions';
 import { MaterialIcons } from '@expo/vector-icons'; 
 import RoundCheckbox from './RoundCheckbox';
+import FastImage from 'react-native-fast-image'
 
 import {
   LongPressGestureHandler,
@@ -12,7 +13,7 @@ import {
   TapGestureHandlerGestureEvent,
   LongPressGestureHandlerGestureEvent,
 } from 'react-native-gesture-handler';
-import { default as Reanimated, useAnimatedGestureHandler } from 'react-native-reanimated';
+import { default as Reanimated, useAnimatedGestureHandler, runOnJS, } from 'react-native-reanimated';
 
 interface Props {
   photo: layout;
@@ -97,11 +98,11 @@ const PhotosChunk: React.FC<Props> = (props) => {
         if(index > -1){
           props.selectedAssets.value.splice(index, 1);
           props.lastSelectedAssetAction.value = 0;
-          Reanimated.runOnJS(setAnimatedVal)(0);
+          runOnJS(setAnimatedVal)(0);
         }else{
           props.selectedAssets.value.push(props.photo.id);
           props.lastSelectedAssetAction.value = 1;
-          Reanimated.runOnJS(setAnimatedVal)(1);
+          runOnJS(setAnimatedVal)(1);
         }
       }
 
@@ -122,12 +123,12 @@ const PhotosChunk: React.FC<Props> = (props) => {
         //console.log('removed '+index);
         props.selectedAssets.value.splice(index, 1);
         props.lastSelectedAssetAction.value = 0;
-        Reanimated.runOnJS(setAnimatedVal)(0);
+        runOnJS(setAnimatedVal)(0);
       }else{
         console.log('added '+index);
         props.selectedAssets.value.push(props.photo.id);
         props.lastSelectedAssetAction.value = 1;
-        Reanimated.runOnJS(setAnimatedVal)(1);
+        runOnJS(setAnimatedVal)(1);
       }
     },
   });
