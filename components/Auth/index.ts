@@ -1,12 +1,12 @@
 import { login } from './Dfinity/auth'
-const dfinity = () => {
-
-    console.log('dfinity clicked');
+const openWeb = () => {
+    console.log('other providers clicked');
     login();
 
 }
 export const authProviders = [{
-    name: 'Internet Identity',
-    key: 'dfinity',
-    action: dfinity,
+    name: 'Other Providers',
+    key: 'otherProviders',
+    action: openWeb,
+    link: ''
 }];

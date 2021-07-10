@@ -10,7 +10,7 @@ import { DelegationIdentity } from "@dfinity/identity";
 import { AuthClient } from '@dfinity/auth-client';
 
 
-export const login = async(url='https://fx.land/Internet-Identity/') => {
+export const login = async(url='https://fx.land/Web-Identity-Providers/') => {
     WebBrowser.maybeCompleteAuthSession();
     Linking.canOpenURL(url).then(
         (url2) => {
