@@ -24,6 +24,7 @@ interface Props {
     scrollY4: Reanimated.SharedValue<number>;
     HEADER_HEIGHT: number;
     headerShown: Reanimated.SharedValue<number>;
+    navigation: any;
 }
 
 const Header: React.FC<Props> = (props) => {
@@ -94,7 +95,26 @@ const Header: React.FC<Props> = (props) => {
                             </Pressable>}
                         >
                             {
-                                Auth.authProviders.map(x => <MenuItem onPress={()=>{x.action();hideMenu();}} key={x.key}>{x.name}</MenuItem>)
+                                Auth.authProviders.map(x => (
+                                    <MenuItem 
+                                        onPress={
+                                            ()=>{
+                                                if(x.link){
+                                                    props.navigation.navigate('Browser', {
+                                                        title: x.name, 
+                                                        link: x.link
+                                                    })
+                                                }else{
+                                                    x.action();
+                                                }
+                                                hideMenu();
+                                            }
+                                        } 
+                                        key={x.key}>
+                                            {x.name}
+                                        </MenuItem>
+                                    )
+                                )
                             }
                             
                         </Menu>

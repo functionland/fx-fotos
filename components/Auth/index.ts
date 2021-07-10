@@ -8,5 +8,5 @@ const dfinity = () => {
 export const authProviders = [{
     name: 'Internet Identity',
     key: 'dfinity',
-    action: dfinity
+    action: dfinity,
 }];

@@ -12,7 +12,7 @@ interface Props {
   selectedAssets:Reanimated.SharedValue<string[]>;
   lastSelectedAssetId: Reanimated.SharedValue<string>;
   lastSelectedAssetAction: Reanimated.SharedValue<number>;
-  }
+}
 const ActionBar: React.FC<Props> = (props) => {
   const animatedStyle = useAnimatedStyle(()=>{
     return {

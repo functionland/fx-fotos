@@ -3,6 +3,7 @@ import {createNativeStackNavigator} from 'react-native-screens/native-stack';
 import PermissionError from '../pages/PermissionError';
 import React, { useState, } from 'react';
 import HomePage from '../pages/HomePage';
+import Browser from './Browser';
 import { StyleSheet, Animated, View, TouchableOpacity, Text, StatusBar } from 'react-native';
 import Header from '../components/Header';
 import { createBottomTabNavigator,BottomTabBarProps,BottomTabBarOptions,  } from '@react-navigation/bottom-tabs';
@@ -42,8 +43,16 @@ const AppNavigation = () => {
     ]}>
       <NavigationContainer>
         <Stack.Navigator
-          screenOptions={{
-            headerCenter: () => <Header scrollY2={scrollY2} scrollY3={scrollY3} scrollY4={scrollY4} HEADER_HEIGHT={HEADER_HEIGHT} headerShown={headerShown} />,
+          screenOptions={({ navigation, route }) => ({
+            headerCenter: () => (
+              <Header 
+                scrollY2={scrollY2} 
+                scrollY3={scrollY3} 
+                scrollY4={scrollY4} 
+                HEADER_HEIGHT={HEADER_HEIGHT} 
+                headerShown={headerShown} 
+                navigation={navigation}
+              />),
             ////headerTitle: '',
             headerStyle: {
               backgroundColor: 'transparent',
@@ -54,7 +63,7 @@ const AppNavigation = () => {
             headerTitleStyle: {
               fontWeight: 'bold',
             },
-          }}
+          })}
         >
           <Stack.Screen
             name="HomePage"
@@ -77,6 +86,11 @@ const AppNavigation = () => {
           <Stack.Screen
             name="PermissionError"
             component={PermissionError}
+            options={{headerShown: false}}
+          />
+          <Stack.Screen
+            name="Browser"
+            component={Browser}
             options={{headerShown: false}}
           />
         </Stack.Navigator>
