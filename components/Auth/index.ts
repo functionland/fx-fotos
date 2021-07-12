@@ -1,4 +1,4 @@
-import { login } from './Dfinity/auth'
+import { login } from './auth'
 const openWeb = () => {
     console.log('other providers clicked');
     login();
