@@ -1,6 +1,8 @@
 We are adding Dfinity support and right now their package does not support react native. So we did custom polyfill to their libraries. To make it work, you need to replace the following files after you ran yarn (and you need to do this if you run yarn again, not optimized but working to bake it into code):
-1- copy and replace "temp/transforms.js" to "...\Photos\node_modules@dfinity\agent\lib\cjs\agent\http\transforms.js"
-2- copy and replace "temp/index.js" to "...\Photos\node_modules@dfinity\authentication\lib\cjs\index.js"
-3- copy and replace "temp/index.d.ts" to "...\Photos\node_modules@dfinity\auth-client\lib\cjs\index.d.ts"
-4- copy and replace "temp/index-2/index.js" to "C:\Users\ehsan\Github\Photos\node_modules@dfinity\auth-client\lib\cjs\index.js" (dont forget to rename the file back to index.js)
-5- copy and replace "temp/index-3/index.js" to "...\Photos\node_modules@dfinity\principal\lib\cjs\index.js" (dont forget to rename the file back to index.js)
+(temp/ files mentioned are here: https://github.com/functionland/photos/tree/main/temp)
+
+1- copy and replace "temp/transforms.js" to "...\Photos\node_modules\@dfinity\agent\lib\cjs\agent\http\transforms.js"
+2- copy and replace "temp/index.js" to "...\Photos\node_modules\@dfinity\authentication\lib\cjs\index.js"
+3- copy and replace "temp/index.d.ts" to "...\Photos\node_modules\@dfinity\auth-client\lib\cjs\index.d.ts"
+4- copy and replace "temp/index-2/index.js" to "...\Photos\node_modules\@dfinity\auth-client\lib\cjs\index.js"
+5- copy and replace "temp/index-3/index.js" to "...\Photos\node_modules\@dfinity\principal\lib\cjs\index.js"
