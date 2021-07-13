@@ -8,7 +8,7 @@
 
 
 # BOX Photos development guide
-Note: Project is still in alpha phase and not production ready. We aim to release beta version by end of June 2021.
+Note: Project is still in alpha phase and not production ready. We aim to release beta version by end of August 2021.
 
 [Intro Blog](https://dev.to/fx/google-photos-open-source-alternative-with-react-native-80c)
 
