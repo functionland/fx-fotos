@@ -247,7 +247,7 @@ RenderPhotos --> PhotosChunk & ThumbScroll & Highlights & FloatingFilters
 
 ## How to contribute?
 
-Just pick any issue from the issues tab or create your own and do a pull request! **We appreciate all the help you can do, even if it is renaming one variable to a better name.**
+Just pick any issue from the issues tab or create your own and do a pull request! Please use yarn instead of npm if you are a contributor to be aligned with other contributors. You can ask questions and get in touch with the rest of contributors and community in the [Discussion here](https://github.com/functionland/photos/discussions/58) **We appreciate all the help you can do, even if it is renaming one variable to a better name.**
 
 ## Road map
  
