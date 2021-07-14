@@ -1,11 +1,10 @@
 import * as React from "react";
-import { StyleSheet, View, Text, PixelRatio, Platform } from "react-native";
+import { StyleSheet, View, Text, Platform } from "react-native";
 import { useRecoilState } from "recoil";
 import { IconButton } from "../components/IconButton";
 import {
   editingModeState,
   glContextState,
-  glProgramState,
   imageBoundsState,
   imageDataState,
   processingState,
@@ -15,7 +14,7 @@ import { Asset } from "expo-asset";
 import { GLView } from "expo-gl";
 import * as ImageManipulator from "expo-image-manipulator";
 import * as FileSystem from "expo-file-system";
-import _, { debounce, throttle } from "lodash";
+import _, { throttle } from "lodash";
 import { EditorContext } from "../ImageEditor";
 
 const vertShader = `

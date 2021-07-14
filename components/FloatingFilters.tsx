@@ -1,6 +1,6 @@
-import React, { FC, useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 
-import { Dimensions, StyleSheet, StatusBar, StyleProp, useWindowDimensions , Text, View } from 'react-native';
+import { StyleSheet, StatusBar, useWindowDimensions , Text, View } from 'react-native';
 import { headerIndex } from '../types/interfaces';
 import {default as Reanimated, useAnimatedStyle,} from 'react-native-reanimated';
 

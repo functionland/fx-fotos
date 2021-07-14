@@ -1,5 +1,5 @@
-import {DataProvider, LayoutProvider} from 'recyclerlistview';
-import {Dimensions} from 'react-native';
+import { LayoutProvider } from 'recyclerlistview';
+import { Dimensions } from 'react-native';
 import {
   useRecoilState,
 } from 'recoil';

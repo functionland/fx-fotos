@@ -5,7 +5,6 @@ import { layout } from '../types/interfaces';
 import { prettyTime } from '../utils/functions';
 import { MaterialIcons } from '@expo/vector-icons'; 
 import RoundCheckbox from './RoundCheckbox';
-import FastImage from 'react-native-fast-image'
 
 import {
   LongPressGestureHandler,

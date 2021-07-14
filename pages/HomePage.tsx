@@ -1,5 +1,5 @@
 import React, {useEffect} from 'react';
-import { SafeAreaView, StyleSheet, Animated, View, useWindowDimensions, StatusBar } from 'react-native';
+import { SafeAreaView, StyleSheet, View, useWindowDimensions, StatusBar } from 'react-native';
 import PhotosContainer from '../components/PhotosContainer';
 import {default as Reanimated,} from 'react-native-reanimated';
 

@@ -1,5 +1,5 @@
-import React, {createRef, useEffect, useRef} from 'react';
-import {Animated, Dimensions} from 'react-native';
+import React, { createRef, useEffect, useRef } from 'react';
+import { Animated, Dimensions } from 'react-native';
 import {sortCondition} from '../types/interfaces';
 import {
   changeSortCondition,
@@ -11,7 +11,7 @@ import {
 import {
   useRecoilState,
 } from 'recoil';
-import {numColumnsState} from '../states';
+import { numColumnsState } from '../states';
 import {
   default as Reanimated, 
   useAnimatedGestureHandler,

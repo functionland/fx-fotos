@@ -1,6 +1,5 @@
-import React, {useEffect, useState, useRef, MutableRefObject} from 'react';
-import {Animated, View, useWindowDimensions, Text} from 'react-native';
-import {FlatSection, story, layout} from '../types/interfaces';
+import React, {useEffect, useRef } from 'react';
+import {Animated, View, Text} from 'react-native';
 import RenderPhotos from './RenderPhotos';
 import SingleMedia from './SingleMedia';
 import StoryHolder from './StoryHolder';

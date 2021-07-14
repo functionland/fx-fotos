@@ -1,6 +1,5 @@
 import React, { useState, useEffect, createRef, useRef } from 'react';
-import {useWindowDimensions , Animated, StyleSheet, BackHandler, View, } from 'react-native';
-import { useBackHandler } from '@react-native-community/hooks'
+import { useWindowDimensions , Animated, StyleSheet, BackHandler } from 'react-native';
 import Media from './Media';
 import { Asset } from 'expo-media-library';
 import { RecyclerListView, DataProvider, BaseScrollView, } from 'recyclerlistview';
@@ -13,10 +12,8 @@ import {
   LongPressGestureHandler,
   PanGestureHandler,
   HandlerStateChangeEvent,
-  PanGestureHandlerEventPayload,
   TapGestureHandlerEventPayload,
   State,
-  ScrollView,
   PinchGestureHandler,
   NativeViewGestureHandler,
   PanGestureHandlerGestureEvent,
@@ -24,7 +21,7 @@ import {
 import {
   useRecoilState,
 } from 'recoil';
-import {numColumnsState, mediasState, singlePhotoIndexState, imagePositionState} from '../states';
+import { mediasState } from '../states';
 import {default as Reanimated, 
   useAnimatedReaction, 
   useAnimatedGestureHandler, 
@@ -36,7 +33,6 @@ import {default as Reanimated,
   runOnJS,
   interpolate,
 } from 'react-native-reanimated';
-import * as MediaLibrary from 'expo-media-library';
 
 class ExternalScrollView extends BaseScrollView {
   scrollTo(...args: any[]) {

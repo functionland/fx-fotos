@@ -1,26 +1,21 @@
-import React, {useEffect, MutableRefObject, useState, useRef} from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   Animated,
-  Dimensions,
   Text,
   StyleSheet,
   StatusBar,
-  ActivityIndicator,
   View,
   FlatList,
   SafeAreaView,
-  LayoutAnimation,
-  Systrace
 } from 'react-native';
 import { layout, FlatSection, ScrollEvent, story,  } from '../types/interfaces';
 import PhotosChunk from './PhotosChunk';
 import ThumbScroll from './ThumbScroll';
 import Highlights from './Highlights';
-import { RecyclerListView, DataProvider, BaseItemAnimator, BaseScrollView, LayoutProvider } from 'recyclerlistview';
+import { BaseItemAnimator, BaseScrollView, LayoutProvider } from 'recyclerlistview';
 import { LayoutUtil } from '../utils/LayoutUtil';
 import FloatingFilters from './FloatingFilters';
 import { useBackHandler } from '@react-native-community/hooks'
-import { Asset } from 'expo-media-library';
 import {default as Reanimated, 
   useSharedValue, 
   useAnimatedRef, 

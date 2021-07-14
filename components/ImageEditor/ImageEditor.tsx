@@ -1,5 +1,5 @@
 import * as React from "react";
-import { StyleSheet, View, StatusBar, Platform, Text } from "react-native";
+import { StyleSheet, View, Platform, Text } from "react-native";
 import { ControlBar } from "./ControlBar";
 import { EditingWindow } from "./EditingWindow";
 import * as ImageManipulator from "expo-image-manipulator";

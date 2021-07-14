@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import ProgressItem from './ProgressItem'
-import { GRAY, WHITE, GREEN, LIGHT_GREEN, LIGHT_GRAY_0, TINT_GRAY } from "../utils/colors";
+import { TINT_GRAY } from "../utils/colors";
 import { ProgressViewProps } from "../utils/interfaceHelper";
 import { View, StyleSheet, FlatList } from "react-native";
 

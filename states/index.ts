@@ -1,8 +1,7 @@
-import {atom, selector} from 'recoil'
-import {Asset} from 'expo-media-library';
-import {FlatSection, story} from '../types/interfaces';
-import { DataProvider, LayoutProvider } from 'recyclerlistview';
-import { LayoutUtil } from '../utils/LayoutUtil';
+import { atom } from 'recoil'
+import { Asset } from 'expo-media-library';
+import { FlatSection, story } from '../types/interfaces';
+import { DataProvider } from 'recyclerlistview';
 
 export const photosState = atom<Array<Asset>>({
     key: 'photosState',

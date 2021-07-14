@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Appbar } from 'react-native-paper';
-import { View, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { default as Reanimated, useSharedValue, useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
 import { ReText } from 'react-native-redash';
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { View, Image, TextInput, StyleSheet, TouchableOpacity, Keyboard, Text, Platform, Easing, Animated, Alert } from 'react-native'
-import { BLACK, SLATE_GRAY, WHITE, GRAY } from '../utils/colors'
+import { BLACK, WHITE } from '../utils/colors'
 import SEND from '../images/send.png'
 import SMILEY from '../images/smiley.png'
 import ARROW from '../images/up-arrow.png'

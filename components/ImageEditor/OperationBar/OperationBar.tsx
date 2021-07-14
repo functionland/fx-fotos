@@ -1,12 +1,11 @@
 import * as React from "react";
-import { Animated, LayoutRectangle, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { editingModeState } from "../Store";
 import { useRecoilState } from "recoil";
 import { OperationSelection } from "./OperationSelection";
 import { Crop } from "./Crop";
 import { Rotate } from "./Rotate";
 import { Blur } from "./Blur";
-import { useState } from "react";
 
 export function OperationBar() {
   //
