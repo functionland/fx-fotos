@@ -120,6 +120,7 @@ npm install
 
 You can run the application in expo-cli using the below command. It gives you a QR code which you can use on your phone(in expo GO application) to open and test the application on your phone(both iOS and Android). Or you can build the android or iOS installation files.
 
+* For a limited time before doing the below, please follow additional steps inside "temp/instructions.txt" and after each time you do yarn or npm install. This temporary and we fix it soon.
 ```bash
 expo start
 ```
