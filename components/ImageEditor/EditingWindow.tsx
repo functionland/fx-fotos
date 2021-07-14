@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Image, PixelRatio, StyleSheet, View } from "react-native";
+import { Image, StyleSheet, View } from "react-native";
 import { ImageCropOverlay } from "./ImageCropOverlay";
 import { useRecoilState } from "recoil";
 import {

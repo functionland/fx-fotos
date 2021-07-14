@@ -1,7 +1,6 @@
 import 'text-encoding';
 import 'react-native-get-random-values'
 import * as Linking from 'expo-linking';
-import * as AuthSession from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
 
 import { Actor, HttpAgent, } from "@dfinity/agent";

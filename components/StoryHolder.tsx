@@ -1,8 +1,6 @@
-import { Asset } from 'expo-media-library';
 import React, {useEffect, useRef,} from 'react';
-import { View, Animated, useWindowDimensions, StyleSheet, } from 'react-native';
+import { Animated, useWindowDimensions, StyleSheet, } from 'react-native';
 import StoryContainer from './Story/stories/StoryContainer';
-import {story, } from '../types/interfaces';
 import { timestampToDate } from '../utils/functions';
 
 import {

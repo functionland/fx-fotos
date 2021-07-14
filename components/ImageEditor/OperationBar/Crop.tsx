@@ -1,5 +1,5 @@
 import * as React from "react";
-import { StyleSheet, View, Text, Platform, Alert } from "react-native";
+import { StyleSheet, View, Text } from "react-native";
 import { useRecoilState } from "recoil";
 import { IconButton } from "../components/IconButton";
 import { editingModeState } from "../Store";

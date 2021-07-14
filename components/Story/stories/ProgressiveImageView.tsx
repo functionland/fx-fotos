@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, Animated, Alert } from 'react-native';
 import { ProgressiveImageProps } from '../utils/interfaceHelper';
-import { GREEN, TINT_GRAY } from '../utils/colors';
 
 const ProgressiveImageView = ({ thumbnailSource, imgSource, style, props }: ProgressiveImageProps) => {
 

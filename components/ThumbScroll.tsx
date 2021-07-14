@@ -3,8 +3,6 @@ import React, { useEffect, createRef, } from 'react';
 import { StyleSheet, useWindowDimensions, StyleProp, Image , Text, View } from 'react-native';
 import { ReText } from 'react-native-redash';
 import { scrollImage } from '../assets/images';
-import { headerIndex } from '../types/interfaces';
-import { timestampToDate } from '../utils/functions';
 
 import {
     PanGestureHandler,

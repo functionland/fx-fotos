@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { Appbar } from 'react-native-paper';
 import { View, StyleSheet, Pressable } from 'react-native';
 import { default as Reanimated, useAnimatedStyle } from 'react-native-reanimated';
 import { MaterialCommunityIcons } from '@expo/vector-icons'; 

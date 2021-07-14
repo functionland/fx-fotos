@@ -1,7 +1,7 @@
-import {Text, View, Button} from 'react-native';
 import React from 'react';
-import {storagePermission} from '../utils/permissions';
-import {useNavigation} from '@react-navigation/native';
+import { Text, View, Button } from 'react-native';
+import { storagePermission } from '../utils/permissions';
+import { useNavigation } from '@react-navigation/native';
 
 const PermissionError = () => {
   const navigation = useNavigation();

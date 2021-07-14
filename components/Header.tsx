@@ -15,7 +15,7 @@ import {
     useDerivedValue,
     interpolate,
 } from 'react-native-reanimated';
-import Menu, { MenuItem, MenuDivider } from 'react-native-material-menu';
+import Menu, { MenuItem } from 'react-native-material-menu';
 import * as Auth from './Auth';
 
 interface Props {

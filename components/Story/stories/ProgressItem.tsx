@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useReducer } from "react";
-import { GREEN, GRAY, LIGHT_GRAY, LIGHT_GREEN, BAR_INACTIVE_COLOR, WHITE, BAR_ACTIVE_COLOR, } from "../utils/colors";
+import { BAR_INACTIVE_COLOR, BAR_ACTIVE_COLOR, } from "../utils/colors";
 import { ProgressItemProps } from "../utils/interfaceHelper";
 import { progressReducer, initialState, PROGRESS } from "./ProgressReducer";
 import { View, StyleSheet, Animated, useWindowDimensions } from "react-native";

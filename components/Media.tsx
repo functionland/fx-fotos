@@ -1,15 +1,13 @@
 import React, {useState, useEffect, createRef, useRef} from 'react';
-import {Animated, StyleSheet, useWindowDimensions } from 'react-native';
+import { StyleSheet, useWindowDimensions } from 'react-native';
 import { Asset } from 'expo-media-library';
 import { Video } from 'expo-av'
 import VideoPlayer from './VideoPlayer';
 import {
   TapGestureHandler,
   PinchGestureHandler,
-  HandlerStateChangeEvent,
   PinchGestureHandlerGestureEvent,
   TapGestureHandlerGestureEvent,
-  State,
   PinchGestureHandlerProps
 } from 'react-native-gesture-handler';
 import { default as Reanimated, useAnimatedGestureHandler, interpolate, useSharedValue, useAnimatedStyle } from 'react-native-reanimated';
@@ -81,12 +79,8 @@ const Media: React.FC<Props> = (props) => {
         translateY.value = 0;
       }
     },
-    onEnd: (event)=>{
-
-    },
-    onCancel: (event) => {
-
-    }
+    onEnd: (event) => {},
+    onCancel: (event) => {}
   });
 
   const _onDoubleTapHandlerStateChange = useAnimatedGestureHandler<TapGestureHandlerGestureEvent, {x: number; y: number; scale: number;}>({

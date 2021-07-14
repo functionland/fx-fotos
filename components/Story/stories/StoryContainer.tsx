@@ -3,7 +3,7 @@ import ProgressView from "./ProgressView"
 import StoryView from "./StoryView"
 import { StoryContainerProps } from "../utils/interfaceHelper"
 import { StyleSheet, View, SafeAreaView, Platform, Keyboard, Animated, KeyboardAvoidingView, useWindowDimensions, BackHandler } from "react-native"
-import { GREEN, LIGHT_GRAY_0, RED, TINT_GRAY, GRAY } from "../utils/colors"
+import { TINT_GRAY } from "../utils/colors"
 import ReplyFooterView from "./ReplyFooterView"
 import UserHeaderView from "./UserHeaderView"
 import {DEFAULT_DURATION} from '../utils/constant' ;
@@ -15,7 +15,6 @@ import {
   PanGestureHandlerEventPayload,
   State,
 } from 'react-native-gesture-handler';
-import { ScaleFromCenterAndroid } from "@react-navigation/stack/lib/typescript/src/TransitionConfigs/TransitionPresets"
 
 const StoryContainer = (props: StoryContainerProps) => {
   const backHandler = useRef<any>();

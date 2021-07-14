@@ -4,7 +4,6 @@ import {
     useRecoilState,
   } from 'recoil';
   import {
-    storiesState,
     dataProviderState, 
   } from '../states';
 

@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, StyleSheet, Text, Image, TouchableOpacity, Dimensions } from 'react-native';
-import { WHITE, GREEN, TINT_GRAY } from '../utils/colors'; 
+import { View, StyleSheet, Text, Image, TouchableOpacity } from 'react-native';
+import { WHITE, TINT_GRAY } from '../utils/colors'; 
 import { UserProps } from '../utils/interfaceHelper';
 
 const UserHeaderView = ({ userImage, userName, userMessage, imageArrow, onImageClick }: UserProps) => {

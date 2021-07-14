@@ -1,6 +1,5 @@
-import { CSSProperties, Component, FunctionComponent, FunctionComponentElement } from "react";
-import { ARROW_LEFT, ARROW_RIGHT } from './constant'
-import { StyleSheet, ViewStyle, ImageStyle, ImageSourcePropType, Animated } from "react-native";
+import { FunctionComponentElement } from "react";
+import { ViewStyle, ImageStyle, ImageSourcePropType, Animated } from "react-native";
 import { Asset } from 'expo-media-library';
 
 export interface CommonProps {
