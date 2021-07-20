@@ -260,7 +260,7 @@ Just pick any issue from the issues tab or create your own and do a pull request
  * [ ] Connect with Dfinity
  * [ ] Auto-upload photos to backend
  * [ ] Automatic Migration tool from Google Photos
- * [ ] Connect with BOX
+ * [ ] Connect with BOX (as a self-owned IPFS solution)
  * [ ] Connect with Filecoin
  * [ ] Connect with AWS
  * [ ] Search page to search by date/tags
