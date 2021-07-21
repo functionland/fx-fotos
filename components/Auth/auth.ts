@@ -2,12 +2,11 @@ import 'text-encoding';
 import 'react-native-get-random-values'
 import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
-
 import 'react-native-polyfill-globals/auto';
 import { Actor, HttpAgent, } from "@dfinity/agent";
 import { Principal } from '@dfinity/principal';
 import { AuthClient } from "@dfinity/auth-client";
-import { blobFromUint32Array } from '@dfinity/candid';
+import { IDL, blobFromUint32Array } from '@dfinity/candid';
 
 import { Ed25519KeyIdentity } from "@dfinity/identity";
 const Buffer = require("buffer").Buffer;
@@ -29,32 +28,46 @@ export const login = async(url='https://fx.land/Web-Identity-Providers/?pubKey64
         };
 		
         const authClient = await AuthClient.create(options);
-        console.log('here1');
+        
         const identity = authClient.getIdentity();
-        const idlFactory = ({ IDL }) =>
-            IDL.Service({
-            whoami: IDL.Func([], [IDL.Principal], ['query']),
+		
+        const idlFactory = ({ IDL }:any) => {
+            return IDL.Service({
+				greet: IDL.Func([], [], ['query']),
             });
-
-        const canisterId = Principal.fromText('4k2wq-cqaaa-aaaab-qac7q-cai');
+		}
+		
+        const canisterId = Principal.fromText('rrkah-fqaaa-aaaaa-aaaaq-cai');
 		const agent = new HttpAgent({
-			host: 'https://boundary.ic0.app/',
+			host: 'http://192.168.68.113:8000/',
 			identity,
 		});
+		
         const actor = Actor.createActor(idlFactory, {
             agent: agent,
             canisterId,
         });
-		const queryData = {
-			methodName: 'whoami',
-			arg: blobFromUint32Array(new Uint32Array(0))
+		console.log('here1');
+		const service = idlFactory({ IDL: IDL });
+		
+		for (const [methodName, func] of service._fields) {
+			console.log(methodName);
+			console.log(func);
+			const arg = IDL.encode(func.argTypes, []);
+			console.log(arg);
 		}
-		agent.query(canisterId, queryData, identity, ).then((res)=>{
+		const queryData = {
+			methodName: 'greet',
+			arg: blobFromUint32Array(new Uint32Array())
+		}
+		console.log(queryData);
+
+		/*agent.query(canisterId, queryData, identity, ).then((res)=>{
 			console.log(res);
-		});
-        /*actor.whoami().then((principal) => {
+		});*/
+        actor.greet().then((principal) => {
             console.log(principal.toText());
-        });*/
+        });
     }
 
     WebBrowser.maybeCompleteAuthSession();

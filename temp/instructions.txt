@@ -6,3 +6,5 @@ We are adding Dfinity support and right now their package does not support react
 3- copy and replace "temp/index.d.ts" to "...\Photos\node_modules\@dfinity\auth-client\lib\cjs\index.d.ts"
 4- copy and replace "temp/index-2/index.js" to "...\Photos\node_modules\@dfinity\auth-client\lib\cjs\index.js"
 5- copy and replace "temp/index-3/index.js" to "...\Photos\node_modules\@dfinity\principal\lib\cjs\index.js"
+6- Install 'react-native-polyfill-globals'
+7- copy and replace "temp/leb128.js" to "...\node_modules@dfinity\candid\lib\cjs\utils\leb128.js"
