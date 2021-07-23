@@ -6,13 +6,14 @@ import 'react-native-polyfill-globals/auto';
 import { Actor, HttpAgent, } from "@dfinity/agent";
 import { Principal } from '@dfinity/principal';
 import { AuthClient } from "@dfinity/auth-client";
-import { IDL, blobFromUint32Array } from '@dfinity/candid';
+import { IDL } from '@dfinity/candid';
 
 import { Ed25519KeyIdentity } from "@dfinity/identity";
 const Buffer = require("buffer").Buffer;
 
 export const login = async(url='https://fx.land/Web-Identity-Providers/?pubKey64=') => {
     const keyPair = Ed25519KeyIdentity.generate();
+	console.log('keyPair generated');
     const keyPairJson = keyPair.toJSON();
     keyPairJson[1] = '';
     
@@ -33,7 +34,7 @@ export const login = async(url='https://fx.land/Web-Identity-Providers/?pubKey64
 		
         const idlFactory = ({ IDL }:any) => {
             return IDL.Service({
-				greet: IDL.Func([], [], ['query']),
+				hello: IDL.Func([IDL.Text], [IDL.Text], ['query']),
             });
 		}
 		
@@ -48,26 +49,26 @@ export const login = async(url='https://fx.land/Web-Identity-Providers/?pubKey64
             canisterId,
         });
 		console.log('here1');
-		const service = idlFactory({ IDL: IDL });
 		
+		/*const service = idlFactory({ IDL: IDL });
+		
+		let arg;
 		for (const [methodName, func] of service._fields) {
-			console.log(methodName);
-			console.log(func);
-			const arg = IDL.encode(func.argTypes, []);
-			console.log(arg);
+			console.log(func.argTypes);
+			arg = IDL.encode(func.argTypes, ['ehsan']);
 		}
 		const queryData = {
-			methodName: 'greet',
-			arg: blobFromUint32Array(new Uint32Array())
+			methodName: 'hello',
+			arg: arg
 		}
 		console.log(queryData);
 
-		/*agent.query(canisterId, queryData, identity, ).then((res)=>{
+		agent.query(canisterId, queryData, ).then((res)=>{
 			console.log(res);
-		});*/
-        actor.greet().then((principal) => {
-            console.log(principal.toText());
-        });
+		}).catch((e)=>{console.log(e)});*/
+        actor.hello('ehsan').then((res) => {
+            console.log(res);
+        }).catch((e)=>{console.log(e)});
     }
 
     WebBrowser.maybeCompleteAuthSession();
