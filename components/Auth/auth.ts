@@ -34,7 +34,7 @@ export const login = async(url='https://fx.land/Web-Identity-Providers/?pubKey64
 		
         const idlFactory = ({ IDL }:any) => {
             return IDL.Service({
-				hello: IDL.Func([IDL.Text], [IDL.Text], ['query']),
+				whoami: IDL.Func([IDL.Text], [IDL.Principal], ['query']),
             });
 		}
 		
@@ -66,7 +66,7 @@ export const login = async(url='https://fx.land/Web-Identity-Providers/?pubKey64
 		agent.query(canisterId, queryData, ).then((res)=>{
 			console.log(res);
 		}).catch((e)=>{console.log(e)});*/
-        actor.hello('ehsan').then((res) => {
+        actor.whoami('ehsan').then((res) => {
             console.log(res);
         }).catch((e)=>{console.log(e)});
     }
@@ -79,7 +79,7 @@ export const login = async(url='https://fx.land/Web-Identity-Providers/?pubKey64
                 let { path, queryParams } = Linking.parse(event.url);
                 console.log([path, queryParams]);
                 test();
-                //WebBrowser.dismissBrowser();
+                WebBrowser.dismissBrowser();
             });
             WebBrowser.openBrowserAsync(url, {
                 createTask: true,
