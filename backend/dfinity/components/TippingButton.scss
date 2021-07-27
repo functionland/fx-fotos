@@ -1,0 +1,50 @@
+:root {
+  --wobble-min: -10px;
+  --wobble-max: 10px;
+}
+
+.TippingButton {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.TippingEffect {
+  position: absolute;
+  top: 0;
+}
+
+.TippingEnvelope {
+  animation: wobble 1.3s ease infinite;
+  filter: var(--toPink);
+  height: 14px;
+  width: 12px !important;
+}
+
+.TippingEnvelopeOuter {
+  animation: rise 4s;
+  position: absolute;
+}
+
+@keyframes wobble {
+  0% {
+    transform: translateX(var(--wobble-min));
+  }
+  50% {
+    transform: translateX(var(--wobble-max));
+  }
+  100% {
+    transform: translateX(var(--wobble-min));
+  }
+}
+
+@keyframes rise {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-130px);
+  }
+}

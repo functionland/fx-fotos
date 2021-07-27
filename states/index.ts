@@ -50,3 +50,8 @@ export const dataProviderState = atom<DataProvider>({
       }),
 });
 
+export const identityState = atom<any>({
+    key: 'identityState',
+    default: null,
+});
+

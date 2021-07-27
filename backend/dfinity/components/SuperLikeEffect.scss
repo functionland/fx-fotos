@@ -1,0 +1,11 @@
+#superLikeEffectContainer {
+  left: 7px;
+  position: absolute;
+  top: -55px;
+  z-index: 0;
+}
+
+.superLikeSecondAnimation {
+  transform: translate(0, 0);
+  transition: transform 0.25s ease-out;
+}

@@ -1,0 +1,21 @@
+.follow-row {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 1.6rem;
+  height: 8rem;
+  border-bottom: 1px solid #efefef;
+
+  .profile-pic {
+    transform: scale(0.32);
+    margin: -6.8rem;
+  }
+
+  .username {
+    margin-left: 1.6rem;
+    flex: 1;
+    color: #292a2e;
+    font-size: 1.8rem;
+  }
+}

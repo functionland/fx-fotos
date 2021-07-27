@@ -6,100 +6,79 @@ import 'react-native-polyfill-globals/auto';
 import { Actor, HttpAgent, } from "@dfinity/agent";
 import { Principal } from '@dfinity/principal';
 import { AuthClient } from "@dfinity/auth-client";
-import { IDL } from '@dfinity/candid';
+import { DelegationIdentity, DelegationChain } from "@dfinity/identity";
+import { IDL, derBlobFromBlob, blobFromUint8Array } from '@dfinity/candid';
 
 import { Ed25519KeyIdentity } from "@dfinity/identity";
 const Buffer = require("buffer").Buffer;
 
-export const login = async(url='https://fx.land/Web-Identity-Providers/?pubKey64=') => {
-    const keyPair = Ed25519KeyIdentity.generate();
-	console.log('keyPair generated');
-    const keyPairJson = keyPair.toJSON();
-    keyPairJson[1] = '';
-    
-    const publicKey = JSON.stringify(keyPairJson);
-    const publicKey64 = new Buffer(publicKey).toString("base64");
-    console.log(publicKey64);
-    url = url + publicKey64;
 
-    const test = async() => {
-        console.log('here0');
-        let options = {
-            identity: Ed25519KeyIdentity.fromJSON(publicKey)
-        };
-		
-        const authClient = await AuthClient.create(options);
-        
-        const identity = authClient.getIdentity();
-		
-        const idlFactory = ({ IDL }:any) => {
-            return IDL.Service({
-				whoami: IDL.Func([IDL.Text], [IDL.Principal], ['query']),
-            });
-		}
-		
-        const canisterId = Principal.fromText('rrkah-fqaaa-aaaaa-aaaaq-cai');
-		const agent = new HttpAgent({
-			host: 'http://192.168.68.113:8000/',
-			identity,
+const afterLogin = async(params:any, keyPair:Ed25519KeyIdentity) => {
+	const delegations = new Buffer(params.delegations64 || '', 'base64').toString();
+	const delegationChain = DelegationChain.fromJSON(delegations);
+	let identity = DelegationIdentity.fromDelegation(keyPair, delegationChain);
+	console.log(identity.getPrincipal().toText());
+	
+
+	//The below line is just for local development and is creating a fixed identity
+	//Because Internet-Identity cannot be used for local development
+	//Remove for production
+	let identity_t = Ed25519KeyIdentity.fromJSON('["302a300506032b6570032100bdb5c06a77a12f0749bd92ddda131a8a239973f9f5e37fe6556378a4c387087e","2849fd03fe5143cfc241fdd882db4470682ddbff66643343c296496daa44b83abdb5c06a77a12f0749bd92ddda131a8a239973f9f5e37fe6556378a4c387087e"]');
+	
+	
+	let isAuthenticated = identity_t.getPrincipal().isAnonymous();
+	let result = {identity: identity_t, success: !isAuthenticated, provider: 'II', userId: identity.getPrincipal().toText()};
+	return result;
+	
+	const idlFactory = ({ IDL }:any) => {
+		return IDL.Service({
+			whoami: IDL.Func([IDL.Text], [IDL.Principal], ['query']),
 		});
-		
-        const actor = Actor.createActor(idlFactory, {
-            agent: agent,
-            canisterId,
-        });
-		console.log('here1');
-		
-		/*const service = idlFactory({ IDL: IDL });
-		
-		let arg;
-		for (const [methodName, func] of service._fields) {
-			console.log(func.argTypes);
-			arg = IDL.encode(func.argTypes, ['ehsan']);
-		}
-		const queryData = {
-			methodName: 'hello',
-			arg: arg
-		}
-		console.log(queryData);
-
-		agent.query(canisterId, queryData, ).then((res)=>{
-			console.log(res);
-		}).catch((e)=>{console.log(e)});*/
-        actor.whoami('ehsan').then((res) => {
-            console.log(res);
-        }).catch((e)=>{console.log(e)});
-    }
-
+	}
+	
+	const canisterId = Principal.fromText('uk5da-6iaaa-aaaab-qadja-cai');
+	
+	const agent = new HttpAgent({
+		host: 'http://192.168.68.118:8000/',
+		identity,
+	});
+	await agent.fetchRootKey();
+	const actor = Actor.createActor(idlFactory, {
+		agent: agent,
+		canisterId,
+	});
+	console.log('here1');
+	
+	actor.whoami('ehsan').then((res:any) => {
+		console.log(res.toText());
+	}).catch((e)=>{console.log(e)});
+	
+}
+export const login = async(url='https://fx.land/Web-Identity-Providers/?pubKey64=', callback: Function=()=>{}) => {
+	
+    const keyPair = Ed25519KeyIdentity.generate();
+	console.log('new keyPair generated');
+    const keyPairJson = keyPair.toJSON();
+	
+	const keyPairJsonPublicOnly = [];
+	keyPairJsonPublicOnly[0] = keyPairJson[0];
+    keyPairJsonPublicOnly[1] = '';
+    
+    const publicKey = JSON.stringify(keyPairJsonPublicOnly);
+    const publicKey64 = new Buffer(publicKey).toString("base64");
+    url = url + publicKey64;
     WebBrowser.maybeCompleteAuthSession();
-    Linking.canOpenURL(url).then(
-        (url2) => {
-            Linking.addEventListener('url', (event)=>{
-                console.log(event.url);
+    return Linking.canOpenURL(url).then(
+        async (url2) => {
+            Linking.addEventListener('url', async (event)=>{
                 let { path, queryParams } = Linking.parse(event.url);
-                console.log([path, queryParams]);
-                test();
-                WebBrowser.dismissBrowser();
+				WebBrowser.dismissBrowser();
+                let result = await afterLogin(queryParams, keyPair);
+				callback(result);
             });
             WebBrowser.openBrowserAsync(url, {
                 createTask: true,
             });
         }
     )
-    /*
-    const identity = authClient.getIdentity();
-    const agent = new HttpAgent({
-        host: 'https://boundary.ic0.app/',
-        identity,
-    });
-    
-    const canisterId = Principal.fromText('4k2wq-cqaaa-aaaab-qac7q-cai');
-    console.log(canisterId);
-    const queryData = {
-        methodName: 'createUser',
-        arg: ???
-    }
-    agent.query(canisterId, queryData, identity, ).then((res)=>{
-        console.log(res);
-    })*/
 }
