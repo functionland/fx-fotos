@@ -2,9 +2,9 @@
 
 # Latest 2 Updates
 
-**July-10-2021:** Integrated Dfinity's Internet Identity
+**July-27-2021:** The work for adding dfinity backend is being done in "dfinityupload" branch
 
-**July-03-2021:** Added image edit feature based on https://github.com/thomas-coldwell/expo-image-editor
+**July-10-2021:** Integrated Dfinity's Internet Identity
 
 
 # BOX Photos development guide
