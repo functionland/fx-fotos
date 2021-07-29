@@ -22,7 +22,7 @@ export interface AuthContext {
 }
 
 // Provider hook that creates auth object and handles state
-export function useProvideAuth(authClient): AuthContext {
+export function useProvideAuth(authClient:any): AuthContext {
   const [user, setUser] = useState<ProfileInfoPlus | undefined>();
   const [isAuthenticatedLocal, setIsAuthenticatedLocal] = useState<boolean>(
     false
@@ -88,7 +88,7 @@ export function useProvideAuth(authClient): AuthContext {
   }, [urlWithSearch, user]);
 
   // When user is set, and is not in local storage yet store the user object
-  // from the canister in local storag so the user doesn't need to be fetched
+  // from the canister in local storage so the user doesn't need to be fetched
   // every load. Then insure user is correctly logged in with identity service,
   // and set them to not logged in if not.
   useEffect(() => {
@@ -163,7 +163,7 @@ export function useProvideAuth(authClient): AuthContext {
 
 const authContext = createContext<AuthContext>(null!);
 
-export function ProvideAuth({ children }) {
+export function ProvideAuth({ children }:any) {
   const auth = useProvideAuth(authenticationClient);
   return <authContext.Provider value={auth}>{children}</authContext.Provider>;
 }

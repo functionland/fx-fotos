@@ -1,11 +1,8 @@
 import { Identity } from '@dfinity/agent';
 import { AuthClient } from '@dfinity/auth-client';
 
-// Where the IDP should be servied from
-const IDENTITY_URL =
-  new URLSearchParams(document.location.search).get('internetIdentityUrl') ||
-  process.env.REACT_APP_INTERNET_IDENTITY_URL ||
-  'https://identity.ic0.app';
+// Where the IDP should be served from
+const IDENTITY_URL = 'https://identity.ic0.app';
 
 /*
  * A simple wrapper for the official auth client to initialize it and wrap

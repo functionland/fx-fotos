@@ -1,13 +1,15 @@
-import { login } from '../Auth/auth';
+import AuthProvidersClass from '../Auth';
 import React, {useEffect, } from 'react';
 import { 
     View, 
     StyleSheet, 
     Image, 
     StatusBar,
-    Pressable
+    Pressable,
+	Text
 } from 'react-native';
-import Menu, { MenuItem } from 'react-native-material-menu';
+import * as Progress from 'react-native-progress';
+import Menu, { MenuItem, MenuDivider } from 'react-native-material-menu';
 
 import {
 	useRecoilState,
@@ -20,23 +22,33 @@ interface Props {
     navigation: any;
 }
 const Auth: React.FC<Props> = (props) => {
+	const chartConfig = {
+		backgroundGradientFrom: "#1E2923",
+		backgroundGradientFromOpacity: 0,
+		backgroundGradientTo: "#08130D",
+		backgroundGradientToOpacity: 0.5,
+		color: (opacity = 1) => `rgba(26, 255, 146, ${opacity})`,
+		strokeWidth: 2, // optional, default 3
+		barPercentage: 0.5,
+		useShadowColorFromDataset: false // optional
+	};
 	const [identity, setIdentity] = useRecoilState(identityState);
+	//TODO: Fix this class
+	const authProvidersClass = new AuthProvidersClass(identity);
 	const processLogin = async (data:any) => {
 		let result = await data;
+		authProvidersClass.setIdentity(result);
 		setIdentity([result]);
-		console.log(result);
-	}
-	const openWeb = async () => {
-		console.log('Internet Identity clicked');
-		let result = await login('https://fx.land/Web-Identity-Providers/?pubKey64=', processLogin);
 	}
 	const disconnectIdentity = () => {
 		setIdentity([]);
 	}
-	const authProviders = [{
-		name: ((identity && identity[0]?.success)?'Disconnect from ':'Connect with')+'Internet Identity',
-		key: 'Internet Identity',
-		action: ((identity && identity[0]?.success)?disconnectIdentity:openWeb),
+	const authProviders = authProvidersClass.authenticate(disconnectIdentity, processLogin);
+
+	const backendProviders = [{
+		name: 'Dfinity',
+		key: 'Dfinity',
+		action: ()=>{},
 		link: ''
 	}];
 
@@ -81,6 +93,39 @@ const Auth: React.FC<Props> = (props) => {
                                             {x.name}
                                         </MenuItem>
                                     )
+                                )
+                            }
+							<MenuDivider />
+							{
+                                (identity && identity[0]?.success) && backendProviders.map(x => (
+                                    <MenuItem 
+                                        onPress={
+                                            ()=>{
+                                                if(x.link){
+                                                    props.navigation.navigate('Browser', {
+                                                        title: x.name, 
+                                                        link: x.link
+                                                    })
+                                                }else{
+                                                    x.action();
+                                                }
+                                                hideMenu();
+                                            }
+                                        } 
+                                        key={x.key}
+									>
+										<View style={{flex:1, flexDirection:'row', width:'100%',}}>
+                                            <View style={{flex:1/2,}}>
+												<Text>
+													{x.name}
+												</Text>
+											</View>
+											<View style={{flex:1/2,}}>
+												<Progress.Bar progress={0.3} width={100} />
+											</View>
+										</View>
+                                    </MenuItem>
+                                )
                                 )
                             }
                             

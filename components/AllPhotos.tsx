@@ -4,11 +4,17 @@ import RenderPhotos from './RenderPhotos';
 import SingleMedia from './SingleMedia';
 import StoryHolder from './StoryHolder';
 import ActionBar from './ActionBar';
+import { Asset, getAssetInfoAsync  } from 'expo-media-library';
+import * as FileSystem from 'expo-file-system';
+import BackEndProvidersClass from '../backend';
+import * as mime from 'react-native-mime-types';
+
 
 import {
   useRecoilState,
 } from 'recoil';
-import {preparedMediaState,} from '../states';
+import {preparedMediaState, identityState,} from '../states';
+
 import { default as Reanimated, useSharedValue, useAnimatedReaction, runOnJS, } from 'react-native-reanimated';
 
 interface Props {
@@ -40,6 +46,7 @@ const AllPhotos: React.FC<Props> = (props) => {
   const lastSelectedAssetAction = useSharedValue(0); //0:unselect, 1:select
 
   const [preparedMedia, setPreparedMedia] = useRecoilState(preparedMediaState);
+	const [identity] = useRecoilState(identityState);
 
   useEffect(()=>{
     console.log([Date.now()+': component AllPhotos rendered']);
@@ -106,7 +113,55 @@ const AllPhotos: React.FC<Props> = (props) => {
 
   const _handleAddToAlbum = () => console.log('Adding');
 
-  const _handleMore = () => console.log('Shown more');
+	const uploadFile = async(mediaAsset: Asset, backEndProviders:BackEndProvidersClass) => {
+		console.log(mediaAsset);
+		if(mediaAsset){
+			const mediaInfo = await getAssetInfoAsync(mediaAsset);
+			console.log(mediaInfo);
+			if(mediaInfo.localUri){
+				let media = await fetch(mediaInfo.localUri);
+				
+				/*
+				const fileBase64 = await FileSystem.readAsStringAsync(mediaInfo.localUri, {
+					encoding: FileSystem.EncodingType.Base64,
+			  });
+				*/
+				
+				let mediaText = await media.arrayBuffer();
+				
+				let mediaFile = new File(
+					[mediaText], 
+					mediaAsset.filename, 
+					{ 
+						lastModified: new Date(mediaAsset.modificationTime || mediaAsset.creationTime).getTime(), 
+						type: mime.lookup(mediaInfo.localUri),
+					}
+				);
+				console.log(mediaFile.type);
+				console.log(await mediaFile.arrayBuffer())
+				const videoUploadController = await backEndProviders.upload(mediaFile, '');
+				//console.log(videoUploadController.completedVideo);
+				
+			}
+		}
+	}
+  const _handleUpload = async() => {
+		console.log('Uploading');
+		console.log(selectedAssetsRef.current);
+		const backEndProviders = new BackEndProvidersClass(identity);
+		preparedMedia.layout.map(
+			(x, index)=>{
+				if(selectedAssetsRef.current.includes(x.id)){
+					if(typeof x.value !== 'string'){
+						uploadFile(x.value, backEndProviders);
+					}
+				}
+			}
+		)
+	}
+	
+	const _handleMore = () => console.log('Shown more');
+
 
 
   
@@ -257,6 +312,12 @@ const AllPhotos: React.FC<Props> = (props) => {
             onPress: _handleDelete,
             color: "#007AFF",
             name: "delete"
+          },
+          {
+            icon: "upload-lock-outline",
+            onPress: _handleUpload,
+            color: "#007AFF",
+            name: "upload"
           }
         ]}
         moreActions={[]}

@@ -80,44 +80,9 @@ async function uploadVideo(userId: string, file: File, caption: string) {
 // This isn't Internet Computer specific, just a helper to generate an image
 // from a video file
 export function generateThumbnail(videoFile: File) {
-  const videoElement = document.createElement("video");
-  const thumbnailCanvas = document.createElement("canvas");
-  const canvasContext = thumbnailCanvas.getContext("2d");
-
-  const videoUrl = URL.createObjectURL(videoFile);
-  videoElement.src = videoUrl;
-
-  videoElement.addEventListener("loadedmetadata", () => {
-    thumbnailCanvas.width = videoElement.videoWidth;
-    thumbnailCanvas.height = videoElement.videoHeight;
-  });
 
   return new Promise<number[]>((resolve, reject) => {
-    videoElement.addEventListener("timeupdate", () => {
-      canvasContext!.drawImage(
-        videoElement,
-        0,
-        0,
-        videoElement.videoWidth,
-        videoElement.videoHeight
-      );
-
-      URL.revokeObjectURL(videoUrl);
-
-      thumbnailCanvas.toBlob(
-        (canvasBlob) => {
-          canvasBlob!.arrayBuffer().then((arrayBuffer) => {
-            resolve([...new Uint8Array(arrayBuffer)]);
-          });
-        },
-        "image/jpeg",
-        0.7
-      );
-    });
-    setTimeout(() => {
-      reject("took too long to create blob");
-    }, 5000);
-    videoElement.currentTime = 0.01;
+    resolve([...new Uint8Array(0)]);
   });
 }
 
@@ -151,7 +116,7 @@ export function useUploadVideo({ userId }: { userId: string }) {
   const [caption, setCaption] = useState("");
   const [ready, setReady] = useState(false);
 
-  async function handleUpload(fileToUpload) {
+  async function handleUpload(fileToUpload: File) {
     console.info("Storing video...");
     try {
       console.time("Stored in");

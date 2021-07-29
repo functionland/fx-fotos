@@ -1,8 +1,5 @@
-import 'text-encoding';
-import 'react-native-get-random-values'
 import * as Linking from 'expo-linking';
 import * as WebBrowser from 'expo-web-browser';
-import 'react-native-polyfill-globals/auto';
 import { Actor, HttpAgent, } from "@dfinity/agent";
 import { Principal } from '@dfinity/principal';
 import { AuthClient } from "@dfinity/auth-client";

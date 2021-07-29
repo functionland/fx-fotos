@@ -1,4 +1,4 @@
-import { Principal } from "@dfinity/agent";
+import { Principal } from "@dfinity/principal";
 import { Optional } from "./canister";
 
 export * from "./CatchAll";
