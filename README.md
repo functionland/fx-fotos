@@ -2,9 +2,9 @@
 
 # Latest 2 Updates
 
-**July-27-2021:** The work for adding dfinity backend is being done in "dfinityupload" branch
+**July-31-2021:** Added Dfinity backup feature
 
-**July-10-2021:** Integrated Dfinity's Internet Identity
+**July-27-2021:** The work for adding dfinity backend is being done in "dfinityupload" branch
 
 
 # BOX Photos development guide
