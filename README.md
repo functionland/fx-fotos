@@ -2,7 +2,7 @@
 
 # Latest 2 Updates
 
-**July-31-2021:** Added Dfinity backup feature
+**July-31-2021:** Added Dfinity backup feature in Dfinity branch
 
 **July-27-2021:** The work for adding dfinity backend is being done in "dfinityupload" branch
 
