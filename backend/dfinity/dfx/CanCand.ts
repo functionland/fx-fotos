@@ -52,7 +52,7 @@ export interface CanCan {
   'getUserNameByPrincipal' : (arg_0: Principal) => Promise<
       [] | [Array<string>]
     >,
-  'getVideoChunk' : (arg_0: VideoId, arg_1: bigint) => Promise<
+  'getVideoChunk' : (arg_0: VideoId, arg_1: number) => Promise<
       [] | [Array<number>]
     >,
   'getVideoInfo' : (arg_0: [] | [UserId_2], arg_1: VideoId) => Promise<
@@ -98,7 +98,7 @@ export interface CanCan {
     >,
   'putVideoChunk' : (
       arg_0: VideoId,
-      arg_1: bigint,
+      arg_1: number,
       arg_2: Array<number>,
     ) => Promise<[] | [null]>,
   'putVideoInfo' : (arg_0: VideoId, arg_1: VideoInit) => Promise<[] | [null]>,
@@ -254,12 +254,12 @@ export interface VideoInfo_2 {
   'createdAt' : Timestamp,
   'tags' : Array<string>,
   'likes' : Array<UserId>,
-  'viewCount' : bigint,
+  'viewCount' : number,
   'caption' : string,
-  'chunkCount' : bigint,
+  'chunkCount' : number,
   'superLikes' : Array<UserId>,
   'viewerHasFlagged' : [] | [boolean],
-  'abuseFlagCount' : bigint,
+  'abuseFlagCount' : number,
   'uploadedAt' : Timestamp,
   'videoId' : VideoId_2,
 };

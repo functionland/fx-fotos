@@ -45,14 +45,19 @@ export async function getUserNameByPrincipal(principal: Principal) {
 
 export async function createUser(
   userId: string,
-  principal?: Principal | null
+	_identity?: any
 ): Promise<ProfileInfoPlus> {
+	const principal = _identity.getPrincipal();
   if (!principal) {
     throw Error("trying to create user without principal");
   }
+	console.log(principal);
+	console.log('authentication started');
+	await actorController.authenticateActor(_identity);
   const profile = unwrap<ProfileInfoPlus>(
     await (await CanCan.actor).createProfile(userId, [])
   );
+	console.log('authentication ended');
   if (profile) {
     return profile;
   } else {
@@ -145,9 +150,16 @@ export async function getProfilePic(userId: string) {
 }
 
 export async function createVideo(videoInit: VideoInit): Promise<string> {
+	console.log('canister.ts-createVideo');
+	const actor = await CanCan.actor;
+	console.log('actor created');
+	const createVideoResult = await actor.createVideo(videoInit);
+	console.log('createVideoResult');
+	console.log(createVideoResult);
   const videoId = unwrap<string>(
-    await (await CanCan.actor).createVideo(videoInit)
+    createVideoResult
   );
+	console.log('videId in canister.ts is '+videoId);
   if (videoId) {
     return videoId;
   } else {
@@ -218,6 +230,7 @@ export async function putVideoChunk(
   chunkNum: number,
   chunkData: number[]
 ) {
+	console.log({'videoId':typeof videoId, 'chunkNum': typeof chunkNum, 'chunkData': typeof chunkData, chunk0: chunkData[0]})
   return (await CanCan.actor).putVideoChunk(videoId, chunkNum, chunkData);
 }
 

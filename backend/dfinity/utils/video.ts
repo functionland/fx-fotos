@@ -42,26 +42,36 @@ async function processAndUploadChunk(
   videoId: string,
   chunk: number
 ) {
+	console.log('processAndUploadChunk started for chunk '+chunk);
   const videoSlice = videoBuffer.slice(
     byteStart,
     Math.min(videoSize, byteStart + MAX_CHUNK_SIZE)
   );
+	console.log('videoSlice finished');
   const sliceToNat = encodeArrayBuffer(videoSlice);
+	console.log('sliceToNat finished');
+	console.log(sliceToNat.length);
   return putVideoChunk(videoId, chunk, sliceToNat);
 }
 
 // Wraps up the previous functions into one step for the UI to trigger
 async function uploadVideo(userId: string, file: File, caption: string) {
+	console.log('uploadVideo started');
   const videoBuffer = (await file?.arrayBuffer()) || new ArrayBuffer(0);
-
+	console.log('videoBuffer fetched');
   const videoInit = getVideoInit(userId, file, caption);
+	console.log('videoInit done for userId '+userId);
+	console.log(videoInit);
   const videoId = await createVideo(videoInit);
-
+	console.log('video created='+videoId)
   let chunk = 1;
   const thumb = await generateThumbnail(file);
   await uploadVideoPic(videoId, thumb);
-
+	console.log('uploadVideoPic done');
   const putChunkPromises: Promise<[] | [null]>[] = [];
+	console.log(videoBuffer.byteLength);
+	console.log(file.size);
+	console.log(chunk);
   for (
     let byteStart = 0;
     byteStart < file.size;
@@ -73,7 +83,7 @@ async function uploadVideo(userId: string, file: File, caption: string) {
   }
 
   await Promise.all(putChunkPromises);
-
+	console.log('video upload finished');
   return await checkVidFromIC(videoId, userId);
 }
 
@@ -119,15 +129,13 @@ export function useUploadVideo({ userId }: { userId: string }) {
   async function handleUpload(fileToUpload: File) {
     console.info("Storing video...");
     try {
-      console.time("Stored in");
       const video = await uploadVideo(userId, fileToUpload, caption);
-
+			console.log('uploadVideo completed');
       setCompletedVideo(video);
       setReady(false);
       setFile(undefined);
-      console.timeEnd("Stored in");
     } catch (error) {
-      console.error("Failed to store video.", error);
+      console.log("Failed to store video.", error);
     }
   }
 

@@ -97,7 +97,7 @@ export interface SuperLikeVideoFail {
   target: VideoId_2;
 }
 export type TimeMode = { ic: null } | { script: BigInt };
-export type Timestamp = bigint;
+export type Timestamp = number;
 export interface Trace {
   status: { ok: null } | { err: null };
   trace: Array<TraceCommand>;
@@ -121,9 +121,9 @@ export interface VideoInfo_2 {
   createdAt: Timestamp;
   tags: Array<string>;
   likes: Array<UserId_2>;
-  viewCount: BigInt;
+  viewCount: number;
   caption: string;
-  chunkCount: BigInt;
+  chunkCount: number;
   superLikes: Array<UserId_2>;
   uploadedAt: Timestamp;
   videoId: VideoId_2;
@@ -135,7 +135,7 @@ export interface VideoInit_2 {
   createdAt: Timestamp;
   tags: Array<string>;
   caption: string;
-  chunkCount: BigInt;
+  chunkCount: number;
 }
 export type VideoPic = VideoPic_2;
 export type VideoPic_2 = Array<number>;

@@ -12,7 +12,7 @@ const isLocalEnv = true;
 
 function getHost() {
   // Setting host to undefined will default to the window location 👍🏻
-  return isLocalEnv ? dfxConfig.networks.local.bind : undefined;
+  return isLocalEnv ? 'http://'+dfxConfig.networks.local.bind : undefined;
 }
 
 const host = getHost();
@@ -40,6 +40,7 @@ class ActorController {
   }
 
   async initBaseActor(identity?: Identity) {
+		console.log('initBaseActor');
     const { agent, actor } = createActor(identity);
     // The root key only has to be fetched for local development environments
     if (isLocalEnv) {
@@ -60,6 +61,7 @@ class ActorController {
    * to create a new actor with it, so they pass their Principal to the backend.
    */
   async authenticateActor(identity: Identity) {
+		console.log('authenticateActor');
     this._actor = this.initBaseActor(identity);
     this._isAuthenticated = true;
   }
@@ -68,6 +70,7 @@ class ActorController {
    * If a user unauthenticates, recreate the actor without an identity.
    */
   unauthenticateActor() {
+		console.log('unauthenticateActor');
     this._actor = this.initBaseActor();
     this._isAuthenticated = false;
   }

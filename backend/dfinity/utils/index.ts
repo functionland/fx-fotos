@@ -9,7 +9,7 @@ export * from "./canister";
 
 export const KEY_LOCALSTORAGE_USER = `ic-cancan-user`;
 
-export const MAX_CHUNK_SIZE = 1024 * 500; // 500kb
+export const MAX_CHUNK_SIZE = 2 * 1024 * 500; // 500kb
 export const REWARDS_CHECK_INTERVAL = 60000;
 export const hashtagRegExp = /(?:\s|^)#[A-Za-z0-9\-._]+(?:\s|$)/gim;
 
@@ -17,6 +17,7 @@ export const encodeArrayBuffer = (file: ArrayBuffer): number[] =>
   Array.from(new Uint8Array(file));
 
 export function unwrap<T>(val: Optional<T>): T | null {
+	console.log(val);
   if (val[0] === undefined) {
     return null;
   } else {

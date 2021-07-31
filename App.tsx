@@ -2,6 +2,7 @@ import React from 'react';
 import 'text-encoding';
 import 'react-native-get-random-values'
 import 'react-native-polyfill-globals/auto';
+import "react-native-wasm";
 import AppNavigation from './navigation/AppNavigation';
 import {
   RecoilRoot,

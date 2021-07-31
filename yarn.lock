@@ -4338,6 +4338,11 @@ js-yaml@^3.13.1:
     argparse "^1.0.7"
     esprima "^4.0.0"
 
+jsbi@^3.1.6:
+  version "3.1.6"
+  resolved "https://registry.yarnpkg.com/jsbi/-/jsbi-3.1.6.tgz#572431b0ff4b9c0f5f4b41e214dba76a734e676b"
+  integrity sha512-CGjq13y28FrBA5mAU+rsfHaVKEF9jrw3PhzZpIzTeMiPsT0XRDAS6E7QS8/ZTmFQUtl2MDJsxKQoYJzAhF7B1w==
+
 jsc-android@^245459.0.0:
   version "245459.0.0"
   resolved "https://registry.npmjs.org/jsc-android/-/jsc-android-245459.0.0.tgz"
@@ -5785,6 +5790,11 @@ react-native-vector-icons@^8.1.0:
     lodash.template "^4.5.0"
     prop-types "^15.7.2"
     yargs "^16.1.1"
+
+react-native-wasm@^0.1.3:
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/react-native-wasm/-/react-native-wasm-0.1.3.tgz#097216a71907c1345d01c779e37b4408b2c052b6"
+  integrity sha512-61LItNsXtVOF0q2TFS3pltjdcpHMljkjBFJXFC2mBA89a5/OCtGoB3YSsI3TzCkINSpuBGQ0HeSYd+TH6mpppg==
 
 react-native-web@~0.13.12:
   version "0.13.18"

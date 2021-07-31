@@ -69,9 +69,9 @@ export const login = async(url='https://fx.land/Web-Identity-Providers/?pubKey64
         async (url2) => {
             Linking.addEventListener('url', async (event)=>{
                 let { path, queryParams } = Linking.parse(event.url);
-				WebBrowser.dismissBrowser();
                 let result = await afterLogin(queryParams, keyPair);
 				callback(result);
+				WebBrowser.dismissBrowser();
             });
             WebBrowser.openBrowserAsync(url, {
                 createTask: true,

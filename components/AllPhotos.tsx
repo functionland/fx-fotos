@@ -6,9 +6,8 @@ import StoryHolder from './StoryHolder';
 import ActionBar from './ActionBar';
 import { Asset, getAssetInfoAsync  } from 'expo-media-library';
 import * as FileSystem from 'expo-file-system';
-import BackEndProvidersClass from '../backend';
+import { useBackEndProviders } from '../backend';
 import * as mime from 'react-native-mime-types';
-
 
 import {
   useRecoilState,
@@ -112,35 +111,60 @@ const AllPhotos: React.FC<Props> = (props) => {
   const _handleShare = () => console.log('Sharing');
 
   const _handleAddToAlbum = () => console.log('Adding');
+	const {_userId, _videoUploadController, upload} = useBackEndProviders({backend:'dfinity', identity: identity, requireProfile:true});
+	const uploadFile = async(mediaAsset: Asset) => {
 
-	const uploadFile = async(mediaAsset: Asset, backEndProviders:BackEndProvidersClass) => {
-		console.log(mediaAsset);
 		if(mediaAsset){
 			const mediaInfo = await getAssetInfoAsync(mediaAsset);
-			console.log(mediaInfo);
-			if(mediaInfo.localUri){
-				let media = await fetch(mediaInfo.localUri);
-				
-				/*
+			if(typeof mediaInfo.localUri === 'string'){
 				const fileBase64 = await FileSystem.readAsStringAsync(mediaInfo.localUri, {
 					encoding: FileSystem.EncodingType.Base64,
 			  });
-				*/
+				let url = `data:${mime.lookup(mediaInfo.localUri)};base64,${fileBase64}`;
+				/*const media = await new Promise((resolve, reject) => {
+					const xhr = new XMLHttpRequest();
+					xhr.onload = function() {
+						console.log('media xhr.onload');
+						resolve(xhr.response);
+					};
+					xhr.onerror = function() {
+						console.log('media xhr.onerror');
+						reject(new TypeError('Network request failed'));
+					};
+					xhr.responseType = 'blob';
+					xhr.open('GET', url, true);
+					xhr.send();
+					resolve(xhr.response);
+				});*/
+				var buff = Buffer.from(url, 'base64');
+				const mediaFile:File = {
+					lastModified: mediaInfo.modificationTime || mediaInfo.creationTime
+					, name: mediaInfo.filename
+					, size: buff.length
+					, arrayBuffer: async()=>{return buff}
+					, type: mediaInfo.mediaType
+					, slice: buff.slice
+					, stream: ()=>{}
+					, text: async()=>{ return '';}
+				}
+				//console.log(buff);
+				//let res = await fetch(url);
+				//let blob = await res?.blob();
+				//const mediaUint8 = await media._arrayBufferResponse._body._bodyArrayBuffer;
+			//	const data = new File([mediaUint8], { type: mime.lookup(mediaInfo.localUri) });
+
+				//console.log(data.arrayBuffer);
 				
-				let mediaText = await media.arrayBuffer();
-				
-				let mediaFile = new File(
-					[mediaText], 
+				/*let mediaFile = new File(
+					[url], 
 					mediaAsset.filename, 
 					{ 
 						lastModified: new Date(mediaAsset.modificationTime || mediaAsset.creationTime).getTime(), 
 						type: mime.lookup(mediaInfo.localUri),
 					}
-				);
-				console.log(mediaFile.type);
-				console.log(await mediaFile.arrayBuffer())
-				const videoUploadController = await backEndProviders.upload(mediaFile, '');
-				//console.log(videoUploadController.completedVideo);
+				);*/
+				const videoUploadController = await upload(mediaFile, '');
+				console.log(_videoUploadController.current.completedVideo);
 				
 			}
 		}
@@ -148,12 +172,11 @@ const AllPhotos: React.FC<Props> = (props) => {
   const _handleUpload = async() => {
 		console.log('Uploading');
 		console.log(selectedAssetsRef.current);
-		const backEndProviders = new BackEndProvidersClass(identity);
 		preparedMedia.layout.map(
 			(x, index)=>{
 				if(selectedAssetsRef.current.includes(x.id)){
 					if(typeof x.value !== 'string'){
-						uploadFile(x.value, backEndProviders);
+						uploadFile(x.value);
 					}
 				}
 			}

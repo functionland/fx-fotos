@@ -133,8 +133,10 @@ const PhotosChunk: React.FC<Props> = (props) => {
   });
 
   const createThumbnail = (media:Asset) => {
-    if(media.duration > 0){
-      return (
+		return (
+			<>
+    {(media.duration > 0)? 
+      (
         <>
           <Image
               source={{uri: media.uri}}
@@ -153,9 +155,9 @@ const PhotosChunk: React.FC<Props> = (props) => {
             <MaterialIcons name="play-circle-filled" size={20} color="white" />
           </View>
         </>
-      );
-    }else{
-      return (
+      )
+    	:
+      (
         <Image
               source={{uri: media.uri}}
               // eslint-disable-next-line react-native/no-inline-styles
@@ -166,9 +168,18 @@ const PhotosChunk: React.FC<Props> = (props) => {
                 zIndex:4,
               }}
         />
-      );
-    }
+      )
+		}
+			<View 
+        style={styles.videoText}
+      >
+        <Text style={styles.durationText}>{prettyTime(media.duration)}</Text>
+        <MaterialIcons name="play-circle-filled" size={20} color="white" />
+      </View>
+		</>
+		)
   }
+		
   
     if(typeof props.photo.value === 'string'){
       return (
