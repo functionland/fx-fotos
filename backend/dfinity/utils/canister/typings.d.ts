@@ -127,6 +127,7 @@ export interface VideoInfo_2 {
   superLikes: Array<UserId_2>;
   uploadedAt: Timestamp;
   videoId: VideoId_2;
+	externalId: string;
 }
 export type VideoInit = VideoInit_2;
 export interface VideoInit_2 {
@@ -136,6 +137,7 @@ export interface VideoInit_2 {
   tags: Array<string>;
   caption: string;
   chunkCount: number;
+	externalId: string;
 }
 export type VideoPic = VideoPic_2;
 export type VideoPic_2 = Array<number>;

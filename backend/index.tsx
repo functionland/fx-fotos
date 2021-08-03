@@ -2,6 +2,7 @@ import React from "hoist-non-react-statics/node_modules/@types/react";
 import { 
 	useUploadVideo, 
 	checkUsername,
+	getUserVideos,
 	createUser,
 } from "./dfinity/utils";
 import { useRef } from 'react';
@@ -39,27 +40,46 @@ export function useBackEndProviders(input:{backend:string, identity:any[], requi
 		}
 		return Promise.resolve(profileChecked.current);
 	}
-	const upload = async(mediaFile:File, caption:string='') => {
-		console.log('upload userId='+_userId.current);
-		/*if(_requireProfile.current){
+	const getMedias = async(identity:any = undefined) => {
+		if(identity){
+			_userId.current = identity.provider + '://' +identity.userId;
+			_identity.current = identity.identity;
+		}
+		console.log('getMedias for userId='+_userId.current);
+		if(_requireProfile.current){
 			let profileCheckSuccess = await checkProfile();
 			if(!profileCheckSuccess){
 				console.log('profile check failed');
 				return undefined;
 			}
-		}*/
+		}
+
+		return getUserVideos(_userId.current);
+
+	}
+	const upload = async(mediaFile:File, caption:string='', id:string='') => {
+		console.log('upload userId='+_userId.current);
+		if(_requireProfile.current){
+			let profileCheckSuccess = await checkProfile();
+			if(!profileCheckSuccess){
+				console.log('profile check failed');
+				return undefined;
+			}
+		}
 
 		if (!mediaFile || !_videoUploadController.current || !_userId.current) {
 			return undefined;
 		}
 		_videoUploadController.current.setFile(mediaFile);
 		_videoUploadController.current.setCaption(caption);
+		_videoUploadController.current.setId(id);
 		_videoUploadController.current.setReady(true);
 		return(_videoUploadController.current);
 	}
 	return {
 		_userId,
 		_videoUploadController,
-		upload
+		upload,
+		getMedias
 	  };
 }

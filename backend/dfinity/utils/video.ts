@@ -4,6 +4,7 @@ import {
   getVideoInfo,
   putVideoChunk,
   putVideoPic,
+	getProfileVideos,
 } from "./canister";
 import { VideoInfo, VideoInit } from "./canister/typings";
 import { MAX_CHUNK_SIZE, encodeArrayBuffer, hashtagRegExp } from "./index";
@@ -12,7 +13,8 @@ import { MAX_CHUNK_SIZE, encodeArrayBuffer, hashtagRegExp } from "./index";
 export function getVideoInit(
   userId: string,
   file: File,
-  caption: string
+  caption: string,
+	id: string,
 ): VideoInit {
   const chunkCount = Number(Math.ceil(file.size / MAX_CHUNK_SIZE));
   return {
@@ -24,6 +26,7 @@ export function getVideoInit(
     name: file.name.replace(/\.mp4/, ""),
     tags: caption.match(hashtagRegExp) || [],
     userId,
+		externalId: id
   };
 }
 
@@ -32,6 +35,7 @@ export interface UploadVideoInit {
   caption: string;
   chunkCount: number;
   userId: string;
+	externalId: string;
 }
 
 // Divides the file into chunks and uploads them to the canister in sequence
@@ -50,18 +54,16 @@ async function processAndUploadChunk(
 	console.log('videoSlice finished');
   const sliceToNat = encodeArrayBuffer(videoSlice);
 	console.log('sliceToNat finished');
-	console.log(sliceToNat.length);
   return putVideoChunk(videoId, chunk, sliceToNat);
 }
 
 // Wraps up the previous functions into one step for the UI to trigger
-async function uploadVideo(userId: string, file: File, caption: string) {
+async function uploadVideo(userId: string, file: File, caption: string, id: string) {
 	console.log('uploadVideo started');
   const videoBuffer = (await file?.arrayBuffer()) || new ArrayBuffer(0);
 	console.log('videoBuffer fetched');
-  const videoInit = getVideoInit(userId, file, caption);
+  const videoInit = getVideoInit(userId, file, caption, id);
 	console.log('videoInit done for userId '+userId);
-	console.log(videoInit);
   const videoId = await createVideo(videoInit);
 	console.log('video created='+videoId)
   let chunk = 1;
@@ -69,9 +71,7 @@ async function uploadVideo(userId: string, file: File, caption: string) {
   await uploadVideoPic(videoId, thumb);
 	console.log('uploadVideoPic done');
   const putChunkPromises: Promise<[] | [null]>[] = [];
-	console.log(videoBuffer.byteLength);
-	console.log(file.size);
-	console.log(chunk);
+	console.log('putChunkPromises done');
   for (
     let byteStart = 0;
     byteStart < file.size;
@@ -118,22 +118,31 @@ async function checkVidFromIC(videoId: string, userId: string) {
   return resultFromCanCan;
 }
 
+export async function getUserVideos(userId: string) {
+	console.log("Getting user videos...");
+	const resultFromCanCan = await getProfileVideos(userId);
+  console.log("User videos fetched");
+  return resultFromCanCan;
+}
+
 // This hook exposes functions to set video data, trigger the upload, and return
 // with "success" to toggle loading states.
 export function useUploadVideo({ userId }: { userId: string }) {
   const [completedVideo, setCompletedVideo] = useState<VideoInfo>();
   const [file, setFile] = useState<File>();
   const [caption, setCaption] = useState("");
+	const [id, setId] = useState("");
   const [ready, setReady] = useState(false);
 
-  async function handleUpload(fileToUpload: File) {
+  async function handleUpload(fileToUpload: File, id: string) {
     console.info("Storing video...");
     try {
-      const video = await uploadVideo(userId, fileToUpload, caption);
+      const video = await uploadVideo(userId, fileToUpload, caption, id);
 			console.log('uploadVideo completed');
       setCompletedVideo(video);
       setReady(false);
       setFile(undefined);
+			setId("");
     } catch (error) {
       console.log("Failed to store video.", error);
     }
@@ -141,7 +150,7 @@ export function useUploadVideo({ userId }: { userId: string }) {
 
   useEffect(() => {
     if (ready && file !== undefined) {
-      handleUpload(file);
+      handleUpload(file, id);
     }
   }, [ready]);
 
@@ -149,6 +158,7 @@ export function useUploadVideo({ userId }: { userId: string }) {
     completedVideo,
     setCaption,
     setFile,
+		setId,
     setReady,
   };
 }

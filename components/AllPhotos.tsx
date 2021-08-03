@@ -44,6 +44,13 @@ const AllPhotos: React.FC<Props> = (props) => {
   const lastSelectedAssetId = useSharedValue('');
   const lastSelectedAssetAction = useSharedValue(0); //0:unselect, 1:select
 
+
+	/**
+	 * the below variable are to control uploaded assets
+	 */
+	 const uploadedAssets = useRef<{[key:string]:number}>({});
+	 const lastUpload:Reanimated.SharedValue<string> = useSharedValue('');
+
   const [preparedMedia, setPreparedMedia] = useRecoilState(preparedMediaState);
 	const [identity] = useRecoilState(identityState);
 
@@ -111,9 +118,59 @@ const AllPhotos: React.FC<Props> = (props) => {
   const _handleShare = () => console.log('Sharing');
 
   const _handleAddToAlbum = () => console.log('Adding');
-	const {_userId, _videoUploadController, upload} = useBackEndProviders({backend:'dfinity', identity: identity, requireProfile:true});
-	const uploadFile = async(mediaAsset: Asset) => {
+	const {_userId, _videoUploadController, upload, getMedias} = useBackEndProviders({backend:'dfinity', identity: identity, requireProfile:false});
 
+	const createUploadedAssets = (backendResponse:Array<any> | undefined) => {
+		console.log('createUploadedAssets');
+		console.log(backendResponse);
+		let res:{[key:string]:number} = {};
+		if(backendResponse){
+			for(let i=0; i<backendResponse.length; i++){
+				if(backendResponse[i] && backendResponse[i].externalId){
+					res[backendResponse[i].externalId] = 100;
+				}
+			}
+		}
+		return res;
+	}
+	useEffect(()=>{
+		console.log('identity changed');
+		console.log(identity);
+		if(identity && identity[0]?.userId){
+			getMedias().then((res)=>{
+				/*res = [
+					Object {
+						"abuseFlagCount": 0n,
+						"caption": "",
+						"chunkCount": 22n,
+						"createdAt": 1628017963470000n,
+						"externalId": "2131A3EC-3715-48E7-A805-F0A5728E4814/L0/001",
+						"likes": Array [],
+						"name": "IMG_5627.MOV",
+						"pic": Array [
+							Array [],
+						],
+						"superLikes": Array [],
+						"tags": Array [],
+						"uploadedAt": 1628017992186192286n,
+						"userId": "II://zfhab-gwmc5-stn3s-aet7i-iwczy-pougc-rqr72-36tal-ew46m-anrdh-tqe",
+						"videoId": "II://zfhab-gwmc5-stn3s-aet7i-iwczy-pougc-rqr72-36tal-ew46m-anrdh-tqe-IMG_5627.MOV-1628017992186192286",
+						"viewCount": 0n,
+						"viewerHasFlagged": Array [],
+						"viralAt": Array [],
+					},
+				]
+				*/
+				const backendMedias = createUploadedAssets(res);
+				console.log(backendMedias);
+				uploadedAssets.current = backendMedias;
+			});
+		}
+	}, [identity])
+	
+	const uploadFile = async(mediaAsset: Asset) => {
+		uploadedAssets.current[mediaAsset.id] = 1;
+		lastUpload.value = mediaAsset.id;
 		if(mediaAsset){
 			const mediaInfo = await getAssetInfoAsync(mediaAsset);
 			if(typeof mediaInfo.localUri === 'string'){
@@ -163,7 +220,9 @@ const AllPhotos: React.FC<Props> = (props) => {
 						type: mime.lookup(mediaInfo.localUri),
 					}
 				);*/
-				const videoUploadController = await upload(mediaFile, '');
+				const videoUploadController = await upload(mediaFile, '', mediaAsset.id);
+				console.log('setting uploaded to true')
+				uploadedAssets.current[mediaAsset.id] = 100;
 				console.log(_videoUploadController.current.completedVideo);
 				
 			}
@@ -184,7 +243,6 @@ const AllPhotos: React.FC<Props> = (props) => {
 	}
 	
 	const _handleMore = () => console.log('Shown more');
-
 
 
   
@@ -226,6 +284,10 @@ const AllPhotos: React.FC<Props> = (props) => {
         selectedAssets={selectedAssets}
         lastSelectedAssetId={lastSelectedAssetId}
         lastSelectedAssetAction={lastSelectedAssetAction}
+
+				uploadedAssets={uploadedAssets}
+				lastUpload={lastUpload}
+
         dragY={dragY}
         SCREEN_HEIGHT={props.SCREEN_HEIGHT}
         SCREEN_WIDTH={props.SCREEN_WIDTH}
@@ -262,6 +324,9 @@ const AllPhotos: React.FC<Props> = (props) => {
         dragY={dragY}
         SCREEN_HEIGHT={props.SCREEN_HEIGHT}
         SCREEN_WIDTH={props.SCREEN_WIDTH}
+
+				uploadedAssets={uploadedAssets}
+				lastUpload={lastUpload}
       />
       <RenderPhotos
         photos={preparedMedia}
@@ -295,6 +360,9 @@ const AllPhotos: React.FC<Props> = (props) => {
         dragY={dragY}
         SCREEN_HEIGHT={props.SCREEN_HEIGHT}
         SCREEN_WIDTH={props.SCREEN_WIDTH}
+
+				uploadedAssets={uploadedAssets}
+				lastUpload={lastUpload}
       />
       <SingleMedia 
         modalShown={modalShown}

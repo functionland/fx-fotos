@@ -134,6 +134,18 @@ export async function getFeedVideos(userId: string): Promise<VideoInfo[]> {
   }
 }
 
+export async function getProfileVideos(userId: string): Promise<VideoInfo[]> {
+  const videos = unwrap<VideoResults>(
+    await (await CanCan.actor).getProfileVideos(userId, [])
+  );
+  if (videos !== null) {
+    const unwrappedVideos = videos.map((v) => v[0]);
+    return unwrappedVideos;
+  } else {
+    return Promise.resolve([]);
+  }
+}
+
 export async function getVideoInfo(userId: string, videoId: string) {
   const videoInfo = unwrap(
     await (await CanCan.actor).getVideoInfo([userId], videoId)
@@ -230,7 +242,6 @@ export async function putVideoChunk(
   chunkNum: number,
   chunkData: number[]
 ) {
-	console.log({'videoId':typeof videoId, 'chunkNum': typeof chunkNum, 'chunkData': typeof chunkData, chunk0: chunkData[0]})
   return (await CanCan.actor).putVideoChunk(videoId, chunkNum, chunkData);
 }
 

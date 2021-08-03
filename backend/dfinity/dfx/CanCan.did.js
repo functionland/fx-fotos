@@ -1,4 +1,22 @@
 export default ({ IDL }) => {
+  const List = IDL.Rec();
+  const List_2 = IDL.Rec();
+  const List_3 = IDL.Rec();
+  const List_4 = IDL.Rec();
+  const List_5 = IDL.Rec();
+  const List_6 = IDL.Rec();
+  const List_7 = IDL.Rec();
+  const List_8 = IDL.Rec();
+  const List_9 = IDL.Rec();
+  const Trie = IDL.Rec();
+  const Trie_2 = IDL.Rec();
+  const Trie_3 = IDL.Rec();
+  const Trie_4 = IDL.Rec();
+  const Trie_5 = IDL.Rec();
+  const Trie_6 = IDL.Rec();
+  const Trie_7 = IDL.Rec();
+  const Trie_8 = IDL.Rec();
+  const Trie_9 = IDL.Rec();
   const ProfilePic_2 = IDL.Vec(IDL.Nat8);
   const ProfilePic = ProfilePic_2;
   const VideoPic_2 = IDL.Vec(IDL.Nat8);
@@ -8,6 +26,7 @@ export default ({ IDL }) => {
   const VideoInfo_2 = IDL.Record({
     'pic' : IDL.Opt(VideoPic_2),
     'viralAt' : IDL.Opt(Timestamp),
+    'externalId' : IDL.Text,
     'userId' : UserId,
     'name' : IDL.Text,
     'createdAt' : Timestamp,
@@ -57,6 +76,7 @@ export default ({ IDL }) => {
   const UserId_2 = UserId;
   const VideoId = VideoId_2;
   const VideoInit_2 = IDL.Record({
+    'externalId' : IDL.Text,
     'userId' : UserId,
     'name' : IDL.Text,
     'createdAt' : Timestamp,
@@ -203,6 +223,159 @@ export default ({ IDL }) => {
     'event' : Event,
   });
   const ProfileInfo = ProfileInfo_2;
+  const Branch_2 = IDL.Record({
+    'left' : Trie_2,
+    'size' : IDL.Nat,
+    'right' : Trie_2,
+  });
+  const Hash = IDL.Nat32;
+  const Key_2 = IDL.Record({ 'key' : UserId, 'hash' : Hash });
+  const Branch_3 = IDL.Record({
+    'left' : Trie_3,
+    'size' : IDL.Nat,
+    'right' : Trie_3,
+  });
+  List_3.fill(IDL.Opt(IDL.Tuple(IDL.Tuple(Key_2, IDL.Null), List_3)));
+  const AssocList_6 = List_3;
+  const AssocList_5 = AssocList_6;
+  const Leaf_3 = IDL.Record({ 'size' : IDL.Nat, 'keyvals' : AssocList_5 });
+  Trie_3.fill(
+    IDL.Variant({ 'branch' : Branch_3, 'leaf' : Leaf_3, 'empty' : IDL.Null })
+  );
+  List_2.fill(IDL.Opt(IDL.Tuple(IDL.Tuple(Key_2, Trie_3), List_2)));
+  const AssocList_4 = List_2;
+  const AssocList_3 = AssocList_4;
+  const Leaf_2 = IDL.Record({ 'size' : IDL.Nat, 'keyvals' : AssocList_3 });
+  Trie_2.fill(
+    IDL.Variant({ 'branch' : Branch_2, 'leaf' : Leaf_2, 'empty' : IDL.Null })
+  );
+  const Trie2D = Trie_2;
+  const RelShared_2 = IDL.Record({ 'forw' : Trie2D });
+  const RelShared = RelShared_2;
+  const Branch_4 = IDL.Record({
+    'left' : Trie_4,
+    'size' : IDL.Nat,
+    'right' : Trie_4,
+  });
+  const Branch_5 = IDL.Record({
+    'left' : Trie_5,
+    'size' : IDL.Nat,
+    'right' : Trie_5,
+  });
+  const Key_3 = IDL.Record({ 'key' : VideoId_2, 'hash' : Hash });
+  List_5.fill(IDL.Opt(IDL.Tuple(IDL.Tuple(Key_3, IDL.Null), List_5)));
+  const AssocList_10 = List_5;
+  const AssocList_9 = AssocList_10;
+  const Leaf_5 = IDL.Record({ 'size' : IDL.Nat, 'keyvals' : AssocList_9 });
+  Trie_5.fill(
+    IDL.Variant({ 'branch' : Branch_5, 'leaf' : Leaf_5, 'empty' : IDL.Null })
+  );
+  List_4.fill(IDL.Opt(IDL.Tuple(IDL.Tuple(Key_2, Trie_5), List_4)));
+  const AssocList_8 = List_4;
+  const AssocList_7 = AssocList_8;
+  const Leaf_4 = IDL.Record({ 'size' : IDL.Nat, 'keyvals' : AssocList_7 });
+  Trie_4.fill(
+    IDL.Variant({ 'branch' : Branch_4, 'leaf' : Leaf_4, 'empty' : IDL.Null })
+  );
+  const Trie2D_2 = Trie_4;
+  const RelShared_4 = IDL.Record({ 'forw' : Trie2D_2 });
+  const RelShared_3 = RelShared_4;
+  const Branch_8 = IDL.Record({
+    'left' : Trie_8,
+    'size' : IDL.Nat,
+    'right' : Trie_8,
+  });
+  const Key_4 = IDL.Record({ 'key' : IDL.Principal, 'hash' : Hash });
+  List_8.fill(IDL.Opt(IDL.Tuple(IDL.Tuple(Key_4, UserId), List_8)));
+  const AssocList_16 = List_8;
+  const AssocList_15 = AssocList_16;
+  const Leaf_8 = IDL.Record({ 'size' : IDL.Nat, 'keyvals' : AssocList_15 });
+  Trie_8.fill(
+    IDL.Variant({ 'branch' : Branch_8, 'leaf' : Leaf_8, 'empty' : IDL.Null })
+  );
+  const MapShared_4 = Trie_8;
+  const Branch_7 = IDL.Record({
+    'left' : Trie_7,
+    'size' : IDL.Nat,
+    'right' : Trie_7,
+  });
+  List_7.fill(IDL.Opt(IDL.Tuple(IDL.Tuple(Key_2, IDL.Nat), List_7)));
+  const AssocList_14 = List_7;
+  const AssocList_13 = AssocList_14;
+  const Leaf_7 = IDL.Record({ 'size' : IDL.Nat, 'keyvals' : AssocList_13 });
+  Trie_7.fill(
+    IDL.Variant({ 'branch' : Branch_7, 'leaf' : Leaf_7, 'empty' : IDL.Null })
+  );
+  const MapShared_3 = Trie_7;
+  const Branch = IDL.Record({
+    'left' : Trie,
+    'size' : IDL.Nat,
+    'right' : Trie,
+  });
+  const ChunkId = IDL.Text;
+  const Key = IDL.Record({ 'key' : ChunkId, 'hash' : Hash });
+  const ChunkData_2 = IDL.Vec(IDL.Nat8);
+  const ChunkData = ChunkData_2;
+  List.fill(IDL.Opt(IDL.Tuple(IDL.Tuple(Key, ChunkData), List)));
+  const AssocList_2 = List;
+  const AssocList = AssocList_2;
+  const Leaf = IDL.Record({ 'size' : IDL.Nat, 'keyvals' : AssocList });
+  Trie.fill(
+    IDL.Variant({ 'branch' : Branch, 'leaf' : Leaf, 'empty' : IDL.Null })
+  );
+  const MapShared = Trie;
+  const Branch_9 = IDL.Record({
+    'left' : Trie_9,
+    'size' : IDL.Nat,
+    'right' : Trie_9,
+  });
+  const Video = IDL.Record({
+    'viralAt' : IDL.Opt(Timestamp),
+    'externalId' : IDL.Text,
+    'userId' : UserId,
+    'name' : IDL.Text,
+    'createdAt' : Timestamp,
+    'tags' : IDL.Vec(IDL.Text),
+    'viewCount' : IDL.Nat,
+    'caption' : IDL.Text,
+    'chunkCount' : IDL.Nat,
+    'uploadedAt' : Timestamp,
+  });
+  List_9.fill(IDL.Opt(IDL.Tuple(IDL.Tuple(Key_3, Video), List_9)));
+  const AssocList_18 = List_9;
+  const AssocList_17 = AssocList_18;
+  const Leaf_9 = IDL.Record({ 'size' : IDL.Nat, 'keyvals' : AssocList_17 });
+  Trie_9.fill(
+    IDL.Variant({ 'branch' : Branch_9, 'leaf' : Leaf_9, 'empty' : IDL.Null })
+  );
+  const MapShared_5 = Trie_9;
+  const Branch_6 = IDL.Record({
+    'left' : Trie_6,
+    'size' : IDL.Nat,
+    'right' : Trie_6,
+  });
+  const Profile = IDL.Record({
+    'userName' : IDL.Text,
+    'createdAt' : Timestamp,
+  });
+  List_6.fill(IDL.Opt(IDL.Tuple(IDL.Tuple(Key_2, Profile), List_6)));
+  const AssocList_12 = List_6;
+  const AssocList_11 = AssocList_12;
+  const Leaf_6 = IDL.Record({ 'size' : IDL.Nat, 'keyvals' : AssocList_11 });
+  Trie_6.fill(
+    IDL.Variant({ 'branch' : Branch_6, 'leaf' : Leaf_6, 'empty' : IDL.Null })
+  );
+  const MapShared_2 = Trie_6;
+  const StateShared = IDL.Record({
+    'follows' : RelShared,
+    'likes' : RelShared_3,
+    'users' : MapShared_4,
+    'rewards' : MapShared_3,
+    'uploaded' : RelShared_3,
+    'chunks' : MapShared,
+    'videos' : MapShared_5,
+    'profiles' : MapShared_2,
+  });
   const VideoInfo = VideoInfo_2;
   const VideoPic = VideoPic_2;
   const CanCan = IDL.Service({
@@ -254,6 +427,7 @@ export default ({ IDL }) => {
         [IDL.Opt(VideoResults)],
         ['query'],
       ),
+    'getState' : IDL.Func([], [StateShared], ['query']),
     'getSuperLikeValidNow' : IDL.Func(
         [UserId_2, VideoId],
         [IDL.Opt(IDL.Bool)],
