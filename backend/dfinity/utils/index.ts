@@ -26,14 +26,14 @@ export function unwrap<T>(val: Optional<T>): T | null {
 }
 
 export function formatBigNumber(number: number): string {
-  if (number >= 1_000_000_000) {
-    return `${(number / 1_000_000_000).toFixed(2)}B`;
+  if (number >= 1000000000) {
+    return `${(number / 1000000000).toFixed(2)}B`;
   }
-  if (number >= 1_000_000) {
-    return `${(number / 1_000_000).toFixed(2)}M`;
+  if (number >= 1000000) {
+    return `${(number / 1000000).toFixed(2)}M`;
   }
-  if (number >= 1_000) {
-    return `${(number / 1_000).toFixed(1)}K`;
+  if (number >= 1000) {
+    return `${(number / 1000).toFixed(1)}K`;
   }
   return `${number}`;
 }
