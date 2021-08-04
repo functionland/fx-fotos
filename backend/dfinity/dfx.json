@@ -1,0 +1,26 @@
+{
+  "canisters": {
+    "CanCan": {
+      "main": "service/CanCan.mo"
+    }
+  },
+  "defaults": {
+    "build": {
+      "packtool": "vessel sources",
+      "output": "build"
+    }
+  },
+  "networks": {
+    "alpha": {
+      "providers": [
+        "https://mainnet.dfinity.network"
+      ],
+      "type": "persistent"
+    },
+    "local": {
+      "bind": "192.168.68.118:8000",
+      "type": "ephemeral"
+    }
+  },
+  "dfx": "0.7.2"
+}

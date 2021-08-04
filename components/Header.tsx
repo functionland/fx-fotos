@@ -15,8 +15,8 @@ import {
     useDerivedValue,
     interpolate,
 } from 'react-native-reanimated';
-import Menu, { MenuItem } from 'react-native-material-menu';
-import * as Auth from './Auth';
+import Auth from './TopMenu';
+
 
 interface Props {
     scrollY2: Reanimated.SharedValue<number>;
@@ -30,24 +30,11 @@ interface Props {
 const Header: React.FC<Props> = (props) => {
     useEffect(()=>{
         console.log('HEADER mounted');
-    })
+    });
+	
     const translateY_t = useSharedValue(0);
     const translateY = useSharedValue(0);
 
-    let _menu: { hide: () => void; show: () => void; } | null = null;
-
-    const setMenuRef = (ref: any) => {
-        _menu = ref;
-    };
-
-    const hideMenu = () => {
-        _menu?.hide();
-    };
-
-    const showMenu = () => {
-        _menu?.show();
-    };
-    
     const animScroll = useSharedValue<number>(0);
     useDerivedValue(() => {
         animScroll.value = (props.scrollY2.value+props.scrollY3.value+props.scrollY4.value);
@@ -88,37 +75,7 @@ const Header: React.FC<Props> = (props) => {
                         />
                     </View>
                     <View style={styles.item}>
-                        <Menu
-                            ref={setMenuRef}
-                            button={<Pressable style={[styles.profilePic]} onPress={showMenu}>
-
-                            </Pressable>}
-                        >
-                            {
-                                Auth.authProviders.map(x => (
-                                    <MenuItem 
-                                        onPress={
-                                            ()=>{
-                                                if(x.link){
-                                                    props.navigation.navigate('Browser', {
-                                                        title: x.name, 
-                                                        link: x.link
-                                                    })
-                                                }else{
-                                                    x.action();
-                                                }
-                                                hideMenu();
-                                            }
-                                        } 
-                                        key={x.key}>
-                                            {x.name}
-                                        </MenuItem>
-                                    )
-                                )
-                            }
-                            
-                        </Menu>
-                        
+						<Auth navigation={props.navigation} />
                     </View>
             </Reanimated.View>
     )

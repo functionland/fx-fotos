@@ -36,9 +36,9 @@ import {
 } from 'recoil';
 import {
   storiesState,
-  dataProviderState, 
 } from '../states';
 
+const notUploadedArray:Array<Animated.Value> = [];
 class ItemAnimator extends React.Component implements BaseItemAnimator {
   constructor(props:any) {
     super(props);
@@ -123,14 +123,20 @@ interface Props {
   scrollY: Reanimated.SharedValue<number>;
   HEADER_HEIGHT: number;
   FOOTER_HEIGHT: number;
-  selectedAssets:Reanimated.SharedValue<string[]>;
+
+	uploadedAssets:React.MutableRefObject<{[key: string]: number;}>
+	lastUpload:Reanimated.SharedValue<string>;
+
   animatedImagePositionX: Reanimated.SharedValue<number>;
   animatedImagePositionY: Reanimated.SharedValue<number>;
   animatedSingleMediaIndex: Reanimated.SharedValue<number>;
   singleImageWidth: Reanimated.SharedValue<number>;
   singleImageHeight: Reanimated.SharedValue<number>;
+
+	selectedAssets:Reanimated.SharedValue<string[]>;
   lastSelectedAssetId: Reanimated.SharedValue<string>;
   lastSelectedAssetAction: Reanimated.SharedValue<number>;
+	
   dragY: Reanimated.SharedValue<number>;
   SCREEN_HEIGHT: number;
   SCREEN_WIDTH: number;
@@ -141,7 +147,6 @@ const RenderPhotos: React.FC<Props> = (props) => {
   const headerHeight = 20;
   const indicatorHeight = 50;
 
-  const [dataProvider] = useRecoilState(dataProviderState);
   const [layoutProvider, setLayoutProvider] = useState<LayoutProvider>(LayoutUtil.getLayoutProvider(props.numColumns, props.sortCondition, headerHeight, props.storiesHeight, props.HEADER_HEIGHT));
   layoutProvider.shouldRefreshWithAnchoring = true;
   const scrollRef:any = useRef();
@@ -214,6 +219,9 @@ const RenderPhotos: React.FC<Props> = (props) => {
     console.log([Date.now()+': component RenderPhotos'+props.numColumns+' rendered']);
   });
 
+	/****
+	 * The below lines are to update the selection checkbox status in each media
+	 */
   const clearSelection = useRef(new Animated.Value(0)).current;
   const selectedAssetsRef = useRef<string[]>([]);
   const setSelectedAssetsRef = (selected:string[]) => {
@@ -222,7 +230,6 @@ const RenderPhotos: React.FC<Props> = (props) => {
   const setClearSelection = (clear:number) => {
     clearSelection.setValue(clear);
   }
-
   useDerivedValue(() => {
     //we need to add a dummy condition on the props.lastSelectedAssetAction.value and props.lastSelectedAssetIndex.value so that useDerivedValue does not ignore updating
     if(props.lastSelectedAssetAction.value>-1 && props.lastSelectedAssetId.value!=='Thisisjustadummytext'){
@@ -238,8 +245,9 @@ const RenderPhotos: React.FC<Props> = (props) => {
 
   }, [props.lastSelectedAssetAction, props.lastSelectedAssetId]);
 
-  //scrollRefExternal?.current?.scrollTo({x:0,y:100});
-
+	/****
+	 * The below lines are to update the scroll position across all modes
+	 */
   useEffect(()=>{
     console.log(['component RenderPhotos mounted '+props.numColumns]);
 
@@ -276,13 +284,15 @@ const RenderPhotos: React.FC<Props> = (props) => {
       }
     }
   }, []);
-  useEffect(()=>{
+
+
+  /*useEffect(()=>{
     console.log('photos.layout length changed');
     //if(dataProvider.getAllData().length !== props.photos.layout.length){
     let data = props.photos.layout;
     //setLayoutProvider(LayoutUtil.getLayoutProvider(props.numColumns, props.sortCondition, headerHeight, dataProvider, props.storiesHeight, props.HEADER_HEIGHT));
     //}
-  },[dataProvider]);
+  },[dataProvider]);*/
 
   useBackHandler(() => {
     /*if (props.showSelectionCheckbox) {
@@ -334,29 +344,34 @@ const RenderPhotos: React.FC<Props> = (props) => {
         );
       break;
       default:
-    return (
-      <PhotosChunk
-        photo={data}
-        index={data.index}
-        modalShown={props.modalShown}
-        headerShown={props.headerShown}
-        headerHeight={headerHeight}
-        selectedAssets={props.selectedAssets}
-        lastSelectedAssetId={props.lastSelectedAssetId}
-        lastSelectedAssetAction={props.lastSelectedAssetAction}
-        animatedImagePositionX={props.animatedImagePositionX}
-        animatedImagePositionY={props.animatedImagePositionY}
-        animatedSingleMediaIndex={props.animatedSingleMediaIndex}
-        singleImageWidth={props.singleImageWidth}
-        singleImageHeight={props.singleImageHeight}
-        imageWidth={(typeof data.value !== 'string')?data.value.width:0}
-        imageHeight={(typeof data.value !== 'string')?data.value.height:0}
-        SCREEN_HEIGHT={props.SCREEN_HEIGHT}
-        SCREEN_WIDTH={props.SCREEN_WIDTH}
-        selectedAssetsRef={selectedAssetsRef}
-        clearSelection={clearSelection}
-      />
-    );
+				return (
+					<PhotosChunk
+						photo={data}
+						index={data.index}
+						modalShown={props.modalShown}
+						headerShown={props.headerShown}
+						headerHeight={headerHeight}
+
+						selectedAssets={props.selectedAssets}
+						lastSelectedAssetId={props.lastSelectedAssetId}
+						lastSelectedAssetAction={props.lastSelectedAssetAction}
+						selectedAssetsRef={selectedAssetsRef}
+						clearSelection={clearSelection}
+
+						uploadedAssets={props.uploadedAssets}
+						lastUpload={props.lastUpload}
+
+						animatedImagePositionX={props.animatedImagePositionX}
+						animatedImagePositionY={props.animatedImagePositionY}
+						animatedSingleMediaIndex={props.animatedSingleMediaIndex}
+						singleImageWidth={props.singleImageWidth}
+						singleImageHeight={props.singleImageHeight}
+						imageWidth={(typeof data.value !== 'string')?data.value.width:0}
+						imageHeight={(typeof data.value !== 'string')?data.value.height:0}
+						SCREEN_HEIGHT={props.SCREEN_HEIGHT}
+						SCREEN_WIDTH={props.SCREEN_WIDTH}
+					/>
+				);
     }
   },[props.photos?.layout?.length]);
 

@@ -28,12 +28,17 @@ interface Props {
   selectedAssets: Reanimated.SharedValue<string[]>
   imageWidth: number;
   imageHeight: number;
+
   lastSelectedAssetId: Reanimated.SharedValue<string>;
   lastSelectedAssetAction: Reanimated.SharedValue<number>;
+	selectedAssetsRef:React.MutableRefObject<string[]>;
+  clearSelection: Animated.Value;
+
+	uploadedAssets: React.MutableRefObject<{[key: string]: number;}>
+	lastUpload: Reanimated.SharedValue<string>;
+
   SCREEN_HEIGHT: number;
   SCREEN_WIDTH: number;
-  selectedAssetsRef:React.MutableRefObject<string[]>;
-  clearSelection: Animated.Value;
 }
 
 
@@ -45,9 +50,14 @@ const PhotosChunk: React.FC<Props> = (props) => {
   const selected = useRef(new Animated.Value(0)).current;
   const selectedOpacity = useRef(Animated.multiply(selected, props.clearSelection)).current;
   const animatedTempScale = useRef(new Animated.Value(1)).current;
-  const setAnimatedVal = (val:number) => {
+  const setAnimatedSelectedVal = (val:number) => {
     selected.setValue(val);
   }
+
+	const notUploaded = useRef(new Animated.Value(1)).current;
+	if(props.uploadedAssets.current.hasOwnProperty(props.photo.id)){
+		notUploaded.setValue(0);
+	}
 
   const selectionScale = useRef(new Animated.Value(1)).current;
 
@@ -63,9 +73,9 @@ const PhotosChunk: React.FC<Props> = (props) => {
   useEffect(()=>{
     let index = props.selectedAssetsRef.current.findIndex(x=>x===props.photo.id);
     if(index>-1){
-      setAnimatedVal(1);
+      setAnimatedSelectedVal(1);
     }else{
-      setAnimatedVal(0);
+      setAnimatedSelectedVal(0);
     }
   },[props.photo.id])
 
@@ -97,11 +107,11 @@ const PhotosChunk: React.FC<Props> = (props) => {
         if(index > -1){
           props.selectedAssets.value.splice(index, 1);
           props.lastSelectedAssetAction.value = 0;
-          runOnJS(setAnimatedVal)(0);
+          runOnJS(setAnimatedSelectedVal)(0);
         }else{
           props.selectedAssets.value.push(props.photo.id);
           props.lastSelectedAssetAction.value = 1;
-          runOnJS(setAnimatedVal)(1);
+          runOnJS(setAnimatedSelectedVal)(1);
         }
       }
 
@@ -122,19 +132,21 @@ const PhotosChunk: React.FC<Props> = (props) => {
         //console.log('removed '+index);
         props.selectedAssets.value.splice(index, 1);
         props.lastSelectedAssetAction.value = 0;
-        runOnJS(setAnimatedVal)(0);
+        runOnJS(setAnimatedSelectedVal)(0);
       }else{
         console.log('added '+index);
         props.selectedAssets.value.push(props.photo.id);
         props.lastSelectedAssetAction.value = 1;
-        runOnJS(setAnimatedVal)(1);
+        runOnJS(setAnimatedSelectedVal)(1);
       }
     },
   });
 
   const createThumbnail = (media:Asset) => {
-    if(media.duration > 0){
-      return (
+		return (
+			<>
+    {(media.duration > 0)? 
+      (
         <>
           <Image
               source={{uri: media.uri}}
@@ -153,9 +165,9 @@ const PhotosChunk: React.FC<Props> = (props) => {
             <MaterialIcons name="play-circle-filled" size={20} color="white" />
           </View>
         </>
-      );
-    }else{
-      return (
+      )
+    	:
+      (
         <Image
               source={{uri: media.uri}}
               // eslint-disable-next-line react-native/no-inline-styles
@@ -166,9 +178,12 @@ const PhotosChunk: React.FC<Props> = (props) => {
                 zIndex:4,
               }}
         />
-      );
-    }
+      )
+		}
+		</>
+		)
   }
+		
   
     if(typeof props.photo.value === 'string'){
       return (
@@ -230,7 +245,18 @@ const PhotosChunk: React.FC<Props> = (props) => {
             onValueChange={() => {}}
           />
           </Animated.View>
+					<Animated.View 
+						style={[
+							styles.uploadStatus,
+							{
+								opacity: notUploaded
+							}
+						]}
+					>
+						<MaterialIcons name="cloud-off" size={20} color="white" />
+					</Animated.View>
         </Animated.View>
+
       );
     }
 };
@@ -248,6 +274,16 @@ const styles = StyleSheet.create({
     right: 5,
     flex: 1,
     flexDirection:'row',
+  },
+	uploadStatus: {
+    zIndex:5,
+    height: 20,
+    position: 'absolute',
+    bottom:5,
+    left: 5,
+    flex: 1,
+    flexDirection:'row',
+		color: 'white',
   },
   checkBox:{
     zIndex:5,
