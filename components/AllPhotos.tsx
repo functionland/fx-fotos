@@ -50,6 +50,7 @@ const AllPhotos: React.FC<Props> = (props) => {
 	 */
 	 const uploadedAssets = useRef<{[key:string]:number}>({});
 	 const lastUpload:Reanimated.SharedValue<string> = useSharedValue('');
+	 const uploadingPercent = useRef<Array<Animated.Value>>([]);
 
   const [preparedMedia, setPreparedMedia] = useRecoilState(preparedMediaState);
 	const [identity] = useRecoilState(identityState);
@@ -168,8 +169,17 @@ const AllPhotos: React.FC<Props> = (props) => {
 		}
 	}, [identity])
 	
-	const uploadFile = async(mediaAsset: Asset) => {
+	const uploadFile = async(mediaAsset: Asset, index:number = 1) => {
+		console.log('uploading index '+index);
+		console.log(uploadingPercent.current[index]);
 		uploadedAssets.current[mediaAsset.id] = 1;
+		if(!uploadingPercent.current[index]){
+			uploadingPercent.current[index] = new Animated.Value(1);
+		}else{
+			console.log('setting uploadingPercent value to 1 for '+index);
+			uploadingPercent.current[index]?.setValue(1);
+		}
+		
 		lastUpload.value = mediaAsset.id;
 		if(mediaAsset){
 			const mediaInfo = await getAssetInfoAsync(mediaAsset);
@@ -235,7 +245,7 @@ const AllPhotos: React.FC<Props> = (props) => {
 			(x, index)=>{
 				if(selectedAssetsRef.current.includes(x.id)){
 					if(typeof x.value !== 'string'){
-						uploadFile(x.value);
+						uploadFile(x.value, index);
 					}
 				}
 			}
@@ -287,6 +297,7 @@ const AllPhotos: React.FC<Props> = (props) => {
 
 				uploadedAssets={uploadedAssets}
 				lastUpload={lastUpload}
+				uploadingPercent={uploadingPercent}
 
         dragY={dragY}
         SCREEN_HEIGHT={props.SCREEN_HEIGHT}
@@ -327,6 +338,7 @@ const AllPhotos: React.FC<Props> = (props) => {
 
 				uploadedAssets={uploadedAssets}
 				lastUpload={lastUpload}
+				uploadingPercent={uploadingPercent}
       />
       <RenderPhotos
         photos={preparedMedia}
@@ -363,6 +375,7 @@ const AllPhotos: React.FC<Props> = (props) => {
 
 				uploadedAssets={uploadedAssets}
 				lastUpload={lastUpload}
+				uploadingPercent={uploadingPercent}
       />
       <SingleMedia 
         modalShown={modalShown}
