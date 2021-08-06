@@ -119,7 +119,7 @@ const AllPhotos: React.FC<Props> = (props) => {
   const _handleShare = () => console.log('Sharing');
 
   const _handleAddToAlbum = () => console.log('Adding');
-	const {_userId, _videoUploadController, upload, getMedias} = useBackEndProviders({backend:'dfinity', identity: identity, requireProfile:false});
+	const {_userId, _videoUploadController, upload, getMedias} = useBackEndProviders({backend:'dfinity', identity: identity, requireProfile:true});
 
 	const createUploadedAssets = (backendResponse:Array<any> | undefined) => {
 		console.log('createUploadedAssets');
