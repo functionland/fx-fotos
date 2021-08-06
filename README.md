@@ -27,7 +27,7 @@ Google photos is a great service with great benefits however, there are major se
 
 2- It does not respect our privacy
 
-We developed this project with the smoothness and features of popular gallery apps in mind to enable anyone jump on and start using it right away. Furthermore, it can connect to "box", a decentralized node based on **IPFS** and **Crust**, or **Dfinity** instead of centralized cloud networks. We are also working on enabling it to connect to centralized cloud networks, however, with web3.0 privacy, do you still want to use web2.0? more information at the [BOX website](https://fx.land)
+We developed this project with the smoothness and features of popular gallery apps in mind to enable anyone jump on and start using it right away. Furthermore, it can connect to "box", a decentralized node based on **IPFS** and **Crust**, or **Dfinity** instead of centralized cloud networks. We are also working on enabling it to connect to centralized cloud networks, however, with web3.0 privacy, do you still want to use web2.0? more information is available in the box repo.
 
 ## demo
 
