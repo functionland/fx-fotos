@@ -1,12 +1,12 @@
 type ViralVideoSuperLiker = 
  record {
    time: int;
-   user: UserId;
+   user: UserId_2;
  };
 type ViralVideo = 
  record {
    superLikers: vec ViralVideoSuperLiker;
-   uploader: UserId;
+   uploader: UserId_2;
    video: VideoId_2;
  };
 type VideosPred = 
@@ -31,7 +31,7 @@ type VideoInit_2 =
    externalId: text;
    name: text;
    tags: vec text;
-   userId: UserId;
+   userId: UserId_2;
  };
 type VideoInit = VideoInit_2;
 type VideoInfo_2 = 
@@ -41,13 +41,14 @@ type VideoInfo_2 =
    chunkCount: nat;
    createdAt: Timestamp;
    externalId: text;
-   likes: vec UserId;
+   likes: vec UserId_2;
    name: text;
    pic: opt VideoPic_2;
-   superLikes: vec UserId;
+   sharedCount: nat;
+   superLikes: vec UserId_2;
    tags: vec text;
    uploadedAt: Timestamp;
-   userId: UserId;
+   userId: UserId_2;
    videoId: VideoId_2;
    viewCount: nat;
    viewerHasFlagged: opt bool;
@@ -66,13 +67,13 @@ type Video =
    name: text;
    tags: vec text;
    uploadedAt: Timestamp;
-   userId: UserId;
+   userId: UserId_2;
    viewCount: nat;
    viralAt: opt Timestamp;
  };
-type UserId_3 = UserId;
-type UserId_2 = UserId;
-type UserId = text;
+type UserId_3 = UserId_2;
+type UserId_2 = text;
+type UserId = UserId_2;
 type UserAllowances = 
  record {
    abuseFlags: AllowanceBalance;
@@ -162,12 +163,12 @@ type TimeMode =
  };
 type SuperLikeVideoFail = 
  record {
-   source: UserId;
+   source: UserId_2;
    target: VideoId_2;
  };
 type SuperLikeVideo = 
  record {
-   source: UserId;
+   source: UserId_2;
    superLikes: bool;
    target: VideoId_2;
  };
@@ -183,11 +184,17 @@ type StateShared =
    videos: MapShared_5;
  };
 type Signal = variant {viralVideo: ViralVideo;};
+type ShareVideo = 
+ record {
+   isShared: bool;
+   receiver: UserId_2;
+   target: VideoId_2;
+ };
 type RewardPointTransfer = 
  record {
    amount: nat;
-   receiver: UserId;
-   sender: UserId;
+   receiver: UserId_2;
+   sender: UserId_2;
  };
 type Result = 
  variant {
@@ -203,8 +210,8 @@ type ProfilePic = ProfilePic_2;
 type ProfileInfo_2 = 
  record {
    abuseFlagCount: nat;
-   followers: vec UserId;
-   following: vec UserId;
+   followers: vec UserId_2;
+   following: vec UserId_2;
    hasPic: bool;
    likedVideos: vec VideoId_2;
    rewards: nat;
@@ -254,7 +261,7 @@ type List_8 =
  opt record {
        record {
          Key_4;
-         UserId;
+         UserId_2;
        };
        List_8;
      };
@@ -317,7 +324,7 @@ type List =
 type LikeVideo = 
  record {
    likes: bool;
-   source: UserId;
+   source: UserId_2;
    target: VideoId_2;
  };
 type Leaf_9 = 
@@ -378,7 +385,7 @@ type Key_3 =
 type Key_2 = 
  record {
    hash: Hash;
-   key: UserId;
+   key: UserId_2;
  };
 type Key = 
  record {
@@ -407,6 +414,7 @@ type EventKind =
    likeVideo: LikeVideo;
    reset: TimeMode;
    rewardPointTransfer: RewardPointTransfer;
+   shareVideo: ShareVideo;
    superLikeVideo: SuperLikeVideo;
    superLikeVideoFail: SuperLikeVideoFail;
  };
@@ -481,42 +489,43 @@ type CanCan =
  service {
    checkUsernameAvailable: (text) -> (bool) query;
    createProfile: (text, opt ProfilePic) -> (opt ProfileInfoPlus);
-   createTestData: (vec UserId_2, vec record {
-                                        UserId_2;
-                                        VideoId;
-                                      }) -> (opt null);
+   createTestData: (vec UserId, vec record {
+                                      UserId;
+                                      VideoId;
+                                    }) -> (opt null);
    createVideo: (VideoInit) -> (opt VideoId);
    doDemo: (vec Command) -> (opt Trace);
    getAccessLog: () -> (opt vec Event_3) query;
+   getAllUserVideos: (UserId, opt nat) -> (opt VideoResults) query;
    getEventLog: () -> (opt vec Event_2) query;
-   getFeedVideos: (UserId_2, opt nat) -> (opt VideoResults) query;
-   getIsSuperLiker: (UserId_2, VideoId) -> (opt bool) query;
-   getMessages: (UserId_2) -> (opt vec Message) query;
-   getProfileInfo: (UserId_2) -> (opt ProfileInfo) query;
-   getProfilePic: (UserId_2) -> (opt ProfilePic) query;
-   getProfilePlus: (opt UserId_2, UserId_2) -> (opt ProfileInfoPlus) query;
-   getProfileVideos: (UserId_2, opt nat) -> (opt VideoResults) query;
+   getFeedVideos: (UserId, opt nat) -> (opt VideoResults) query;
+   getIsSuperLiker: (UserId, VideoId) -> (opt bool) query;
+   getMessages: (UserId) -> (opt vec Message) query;
+   getProfileInfo: (UserId) -> (opt ProfileInfo) query;
+   getProfilePic: (UserId) -> (opt ProfilePic) query;
+   getProfilePlus: (opt UserId, UserId) -> (opt ProfileInfoPlus) query;
+   getProfileVideos: (UserId, opt nat) -> (opt VideoResults) query;
    getProfiles: () -> (opt vec ProfileInfo) query;
-   getSearchVideos: (UserId_2, vec text, opt nat) -> (opt VideoResults) query;
+   getSearchVideos: (UserId, vec text, opt nat) -> (opt VideoResults) query;
    getState: () -> (StateShared) query;
-   getSuperLikeValidNow: (UserId_2, VideoId) -> (opt bool) query;
+   getSuperLikeValidNow: (UserId, VideoId) -> (opt bool) query;
    getUserNameByPrincipal: (principal) -> (opt vec text);
    getVideoChunk: (VideoId, nat) -> (opt vec nat8) query;
-   getVideoInfo: (opt UserId_2, VideoId) -> (opt VideoInfo) query;
+   getVideoInfo: (opt UserId, VideoId) -> (opt VideoInfo) query;
    getVideoPic: (VideoId) -> (opt VideoPic) query;
    getVideos: () -> (opt vec VideoInfo) query;
    isDropDay: () -> (opt bool) query;
-   putAbuseFlagUser: (UserId_2, UserId_2, bool) -> (opt null);
-   putAbuseFlagVideo: (UserId_2, VideoId, bool) -> (opt null);
-   putProfileFollow: (UserId_2, UserId_2, bool) -> (opt null);
-   putProfilePic: (UserId_2, opt ProfilePic) -> (opt null);
-   putProfileVideoLike: (UserId_2, VideoId, bool) -> (opt null);
-   putRewardTransfer: (UserId_2, UserId_2, nat) -> (opt null);
-   putRewards: (UserId_2, nat) -> (opt null);
-   putSuperLike: (UserId_2, VideoId, bool) -> (opt null);
+   putAbuseFlagUser: (UserId, UserId, bool) -> (opt null);
+   putAbuseFlagVideo: (UserId, VideoId, bool) -> (opt null);
+   putProfileFollow: (UserId, UserId, bool) -> (opt null);
+   putProfilePic: (UserId, opt ProfilePic) -> (opt null);
+   putProfileVideoLike: (UserId, VideoId, bool) -> (opt null);
+   putRewardTransfer: (UserId, UserId, nat) -> (opt null);
+   putRewards: (UserId, nat) -> (opt null);
+   putSuperLike: (UserId, VideoId, bool) -> (opt null);
    putTestFollows: (vec record {
-                          UserId_2;
-                          UserId_2;
+                          UserId;
+                          UserId;
                         }) -> (opt null);
    putVideoChunk: (VideoId, nat, vec nat8) -> (opt null);
    putVideoInfo: (VideoId, VideoInit) -> (opt null);
@@ -530,6 +539,8 @@ type CanCan =
                    ic;
                    script: int;
                  }) -> (opt null);
+   shareVideo: (UserId, VideoId, bool) -> (opt VideoId);
+   testGetUserNameByPrincipal: (opt principal) -> ();
  };
 type Branch_9 = 
  record {
@@ -613,15 +624,15 @@ type ActionTarget =
  variant {
    all;
    pubView;
-   user: UserId;
+   user: UserId_2;
    video: VideoId_2;
  };
 type AbuseFlag = 
  record {
    flag: bool;
-   reporter: UserId;
+   reporter: UserId_2;
    target: variant {
-             user: UserId;
+             user: UserId_2;
              video: VideoId_2;
            };
  };
