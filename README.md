@@ -14,7 +14,9 @@ Note: Project is still in alpha phase and not production ready. We aim to releas
 
 ## Project Description
 
-BOX Photos is a react-native(expo)+typescript application to replace Google Photos/Apple Photos, and give freedom in hosting your photos on any platform, either centralized servers like Amazon or Microsoft, or decentralized solutions such as Dfinity or IPFS-based "box". It is optimized for decentralized platforms, but is backend agnostic. Your can easily use it with a "box" to host your files and photos with the same experience you had using Google Photos, however, with full privacy.
+![](https://github.com/functionland/photos/blob/main/assets/images/Photos-integrations.png)
+
+Photos is a react-native(expo)+typescript application to replace Google Photos/Apple Photos, and give freedom in hosting your photos on any platform, either centralized servers like Amazon or Microsoft, or decentralized solutions such as Dfinity or IPFS-based "box". It is optimized for decentralized platforms, but is backend agnostic. Your can easily use it with a "box" to host your files and photos with the same experience you had using Google Photos, however, with full privacy.
 
 ## Why?
 Decentralzied Backend(IPFS, Dfinity, Crust, Filecoin) + Photos = Awesome!
