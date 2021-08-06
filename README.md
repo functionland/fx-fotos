@@ -2,9 +2,9 @@
 
 # Latest 2 Updates
 
-**July-31-2021:** Added Dfinity backup feature in Dfinity branch
+**August-05-2021:** The work for adding dfinity backedn is completed for upload and download and merged in main branch
 
-**July-27-2021:** The work for adding dfinity backend is being done in "dfinityupload" branch
+**July-31-2021:** Added Dfinity backup feature in Dfinity branch
 
 
 # BOX Photos development guide
@@ -14,10 +14,10 @@ Note: Project is still in alpha phase and not production ready. We aim to releas
 
 ## Project Description
 
-BOX Photos is a react-native(expo)+typescript application to replace Google Photos/Apple Photos, and give freedom in hosting your photos on any platform, either centralized servers like Amazon or Microsoft, or decentralized solutions like IPFS-based "box". It is optimized for decentralized IPFS platforms. Your can easily use it with a "box" to host your files and photos with the same experience you had using Google Photos, however, with full privacy.
+BOX Photos is a react-native(expo)+typescript application to replace Google Photos/Apple Photos, and give freedom in hosting your photos on any platform, either centralized servers like Amazon or Microsoft, or decentralized solutions such as Dfinity or IPFS-based "box". It is optimized for decentralized platforms, but is backend agnostic. Your can easily use it with a "box" to host your files and photos with the same experience you had using Google Photos, however, with full privacy.
 
 ## Why?
-IPFS + BOX Photos = Awesome!
+Decentralzied Backend(IPFS, Dfinity, Crust, Filecoin) + Photos = Awesome!
 
 Google photos is a great service with great benefits however, there are major setbacks with it:
 
@@ -25,7 +25,7 @@ Google photos is a great service with great benefits however, there are major se
 
 2- It does not respect our privacy
 
-We developed this project with the smoothness and features of popular gallery apps in mind to enable anyone jump on and start using it right away. Furthermore, it can connect to "box", a decentralized node based on IPFS instead of centralized cloud networks. We are also working on enabling it to connect to centralized cloud networks, however, with web3.0 privacy, do you still want to use web2.0? more information at the [BOX website](https://fx.land)
+We developed this project with the smoothness and features of popular gallery apps in mind to enable anyone jump on and start using it right away. Furthermore, it can connect to "box", a decentralized node based on **IPFS** and **Crust** instead of centralized cloud networks. For those who do not want to use any hardware at all, like "**box**", we are integrating it with **Dfinity** network. We are also working on enabling it to connect to centralized cloud networks, however, with web3.0 privacy, do you still want to use web2.0? more information at the [BOX website](https://fx.land)
 
 ## demo
 
@@ -257,7 +257,7 @@ Just pick any issue from the issues tab or create your own and do a pull request
  * [x] Show highlights
  * [x] Fast scroll/thumb scroll
  * [x] Select and unselect each image to delete/edit/share
- * [ ] Connect with Dfinity
+ * [x] Connect with Dfinity
  * [ ] Auto-upload photos to backend
  * [ ] Automatic Migration tool from Google Photos
  * [ ] Connect with BOX (as a self-owned IPFS solution)
