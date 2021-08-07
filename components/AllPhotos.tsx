@@ -1,5 +1,5 @@
 import React, {useEffect, useRef } from 'react';
-import {Animated, View, Text} from 'react-native';
+import {Animated, View, Text, } from 'react-native';
 import RenderPhotos from './RenderPhotos';
 import SingleMedia from './SingleMedia';
 import StoryHolder from './StoryHolder';
@@ -8,6 +8,8 @@ import { Asset, getAssetInfoAsync  } from 'expo-media-library';
 import * as FileSystem from 'expo-file-system';
 import { useBackEndProviders } from '../backend';
 import * as mime from 'react-native-mime-types';
+import BottomSheet from '@gorhom/bottom-sheet';
+import ShareSheet from './BottomSheets'
 
 import {
   useRecoilState,
@@ -54,6 +56,10 @@ const AllPhotos: React.FC<Props> = (props) => {
 
   const [preparedMedia, setPreparedMedia] = useRecoilState(preparedMediaState);
 	const [identity] = useRecoilState(identityState);
+
+	// share bottom sheet ref
+	const shareBottomSheetRef = useRef<BottomSheet>(null);
+	const bottomSheetOpacity = new Animated.Value(0);
 
   useEffect(()=>{
     console.log([Date.now()+': component AllPhotos rendered']);
@@ -116,7 +122,10 @@ const AllPhotos: React.FC<Props> = (props) => {
     _goBack();
   }
 
-  const _handleShare = () => console.log('Sharing');
+  const _handleShare = () => {
+		console.log('Sharing');
+		shareBottomSheetRef.current?.snapToIndex(1);
+	}
 
   const _handleAddToAlbum = () => console.log('Adding');
 	const {_userId, _videoUploadController, upload, getMedias} = useBackEndProviders({backend:'dfinity', identity: identity, requireProfile:true});
@@ -426,7 +435,7 @@ const AllPhotos: React.FC<Props> = (props) => {
         ]}
         moreActions={[]}
       />
-      
+      <ShareSheet bottomSheetRef={shareBottomSheetRef} opacity={bottomSheetOpacity} />
     </View>
     ):(
       <View><Text>No Photos</Text></View>

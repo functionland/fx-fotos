@@ -1,0 +1,28 @@
+diff --git a/node_modules/@dfinity/candid/lib/cjs/idl.js b/node_modules/@dfinity/candid/lib/cjs/idl.js
+index ddf1b94..a652d85 100644
+--- a/node_modules/@dfinity/candid/lib/cjs/idl.js
++++ b/node_modules/@dfinity/candid/lib/cjs/idl.js
+@@ -1,4 +1,5 @@
+ "use strict";
++import JSBI from 'jsbi';
+ var __importDefault = (this && this.__importDefault) || function (mod) {
+     return (mod && mod.__esModule) ? mod : { "default": mod };
+ };
+@@ -507,13 +508,13 @@ class FixedNatClass extends PrimitiveType {
+         return v.visitFixedNat(this, d);
+     }
+     covariant(x) {
+-        const max = BigInt(2) ** BigInt(this.bits);
++		const max = JSBI.exponentiate(JSBI.BigInt(2), JSBI.BigInt(this.bits));
+         if (typeof x === 'bigint' && x >= BigInt(0)) {
+-            return x < max;
++            return JSBI.GT(x, max);
+         }
+         else if (Number.isInteger(x) && x >= 0) {
+-            const v = BigInt(x);
+-            return v < max;
++            const v = JSBI.BigInt(x);
++            return JSBI.lessThan(v, max);
+         }
+         else {
+             return false;
