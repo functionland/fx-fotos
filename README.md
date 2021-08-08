@@ -2,9 +2,9 @@
 
 # Latest 2 Updates
 
-**August-05-2021:** The work for adding dfinity backedn is completed for upload and download and merged in main branch
+**August-07-2021:** Added share photo placeholder in dfinitydownload branch
 
-**July-31-2021:** Added Dfinity backup feature in Dfinity branch
+**August-05-2021:** The work for adding dfinity backend is completed for upload and download and merged in main branch
 
 
 # BOX Photos development guide
