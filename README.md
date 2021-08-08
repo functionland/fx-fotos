@@ -2,7 +2,7 @@
 
 # Latest 2 Updates
 
-**August-07-2021:** Added share photo placeholder in dfinitydownload branch
+**August-07-2021:** Added share photo placeholder and patched dfinity libraries
 
 **August-05-2021:** The work for adding dfinity backend is completed for upload and download and merged in main branch
 
@@ -19,7 +19,7 @@ Note: Project is still in alpha phase and not production ready. We aim to releas
 Photos is a react-native(expo)+typescript application to replace Google Photos/Apple Photos, and give freedom in hosting your photos on any platform, either centralized servers like Amazon or Microsoft, or decentralized solutions such as Dfinity or IPFS-based "box". It is optimized for decentralized platforms, but is backend agnostic. Your can easily use it with the IPFS-based "box" or "Dfinity" to host your files and photos with the same experience you had using Google Photos, however, with full privacy.
 
 ## Why?
-Decentralzied Backend(IPFS, Dfinity, Crust, Filecoin) + Photos = Awesome!
+Decentralized Backend(IPFS, Dfinity, Crust, Filecoin) + Photos = Awesome!
 
 Google photos is a great service with great benefits however, there are major setbacks with it:
 
@@ -122,7 +122,6 @@ npm install
 
 You can run the application in expo-cli using the below command. It gives you a QR code which you can use on your phone(in expo GO application) to open and test the application on your phone(both iOS and Android). Or you can build the android or iOS installation files.
 
-* For a limited time before doing the below, please follow additional steps inside "temp/instructions.txt" and after each time you do yarn or npm install. This temporary and we fix it soon.
 ```bash
 expo start
 ```
