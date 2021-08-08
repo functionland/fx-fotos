@@ -1,5 +1,5 @@
 import React, {useEffect, useRef } from 'react';
-import {Animated, View, Text} from 'react-native';
+import {Animated, View, Text, } from 'react-native';
 import RenderPhotos from './RenderPhotos';
 import SingleMedia from './SingleMedia';
 import StoryHolder from './StoryHolder';
@@ -8,6 +8,8 @@ import { Asset, getAssetInfoAsync  } from 'expo-media-library';
 import * as FileSystem from 'expo-file-system';
 import { useBackEndProviders } from '../backend';
 import * as mime from 'react-native-mime-types';
+import BottomSheet from '@gorhom/bottom-sheet';
+import ShareSheet from './BottomSheets'
 
 import {
   useRecoilState,
@@ -50,9 +52,14 @@ const AllPhotos: React.FC<Props> = (props) => {
 	 */
 	 const uploadedAssets = useRef<{[key:string]:number}>({});
 	 const lastUpload:Reanimated.SharedValue<string> = useSharedValue('');
+	 const uploadingPercent = useRef<Array<Animated.Value>>([]);
 
   const [preparedMedia, setPreparedMedia] = useRecoilState(preparedMediaState);
 	const [identity] = useRecoilState(identityState);
+
+	// share bottom sheet ref
+	const shareBottomSheetRef = useRef<BottomSheet>(null);
+	const bottomSheetOpacity = new Animated.Value(0);
 
   useEffect(()=>{
     console.log([Date.now()+': component AllPhotos rendered']);
@@ -115,10 +122,13 @@ const AllPhotos: React.FC<Props> = (props) => {
     _goBack();
   }
 
-  const _handleShare = () => console.log('Sharing');
+  const _handleShare = () => {
+		console.log('Sharing');
+		shareBottomSheetRef.current?.snapToIndex(1);
+	}
 
   const _handleAddToAlbum = () => console.log('Adding');
-	const {_userId, _videoUploadController, upload, getMedias} = useBackEndProviders({backend:'dfinity', identity: identity, requireProfile:false});
+	const {_userId, _videoUploadController, upload, getMedias} = useBackEndProviders({backend:'dfinity', identity: identity, requireProfile:true});
 
 	const createUploadedAssets = (backendResponse:Array<any> | undefined) => {
 		console.log('createUploadedAssets');
@@ -168,8 +178,17 @@ const AllPhotos: React.FC<Props> = (props) => {
 		}
 	}, [identity])
 	
-	const uploadFile = async(mediaAsset: Asset) => {
+	const uploadFile = async(mediaAsset: Asset, index:number = 1) => {
+		console.log('uploading index '+index);
+		console.log(uploadingPercent.current[index]);
 		uploadedAssets.current[mediaAsset.id] = 1;
+		if(!uploadingPercent.current[index]){
+			uploadingPercent.current[index] = new Animated.Value(1);
+		}else{
+			console.log('setting uploadingPercent value to 1 for '+index);
+			uploadingPercent.current[index]?.setValue(1);
+		}
+		
 		lastUpload.value = mediaAsset.id;
 		if(mediaAsset){
 			const mediaInfo = await getAssetInfoAsync(mediaAsset);
@@ -235,7 +254,7 @@ const AllPhotos: React.FC<Props> = (props) => {
 			(x, index)=>{
 				if(selectedAssetsRef.current.includes(x.id)){
 					if(typeof x.value !== 'string'){
-						uploadFile(x.value);
+						uploadFile(x.value, index);
 					}
 				}
 			}
@@ -287,6 +306,7 @@ const AllPhotos: React.FC<Props> = (props) => {
 
 				uploadedAssets={uploadedAssets}
 				lastUpload={lastUpload}
+				uploadingPercent={uploadingPercent}
 
         dragY={dragY}
         SCREEN_HEIGHT={props.SCREEN_HEIGHT}
@@ -327,6 +347,7 @@ const AllPhotos: React.FC<Props> = (props) => {
 
 				uploadedAssets={uploadedAssets}
 				lastUpload={lastUpload}
+				uploadingPercent={uploadingPercent}
       />
       <RenderPhotos
         photos={preparedMedia}
@@ -363,6 +384,7 @@ const AllPhotos: React.FC<Props> = (props) => {
 
 				uploadedAssets={uploadedAssets}
 				lastUpload={lastUpload}
+				uploadingPercent={uploadingPercent}
       />
       <SingleMedia 
         modalShown={modalShown}
@@ -413,7 +435,11 @@ const AllPhotos: React.FC<Props> = (props) => {
         ]}
         moreActions={[]}
       />
-      
+      <ShareSheet 
+				bottomSheetRef={shareBottomSheetRef} 
+				opacity={bottomSheetOpacity} 
+				FOOTER_HEIGHT={props.FOOTER_HEIGHT}
+			/>
     </View>
     ):(
       <View><Text>No Photos</Text></View>

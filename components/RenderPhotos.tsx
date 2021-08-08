@@ -72,6 +72,7 @@ class ItemAnimator extends React.Component implements BaseItemAnimator {
     return false;
   }
   animateWillUnmount(atX:number, atY:number, itemRef:any, itemIndex:number): void {
+		console.log('animateWillUnmount index '+itemIndex)
     //This method is called before the componentWillUnmount of the list item in the rowrenderer
     //No return
   }
@@ -126,6 +127,7 @@ interface Props {
 
 	uploadedAssets:React.MutableRefObject<{[key: string]: number;}>
 	lastUpload:Reanimated.SharedValue<string>;
+	uploadingPercent:React.MutableRefObject<Animated.Value[]>
 
   animatedImagePositionX: Reanimated.SharedValue<number>;
   animatedImagePositionY: Reanimated.SharedValue<number>;
@@ -344,6 +346,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
         );
       break;
       default:
+				props.uploadingPercent.current[index] = new Animated.Value(0);
 				return (
 					<PhotosChunk
 						photo={data}
@@ -360,6 +363,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
 
 						uploadedAssets={props.uploadedAssets}
 						lastUpload={props.lastUpload}
+						uploadingPercent={props.uploadingPercent.current[index]}
 
 						animatedImagePositionX={props.animatedImagePositionX}
 						animatedImagePositionY={props.animatedImagePositionY}
@@ -453,7 +457,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
     },
   });
   
-  const itemAnimator = new ItemAnimator({test:'test'});
+  const itemAnimator = new ItemAnimator({uploadingPercent: props.uploadingPercent});
 
   return props.photos.layout ? (
     <Reanimated.View

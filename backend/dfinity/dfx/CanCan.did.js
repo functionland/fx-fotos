@@ -21,21 +21,22 @@ export default ({ IDL }) => {
   const ProfilePic = ProfilePic_2;
   const VideoPic_2 = IDL.Vec(IDL.Nat8);
   const Timestamp = IDL.Int;
-  const UserId = IDL.Text;
+  const UserId_2 = IDL.Text;
   const VideoId_2 = IDL.Text;
   const VideoInfo_2 = IDL.Record({
     'pic' : IDL.Opt(VideoPic_2),
     'viralAt' : IDL.Opt(Timestamp),
     'externalId' : IDL.Text,
-    'userId' : UserId,
+    'userId' : UserId_2,
     'name' : IDL.Text,
     'createdAt' : Timestamp,
     'tags' : IDL.Vec(IDL.Text),
-    'likes' : IDL.Vec(UserId),
+    'likes' : IDL.Vec(UserId_2),
     'viewCount' : IDL.Nat,
     'caption' : IDL.Text,
+    'sharedCount' : IDL.Nat,
     'chunkCount' : IDL.Nat,
-    'superLikes' : IDL.Vec(UserId),
+    'superLikes' : IDL.Vec(UserId_2),
     'viewerHasFlagged' : IDL.Opt(IDL.Bool),
     'abuseFlagCount' : IDL.Nat,
     'uploadedAt' : Timestamp,
@@ -56,8 +57,8 @@ export default ({ IDL }) => {
     'likedVideos' : IDL.Vec(VideoId_2),
     'rewards' : IDL.Nat,
     'hasPic' : IDL.Bool,
-    'followers' : IDL.Vec(UserId),
-    'following' : IDL.Vec(UserId),
+    'followers' : IDL.Vec(UserId_2),
+    'following' : IDL.Vec(UserId_2),
     'abuseFlagCount' : IDL.Nat,
   });
   const ProfileInfoPlus_2 = IDL.Record({
@@ -73,11 +74,11 @@ export default ({ IDL }) => {
     'abuseFlagCount' : IDL.Nat,
   });
   const ProfileInfoPlus = ProfileInfoPlus_2;
-  const UserId_2 = UserId;
+  const UserId = UserId_2;
   const VideoId = VideoId_2;
   const VideoInit_2 = IDL.Record({
     'externalId' : IDL.Text,
-    'userId' : UserId,
+    'userId' : UserId_2,
     'name' : IDL.Text,
     'createdAt' : Timestamp,
     'tags' : IDL.Vec(IDL.Text),
@@ -86,7 +87,7 @@ export default ({ IDL }) => {
   });
   const VideoInit = VideoInit_2;
   const VideoId_3 = VideoId_2;
-  const UserId_3 = UserId;
+  const UserId_3 = UserId_2;
   const VideosPred = IDL.Variant({
     'containsAll' : IDL.Vec(VideoId_3),
     'equals' : IDL.Vec(VideoId_3),
@@ -138,7 +139,7 @@ export default ({ IDL }) => {
   const ActionTarget = IDL.Variant({
     'all' : IDL.Null,
     'video' : VideoId_2,
-    'user' : UserId,
+    'user' : UserId_2,
     'pubView' : IDL.Null,
   });
   const Check = IDL.Record({
@@ -151,43 +152,51 @@ export default ({ IDL }) => {
     'isOk' : IDL.Bool,
     'time' : IDL.Int,
   });
+  const VideoResult = IDL.Tuple(VideoInfo_2, IDL.Opt(VideoPic_2));
+  const VideoResults_2 = IDL.Vec(VideoResult);
+  const VideoResults = VideoResults_2;
   const LikeVideo = IDL.Record({
-    'source' : UserId,
+    'source' : UserId_2,
     'likes' : IDL.Bool,
     'target' : VideoId_2,
   });
   const AbuseFlag = IDL.Record({
     'flag' : IDL.Bool,
-    'target' : IDL.Variant({ 'video' : VideoId_2, 'user' : UserId }),
-    'reporter' : UserId,
+    'target' : IDL.Variant({ 'video' : VideoId_2, 'user' : UserId_2 }),
+    'reporter' : UserId_2,
   });
   const SuperLikeVideoFail = IDL.Record({
-    'source' : UserId,
+    'source' : UserId_2,
     'target' : VideoId_2,
   });
   const SuperLikeVideo = IDL.Record({
-    'source' : UserId,
+    'source' : UserId_2,
     'target' : VideoId_2,
     'superLikes' : IDL.Bool,
   });
   const RewardPointTransfer = IDL.Record({
-    'sender' : UserId,
+    'sender' : UserId_2,
     'amount' : IDL.Nat,
-    'receiver' : UserId,
+    'receiver' : UserId_2,
   });
   const CreateVideo = IDL.Record({ 'info' : VideoInit_2 });
+  const ShareVideo = IDL.Record({
+    'isShared' : IDL.Bool,
+    'target' : VideoId_2,
+    'receiver' : UserId_2,
+  });
   const CreateProfile = IDL.Record({
     'pic' : IDL.Opt(ProfilePic_2),
     'userName' : IDL.Text,
   });
   const ViralVideoSuperLiker = IDL.Record({
     'time' : IDL.Int,
-    'user' : UserId,
+    'user' : UserId_2,
   });
   const ViralVideo = IDL.Record({
     'video' : VideoId_2,
     'superLikers' : IDL.Vec(ViralVideoSuperLiker),
-    'uploader' : UserId,
+    'uploader' : UserId_2,
   });
   const Signal = IDL.Variant({ 'viralVideo' : ViralVideo });
   const EventKind = IDL.Variant({
@@ -197,6 +206,7 @@ export default ({ IDL }) => {
     'superLikeVideo' : SuperLikeVideo,
     'rewardPointTransfer' : RewardPointTransfer,
     'createVideo' : CreateVideo,
+    'shareVideo' : ShareVideo,
     'createProfile' : CreateProfile,
     'emitSignal' : Signal,
     'reset' : TimeMode,
@@ -206,9 +216,6 @@ export default ({ IDL }) => {
     'kind' : EventKind,
     'time' : IDL.Int,
   });
-  const VideoResult = IDL.Tuple(VideoInfo_2, IDL.Opt(VideoPic_2));
-  const VideoResults_2 = IDL.Vec(VideoResult);
-  const VideoResults = VideoResults_2;
   const Event = IDL.Variant({
     'uploadReward' : IDL.Record({ 'rewards' : IDL.Nat, 'videoId' : VideoId_2 }),
     'superlikerReward' : IDL.Record({
@@ -229,7 +236,7 @@ export default ({ IDL }) => {
     'right' : Trie_2,
   });
   const Hash = IDL.Nat32;
-  const Key_2 = IDL.Record({ 'key' : UserId, 'hash' : Hash });
+  const Key_2 = IDL.Record({ 'key' : UserId_2, 'hash' : Hash });
   const Branch_3 = IDL.Record({
     'left' : Trie_3,
     'size' : IDL.Nat,
@@ -286,7 +293,7 @@ export default ({ IDL }) => {
     'right' : Trie_8,
   });
   const Key_4 = IDL.Record({ 'key' : IDL.Principal, 'hash' : Hash });
-  List_8.fill(IDL.Opt(IDL.Tuple(IDL.Tuple(Key_4, UserId), List_8)));
+  List_8.fill(IDL.Opt(IDL.Tuple(IDL.Tuple(Key_4, UserId_2), List_8)));
   const AssocList_16 = List_8;
   const AssocList_15 = AssocList_16;
   const Leaf_8 = IDL.Record({ 'size' : IDL.Nat, 'keyvals' : AssocList_15 });
@@ -332,7 +339,7 @@ export default ({ IDL }) => {
   const Video = IDL.Record({
     'viralAt' : IDL.Opt(Timestamp),
     'externalId' : IDL.Text,
-    'userId' : UserId,
+    'userId' : UserId_2,
     'name' : IDL.Text,
     'createdAt' : Timestamp,
     'tags' : IDL.Vec(IDL.Text),
@@ -386,50 +393,51 @@ export default ({ IDL }) => {
         [],
       ),
     'createTestData' : IDL.Func(
-        [IDL.Vec(UserId_2), IDL.Vec(IDL.Tuple(UserId_2, VideoId))],
+        [IDL.Vec(UserId), IDL.Vec(IDL.Tuple(UserId, VideoId))],
         [IDL.Opt(IDL.Null)],
         [],
       ),
     'createVideo' : IDL.Func([VideoInit], [IDL.Opt(VideoId)], []),
     'doDemo' : IDL.Func([IDL.Vec(Command)], [IDL.Opt(Trace)], []),
     'getAccessLog' : IDL.Func([], [IDL.Opt(IDL.Vec(Event_3))], ['query']),
+    'getAllUserVideos' : IDL.Func(
+        [UserId, IDL.Opt(IDL.Nat)],
+        [IDL.Opt(VideoResults)],
+        ['query'],
+      ),
     'getEventLog' : IDL.Func([], [IDL.Opt(IDL.Vec(Event_2))], ['query']),
     'getFeedVideos' : IDL.Func(
-        [UserId_2, IDL.Opt(IDL.Nat)],
+        [UserId, IDL.Opt(IDL.Nat)],
         [IDL.Opt(VideoResults)],
         ['query'],
       ),
     'getIsSuperLiker' : IDL.Func(
-        [UserId_2, VideoId],
+        [UserId, VideoId],
         [IDL.Opt(IDL.Bool)],
         ['query'],
       ),
-    'getMessages' : IDL.Func(
-        [UserId_2],
-        [IDL.Opt(IDL.Vec(Message))],
-        ['query'],
-      ),
-    'getProfileInfo' : IDL.Func([UserId_2], [IDL.Opt(ProfileInfo)], ['query']),
-    'getProfilePic' : IDL.Func([UserId_2], [IDL.Opt(ProfilePic)], ['query']),
+    'getMessages' : IDL.Func([UserId], [IDL.Opt(IDL.Vec(Message))], ['query']),
+    'getProfileInfo' : IDL.Func([UserId], [IDL.Opt(ProfileInfo)], ['query']),
+    'getProfilePic' : IDL.Func([UserId], [IDL.Opt(ProfilePic)], ['query']),
     'getProfilePlus' : IDL.Func(
-        [IDL.Opt(UserId_2), UserId_2],
+        [IDL.Opt(UserId), UserId],
         [IDL.Opt(ProfileInfoPlus)],
         ['query'],
       ),
     'getProfileVideos' : IDL.Func(
-        [UserId_2, IDL.Opt(IDL.Nat)],
+        [UserId, IDL.Opt(IDL.Nat)],
         [IDL.Opt(VideoResults)],
         ['query'],
       ),
     'getProfiles' : IDL.Func([], [IDL.Opt(IDL.Vec(ProfileInfo))], ['query']),
     'getSearchVideos' : IDL.Func(
-        [UserId_2, IDL.Vec(IDL.Text), IDL.Opt(IDL.Nat)],
+        [UserId, IDL.Vec(IDL.Text), IDL.Opt(IDL.Nat)],
         [IDL.Opt(VideoResults)],
         ['query'],
       ),
     'getState' : IDL.Func([], [StateShared], ['query']),
     'getSuperLikeValidNow' : IDL.Func(
-        [UserId_2, VideoId],
+        [UserId, VideoId],
         [IDL.Opt(IDL.Bool)],
         ['query'],
       ),
@@ -444,7 +452,7 @@ export default ({ IDL }) => {
         ['query'],
       ),
     'getVideoInfo' : IDL.Func(
-        [IDL.Opt(UserId_2), VideoId],
+        [IDL.Opt(UserId), VideoId],
         [IDL.Opt(VideoInfo)],
         ['query'],
       ),
@@ -452,43 +460,43 @@ export default ({ IDL }) => {
     'getVideos' : IDL.Func([], [IDL.Opt(IDL.Vec(VideoInfo))], ['query']),
     'isDropDay' : IDL.Func([], [IDL.Opt(IDL.Bool)], ['query']),
     'putAbuseFlagUser' : IDL.Func(
-        [UserId_2, UserId_2, IDL.Bool],
+        [UserId, UserId, IDL.Bool],
         [IDL.Opt(IDL.Null)],
         [],
       ),
     'putAbuseFlagVideo' : IDL.Func(
-        [UserId_2, VideoId, IDL.Bool],
+        [UserId, VideoId, IDL.Bool],
         [IDL.Opt(IDL.Null)],
         [],
       ),
     'putProfileFollow' : IDL.Func(
-        [UserId_2, UserId_2, IDL.Bool],
+        [UserId, UserId, IDL.Bool],
         [IDL.Opt(IDL.Null)],
         [],
       ),
     'putProfilePic' : IDL.Func(
-        [UserId_2, IDL.Opt(ProfilePic)],
+        [UserId, IDL.Opt(ProfilePic)],
         [IDL.Opt(IDL.Null)],
         [],
       ),
     'putProfileVideoLike' : IDL.Func(
-        [UserId_2, VideoId, IDL.Bool],
+        [UserId, VideoId, IDL.Bool],
         [IDL.Opt(IDL.Null)],
         [],
       ),
     'putRewardTransfer' : IDL.Func(
-        [UserId_2, UserId_2, IDL.Nat],
+        [UserId, UserId, IDL.Nat],
         [IDL.Opt(IDL.Null)],
         [],
       ),
-    'putRewards' : IDL.Func([UserId_2, IDL.Nat], [IDL.Opt(IDL.Null)], []),
+    'putRewards' : IDL.Func([UserId, IDL.Nat], [IDL.Opt(IDL.Null)], []),
     'putSuperLike' : IDL.Func(
-        [UserId_2, VideoId, IDL.Bool],
+        [UserId, VideoId, IDL.Bool],
         [IDL.Opt(IDL.Null)],
         [],
       ),
     'putTestFollows' : IDL.Func(
-        [IDL.Vec(IDL.Tuple(UserId_2, UserId_2))],
+        [IDL.Vec(IDL.Tuple(UserId, UserId))],
         [IDL.Opt(IDL.Null)],
         [],
       ),
@@ -514,6 +522,12 @@ export default ({ IDL }) => {
         [IDL.Opt(IDL.Null)],
         [],
       ),
+    'shareVideo' : IDL.Func(
+        [UserId, VideoId, IDL.Bool],
+        [IDL.Opt(VideoId)],
+        [],
+      ),
+    'testGetUserNameByPrincipal' : IDL.Func([IDL.Opt(IDL.Principal)], [], []),
   });
   return CanCan;
 };

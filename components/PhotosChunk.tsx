@@ -34,8 +34,9 @@ interface Props {
 	selectedAssetsRef:React.MutableRefObject<string[]>;
   clearSelection: Animated.Value;
 
-	uploadedAssets: React.MutableRefObject<{[key: string]: number;}>
+	uploadedAssets: React.MutableRefObject<{[key: string]: number;}>;
 	lastUpload: Reanimated.SharedValue<string>;
+	uploadingPercent: Animated.Value;
 
   SCREEN_HEIGHT: number;
   SCREEN_WIDTH: number;
@@ -50,16 +51,42 @@ const PhotosChunk: React.FC<Props> = (props) => {
   const selected = useRef(new Animated.Value(0)).current;
   const selectedOpacity = useRef(Animated.multiply(selected, props.clearSelection)).current;
   const animatedTempScale = useRef(new Animated.Value(1)).current;
-  const setAnimatedSelectedVal = (val:number) => {
+  const setAnimatedSelectedVal = (val:number, index:number=-1) => {
     selected.setValue(val);
+		if(index>-1 && val===0){
+			props.selectedAssetsRef.current.splice(index, 1);
+			props.selectedAssets.value.splice(index, 1);
+      props.lastSelectedAssetAction.value = 0;
+			props.lastSelectedAssetId.value = props.photo.id;
+		}
   }
 
 	const notUploaded = useRef(new Animated.Value(1)).current;
 	if(props.uploadedAssets.current.hasOwnProperty(props.photo.id)){
 		notUploaded.setValue(0);
 	}
-
   const selectionScale = useRef(new Animated.Value(1)).current;
+
+	const changeSelection = (selected:number = 1) => {
+		let index = props.selectedAssetsRef.current.findIndex(x=>x===props.photo.id);
+    if(index>-1){
+      setAnimatedSelectedVal(selected, index);
+    }else{
+      setAnimatedSelectedVal(0);
+    }
+	}
+	useEffect(()=>{
+		props.uploadingPercent.addListener(({value})=>{
+			console.log('value changed to '+value);
+			if(value>0){
+				notUploaded.setValue(0);
+				changeSelection(0);
+				selected.setValue(0);
+			}
+		})
+
+		return ()=>{props.uploadingPercent.removeAllListeners();}
+	}, []);
 
   Animated.timing(selectionScale, {
     toValue: selectedOpacity.interpolate({
@@ -69,14 +96,9 @@ const PhotosChunk: React.FC<Props> = (props) => {
     duration: 300,
     useNativeDriver: true,
   }).start();
-
+	
   useEffect(()=>{
-    let index = props.selectedAssetsRef.current.findIndex(x=>x===props.photo.id);
-    if(index>-1){
-      setAnimatedSelectedVal(1);
-    }else{
-      setAnimatedSelectedVal(0);
-    }
+    changeSelection();
   },[props.photo.id])
 
   const _onTapGestureEvent = useAnimatedGestureHandler<TapGestureHandlerGestureEvent, {}>({
@@ -123,22 +145,31 @@ const PhotosChunk: React.FC<Props> = (props) => {
     },
   });
 
-  const _onLongGestureEvent = useAnimatedGestureHandler<LongPressGestureHandlerGestureEvent, {}>({
-    onActive: (event)=>{
-      console.log('onLongActive');
-      let index = props.selectedAssets.value.findIndex(x=>x===props.photo.id);
-      props.lastSelectedAssetId.value = props.photo.id;
-      if(index > -1){
-        //console.log('removed '+index);
-        props.selectedAssets.value.splice(index, 1);
-        props.lastSelectedAssetAction.value = 0;
-        runOnJS(setAnimatedSelectedVal)(0);
-      }else{
-        console.log('added '+index);
-        props.selectedAssets.value.push(props.photo.id);
-        props.lastSelectedAssetAction.value = 1;
-        runOnJS(setAnimatedSelectedVal)(1);
-      }
+  const _onLongGestureEvent = useAnimatedGestureHandler<LongPressGestureHandlerGestureEvent, {time:number, absoluteX:number}>({
+    onActive: (event, ctx)=>{
+			const timeDiff = new Date().getTime() - ctx.time;
+			console.log('onLongActive');
+			console.log(timeDiff);
+			if(timeDiff > 500 || ctx.absoluteX !== event.absoluteX){
+				ctx.absoluteX = event.absoluteX;
+				ctx.time = new Date().getTime();
+				let index = props.selectedAssets.value.findIndex(x=>x===props.photo.id);
+				props.lastSelectedAssetId.value = props.photo.id;
+				if(index > -1){
+					//console.log('removed '+index);
+					props.selectedAssets.value.splice(index, 1);
+					props.lastSelectedAssetAction.value = 0;
+					runOnJS(setAnimatedSelectedVal)(0);
+				}else{
+					console.log('added '+index);
+					props.selectedAssets.value.push(props.photo.id);
+					props.lastSelectedAssetAction.value = 1;
+					runOnJS(setAnimatedSelectedVal)(1);
+				}
+			}else{
+				ctx.time = new Date().getTime();
+				ctx.absoluteX = event.absoluteX;
+			}
     },
   });
 

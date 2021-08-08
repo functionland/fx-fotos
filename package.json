@@ -38,7 +38,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "eject": "expo eject"
+    "eject": "expo eject",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@dfinity/agent": "^0.9.1",
@@ -48,6 +49,7 @@
     "@dfinity/identity": "^0.9.1",
     "@dfinity/principal": "^0.9.1",
     "@expo/react-native-action-sheet": "^3.9.0",
+    "@gorhom/bottom-sheet": "4.0.0-alpha.25",
     "@miblanchard/react-native-slider": "^1.5.0",
     "@react-native-community/hooks": "^2.6.0",
     "@react-native-community/masked-view": "0.1.10",
@@ -77,6 +79,8 @@
     "lodash": "^4.17.21",
     "modal-enhanced-react-native-web": "^0.2.0",
     "no-scroll": "^2.1.1",
+    "patch-package": "^6.4.7",
+    "postinstall-postinstall": "^2.1.0",
     "react": "16.13.1",
     "react-art": "^17.0.2",
     "react-dom": "16.13.1",
