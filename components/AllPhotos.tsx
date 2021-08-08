@@ -435,7 +435,11 @@ const AllPhotos: React.FC<Props> = (props) => {
         ]}
         moreActions={[]}
       />
-      <ShareSheet bottomSheetRef={shareBottomSheetRef} opacity={bottomSheetOpacity} />
+      <ShareSheet 
+				bottomSheetRef={shareBottomSheetRef} 
+				opacity={bottomSheetOpacity} 
+				FOOTER_HEIGHT={props.FOOTER_HEIGHT}
+			/>
     </View>
     ):(
       <View><Text>No Photos</Text></View>
