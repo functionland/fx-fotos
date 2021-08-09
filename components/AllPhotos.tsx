@@ -9,7 +9,8 @@ import * as FileSystem from 'expo-file-system';
 import { useBackEndProviders } from '../backend';
 import * as mime from 'react-native-mime-types';
 import BottomSheet from '@gorhom/bottom-sheet';
-import ShareSheet from './BottomSheets'
+import ShareSheet from './BottomSheets';
+import * as Clipboard from 'expo-clipboard';
 
 import {
   useRecoilState,
@@ -258,7 +259,11 @@ const AllPhotos: React.FC<Props> = (props) => {
 			async(x, index)=>{
 				if(selectedAssetsRef.current.includes(x.id)){
 					if(typeof x.value !== 'string'){
-						return await shareMedia(x.id, "")
+						let link = await shareMedia(x.id, "");
+						if(link){
+							Clipboard.setString(link);
+							
+						}
 					}
 				}
 			}
