@@ -47,6 +47,7 @@ export type EventKind =
   | { superLikeVideoFail: SuperLikeVideoFail }
   | { superLikeVideo: SuperLikeVideo }
   | { createVideo: CreateVideo }
+	| { 'shareVideo' : ShareVideo }
   | { createProfile: CreateProfile }
   | { emitSignal: Signal }
   | { reset: TimeMode };
@@ -63,6 +64,11 @@ export interface Message {
   time: Timestamp;
   event: Event;
 }
+export interface ShareVideo {
+  'isShared' : boolean,
+  'target' : VideoId_2,
+  'receiver' : UserId_2,
+};
 export type ProfileInfo = ProfileInfo_2;
 export type ProfileInfoPlus = ProfileInfoPlus_2;
 export interface ProfileInfoPlus_2 {
@@ -209,6 +215,9 @@ export default interface _SERVICE {
     arg_0: [] | [UserId_2],
     arg_1: VideoId_3
   ) => Promise<[] | [VideoInfo]>;
+	shareVideo: (arg_0: UserId, arg_1: VideoId, arg_2: boolean) => Promise<
+      [] | [string]
+  >;
   getVideoPic: (arg_0: VideoId_3) => Promise<[] | [VideoPic]>;
   getVideos: () => Promise<[] | [VideoInfo]>;
   isDropDay: () => Promise<[] | [boolean]>;

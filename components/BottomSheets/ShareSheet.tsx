@@ -1,11 +1,13 @@
 import React, { useCallback, useMemo, useEffect,  } from 'react';
-import { View, Text, StyleSheet, Animated, SectionListData } from 'react-native';
+import { View, Text, StyleSheet, Animated, SectionListData, TouchableOpacity } from 'react-native';
 import BottomSheet, { useBottomSheet, BottomSheetSectionList, BottomSheetFlatList } from '@gorhom/bottom-sheet';
+import { MaterialIcons } from '@expo/vector-icons'; 
 
 interface Props {
   bottomSheetRef: React.RefObject<BottomSheet>;
 	opacity: Animated.Value;
 	FOOTER_HEIGHT: number;
+	methods: {share: Function}
 }
 
 const ShareSheet: React.FC<Props> = (props) => {
@@ -13,7 +15,7 @@ const ShareSheet: React.FC<Props> = (props) => {
 		props.bottomSheetRef?.current?.close();
 	}, [])
   // variables
-  const snapPoints = useMemo(() => [-1, 300+props.FOOTER_HEIGHT], [props.FOOTER_HEIGHT]);
+  const snapPoints = useMemo(() => [-1, 300], []);
 
   // callbacks
   const handleSheetChanges = useCallback((index: number) => {
@@ -32,12 +34,10 @@ const ShareSheet: React.FC<Props> = (props) => {
           title: "Send in Photos",
           data: [[
 						{
-							'name': 'test1',
-							'key': 'test1'
-						},
-						{
-							'name': 'test2',
-							'key': 'test2'
+							'name': 'New contact',
+							'icon': 'group-add',
+							'key': 'newContact',
+							'action': () => {}
 						},
 					]],
 					key: '1'
@@ -46,12 +46,10 @@ const ShareSheet: React.FC<Props> = (props) => {
           title: "Share to Apps",
           data: [[
 						{
-							'name': 'test10',
-							'key': 'test10'
-						},
-						{
-							'name': 'test20',
-							'key': 'test20'
+							'name': 'Create Link',
+							'icon': 'add-link',
+							'key': 'createLink',
+							'action': props.methods.share
 						},
 					]],
 					key: '2'
@@ -62,12 +60,16 @@ const ShareSheet: React.FC<Props> = (props) => {
     ({ section } : {
 			section: SectionListData<{
 					name: string;
+					icon: string;
 					key: string;
+					action: any;
 			}[], {
 					title: string;
 					data: {
 							name: string;
+							icon: string;
 							key: string;
+							action: any
 					}[][];
 					key: string;
 			}>}) => (
@@ -81,20 +83,22 @@ const ShareSheet: React.FC<Props> = (props) => {
 	const renderItem = useCallback(
     ({ item }: {item: {
 			name: string;
+			icon: string;
 			key: string;
+			action: any;
 	}}) => {
 			console.log(item);
-			return (
-      <View style={styles.itemContainer}>
-        <Text>{item.name}</Text>
-      </View>
-    )},
+			return itemBuilder(item.name, item.icon, item.action)
+    },
     []
   );
+
   const renderList = useCallback(
     ({ item }:{item:{
 			name: string;
+			icon: string;
 			key: string;
+			action: any;
 	}[]}) => {
 			console.log(item);
 			return (
@@ -110,6 +114,20 @@ const ShareSheet: React.FC<Props> = (props) => {
     )},
     []
   );
+	
+	const itemBuilder = (name: string, icon: any, onPress: any) => {
+		return (
+			<TouchableOpacity 
+			onPress={onPress}
+        style={styles.itemContainer}
+      >
+				<View style={styles.itemContainer}>
+            <MaterialIcons name={icon} size={40} color="blue" />
+						<Text style={styles.itemText}>{name}</Text>
+						</View>
+      </TouchableOpacity>
+		)
+	}
 
   // renders
   return (
@@ -175,13 +193,21 @@ const styles = StyleSheet.create({
   },
   itemContainer: {
 		width: 100,
-		height: 100
+		height: 100,
+		flex: 1,
+    flexDirection:'column',
+		alignItems: 'center'
   },
 	listContainer: {
 		height: 100,
 		width: '100%',
 		borderBottomColor: 'lightgrey',
 		borderBottomWidth: 1
+  },
+	itemText:{
+    color: 'grey',
+    position: 'relative',
+    marginRight:5
   },
 });
 

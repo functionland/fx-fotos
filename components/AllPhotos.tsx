@@ -59,7 +59,7 @@ const AllPhotos: React.FC<Props> = (props) => {
 
 	// share bottom sheet ref
 	const shareBottomSheetRef = useRef<BottomSheet>(null);
-	const bottomSheetOpacity = new Animated.Value(0);
+	const bottomSheetOpacity = useRef(new Animated.Value(0)).current;
 
   useEffect(()=>{
     console.log([Date.now()+': component AllPhotos rendered']);
@@ -124,11 +124,16 @@ const AllPhotos: React.FC<Props> = (props) => {
 
   const _handleShare = () => {
 		console.log('Sharing');
+		console.log(shareBottomSheetRef.current);
 		shareBottomSheetRef.current?.snapToIndex(1);
 	}
 
   const _handleAddToAlbum = () => console.log('Adding');
-	const {_userId, _videoUploadController, upload, getMedias} = useBackEndProviders({backend:'dfinity', identity: identity, requireProfile:true});
+	const {_userId, _videoUploadController, upload, getMedias, share} = useBackEndProviders({backend:'dfinity', identity: identity, requireProfile:true});
+
+	const shareMedia = async(videoId:string, targetUserId:string) => {
+		return await share(videoId, targetUserId);
+	}
 
 	const createUploadedAssets = (backendResponse:Array<any> | undefined) => {
 		console.log('createUploadedAssets');
@@ -247,6 +252,19 @@ const AllPhotos: React.FC<Props> = (props) => {
 			}
 		}
 	}
+
+	const shareLink = async() => {
+		preparedMedia.layout.map(
+			async(x, index)=>{
+				if(selectedAssetsRef.current.includes(x.id)){
+					if(typeof x.value !== 'string'){
+						return await shareMedia(x.id, "")
+					}
+				}
+			}
+		)
+	}
+
   const _handleUpload = async() => {
 		console.log('Uploading');
 		console.log(selectedAssetsRef.current);
@@ -439,6 +457,9 @@ const AllPhotos: React.FC<Props> = (props) => {
 				bottomSheetRef={shareBottomSheetRef} 
 				opacity={bottomSheetOpacity} 
 				FOOTER_HEIGHT={props.FOOTER_HEIGHT}
+				methods={{
+					share: shareLink
+				}}
 			/>
     </View>
     ):(

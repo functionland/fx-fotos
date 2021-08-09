@@ -523,8 +523,8 @@ export default ({ IDL }) => {
         [],
       ),
     'shareVideo' : IDL.Func(
-        [UserId, VideoId, IDL.Bool],
-        [IDL.Opt(VideoId)],
+        [UserId, IDL.Text, IDL.Bool],
+        [IDL.Opt(IDL.Text)],
         [],
       ),
     'testGetUserNameByPrincipal' : IDL.Func([IDL.Opt(IDL.Principal)], [], []),

@@ -146,6 +146,19 @@ export async function getProfileVideos(userId: string): Promise<VideoInfo[]> {
   }
 }
 
+export async function shareVideo(videoId: string, targetUserId: string): Promise<string> {
+  const videoHash = unwrap<string>(
+    await (await CanCan.actor).shareVideo(targetUserId, videoId, true)
+  );
+	if(videoHash){
+		console.log('videoHash unwrapped');
+		console.log(videoHash);
+  	return videoHash;
+	}else{
+		return Promise.resolve("");
+	}
+}
+
 export async function getVideoInfo(userId: string, videoId: string) {
   const videoInfo = unwrap(
     await (await CanCan.actor).getVideoInfo([userId], videoId)

@@ -539,7 +539,7 @@ type CanCan =
                    ic;
                    script: int;
                  }) -> (opt null);
-   shareVideo: (UserId, VideoId, bool) -> (opt VideoId);
+   shareVideo: (UserId, text, bool) -> (opt text);
    testGetUserNameByPrincipal: (opt principal) -> ();
  };
 type Branch_9 = 

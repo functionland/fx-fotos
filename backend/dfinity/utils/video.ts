@@ -5,6 +5,7 @@ import {
   putVideoChunk,
   putVideoPic,
 	getProfileVideos,
+	shareVideo,
 } from "./canister";
 import { VideoInfo, VideoInit } from "./canister/typings";
 import { MAX_CHUNK_SIZE, encodeArrayBuffer, hashtagRegExp } from "./index";
@@ -122,6 +123,14 @@ export async function getUserVideos(userId: string) {
 	console.log("Getting user videos...");
 	const resultFromCanCan = await getProfileVideos(userId);
   console.log("User videos fetched");
+  return resultFromCanCan;
+}
+
+export async function shareMedia(videoId:string, targetUserId: string) {
+	console.log("Sharing user video...");
+	const resultFromCanCan = await shareVideo(videoId, targetUserId);
+  console.log("User video shared");
+	console.log(resultFromCanCan);
   return resultFromCanCan;
 }
 

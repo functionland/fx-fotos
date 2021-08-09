@@ -4,6 +4,7 @@ import {
 	checkUsername,
 	getUserVideos,
 	createUser,
+	shareMedia,
 } from "./dfinity/utils";
 import { useRef } from 'react';
 export function useBackEndProviders(input:{backend:string, identity:any[], requireProfile?:Boolean}){
@@ -57,6 +58,18 @@ export function useBackEndProviders(input:{backend:string, identity:any[], requi
 		return getUserVideos(_userId.current);
 
 	}
+	const share = async(videoId:string, targetUserId:string) => {
+		console.log('sharing from userId='+_userId.current);
+		if(_requireProfile.current){
+			let profileCheckSuccess = await checkProfile();
+			if(!profileCheckSuccess){
+				console.log('profile check failed');
+				return undefined;
+			}
+		}
+		console.log('profileCheckSuccess videoId='+videoId+',targetUserId='+targetUserId);
+		return shareMedia(videoId, targetUserId);
+	}
 	const upload = async(mediaFile:File, caption:string='', id:string='') => {
 		console.log('upload userId='+_userId.current);
 		if(_requireProfile.current){
@@ -80,6 +93,7 @@ export function useBackEndProviders(input:{backend:string, identity:any[], requi
 		_userId,
 		_videoUploadController,
 		upload,
-		getMedias
+		getMedias,
+		share,
 	  };
 }
