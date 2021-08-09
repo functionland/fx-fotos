@@ -8,13 +8,17 @@ import {
   RecoilRoot,
 } from 'recoil';
 import { LogBox } from 'react-native';
+import { RootSiblingParent } from 'react-native-root-siblings';
+
 
 LogBox.ignoreLogs(['Setting a timer']);
 
 const App = () => {
   return (
     <RecoilRoot>
-      <AppNavigation />
+			<RootSiblingParent>
+      	<AppNavigation />
+			</RootSiblingParent>
     </RecoilRoot>
   );
 };

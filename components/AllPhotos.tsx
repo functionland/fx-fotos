@@ -11,6 +11,7 @@ import * as mime from 'react-native-mime-types';
 import BottomSheet from '@gorhom/bottom-sheet';
 import ShareSheet from './BottomSheets';
 import * as Clipboard from 'expo-clipboard';
+import Toast from 'react-native-root-toast';
 
 import {
   useRecoilState,
@@ -262,7 +263,9 @@ const AllPhotos: React.FC<Props> = (props) => {
 						let link = await shareMedia(x.id, "");
 						if(link){
 							Clipboard.setString(link);
-							
+							let toast = Toast.show('Link is copied to clipboard', {
+								duration: Toast.durations.LONG,
+							});
 						}
 					}
 				}
