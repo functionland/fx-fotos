@@ -14,13 +14,14 @@ type VideosPred =
    containsAll: vec VideoId_3;
    equals: vec VideoId_3;
  };
-type VideoResults_2 = vec VideoResult;
+type VideoResults_2 = vec VideoResult_2;
 type VideoResults = VideoResults_2;
-type VideoResult = 
+type VideoResult_2 = 
  record {
    VideoInfo_2;
    opt VideoPic_2;
  };
+type VideoResult = VideoResult_2;
 type VideoPic_2 = vec nat8;
 type VideoPic = VideoPic_2;
 type VideoInit_2 = 
@@ -507,9 +508,11 @@ type CanCan =
    getProfileVideos: (UserId, opt nat) -> (opt VideoResults) query;
    getProfiles: () -> (opt vec ProfileInfo) query;
    getSearchVideos: (UserId, vec text, opt nat) -> (opt VideoResults) query;
+   getSharedVideos: (opt text) -> (opt VideoResults) query;
    getState: () -> (StateShared) query;
    getSuperLikeValidNow: (UserId, VideoId) -> (opt bool) query;
    getUserNameByPrincipal: (principal) -> (opt vec text);
+   getVideo: (opt text, opt text) -> (opt VideoResult) query;
    getVideoChunk: (VideoId, nat) -> (opt vec nat8) query;
    getVideoInfo: (opt UserId, VideoId) -> (opt VideoInfo) query;
    getVideoPic: (VideoId) -> (opt VideoPic) query;

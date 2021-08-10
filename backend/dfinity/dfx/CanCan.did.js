@@ -152,8 +152,8 @@ export default ({ IDL }) => {
     'isOk' : IDL.Bool,
     'time' : IDL.Int,
   });
-  const VideoResult = IDL.Tuple(VideoInfo_2, IDL.Opt(VideoPic_2));
-  const VideoResults_2 = IDL.Vec(VideoResult);
+  const VideoResult_2 = IDL.Tuple(VideoInfo_2, IDL.Opt(VideoPic_2));
+  const VideoResults_2 = IDL.Vec(VideoResult_2);
   const VideoResults = VideoResults_2;
   const LikeVideo = IDL.Record({
     'source' : UserId_2,
@@ -383,6 +383,7 @@ export default ({ IDL }) => {
     'videos' : MapShared_5,
     'profiles' : MapShared_2,
   });
+  const VideoResult = VideoResult_2;
   const VideoInfo = VideoInfo_2;
   const VideoPic = VideoPic_2;
   const CanCan = IDL.Service({
@@ -435,6 +436,11 @@ export default ({ IDL }) => {
         [IDL.Opt(VideoResults)],
         ['query'],
       ),
+    'getSharedVideos' : IDL.Func(
+        [IDL.Opt(IDL.Text)],
+        [IDL.Opt(VideoResults)],
+        ['query'],
+      ),
     'getState' : IDL.Func([], [StateShared], ['query']),
     'getSuperLikeValidNow' : IDL.Func(
         [UserId, VideoId],
@@ -445,6 +451,11 @@ export default ({ IDL }) => {
         [IDL.Principal],
         [IDL.Opt(IDL.Vec(IDL.Text))],
         [],
+      ),
+    'getVideo' : IDL.Func(
+        [IDL.Opt(IDL.Text), IDL.Opt(IDL.Text)],
+        [IDL.Opt(VideoResult)],
+        ['query'],
       ),
     'getVideoChunk' : IDL.Func(
         [VideoId, IDL.Nat],
