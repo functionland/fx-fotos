@@ -2,9 +2,9 @@
 
 # Latest 2 Updates
 
-**August-07-2021:** Added share photo placeholder and patched dfinity libraries
+**August-05-2021:** Added share photo feature to enable users share a link and see it from any browser(using a shared hash)
 
-**August-05-2021:** The work for adding dfinity backend is completed for upload and download and merged in main branch
+**August-07-2021:** Added share photo placeholder and patched dfinity libraries
 
 
 # BOX Photos development guide
