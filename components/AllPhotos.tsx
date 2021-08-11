@@ -219,7 +219,7 @@ const AllPhotos: React.FC<Props> = (props) => {
 					xhr.send();
 					resolve(xhr.response);
 				});*/
-				var buff = Buffer.from(url, 'base64');
+				var buff = Buffer.from(fileBase64, 'base64');
 				const mediaFile:File = {
 					lastModified: mediaInfo.modificationTime || mediaInfo.creationTime
 					, name: mediaInfo.filename
