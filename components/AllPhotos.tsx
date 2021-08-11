@@ -131,7 +131,7 @@ const AllPhotos: React.FC<Props> = (props) => {
 	}
 
   const _handleAddToAlbum = () => console.log('Adding');
-	const {_userId, _videoUploadController, upload, getMedias, share} = useBackEndProviders({backend:'dfinity', identity: identity, requireProfile:true});
+	const {_userId, _videoUploadController, upload, getMedias, share, backendSettings} = useBackEndProviders({backend:'dfinity', identity: identity, requireProfile:true});
 
 	const shareMedia = async(videoId:string, targetUserId:string) => {
 		return await share(videoId, targetUserId);
@@ -262,7 +262,8 @@ const AllPhotos: React.FC<Props> = (props) => {
 					if(typeof x.value !== 'string'){
 						let link = await shareMedia(x.id, "");
 						if(link){
-							Clipboard.setString(link);
+							let fullURL = backendSettings?.networks?.uiLocal?.bind+link;
+							Clipboard.setString(fullURL);
 							let toast = Toast.show('Link is copied to clipboard', {
 								duration: Toast.durations.LONG,
 							});

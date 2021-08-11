@@ -20,6 +20,10 @@
     "local": {
       "bind": "192.168.68.118:8000",
       "type": "ephemeral"
+    },
+    "uiLocal": {
+      "bind": "192.168.68.118:3000/Shared/",
+      "type": "ephemeral"
     }
   },
   "dfx": "0.7.2"
