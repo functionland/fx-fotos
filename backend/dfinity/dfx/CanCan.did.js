@@ -458,7 +458,7 @@ export default ({ IDL }) => {
         ['query'],
       ),
     'getVideoChunk' : IDL.Func(
-        [VideoId, IDL.Nat],
+        [VideoId, IDL.Nat, IDL.Opt(IDL.Text)],
         [IDL.Opt(IDL.Vec(IDL.Nat8))],
         ['query'],
       ),

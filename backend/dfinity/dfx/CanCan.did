@@ -513,7 +513,7 @@ type CanCan =
    getSuperLikeValidNow: (UserId, VideoId) -> (opt bool) query;
    getUserNameByPrincipal: (principal) -> (opt vec text);
    getVideo: (opt text, opt text) -> (opt VideoResult) query;
-   getVideoChunk: (VideoId, nat) -> (opt vec nat8) query;
+   getVideoChunk: (VideoId, nat, opt text) -> (opt vec nat8) query;
    getVideoInfo: (opt UserId, VideoId) -> (opt VideoInfo) query;
    getVideoPic: (VideoId) -> (opt VideoPic) query;
    getVideos: () -> (opt vec VideoInfo) query;

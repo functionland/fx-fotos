@@ -119,9 +119,11 @@ export interface CanCan {
   'getVideo' : (arg_0: [] | [string], arg_1: [] | [string]) => Promise<
       [] | [VideoResult]
     >,
-  'getVideoChunk' : (arg_0: VideoId, arg_1: bigint) => Promise<
-      [] | [Array<number>]
-    >,
+  'getVideoChunk' : (
+      arg_0: VideoId,
+      arg_1: bigint,
+      arg_2: [] | [string],
+    ) => Promise<[] | [Array<number>]>,
   'getVideoInfo' : (arg_0: [] | [UserId], arg_1: VideoId) => Promise<
       [] | [VideoInfo]
     >,
