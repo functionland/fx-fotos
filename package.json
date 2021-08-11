@@ -76,6 +76,7 @@
     "expo-random": "~11.2.0",
     "expo-status-bar": "~1.0.4",
     "expo-web-browser": "~9.2.0",
+    "hermes-engine": "^0.8.1",
     "jsbi": "^3.1.6",
     "lodash": "^4.17.21",
     "modal-enhanced-react-native-web": "^0.2.0",
