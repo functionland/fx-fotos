@@ -2,7 +2,7 @@
 
 # Latest 2 Updates
 
-**August-05-2021:** Added share photo feature to enable users share a link and see it from any browser(using a shared hash)
+**August-10-2021:** Added share photo feature to enable users share a link and see it from any browser(using a shared hash)
 
 **August-07-2021:** Added share photo placeholder and patched dfinity libraries
 
