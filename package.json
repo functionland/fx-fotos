@@ -106,7 +106,7 @@
     "react-native-vector-icons": "^8.1.0",
     "react-native-wasm": "^0.1.3",
     "react-native-web": "~0.13.12",
-    "react-native-webview": "^11.6.5",
+    "react-native-webview": "11.6.2",
     "recoil": "^0.3.1",
     "recyclerlistview": "^3.0.5",
     "rn-round-checkbox": "^1.0.0",
