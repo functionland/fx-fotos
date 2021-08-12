@@ -10,9 +10,9 @@ interface IUniversalModalProps extends React.ComponentProps<typeof RNModal> {
 export const UniversalModal = (props: IUniversalModalProps) => {
   if (Platform.OS === "web") {
     return (
-      <WebModal isVisible={props.visible} style={{ margin: 0 }}>
+      <RNModal visible={props.visible} style={{ margin: 0 }}>
         {props.children}
-      </WebModal>
+      </RNModal>
     );
   }
 
