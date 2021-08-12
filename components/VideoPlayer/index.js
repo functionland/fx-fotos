@@ -2,6 +2,7 @@ import { __rest } from "tslib";
 import { Audio, Video } from 'expo-av';
 import { Animated, Dimensions, Text, TouchableOpacity, TouchableWithoutFeedback, View, } from 'react-native';
 import { FullscreenEnterIcon, FullscreenExitIcon, PauseIcon, PlayIcon, ReplayIcon, Spinner, MuteIcon, UnmuteIcon } from './assets/icons';
+import NetInfo from '@react-native-community/netinfo';
 import { withDefaultProps } from 'with-default-props';
 import React, { useEffect, useState, useRef } from 'react';
 import Slider from '@react-native-community/slider';
@@ -85,8 +86,10 @@ const VideoPlayer = (props) => {
     let hideAnimation = null;
     let shouldPlayAtEndOfSeek = false;
     let controlsTimer = null;
-    //const { isConnected } = useNetInfo();
-    const isConnected = true; //TODO: use a real connection identifier instead of useNetInfo
+    const [isConnected, setIsConnected] = useState<Boolean>(true);
+	NetInfo.fetch().then(state => {
+		setIsConnected(state.isConnected);
+	});
     const [playbackState, setPlaybackState] = useState(PlaybackStates.Loading);
     const [lastPlaybackStateUpdate, setLastPlaybackStateUpdate] = useState(Date.now());
     const [seekState, setSeekState] = useState(SeekStates.NotSeeking);
