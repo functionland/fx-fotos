@@ -74,8 +74,8 @@ export function textToColor(text: string): string {
 }
 
 // Regular expressions for detecting canisterId in various formats
-const ic0AppHostRegEx = /(?:(?<canisterId>.*)\.)?(?<subdomain>[^.]*)\.(?<domain>ic0\.app)$/;
-const localhostRegEx = /(?<canisterId>(?:\w{5}-){4}cai)\.[^.]*$/;
+const ic0AppHostRegEx = /\(?:(?<canisterId>.*)\.)?(?<subdomain>[^.]*)\.(?<domain>ic0\.app)$/;
+const localhostRegEx = /\(?<canisterId>(?:\w{5}-){4}cai)\.[^.]*$/;
 
 // Detect canisterId from current URL
 export function getCanisterId(): Principal {
