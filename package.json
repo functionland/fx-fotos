@@ -52,7 +52,6 @@
     "@gorhom/bottom-sheet": "4.0.0-alpha.25",
     "@miblanchard/react-native-slider": "^1.5.0",
     "@react-native-community/hooks": "^2.6.0",
-    "@react-native-community/netinfo": "6.0.0",
     "@react-native-community/slider": "3.0.3",
     "@react-navigation/bottom-tabs": "^5.11.11",
     "@react-navigation/native": "^5.9.4",
