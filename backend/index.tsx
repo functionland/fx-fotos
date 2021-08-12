@@ -1,4 +1,4 @@
-import React from "hoist-non-react-statics/node_modules/@types/react";
+import { useRef } from 'react';
 import { 
 	useUploadVideo, 
 	checkUsername,
@@ -6,8 +6,8 @@ import {
 	createUser,
 	shareMedia,
 } from "./dfinity/utils";
-import backendSettings from './dfinity/dfx.json';
-import { useRef } from 'react';
+import backendSettings from './dfinity/dfx';
+
 export function useBackEndProviders(input:{backend:string, identity:any[], requireProfile?:Boolean}){
 	const _userId = useRef<string>('');
 	const _identity = useRef<any>();
