@@ -7,7 +7,7 @@ export * from "./auth";
 export * from "./updateHead";
 export * from "./canister";
 
-export const KEY_LOCALSTORAGE_USER = `ic-cancan-user`;
+export const KEY_LOCALSTORAGE_USER = `ic-cancan-photos-user`;
 
 export const MAX_CHUNK_SIZE = 1024 * 500; // 500kb
 export const REWARDS_CHECK_INTERVAL = 60000;
