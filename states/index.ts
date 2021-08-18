@@ -55,3 +55,8 @@ export const identityState = atom<any>({
     default: null,
 });
 
+export const contactsState = atom<Array<{id:string}>>({
+    key: 'contactsState',
+    default: [],
+});
+

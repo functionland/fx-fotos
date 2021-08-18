@@ -4,6 +4,7 @@ import PermissionError from '../pages/PermissionError';
 import React, { useState, } from 'react';
 import HomePage from '../pages/HomePage';
 import Browser from './Browser';
+import BarcodeScanner from '../pages/BarcodeScanner';
 import { StyleSheet, Animated, View, TouchableOpacity, Text, StatusBar } from 'react-native';
 import Header from '../components/Header';
 import { createBottomTabNavigator,BottomTabBarProps,BottomTabBarOptions,  } from '@react-navigation/bottom-tabs';
@@ -92,6 +93,11 @@ const AppNavigation = () => {
             name="Browser"
             component={Browser}
             options={{headerShown: false}}
+          />
+					<Stack.Screen
+            name="BarcodeScanner"
+            component={BarcodeScanner}
+            options={{headerShown: true}}
           />
         </Stack.Navigator>
       </NavigationContainer>

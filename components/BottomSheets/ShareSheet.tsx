@@ -1,13 +1,17 @@
 import React, { useCallback, useMemo, useEffect,  } from 'react';
 import { View, Text, StyleSheet, Animated, SectionListData, TouchableOpacity } from 'react-native';
 import BottomSheet, { useBottomSheet, BottomSheetSectionList, BottomSheetFlatList } from '@gorhom/bottom-sheet';
-import { MaterialIcons } from '@expo/vector-icons'; 
+import { MaterialIcons } from '@expo/vector-icons';
+import {
+	useRecoilState,
+  } from 'recoil';
+  import {contactsState} from '../../states';
 
 interface Props {
   bottomSheetRef: React.RefObject<BottomSheet>;
 	opacity: Animated.Value;
 	FOOTER_HEIGHT: number;
-	methods: {share: Function}
+	methods: {shareLink: Function, shareWithContact: Function}
 }
 
 const ShareSheet: React.FC<Props> = (props) => {
@@ -37,7 +41,7 @@ const ShareSheet: React.FC<Props> = (props) => {
 							'name': 'New contact',
 							'icon': 'group-add',
 							'key': 'newContact',
-							'action': () => {}
+							'action': ()=>{props.methods.shareWithContact();}
 						},
 					]],
 					key: '1'
@@ -49,7 +53,7 @@ const ShareSheet: React.FC<Props> = (props) => {
 							'name': 'Create Link',
 							'icon': 'add-link',
 							'key': 'createLink',
-							'action': props.methods.share
+							'action': props.methods.shareLink
 						},
 					]],
 					key: '2'

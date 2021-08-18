@@ -12,6 +12,7 @@ import BottomSheet from '@gorhom/bottom-sheet';
 import ShareSheet from './BottomSheets';
 import * as Clipboard from 'expo-clipboard';
 import Toast from 'react-native-root-toast';
+import { useNavigation } from '@react-navigation/native';
 
 import {
   useRecoilState,
@@ -41,6 +42,7 @@ interface Props {
 }
 
 const AllPhotos: React.FC<Props> = (props) => {
+	const navigation = useNavigation();
   const selectedAssets:Reanimated.SharedValue<string[]> = useSharedValue([]);
   // Since animated arrays are not natively supported and updates do not propagate, we need to ad
   // the two below natively supported numbers to detect changes in the array
@@ -226,8 +228,8 @@ const AllPhotos: React.FC<Props> = (props) => {
 					, size: buff.length
 					, arrayBuffer: async()=>{return buff}
 					, type: mediaInfo.mediaType
-					, slice: buff.slice
-					, stream: ()=>{}
+					, slice: (buff.slice as any)
+					, stream: ():any=>{}
 					, text: async()=>{ return '';}
 				}
 				//console.log(buff);
@@ -255,6 +257,12 @@ const AllPhotos: React.FC<Props> = (props) => {
 		}
 	}
 
+	const shareWithContact = async(contactId:string = "") => {
+		if(!contactId){
+			console.log('sharing without a contact');
+			navigation.navigate('BarcodeScanner');
+		}
+	}
 	const shareLink = async() => {
 		preparedMedia.layout.map(
 			async(x, index)=>{
@@ -467,7 +475,8 @@ const AllPhotos: React.FC<Props> = (props) => {
 				opacity={bottomSheetOpacity} 
 				FOOTER_HEIGHT={props.FOOTER_HEIGHT}
 				methods={{
-					share: shareLink
+					shareLink: shareLink,
+					shareWithContact: shareWithContact,
 				}}
 			/>
     </View>

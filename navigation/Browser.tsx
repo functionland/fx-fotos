@@ -9,10 +9,10 @@ class Browser extends Component {
 
   render() {
       console.log(this.props);
-    const { params } = this.props.route;
+    const { params } = (this.props as any).route;
 
     return (
-      <WebView
+      params.link && <WebView
         source={{ uri: params.link }}
         renderLoading={this.LoadingIndicatorView}
         startInLoadingState={true}

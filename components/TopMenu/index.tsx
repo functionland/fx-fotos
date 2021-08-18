@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import * as Progress from 'react-native-progress';
 import Menu, { MenuItem, MenuDivider } from 'react-native-material-menu';
+import QRCode from 'react-native-qrcode-svg';
 
 import {
 	useRecoilState,
@@ -17,6 +18,7 @@ import {
   import {
 	identityState, 
   } from '../../states';
+import { AutoScroll } from 'recyclerlistview';
 
 interface Props {
     navigation: any;
@@ -113,6 +115,12 @@ const Auth: React.FC<Props> = (props) => {
                                             }
                                         } 
                                         key={x.key}
+										style={{
+											alignItems: 'flex-start',
+											display: 'flex',
+											justifyContent: 'center',
+											paddingTop: 10
+										}}
 									>
 										<View style={{flex:1, flexDirection:'row', width:'100%',}}>
                                             <View style={{flex:1/2,}}>
@@ -128,6 +136,30 @@ const Auth: React.FC<Props> = (props) => {
                                 )
                                 )
                             }
+
+							{
+                                (identity && identity[0]?.success) && (
+									<>
+									<MenuDivider />
+									<MenuItem 
+										style = {{
+											height: 120,
+											paddingTop: 5,
+											alignSelf: 'center'
+										}}
+									>
+										<View style={{flex:1}}>
+											<QRCode
+												value="this is identification"
+												//logo={{uri: base64Logo}}
+												logoSize={30}
+												logoBackgroundColor='transparent'
+											/>
+										</View>
+                                    </MenuItem>
+									</>
+								)
+							}
                             
         </Menu>
 

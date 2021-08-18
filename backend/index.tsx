@@ -6,7 +6,7 @@ import {
 	createUser,
 	shareMedia,
 } from "./dfinity/utils";
-import backendSettings from './dfinity/dfx';
+import backendSettings from './dfinity/dfx.json';
 
 export function useBackEndProviders(input:{backend:string, identity:any[], requireProfile?:Boolean}){
 	const _userId = useRef<string>('');
