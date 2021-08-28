@@ -18,10 +18,12 @@ import {
   import {
 	identityState, 
   } from '../../states';
-import { AutoScroll } from 'recyclerlistview';
+  import {default as Reanimated,} from 'react-native-reanimated';
 
 interface Props {
     navigation: any;
+	HEADER_HEIGHT: number;
+    headerShown: Reanimated.SharedValue<number>;
 }
 const Auth: React.FC<Props> = (props) => {
 	const chartConfig = {
@@ -136,7 +138,19 @@ const Auth: React.FC<Props> = (props) => {
                                 )
                                 )
                             }
-
+							<MenuDivider />
+							<MenuItem 
+                                onPress={
+                                    ()=>{
+                                        props.navigation.navigate('Settings', {
+											HEADER_HEIGHT: props.HEADER_HEIGHT
+										});
+                                    }
+                                } 
+                                key="settings"
+							>
+                                Settings
+                            </MenuItem>
 							{
                                 (identity && identity[0]?.success) && (
 									<>
@@ -174,6 +188,8 @@ const styles = StyleSheet.create({
         alignSelf:'center',
         marginTop: '10%'
     }
-  });
-
-export default React.memo(Auth);
+});
+const isEqual = (prevProps:Props, nextProps:Props) => {
+	return (prevProps.HEADER_HEIGHT === nextProps.HEADER_HEIGHT);
+}
+export default React.memo(Auth, isEqual);

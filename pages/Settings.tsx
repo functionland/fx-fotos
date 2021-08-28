@@ -4,9 +4,8 @@ import SettingsContainer from '../components/SettingsContainer';
 import {default as Reanimated,} from 'react-native-reanimated';
 
 interface Props {
-  HEADER_HEIGHT: number;
-  FOOTER_HEIGHT: number;
-  headerShown: Reanimated.SharedValue<number>;
+  navigation: any;
+  route: {params:{HEADER_HEIGHT: number;FOOTER_HEIGHT: number;headerShown:Reanimated.SharedValue<number>;}}
 }
 
 const Settings: React.FC<Props> = (props) => {
@@ -18,11 +17,18 @@ const Settings: React.FC<Props> = (props) => {
 
   return (
     <SafeAreaView style={styles.SafeAreaView}>
-      <View style={[styles.View, {width: SCREEN_WIDTH, zIndex:1, marginTop:(StatusBar.currentHeight||0)}]}>
+      <View style={[
+				styles.View, 
+				{
+					width: SCREEN_WIDTH, 
+					zIndex:1, 
+					top:((StatusBar.currentHeight||0)+(2*props.route.params.HEADER_HEIGHT||0))
+				}
+			]}>
         <SettingsContainer 
-          HEADER_HEIGHT={props.HEADER_HEIGHT} 
-          FOOTER_HEIGHT={props.FOOTER_HEIGHT}
-          headerShown={props.headerShown}
+          HEADER_HEIGHT={props.route.params.HEADER_HEIGHT} 
+          FOOTER_HEIGHT={props.route.params.FOOTER_HEIGHT}
+          headerShown={props.route.params.headerShown}
         />
       </View>
     </SafeAreaView>
@@ -36,9 +42,12 @@ const styles = StyleSheet.create({
     backgroundColor: 'white'
   },
   View: {
-    position: 'absolute',
-    top: 0,
-    left: 0
+    position: 'relative',
+    left: 0,
+		flex: 1,
   }
 });
-export default React.memo(Settings);
+const isEqual = (prevProps:Props, nextProps:Props) => {
+  return (prevProps.route.params.HEADER_HEIGHT === nextProps.route.params.HEADER_HEIGHT);
+}
+export default React.memo(Settings, isEqual);

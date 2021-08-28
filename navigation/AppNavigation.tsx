@@ -3,6 +3,8 @@ import {createNativeStackNavigator} from 'react-native-screens/native-stack';
 import PermissionError from '../pages/PermissionError';
 import React, { useState, } from 'react';
 import HomePage from '../pages/HomePage';
+import Settings from '../pages/Settings';
+import ImportGoogle from '../pages/ImportGoogle';
 import Browser from './Browser';
 import BarcodeScanner from '../pages/BarcodeScanner';
 import { StyleSheet, Animated, View, TouchableOpacity, Text, StatusBar } from 'react-native';
@@ -45,6 +47,7 @@ const AppNavigation = () => {
       <NavigationContainer>
         <Stack.Navigator
           screenOptions={({ navigation, route }) => ({
+						headerMode: 'screen',
             headerCenter: () => (
               <Header 
                 scrollY2={scrollY2} 
@@ -89,6 +92,16 @@ const AppNavigation = () => {
             component={PermissionError}
             options={{headerShown: false}}
           />
+					<Stack.Screen
+            name="Settings"
+            component={Settings}
+            options={{headerShown: true}}
+          />
+					<Stack.Screen
+            name="ImportGoogle"
+            component={ImportGoogle}
+            options={{headerShown: true}}
+          />
           <Stack.Screen
             name="Browser"
             component={Browser}
@@ -97,7 +110,7 @@ const AppNavigation = () => {
 					<Stack.Screen
             name="BarcodeScanner"
             component={BarcodeScanner}
-            options={{headerShown: true}}
+            options={{headerShown: true, headerTranslucent: false }}
           />
         </Stack.Navigator>
       </NavigationContainer>
