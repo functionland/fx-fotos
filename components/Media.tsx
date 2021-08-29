@@ -2,7 +2,7 @@ import React, {useState, useEffect, createRef, useRef} from 'react';
 import { StyleSheet, useWindowDimensions } from 'react-native';
 import { Asset } from 'expo-media-library';
 import { Video } from 'expo-av'
-import VideoPlayer from './VideoPlayer';
+import VideoPlayer from 'expo-video-player';
 import {
   TapGestureHandler,
   PinchGestureHandler,
@@ -115,15 +115,17 @@ const Media: React.FC<Props> = (props) => {
     }
   });
 
-      let video:any;
+			const video = React.useRef<any>(null);
       const [isMute, setIsMute] = useState<boolean>(false);
       useEffect(()=>{
-        if(video && props?.media?.duration && isMounted.current){
+        if(video.current && props?.media?.duration && isMounted.current){
           if(state?.activeIndex===props.index){
             ////console.log('video unloaded');
-            video?.unloadAsync();
+						console.log('unloading video');
+            video?.current?.unloadAsync();
           }else if(state?.activeIndex===props.index){
-            video.loadAsync({uri: props.media?.uri},{shouldPlay: true, positionMillis: 0});
+						console.log('loading video');
+            video.current?.loadAsync({uri: props.media?.uri},{shouldPlay: true, positionMillis: 0});
           }
         }
       }, [props.index, state?.activeIndex, state]);
@@ -151,14 +153,8 @@ const Media: React.FC<Props> = (props) => {
           if(media?.duration > 0){ 
             return (
               <VideoPlayer
-                sliderColor='whitesmoke'
-                showFullscreenButton={false}
-                showMuteButton={true}
-                mute={() =>setIsMute(true)}
-                unmute={() =>setIsMute(false)}
-                isMute={isMute || !(state?.activeIndex===props.index?true:false)}
                 videoProps={{
-                  ref: (v: any) => (video = v),
+                  ref: video,
                   shouldPlay: (state?.activeIndex===props.index),
                   isMuted: isMute,
                   resizeMode: Video.RESIZE_MODE_CONTAIN,
@@ -166,12 +162,10 @@ const Media: React.FC<Props> = (props) => {
                     uri: media.uri,
                   },
                 }}
-                inFullscreen={false}
-                height= {props.imageHeight}
-                width= {props.imageWidth}
-                fadeOutDuration={2000}
-                quickFadeOutDuration={2000}
-                showControlsOnLoad={true}
+								style={{
+									height:props.imageHeight,
+									width:props.imageWidth
+								}}
               />
             );
           }else{

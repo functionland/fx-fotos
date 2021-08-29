@@ -76,6 +76,7 @@
     "expo-media-library": "~12.1.2",
     "expo-random": "~11.2.0",
     "expo-status-bar": "~1.0.4",
+    "expo-video-player": "github:functionland/expo-video-player",
     "expo-web-browser": "~9.2.0",
     "jsbi": "^3.1.6",
     "jszip": "^3.7.1",

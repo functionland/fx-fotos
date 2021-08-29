@@ -38,12 +38,12 @@ const ImportGoogle: React.FC<Props> = (props) => {
 		)
 	};
 
-	const readCacheDirectory = async() => {
+	/*const readCacheDirectory = async() => {
 		const entries = await FileSystem.readDirectoryAsync(
 		  FileSystem.cacheDirectory + "photosUnzipped/Takeout/Google Photos"
 		);
 		setImageList(entries);
-	}
+	}*/
 	const openDocumentSelector = async() => {
 		let options = {
 			//base64: false,
