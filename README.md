@@ -2,9 +2,9 @@
 
 # Latest 2 Updates
 
-**August-10-2021:** Added share photo feature to enable users share a link and see it from any browser(using a shared hash)
+**August-30-2021:** Added settings page and working on import from Google Photos
 
-**August-07-2021:** Added share photo placeholder and patched dfinity libraries
+**August-10-2021:** Added share photo feature to enable users share a link and see it from any browser(using a shared hash)
 
 
 # BOX Photos development guide
