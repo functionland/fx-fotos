@@ -153,6 +153,9 @@ const Media: React.FC<Props> = (props) => {
           if(media?.duration > 0){ 
             return (
               <VideoPlayer
+								mute={{
+									visible: true,
+								}}
                 videoProps={{
                   ref: video,
                   shouldPlay: (state?.activeIndex===props.index),
