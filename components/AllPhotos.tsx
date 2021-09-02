@@ -9,7 +9,7 @@ import * as FileSystem from 'expo-file-system';
 import { useBackEndProviders } from '../backend';
 import * as mime from 'react-native-mime-types';
 import BottomSheet from '@gorhom/bottom-sheet';
-import ShareSheet from './BottomSheets';
+import { ShareSheet, AlbumSheet } from './BottomSheets';
 import * as Clipboard from 'expo-clipboard';
 import Toast from 'react-native-root-toast';
 import { useNavigation } from '@react-navigation/native';
@@ -17,7 +17,7 @@ import { useNavigation } from '@react-navigation/native';
 import {
   useRecoilState,
 } from 'recoil';
-import {preparedMediaState, identityState,} from '../states';
+import {preparedMediaState, identityState, } from '../states';
 
 import { default as Reanimated, useSharedValue, useAnimatedReaction, runOnJS, } from 'react-native-reanimated';
 
@@ -80,6 +80,10 @@ const AllPhotos: React.FC<Props> = (props) => {
   const scrollIndex2 = useRef(new Animated.Value(0)).current;
   const scrollIndex3 = useRef(new Animated.Value(0)).current;
   const scrollIndex4 = useRef(new Animated.Value(0)).current;
+	const lastAlbumName = useRef<string>('');
+	const ChangeLastAlbumName = (newAlbumName:string) => {
+		lastAlbumName.current = newAlbumName;
+	}
 
 
   const dragY = useSharedValue(0);
@@ -128,15 +132,36 @@ const AllPhotos: React.FC<Props> = (props) => {
 
   const _handleShare = () => {
 		console.log('Sharing');
-		console.log(shareBottomSheetRef.current);
 		shareBottomSheetRef.current?.snapToIndex(1);
 	}
 
-  const _handleAddToAlbum = () => console.log('Adding');
-	const {_userId, _videoUploadController, upload, getMedias, share, backendSettings} = useBackEndProviders({backend:'dfinity', identity: identity, requireProfile:true});
+  const _handleAddToAlbum = () => {
+		console.log('Adding to Album');
+		shareBottomSheetRef.current?.snapToIndex(1);
+	}
+	const addToAlbum = () => {
+		preparedMedia.layout.map(
+			async(x, index)=>{
+				if(selectedAssetsRef.current.includes(x.id)){
+					if(typeof x.value !== 'string'){
+						let added = await addToAlbum_(x.id, lastAlbumName.current);
+						if(added){
+							let toast = Toast.show('Added to Album', {
+								duration: Toast.durations.LONG,
+							});
+						}
+					}
+				}
+			}
+		);
+	}
+	const {_userId, _videoUploadController, upload, getMedias, share, backendSettings, addMediaToAlbum, getAlbums} = useBackEndProviders({backend:'dfinity', identity: identity, requireProfile:true});
 
 	const shareMedia = async(videoId:string, targetUserId:string) => {
 		return await share(videoId, targetUserId);
+	}
+	const addToAlbum_ = async(videoId:string, albumName:string) => {
+		return await addMediaToAlbum(albumName, videoId);
 	}
 
 	const createUploadedAssets = (backendResponse:Array<any> | undefined) => {
@@ -206,21 +231,6 @@ const AllPhotos: React.FC<Props> = (props) => {
 					encoding: FileSystem.EncodingType.Base64,
 			  });
 				let url = `data:${mime.lookup(mediaInfo.localUri)};base64,${fileBase64}`;
-				/*const media = await new Promise((resolve, reject) => {
-					const xhr = new XMLHttpRequest();
-					xhr.onload = function() {
-						console.log('media xhr.onload');
-						resolve(xhr.response);
-					};
-					xhr.onerror = function() {
-						console.log('media xhr.onerror');
-						reject(new TypeError('Network request failed'));
-					};
-					xhr.responseType = 'blob';
-					xhr.open('GET', url, true);
-					xhr.send();
-					resolve(xhr.response);
-				});*/
 				var buff = Buffer.from(fileBase64, 'base64');
 				const mediaFile:File = {
 					lastModified: mediaInfo.modificationTime || mediaInfo.creationTime
@@ -232,22 +242,6 @@ const AllPhotos: React.FC<Props> = (props) => {
 					, stream: ():any=>{}
 					, text: async()=>{ return '';}
 				}
-				//console.log(buff);
-				//let res = await fetch(url);
-				//let blob = await res?.blob();
-				//const mediaUint8 = await media._arrayBufferResponse._body._bodyArrayBuffer;
-			//	const data = new File([mediaUint8], { type: mime.lookup(mediaInfo.localUri) });
-
-				//console.log(data.arrayBuffer);
-				
-				/*let mediaFile = new File(
-					[url], 
-					mediaAsset.filename, 
-					{ 
-						lastModified: new Date(mediaAsset.modificationTime || mediaAsset.creationTime).getTime(), 
-						type: mime.lookup(mediaInfo.localUri),
-					}
-				);*/
 				const videoUploadController = await upload(mediaFile, '', mediaAsset.id);
 				console.log('setting uploaded to true')
 				uploadedAssets.current[mediaAsset.id] = 100;
@@ -477,6 +471,15 @@ const AllPhotos: React.FC<Props> = (props) => {
 				methods={{
 					shareLink: shareLink,
 					shareWithContact: shareWithContact,
+				}}
+			/>
+			<AlbumSheet 
+				bottomSheetRef={shareBottomSheetRef} 
+				opacity={bottomSheetOpacity} 
+				FOOTER_HEIGHT={props.FOOTER_HEIGHT}
+				methods={{
+					addToAlbum: addToAlbum,
+					ChangeLastAlbumName: ChangeLastAlbumName,
 				}}
 			/>
     </View>

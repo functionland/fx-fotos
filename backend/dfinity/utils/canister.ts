@@ -11,7 +11,8 @@ import {
   VideoInfo,
   VideoInit,
   VideoResults,
-} from "./canister/typings";
+	AlbumInfo,
+} from "../dfx/CanCand";
 import { unwrap } from "./index";
 import { actorController } from "./canister/actor";
 
@@ -37,7 +38,7 @@ export function getUserFromStorage(
 }
 
 export async function getUserNameByPrincipal(principal: Principal) {
-  const icUserName = unwrap<string>(
+  const icUserName = unwrap<Array<string>>(
     await (await CanCan.actor).getUserNameByPrincipal(principal)
   )!;
   return icUserName;
@@ -146,6 +147,18 @@ export async function getProfileVideos(userId: string): Promise<VideoInfo[]> {
   }
 }
 
+export async function getProfileAlbums(userId: string): Promise<AlbumInfo[]> {
+  const albums = unwrap<Array<AlbumInfo>>(
+    await (await CanCan.actor).getProfileAlbums(userId, [])
+  );
+  if (albums !== null) {
+    const unwrappedAlbums = albums.map((v) => v);
+    return unwrappedAlbums;
+  } else {
+    return Promise.resolve([]);
+  }
+}
+
 export async function shareVideo(videoId: string, targetUserId: string): Promise<string> {
   const videoHash = unwrap<string>(
     await (await CanCan.actor).shareVideo(targetUserId, videoId, true)
@@ -234,7 +247,7 @@ export async function getVideoChunks(videoInfo: VideoInfo): Promise<string> {
   const chunkBuffers: Buffer[] = [];
   const chunksAsPromises: Array<Promise<Optional<number[]>>> = [];
   for (let i = 1; i <= Number(chunkCount.toString()); i++) {
-    chunksAsPromises.push((await CanCan.actor).getVideoChunk(videoId, i));
+    chunksAsPromises.push((await CanCan.actor).getVideoChunk(videoId, i, []));
   }
   const nestedBytes: number[][] = (await Promise.all(chunksAsPromises))
     .map(unwrap)
@@ -256,6 +269,14 @@ export async function putVideoChunk(
   chunkData: number[]
 ) {
   return (await CanCan.actor).putVideoChunk(videoId, chunkNum, chunkData);
+}
+
+export async function addVideo2Album(
+  album: string,
+  videoId: string,
+  userId: string
+) {
+  return (await CanCan.actor).addVideo2Album([[album]], videoId, userId);
 }
 
 export async function putVideoPic(videoId: string, file: number[]) {
@@ -287,7 +308,7 @@ export async function checkUsername(username: string): Promise<boolean> {
   return await (await CanCan.actor).checkUsernameAvailable(username);
 }
 
-export async function getMessages(username: string): Promise<Message[]> {
+export async function getMessages(username: string): Promise<[Array<Message>]|[]> {
   const messages = await (await CanCan.actor).getMessages(username);
   return messages;
 }
@@ -295,7 +316,7 @@ export async function getMessages(username: string): Promise<Message[]> {
 export async function putRewardTransfer(
   sender: string,
   recipient: string,
-  amount: BigInt
+  amount: number
 ) {
   return await (await CanCan.actor).putRewardTransfer(
     sender,

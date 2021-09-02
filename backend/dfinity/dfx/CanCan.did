@@ -26,29 +26,41 @@ type VideoPic_2 = vec nat8;
 type VideoPic = VideoPic_2;
 type VideoInit_2 = 
  record {
+   album: opt vec text;
    caption: text;
    chunkCount: nat;
    createdAt: Timestamp;
    externalId: text;
+   geoData: opt GeoData;
+   geoDataExif: opt GeoData;
+   lastModifiedAt: opt Timestamp;
    name: text;
+   people: opt People;
    tags: vec text;
+   uploadedFrom: opt UploadOrigin;
    userId: UserId_2;
  };
 type VideoInit = VideoInit_2;
 type VideoInfo_2 = 
  record {
    abuseFlagCount: nat;
+   album: opt vec text;
    caption: text;
    chunkCount: nat;
    createdAt: Timestamp;
    externalId: text;
+   geoData: opt GeoData;
+   geoDataExif: opt GeoData;
+   lastModifiedAt: opt Timestamp;
    likes: vec UserId_2;
    name: text;
+   people: opt People;
    pic: opt VideoPic_2;
    sharedCount: nat;
    superLikes: vec UserId_2;
    tags: vec text;
    uploadedAt: Timestamp;
+   uploadedFrom: opt UploadOrigin;
    userId: UserId_2;
    videoId: VideoId_2;
    viewCount: nat;
@@ -65,9 +77,14 @@ type Video =
    chunkCount: nat;
    createdAt: Timestamp;
    externalId: text;
+   geoData: opt GeoData;
+   geoDataExif: opt GeoData;
+   lastModifiedAt: opt Timestamp;
    name: text;
+   people: opt People;
    tags: vec text;
    uploadedAt: Timestamp;
+   uploadedFrom: opt UploadOrigin;
    userId: UserId_2;
    viewCount: nat;
    viralAt: opt Timestamp;
@@ -86,6 +103,12 @@ type UserAction =
    create;
    update;
    view;
+ };
+type UploadOrigin = 
+ record {
+   deviceType: text;
+   localFolderName: text;
+   url: text;
  };
 type Trie_9 = 
  variant {
@@ -135,8 +158,21 @@ type Trie_2 =
    "empty";
    leaf: Leaf_2;
  };
+type Trie_11 = 
+ variant {
+   branch: Branch_11;
+   "empty";
+   leaf: Leaf_11;
+ };
+type Trie_10 = 
+ variant {
+   branch: Branch_10;
+   "empty";
+   leaf: Leaf_10;
+ };
+type Trie2D_3 = Trie_6;
 type Trie2D_2 = Trie_4;
-type Trie2D = Trie_2;
+type Trie2D = Trie;
 type Trie = 
  variant {
    branch: Branch;
@@ -175,12 +211,13 @@ type SuperLikeVideo =
  };
 type StateShared = 
  record {
+   albums: RelShared;
    chunks: MapShared;
-   follows: RelShared;
-   likes: RelShared_3;
+   follows: RelShared_3;
+   likes: RelShared_5;
    profiles: MapShared_2;
    rewards: MapShared_3;
-   uploaded: RelShared_3;
+   uploaded: RelShared_5;
    users: MapShared_4;
    videos: MapShared_5;
  };
@@ -202,6 +239,8 @@ type Result =
    err: text;
    ok;
  };
+type RelShared_6 = record {forw: Trie2D_3;};
+type RelShared_5 = RelShared_6;
 type RelShared_4 = record {forw: Trie2D_2;};
 type RelShared_3 = RelShared_4;
 type RelShared_2 = record {forw: Trie2D;};
@@ -239,53 +278,55 @@ type Profile =
    createdAt: Timestamp;
    userName: text;
  };
+type Person = record {name: text;};
+type People = vec Person;
 type Message = 
  record {
    event: Event;
    id: nat;
    time: Timestamp;
  };
-type MapShared_5 = Trie_9;
-type MapShared_4 = Trie_8;
-type MapShared_3 = Trie_7;
-type MapShared_2 = Trie_6;
-type MapShared = Trie;
+type MapShared_5 = Trie_11;
+type MapShared_4 = Trie_10;
+type MapShared_3 = Trie_9;
+type MapShared_2 = Trie_8;
+type MapShared = Trie_3;
 type List_9 = 
  opt record {
        record {
-         Key_3;
-         Video;
+         Key;
+         nat;
        };
        List_9;
      };
 type List_8 = 
  opt record {
        record {
-         Key_4;
-         UserId_2;
+         Key;
+         Profile;
        };
        List_8;
      };
 type List_7 = 
  opt record {
        record {
-         Key_2;
-         nat;
+         Key_4;
+         null;
        };
        List_7;
      };
 type List_6 = 
  opt record {
        record {
-         Key_2;
-         Profile;
+         Key;
+         Trie_7;
        };
        List_6;
      };
 type List_5 = 
  opt record {
        record {
-         Key_3;
+         Key;
          null;
        };
        List_5;
@@ -293,7 +334,7 @@ type List_5 =
 type List_4 = 
  opt record {
        record {
-         Key_2;
+         Key;
          Trie_5;
        };
        List_4;
@@ -301,8 +342,8 @@ type List_4 =
 type List_3 = 
  opt record {
        record {
-         Key_2;
-         null;
+         Key_3;
+         ChunkData;
        };
        List_3;
      };
@@ -310,15 +351,31 @@ type List_2 =
  opt record {
        record {
          Key_2;
-         Trie_3;
+         null;
        };
        List_2;
+     };
+type List_11 = 
+ opt record {
+       record {
+         Key_4;
+         Video;
+       };
+       List_11;
+     };
+type List_10 = 
+ opt record {
+       record {
+         Key_5;
+         UserId_2;
+       };
+       List_10;
      };
 type List = 
  opt record {
        record {
          Key;
-         ChunkData;
+         Trie_2;
        };
        List;
      };
@@ -368,32 +425,55 @@ type Leaf_2 =
    keyvals: AssocList_3;
    size: nat;
  };
+type Leaf_11 = 
+ record {
+   keyvals: AssocList_21;
+   size: nat;
+ };
+type Leaf_10 = 
+ record {
+   keyvals: AssocList_19;
+   size: nat;
+ };
 type Leaf = 
  record {
    keyvals: AssocList;
    size: nat;
  };
-type Key_4 = 
+type Key_5 = 
  record {
    hash: Hash;
    key: principal;
  };
-type Key_3 = 
+type Key_4 = 
  record {
    hash: Hash;
    key: VideoId_2;
  };
-type Key_2 = 
- record {
-   hash: Hash;
-   key: UserId_2;
- };
-type Key = 
+type Key_3 = 
  record {
    hash: Hash;
    key: ChunkId;
  };
+type Key_2 = 
+ record {
+   hash: Hash;
+   key: text;
+ };
+type Key = 
+ record {
+   hash: Hash;
+   key: UserId_2;
+ };
 type Hash = nat32;
+type GeoData = 
+ record {
+   altitude: text;
+   latitude: text;
+   latitudeSpan: text;
+   longitude: text;
+   longitudeSpan: text;
+ };
 type Event_3 = 
  record {
    check: Check;
@@ -488,7 +568,9 @@ type Check =
  };
 type CanCan = 
  service {
+   addVideo2Album: (opt vec text, VideoId, UserId) -> ();
    checkUsernameAvailable: (text) -> (bool) query;
+   createAlbum: (opt vec text, UserId) -> (opt vec text);
    createProfile: (text, opt ProfilePic) -> (opt ProfileInfoPlus);
    createTestData: (vec UserId, vec record {
                                       UserId;
@@ -502,6 +584,7 @@ type CanCan =
    getFeedVideos: (UserId, opt nat) -> (opt VideoResults) query;
    getIsSuperLiker: (UserId, VideoId) -> (opt bool) query;
    getMessages: (UserId) -> (opt vec Message) query;
+   getProfileAlbums: (UserId, opt nat) -> (opt vec AlbumInfo) query;
    getProfileInfo: (UserId) -> (opt ProfileInfo) query;
    getProfilePic: (UserId) -> (opt ProfilePic) query;
    getProfilePlus: (opt UserId, UserId) -> (opt ProfileInfoPlus) query;
@@ -593,6 +676,18 @@ type Branch_2 =
    right: Trie_2;
    size: nat;
  };
+type Branch_11 = 
+ record {
+   left: Trie_11;
+   right: Trie_11;
+   size: nat;
+ };
+type Branch_10 = 
+ record {
+   left: Trie_10;
+   right: Trie_10;
+   size: nat;
+ };
 type Branch = 
  record {
    left: Trie;
@@ -606,7 +701,11 @@ type AssocList_6 = List_3;
 type AssocList_5 = AssocList_6;
 type AssocList_4 = List_2;
 type AssocList_3 = AssocList_4;
+type AssocList_22 = List_11;
+type AssocList_21 = AssocList_22;
+type AssocList_20 = List_10;
 type AssocList_2 = List;
+type AssocList_19 = AssocList_20;
 type AssocList_18 = List_9;
 type AssocList_17 = AssocList_18;
 type AssocList_16 = List_8;
@@ -623,6 +722,8 @@ type AllowanceBalance =
    zeroForever;
    zeroUntil: Timestamp;
  };
+type AlbumInfo_2 = record {name: text;};
+type AlbumInfo = AlbumInfo_2;
 type ActionTarget = 
  variant {
    all;

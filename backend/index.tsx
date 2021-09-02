@@ -5,6 +5,8 @@ import {
 	getUserVideos,
 	createUser,
 	shareMedia,
+	getUserAlbums,
+	addVideoToAlbum,
 } from "./dfinity/utils";
 import backendSettings from './dfinity/dfx.json';
 
@@ -59,6 +61,25 @@ export function useBackEndProviders(input:{backend:string, identity:any[], requi
 		return getUserVideos(_userId.current);
 
 	}
+
+	const getAlbums = async(identity:any = undefined) => {
+		if(identity){
+			_userId.current = identity.provider + '://' +identity.userId;
+			_identity.current = identity.identity;
+		}
+		console.log('getAlbums for userId='+_userId.current);
+		if(_requireProfile.current){
+			let profileCheckSuccess = await checkProfile();
+			if(!profileCheckSuccess){
+				console.log('profile check failed');
+				return undefined;
+			}
+		}
+
+		return getUserAlbums(_userId.current);
+
+	}
+	
 	const share = async(videoId:string, targetUserId:string) => {
 		console.log('sharing from userId='+_userId.current);
 		if(_requireProfile.current){
@@ -71,6 +92,20 @@ export function useBackEndProviders(input:{backend:string, identity:any[], requi
 		console.log('profileCheckSuccess videoId='+videoId+',targetUserId='+targetUserId);
 		return shareMedia(videoId, targetUserId);
 	}
+
+	const addMediaToAlbum = async(album: string, videoId: string) => {
+		console.log('adding video ot album for userId='+_userId.current);
+		if(_requireProfile.current){
+			let profileCheckSuccess = await checkProfile();
+			if(!profileCheckSuccess){
+				console.log('profile check failed');
+				return undefined;
+			}
+		}
+		console.log('profileCheckSuccess videoId='+videoId+',userId='+_userId.current);
+		return addVideoToAlbum(album, videoId, _userId.current);
+	}
+
 	const upload = async(mediaFile:File, caption:string='', id:string='') => {
 		console.log('upload userId='+_userId.current);
 		if(_requireProfile.current){
@@ -96,6 +131,8 @@ export function useBackEndProviders(input:{backend:string, identity:any[], requi
 		upload,
 		getMedias,
 		share,
+		getAlbums,
+		addMediaToAlbum,
 		backendSettings
 	  };
 }

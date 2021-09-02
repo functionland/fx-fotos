@@ -1,6 +1,6 @@
 import { atom } from 'recoil'
 import { Asset } from 'expo-media-library';
-import { FlatSection, story } from '../types/interfaces';
+import { FlatSection, story, album } from '../types/interfaces';
 import { DataProvider } from 'recyclerlistview';
 
 export const photosState = atom<Array<Asset>>({
@@ -60,3 +60,7 @@ export const contactsState = atom<Array<{id:string}>>({
     default: [],
 });
 
+export const albumsState = atom<Array<album>>({
+	key: 'albumsState',
+	default: [],
+});

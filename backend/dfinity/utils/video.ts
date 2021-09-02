@@ -6,8 +6,10 @@ import {
   putVideoPic,
 	getProfileVideos,
 	shareVideo,
+	getProfileAlbums,
+	addVideo2Album,
 } from "./canister";
-import { VideoInfo, VideoInit } from "./canister/typings";
+import { VideoInfo, VideoInit } from "../dfx/CanCand";
 import { MAX_CHUNK_SIZE, encodeArrayBuffer, hashtagRegExp } from "./index";
 
 // Determines number of chunks and creates the VideoInfo
@@ -27,7 +29,13 @@ export function getVideoInit(
     name: file.name.replace(/\.mp4/, ""),
     tags: caption.match(hashtagRegExp) || [],
     userId,
-		externalId: id
+		externalId: id,
+		lastModifiedAt: [],
+		geoData: [],
+		geoDataExif: [],
+		people: [],
+		uploadedFrom: [],
+		album: [],
   };
 }
 
@@ -124,6 +132,24 @@ export async function getUserVideos(userId: string) {
 	const resultFromCanCan = await getProfileVideos(userId);
   console.log("User videos fetched");
   return resultFromCanCan;
+}
+
+export async function getUserAlbums(userId: string) {
+	console.log("Getting user albums...");
+	const resultFromCanCan = await getProfileAlbums(userId);
+  console.log("User albums fetched");
+	console.log(resultFromCanCan);
+  return resultFromCanCan;
+}
+
+export async function addVideoToAlbum(album: string, videoId: string, userId: string) {
+  console.log("Adding video to Album...");
+  try {
+    return await addVideo2Album(album, videoId, userId);
+    console.log(`Added video to album for ${videoId}`);
+  } catch (error) {
+    console.error("Unable to add video to album:", error);
+  }
 }
 
 export async function shareMedia(videoId:string, targetUserId: string) {

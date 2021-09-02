@@ -1,4 +1,5 @@
 import {Asset} from 'expo-media-library';
+import { SectionListData } from 'react-native';
 
 export interface reduxState {
   user: {
@@ -22,6 +23,10 @@ export interface sortedPhotos {
 export interface reduxAction {
   type: string;
   payload: any;
+}
+
+export interface album {
+	name: string;
 }
 
 export interface changeSortConditionAndNumColumns {
@@ -81,6 +86,12 @@ export interface Dimension {
   width: number;
 }
 
+export interface BottomSheetElement {
+	name: string;
+	icon: string;
+	key: string;
+	action: any;
+}
 
 export interface layout {value:Asset|string; sortCondition:'day'|'month'|''|'deleted', index: number, deleted:boolean, id:string};
 

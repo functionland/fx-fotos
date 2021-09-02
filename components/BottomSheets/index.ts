@@ -1,2 +1,3 @@
 import ShareSheet from "./ShareSheet";
-export default ShareSheet;
+import AlbumSheet from "./AlbumSheet";
+export {ShareSheet, AlbumSheet};

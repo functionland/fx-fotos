@@ -4,7 +4,7 @@ import {
   canisterId as CanCan_canister_id,
 } from "../../dfx/CanCan";
 
-import _SERVICE from "./typings";
+import _SERVICE from "../../dfx/CanCand";
 
 import dfxConfig from "../../dfx.json";
 
