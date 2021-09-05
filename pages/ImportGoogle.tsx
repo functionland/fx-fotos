@@ -7,8 +7,6 @@ import {default as Reanimated,} from 'react-native-reanimated';
 import * as Linking from 'expo-linking';
 import * as FileSystem from 'expo-file-system';
 
-import { unzip } from "react-native-zip-archive";
-
 interface Props {
   navigation: any;
   route: {params:{HEADER_HEIGHT: number;FOOTER_HEIGHT: number;headerShown:Reanimated.SharedValue<number>;}}
@@ -57,13 +55,13 @@ const ImportGoogle: React.FC<Props> = (props) => {
 				console.log(selectedDoc);
 				console.log(FileSystem.cacheDirectory);
 				const targetPath = FileSystem.cacheDirectory + "photosUnzipped";
-				unzip(selectedDoc.uri, targetPath, "UTF-8")
+				/*unzip(selectedDoc.uri, targetPath, "UTF-8")
 				.then((path) => {
 				console.log(`unzip completed at ${path}`);
 				})
 				.catch((error) => {
 				console.error(error);
-				});
+				});*/
 			}catch(e){
 				console.log(e);
 			}
