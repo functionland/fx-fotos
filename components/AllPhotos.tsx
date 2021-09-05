@@ -63,7 +63,12 @@ const AllPhotos: React.FC<Props> = (props) => {
 
 	// share bottom sheet ref
 	const shareBottomSheetRef = useRef<BottomSheet>(null);
-	const bottomSheetOpacity = useRef(new Animated.Value(0)).current;
+	const shareBottomSheetOpacity = useRef(new Animated.Value(0)).current;
+
+	// album bottom sheet ref
+	const albumBottomSheetRef = useRef<BottomSheet>(null);
+	const albumBottomSheetOpacity = useRef(new Animated.Value(0)).current;
+	
 
   useEffect(()=>{
     console.log([Date.now()+': component AllPhotos rendered']);
@@ -137,7 +142,7 @@ const AllPhotos: React.FC<Props> = (props) => {
 
   const _handleAddToAlbum = () => {
 		console.log('Adding to Album');
-		shareBottomSheetRef.current?.snapToIndex(1);
+		albumBottomSheetRef.current?.snapToIndex(1);
 	}
 	const addToAlbum = () => {
 		preparedMedia.layout.map(
@@ -466,7 +471,7 @@ const AllPhotos: React.FC<Props> = (props) => {
       />
       <ShareSheet 
 				bottomSheetRef={shareBottomSheetRef} 
-				opacity={bottomSheetOpacity} 
+				opacity={shareBottomSheetOpacity} 
 				FOOTER_HEIGHT={props.FOOTER_HEIGHT}
 				methods={{
 					shareLink: shareLink,
@@ -474,8 +479,8 @@ const AllPhotos: React.FC<Props> = (props) => {
 				}}
 			/>
 			<AlbumSheet 
-				bottomSheetRef={shareBottomSheetRef} 
-				opacity={bottomSheetOpacity} 
+				bottomSheetRef={albumBottomSheetRef} 
+				opacity={albumBottomSheetOpacity} 
 				FOOTER_HEIGHT={props.FOOTER_HEIGHT}
 				methods={{
 					addToAlbum: addToAlbum,

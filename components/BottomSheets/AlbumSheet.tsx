@@ -142,7 +142,11 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 1,
     backgroundColor: 'rgba(52, 52, 52, 0.7)',
-		zIndex: 7,
+	width: '100%',
+	height: '100%',
+	position: 'absolute',
+	bottom: 0,
+	right: 0,
   },
   sectionListContentContainer: {
     flex: 1,
