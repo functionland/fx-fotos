@@ -2,33 +2,27 @@ import * as MediaLibrary from 'expo-media-library';
 import {useNavigation} from '@react-navigation/native';
 import React, {useEffect, useRef, useState} from 'react';
 import {Text, View, useWindowDimensions, StyleSheet, ScrollView, TouchableHighlight} from 'react-native';
-
-import {
-  useRecoilState,
-} from 'recoil';
-import {photosState, } from '../states';
-import {default as Reanimated,} from 'react-native-reanimated';
+import { Constant } from '../utils/constants';
 interface Props {
-  HEADER_HEIGHT: number;
-  FOOTER_HEIGHT: number;
-  headerShown: Reanimated.SharedValue<number>;
+	ChangeLastAlbumName: Function;
+	addToAlbum: Function;
 }
 
-const SettingsContainer: React.FC<Props> = (props) => {
+const NewAlbumContainer: React.FC<Props> = (props) => {
   const SCREEN_WIDTH = useWindowDimensions().width;
   const SCREEN_HEIGHT = useWindowDimensions().height;
 	const navigation = useNavigation();
 
   useEffect(()=>{
-    console.log([Date.now()+': component SettingsContainer rendered']);
+    console.log([Date.now()+': component NewAlbumContainer rendered']);
   });
   useEffect(() => {
-    console.log(['component SettingsContainer mounted']);
-      return () => {console.log(['component SettingsContainer unmounted']);}
+    console.log(['component NewAlbumContainer mounted']);
+      return () => {console.log(['component NewAlbumContainer unmounted']);}
   }, []);
 
 	const goToPage = (pageName:string) => {
-		navigation.navigate(pageName, {HEADER_HEIGHT: props.HEADER_HEIGHT});
+		navigation.navigate(pageName, {HEADER_HEIGHT: Constant.HEADER_HEIGHT});
 	}
 
   return (
@@ -41,7 +35,7 @@ const SettingsContainer: React.FC<Props> = (props) => {
         zIndex:10,
       }}
     >
-          <ScrollView style={styles.scrollView}>
+        <ScrollView style={styles.scrollView}>
 						<TouchableHighlight 
 							style={styles.menuItem}
 							activeOpacity={0.2}
@@ -52,7 +46,7 @@ const SettingsContainer: React.FC<Props> = (props) => {
 								Import from Google Photos
 							</Text>
 						</TouchableHighlight>
-					</ScrollView>
+		</ScrollView>
     </View>
   );
 };
@@ -79,6 +73,6 @@ const styles = StyleSheet.create({
 	}
 });
 const isEqual = (prevProps:Props, nextProps:Props) => {
-  return (prevProps.HEADER_HEIGHT === nextProps.HEADER_HEIGHT);
+  return true;
 }
-export default React.memo(SettingsContainer, isEqual);
+export default React.memo(NewAlbumContainer, isEqual);
