@@ -20,4 +20,6 @@ export const Constant = {
     sortConditionChange: 'SORT_CONDITION_CHANGE',
     numColumnsChange: 'NUMBER_OF_COLUMNS_CHANGE',
   },
+	HEADER_HEIGHT: 30,
+	FOOTER_HEIGHT: 60,
 };

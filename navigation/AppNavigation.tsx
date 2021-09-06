@@ -102,6 +102,11 @@ const AppNavigation = () => {
             component={ImportGoogle}
             options={{headerShown: true}}
           />
+					<Stack.Screen
+            name="NewAlbum"
+            component={ImportGoogle}
+            options={{headerShown: true}}
+          />
           <Stack.Screen
             name="Browser"
             component={Browser}

@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, useEffect, useState } from 'react';
+import {useNavigation} from '@react-navigation/native';
 import { View, Text, StyleSheet, Animated, SectionListData, TouchableOpacity, useWindowDimensions } from 'react-native';
 import BottomSheet, { BottomSheetSectionList, BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -17,12 +18,19 @@ interface Props {
 
 const AlbumSheet: React.FC<Props> = (props) => {
 	const SCREEN_HEIGHT = useWindowDimensions().height;
+	const navigation = useNavigation();
 	const [albums] = useRecoilState(albumsState);
 	useEffect(()=>{
 		props.bottomSheetRef?.current?.close();
 	}, [])
   // variables
   const snapPoints = useMemo(() => [-1, 300, SCREEN_HEIGHT], []);
+  const goToPage = (pageName:string) => {
+	navigation.navigate(pageName, {
+		ChangeLastAlbumName: props.methods.ChangeLastAlbumName,
+		addToAlbum: props.methods.addToAlbum,
+	});
+  }
 
   // callbacks
   const handleSheetChanges = useCallback((index: number) => {
@@ -44,7 +52,9 @@ const AlbumSheet: React.FC<Props> = (props) => {
 							'name': 'Album',
 							'icon': 'photo-album',
 							'key': 'newAlbum',
-							'action': ()=>{}
+							'action': () => {
+								goToPage('NewAlbum');
+							}
 						},
 			],
 			key: '1'
@@ -64,7 +74,10 @@ const AlbumSheet: React.FC<Props> = (props) => {
 					'name': album.name,
 					'icon': '',
 					'key': album.name,
-					action: () => {props.methods.addToAlbum(album.name);}
+					action: () => {
+						props.methods.ChangeLastAlbumName(album.name);
+						props.methods.addToAlbum();
+					}
 				});
 			});
 			setSections(section_t);
@@ -72,8 +85,7 @@ const AlbumSheet: React.FC<Props> = (props) => {
 	}, [albums, sections]);
 
 	const renderSectionHeader = useCallback(
-    ({ section } : {
-			section: any}) => (
+    ({ section } : {section: any}) => (
       <View style={styles.sectionHeaderContainer}>
         <Text>{section.title}</Text>
       </View>
