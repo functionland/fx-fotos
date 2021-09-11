@@ -18,11 +18,11 @@
       "type": "persistent"
     },
     "local": {
-      "bind": "192.168.68.118:8000",
+      "bind": "192.168.68.114:8000",
       "type": "ephemeral"
     },
     "uiLocal": {
-      "bind": "192.168.68.118:3000/Shared/",
+      "bind": "192.168.68.114:3000/Shared/",
       "type": "ephemeral"
     }
   },
