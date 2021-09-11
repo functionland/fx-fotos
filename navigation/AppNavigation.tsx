@@ -5,6 +5,7 @@ import React, { useState, } from 'react';
 import HomePage from '../pages/HomePage';
 import Settings from '../pages/Settings';
 import ImportGoogle from '../pages/ImportGoogle';
+import NewAlbum from '../pages/NewAlbum';
 import Browser from './Browser';
 import BarcodeScanner from '../pages/BarcodeScanner';
 import { StyleSheet, Animated, View, TouchableOpacity, Text, StatusBar } from 'react-native';
@@ -104,7 +105,7 @@ const AppNavigation = () => {
           />
 					<Stack.Screen
             name="NewAlbum"
-            component={ImportGoogle}
+            component={NewAlbum}
             options={{headerShown: true}}
           />
           <Stack.Screen

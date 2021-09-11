@@ -1,7 +1,7 @@
 import * as MediaLibrary from 'expo-media-library';
 import {useNavigation} from '@react-navigation/native';
 import React, {useEffect, useRef, useState} from 'react';
-import {Text, View, useWindowDimensions, StyleSheet, ScrollView, TouchableHighlight} from 'react-native';
+import {TextInput, View, useWindowDimensions, StyleSheet, Button } from 'react-native';
 import { Constant } from '../utils/constants';
 interface Props {
 	ChangeLastAlbumName: Function;
@@ -11,8 +11,16 @@ interface Props {
 const NewAlbumContainer: React.FC<Props> = (props) => {
   const SCREEN_WIDTH = useWindowDimensions().width;
   const SCREEN_HEIGHT = useWindowDimensions().height;
-	const navigation = useNavigation();
-
+  const navigation = useNavigation();
+  const [albumName, setAlbumName] = React.useState('');
+  const onChangeAlbumName = (input: string) => {
+	setAlbumName(input);
+  }
+  const onSubmit = () => {
+	props.ChangeLastAlbumName(albumName);
+	props.addToAlbum();
+	navigation.goBack();
+  }
   useEffect(()=>{
     console.log([Date.now()+': component NewAlbumContainer rendered']);
   });
@@ -35,18 +43,18 @@ const NewAlbumContainer: React.FC<Props> = (props) => {
         zIndex:10,
       }}
     >
-        <ScrollView style={styles.scrollView}>
-						<TouchableHighlight 
-							style={styles.menuItem}
-							activeOpacity={0.2}
-							underlayColor="#DDDDDD"
-							onPress={()=>{goToPage('ImportGoogle');}}
-						>
-							<Text style={styles.text}>
-								Import from Google Photos
-							</Text>
-						</TouchableHighlight>
-		</ScrollView>
+		<TextInput
+			style={styles.input}
+			onChangeText={onChangeAlbumName}
+			value={albumName}
+			placeholder="Enter an album name"
+		/>
+		<Button
+			onPress={onSubmit}
+			title="Save"
+			color="#841584"
+			accessibilityLabel="Save new album"
+		/>
     </View>
   );
 };
@@ -70,7 +78,13 @@ const styles = StyleSheet.create({
 		flexDirection:'row',
 		justifyContent: 'center',
 		textAlignVertical: 'center'
-	}
+	},
+	input: {
+		height: 40,
+		margin: 12,
+		borderWidth: 1,
+		padding: 10,
+	},
 });
 const isEqual = (prevProps:Props, nextProps:Props) => {
   return true;

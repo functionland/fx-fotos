@@ -150,11 +150,11 @@ const AllPhotos: React.FC<Props> = (props) => {
 				if(selectedAssetsRef.current.includes(x.id)){
 					if(typeof x.value !== 'string'){
 						let added = await addToAlbum_(x.id, lastAlbumName.current);
-						if(added){
-							let toast = Toast.show('Added to Album', {
-								duration: Toast.durations.LONG,
-							});
-						}
+						console.log('added videos to album');
+						console.log(added);
+						let toast = Toast.show('Added to Album', {
+							duration: Toast.durations.SHORT,
+						});
 					}
 				}
 			}
