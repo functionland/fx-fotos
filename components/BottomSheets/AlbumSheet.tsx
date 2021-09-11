@@ -70,6 +70,8 @@ const AlbumSheet: React.FC<Props> = (props) => {
 		if(albums && albums.length>0 && sections && sections.length > 0){
 			let section_t = sections;
 			albums.map((album) => {
+				console.log('album is');
+				console.log(album);
 				section_t[1].data.push({
 					'name': album.name,
 					'icon': '',

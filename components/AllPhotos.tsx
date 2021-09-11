@@ -17,7 +17,7 @@ import { useNavigation } from '@react-navigation/native';
 import {
   useRecoilState,
 } from 'recoil';
-import {preparedMediaState, identityState, } from '../states';
+import {preparedMediaState, identityState, albumsState, } from '../states';
 
 import { default as Reanimated, useSharedValue, useAnimatedReaction, runOnJS, } from 'react-native-reanimated';
 
@@ -60,6 +60,7 @@ const AllPhotos: React.FC<Props> = (props) => {
 
   const [preparedMedia, setPreparedMedia] = useRecoilState(preparedMediaState);
 	const [identity] = useRecoilState(identityState);
+	const [albums, setAlbums] = useRecoilState(albumsState);
 
 	// share bottom sheet ref
 	const shareBottomSheetRef = useRef<BottomSheet>(null);
@@ -213,6 +214,13 @@ const AllPhotos: React.FC<Props> = (props) => {
 				const backendMedias = createUploadedAssets(res);
 				console.log(backendMedias);
 				uploadedAssets.current = backendMedias;
+				getAlbums().then((res)=>{
+					console.log('get albums');
+					console.log(res);
+					if(res){
+						setAlbums(res);
+					}
+				});
 			});
 		}
 	}, [identity])
