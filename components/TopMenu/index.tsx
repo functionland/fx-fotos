@@ -1,10 +1,8 @@
 import AuthProvidersClass from '../Auth';
 import React, {useEffect, } from 'react';
 import { 
-    View, 
-    StyleSheet, 
-    Image, 
-    StatusBar,
+    View,
+    StyleSheet,
     Pressable,
 	Text
 } from 'react-native';
