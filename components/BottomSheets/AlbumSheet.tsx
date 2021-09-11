@@ -68,23 +68,26 @@ const AlbumSheet: React.FC<Props> = (props) => {
 	
 	useEffect(() => {
 		if(albums && albums.length>0 && sections && sections.length > 0){
-			let section_t = sections;
+			let temp : any = [];
 			albums.map((album) => {
-				console.log('album is');
-				console.log(album);
-				section_t[1].data.push({
-					'name': album.name,
-					'icon': '',
-					'key': album.name,
-					action: () => {
-						props.methods.ChangeLastAlbumName(album.name);
-						props.methods.addToAlbum();
+					let isFound = sections[1].data.findIndex(x=>x.key===album.name);
+					if(isFound === -1){
+						temp.push({
+							'name': album.name,
+							'icon': '',
+							'key': album.name,
+							action: () => {
+								props.methods.ChangeLastAlbumName(album.name);
+								props.methods.addToAlbum();
+							}
+						});
 					}
-				});
 			});
-			setSections(section_t);
+			setSections(d=>(
+				[...d.slice(0,1), {...d[1], data:[...d[1].data, ...temp]}]
+			));
 		}
-	}, [albums, sections]);
+	}, [albums, sections?.length > 0]);
 
 	const renderSectionHeader = useCallback(
     ({ section } : {section: any}) => (

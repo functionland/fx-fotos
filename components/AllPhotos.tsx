@@ -153,6 +153,7 @@ const AllPhotos: React.FC<Props> = (props) => {
 						let added = await addToAlbum_(x.id, lastAlbumName.current);
 						console.log('added videos to album');
 						console.log(added);
+						setAlbums([...albums, {name: lastAlbumName.current}]);
 						let toast = Toast.show('Added to Album', {
 							duration: Toast.durations.SHORT,
 						});
