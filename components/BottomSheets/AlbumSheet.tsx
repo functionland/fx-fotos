@@ -18,6 +18,7 @@ interface Props {
 
 const AlbumSheet: React.FC<Props> = (props) => {
 	const SCREEN_HEIGHT = useWindowDimensions().height;
+	const SCREEN_WIDTH = useWindowDimensions().width;
 	const navigation = useNavigation();
 	const [albums] = useRecoilState(albumsState);
 	useEffect(()=>{
@@ -91,7 +92,7 @@ const AlbumSheet: React.FC<Props> = (props) => {
 
 	const renderSectionHeader = useCallback(
     ({ section } : {section: any}) => (
-      <View style={styles.sectionHeaderContainer}>
+      <View style={[styles.sectionHeaderContainer,{width: SCREEN_WIDTH}]}>
         <Text>{section.title}</Text>
       </View>
     ),
@@ -155,53 +156,54 @@ const AlbumSheet: React.FC<Props> = (props) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 1,
-    backgroundColor: 'rgba(52, 52, 52, 0.7)',
-	width: '100%',
-	height: '100%',
-	position: 'absolute',
-	bottom: 0,
-	right: 0,
-  },
-  sectionListContentContainer: {
-    flex: 1,
-    alignItems: 'flex-start',
+	container: {
+		flex: 1,
+		padding: 1,
+		backgroundColor: 'rgba(52, 52, 52, 0.7)',
+		width: '100%',
+		height: '100%',
+		position: 'absolute',
+		bottom: 0,
+		right: 0,
+	},
+	sectionListContentContainer: {
+		flex: 1,
+		alignItems: 'flex-start',
 		paddingLeft: 5,
 		paddingRight: 5
-  },
+	},
 	flatListContentContainer: {
-    height: 100,
+    	height: 100,
 		width: '100%',
-    alignItems: 'center',
-  },
+    	alignItems: 'flex-start',
+  	},
 	bottomSheetContainer: {
 		flex: 1,
-    alignItems: 'center',
+		alignItems: 'flex-start',
+		width: '100%',
 	},
 	sectionHeaderContainer: {
 		width: '100%',
 		height: 30,
-  },
-  itemContainer: {
+	},
+	itemContainer: {
 		width: 100,
 		height: 100,
 		flex: 1,
-    flexDirection:'column',
+		flexDirection:'column',
 		alignItems: 'center'
-  },
+	},
 	listContainer: {
 		height: 100,
 		width: '100%',
 		borderBottomColor: 'lightgrey',
 		borderBottomWidth: 1
-  },
+  	},
 	itemText:{
-    color: 'grey',
-    position: 'relative',
-    marginRight:5
-  },
+		color: 'grey',
+		position: 'relative',
+		marginRight:5
+  	},
 });
 
 export default AlbumSheet;
