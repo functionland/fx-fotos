@@ -398,3 +398,6 @@ export const saveImage = async(result:any) => {
   const asset = await MediaLibrary.createAssetAsync(result.uri);
   return asset;
 }
+export const getFileNameWithExtention=(path:string)=>{
+  return path.replace(/^.*[\\\/]/, '');
+}
