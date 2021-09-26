@@ -10,6 +10,11 @@ import { unzip, ZipEntry } from 'unzipit';
 import { StatelessFileReader } from '../utils/statelessFileReader'
 import ZipFileExplorer from '../components/zipFileExplorer';
 import { Checkbox } from 'react-native-paper';
+import { MediaType } from 'expo-media-library';
+import { useBackEndProviders } from '../backend';
+import { identityState } from '../states';
+import { useRecoilState } from 'recoil';
+import { getFileNameWithExtention } from '../utils/functions';
 interface Props {
 	navigation: any;
 	route: { params: { HEADER_HEIGHT: number; FOOTER_HEIGHT: number; headerShown: Reanimated.SharedValue<number>; zipFile: string } }
@@ -17,13 +22,16 @@ interface Props {
 
 const ZipFileUploader: React.FC<Props> = (props) => {
 	console.log(Date.now() + ': ZipFileUploader re-rendered');
+	const [identity] = useRecoilState(identityState);
+	const { _userId, _videoUploadController, upload, getMedias, share, backendSettings, addMediaToAlbum, getAlbums } = useBackEndProviders({ backend: 'dfinity', identity: identity, requireProfile: true });
+
 	const [checkedAll, setCheckedAll] = useState(false);
 	const SCREEN_WIDTH = useWindowDimensions().width;
 	const [zipEntry, setZipEntry] = useState<{ [key: string]: ZipEntry }>({});
 	const { route, navigation } = props;
 	const { zipFile } = route.params;
 	console.log("ZipFileUploader.zipFile:", zipFile)
-	
+
 	useEffect(() => {
 		console.log(Date.now() + ': ZipFileUploader mounted');
 		loadZipEntry();
@@ -34,13 +42,13 @@ const ZipFileUploader: React.FC<Props> = (props) => {
 				<Checkbox
 					status={checkedAll ? 'checked' : 'unchecked'}
 					onPress={() => {
-						console.log("checkedAll:",checkedAll);
+						console.log("checkedAll:", checkedAll);
 						setCheckedAll(!checkedAll);
 					}}
 				/>
 			),
 		});
-	}, [navigation,checkedAll]);
+	}, [navigation, checkedAll]);
 
 	const loadZipEntry = async () => {
 		try {
@@ -52,13 +60,37 @@ const ZipFileUploader: React.FC<Props> = (props) => {
 		}
 	}
 
-	const uploadFile = async (key: string) => {
-        return new Promise<'upload' | 'done' | 'error'>((resolve, reject) => {
-            setTimeout(() => {
-                resolve('done');
-            }, 500);
-        });
-    }
+	const uploadFile = async (key: string): Promise<'upload' | 'done' | 'error'> => {
+		// return new Promise<'upload' | 'done' | 'error'>((resolve, reject) => {
+		// 	const fileBase64 = await FileSystem.readAsStringAsync(mediaInfo.localUri, {
+		// 		encoding: FileSystem.EncodingType.Base64,
+		//   });
+		try {
+			if (!zipEntry)
+				return 'error'
+			const picData = await zipEntry[key].arrayBuffer();
+			//const base64Data = btoa(String.fromCharCode(...new Uint8Array(picData)))
+			//const blob = await zipEntry[selected].blob('image/png');
+			console.log("picData:", picData);
+			const mediaFile: File = {
+				lastModified: new Date().getTime(),
+				name: getFileNameWithExtention(key),
+				size: picData.byteLength,
+				arrayBuffer: async () => { return picData; },
+				type: MediaType.photo,
+				slice: (picData.slice as any),
+				stream: (): any => { },
+				text: async () => { return ''; },
+				webkitRelativePath: ''
+			}
+			const videoUploadController = await upload(mediaFile, '', key);
+		} catch (error) {
+			console.log('uploadFile:', error)
+			return 'error';
+		} finally {
+			return 'done'
+		}
+	}
 	return (
 		<SafeAreaView style={styles.SafeAreaView}>
 			<View style={[
@@ -76,7 +108,7 @@ const ZipFileUploader: React.FC<Props> = (props) => {
 						zipEntry={zipEntry}
 						checkedAll={checkedAll}
 						uploadFile={uploadFile}
-						//onFinish={()=>setCheckedAll(false)}
+					//onFinish={()=>setCheckedAll(false)}
 					/>
 				</View >
 			</View >

@@ -79,16 +79,6 @@ const ZipFileExplorer = (props: Props) => {
                 [key]: true
             })
         }, 0);
-
-
-        // if (!zipEntry)
-        //     return
-        // const picData = await zipEntry[key].arrayBuffer();
-        // const base64Data = btoa(String.fromCharCode(...new Uint8Array(picData)))
-        // setImageData(base64Data);
-        // //const blob = await zipEntry[selected].blob('image/png');
-        // console.log("base64Data:", base64Data);
-        //console.log("blob:", blob)
     };
     useEffect(() => {
         if (checkedAll) {
@@ -117,15 +107,16 @@ const ZipFileExplorer = (props: Props) => {
                     zipEntry && Object.keys(zipEntry).map((key, index) => {
                         const entry: ZipEntry = zipEntry[key];
                         const filename = getFileNameWithExtention(entry.name);
-                        const mome = mime.lookup(entry.name)
-
+                        const mimeType = mime.lookup(entry.name)
+                        if (mimeType == 'application/json' || mimeType == 'text/html')
+                            return null;
                         return (
                             <List.Item
                                 key={index}
                                 onPress={() => onSelectedItem(key)}
                                 title={filename}
-                                description={mome}
-                                left={props => <List.Icon {...props} icon={mimeToIconName(mome)} />}
+                                description={mimeType}
+                                left={props => <List.Icon {...props} icon={mimeToIconName(mimeType)} />}
                                 right={props =>
                                     selectedItems[key] ?
                                         uploadingItems[key] == "upload" ? <ActivityIndicator size="small" animating={true} color="green" style={{ paddingEnd: 5 }} />
@@ -143,8 +134,8 @@ const ZipFileExplorer = (props: Props) => {
                 loading={uploading}
                 onPress={() => {
                     setTimeout(() => {
-                        setUploading(s=>{
-                            if(!s)
+                        setUploading(s => {
+                            if (!s)
                                 uploadFiles();
                             return true;
                         });
