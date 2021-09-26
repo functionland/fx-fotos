@@ -6,6 +6,10 @@
 
 **August-10-2021:** Added share photo feature to enable users share a link and see it from any browser(using a shared hash)
 
+# Discussions
+
+This project is part of a bigger project to disrupt the subscription industry. Join the channel and group to participate in the discussion.
+https://t.me/functionland
 
 # BOX Photos development guide
 Note: Project is still in alpha phase and not production ready. We aim to release beta version by end of August 2021.
