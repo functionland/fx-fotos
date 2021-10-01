@@ -4,7 +4,7 @@ export class StatelessFileReader implements Reader {
 	filename: string = '';
 	length?: number = undefined;
 	constructor(filename: string) {
-		this.filename = filename;
+		this.filename = decodeURIComponent(filename);
 	}
 	async getLength(): Promise<number> {
 		if (this.length === undefined) {
@@ -15,7 +15,7 @@ export class StatelessFileReader implements Reader {
 		return this.length || 0;
 	}
 	async read(offset: number, length: number) {
-		console.log('StatelessFileReader.read:', {offset, length});
+		console.log('StatelessFileReader.read:', {filename:this.filename,offset, length});
 
 		const base64Data = await FileSystem.readAsStringAsync(this.filename, {
 			encoding: 'base64',
