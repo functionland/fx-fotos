@@ -52,7 +52,8 @@ const ZipFileUploader: React.FC<Props> = (props) => {
 
 	const loadZipEntry = async () => {
 		try {
-			const reader = new StatelessFileReader('file://' + zipFile);
+			const fileUri = zipFile.startsWith('file://') ? zipFile : 'file://' + zipFile;
+			const reader = new StatelessFileReader(fileUri);
 			const { zip, entries } = await unzip(reader);
 			setZipEntry(entries);
 		} catch (error) {
