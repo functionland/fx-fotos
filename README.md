@@ -271,3 +271,10 @@ Just pick any issue from the issues tab or create your own and do a pull request
  * [ ] Search page to search by date/tags
  * [ ] Library page to show images by folder/Album
  * [ ] AI features to do on-device analysis for face recognition/object recognition
+
+## Related Publications and News
+
+- https://filecoin.io/blog/posts/249k-for-17-projects-from-dorahacks-filecoin-grant-hackathon/
+- https://dev.to/fx/google-photos-open-source-alternative-with-react-native-80c
+- https://hackernoon.com/were-building-an-open-source-google-photos-alternative-with-react-native-zw4537pa
+- https://crustnetwork.medium.com/crust-network-and-functionland-partnering-up-on-web3-developer-tools-309e41074fc5
