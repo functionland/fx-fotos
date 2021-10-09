@@ -21,8 +21,6 @@ export default ({ IDL }) => {
   const Trie_7 = IDL.Rec();
   const Trie_8 = IDL.Rec();
   const Trie_9 = IDL.Rec();
-  const VideoId_2 = IDL.Text;
-  const VideoId = VideoId_2;
   const UserId_2 = IDL.Text;
   const UserId = UserId_2;
   const ProfilePic_2 = IDL.Vec(IDL.Nat8);
@@ -43,6 +41,7 @@ export default ({ IDL }) => {
   });
   const Person = IDL.Record({ 'name' : IDL.Text });
   const People = IDL.Vec(Person);
+  const VideoId_2 = IDL.Text;
   const VideoInfo_2 = IDL.Record({
     'pic' : IDL.Opt(VideoPic_2),
     'viralAt' : IDL.Opt(Timestamp),
@@ -100,6 +99,7 @@ export default ({ IDL }) => {
     'abuseFlagCount' : IDL.Nat,
   });
   const ProfileInfoPlus = ProfileInfoPlus_2;
+  const VideoId = VideoId_2;
   const VideoInit_2 = IDL.Record({
     'uploadedFrom' : IDL.Opt(UploadOrigin),
     'album' : IDL.Opt(IDL.Vec(IDL.Text)),
@@ -111,6 +111,7 @@ export default ({ IDL }) => {
     'createdAt' : Timestamp,
     'tags' : IDL.Vec(IDL.Text),
     'geoDataExif' : IDL.Opt(GeoData),
+    'viewCount' : IDL.Opt(IDL.Nat),
     'caption' : IDL.Text,
     'lastModifiedAt' : IDL.Opt(Timestamp),
     'chunkCount' : IDL.Nat,
@@ -454,8 +455,8 @@ export default ({ IDL }) => {
   const VideoPic = VideoPic_2;
   const CanCan = IDL.Service({
     'addVideo2Album' : IDL.Func(
-        [IDL.Opt(IDL.Vec(IDL.Text)), VideoId, UserId],
-        [],
+        [IDL.Opt(IDL.Vec(IDL.Text)), IDL.Text, UserId],
+        [IDL.Opt(IDL.Null)],
         [],
       ),
     'checkUsernameAvailable' : IDL.Func([IDL.Text], [IDL.Bool], ['query']),

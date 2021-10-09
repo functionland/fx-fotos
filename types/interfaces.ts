@@ -96,3 +96,30 @@ export interface BottomSheetElement {
 export interface layout {value:Asset|string; sortCondition:'day'|'month'|''|'deleted', index: number, deleted:boolean, id:string};
 
 export interface headerIndex {header:string;index:number;count:number;yearStart:string; sortCondition:'day'|'month'; timestamp: number;};
+
+export interface geoData {
+	latitude: string;
+	longitude: string;
+	altitude: string;
+	latitudeSpan: string;
+	longitudeSpan: string;
+}
+
+export interface uploadedFrom {
+	url: string;
+	localFolderName: string;
+	deviceType: string;
+}
+
+export interface metadata {
+	name: string;
+	caption: string;
+	createdAt: number;
+	photoTakenTime: number;
+	lastModifiedAt: number;
+	geoData: geoData;
+	geoDataExif: geoData;
+	people: [string];
+	uploadedFrom: uploadedFrom;
+	viewCount: number;
+};

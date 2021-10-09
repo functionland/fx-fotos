@@ -39,6 +39,7 @@ type VideoInit_2 =
    tags: vec text;
    uploadedFrom: opt UploadOrigin;
    userId: UserId_2;
+   viewCount: opt nat;
  };
 type VideoInit = VideoInit_2;
 type VideoInfo_2 = 
@@ -568,7 +569,7 @@ type Check =
  };
 type CanCan = 
  service {
-   addVideo2Album: (opt vec text, VideoId, UserId) -> ();
+   addVideo2Album: (opt vec text, text, UserId) -> (opt null);
    checkUsernameAvailable: (text) -> (bool) query;
    createAlbum: (opt vec text, UserId) -> (opt vec text);
    createProfile: (text, opt ProfilePic) -> (opt ProfileInfoPlus);

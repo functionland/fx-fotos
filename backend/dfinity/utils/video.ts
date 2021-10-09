@@ -17,25 +17,27 @@ export function getVideoInit(
   userId: string,
   file: File,
   caption: string,
-	id: string,
+  id: string,
+  metadata: any,
 ): VideoInit {
   const chunkCount = Number(Math.ceil(file.size / MAX_CHUNK_SIZE));
   return {
-    caption,
+    caption: metadata.caption || caption,
     // @ts-ignore
     chunkCount,
     // @ts-ignore
-    createdAt: Number(Date.now() * 1000), // motoko is using nanoseconds
-    name: file.name.replace(/\.mp4/, ""),
-    tags: caption.match(hashtagRegExp) || [],
+    createdAt: (metadata.createdAt * 1000000) || Number(Date.now() * 1000), // motoko is using nanoseconds
+    name: file.name.replace(/\.mp4/, "").replace(/\.jpg/, "").replace(/\.jpeg/, "").replace(/\.JPG/, ""),
+    tags: (metadata.caption || caption).match(hashtagRegExp) || [],
     userId,
-		externalId: id,
-		lastModifiedAt: [],
-		geoData: [],
-		geoDataExif: [],
-		people: [],
-		uploadedFrom: [],
-		album: [],
+	externalId: id,
+	lastModifiedAt: ([metadata.lastModifiedAt * 1000000]) || [],
+	geoData: metadata.geoData || [],
+	geoDataExif: metadata.geoDataExif || [],
+	people: metadata.people || [],
+	uploadedFrom: metadata.uploadedFrom || [],
+	album: metadata.album || [],
+	viewCount: metadata.viewCount || 0,
   };
 }
 
@@ -67,11 +69,11 @@ async function processAndUploadChunk(
 }
 
 // Wraps up the previous functions into one step for the UI to trigger
-async function uploadVideo(userId: string, file: File, caption: string, id: string) {
+async function uploadVideo(userId: string, file: File, caption: string, id: string, metadata: any) {
 	console.log('uploadVideo started');
   const videoBuffer = (await file?.arrayBuffer()) || new ArrayBuffer(0);
 	console.log('videoBuffer fetched');
-  const videoInit = getVideoInit(userId, file, caption, id);
+  const videoInit = getVideoInit(userId, file, caption, id, metadata);
 	console.log('videoInit done for userId '+userId);
   const videoId = await createVideo(videoInit);
 	console.log('video created='+videoId)
@@ -166,18 +168,20 @@ export function useUploadVideo({ userId }: { userId: string }) {
   const [completedVideo, setCompletedVideo] = useState<VideoInfo>();
   const [file, setFile] = useState<File>();
   const [caption, setCaption] = useState("");
-	const [id, setId] = useState("");
+  const [metaData, setMetadata] = useState({});
+  const [id, setId] = useState("");
   const [ready, setReady] = useState(false);
 
   async function handleUpload(fileToUpload: File, id: string) {
     console.info("Storing video...");
     try {
-      const video = await uploadVideo(userId, fileToUpload, caption, id);
-			console.log('uploadVideo completed');
+      const video = await uploadVideo(userId, fileToUpload, caption, id, metaData);
+	  console.log('uploadVideo completed');
       setCompletedVideo(video);
       setReady(false);
       setFile(undefined);
-			setId("");
+	  setId("");
+	  setMetadata({});
     } catch (error) {
       console.log("Failed to store video.", error);
     }
@@ -193,7 +197,8 @@ export function useUploadVideo({ userId }: { userId: string }) {
     completedVideo,
     setCaption,
     setFile,
-		setId,
+	setId,
     setReady,
+	setMetadata,
   };
 }

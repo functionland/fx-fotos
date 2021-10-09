@@ -90,9 +90,9 @@ export interface Branch_9 {
 export interface CanCan {
   'addVideo2Album' : (
       arg_0: [] | [Array<string>],
-      arg_1: VideoId,
+      arg_1: string,
       arg_2: UserId,
-    ) => Promise<undefined>,
+    ) => Promise<[] | [null]>,
   'checkUsernameAvailable' : (arg_0: string) => Promise<boolean>,
   'createAlbum' : (arg_0: [] | [Array<string>], arg_1: UserId) => Promise<
       [] | [Array<string>]
@@ -514,6 +514,7 @@ export interface VideoInit_2 {
   'createdAt' : Timestamp,
   'tags' : Array<string>,
   'geoDataExif' : [] | [GeoData],
+  'viewCount' : [] | [number],
   'caption' : string,
   'lastModifiedAt' : [] | [Timestamp],
   'chunkCount' : number,
