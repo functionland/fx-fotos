@@ -51,7 +51,8 @@ const ImportGoogle: React.FC<Props> = (props) => {
 		let options = {
 			//base64: false,
 			//copyToCacheDirectory: true,
-			type: '*/*',
+			type: 'application/zip',
+			multiple:true
 		}
 		let selectedDoc = await DocumentPicker.getDocumentAsync(options);
 		if (selectedDoc.type === 'success') {
@@ -85,7 +86,7 @@ const ImportGoogle: React.FC<Props> = (props) => {
 					// //setZipEntity(zipFile);
 
 					// console.log("zipFile:",zipFile);
-					const reader = new StatelessFileReader('file://' + selectedDoc.uri);
+					//const reader = new StatelessFileReader('file://' + selectedDoc.uri);
 					//const { zip, entries } = await unzip(reader);
 					//setZipEntry(entries);
 					navigation.navigate("ZipFileUploader",{

@@ -7,6 +7,8 @@ import { default as Reanimated, } from 'react-native-reanimated';
 import * as Linking from 'expo-linking';
 import * as FileSystem from 'expo-file-system';
 import { unzip, ZipEntry } from 'unzipit';
+import * as mime from 'react-native-mime-types';
+
 import { StatelessFileReader } from '../utils/statelessFileReader'
 import ZipFileExplorer from '../components/zipFileExplorer';
 import { Checkbox } from 'react-native-paper';
@@ -14,8 +16,10 @@ import { MediaType } from 'expo-media-library';
 import { useBackEndProviders } from '../backend';
 import { identityState } from '../states';
 import { useRecoilState } from 'recoil';
-import { getFileNameWithExtention } from '../utils/functions';
+import { getFileNameWithExtention, mimeToMediaType } from '../utils/functions';
 import { UploadProcessStatus } from '../types';
+import { albumMetadata, metadata } from '../types/interfaces'
+import { albumsState } from '../states';
 
 interface Props {
 	navigation: any;
@@ -24,8 +28,9 @@ interface Props {
 
 const ZipFileUploader: React.FC<Props> = (props) => {
 	console.log(Date.now() + ': ZipFileUploader re-rendered');
+	const [albums, setAlbums] = useRecoilState(albumsState);
 	const [identity] = useRecoilState(identityState);
-	const { _userId, _videoUploadController, upload, getMedias, share, backendSettings, addMediaToAlbum, getAlbums } = useBackEndProviders({ backend: 'dfinity', identity: identity, requireProfile: true });
+	const { _userId, _videoUploadController, upload, getMedias, share, backendSettings, addMediaToAlbum, getAlbums, createAlbum } = useBackEndProviders({ backend: 'dfinity', identity: identity, requireProfile: true });
 
 	const [checkedAll, setCheckedAll] = useState(false);
 	const SCREEN_WIDTH = useWindowDimensions().width;
@@ -62,31 +67,110 @@ const ZipFileUploader: React.FC<Props> = (props) => {
 			console.log(error);
 		}
 	}
-
-	const uploadFile = async (key: string): Promise<void> => {
-		// return new Promise<'upload' | 'done' | 'error'>((resolve, reject) => {
-		// 	const fileBase64 = await FileSystem.readAsStringAsync(mediaInfo.localUri, {
-		// 		encoding: FileSystem.EncodingType.Base64,
-		//   });
+	const getFileMetadata = async (key: string): Promise<metadata> => {
 		try {
 			if (!zipEntry)
 				throw 'The zip file entry is null!'
-			const picData = await zipEntry[key].arrayBuffer();
-			//const base64Data = btoa(String.fromCharCode(...new Uint8Array(picData)))
-			//const blob = await zipEntry[selected].blob('image/png');
-			console.log("picData:", picData);
+			let fileName = getFileNameWithExtention(key);
+			let metadataFilePath = key.replace(fileName, fileName.split('.')?.[0] + '.json');
+
+			const albumData = await zipEntry[metadataFilePath].json();
+			const result: metadata = {
+				name: albumData.title,
+				caption: albumData.description,
+				createdAt: Number(Number(albumData.creationTime?.timestamp)),
+				photoTakenTime: Number(albumData.photoTakenTime?.timestamp),
+				lastModifiedAt: Number(albumData.photoLastModifiedTime?.timestamp),
+				geoData: {
+					latitude: albumData.geoData?.latitude.toString(),
+					longitude: albumData.geoData?.longitude.toString(),
+					altitude: albumData.geoData?.altitude.toString(),
+					latitudeSpan: albumData.geoData?.latitudeSpan.toString(),
+					longitudeSpan: albumData.geoData?.longitudeSpan.toString()
+				},
+				geoDataExif: {
+					latitude: albumData.geoDataExif?.latitude.toString(),
+					longitude: albumData.geoDataExif?.longitude.toString(),
+					altitude: albumData.geoDataExif?.altitude.toString(),
+					latitudeSpan: albumData.geoDataExif?.latitudeSpan.toString(),
+					longitudeSpan: albumData.geoDataExif?.longitudeSpan.toString()
+				},
+				people: albumData.people,
+				uploadedFrom: {
+					url: albumData.url,
+					localFolderName: albumData.googlePhotosOrigin?.mobileUpload?.deviceFolder?.localFolderName,
+					deviceType: albumData.googlePhotosOrigin?.mobileUpload?.deviceType
+				},
+				viewCount: Number(albumData.imageViews)
+			}
+			return result;
+
+		} catch (error) {
+			console.log('getFileMetadata:', error)
+			throw error;
+		}
+	}
+	const getAlbumMetadata = async (key: string): Promise<albumMetadata | null> => {
+		try {
+			if (!zipEntry)
+				throw 'The zip file entry is null!'
+			let fileName = getFileNameWithExtention(key);
+			let albumMetadataFilePath = key.replace(fileName, 'metadata.json');
+			const fileData = await zipEntry[albumMetadataFilePath].json();
+			const { albumData = {} } = fileData;
+			const result: albumMetadata = {
+				name: albumData.title,
+				description: albumData.description,
+				access: albumData.access,
+				date: albumData.formatted,
+				geoData: {
+					latitude: albumData.geoData?.latitude.toString(),
+					longitude: albumData.geoData?.longitude.toString(),
+					altitude: albumData.geoData?.altitude.toString(),
+					latitudeSpan: albumData.geoData?.latitudeSpan.toString(),
+					longitudeSpan: albumData.geoData?.longitudeSpan.toString()
+				},
+			}
+			return result;
+
+		} catch (error) {
+			return null;
+		}
+	}
+	const uploadAlbumMetadata = async (medatadat: albumMetadata | null) => {
+		try {
+			if (!medatadat || !medatadat.name || albums.find(album => album.name === medatadat?.name))
+				return;
+			setAlbums(albums => [...albums, {
+				name: medatadat?.name
+			}]);
+			await createAlbum(medatadat.name, medatadat);
+		} catch (error) {
+			return
+		}
+	}
+	const uploadFile = async (key: string): Promise<void> => {
+		try {
+			if (!zipEntry)
+				throw 'The zip file entry is null!'
+			const fileMetadata = await getFileMetadata(key);
+			const albumMetadata = await getAlbumMetadata(key);
+			await uploadAlbumMetadata(albumMetadata);
+
+			const albumData = await zipEntry[key].arrayBuffer();
 			const mediaFile: File = {
 				lastModified: new Date().getTime(),
 				name: getFileNameWithExtention(key),
-				size: picData.byteLength,
-				arrayBuffer: async () => { return picData; },
-				type: MediaType.photo,
-				slice: (picData.slice as any),
+				size: albumData.byteLength,
+				arrayBuffer: async () => { return albumData; },
+				type: mimeToMediaType(mime.lookup(key)),
+				slice: (albumData.slice as any),
 				stream: (): any => { },
 				text: async () => { return ''; },
 				webkitRelativePath: ''
 			}
-			const videoUploadController = await upload(mediaFile, '', key);
+			const fileId = getFileNameWithExtention(fileMetadata.uploadedFrom?.url || key);
+			await upload(mediaFile, '', fileId, fileMetadata);
 		} catch (error) {
 			console.log('uploadFile:', error)
 			throw error;

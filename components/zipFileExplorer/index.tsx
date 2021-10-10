@@ -95,13 +95,6 @@ const ZipFileExplorer = (props: Props) => {
     return (
         <View style={styles.container}>
             <ScrollView style={{ paddingBottom: 60 }}>
-                {/* {imageData && <Image style={{
-            width: "100%",
-            height: 300,
-            borderColor: "gray",
-            borderWidth: 1
-
-        }} source={{ uri: `data:image/png;base64,${imageData}` }} />} */}
                 {
                     zipEntry && Object.keys(zipEntry).map((key, index) => {
                         const entry: ZipEntry = zipEntry[key];
