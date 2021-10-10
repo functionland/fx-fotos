@@ -113,13 +113,21 @@ export interface uploadedFrom {
 
 export interface metadata {
 	name: string;
-	caption: string;
-	createdAt: number;
-	photoTakenTime: number;
-	lastModifiedAt: number;
-	geoData: geoData;
-	geoDataExif: geoData;
-	people: [string];
-	uploadedFrom: uploadedFrom;
-	viewCount: number;
+	caption?: string;
+	createdAt?: number;
+	photoTakenTime?: number;
+	lastModifiedAt?: number;
+	geoData?: geoData;
+	geoDataExif?: geoData;
+	people?: [string];
+	uploadedFrom?: uploadedFrom;
+	viewCount?: number;
 };
+
+export interface albumMetadata {
+	name: string;
+  description?: string;
+  access?: string;
+  date?: string;
+  geoData?: geoData;
+}

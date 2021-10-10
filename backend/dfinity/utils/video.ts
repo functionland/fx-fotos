@@ -8,8 +8,9 @@ import {
 	shareVideo,
 	getProfileAlbums,
 	addVideo2Album,
+	createAlbum,
 } from "./canister";
-import { VideoInfo, VideoInit } from "../dfx/CanCand";
+import { VideoInfo, VideoInit, AlbumInfo } from "../dfx/CanCand";
 import { MAX_CHUNK_SIZE, encodeArrayBuffer, hashtagRegExp } from "./index";
 
 // Determines number of chunks and creates the VideoInfo
@@ -153,6 +154,17 @@ export async function addVideoToAlbum(album: string, videoId: string, userId: st
     console.error("Unable to add video to album:", error);
   }
 }
+
+export async function addAlbum(albumName: string, metaData: AlbumInfo, userId: string) {
+  console.log("Adding Album...");
+  try {
+    return await createAlbum(albumName, metaData, userId);
+    console.log(`Added album ${albumName}`);
+  } catch (error) {
+    console.error("Unable to add album:", error);
+  }
+}
+
 
 export async function shareMedia(videoId:string, targetUserId: string) {
 	console.log("Sharing user video...");
