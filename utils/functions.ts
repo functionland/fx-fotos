@@ -398,3 +398,19 @@ export const saveImage = async(result:any) => {
   const asset = await MediaLibrary.createAssetAsync(result.uri);
   return asset;
 }
+export const getFileNameWithExtention=(path:string)=>{
+  return path.replace(/^.*[\\\/]/, '');
+}
+export const mimeToMediaType = (mime:string):MediaLibrary.MediaTypeValue=>{
+  const type=mime?.split('/')?.[0];
+  switch(type){
+    case 'audio':
+      return 'audio';
+    case 'image':
+      return 'photo'
+    case 'video':
+      return 'video';
+    default :
+      return'unknown';
+  }
+}

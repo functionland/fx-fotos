@@ -5,6 +5,7 @@ import React, { useState, } from 'react';
 import HomePage from '../pages/HomePage';
 import Settings from '../pages/Settings';
 import ImportGoogle from '../pages/ImportGoogle';
+import ZipFileUploader from '../pages/ZipFileUploader';
 import NewAlbum from '../pages/NewAlbum';
 import Browser from './Browser';
 import BarcodeScanner from '../pages/BarcodeScanner';
@@ -14,6 +15,7 @@ import { createBottomTabNavigator,BottomTabBarProps,BottomTabBarOptions,  } from
 //import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import { FontAwesome5 } from '@expo/vector-icons';
 import {default as Reanimated, useSharedValue, useDerivedValue, runOnJS } from 'react-native-reanimated';
+import { Title } from 'react-native-paper';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -102,6 +104,14 @@ const AppNavigation = () => {
             name="ImportGoogle"
             component={ImportGoogle}
             options={{headerShown: true}}
+          />
+          <Stack.Screen
+            name="ZipFileUploader"
+            component={ZipFileUploader}
+            options={({ navigation, route }) => ({
+              headerShown: true,
+              headerCenter : props=><Title>Upload files</Title>
+            })}
           />
 					<Stack.Screen
             name="NewAlbum"

@@ -67,3 +67,6 @@ BoxPhotos.jks
 assets/playStore/screenshot.psd
 keystore.txt
 *.aab
+
+
+.expo/
