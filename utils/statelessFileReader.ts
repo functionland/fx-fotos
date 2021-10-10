@@ -4,7 +4,7 @@ export class StatelessFileReader implements Reader {
 	filename: string = '';
 	length?: number = undefined;
 	constructor(filename: string) {
-		this.filename = decodeURIComponent(filename);
+		this.filename = filename;
 	}
 	async getLength(): Promise<number> {
 		if (this.length === undefined) {

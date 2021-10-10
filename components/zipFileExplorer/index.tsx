@@ -4,11 +4,12 @@ import { View, Text, ScrollView, Image, StyleSheet } from 'react-native';
 import { ZipEntry } from 'unzipit';
 import * as mime from 'react-native-mime-types';
 import { getFileNameWithExtention } from '../../utils/functions';
-import { List, FAB, ActivityIndicator } from 'react-native-paper'
+import { List, FAB, ActivityIndicator } from 'react-native-paper';
+import { UploadProcessStatus } from '../../types';
 interface Props {
     zipEntry: { [key: string]: ZipEntry } | undefined,
     checkedAll: boolean,
-    uploadFile?: (fileName: string) => Promise<'upload' | 'done' | 'error'>,
+    uploadFile?: (fileName: string) => Promise<void>,
     onFinish?: () => void
 }
 const mimeToIconName = (mime: string) => {
@@ -28,14 +29,12 @@ const mimeToIconName = (mime: string) => {
 const ZipFileExplorer = (props: Props) => {
     const [imageData, setImageData] = useState<string | null>(null)
     const [selectedItems, setselectedItems] = useState<{ [key: string]: boolean }>({})
-    const [uploadingItems, setUploadingItems] = useState<{ [key: string]: 'upload' | 'done' | 'error' }>({})
+    const [uploadingItems, setUploadingItems] = useState<{ [key: string]: UploadProcessStatus }>({})
     const [uploading, setUploading] = useState(false);
     const { zipEntry, checkedAll, uploadFile, onFinish } = props;
 
     console.log(Date.now() + ': ZipFileExplorer re-rendered', uploadingItems);
     const uploadFiles = async () => {
-        //setUploadingItems({});
-        console.log("uploadFiles:", uploadingItems)
         const items = Object.keys(selectedItems);
         for (let index = 0; index < items.length; index++) {
             const key = items[index];
@@ -44,7 +43,7 @@ const ZipFileExplorer = (props: Props) => {
                 try {
                     setUploadingItems((s) => ({
                         ...s,
-                        [key]: 'upload'
+                        [key]: 'uploading'
                     }));
                     await uploadFile(key);
                     setUploadingItems((s) => ({
@@ -119,7 +118,7 @@ const ZipFileExplorer = (props: Props) => {
                                 left={props => <List.Icon {...props} icon={mimeToIconName(mimeType)} />}
                                 right={props =>
                                     selectedItems[key] ?
-                                        uploadingItems[key] == "upload" ? <ActivityIndicator size="small" animating={true} color="green" style={{ paddingEnd: 5 }} />
+                                        uploadingItems[key] == "uploading" ? <ActivityIndicator size="small" animating={true} color="green" style={{ paddingEnd: 5 }} />
                                             : <List.Icon {...props} icon={uploadingItems[key] === "done" ? "cloud-check" : "check"} color="green" />
                                         : null}
                             />)

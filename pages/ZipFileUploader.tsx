@@ -15,6 +15,8 @@ import { useBackEndProviders } from '../backend';
 import { identityState } from '../states';
 import { useRecoilState } from 'recoil';
 import { getFileNameWithExtention } from '../utils/functions';
+import { UploadProcessStatus } from '../types';
+
 interface Props {
 	navigation: any;
 	route: { params: { HEADER_HEIGHT: number; FOOTER_HEIGHT: number; headerShown: Reanimated.SharedValue<number>; zipFile: string } }
@@ -61,14 +63,14 @@ const ZipFileUploader: React.FC<Props> = (props) => {
 		}
 	}
 
-	const uploadFile = async (key: string): Promise<'upload' | 'done' | 'error'> => {
+	const uploadFile = async (key: string): Promise<void> => {
 		// return new Promise<'upload' | 'done' | 'error'>((resolve, reject) => {
 		// 	const fileBase64 = await FileSystem.readAsStringAsync(mediaInfo.localUri, {
 		// 		encoding: FileSystem.EncodingType.Base64,
 		//   });
 		try {
 			if (!zipEntry)
-				return 'error'
+				throw 'The zip file entry is null!'
 			const picData = await zipEntry[key].arrayBuffer();
 			//const base64Data = btoa(String.fromCharCode(...new Uint8Array(picData)))
 			//const blob = await zipEntry[selected].blob('image/png');
@@ -87,9 +89,7 @@ const ZipFileUploader: React.FC<Props> = (props) => {
 			const videoUploadController = await upload(mediaFile, '', key);
 		} catch (error) {
 			console.log('uploadFile:', error)
-			return 'error';
-		} finally {
-			return 'done'
+			throw error;
 		}
 	}
 	return (
