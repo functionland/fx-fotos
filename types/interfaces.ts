@@ -97,54 +97,37 @@ export interface layout {value:Asset|string; sortCondition:'day'|'month'|''|'del
 
 export interface headerIndex {header:string;index:number;count:number;yearStart:string; sortCondition:'day'|'month'; timestamp: number;};
 
-export interface FileMetadata {
-  title: string,
-  description: string,
-  imageViews: string,
-  creationTime: {
-    timestamp: string,
-    formatted: string
-  },
-  photoTakenTime: {
-    timestamp: string,
-    formatted: string
-  },
-  geoData: {
-    latitude: number,
-    longitude: number,
-    altitude: number,
-    latitudeSpan: number,
-    longitudeSpan: number
-  },
-  geoDataExif: {
-    latitude: number,
-    longitude: number,
-    altitude: number,
-    latitudeSpan: number,
-    longitudeSpan: number
-  },
-  url: string,
-  photoLastModifiedTime: {
-    timestamp: string,
-    formatted: string
-  }
+export interface geoData {
+	latitude: string;
+	longitude: string;
+	altitude: string;
+	latitudeSpan: string;
+	longitudeSpan: string;
 }
-export interface AlbumMetadata {
-  albumData: {
-    title: string,
-    description:string,
-    access: string,
-    date: {
-      timestamp: string,
-      formatted: string
-    },
-    location: string,
-    geoData: {
-      latitude: number,
-      longitude: number,
-      altitude: number,
-      latitudeSpan: number,
-      longitudeSpan: number
-    }
-  }
+
+export interface uploadedFrom {
+	url: string;
+	localFolderName: string;
+	deviceType: string;
+}
+
+export interface metadata {
+	name: string;
+	caption?: string;
+	createdAt?: number;
+	photoTakenTime?: number;
+	lastModifiedAt?: number;
+	geoData?: geoData;
+	geoDataExif?: geoData;
+	people?: [string];
+	uploadedFrom?: uploadedFrom;
+	viewCount?: number;
+};
+
+export interface albumMetadata {
+	name: string;
+  description?: string;
+  access?: string;
+  date?: string;
+  geoData?: geoData;
 }

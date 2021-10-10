@@ -248,6 +248,7 @@ const AllPhotos: React.FC<Props> = (props) => {
 				var buff = Buffer.from(fileBase64, 'base64');
 				const mediaFile:File = {
 					lastModified: mediaInfo.modificationTime || mediaInfo.creationTime
+					, webkitRelativePath: mediaInfo.uri
 					, name: mediaInfo.filename
 					, size: buff.length
 					, arrayBuffer: async()=>{return buff}

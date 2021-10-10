@@ -205,6 +205,25 @@ export async function createVideo(videoInit: VideoInit): Promise<string> {
   }
 }
 
+export async function createAlbum(albumName: string, albumInfo: AlbumInfo, userId: string): Promise<string> {
+	console.log('canister.ts-createAlbum');
+	const actor = await CanCan.actor;
+	console.log('actor created');
+	const createAlbumResult = await actor.createAlbum([[albumName]], userId);
+	console.log('createAlbumResult');
+	console.log(createAlbumResult);
+  const name = unwrap<string[]>(
+    createAlbumResult
+  );
+	console.log(['albumName in canister.ts is ', name]);
+  if (name && name[0]) {
+    return name[0];
+  } else {
+    throw Error("failed to create album");
+  }
+}
+
+
 export async function follow(
   userToFollow: string,
   follower: string,

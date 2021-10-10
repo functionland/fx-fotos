@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { metadata, albumMetadata } from '../types/interfaces';
 import { 
 	useUploadVideo, 
 	checkUsername,
@@ -7,6 +8,7 @@ import {
 	shareMedia,
 	getUserAlbums,
 	addVideoToAlbum,
+	addAlbum,
 } from "./dfinity/utils";
 import backendSettings from './dfinity/dfx.json';
 
@@ -106,7 +108,20 @@ export function useBackEndProviders(input:{backend:string, identity:any[], requi
 		return addVideoToAlbum(album, videoId, _userId.current);
 	}
 
-	const upload = async(mediaFile:File, caption:string='', id:string='') => {
+	const createAlbum = async(albumName: string, metaData: albumMetadata) => {
+		console.log('adding an album for userId='+_userId.current);
+		if(_requireProfile.current){
+			let profileCheckSuccess = await checkProfile();
+			if(!profileCheckSuccess){
+				console.log('profile check failed');
+				return undefined;
+			}
+		}
+		console.log('profileCheckSuccess albumName='+albumName+',userId='+_userId.current);
+		return addAlbum(albumName, metaData, _userId.current);
+	}
+
+	const upload = async(mediaFile:File, caption:string='', id:string='', metadata:(metadata|{})={}) => {
 		console.log('upload userId='+_userId.current);
 		if(_requireProfile.current){
 			let profileCheckSuccess = await checkProfile();
@@ -121,6 +136,7 @@ export function useBackEndProviders(input:{backend:string, identity:any[], requi
 		}
 		_videoUploadController.current.setFile(mediaFile);
 		_videoUploadController.current.setCaption(caption);
+		_videoUploadController.current.setMetadata(metadata);
 		_videoUploadController.current.setId(id);
 		_videoUploadController.current.setReady(true);
 		return(_videoUploadController.current);
@@ -133,6 +149,7 @@ export function useBackEndProviders(input:{backend:string, identity:any[], requi
 		share,
 		getAlbums,
 		addMediaToAlbum,
-		backendSettings
+		backendSettings,
+		createAlbum,
 	  };
 }
