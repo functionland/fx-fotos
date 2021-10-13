@@ -113,7 +113,7 @@ const ImportGoogle: React.FC<Props> = (props) => {
 				{
 					width: SCREEN_WIDTH,
 					zIndex: 1,
-					marginTop: ((StatusBar.currentHeight || 0) + (2 * props.route.params.HEADER_HEIGHT || 0))
+					marginTop: Platform.OS=="android"?((StatusBar.currentHeight || 0) + (2 * props.route.params.HEADER_HEIGHT || 0)):0
 				}
 			]}>
 				<ScrollView>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import * as WebBrowser from 'expo-web-browser';
 import { useNavigation } from '@react-navigation/native';
-import { SafeAreaView, StyleSheet, View, useWindowDimensions, StatusBar, Text, TouchableHighlight, Button, ScrollView } from 'react-native';
+import { SafeAreaView, StyleSheet, View, useWindowDimensions, StatusBar, Text, TouchableHighlight, Button, ScrollView, Platform } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import { default as Reanimated, } from 'react-native-reanimated';
 import * as Linking from 'expo-linking';
@@ -11,7 +11,7 @@ import * as mime from 'react-native-mime-types';
 
 import { StatelessFileReader } from '../utils/statelessFileReader'
 import ZipFileExplorer from '../components/zipFileExplorer';
-import { Checkbox } from 'react-native-paper';
+import { IconButton } from 'react-native-paper';
 import { MediaType } from 'expo-media-library';
 import { useBackEndProviders } from '../backend';
 import { identityState } from '../states';
@@ -43,16 +43,19 @@ const ZipFileUploader: React.FC<Props> = (props) => {
 		console.log(Date.now() + ': ZipFileUploader mounted');
 		loadZipEntry();
 	}, []);
-	React.useEffect(() => {
+	React.useLayoutEffect(() => {
 		navigation.setOptions({
 			headerRight: () => (
-				<Checkbox
-					status={checkedAll ? 'checked' : 'unchecked'}
+				<IconButton
+					icon={checkedAll ? "checkbox-multiple-marked-outline" : "checkbox-multiple-blank-outline"}
+					size={26}
 					onPress={() => {
-						console.log("checkedAll:", checkedAll);
-						setCheckedAll(!checkedAll);
+						setTimeout(() => {
+							setCheckedAll(!checkedAll);
+						}, 0);
 					}}
 				/>
+
 			),
 		});
 	}, [navigation, checkedAll]);
@@ -183,7 +186,7 @@ const ZipFileUploader: React.FC<Props> = (props) => {
 				{
 					width: SCREEN_WIDTH,
 					zIndex: 1,
-					marginTop: ((StatusBar.currentHeight || 0) + (2 * props.route.params.HEADER_HEIGHT || 0))
+					marginTop: Platform.OS=="android"?((StatusBar.currentHeight || 0) + (2 * props.route.params.HEADER_HEIGHT || 0)):0
 				}
 			]}>
 				<View
