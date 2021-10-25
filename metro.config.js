@@ -6,14 +6,6 @@
  */
 
 module.exports = {
-  resolver: {
-    extraNodeModules: {
-        stream: require.resolve('readable-stream'),
-        crypto: require.resolve('expo-crypto'),
-        // "node-fetch": require.resolve('isomorphic-fetch')
-    },
-    sourceExts: ['jsx', 'js', 'ts', 'tsx']
-  },
   transformer: {
     getTransformOptions: async () => ({
       transform: {

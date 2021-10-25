@@ -15,7 +15,6 @@ import {
     useDerivedValue,
     interpolate,
 } from 'react-native-reanimated';
-import Auth from './TopMenu';
 
 
 interface Props {
@@ -75,11 +74,7 @@ const Header: React.FC<Props> = (props) => {
                         />
                     </View>
                     <View style={styles.item}>
-						<Auth 
-							navigation={props.navigation}
-							HEADER_HEIGHT={props.HEADER_HEIGHT}
-							headerShown={props.headerShown} 
-						/>
+						
                     </View>
             </Reanimated.View>
     )
