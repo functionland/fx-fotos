@@ -8,9 +8,7 @@ import {storagePermission} from '../utils/permissions';
 import AllPhotos from './AllPhotos';
 import PinchZoom from './PinchZoom';
 import {prepareLayout,} from '../utils/functions';
-import {
-  useRecoilState,
-} from 'recoil';
+import {useRecoilState} from 'recoil';
 import {photosState, dataProviderState, storiesState, preparedMediaState, mediasState} from '../states';
 import {default as Reanimated,} from 'react-native-reanimated';
 interface Props {
