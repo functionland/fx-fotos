@@ -164,137 +164,30 @@ const AllPhotos: React.FC<Props> = (props) => {
 	}
 
 	const shareMedia = async (videoId: string, targetUserId: string) => {
-		return await share(videoId, targetUserId);
+		console.log("not implemented")
 	}
 	const addToAlbum_ = async (videoId: string, albumName: string) => {
-		return await addMediaToAlbum(albumName, videoId);
+		console.log("not implemented")
 	}
 
 	useEffect(() => {
-		console.log('identity changed');
-		console.log(identity);
-		if (identity && identity[0]?.userId) {
-			getMedias().then((res) => {
-				/*res = [
-					Object {
-						"abuseFlagCount": 0n,
-						"caption": "",
-						"chunkCount": 22n,
-						"createdAt": 1628017963470000n,
-						"externalId": "2131A3EC-3715-48E7-A805-F0A5728E4814/L0/001",
-						"likes": Array [],
-						"name": "IMG_5627.MOV",
-						"pic": Array [
-							Array [],
-						],
-						"superLikes": Array [],
-						"tags": Array [],
-						"uploadedAt": 1628017992186192286n,
-						"userId": "II://zfhab-gwmc5-stn3s-aet7i-iwczy-pougc-rqr72-36tal-ew46m-anrdh-tqe",
-						"videoId": "II://zfhab-gwmc5-stn3s-aet7i-iwczy-pougc-rqr72-36tal-ew46m-anrdh-tqe-IMG_5627.MOV-1628017992186192286",
-						"viewCount": 0n,
-						"viewerHasFlagged": Array [],
-						"viralAt": Array [],
-					},
-				]
-				*/
-				const backendMedias = createUploadedAssets(res);
-				console.log(backendMedias);
-				uploadedAssets.current = backendMedias;
-				getAlbums().then((res) => {
-					console.log('get albums');
-					console.log(res);
-					if (res) {
-						setAlbums(res);
-					}
-				});
-			});
-		}
+
 	}, [identity])
 
 	const uploadFile = async (mediaAsset: Asset, index: number = 1) => {
-		console.log('uploading index ' + index);
-		console.log(uploadingPercent.current[index]);
-		uploadedAssets.current[mediaAsset.id] = 1;
-		if (!uploadingPercent.current[index]) {
-			uploadingPercent.current[index] = new Animated.Value(1);
-		} else {
-			console.log('setting uploadingPercent value to 1 for ' + index);
-			uploadingPercent.current[index]?.setValue(1);
-		}
-
-		lastUpload.value = mediaAsset.id;
-		if (mediaAsset) {
-			const mediaInfo = await getAssetInfoAsync(mediaAsset);
-			if (typeof mediaInfo.localUri === 'string') {
-				const fileBase64 = await FileSystem.readAsStringAsync(mediaInfo.localUri, {
-					encoding: FileSystem.EncodingType.Base64,
-				});
-				let url = `data:${mime.lookup(mediaInfo.localUri)};base64,${fileBase64}`;
-				var buff = Buffer.from(fileBase64, 'base64');
-				const mediaFile: File = {
-					lastModified: mediaInfo.modificationTime || mediaInfo.creationTime
-					, webkitRelativePath: mediaInfo.uri
-					, name: mediaInfo.filename
-					, size: buff.length
-					, arrayBuffer: async () => {
-						return buff
-					}
-					, type: mediaInfo.mediaType
-					, slice: (buff.slice as any)
-					, stream: (): any => {
-					}
-					, text: async () => {
-						return '';
-					}
-				}
-				const videoUploadController = await upload(mediaFile, '', mediaAsset.id);
-				console.log('setting uploaded to true')
-				uploadedAssets.current[mediaAsset.id] = 100;
-				console.log(_videoUploadController.current.completedVideo);
-
-			}
-		}
+		console.log("not implemented")
 	}
 
 	const shareWithContact = async (contactId: string = "") => {
-		if (!contactId) {
-			console.log('sharing without a contact');
-			navigation.navigate('BarcodeScanner');
-		}
+		console.log("not implemented")
 	}
 
 	const shareLink = async () => {
-		preparedMedia.layout.map(
-			async (x, index) => {
-				if (selectedAssetsRef.current.includes(x.id)) {
-					if (typeof x.value !== 'string') {
-						let link = await shareMedia(x.id, "");
-						if (link) {
-							let fullURL = backendSettings?.networks?.uiLocal?.bind + link;
-							Clipboard.setString(fullURL);
-							let toast = Toast.show('Link is copied to clipboard', {
-								duration: Toast.durations.LONG,
-							});
-						}
-					}
-				}
-			}
-		)
+		console.log("not implemented")
 	}
 
 	const _handleUpload = async () => {
-		console.log('Uploading');
-		console.log(selectedAssetsRef.current);
-		preparedMedia.layout.map(
-			(x, index) => {
-				if (selectedAssetsRef.current.includes(x.id)) {
-					if (typeof x.value !== 'string') {
-						uploadFile(x.value, index);
-					}
-				}
-			}
-		)
+		console.log("not implemented")
 	}
 
 	const _handleMore = () => console.log('Shown more');
@@ -379,7 +272,6 @@ const AllPhotos: React.FC<Props> = (props) => {
 					dragY={dragY}
 					SCREEN_HEIGHT={props.SCREEN_HEIGHT}
 					SCREEN_WIDTH={props.SCREEN_WIDTH}
-
 					uploadedAssets={uploadedAssets}
 					lastUpload={lastUpload}
 					uploadingPercent={uploadingPercent}

@@ -1,6 +1,5 @@
 import * as React from "react";
-import { Animated, StyleSheet, View, TouchableOpacity } from "react-native";
-import _ from "lodash";
+import { Animated, StyleSheet, View } from "react-native";
 import { useRecoilState } from "recoil";
 import { cropSizeState, imageBoundsState, accumulatedPanState } from "./Store";
 import {
@@ -10,7 +9,7 @@ import {
   State,
 } from "react-native-gesture-handler";
 import { useContext } from "react";
-import { EditorContext } from "./ImageEditor";
+import { EditorContext } from "./EditorContext";
 
 const horizontalSections = ["top", "middle", "bottom"];
 const verticalSections = ["left", "middle", "right"];

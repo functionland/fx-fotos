@@ -14,8 +14,9 @@ import { Asset } from "expo-asset";
 import { GLView } from "expo-gl";
 import * as ImageManipulator from "expo-image-manipulator";
 import * as FileSystem from "expo-file-system";
+// @ts-ignore
 import _, { throttle } from "lodash";
-import { EditorContext } from "../ImageEditor";
+import { EditorContext } from "../EditorContext";
 
 const vertShader = `
 precision highp float;

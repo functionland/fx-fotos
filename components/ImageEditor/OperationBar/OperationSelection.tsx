@@ -15,7 +15,7 @@ import {
   EditingOperations,
   EditorContext,
   TransformOperations,
-} from "../ImageEditor";
+} from "../EditorContext";
 import { useMemo } from "react";
 
 interface Operation<T> {
@@ -98,7 +98,8 @@ export function OperationSelection() {
     isAdjustmentOnly,
   ]);
 
-  return (
+  
+	return (
     <>
       <ScrollView style={styles.opRow} horizontal>
         {filteredOperations[selectedOperationGroup].map(
