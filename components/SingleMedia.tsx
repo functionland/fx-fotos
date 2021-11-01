@@ -92,7 +92,7 @@ const SingleMedia: React.FC<Props> = (props) => {
   const scrollRef:any = useRef();
   const scrollRefExternal = useAnimatedRef<Reanimated.ScrollView>();
   const [dataProvider, setDataProvider] = useState<DataProvider>(new DataProvider((r1, r2) => {
-    return r1.index !== r2.index;
+    return r1.id !== r2.id;
   }));
   const [layoutProvider, setLayoutProvider] = useState<any>(LayoutUtil.getSingleImageLayoutProvider());
 

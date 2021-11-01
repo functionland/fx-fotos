@@ -4,8 +4,8 @@ import {
   useRecoilState,
 } from 'recoil';
 import {
-  dataProviderState, 
-} from '../states';
+  layoutState, 
+} from '../states/gallery';
 
 export class LayoutUtil {
   static getWindowWidth() {
@@ -37,8 +37,8 @@ export class LayoutUtil {
     mainHeaderHeight: number,
   ) {
     console.log('layoutProvider');
-    const [dataProvider, setDataProvider] = useRecoilState(dataProviderState);
-    const data = dataProvider?.getAllData() || [];
+    const [data] = useRecoilState(layoutState);
+    // const data = dataProvider?.getAllData() || [];
     return new LayoutProvider(
       (index) => {
         return index === 0 ? 'story' : 'image'; //Since we have just one view type
@@ -55,7 +55,7 @@ export class LayoutUtil {
           ) {
             //let isHeader = headerIndexes.findIndex(x=>x.index===index && x.sortCondition===groupBy);
             let isHeader: boolean =
-              typeof data[index]?.value === 'string' ? true : false;
+              typeof data[index]?.value === 'string';
             if (isHeader) {
               dim.width = windowWidth;
               dim.height = headerHeight;

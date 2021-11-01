@@ -10,7 +10,7 @@ import {
 import {
   useRecoilState,
 } from 'recoil';
-import {storyState} from '../states';
+import {storyState} from '../states/gallery';
 import { default as Reanimated } from 'react-native-reanimated';
 
 interface Props {

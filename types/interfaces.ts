@@ -1,4 +1,5 @@
 import {Asset} from 'expo-media-library';
+import {Media} from "../domian";
 
 
 export interface album {
@@ -13,18 +14,7 @@ export interface changeSortConditionAndNumColumns {
 	): { sortCondition: sortCondition; numColumns: 2 | 3 | 4 };
 }
 
-export interface sortDetails {
-	sortCode: sortCondition;
-	width: number;
-	height: number;
-}
-
 export type sortCondition = 'day' | 'month';
-
-export interface photoChunk {
-	date: { value: string; };
-	data: Array<{ value: Asset }>;
-}
 
 export interface flatMedia {
 	value: Asset | string;
@@ -40,13 +30,6 @@ export interface FlatSection {
 	headerIndexes: headerIndex[];
 	stories: story[];
 	lastTimestamp: number;
-}
-
-export interface MediaItem {
-	assets: Array<Asset>;
-	endCursor: string;
-	hasNextPage: boolean;
-	totalCount: number;
 }
 
 export interface ScrollEvent {
@@ -73,7 +56,7 @@ export interface BottomSheetElement {
 }
 
 export interface layout {
-	value: Asset | string;
+	value: Media | string;
 	sortCondition: 'day' | 'month' | '' | 'deleted',
 	index: number,
 	deleted: boolean,

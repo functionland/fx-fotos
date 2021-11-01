@@ -1,4 +1,5 @@
 import React, {useEffect, useState, useRef} from 'react';
+import {BaseItemAnimator, BaseScrollView, DataProvider, LayoutProvider, RecyclerListView} from 'recyclerlistview';
 import {
 	Animated,
 	Text,
@@ -8,11 +9,10 @@ import {
 	FlatList,
 	SafeAreaView,
 } from 'react-native';
-import {layout, FlatSection, ScrollEvent, story,} from '../types/interfaces';
+import {layout, story,} from '../types/interfaces';
 import PhotosChunk from './PhotosChunk';
 import ThumbScroll from './ThumbScroll';
 import Highlights from './Highlights';
-import {BaseItemAnimator, BaseScrollView, LayoutProvider} from 'recyclerlistview';
 import {LayoutUtil} from '../utils/LayoutUtil';
 import FloatingFilters from './FloatingFilters';
 import {useBackHandler} from '@react-native-community/hooks'
@@ -30,16 +30,8 @@ import {
 	withTiming,
 } from 'react-native-reanimated';
 import {timestampToDate} from '../utils/functions';
-import RCL from './RCL';
-
-import {
-	useRecoilState,
-} from 'recoil';
-import {
-	storiesState,
-} from '../states';
-
-const notUploadedArray: Array<Animated.Value> = [];
+import {useRecoilState} from 'recoil';
+import {headerIndexesState, layoutState, storiesState} from '../states/gallery';
 
 class ItemAnimator extends React.Component implements BaseItemAnimator {
 	constructor(props: any) {
@@ -86,11 +78,7 @@ class ItemAnimator extends React.Component implements BaseItemAnimator {
 
 class ExternalScrollView extends BaseScrollView {
 	scrollTo(...args: any[]) {
-		//if ((this.props as any).scrollRefExternal?.current) { 
 		(this.props as any).scrollRefExternal?.current?.scrollTo(...args);
-		//reanimatedScrollTo((this.props as any).scrollRefExternal, 0, args[0].y, true);
-		//(this.props as any).scroll.value = args[0].y;
-		//}
 	}
 
 	render() {
@@ -102,8 +90,6 @@ class ExternalScrollView extends BaseScrollView {
 								   nestedScrollEnabled={true}
 								   removeClippedSubviews={true}
 								   showsVerticalScrollIndicator={false}
-				//onScroll={(this.props as any)._onScrollExternal}
-				//onScroll={Reanimated.event([(this.props as any).animatedEvent], {listener: this.props.onScroll, useNativeDriver: true})}
 			>
 				{this.props.children}
 			</Reanimated.ScrollView>
@@ -112,7 +98,6 @@ class ExternalScrollView extends BaseScrollView {
 }
 
 interface Props {
-	photos: FlatSection;
 	maxWidth: number;
 	minWidth: number;
 	numColumns: 2 | 3 | 4;
@@ -132,32 +117,30 @@ interface Props {
 	scrollY: Reanimated.SharedValue<number>;
 	HEADER_HEIGHT: number;
 	FOOTER_HEIGHT: number;
-
-	uploadedAssets: React.MutableRefObject<{ [key: string]: number; }>
-	lastUpload: Reanimated.SharedValue<string>;
-	uploadingPercent: React.MutableRefObject<Animated.Value[]>
-
 	animatedImagePositionX: Reanimated.SharedValue<number>;
 	animatedImagePositionY: Reanimated.SharedValue<number>;
 	animatedSingleMediaIndex: Reanimated.SharedValue<number>;
 	singleImageWidth: Reanimated.SharedValue<number>;
 	singleImageHeight: Reanimated.SharedValue<number>;
-
 	selectedAssets: Reanimated.SharedValue<string[]>;
 	lastSelectedAssetId: Reanimated.SharedValue<string>;
 	lastSelectedAssetAction: Reanimated.SharedValue<number>;
-
 	dragY: Reanimated.SharedValue<number>;
 	SCREEN_HEIGHT: number;
 	SCREEN_WIDTH: number;
 }
 
 const RenderPhotos: React.FC<Props> = (props) => {
-	const [stories, setStories] = useRecoilState(storiesState);
+	const [stories] = useRecoilState(storiesState);
+	const [layouts] = useRecoilState(layoutState);
+	const [headerIndexes] = useRecoilState(headerIndexesState)
 	const headerHeight = 20;
 	const indicatorHeight = 50;
 
-	const [layoutProvider, setLayoutProvider] = useState<LayoutProvider>(LayoutUtil.getLayoutProvider(props.numColumns, props.sortCondition, headerHeight, props.storiesHeight, props.HEADER_HEIGHT));
+	const [layoutProvider,setLayoutProvider] = useState<LayoutProvider>(LayoutUtil.getLayoutProvider(props.numColumns, props.sortCondition, headerHeight, props.storiesHeight, props.HEADER_HEIGHT));
+	const [dataProvider, setDataProvider] = useState<DataProvider>(()=>{return new DataProvider((r1,r2)=>{
+		return r1 !== r2
+	})})
 	layoutProvider.shouldRefreshWithAnchoring = true;
 	const scrollRef: any = useRef();
 	const scrollRefExternal = useAnimatedRef<Reanimated.ScrollView>();
@@ -167,8 +150,6 @@ const RenderPhotos: React.FC<Props> = (props) => {
 	const animatedTimeStampString = useSharedValue('');
 
 	const layoutHeightAnimated = useSharedValue(99999999);
-
-	const [currentImageTimestamp, setCurrentImageTimestamp] = useState<number>(0);
 
 	const animatedStyle = useAnimatedStyle(() => {
 		const scale = (props.numColumns === props.numColumnsAnimated.value) ? interpolate(
@@ -294,22 +275,18 @@ const RenderPhotos: React.FC<Props> = (props) => {
 			}
 		}
 	}, []);
+	
+	// If layout dependencies change rerender
+	// useEffect(()=>{
+	// 	setLayoutProvider(LayoutUtil.getLayoutProvider(props.numColumns, props.sortCondition, headerHeight, props.storiesHeight, props.HEADER_HEIGHT))
+	// },[props.numColumns, props.sortCondition, headerHeight, props.storiesHeight, props.HEADER_HEIGHT])
 
-
-	/*useEffect(()=>{
-	  console.log('photos.layout length changed');
-	  //if(dataProvider.getAllData().length !== props.photos.layout.length){
-	  let data = props.photos.layout;
-	  //setLayoutProvider(LayoutUtil.getLayoutProvider(props.numColumns, props.sortCondition, headerHeight, dataProvider, props.storiesHeight, props.HEADER_HEIGHT));
-	  //}
-	},[dataProvider]);*/
+	useEffect(()=>{
+		setDataProvider(dataProvider.cloneWithRows(layouts));
+	},[layouts])
+	
 
 	useBackHandler(() => {
-		/*if (props.showSelectionCheckbox) {
-		  
-		  return true
-		}*/
-		// let the default thing happen
 		return false
 	})
 
@@ -352,9 +329,8 @@ const RenderPhotos: React.FC<Props> = (props) => {
 						/>
 					</SafeAreaView>
 				);
-				break;
 			default:
-				props.uploadingPercent.current[index] = new Animated.Value(0);
+				// props.uploadingPercent.current[index] = new Animated.Value(0);
 				return (
 					<PhotosChunk
 						photo={data}
@@ -362,17 +338,11 @@ const RenderPhotos: React.FC<Props> = (props) => {
 						modalShown={props.modalShown}
 						headerShown={props.headerShown}
 						headerHeight={headerHeight}
-
 						selectedAssets={props.selectedAssets}
 						lastSelectedAssetId={props.lastSelectedAssetId}
 						lastSelectedAssetAction={props.lastSelectedAssetAction}
 						selectedAssetsRef={selectedAssetsRef}
 						clearSelection={clearSelection}
-
-						uploadedAssets={props.uploadedAssets}
-						lastUpload={props.lastUpload}
-						uploadingPercent={props.uploadingPercent.current[index]}
-
 						animatedImagePositionX={props.animatedImagePositionX}
 						animatedImagePositionY={props.animatedImagePositionY}
 						animatedSingleMediaIndex={props.animatedSingleMediaIndex}
@@ -385,18 +355,18 @@ const RenderPhotos: React.FC<Props> = (props) => {
 					/>
 				);
 		}
-	}, [props.photos?.layout?.length]);
+	}, [layouts?.length]);
 
 
 	const _onMomentumScrollEnd = () => {
 		let currentTimeStamp = 0;
 		let lastIndex = (scrollRef?.current?.findApproxFirstVisibleIndex() || 0);
-		let currentImage = props.photos.layout[lastIndex].value;
+		let currentImage = layouts[lastIndex].value;
 
 		if (typeof currentImage === 'string') {
-			currentImage = props.photos.layout[lastIndex + 1]?.value;
+			currentImage = layouts[lastIndex + 1]?.value;
 			if (currentImage && typeof currentImage === 'string') {
-				currentImage = props.photos.layout[lastIndex + 2]?.value;
+				currentImage = layouts[lastIndex + 2]?.value;
 			}
 		}
 		if (currentImage && typeof currentImage !== 'string') {
@@ -412,41 +382,13 @@ const RenderPhotos: React.FC<Props> = (props) => {
 		} else if (props.numColumns === 4) {
 			props.scrollIndex4.setValue(lastIndex);
 		}
-		////console.log(['momentum ended', {'in':props.numColumns, 'to':lastIndex}, lastOffset]);
 		showThumbScroll.value = withDelay(3000, withTiming(0));
 	}
 	useDerivedValue(() => {
-		let approximateIndex = Math.ceil(props.dragY.value / props.numColumns);
-
-		//animatedTimeStampString.value = approximateIndex.toString();
 		reanimatedScrollTo(scrollRefExternal, 0, props.dragY.value, false);
 	}, [props.dragY]);
-
-	const scrollBarToViewSync = (value: number) => {
-		let sampleHeight = scrollRef?.current?.getContentDimension().height;
-		//console.log('value='+value);
-		//console.log('ViewOffset='+ViewOffset);
-		//console.log('sampleHeight='+sampleHeight);
-		//console.log('SCREEN_HEIGHT='+SCREEN_HEIGHT);
-		let currentImageIndex = scrollRef.current.findApproxFirstVisibleIndex();
-		let currentImage = props.photos.layout[currentImageIndex].value;
-		let currentTimeStamp = 0;
-		if (typeof currentImage === 'string') {
-			currentImage = props.photos.layout[currentImageIndex + 1]?.value;
-			if (currentImage && typeof currentImage === 'string') {
-				currentImage = props.photos.layout[currentImageIndex + 2]?.value;
-			}
-		}
-		if (currentImage && typeof currentImage !== 'string') {
-			currentTimeStamp = currentImage.modificationTime;
-		}
-		setCurrentImageTimestamp(currentTimeStamp);
-	}
-
-
-	/*useEffect(()=>{
-	  adjustScrollPosition(props.scrollOffset);
-	},[props.scrollOffset]);*/
+	
+	
 
 	const scrollHandlerReanimated = useAnimatedScrollHandler({
 		onScroll: (e) => {
@@ -464,9 +406,9 @@ const RenderPhotos: React.FC<Props> = (props) => {
 		},
 	});
 
-	const itemAnimator = new ItemAnimator({uploadingPercent: props.uploadingPercent});
+	// const itemAnimator = new ItemAnimator({uploadingPercent: props.uploadingPercent});
 
-	return props.photos.layout ? (
+	return layouts ? (
 		<Reanimated.View
 			// eslint-disable-next-line react-native/no-inline-styles
 			style={[animatedStyle, {
@@ -480,17 +422,29 @@ const RenderPhotos: React.FC<Props> = (props) => {
 				left: 0,
 			}]}
 		>
-			<RCL
-				scrollRef={scrollRef}
+			<RecyclerListView
+				ref={scrollRef}
 				externalScrollView={ExternalScrollView}
-				itemAnimator={itemAnimator}
-				SCREEN_WIDTH={props.SCREEN_WIDTH}
-				SCREEN_HEIGHT={props.SCREEN_HEIGHT}
+				style={{
+					flex: 1,
+					width: props.SCREEN_WIDTH,
+					height: props.SCREEN_HEIGHT,
+					position: 'absolute',
+					top: 0,
+					bottom: 0,
+					marginTop: 0,
+					right: 0,
+					left: 0,
+					zIndex:1,
+				}}
+				optimizeForInsertDeleteAnimations={true}
+				dataProvider={dataProvider}
 				layoutProvider={layoutProvider}
 				rowRenderer={rowRenderer}
-				scrollRefExternal={scrollRefExternal}
-				scrollHandlerReanimated={scrollHandlerReanimated}
-				key={"RCL_" + props.sortCondition + props.numColumns}
+				scrollViewProps={{
+					scrollRefExternal:scrollRefExternal,
+					_onScrollExternal:scrollHandlerReanimated,
+				}}
 			/>
 
 			<ThumbScroll
@@ -511,7 +465,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
 				currentImageTimestamp={animatedTimeStampString}
 			/>
 			<FloatingFilters
-				headerIndexes={props.photos.headerIndexes}
+				headerIndexes={headerIndexes}
 				floatingFiltersOpacity={showFloatingFilters}
 				numColumns={props.numColumns}
 				sortCondition={props.sortCondition}
@@ -548,7 +502,7 @@ const styles = StyleSheet.create({
 });
 
 const isEqual = (prevProps: Props, nextProps: Props) => {
-	return (prevProps.photos.layout.length === nextProps.photos.layout.length);
+	return (prevProps === nextProps);
 }
 
 export default React.memo(RenderPhotos, isEqual);

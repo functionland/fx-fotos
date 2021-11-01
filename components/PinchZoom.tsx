@@ -11,7 +11,7 @@ import {
 import {
   useRecoilState,
 } from 'recoil';
-import { numColumnsState } from '../states';
+import { numColumnsState } from '../states/gallery';
 import {
   default as Reanimated, 
   useAnimatedGestureHandler,
