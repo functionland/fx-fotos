@@ -178,7 +178,8 @@ const PhotosContainer: React.FC<Props> = (props) => {
 					}
 					count[sortCondition_j] = count[sortCondition_j] + 1;
 				}
-
+				console.log("index",i)
+				console.log("lastIndex",lastIndex)
 				layout.push({
 					value: medias[i],
 					sortCondition: '',
@@ -235,7 +236,7 @@ const PhotosContainer: React.FC<Props> = (props) => {
 
 	useEffect(() => {
 		if (medias?.length) {
-			loadGallery(medias, ['day', 'month'], 0, medias.length)
+			loadGallery(medias, ['day', 'month'], 0, 0)
 		}
 	}, [medias]);
 	const removeElements = (elementIndex: string[]) => {
