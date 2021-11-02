@@ -12,7 +12,7 @@ import SingleMedia from './SingleMedia';
 import StoryHolder from './StoryHolder';
 import ActionBar from './ActionBar';
 import {ShareSheet, AlbumSheet} from './BottomSheets';
-import {layoutState} from '../states/gallery';
+import {layoutState} from '../states/photos';
 import {default as Reanimated, useSharedValue, useAnimatedReaction, runOnJS,} from 'react-native-reanimated';
 
 

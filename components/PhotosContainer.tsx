@@ -6,10 +6,8 @@ import PinchZoom from './PinchZoom';
 import {useRecoilState, useRecoilTransaction_UNSTABLE} from 'recoil';
 import {mediasState} from '../states';
 import {default as Reanimated,} from 'react-native-reanimated';
-import {headerIndexesState, lastTimestampState, layoutState, storiesState} from "../states/gallery";
+import {headerIndexesState, lastTimestampState, layoutState, storiesState} from "../states/photos";
 import {Media} from "../domian";
-import {headerIndex, story, layout} from "../types/interfaces";
-import {timestampToDate} from "../utils/functions";
 import {flatListFactory} from "../utils/factories";
 
 

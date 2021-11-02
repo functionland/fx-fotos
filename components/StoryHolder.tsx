@@ -2,16 +2,11 @@ import React, {useEffect, useRef,} from 'react';
 import { Animated, useWindowDimensions, StyleSheet, } from 'react-native';
 import StoryContainer from './Story/stories/StoryContainer';
 import { timestampToDate } from '../utils/functions';
-
-import {
-  BAR_ACTIVE_COLOR,
-  BAR_INACTIVE_COLOR,
-} from './Story/utils/colors';
-import {
-  useRecoilState,
-} from 'recoil';
-import {storyState} from '../states/gallery';
+import {BAR_ACTIVE_COLOR,BAR_INACTIVE_COLOR} from './Story/utils/colors';
+import {useRecoilState} from 'recoil';
+import {storyState} from '../states/photos';
 import { default as Reanimated } from 'react-native-reanimated';
+
 
 interface Props {
   duration: number;

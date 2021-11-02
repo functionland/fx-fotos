@@ -14,7 +14,7 @@ import {default as Reanimated,} from 'react-native-reanimated';
 import {
   useRecoilState,
 } from 'recoil';
-import {storyState} from '../states/gallery';
+import {storyState} from '../states/photos';
 
 interface Props {
   story:story;

@@ -31,7 +31,7 @@ import {
 } from 'react-native-reanimated';
 import {timestampToDate} from '../utils/functions';
 import {useRecoilState} from 'recoil';
-import {headerIndexesState, layoutState, storiesState} from '../states/gallery';
+import {headerIndexesState, layoutState, storiesState} from '../states/photos';
 
 class ItemAnimator extends React.Component implements BaseItemAnimator {
 	constructor(props: any) {
