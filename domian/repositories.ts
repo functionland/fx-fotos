@@ -91,6 +91,7 @@ export const refreshMedias = async () => {
 	let assets = await getLocalAssets();
 	let medias = await getMedias()
 	const merged = await asyncMerge(assets, medias)
+	merged.sort((a,b)=>b.creationTime-a.creationTime)
 	await setMedias(merged)
 	return merged
 }

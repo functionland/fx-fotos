@@ -139,7 +139,7 @@ const RenderPhotos: React.FC<Props> = (props) => {
 
 	const [layoutProvider,setLayoutProvider] = useState<LayoutProvider>(LayoutUtil.getLayoutProvider(props.numColumns, props.sortCondition, headerHeight, props.storiesHeight, props.HEADER_HEIGHT));
 	const [dataProvider, setDataProvider] = useState<DataProvider>(()=>{return new DataProvider((r1,r2)=>{
-		return r1 !== r2
+		return r1.index !== r2.index
 	})})
 	layoutProvider.shouldRefreshWithAnchoring = true;
 	const scrollRef: any = useRef();

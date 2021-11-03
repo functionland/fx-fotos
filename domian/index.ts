@@ -1,4 +1,5 @@
 import type {Asset} from 'expo-media-library';
+import {EventEmitter} from "react-native";
 
 export interface IEntity {
 	
@@ -13,14 +14,15 @@ export interface Scan extends IService{
 }
 
 export interface Sync extends IService{
-	backup():void
-	restore():void
+	backup():EventEmitter
+	restore():EventEmitter
 }
 
 export interface Media extends IEntity, Asset{
 	hasCid:Boolean
 	cid:string
 }
+
 
 
 

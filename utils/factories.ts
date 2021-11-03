@@ -138,8 +138,6 @@ export const flatListFactory = (medias: Media[],
 			}
 			count[sortCondition_j] = count[sortCondition_j] + 1;
 		}
-		console.log("index",i)
-		console.log("lastIndex",lastIndex)
 		layout.push({
 			value: medias[i],
 			sortCondition: '',
