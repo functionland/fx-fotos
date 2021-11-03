@@ -91,7 +91,6 @@ const ShareSheet: React.FC<Props> = (props) => {
 			key: string;
 			action: any;
 	}}) => {
-			console.log(item);
 			return itemBuilder(item.name, item.icon, item.action)
     },
     []
@@ -104,7 +103,6 @@ const ShareSheet: React.FC<Props> = (props) => {
 			key: string;
 			action: any;
 	}[]}) => {
-			console.log(item);
 			return (
       <View style={styles.listContainer}>
         <BottomSheetFlatList
