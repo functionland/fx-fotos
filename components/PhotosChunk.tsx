@@ -321,6 +321,6 @@ const styles = StyleSheet.create({
 });
 
 const isEqual = (prevProps: Props, nextProps: Props) => {
-	return (prevProps.photo.id === nextProps.photo.id && prevProps.index === nextProps.index);
+	return (prevProps.photo.uid === nextProps.photo.uid);
 }
-export default PhotosChunk;
+export default React.memo(PhotosChunk, isEqual);

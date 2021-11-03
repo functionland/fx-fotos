@@ -505,4 +505,4 @@ const isEqual = (prevProps: Props, nextProps: Props) => {
 	return (prevProps === nextProps);
 }
 
-export default React.memo(RenderPhotos, isEqual);
+export default RenderPhotos;

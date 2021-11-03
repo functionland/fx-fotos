@@ -1,11 +1,12 @@
 import React, {useContext, useEffect, useRef} from 'react';
-import {Animated, View, Text, AsyncStorage,} from 'react-native';
+import {Animated, View, Text, AsyncStorage, DeviceEventEmitter,} from 'react-native';
+import * as Clipboard from 'expo-clipboard';
 // @ts-ignore
 import * as mime from 'react-native-mime-types';
 import BottomSheet from '@gorhom/bottom-sheet';
 import {Asset, getAssetInfoAsync} from 'expo-media-library';
 import {useRecoilState} from 'recoil';
-import {useNavigation} from '@react-navigation/native';
+import Toast from 'react-native-root-toast';
 import {BorgContext} from '@functionland/rn-borg/src/BorgClient';
 import RenderPhotos from './RenderPhotos';
 import SingleMedia from './SingleMedia';
@@ -14,7 +15,6 @@ import ActionBar from './ActionBar';
 import {ShareSheet, AlbumSheet} from './BottomSheets';
 import {layoutState} from '../states/photos';
 import {default as Reanimated, useSharedValue, useAnimatedReaction, runOnJS,} from 'react-native-reanimated';
-
 
 
 interface Props {
@@ -60,7 +60,7 @@ const AllPhotos: React.FC<Props> = (props) => {
 	useEffect(() => {
 		console.log([Date.now() + ': component AllPhotos rendered']);
 	});
-	
+
 
 	const showStory = useRef(new Animated.Value(0)).current;
 	const scrollIndex2 = useRef(new Animated.Value(0)).current;
@@ -141,7 +141,7 @@ const AllPhotos: React.FC<Props> = (props) => {
 			if (typeof mediaInfo.localUri === 'string') {
 				console.log("started")
 				// @ts-ignore
-				const videoUploadController = await borg.sendFile(mediaInfo.localUri);				
+				const videoUploadController = await borg.sendFile(mediaInfo.localUri);
 				console.log('setting uploaded to true')
 				await addUploadedFiles(mediaInfo.id)
 			}
@@ -155,26 +155,41 @@ const AllPhotos: React.FC<Props> = (props) => {
 		}
 	}
 	const shareLink = async () => {
-		console.log('Not Implemented');
+		layouts.map((x, index) => {
+				if (selectedAssetsRef.current.includes(x.id)) {
+					if (typeof x.value !== 'string') {
+						if (x.value.cid) {
+							let fullURL = x.value.cid;
+							Clipboard.setString(fullURL);
+							console.log(fullURL)
+							let toast = Toast.show('Link is copied to clipboard', {
+								duration: Toast.durations.LONG,
+							});
+						}
+					}
+				}
+			}
+		)
 	}
 
 	const _handleUpload = async () => {
 		console.log('Uploading');
 		console.log(selectedAssetsRef.current);
+		DeviceEventEmitter.emit("downloadStart", selectedAssetsRef.current)
 	}
 
 	const _handleMore = () => console.log('Shown more');
-	
-	const addUploadedFiles = async (assetId:string) => {
+
+	const addUploadedFiles = async (assetId: string) => {
 		try {
 			const uploadedFileStr = await AsyncStorage.getItem('uploaded')
-			await AsyncStorage.setItem('uploaded', JSON.stringify([...(uploadedFileStr!=null ? JSON.parse(uploadedFileStr) : []),assetId]))
+			await AsyncStorage.setItem('uploaded', JSON.stringify([...(uploadedFileStr != null ? JSON.parse(uploadedFileStr) : []), assetId]))
 			console.log("upload ended")
 		} catch (e) {
 			console.log(e)
 		}
 	}
-	
+
 	return (
 		layouts.length > 0 ? (
 			<View
@@ -257,10 +272,10 @@ const AllPhotos: React.FC<Props> = (props) => {
 							name: "delete"
 						},
 						{
-							icon: "upload-lock-outline",
+							icon: "download-lock-outline",
 							onPress: _handleUpload,
 							color: "#007AFF",
-							name: "upload"
+							name: "download"
 						}
 					]}
 					moreActions={[]}
