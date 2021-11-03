@@ -61,6 +61,7 @@ export interface layout {
 	index: number,
 	deleted: boolean,
 	id: string
+	uid : string
 };
 
 export interface headerIndex {
@@ -70,4 +71,5 @@ export interface headerIndex {
 	yearStart: string;
 	sortCondition: 'day' | 'month';
 	timestamp: number;
+	uid : string
 };

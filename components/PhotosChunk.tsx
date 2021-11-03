@@ -273,7 +273,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
 					style={[
 						styles.uploadStatus,
 						{
-							opacity: notUploaded
+							opacity: props.photo.value.hasCid?0:100
 						}
 					]}
 				>
@@ -323,4 +323,4 @@ const styles = StyleSheet.create({
 const isEqual = (prevProps: Props, nextProps: Props) => {
 	return (prevProps.photo.id === nextProps.photo.id && prevProps.index === nextProps.index);
 }
-export default React.memo(PhotosChunk, isEqual);
+export default PhotosChunk;

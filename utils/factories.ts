@@ -1,6 +1,7 @@
 import {Media} from "../domian";
 import {headerIndex, story, layout, FlatSection} from "../types/interfaces";
 import {timestampToDate} from "./functions";
+import uuid from 'react-native-uuid';
 
 export const flatListFactory = (medias: Media[],
 							   sortConditions: Array<'day' | 'month'>,
@@ -12,7 +13,7 @@ export const flatListFactory = (medias: Media[],
 	let stories: story[] = [];
 	let count = {'day': 0, 'month': 0};
 	if (lastTimestamp === 0) {
-		layout.push({value: 'story placeholder', sortCondition: '', index: -1, deleted: false, id: 'story'});
+		layout.push({value: 'story placeholder', sortCondition: '', index: -1, deleted: false, id: 'story' ,uid:uuid.v4() as string});
 	}
 
 	let lastTimestampObj = timestampToDate(
@@ -114,7 +115,8 @@ export const flatListFactory = (medias: Media[],
 					sortCondition: sortCondition_j,
 					index: -1,
 					deleted: false,
-					id: (medias[i].modificationTime + '' + j)
+					id: (medias[i].modificationTime + '' + j),
+					uid:uuid.v4() as string
 				});
 
 				let headerIndexLength = headerIndexes.length;
@@ -132,7 +134,8 @@ export const flatListFactory = (medias: Media[],
 					count: 0,
 					yearStart: yearStart[sortCondition_j],
 					sortCondition: sortCondition_j,
-					timestamp: medias[i].modificationTime
+					timestamp: medias[i].modificationTime,
+					uid:uuid.v4() as string
 				});
 				count[sortCondition_j] = 0;
 			}
@@ -143,7 +146,8 @@ export const flatListFactory = (medias: Media[],
 			sortCondition: '',
 			index: i + lastIndex,
 			deleted: false,
-			id: medias[i].id
+			id: medias[i].id,
+			uid:uuid.v4() as string
 		});
 
 	}
