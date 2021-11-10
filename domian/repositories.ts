@@ -7,16 +7,29 @@ import {manipulateAsync, SaveFormat} from 'expo-image-manipulator';
 export class MediaRepository {
 	constructor() {
 	}
-	async getAll(): Promise<Media[]> {
-		const media = await refreshMedias()
-		return media as Media[]
+	
+	async * getIterable():AsyncIterable<Media[]>{
+		const gen = asyncMerge()
+		while (!gen.done){
+			yield (await gen.next()).value
+		}
 	}
+
+	async getAll(): Promise<Media[]> {
+		const gen = asyncMerge()
+		let all=[];
+		while (!gen.done){
+			all.push((await gen.next()).value)
+		}
+		return  all
+	}
+
 	async write(medias: Media[]) {
 		await setMedias(medias)
 	}
 }
 
-async function getLocalAssets(assets: Array<Asset> = [], after: string = '',size=9999999999): Promise<Array<Asset>> {
+async function* getLocalAssets(after: string = '', size = 9999999999): AsyncIterable<Asset[]> {
 	const getStorageCursor = (
 		limit: number = 99999999999999,
 		after: string = '',
@@ -48,42 +61,47 @@ async function getLocalAssets(assets: Array<Asset> = [], after: string = '',size
 
 		return MediaLibrary.getAssetsAsync(mediaFilter);
 	};
-	let _assets = assets ? assets : []
-	const asset = await getStorageCursor(999999999, after)
-	console.log("is asset comming")
-	asset.assets.map((value) => {
-		_assets.push(value)
-	})
-	if(size && _assets.length>=size){
-		return _assets
+	let assetPage
+	let flag = 0
+	do {
+		assetPage = await getStorageCursor(100, after)
+		yield assetPage.assets
+		console.log(assetPage.hasNextPage)
+		console.log("asdfjakdsfjlaksjdflasjkdfhas;kdfl")
+		flag += assetPage.assets.length
+		after = assetPage.endCursor
 	}
-	if (asset.hasNextPage) {
-		return await getLocalAssets(_assets, asset.endCursor,999999999)
-	}
-	return _assets
+	while (assetPage.hasNextPage && size > flag)
+
 }
 
-async function asyncMerge(assets: Asset[], medias: Media[]) {
-	let merged = []
-	let _assets = assets
-	for (const media of medias) {
-		const asset = _assets.find((value) => value.id === media.id)
-		if (asset) {
-			merged.push({...media, ...asset})
-			_assets = _assets.filter((value) => value.id !== media.id)
-		} else {
-			if(media.hasCid)
-				merged.push({...media, uri: null})
+async function* asyncMerge(): AsyncIterable<Media[]> {
+	let medias = await getMedias()
+	let Hashmap = new Map<string, number>()
+	for (const [index, media] of medias.entries()) {
+		Hashmap.set(media.id, index)
+	}
+	const gen = getLocalAssets()
+	while (!gen.done){
+		let merged = []
+		const assets = (await gen.next()).value
+		for (const asset of assets) {
+			if (Hashmap.has(asset.id)) {
+				merged.push({...asset, ...medias[Hashmap.get(asset.id) as number]})
+			} else {
+				let thumbnail = null;
+				if (asset.mediaType === 'photo')
+					thumbnail = await manipulateAsync(asset.uri, [{'resize': {width: 300, height: 300}}], {
+						compress: 0,
+						format: SaveFormat.PNG
+					})
+				// console.log(thumbnail?.uri)
+				merged.push({...asset, cid: '', hasCid: false, preview: thumbnail ? thumbnail.uri : ''})
+			}
+
 		}
+		yield merged
 	}
-	for (const asset of _assets) {
-		let thumbnail = null;
-		// if(asset.mediaType==='photo')
-			// thumbnail = await manipulateAsync(asset.uri,[{'resize':{width:300,height:300}}],{compress:0,format:SaveFormat.PNG})
-		// console.log(thumbnail?.uri)
-		merged.push({...asset, cid: '', hasCid: false,preview:''})
-	}
-	return merged as Media[]
 }
 
 
@@ -94,15 +112,6 @@ const getMedias = async () => {
 	} catch (e) {
 		console.log(e)
 	}
-}
-
-export const refreshMedias = async () => {
-	let assets = await getLocalAssets();
-	let medias = await getMedias()
-	const merged = await asyncMerge(assets, medias)
-	merged.sort((a,b)=>b.creationTime-a.creationTime)
-	await setMedias(merged)
-	return merged
 }
 
 export const setMedias = async (value: Media[]) => {

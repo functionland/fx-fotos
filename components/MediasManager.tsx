@@ -7,7 +7,7 @@ import {MediaRepository} from "../domian/repositories";
 import {storagePermission} from "../utils/permissions";
 
 const MediasManager = () => {
-	type Action = { type: "insert" | "delete" | "refresh", payload: Asset[] }
+	type Action = { type: "insert" | "delete" | "refresh" | "loading", payload: Asset[] }
 	const [medias,setMedias]=useRecoilState(mediasState)
 	const mediaRepository = new MediaRepository();
 	const mediaReducer = (action: Action) => {
@@ -34,6 +34,19 @@ const MediasManager = () => {
 				// 
 			})()
 		}
+		if (action.type === "loading") {
+			console.log("refresh called");
+			(async () => {
+				const gen = mediaRepository.getIterable()
+				while (!gen.done){
+					let value = (await gen.next()).value
+					setMedias((currVal) => [...currVal,...value])
+					console.log("refresh call end");
+				}
+				
+	
+			})()
+		}
 	}
 	useEffect(() => {
 		storagePermission()
@@ -54,7 +67,7 @@ const MediasManager = () => {
 			}
 			
 		})
-		mediaReducer({type:"refresh",payload:[]})
+		mediaReducer({type:"loading",payload:[]})
 		return () => {MediaLibrary.removeAllListeners()}
 	}, [])
 	useEffect(()=>{

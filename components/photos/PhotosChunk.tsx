@@ -192,7 +192,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
 					:
 					(
 						<Image
-							source={{uri: media.uri}}
+							source={{uri: media.preview?media.preview:media.uri}}
 							// eslint-disable-next-line react-native/no-inline-styles
 							style={{
 								flex: 1,
