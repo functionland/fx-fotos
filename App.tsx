@@ -6,7 +6,7 @@ import {RootSiblingParent} from 'react-native-root-siblings';
 import Borg from '@functionland/rn-borg/src/index';
 import MediasManager from "./components/MediasManager";
 import Sync from "./components/Sync";
-
+import ScrollContextProvider from "./components/Shared/ScrollContext";
 
 LogBox.ignoreLogs(['Setting a timer']);
 
@@ -17,7 +17,9 @@ const App = () => {
 				<Borg>
 					<Sync/>
 					<MediasManager/>
-					<AppNavigation/>
+					<ScrollContextProvider>
+						<AppNavigation/>
+					</ScrollContextProvider>
 				</Borg>
 			</RootSiblingParent>
 		</RecoilRoot>

@@ -41,7 +41,6 @@ const Sync = () => {
 						const cid = await borg.sendFile(pending.uri)
 						DeviceEventEmitter.emit("uploadcomplete", {id: pending.id, cid: cid})
 					})()
-					console.log(pending)
 					// @ts-ignore
 
 				} catch (e) {
@@ -91,17 +90,18 @@ const Sync = () => {
 						setMedias((currVal) => {
 							const assetIndex = currVal.findIndex(media => media.id === asset.id)
 							if (assetIndex > -1) {
-								return [...currVal.slice(0, index),
+								return [
+									...currVal.slice(0, index),
 									{...currVal[assetIndex], cid: currentMedia[index].cid, hasCid: true},
 									...currVal.slice(index + 1)
 								].filter(media => media.id !== id)
 							} else {
-								return [...currVal.filter(media => media.id !== id), {
+								return[...currVal.filter(media => media.id !== id), {
 									...asset,
 									cid: currentMedia[index].cid,
 									hasCid: true
 								}]
-
+								
 							}
 
 
@@ -132,7 +132,7 @@ const Sync = () => {
 		}
 	}, [])
 	useEffect(() => {
-		DeviceEventEmitter.emit("newdata", medias.filter(media => !media.hasCid));
+		DeviceEventEmitter.emit("newdata", medias.filter(media => !media.hasCid && media.mediaType === 'photo'));
 		DeviceEventEmitter.emit("mediasChanged", medias);
 	}, [medias])
 

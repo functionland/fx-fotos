@@ -1,10 +1,10 @@
 import {Asset} from 'expo-media-library';
 import React, {createRef, useRef, useEffect} from 'react';
-import {Image, Text, StyleSheet, Animated, View} from 'react-native';
-import {layout} from '../types/interfaces';
-import {prettyTime} from '../utils/functions';
+import {Image, Text, StyleSheet, Animated, View, useWindowDimensions} from 'react-native';
+import {layout} from '../../types/interfaces';
+import {prettyTime} from '../../utils/functions';
 import {MaterialIcons} from '@expo/vector-icons';
-import RoundCheckbox from './RoundCheckbox';
+import RoundCheckbox from '../Shared/RoundCheckbox';
 import {
 	LongPressGestureHandler,
 	TapGestureHandler,
@@ -12,12 +12,14 @@ import {
 	LongPressGestureHandlerGestureEvent,
 } from 'react-native-gesture-handler';
 import {default as Reanimated, useAnimatedGestureHandler, runOnJS,} from 'react-native-reanimated';
+import {SetterOrUpdater} from "recoil";
+import {Media} from "../../domian";
 
 interface Props {
 	photo: layout;
 	index: number;
 	modalShown: Reanimated.SharedValue<number>;
-	headerShown: Reanimated.SharedValue<number>;
+	setHeaderVisibility: SetterOrUpdater<boolean>
 	headerHeight: number;
 	animatedImagePositionX: Reanimated.SharedValue<number>;
 	animatedImagePositionY: Reanimated.SharedValue<number>;
@@ -32,14 +34,12 @@ interface Props {
 	lastSelectedAssetAction: Reanimated.SharedValue<number>;
 	selectedAssetsRef: React.MutableRefObject<string[]>;
 	clearSelection: Animated.Value;
-
-	SCREEN_HEIGHT: number;
-	SCREEN_WIDTH: number;
 }
 
 
 const PhotosChunk: React.FC<Props> = (props) => {
 	const loading = false;
+	const screenDim = useWindowDimensions()
 	const longTapRef = createRef<LongPressGestureHandler>();
 	const singleTapRef = createRef<TapGestureHandler>();
 	// const [asset] = useRecoilState(uploadedAsset(props.photo.id))
@@ -101,19 +101,19 @@ const PhotosChunk: React.FC<Props> = (props) => {
 				props.animatedImagePositionX.value = event.absoluteX - event.x;
 				props.animatedSingleMediaIndex.value = props.index;
 				const ratio = props.imageHeight / props.imageWidth;
-				const screenRatio = props.SCREEN_HEIGHT / props.SCREEN_WIDTH;
-				let height = props.SCREEN_HEIGHT;
-				let width = props.SCREEN_WIDTH;
+				const screenRatio = screenDim.height / screenDim.width;
+				let height = screenDim.height;
+				let width = screenDim.width;
 				if (ratio > screenRatio) {
-					width = props.SCREEN_HEIGHT / screenRatio;
+					width = screenDim.height / screenRatio;
 				} else {
-					height = props.SCREEN_WIDTH * screenRatio;
+					height = screenDim.width * screenRatio;
 				}
 				props.singleImageHeight.value = height;
 				props.singleImageWidth.value = width;
 				console.log('Opening modal');
 
-				props.headerShown.value = 0;
+				runOnJS(props.setHeaderVisibility)(false);
 				props.modalShown.value = 1;
 			} else {
 				let index = props.selectedAssets.value.findIndex(x => x === props.photo.id);
@@ -165,7 +165,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
 		},
 	});
 
-	const createThumbnail = (media: Asset) => {
+	const createThumbnail = (media: Media) => {
 		return (
 			<>
 				{(media.duration > 0) ?
@@ -209,8 +209,9 @@ const PhotosChunk: React.FC<Props> = (props) => {
 
 
 	if (typeof props.photo.value === 'string') {
+		
 		return (
-			<View style={{flex: 1, width: props.SCREEN_WIDTH,}}>
+			<View style={{flex: 1, width: screenDim.width,}}>
 				<Text>{props.photo.value}</Text>
 			</View>
 		)
@@ -321,6 +322,6 @@ const styles = StyleSheet.create({
 });
 
 const isEqual = (prevProps: Props, nextProps: Props) => {
-	return (prevProps.photo.uid === nextProps.photo.uid);
+	return (prevProps.photo.id === nextProps.photo.id);
 }
 export default React.memo(PhotosChunk, isEqual);

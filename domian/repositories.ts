@@ -1,7 +1,8 @@
-import {Asset} from "expo-media-library";
 import * as MediaLibrary from "expo-media-library";
+import {Asset} from "expo-media-library";
 import {Media} from "./index";
 import {AsyncStorage} from "react-native";
+import {manipulateAsync, SaveFormat} from 'expo-image-manipulator';
 
 export class MediaRepository {
 	constructor() {
@@ -15,7 +16,7 @@ export class MediaRepository {
 	}
 }
 
-async function getLocalAssets(assets: Array<Asset> = [], after: string = ''): Promise<Array<Asset>> {
+async function getLocalAssets(assets: Array<Asset> = [], after: string = '',size=9999999999): Promise<Array<Asset>> {
 	const getStorageCursor = (
 		limit: number = 99999999999999,
 		after: string = '',
@@ -48,12 +49,16 @@ async function getLocalAssets(assets: Array<Asset> = [], after: string = ''): Pr
 		return MediaLibrary.getAssetsAsync(mediaFilter);
 	};
 	let _assets = assets ? assets : []
-	const asset = await getStorageCursor(9999999, after)
+	const asset = await getStorageCursor(999999999, after)
+	console.log("is asset comming")
 	asset.assets.map((value) => {
 		_assets.push(value)
 	})
+	if(size && _assets.length>=size){
+		return _assets
+	}
 	if (asset.hasNextPage) {
-		return await getLocalAssets(_assets, asset.endCursor)
+		return await getLocalAssets(_assets, asset.endCursor,999999999)
 	}
 	return _assets
 }
@@ -72,7 +77,11 @@ async function asyncMerge(assets: Asset[], medias: Media[]) {
 		}
 	}
 	for (const asset of _assets) {
-		merged.push({...asset, cid: '', hasCid: false})
+		let thumbnail = null;
+		// if(asset.mediaType==='photo')
+			// thumbnail = await manipulateAsync(asset.uri,[{'resize':{width:300,height:300}}],{compress:0,format:SaveFormat.PNG})
+		// console.log(thumbnail?.uri)
+		merged.push({...asset, cid: '', hasCid: false,preview:''})
 	}
 	return merged as Media[]
 }

@@ -11,20 +11,16 @@ import BarcodeScanner from '../pages/BarcodeScanner';
 import {StyleSheet, Animated, View, TouchableOpacity, Text, StatusBar} from 'react-native';
 import Header from '../components/Header';
 import {createBottomTabNavigator, BottomTabBarProps, BottomTabBarOptions,} from '@react-navigation/bottom-tabs';
-//import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import {FontAwesome5} from '@expo/vector-icons';
 import {default as Reanimated, useSharedValue, useDerivedValue, runOnJS} from 'react-native-reanimated';
+import ScrollContext from "../components/Shared/ScrollContext";
+import {useRecoilValue} from "recoil";
+import {HeaderVisibilityState} from "../states/layout";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 const AppNavigation = () => {
-	const scrollY2 = useSharedValue(0);
-	const scrollY3 = useSharedValue(0);
-	const scrollY4 = useSharedValue(0);
-
-	const scale = useSharedValue(1);
-	const numColumnsAnimated = useSharedValue(2);
 	const [showHeader, setShowHeader] = useState<boolean | undefined>(true);
 
 	const headerShown = useSharedValue(1);
@@ -51,12 +47,7 @@ const AppNavigation = () => {
 						headerMode: 'screen',
 						headerCenter: () => (
 							<Header
-								scrollY2={scrollY2}
-								scrollY3={scrollY3}
-								scrollY4={scrollY4}
 								HEADER_HEIGHT={HEADER_HEIGHT}
-								headerShown={headerShown}
-								navigation={navigation}
 							/>),
 						////headerTitle: '',
 						headerStyle: {
@@ -75,15 +66,8 @@ const AppNavigation = () => {
 						options={{}}
 					>
 						{props => <HomeNavigation {...props}
-												  scrollY2={scrollY2}
-												  scrollY3={scrollY3}
-												  scrollY4={scrollY4}
-												  scale={scale}
-												  numColumnsAnimated={numColumnsAnimated}
 												  HEADER_HEIGHT={HEADER_HEIGHT}
 												  FOOTER_HEIGHT={FOOTER_HEIGHT}
-												  headerShown={headerShown}
-												  showHeader={showHeader}
 						/>}
 					</Stack.Screen>
 					<Stack.Screen
@@ -123,24 +107,18 @@ const AppNavigation = () => {
 };
 
 interface Props {
-	scrollY2: Reanimated.SharedValue<number>;
-	scrollY3: Reanimated.SharedValue<number>;
-	scrollY4: Reanimated.SharedValue<number>;
-	scale: Reanimated.SharedValue<number>;
-	numColumnsAnimated: Reanimated.SharedValue<number>;
 	HEADER_HEIGHT: number;
 	FOOTER_HEIGHT: number;
-	headerShown: Reanimated.SharedValue<number>;
-	showHeader: boolean | undefined;
 }
 
 const HomeNavigation: React.FC<Props> = (mainProps) => {
+	const headerVisibility = useRecoilValue(HeaderVisibilityState)
 	const TabBar = ({state, descriptors, navigation}: BottomTabBarProps<BottomTabBarOptions>) => {
 		return (
 			<View style={[
 				{
-					opacity: mainProps.showHeader ? 1 : 0,
-					height: mainProps.showHeader ? mainProps.FOOTER_HEIGHT : 0,
+					opacity: headerVisibility ? 1 : 0,
+					height: headerVisibility ? mainProps.FOOTER_HEIGHT : 0,
 					flexDirection: 'row',
 					backgroundColor: "white",
 					borderRadius: 0,
@@ -238,14 +216,8 @@ const HomeNavigation: React.FC<Props> = (mainProps) => {
 					}}
 				>
 					{props => <HomePage {...props}
-										scrollY2={mainProps.scrollY2}
-										scrollY3={mainProps.scrollY3}
-										scrollY4={mainProps.scrollY4}
-										scale={mainProps.scale}
-										numColumnsAnimated={mainProps.numColumnsAnimated}
 										HEADER_HEIGHT={mainProps.HEADER_HEIGHT + (StatusBar.currentHeight || 0)}
 										FOOTER_HEIGHT={mainProps.FOOTER_HEIGHT}
-										headerShown={mainProps.headerShown}
 					/>}
 				</Tab.Screen>
 				<Tab.Screen

@@ -20,7 +20,8 @@ export interface Sync extends IService{
 
 export interface Media extends IEntity, Asset{
 	hasCid:Boolean
-	cid:string
+	cid:string,
+	preview:string
 }
 
 

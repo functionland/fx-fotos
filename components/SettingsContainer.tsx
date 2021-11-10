@@ -3,10 +3,6 @@ import {useNavigation} from '@react-navigation/native';
 import React, {useEffect, useRef, useState} from 'react';
 import {Text, View, useWindowDimensions, StyleSheet, ScrollView, TouchableHighlight} from 'react-native';
 
-import {
-  useRecoilState,
-} from 'recoil';
-import {photosState, } from '../states';
 import {default as Reanimated,} from 'react-native-reanimated';
 interface Props {
   HEADER_HEIGHT: number;

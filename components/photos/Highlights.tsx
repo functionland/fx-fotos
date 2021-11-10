@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, createRef} from 'react';
 import { View, useWindowDimensions, StyleSheet, Image, Text, Animated } from 'react-native';
-import {story, } from '../types/interfaces';
+import {story, } from '../../types/interfaces';
 
 import {
   TapGestureHandler,
@@ -12,9 +12,10 @@ import {default as Reanimated,} from 'react-native-reanimated';
 
 
 import {
-  useRecoilState,
+	SetterOrUpdater,
+	useRecoilState,
 } from 'recoil';
-import {storyState} from '../states/photos';
+import {storyState} from '../../states/photos';
 
 interface Props {
   story:story;
@@ -23,7 +24,7 @@ interface Props {
   text?: string | undefined;
   height: number;
   showStory:Animated.Value;
-  headerShown:Reanimated.SharedValue<number>;
+  setHeaderVisibility:SetterOrUpdater<boolean>;
 }
 
 const Highlights: React.FC<Props> = (props) => {
@@ -43,8 +44,7 @@ const Highlights: React.FC<Props> = (props) => {
     setStory(props.story);
     console.log('opening highlight');
     props.showStory.setValue(1);
-    props.headerShown.value = 0;
-    ////console.log('here');
+	props.setHeaderVisibility(false);
   }
 
   const _onTapHandlerStateChange = ( event:HandlerStateChangeEvent<TapGestureHandlerEventPayload> ) => {

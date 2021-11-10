@@ -4,6 +4,7 @@ import {Asset} from "expo-media-library";
 import React, {useEffect} from "react";
 import * as MediaLibrary from "expo-media-library";
 import {MediaRepository} from "../domian/repositories";
+import {storagePermission} from "../utils/permissions";
 
 const MediasManager = () => {
 	type Action = { type: "insert" | "delete" | "refresh", payload: Asset[] }
@@ -35,6 +36,10 @@ const MediasManager = () => {
 		}
 	}
 	useEffect(() => {
+		storagePermission()
+			// .then((res) => setPermission(res))
+			.catch((error) => {
+			});
 		MediaLibrary.addListener(event => {
 			console.log(event)
 			if (event.hasIncrementalChanges) {
