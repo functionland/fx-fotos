@@ -2,9 +2,9 @@
 
 # Latest 2 Updates
 
-**September-10-2021:** Added import from Google Photos feature
+**November-15-2021:** A lot of updates! Many performance optimizations. Connected to backend of Box. Auto-upload photos to backend. Presented in Dfinity community!
 
-**August-30-2021:** Added settings page and working on import from Google Photos
+**September-10-2021:** Added import from Google Photos feature
 
 # Discussions
 
@@ -263,9 +263,9 @@ Just pick any issue from the issues tab or create your own and do a pull request
  * [x] Fast scroll/thumb scroll
  * [x] Select and unselect each image to delete/edit/share
  * [x] Connect with Dfinity
- * [ ] Auto-upload photos to backend
- * [ ] Automatic Migration tool from Google Photos
- * [ ] Connect with BOX (as a self-owned IPFS solution)
+ * [x] Auto-upload photos to backend
+ * [x] Automatic Migration tool from Google Photos
+ * [x] Connect with BOX (as a self-owned IPFS solution)
  * [ ] Connect with Filecoin
  * [ ] Connect with AWS
  * [ ] Search page to search by date/tags
