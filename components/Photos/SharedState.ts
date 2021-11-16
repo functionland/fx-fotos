@@ -35,6 +35,11 @@ export const VerticalDataState = selector<Data[]>({
 	}
 })
 
+export const SelectedItemsState = atom({
+	key:'SelectedItemsState',
+	default: {}
+})
+
 const HorizontalDataState = selector<Data[]>({
 	key: 'HorizontalDataState',
 	get: ({get}) => get(mediasState).map((media: Media) => {

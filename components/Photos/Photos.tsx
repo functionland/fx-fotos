@@ -1,13 +1,14 @@
 import React, {useContext, useEffect} from "react";
-import PinchZoom, {ScaleContext} from "../Photos/PinchZoom";
+import PinchZoom, {ScaleContext} from "./Shared/PinchZoom";
 import VerticalList from "./List/VerticalList";
 import {
 	default as Reanimated, interpolate, useAnimatedStyle, useSharedValue
 } from 'react-native-reanimated';
 import {StatusBar, StyleSheet, useWindowDimensions} from "react-native";
 import {useRecoilValue} from "recoil";
-import {ColumnState, VerticalDataState} from "./SharedState";
-import {FOOTER_HEIGHT, HeaderHeight} from "./Constants";
+import {ColumnState} from "./SharedState";
+import {FOOTER_HEIGHT} from "./Constants";
+import ActionBar from "./Shared/ActionBar";
 
 
 interface Props {
@@ -15,15 +16,29 @@ interface Props {
 }
 
 const PhotosContainer: React.FC<Props> = (props) => {
+	
 	return (
-		<PinchZoom>
-			<Photos></Photos>
-		</PinchZoom>
+		<>
+			<ActionBar
+				actions={[
+					{
+						icon: "download-lock-outline",
+						onPress: ()=>{},
+						color: "#007AFF",
+						name: "download"
+					}
+				]}
+				moreActions={[]}
+			/>
+			<PinchZoom>
+				<Photos></Photos>
+			</PinchZoom>
+		</>
+
 	)
 }
 
 function Photos() {
-	const data = useRecoilValue(VerticalDataState)
 	const col = useRecoilValue(ColumnState)
 	const numColumnsAnimated = useSharedValue(col)
 	const {width, height} = useWindowDimensions()
@@ -68,7 +83,7 @@ function Photos() {
 		return {
 			...styles.listContainer, 
 			width,
-			height:height-FOOTER_HEIGHT-70,
+			maxHeight:height-FOOTER_HEIGHT-65,
 		}
 	}
 	return (
@@ -83,11 +98,8 @@ function Photos() {
 const styles = StyleSheet.create({
 	listContainer: {
 		flex: 1,
-		position: 'absolute',
-		top: HeaderHeight + (StatusBar.currentHeight || 0) + 10,
-		bottom: 0,
-		right: 0,
-		left: 3,
+		position: 'relative',
+
 	}
 })
 

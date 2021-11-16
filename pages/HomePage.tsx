@@ -1,12 +1,12 @@
 import React from 'react';
-import Photos from "../components/Photos/Photos";
+import PhotosContainer from "../components/Photos/Photos";
 
 interface Props {
 }
 
 const HomePage: React.FC<Props> = () => {
 	return (
-			<Photos />
+			<PhotosContainer />
 	);
 };
 

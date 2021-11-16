@@ -22,29 +22,14 @@ const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 const AppNavigation = () => {
-	const [showHeader, setShowHeader] = useState<boolean | undefined>(true);
 
-	const headerShown = useSharedValue(1);
-
-	useDerivedValue(() => {
-		console.log('headerShown changed to ' + headerShown.value);
-		if (headerShown.value === 0) {
-			runOnJS(setShowHeader)(false);
-		} else {
-			runOnJS(setShowHeader)(true);
-		}
-	}, [headerShown])
-
-
-
-
+	const mainHeaderVisibility = useRecoilValue(HeaderVisibilityState)
 	return (
-		<Reanimated.View style={[styles.View,
-		]}>
+
 			<NavigationContainer>
 				<Stack.Navigator
 					screenOptions={({navigation, route}) => ({
-						headerMode: 'screen',
+						headerTopInsetEnabled:true,
 						headerCenter: () => (
 							<Header
 								HEADER_HEIGHT={HEADER_HEIGHT}
@@ -54,8 +39,9 @@ const AppNavigation = () => {
 							backgroundColor: 'transparent',
 						},
 						headerHideShadow: true,
-						headerShown: showHeader,
-						headerTranslucent: true,
+						headerShown: mainHeaderVisibility,
+						headerStatusBarHeight:0,
+						// headerTranslucent: true,
 						headerTitleStyle: {
 							fontWeight: 'bold',
 						},
@@ -102,7 +88,6 @@ const AppNavigation = () => {
 					/>
 				</Stack.Navigator>
 			</NavigationContainer>
-		</Reanimated.View>
 	);
 };
 
@@ -215,10 +200,7 @@ const HomeNavigation: React.FC<Props> = (mainProps) => {
 						),
 					}}
 				>
-					{props => <HomePage {...props}
-										HEADER_HEIGHT={mainProps.HEADER_HEIGHT + (StatusBar.currentHeight || 0)}
-										FOOTER_HEIGHT={mainProps.FOOTER_HEIGHT}
-					/>}
+					{props => <HomePage {...props}/>}
 				</Tab.Screen>
 				<Tab.Screen
 					name="Search"

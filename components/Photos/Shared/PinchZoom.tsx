@@ -2,14 +2,13 @@ import React, {createContext, createRef, useEffect, useRef} from 'react';
 import {useWindowDimensions} from 'react-native';
 import {PinchGestureHandler, PinchGestureHandlerGestureEvent} from 'react-native-gesture-handler';
 import {useRecoilState} from 'recoil';
-import {numColumnsState} from '../../states/photos';
 import {
 	default as Reanimated,
 	useAnimatedGestureHandler,
 	Easing,
 	withTiming, runOnJS, useSharedValue,
 } from 'react-native-reanimated';
-import {ColumnState} from "./SharedState";
+import {ColumnState} from "../SharedState";
 
 export const ScaleContext = createContext<Reanimated.SharedValue<number>|null>(null)
 
