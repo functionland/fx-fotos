@@ -15,7 +15,7 @@ const App = () => {
 		<RecoilRoot>
 			<RootSiblingParent>
 				<Borg>
-					<Sync/>
+					{/*<Sync/>*/}
 					<MediasManager/>
 					<ScrollContextProvider>
 						<AppNavigation/>

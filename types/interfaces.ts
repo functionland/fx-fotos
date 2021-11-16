@@ -21,7 +21,7 @@ export interface flatMedia {
 }
 
 export interface story {
-	medias: Asset[],
+	medias: Media[],
 	text: string,
 };
 
@@ -73,3 +73,32 @@ export interface headerIndex {
 	timestamp: number;
 	uid : string
 };
+
+
+// new one's
+
+export declare type Column = 2 | 3 | 4
+
+export enum SectionType {
+	Day = "DAY",
+	Month = 'MONTH',
+	Year = 'YEAR'
+}
+
+export interface SectionHeader {
+	timeStamp: Date
+}
+
+export enum ItemType {
+	Photo,
+	Video,
+	Stories,
+	SectionHeader,
+	SectionHeaderBig,
+}
+
+export interface Data {
+	id: string
+	value: story[] | Media | SectionHeader,
+	type: ItemType
+}

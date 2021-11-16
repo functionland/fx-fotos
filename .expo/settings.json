@@ -5,6 +5,6 @@
   "minify": false,
   "urlRandomness": "9r-td9",
   "https": false,
-  "scheme": null,
-  "devClient": false
+  "scheme": "land.fx.BoxPhotos",
+  "devClient": true
 }

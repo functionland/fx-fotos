@@ -9,14 +9,15 @@ import {
 	Easing,
 	withTiming, runOnJS, useSharedValue,
 } from 'react-native-reanimated';
+import {ColumnState} from "./SharedState";
 
-export const ScaleContext = createContext<Reanimated.SharedValue<number> | null>(null)
+export const ScaleContext = createContext<Reanimated.SharedValue<number>|null>(null)
 
 interface Props {
 }
 
 const PinchZoom: React.FC<Props> = (props) => {
-	const [numColumns, setNumColumns] = useRecoilState(numColumnsState);
+	const [numColumns, setNumColumns] = useRecoilState(ColumnState);
 	const numColumnsAnimated = useSharedValue(numColumns)
 	const {height, width} = useWindowDimensions();
 	const scale = useSharedValue(1)

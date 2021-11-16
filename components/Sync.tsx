@@ -31,6 +31,9 @@ const Sync = () => {
 		})()
 		const interval = setInterval(() => {
 			console.log("interval started")
+			console.log(processFlag)
+			console.log(qu.length)
+			console.log(borgConnected)
 			if (!processFlag && borgConnected && qu.length > 0) {
 				processFlag = true
 				console.log("uploading started")

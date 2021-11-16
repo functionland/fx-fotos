@@ -3,6 +3,7 @@ import {Asset} from "expo-media-library";
 import {Media} from "./index";
 import {AsyncStorage} from "react-native";
 import {manipulateAsync, SaveFormat} from 'expo-image-manipulator';
+import {PhotoHeight} from "../components/Photos/Constants";
 
 export class MediaRepository {
 	constructor() {
@@ -10,16 +11,26 @@ export class MediaRepository {
 	
 	async * getIterable():AsyncIterable<Media[]>{
 		const gen = asyncMerge()
-		while (!gen.done){
-			yield (await gen.next()).value
+		while (true){
+			const {done,value} = await gen.next()
+			if(done){
+				console.log("get all done")
+				break;
+			}
+			yield(value)
 		}
 	}
 
 	async getAll(): Promise<Media[]> {
 		const gen = asyncMerge()
 		let all=[];
-		while (!gen.done){
-			all.push((await gen.next()).value)
+		while (true){
+			const {done,value} = await gen.next()
+			if(done){
+				console.log("get all done")
+				break;
+			}
+			all.push(...value)
 		}
 		return  all
 	}
@@ -42,7 +53,7 @@ async function* getLocalAssets(after: string = '', size = 9999999999): AsyncIter
 	) => {
 		let mediaFilter: MediaLibrary.AssetsOptions = {
 			mediaType: mediaType,
-			sortBy: [MediaLibrary.SortBy.modificationTime],
+			sortBy: [MediaLibrary.SortBy.creationTime],
 		};
 		if (limit) {
 			mediaFilter.first = limit;
@@ -64,12 +75,15 @@ async function* getLocalAssets(after: string = '', size = 9999999999): AsyncIter
 	let assetPage
 	let flag = 0
 	do {
-		assetPage = await getStorageCursor(100, after)
-		yield assetPage.assets
-		console.log(assetPage.hasNextPage)
-		console.log("asdfjakdsfjlaksjdflasjkdfhas;kdfl")
-		flag += assetPage.assets.length
-		after = assetPage.endCursor
+		try{
+			assetPage = await getStorageCursor(100, after)
+			yield assetPage.assets
+			flag += assetPage.assets.length
+			after = assetPage.endCursor
+		}catch (e) {
+			break;
+		}
+
 	}
 	while (assetPage.hasNextPage && size > flag)
 
@@ -81,18 +95,25 @@ async function* asyncMerge(): AsyncIterable<Media[]> {
 	for (const [index, media] of medias.entries()) {
 		Hashmap.set(media.id, index)
 	}
-	const gen = getLocalAssets()
-	while (!gen.done){
+	const gen = getLocalAssets('',99999999)
+	while (true){
+		const {done, value} = await gen.next()
+		if(done){
+			console.log("get Local asset done")
+			break;
+		}
 		let merged = []
-		const assets = (await gen.next()).value
-		for (const asset of assets) {
+		for (const asset of value) {
+			if(!asset.uri||!asset.uri.includes('DCIM')){
+				continue;
+			}
 			if (Hashmap.has(asset.id)) {
 				merged.push({...asset, ...medias[Hashmap.get(asset.id) as number]})
 			} else {
 				let thumbnail = null;
-				if (asset.mediaType === 'photo')
-					thumbnail = await manipulateAsync(asset.uri, [{'resize': {width: 300, height: 300}}], {
-						compress: 0,
+				if (asset.mediaType === 'photo'&& asset.uri)
+					thumbnail = await manipulateAsync(asset.uri, [{'resize': {height: PhotoHeight}}], {
+						compress: 1,
 						format: SaveFormat.PNG
 					})
 				// console.log(thumbnail?.uri)

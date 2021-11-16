@@ -28,23 +28,23 @@ const MediasManager = () => {
 			console.log("refresh called");
 			(async () => {
 				const data = await mediaRepository.getAll()
-				
 				setMedias(data)
 				console.log("refresh call end");
 				// 
 			})()
 		}
 		if (action.type === "loading") {
-			console.log("refresh called");
+			console.log("loading called");
 			(async () => {
 				const gen = mediaRepository.getIterable()
-				while (!gen.done){
-					let value = (await gen.next()).value
+				while (true){
+					const {done,value} = await gen.next()
+					if(done){
+						console.log("get all done")
+						break;
+					}
 					setMedias((currVal) => [...currVal,...value])
-					console.log("refresh call end");
-				}
-				
-	
+				}				
 			})()
 		}
 	}
@@ -63,7 +63,7 @@ const MediasManager = () => {
 					mediaReducer({type:"delete",payload:event.deletedAssets})
 				}
 			}else {
-				mediaReducer({type:"refresh",payload:[]})
+				mediaReducer({type:"loading",payload:[]})
 			}
 			
 		})
@@ -75,6 +75,5 @@ const MediasManager = () => {
 	},[medias])
 	return (<></>)
 }
-
 
 export default MediasManager

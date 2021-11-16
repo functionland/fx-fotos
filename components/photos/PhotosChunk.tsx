@@ -14,6 +14,7 @@ import {
 import {default as Reanimated, useAnimatedGestureHandler, runOnJS,} from 'react-native-reanimated';
 import {SetterOrUpdater} from "recoil";
 import {Media} from "../../domian";
+import FastImage from 'react-native-fast-image'
 
 interface Props {
 	photo: layout;
@@ -72,7 +73,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
 
 	useEffect(() => {
 		changeSelection();
-		if(typeof props.photo.value !== 'string' && props.photo.value.hasCid){
+		if (typeof props.photo.value !== 'string' && props.photo.value.hasCid) {
 			notUploaded.setValue(0);
 		}
 	}, [props.photo.id])
@@ -171,7 +172,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
 				{(media.duration > 0) ?
 					(
 						<>
-							<Image
+							<FastImage
 								source={{uri: media.uri}}
 								// eslint-disable-next-line react-native/no-inline-styles
 								style={{
@@ -191,15 +192,18 @@ const PhotosChunk: React.FC<Props> = (props) => {
 					)
 					:
 					(
-						<Image
-							source={{uri: media.preview?media.preview:media.uri}}
-							// eslint-disable-next-line react-native/no-inline-styles
+						<FastImage
 							style={{
 								flex: 1,
 								backgroundColor: 'grey',
 								margin: 2.5,
 								zIndex: 4,
 							}}
+							source={{
+								uri: media.preview ? media.preview : media.uri,
+								priority: FastImage.priority.normal,
+							}}
+							resizeMode={FastImage.resizeMode.contain}
 						/>
 					)
 				}
@@ -209,7 +213,7 @@ const PhotosChunk: React.FC<Props> = (props) => {
 
 
 	if (typeof props.photo.value === 'string') {
-		
+
 		return (
 			<View style={{flex: 1, width: screenDim.width,}}>
 				<Text>{props.photo.value}</Text>
@@ -217,70 +221,9 @@ const PhotosChunk: React.FC<Props> = (props) => {
 		)
 	} else {
 		return (
-			<Animated.View style={[{
-				zIndex: 4,
-				flex: 1,
-				opacity: animatedTempScale,
-				transform: [
-					{
-						scale: selectionScale
-					}
-				]
-			}]}>
-				<LongPressGestureHandler
-					ref={longTapRef}
-					onGestureEvent={_onLongGestureEvent}
-					minDurationMs={400}
-				>
-					<Reanimated.View
-						style={{
-							flex: 1,
-							zIndex: 5
-						}}>
-						<TapGestureHandler
-							ref={singleTapRef}
-							onGestureEvent={_onTapGestureEvent}
-						>
-							<Reanimated.View
-								style={{
-									flex: 1,
-								}}
-							>
-								{createThumbnail(props.photo.value)}
-							</Reanimated.View>
-						</TapGestureHandler>
-					</Reanimated.View>
-				</LongPressGestureHandler>
-				<Animated.View style={
-					[
-						styles.checkBox,
-						{
-							opacity: selectedOpacity
-						}
-					]
-				}>
-					<RoundCheckbox
-						size={24}
-						checked={selectedOpacity}
-						borderColor='whitesmoke'
-						icon='check'
-						backgroundColor='#007AFF'
-						iconColor='white'
-						onValueChange={() => {
-						}}
-					/>
-				</Animated.View>
-				<Animated.View
-					style={[
-						styles.uploadStatus,
-						{
-							opacity: props.photo.value.hasCid?0:100
-						}
-					]}
-				>
-					<MaterialIcons name="cloud-off" size={20} color="white"/>
-				</Animated.View>
-			</Animated.View>
+			<View style={{flex: 1}}>
+				{createThumbnail(props.photo.value)}
+			</View>
 
 		);
 	}
@@ -322,6 +265,6 @@ const styles = StyleSheet.create({
 });
 
 const isEqual = (prevProps: Props, nextProps: Props) => {
-	return (prevProps.photo.id === nextProps.photo.id);
+	return (prevProps.photo.uid === nextProps.photo.uid);
 }
-export default React.memo(PhotosChunk, isEqual);
+export default PhotosChunk;

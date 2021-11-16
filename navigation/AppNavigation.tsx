@@ -16,6 +16,7 @@ import {default as Reanimated, useSharedValue, useDerivedValue, runOnJS} from 'r
 import ScrollContext from "../components/Shared/ScrollContext";
 import {useRecoilValue} from "recoil";
 import {HeaderVisibilityState} from "../states/layout";
+import {FOOTER_HEIGHT, HEADER_HEIGHT} from "../components/Photos/Constants";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -35,8 +36,7 @@ const AppNavigation = () => {
 	}, [headerShown])
 
 
-	const HEADER_HEIGHT = 30;
-	const FOOTER_HEIGHT = 60;
+
 
 	return (
 		<Reanimated.View style={[styles.View,

@@ -1,20 +1,13 @@
 import React from 'react';
-
-// import Photos from "../components/photos/Photos";
-import {Text} from "react-native";
+import Photos from "../components/Photos/Photos";
 
 interface Props {
-	HEADER_HEIGHT: number;
-	FOOTER_HEIGHT: number;
 }
 
-const HomePage: React.FC<Props> = ({HEADER_HEIGHT,FOOTER_HEIGHT}) => {
-	const Photos = React.lazy(() => import("../components/photos/Photos"));
+const HomePage: React.FC<Props> = () => {
 	return (
-		<React.Suspense fallback={<Text>loding</Text>}>
-			<Photos HEADER_HEIGHT={HEADER_HEIGHT} FOOTER_HEIGHT={FOOTER_HEIGHT}/>
-		</React.Suspense>
+			<Photos />
 	);
 };
 
-export default React.memo(HomePage);
+export default HomePage;

@@ -1,34 +1,24 @@
 import React, {useEffect, useRef, createRef} from 'react';
-import { View, useWindowDimensions, StyleSheet, Image, Text, Animated } from 'react-native';
+import { View, useWindowDimensions, StyleSheet, Image, Text } from 'react-native';
 import {story, } from '../../types/interfaces';
-
 import {
   TapGestureHandler,
   HandlerStateChangeEvent,
   TapGestureHandlerEventPayload,
   State,
 } from 'react-native-gesture-handler';
-import {default as Reanimated,} from 'react-native-reanimated';
-
-
-import {
-	SetterOrUpdater,
-	useRecoilState,
-} from 'recoil';
-import {storyState} from '../../states/photos';
+import {useRecoilState} from 'recoil';
+// import {storyState} from '../../states/photos';
 
 interface Props {
   story:story;
   duration: number;
-  numColumns: 2|3|4;
   text?: string | undefined;
   height: number;
-  showStory:Animated.Value;
-  setHeaderVisibility:SetterOrUpdater<boolean>;
 }
 
 const Highlights: React.FC<Props> = (props) => {
-  const [story, setStory] = useRecoilState(storyState);
+  // const [story, setStory] = useRecoilState(storyState);
 
   const isMounted = useRef(false);
   useEffect(() => {
@@ -41,10 +31,7 @@ const Highlights: React.FC<Props> = (props) => {
   const _tapRef = createRef<TapGestureHandler>();
 
   const openHighlight = () => {
-    setStory(props.story);
-    console.log('opening highlight');
-    props.showStory.setValue(1);
-	props.setHeaderVisibility(false);
+    // setStory(props.story);
   }
 
   const _onTapHandlerStateChange = ( event:HandlerStateChangeEvent<TapGestureHandlerEventPayload> ) => {
