@@ -13,6 +13,7 @@ import {
 } from "../Constants";
 import ListItem from "./ListItems/ListItem";
 import {Data, ItemType} from "../../../types/interfaces";
+import SelectedItems from "../Shared/SelectedItems";
 
 
 interface Props {
@@ -68,27 +69,30 @@ const VerticalList: React.FC<Props> = (props) => {
 			}
 		},
 	)
-		
+
 	const rowRenderer = (type: ReactText, data: Data, index: number) => {
-		return(<ListItem data={data} type={type}/>)
+		return (<ListItem data={data} type={type}/>)
 	}
-	
+
 
 	useEffect(() => {
 		setDataProvider(dataProvider.cloneWithRows(data))
 	}, [data])
 	return (
 		data.length > 0
-			? <RecyclerListView
-				// extendedState={extendedState}
-				style={styles.listContainer}
-				layoutProvider={layoutProvider}
-				dataProvider={dataProvider}
-				scrollViewProps={{
-					removeClippedSubviews: true,
-				}}
-				// renderAheadOffset={100}
-				rowRenderer={rowRenderer}/>
+			? <>
+				<SelectedItems/>
+				<RecyclerListView
+					// extendedState={extendedState}
+					style={styles.listContainer}
+					layoutProvider={layoutProvider}
+					dataProvider={dataProvider}
+					scrollViewProps={{
+						removeClippedSubviews: true,
+						decelerationRate: 0.9
+					}}
+					// renderAheadOffset={10}
+					rowRenderer={rowRenderer}/></>
 			: <View><Text>Loading</Text></View>
 	)
 }

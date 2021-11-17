@@ -43,11 +43,17 @@ export const SelectedItemsState = atom({
 export const SelectModeState = selector({
 	key:'SelectModeState',
 	get:({get})=>{
-		const selectedItemsLength = Object.keys(get(SelectedItemsState)).length
-		return {mode: selectedItemsLength> 0,count:selectedItemsLength }
+		return Object.keys(get(SelectedItemsState)).length > 0
 	},
 	set:({reset})=>{
 		reset(SelectedItemsState)	
+	}
+})
+
+export const SelectCounterState = selector({
+	key:'SelectCounterState',
+	get:({get})=>{
+		return Object.keys(get(SelectedItemsState)).length
 	}
 })
 
@@ -85,3 +91,31 @@ const HorizontalDataState = selector<Data[]>({
 		}
 	})
 })
+
+interface HeaderActions {
+	icon: string;
+	color: string; 
+	onPress: Function; 
+	name: string;
+}
+
+interface HeaderOptions {
+	showBack:boolean
+	back:Function
+	showLogo:boolean
+	leftActions:HeaderActions[]
+	rightActions:HeaderActions[]
+	leftCounter:any
+}
+
+export const HeaderOptionsState = atom<HeaderOptions>({
+	key:'HeaderState',
+	default: {
+		showBack:false,
+		back:()=>{},
+		showLogo:true,
+		leftActions:[],
+		rightActions:[],
+		leftCounter:null
+	}
+}) 

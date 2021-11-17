@@ -9,10 +9,8 @@ import NewAlbum from '../pages/NewAlbum';
 import Browser from './Browser';
 import BarcodeScanner from '../pages/BarcodeScanner';
 import {View, TouchableOpacity, Text} from 'react-native';
-import {createBottomTabNavigator, BottomTabBarProps, BottomTabBarOptions,} from '@react-navigation/bottom-tabs';
+import {createBottomTabNavigator, BottomTabBarProps, BottomTabBarOptions} from '@react-navigation/bottom-tabs';
 import {FontAwesome5} from '@expo/vector-icons';
-import {useRecoilValue} from "recoil";
-import {FooterVisibilityState} from "../states/layout";
 import {FOOTER_HEIGHT} from "../components/Photos/Constants";
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 
@@ -73,7 +71,6 @@ interface Props {
 }
 
 const HomeNavigation: React.FC<Props> = (mainProps) => {
-	const footerVisibility = useRecoilValue(FooterVisibilityState)
 	const TabBar = ({state, descriptors, navigation}: BottomTabBarProps<BottomTabBarOptions>) => {
 		return (
 			<View style={[

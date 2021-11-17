@@ -25,7 +25,7 @@ const ListItem: React.FC<Props> = (props) => {
 	}
 
 	const onPress = () => {
-		if(selectModeState.mode){
+		if(selectModeState){
 			setSelected(!selected)
 		}
 	}

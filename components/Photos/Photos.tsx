@@ -6,12 +6,10 @@ import {
 } from 'react-native-reanimated';
 import {StatusBar, StyleSheet, useWindowDimensions} from "react-native";
 import {DefaultCol} from "./Constants";
-import ActionBar from "./Shared/ActionBar";
+import Header from "./Shared/Header";
 
 
-interface Props {
-
-}
+interface Props {}
 
 const Photos: React.FC<Props> = (props) => {
 	const numColumnsAnimated = useSharedValue(DefaultCol)
@@ -55,17 +53,7 @@ const Photos: React.FC<Props> = (props) => {
 	}
 	return (
 		<>
-			<ActionBar
-				actions={[
-					{
-						icon: "download-lock-outline",
-						onPress: ()=>{},
-						color: "#007AFF",
-						name: "download"
-					}
-				]}
-				moreActions={[]}
-			/>
+			<Header/>
 			<PinchZoom animatedScale={scale} animatedCol={numColumnsAnimated}>
 				<Reanimated.View
 					style={[animatedStyle, baseStyle()]}
