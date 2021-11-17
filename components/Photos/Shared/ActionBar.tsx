@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { Appbar } from 'react-native-paper';
 import {StatusBar, StyleSheet, useWindowDimensions} from 'react-native';
-import { default as Reanimated, useSharedValue, useDerivedValue, useAnimatedStyle } from 'react-native-reanimated';
+import {useSharedValue } from 'react-native-reanimated';
 import { ReText } from 'react-native-redash';
-import {useRecoilCallback, useRecoilState, useRecoilValue} from "recoil";
-import {SelectedItemsState} from "../SharedState";
+import {useRecoilState} from "recoil";
+import {SelectModeState} from "../SharedState";
 import {useEffect} from "react";
 import {HeaderVisibilityState} from "../../../states/layout";
 
@@ -12,25 +12,29 @@ interface Props {
 	actions: Array<{icon:string;color:string;onPress:Function;name: string;}>;
 	moreActions:Array<{icon:string;color:string;onPress:Function;name: string;}>;
 }
+
+
 const ActionBar: React.FC<Props> = (props) => {
-	const [selectedItems,setSelectedOption] = useRecoilState(SelectedItemsState);
 	const [mainHeaderVisibility,setMainHeaderVisibility] =useRecoilState(HeaderVisibilityState) 
+	const [selectMode,setSelectMode] = useRecoilState(SelectModeState)
 	const {width} = useWindowDimensions()
 	const numberSelected = useSharedValue('');
+	
 	useEffect(()=>{
-		if(Object.keys(selectedItems).length>0){
+		if(selectMode.mode){
 			setMainHeaderVisibility(false)
 		}else {
 			setMainHeaderVisibility(true)
 		}
-		numberSelected.value = Object.keys(selectedItems).length.toString()
-	},[selectedItems])
+		numberSelected.value = selectMode.count.toString()
+	},[selectMode])
 
 	const onClosePress = ()=>{
-		console.log("segee");
 		setMainHeaderVisibility(true);
-		setSelectedOption([])
+		// @ts-ignore
+		setSelectMode(false)
 	} 
+	
 	return (
 		<>
 			{!mainHeaderVisibility && <Appbar style={[styles.actionBar,{width:width}]}>
@@ -58,11 +62,11 @@ const ActionBar: React.FC<Props> = (props) => {
 				}
 
 			</Appbar>}
-
 		</>
 
 	);
 };
+
 const styles = StyleSheet.create({
 	actionBar: {
 		opacity:1,
@@ -72,4 +76,5 @@ const styles = StyleSheet.create({
 		backgroundColor: 'white',
 	},
 });
+
 export default ActionBar;

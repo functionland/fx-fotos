@@ -7,3 +7,4 @@ export const SectionHeaderBigHeight = 100
 export const HeaderHeight = 50
 export const HEADER_HEIGHT = 30;
 export const FOOTER_HEIGHT = 60;
+export const DefaultCol = 2;

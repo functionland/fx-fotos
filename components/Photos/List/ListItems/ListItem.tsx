@@ -7,8 +7,8 @@ import VideoItem from "./VideoItem";
 import StoriesItem from "./StoriesItem";
 import SectionHeaderItem from "./SectionHeader";
 import {MaterialIcons} from "@expo/vector-icons";
-import {useRecoilState} from "recoil";
-import {SelectedItemsState} from "../../SharedState";
+import {useRecoilState, useRecoilValue} from "recoil";
+import {IsSelectedState, SelectModeState} from "../../SharedState";
 
 interface Props {
 	type: ReactText,
@@ -16,28 +16,17 @@ interface Props {
 }
 
 const ListItem: React.FC<Props> = (props) => {
-	const [selected,setSelected] = useRecoilState(SelectedItemsState)
-	const [isSelected,setIsSelected] = useState(false)
+	
+	const [selected,setSelected] = useRecoilState(IsSelectedState(props.data.id))
+	const selectModeState = useRecoilValue(SelectModeState)
+	
 	const onLongPress = () => {
-		setSelected(currVal => {return {...currVal,...{[props.data.id]:true}}})
+		setSelected(!selected)
 	}
-	useEffect(()=>{
-		if(props.data.id in selected){
-			setIsSelected(true);
-		}else {
-			setIsSelected(false)
-		}
-	},[selected])
 
 	const onPress = () => {
-		if(isSelected)
-			setSelected(currVal => {
-				let _selecteds = {...currVal}
-				delete _selecteds[props.data.id]
-				return _selecteds
-			})
-		if(Object.keys(selected).length>0 && !isSelected){
-			setSelected(currVal => {return {...currVal,...{[props.data.id]:true}}})
+		if(selectModeState.mode){
+			setSelected(!selected)
 		}
 	}
 	
@@ -64,7 +53,7 @@ const ListItem: React.FC<Props> = (props) => {
 	}
 	const backStyle = {
 		flex: 1,
-		margin:props.data.id in selected?8:0
+		margin:selected?8:0
 	}
 
 	return (
@@ -79,7 +68,7 @@ const ListItem: React.FC<Props> = (props) => {
 						underlayColor='#dddddd'>
 						<View style={backStyle}>
 							{getItemByType(props.type, props.data)}
-							<MaterialIcons style={[styles.checkBox,{opacity:props.data.id in selected?1:0}]} name="check" size={25} color="white"/>
+							<MaterialIcons style={[styles.checkBox,{opacity:selected?1:0}]} name="check" size={25} color="white"/>
 						</View>
 					</TouchableHighlight>
 			}
