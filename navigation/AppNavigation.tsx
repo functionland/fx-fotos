@@ -1,61 +1,38 @@
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from 'react-native-screens/native-stack';
 import PermissionError from '../pages/PermissionError';
-import React, {useState,} from 'react';
+import React from 'react';
 import HomePage from '../pages/HomePage';
 import Settings from '../pages/Settings';
 import ImportGoogle from '../pages/ImportGoogle';
 import NewAlbum from '../pages/NewAlbum';
 import Browser from './Browser';
 import BarcodeScanner from '../pages/BarcodeScanner';
-import {StyleSheet, Animated, View, TouchableOpacity, Text, StatusBar} from 'react-native';
-import Header from '../components/Header';
+import {View, TouchableOpacity, Text} from 'react-native';
 import {createBottomTabNavigator, BottomTabBarProps, BottomTabBarOptions,} from '@react-navigation/bottom-tabs';
 import {FontAwesome5} from '@expo/vector-icons';
-import {default as Reanimated, useSharedValue, useDerivedValue, runOnJS} from 'react-native-reanimated';
-import ScrollContext from "../components/Shared/ScrollContext";
 import {useRecoilValue} from "recoil";
-import {HeaderVisibilityState} from "../states/layout";
-import {FOOTER_HEIGHT, HEADER_HEIGHT} from "../components/Photos/Constants";
+import {FooterVisibilityState} from "../states/layout";
+import {FOOTER_HEIGHT} from "../components/Photos/Constants";
+import {SafeAreaProvider} from 'react-native-safe-area-context';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 const AppNavigation = () => {
-
-	const mainHeaderVisibility = useRecoilValue(HeaderVisibilityState)
 	return (
-
+		<SafeAreaProvider>
 			<NavigationContainer>
 				<Stack.Navigator
 					screenOptions={({navigation, route}) => ({
-						headerTopInsetEnabled:true,
-						headerCenter: () => (
-							<Header
-								HEADER_HEIGHT={HEADER_HEIGHT}
-							/>),
-						////headerTitle: '',
-						headerStyle: {
-							backgroundColor: 'transparent',
-						},
-						headerHideShadow: true,
-						headerShown: mainHeaderVisibility,
-						headerStatusBarHeight:0,
-						// headerTranslucent: true,
-						headerTitleStyle: {
-							fontWeight: 'bold',
-						},
+						headerShown: false
 					})}
 				>
 					<Stack.Screen
 						name="HomePage"
 						options={{}}
-					>
-						{props => <HomeNavigation {...props}
-												  HEADER_HEIGHT={HEADER_HEIGHT}
-												  FOOTER_HEIGHT={FOOTER_HEIGHT}
-						/>}
-					</Stack.Screen>
+						component={HomeNavigation}
+					/>
 					<Stack.Screen
 						name="PermissionError"
 						component={PermissionError}
@@ -88,22 +65,20 @@ const AppNavigation = () => {
 					/>
 				</Stack.Navigator>
 			</NavigationContainer>
+		</SafeAreaProvider>
 	);
 };
 
 interface Props {
-	HEADER_HEIGHT: number;
-	FOOTER_HEIGHT: number;
 }
 
 const HomeNavigation: React.FC<Props> = (mainProps) => {
-	const headerVisibility = useRecoilValue(HeaderVisibilityState)
+	const footerVisibility = useRecoilValue(FooterVisibilityState)
 	const TabBar = ({state, descriptors, navigation}: BottomTabBarProps<BottomTabBarOptions>) => {
 		return (
 			<View style={[
 				{
-					opacity: headerVisibility ? 1 : 0,
-					height: headerVisibility ? mainProps.FOOTER_HEIGHT : 0,
+					height: FOOTER_HEIGHT,
 					flexDirection: 'row',
 					backgroundColor: "white",
 					borderRadius: 0,
@@ -178,54 +153,44 @@ const HomeNavigation: React.FC<Props> = (mainProps) => {
 		);
 	}
 	return (
-		<Animated.View
-			style={
-				[
-					styles.View,
-					{
-						marginTop: 0,
-					}
-				]
-			}>
-			<Tab.Navigator
-				tabBar={props => <TabBar {...props} key='mainTabBar'/>}
-			>
-				<Tab.Screen
-					name="Photos"
-					key="TabScreen_Photos"
-					options={{
-						tabBarLabel: 'Photos',
-						tabBarIcon: ({color, size}) => (
-							<FontAwesome5 name="photo-video" color={color} size={size}/>
-						),
-					}}
-				>
-					{props => <HomePage {...props}/>}
-				</Tab.Screen>
-				<Tab.Screen
-					name="Search"
-					key="TabScreen_Search"
-					component={Search}
-					options={{
-						tabBarLabel: 'Search',
-						tabBarIcon: ({color, size}) => (
-							<FontAwesome5 name="search" size={size} color={color}/>
-						),
-					}}
-				/>
-				<Tab.Screen
-					name="Library"
-					key="TabScreen_Library"
-					component={Library}
-					options={{
-						tabBarLabel: 'Library',
-						tabBarIcon: ({color, size}) => (
-							<FontAwesome5 name="list-alt" size={size} color={color}/>
-						),
-					}}
-				/>
-			</Tab.Navigator>
-		</Animated.View>
+		<Tab.Navigator
+			tabBar={props => <TabBar {...props} key='mainTabBar'/>}
+		>
+			<Tab.Screen
+				name="Photos"
+				key="TabScreen_Photos"
+				options={{
+					tabBarLabel: 'Photos',
+					tabBarIcon: ({color, size}) => (
+						<FontAwesome5 name="photo-video" color={color} size={size}/>
+					),
+				}}
+				component={HomePage}
+			/>
+			<Tab.Screen
+				name="Search"
+				key="TabScreen_Search"
+				component={Search}
+				options={{
+					tabBarLabel: 'Search',
+					tabBarIcon: ({color, size}) => (
+						<FontAwesome5 name="search" size={size} color={color}/>
+					),
+				}}
+			/>
+			<Tab.Screen
+				name="Library"
+				key="TabScreen_Library"
+				component={Library}
+				options={{
+					tabBarLabel: 'Library',
+					tabBarIcon: ({color, size}) => (
+						<FontAwesome5 name="list-alt" size={size} color={color}/>
+					),
+				}}
+			/>
+		</Tab.Navigator>
+
 	);
 };
 
@@ -237,12 +202,4 @@ function Library() {
 	return (<></>);
 }
 
-const styles = StyleSheet.create({
-	View: {
-		flex: 1,
-		//marginTop: StatusBar.currentHeight || 0,
-		backgroundColor: 'white',
-		position: 'relative',
-	},
-});
 export default AppNavigation;

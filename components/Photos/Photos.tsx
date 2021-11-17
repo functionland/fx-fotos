@@ -5,7 +5,7 @@ import {
 	default as Reanimated, interpolate, useAnimatedStyle, useSharedValue
 } from 'react-native-reanimated';
 import {StatusBar, StyleSheet, useWindowDimensions} from "react-native";
-import {DefaultCol, FOOTER_HEIGHT} from "./Constants";
+import {DefaultCol} from "./Constants";
 import ActionBar from "./Shared/ActionBar";
 
 
@@ -15,7 +15,7 @@ interface Props {
 
 const Photos: React.FC<Props> = (props) => {
 	const numColumnsAnimated = useSharedValue(DefaultCol)
-	const {width, height} = useWindowDimensions()
+	const {width} = useWindowDimensions()
 	const scale = useSharedValue(1);
 	const animatedStyle = useAnimatedStyle(() => {
 		const _scale = interpolate(
@@ -50,9 +50,7 @@ const Photos: React.FC<Props> = (props) => {
 	});
 	const baseStyle = () => {
 		return {
-			...styles.listContainer, 
-			width,
-			maxHeight:height-FOOTER_HEIGHT-65,
+			...styles.listContainer
 		}
 	}
 	return (
@@ -84,7 +82,6 @@ const Photos: React.FC<Props> = (props) => {
 const styles = StyleSheet.create({
 	listContainer: {
 		flex: 1,
-		position: 'relative',
 	}
 })
 
