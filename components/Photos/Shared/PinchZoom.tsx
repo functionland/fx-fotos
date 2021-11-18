@@ -1,5 +1,4 @@
 import React, {createRef, useEffect} from 'react';
-import {useWindowDimensions} from 'react-native';
 import {PinchGestureHandler, PinchGestureHandlerGestureEvent} from 'react-native-gesture-handler';
 import {useRecoilState} from 'recoil';
 import {
@@ -17,7 +16,6 @@ interface Props {
 
 const PinchZoom: React.FC<Props> = (props) => {
 	const [numColumns, setNumColumns] = useRecoilState(ColumnState);
-	const {height, width} = useWindowDimensions();
 
 	useEffect(() => {
 		console.log([Date.now() + ': component PinchZoom' + numColumns + ' rendered']);
@@ -89,13 +87,7 @@ const PinchZoom: React.FC<Props> = (props) => {
 		<PinchGestureHandler
 			ref={pinchRef}
 			onGestureEvent={_onPinchGestureEvent}>
-			<Reanimated.View
-				style={{
-					width,
-					height,
-				}}>
 				{props.children}
-			</Reanimated.View>
 		</PinchGestureHandler>
 
 	);

@@ -56,7 +56,9 @@ const MediasManager = () => {
 		MediaLibrary.addListener(event => {
 			mediaReducer({type:"loading",payload:[]})
 		})
-		return () => {MediaLibrary.removeAllListeners()}
+		return () => {
+			MediaLibrary.removeAllListeners()
+			mediaRepository.close()}
 	}, [])
 
 	return (<></>)

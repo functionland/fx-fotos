@@ -2,6 +2,7 @@ import React, {useEffect} from 'react';
 import Photo from "../components/Photos/Photos";
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {StyleSheet} from "react-native";
+import Header from "../components/Photos/Shared/Header";
 
 
 interface Props {
@@ -9,11 +10,9 @@ interface Props {
 }
 
 const HomePage: React.FC<Props> = ({navigation}) => {
-	useEffect(()=>{
-		console.log('are u working')
-	})
 	return (
 		<SafeAreaView style={styles.homeContainer}>
+			<Header/>
 			<Photo/>
 		</SafeAreaView>
 	);

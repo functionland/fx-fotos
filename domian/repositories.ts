@@ -12,28 +12,39 @@ interface MediaResponse {
 }
 
 export class MediaRepository {
+	private locked = false;
+	private hasListener = true;
 	constructor() {
 	}
 
 	async* getIterable(): AsyncIterable<MediaResponse> {
-		if(await getLock()){
+		if(this.locked){
 			throw Error('Media Locked')
 		}
-		await setLock(true)
-		const gen = asyncMerge()
-		while (true) {
-			// @ts-ignore
-			const {done, value} = await gen.next()
-			if (done) {
-				break;
+		try{
+			this.locked=true
+			const gen = asyncMerge()
+			while (this.hasListener) {
+				// @ts-ignore
+				const {done, value} = await gen.next()
+				if (done) {
+					break;
+				}
+				yield(value)
 			}
-			yield(value)
+		}catch (e){
+			console.log(e.message)
+		}finally {
+			this.locked=false;
 		}
-		await setLock(false)
 	}
 
 	async write(medias: Media[]) {
 		await setMedias(medias)
+	}
+	
+	close(){
+		this.hasListener = false;
 	}
 }
 
@@ -148,23 +159,6 @@ const getMedias = async () => {
 export const setMedias = async (value: Media[]) => {
 	try {
 		await AsyncStorage.setItem('medias', JSON.stringify(value))
-	} catch (e) {
-		console.log(e)
-	}
-}
-
-const setLock = async (value:boolean)=>{
-	try {
-		await AsyncStorage.setItem('mediaLock', JSON.stringify(value))
-	} catch (e) {
-		console.log(e)
-	}
-}
-
-const getLock = async () => {
-	try {
-		const jsonValue = await AsyncStorage.getItem('mediaLock')
-		return jsonValue != null ? JSON.parse(jsonValue) : false;
 	} catch (e) {
 		console.log(e)
 	}

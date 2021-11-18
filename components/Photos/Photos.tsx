@@ -6,14 +6,16 @@ import {
 } from 'react-native-reanimated';
 import {StatusBar, StyleSheet, useWindowDimensions} from "react-native";
 import {DefaultCol} from "./Constants";
-import Header from "./Shared/Header";
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 
 
 interface Props {}
 
 const Photos: React.FC<Props> = (props) => {
+	const insets = useSafeAreaInsets();
 	const numColumnsAnimated = useSharedValue(DefaultCol)
-	const {width} = useWindowDimensions()
+	const {width,height} = useWindowDimensions()
 	const scale = useSharedValue(1);
 	const animatedStyle = useAnimatedStyle(() => {
 		const _scale = interpolate(
@@ -48,12 +50,15 @@ const Photos: React.FC<Props> = (props) => {
 	});
 	const baseStyle = () => {
 		return {
-			...styles.listContainer
+			...styles.listContainer,
+			width:width,
+			height:height - insets.bottom
 		}
 	}
 	return (
 		<>
-			<Header/>
+
+			
 			<PinchZoom animatedScale={scale} animatedCol={numColumnsAnimated}>
 				<Reanimated.View
 					style={[animatedStyle, baseStyle()]}

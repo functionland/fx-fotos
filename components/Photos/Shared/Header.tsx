@@ -70,6 +70,7 @@ const styles = StyleSheet.create({
 	appBar: {
 		flex: 1,
 		minHeight: HeaderHeight,
+		maxHeight: HeaderHeight,
 		backgroundColor: 'white'
 	}
 });
