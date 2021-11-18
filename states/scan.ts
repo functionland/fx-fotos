@@ -1,6 +1,6 @@
 import {atom, selector} from "recoil";
 import {Media} from "../domian";
-import {MediaRepository} from '../domian/repositories'
+import {MediaRepository} from '../repositories/MediaRepository'
 
 
 // @ts-ignore

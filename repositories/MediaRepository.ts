@@ -1,6 +1,6 @@
 import * as MediaLibrary from "expo-media-library";
 import {Asset} from "expo-media-library";
-import {Media} from "./index";
+import {Media} from "../domian";
 import {AsyncStorage} from "react-native";
 import {manipulateAsync, SaveFormat} from 'expo-image-manipulator';
 import {PhotoHeight} from "../components/Photos/Constants";

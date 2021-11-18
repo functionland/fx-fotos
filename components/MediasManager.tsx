@@ -3,7 +3,7 @@ import {mediasState} from "../states";
 import {Asset} from "expo-media-library";
 import React, {useEffect} from "react";
 import * as MediaLibrary from "expo-media-library";
-import {MediaRepository} from "../domian/repositories";
+import {MediaRepository} from "../repositories/MediaRepository";
 import {storagePermission} from "../utils/permissions";
 
 const MediasManager = () => {

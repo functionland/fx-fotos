@@ -1,8 +1,8 @@
 import React from "react";
 import {FlatList, SafeAreaView, View} from "react-native";
 import {story} from "../../../../types/interfaces";
-import Highlights from "../../../photos/Highlights";
-import {HeaderHeight, StoriesHeight} from "../../Constants";
+import Highlights from "../../Shared/Highlights";
+import {StoriesHeight} from "../../Constants";
 
 
 interface Props {
