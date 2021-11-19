@@ -36,12 +36,14 @@ export class SyncEngine {
 					(async () => {
 						// @ts-ignore
 						const cid = await this.borg.sendFile(pending.uri)
+						// @ts-ignore
 						this._finishUploadMedia(pending,cid)
 					})()
 					// @ts-ignore
 
 				} catch (e) {
 					console.log(e)
+					// @ts-ignore
 					this._failedUploadMedia(pending)
 				}
 			}

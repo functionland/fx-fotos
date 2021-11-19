@@ -1,14 +1,17 @@
-import {useRecoilState, useRecoilTransaction_UNSTABLE} from "recoil";
+import {useRecoilState, useRecoilTransaction_UNSTABLE, useSetRecoilState} from "recoil";
 import {mediasState} from "../states";
-import {Asset} from "expo-media-library";
+import {Asset, MediaType} from "expo-media-library";
 import React, {useEffect} from "react";
 import * as MediaLibrary from "expo-media-library";
 import {MediaRepository} from "../repositories/MediaRepository";
 import {storagePermission} from "../utils/permissions";
+import {uploadListState} from "./Sync/SyncState";
+import {Media} from "../domian";
 
 const MediasManager = () => {
 	type Action = { type: "insert" | "delete" | "refresh" | "loading", payload: Asset[] }
-	const [medias,setMedias]=useRecoilState(mediasState)
+	const [medias,setMedias]=useRecoilState<Media[]>(mediasState)
+	const setUploadList = useSetRecoilState(uploadListState)
 	const mediaRepository = new MediaRepository();
 	const mediaReducer = (action: Action) => {
 		if (action.type === "loading") {
@@ -24,16 +27,19 @@ const MediasManager = () => {
 						switch (value.type){
 							case 'old':{
 								setMedias((currVal) => [...currVal,...value.medias])
+								setUploadList(value.medias.filter((x:Media)=>x.mediaType===MediaType.photo&&!x.hasCid))
 								break;
 							}
 							case 'cache':{
 								if(medias.length===0){
 									setMedias(value.medias)
+									setUploadList(value.medias.filter((x:Media)=>x.mediaType===MediaType.photo&&!x.hasCid))
 								}
 								break;
 							}
 							case 'new':{
 								setMedias((currVal) => [...value.medias, ...currVal])
+								setUploadList(value.medias.filter((x:Media)=>x.mediaType===MediaType.photo&&!x.hasCid))
 								break;
 							}
 						}

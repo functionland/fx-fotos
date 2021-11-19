@@ -81,16 +81,16 @@ export const IsSelectedState = selectorFamily<boolean,string>({
 	}
 })
 
-const HorizontalDataState = selector<Data[]>({
-	key: 'HorizontalDataState',
-	get: ({get}) => get(mediasState).map((media: Media) => {
-		return {
-			id: media.id,
-			value: media,
-			type: ItemTypeFromMediaType(media.mediaType)
-		}
-	})
-})
+// const HorizontalDataState = selector<Data[]>({
+// 	key: 'HorizontalDataState',
+// 	get: ({get}) => get(mediasState).map((media: Media) => {
+// 		return {
+// 			id: media.id,
+// 			value: media,
+// 			type: ItemTypeFromMediaType(media.mediaType)
+// 		}
+// 	})
+// })
 
 interface HeaderActions {
 	icon: string;

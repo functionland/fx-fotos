@@ -3,7 +3,7 @@ import React, {useContext, useEffect, useState} from "react";
 import {BorgContext} from "@functionland/rn-borg/src/BorgClient";
 import {mediasState} from "../../states";
 import {SyncEngine} from "./SyncEngine";
-import {uploadListState} from "../../states/sync";
+import {uploadListState} from "./SyncState";
 import {DeviceEventEmitter} from "react-native";
 import {Media} from "../../domian";
 import * as FileSystem from 'expo-file-system';

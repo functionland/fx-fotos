@@ -1,35 +1,28 @@
 import React, {ReactText, useEffect, useState} from "react";
-import {StatusBar, StyleSheet, Text, useWindowDimensions, View} from "react-native";
-import {useRecoilState, useRecoilValue} from "recoil";
-import {ColumnState, SelectedItemsState, VerticalDataState} from "../SharedState";
+import {StyleSheet, Text, useWindowDimensions, View} from "react-native";
+import {useRecoilValue} from "recoil";
+import {ColumnState, VerticalDataState} from "../SharedState";
 import {DataProvider, LayoutProvider, RecyclerListView} from "recyclerlistview";
-import {
-	FOOTER_HEIGHT,
-	HeaderHeight,
-	PhotoHeight,
-	SectionHeaderBigHeight,
-	SectionHeaderHeight,
-	StoriesHeight
-} from "../Constants";
+import {SectionHeaderBigHeight, SectionHeaderHeight, StoriesHeight} from "../Constants";
 import ListItem from "./ListItems/ListItem";
 import {Data, ItemType} from "../../../types/interfaces";
 import SelectedItems from "../Shared/SelectedItems";
+import ItemAnimator from "./ItemAnimator";
 
 
 interface Props {
 
 }
 
-interface ExtendedState extends Object {
-	selected: {}
-}
-
 const VerticalList: React.FC<Props> = (props) => {
 	const data = useRecoilValue(VerticalDataState)
 	const col = useRecoilValue(ColumnState)
 	const [dataProvider, setDataProvider] = useState(new DataProvider(
-		(r1, r2) => r1.id !== r2.id)
+		(r1, r2) => r1.id !== r2.id,
+		index => data[index].id
+		)
 	)
+	const [animator] = useState(new ItemAnimator());
 	const {width} = useWindowDimensions()
 	const windowWidth = Math.round(width * 1000) / 1000 - 6;
 	const layoutProvider = new LayoutProvider(
@@ -44,12 +37,12 @@ const VerticalList: React.FC<Props> = (props) => {
 				}
 				case ItemType.Photo: {
 					dim.width = columnWidth
-					dim.height = columnWidth * 1.3
+					dim.height = columnWidth * 1.2
 					break;
 				}
 				case ItemType.Video: {
 					dim.width = columnWidth
-					dim.height = columnWidth * 1.3
+					dim.height = columnWidth * 1.2
 					break;
 				}
 				case ItemType.SectionHeader: {
@@ -73,9 +66,13 @@ const VerticalList: React.FC<Props> = (props) => {
 	const rowRenderer = (type: ReactText, data: Data, index: number) => {
 		return (<ListItem data={data} type={type}/>)
 	}
-
+	
+	useEffect(()=>{
+		
+	},[])
 
 	useEffect(() => {
+		dataProvider.getStableId = index => data[index].id
 		setDataProvider(dataProvider.cloneWithRows(data))
 	}, [data])
 	return (
@@ -88,10 +85,10 @@ const VerticalList: React.FC<Props> = (props) => {
 					layoutProvider={layoutProvider}
 					dataProvider={dataProvider}
 					scrollViewProps={{
-						removeClippedSubviews: true,
 						decelerationRate: 0.9
 					}}
-					// renderAheadOffset={10}
+					itemAnimator={animator}
+					renderAheadOffset={40}
 					rowRenderer={rowRenderer}/></>
 			: <View><Text>Loading</Text></View>
 	)
