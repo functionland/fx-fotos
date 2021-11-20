@@ -33,7 +33,7 @@ export function dataMapper(medias: Media[], sectionType: SectionType): Data[] {
 			default : {
 				const lastTimeStamp = new Date(all[index - 1].creationTime)
 				const currTimeStamp = new Date(media.creationTime)
-				if (!getDiffFunc(SectionType.Day)(lastTimeStamp, currTimeStamp)) {
+				if (!getDiffFunc(sectionType)(lastTimeStamp, currTimeStamp)) {
 					result.push({
 						id: media.creationTime.toString(),
 						type: !getDiffFunc(SectionType.Month)(lastTimeStamp, currTimeStamp) ? ItemType.SectionHeaderBig : ItemType.SectionHeader,

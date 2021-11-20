@@ -62,13 +62,13 @@ const VerticalList: React.FC<Props> = (props) => {
 			}
 		},
 	)
-
+	layoutProvider.shouldRefreshWithAnchoring = false;
 	const rowRenderer = (type: ReactText, data: Data, index: number) => {
 		return (<ListItem data={data} type={type}/>)
 	}
 	
 	useEffect(()=>{
-		
+		// setDataProvider()
 	},[])
 
 	useEffect(() => {
@@ -76,7 +76,7 @@ const VerticalList: React.FC<Props> = (props) => {
 		setDataProvider(dataProvider.cloneWithRows(data))
 	}, [data])
 	return (
-		data.length > 0
+		dataProvider.getSize() > 0
 			? <>
 				<SelectedItems/>
 				<RecyclerListView
@@ -87,8 +87,8 @@ const VerticalList: React.FC<Props> = (props) => {
 					scrollViewProps={{
 						decelerationRate: 0.9
 					}}
-					itemAnimator={animator}
-					renderAheadOffset={40}
+					// itemAnimator={animator}
+					// renderAheadOffset={40}
 					rowRenderer={rowRenderer}/></>
 			: <View><Text>Loading</Text></View>
 	)

@@ -3,6 +3,7 @@ import {Media} from "../../domian";
 
 
 export class SyncEngine {
+	static myInstance:SyncEngine;
 	private borg: any;
 	private uploadQueue: Media[];
 	private pending: Media[];
@@ -11,8 +12,9 @@ export class SyncEngine {
 	private borgReady: boolean;
 	private uploadRunner:any;
 	private readonly maxConcurrent:number;
+	private onUploadComplete: Function;
 
-	constructor(borg: any) {
+	constructor(borg: any,onUploadComplete:Function) {
 		this.borg = borg;
 		this.uploadQueue = [];
 		this.pending = []
@@ -20,6 +22,19 @@ export class SyncEngine {
 		this.borgReady = false;
 		this.safetyMap = new Map();
 		this.maxConcurrent = 1;
+		this.onUploadComplete = onUploadComplete
+	}
+
+
+	/**
+	 * @returns {SyncEngine}
+	 */
+	static getInstance(borg:any,onUploadComplete:Function) {
+		if (!SyncEngine.myInstance) {
+			SyncEngine.myInstance = new SyncEngine(borg,onUploadComplete);
+		}
+
+		return this.myInstance;
 	}
 	
 	end(){
@@ -80,7 +95,7 @@ export class SyncEngine {
 	_finishUploadMedia(media: Media, cid: string) {
 		this.pending = this.pending.filter(x => x.id !== media.id)
 		this.safetyMap.set(media.id, "done")
-		DeviceEventEmitter.emit("uploadcomplete", {id: media.id, cid: cid})
+		this.onUploadComplete( {id: media.id, cid: cid})
 	}
 
 	_failedUploadMedia(media: Media) {

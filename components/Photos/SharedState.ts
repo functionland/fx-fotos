@@ -1,7 +1,6 @@
 import {atom, selector, selectorFamily} from "recoil";
-import {Media} from "../../domian";
 import {mediasState} from '../../states/scan'
-import {dataMapper, ItemTypeFromMediaType} from "./utils";
+import {dataMapper} from "./utils";
 import {Column, Data, SectionType} from "../../types/interfaces";
 import {DefaultCol} from "./Constants";
 
@@ -11,11 +10,11 @@ export const SectionByState = selector<SectionType>({
 	get: ({get}) => {
 		const col = get(ColumnState)
 		switch (col) {
-			case 2: {
+			case 4: {
 				return SectionType.Day
 			}
 			default: {
-				return SectionType.Month
+				return SectionType.Day
 			}
 		}
 	}
@@ -30,7 +29,8 @@ export const VerticalDataState = selector<Data[]>({
 	key: 'VerticalDataState',
 	get: ({get}) => {
 		const medias = get(mediasState)
-		const sectionType = get(SectionByState)
+		const sectionType = get(ColumnState)===4?SectionType.Month:SectionType.Day
+		console.log("you most run")
 		return dataMapper(medias, sectionType)
 	}
 })
