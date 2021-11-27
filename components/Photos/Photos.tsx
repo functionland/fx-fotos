@@ -3,12 +3,7 @@ import PinchZoom from "./Shared/PinchZoom";
 import VerticalList from "./List/VerticalList";
 
 
-interface Props {
-}
-
-const Photos: React.FC<Props> = (props) => {
-
-
+const Photos: React.FC = () => {
 	return (
 		<PinchZoom>
 			<VerticalList/>

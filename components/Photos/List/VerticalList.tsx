@@ -9,11 +9,7 @@ import {Data, ItemType} from "../../../types/interfaces";
 import SelectedItems from "../Shared/SelectedItems";
 
 
-interface Props {
-
-}
-
-const VerticalList: React.FC<Props> = (props) => {
+const VerticalList: React.FC = () => {
 	const data = useRecoilValue(VerticalDataState)
 	const col = useRecoilValue(ColumnState)
 	const [dataProvider, setDataProvider] = useState(new DataProvider(
