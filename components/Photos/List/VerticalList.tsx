@@ -67,9 +67,6 @@ const VerticalList: React.FC<Props> = (props) => {
 		return (<ListItem data={data} type={type}/>)
 	}
 	
-	useEffect(()=>{
-		// setDataProvider()
-	},[])
 
 	useEffect(() => {
 		dataProvider.getStableId = index => data[index].id
@@ -80,15 +77,14 @@ const VerticalList: React.FC<Props> = (props) => {
 			? <>
 				<SelectedItems/>
 				<RecyclerListView
-					// extendedState={extendedState}
+					optimizeForInsertDeleteAnimations={true}
 					style={styles.listContainer}
 					layoutProvider={layoutProvider}
 					dataProvider={dataProvider}
 					scrollViewProps={{
 						decelerationRate: 0.9
 					}}
-					// itemAnimator={animator}
-					// renderAheadOffset={40}
+					itemAnimator={animator}
 					rowRenderer={rowRenderer}/></>
 			: <View><Text>Loading</Text></View>
 	)
