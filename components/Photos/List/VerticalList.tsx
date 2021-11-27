@@ -7,7 +7,6 @@ import {SectionHeaderBigHeight, SectionHeaderHeight, StoriesHeight} from "../Con
 import ListItem from "./ListItems/ListItem";
 import {Data, ItemType} from "../../../types/interfaces";
 import SelectedItems from "../Shared/SelectedItems";
-import ItemAnimator from "./ItemAnimator";
 
 
 interface Props {
@@ -22,7 +21,6 @@ const VerticalList: React.FC<Props> = (props) => {
 		index => data[index].id
 		)
 	)
-	const [animator] = useState(new ItemAnimator());
 	const {width} = useWindowDimensions()
 	const windowWidth = Math.round(width * 1000) / 1000 - 6;
 	const layoutProvider = new LayoutProvider(
@@ -55,6 +53,11 @@ const VerticalList: React.FC<Props> = (props) => {
 					dim.height = SectionHeaderBigHeight
 					break;
 				}
+				case ItemType.SectionHeaderMedium: {
+					dim.width = windowWidth
+					dim.height = SectionHeaderBigHeight
+					break;
+				}
 				default: {
 					dim.width = windowWidth
 					dim.height = 0
@@ -63,15 +66,16 @@ const VerticalList: React.FC<Props> = (props) => {
 		},
 	)
 	layoutProvider.shouldRefreshWithAnchoring = false;
-	const rowRenderer = (type: ReactText, data: Data, index: number) => {
+	
+	const rowRenderer = (type: ReactText, data: Data) => {
 		return (<ListItem data={data} type={type}/>)
 	}
 	
-
 	useEffect(() => {
 		dataProvider.getStableId = index => data[index].id
 		setDataProvider(dataProvider.cloneWithRows(data))
 	}, [data])
+	
 	return (
 		dataProvider.getSize() > 0
 			? <>
@@ -84,7 +88,6 @@ const VerticalList: React.FC<Props> = (props) => {
 					scrollViewProps={{
 						decelerationRate: 0.9
 					}}
-					itemAnimator={animator}
 					rowRenderer={rowRenderer}/></>
 			: <View><Text>Loading</Text></View>
 	)
