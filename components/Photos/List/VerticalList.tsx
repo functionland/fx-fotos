@@ -13,8 +13,7 @@ const VerticalList: React.FC = () => {
 	const data = useRecoilValue(VerticalDataState)
 	const col = useRecoilValue(ColumnState)
 	const [dataProvider, setDataProvider] = useState(new DataProvider(
-		(r1, r2) => r1.id !== r2.id,
-		index => data[index].id
+		(r1, r2) => r1.id !== r2.id
 		)
 	)
 	const {width} = useWindowDimensions()
@@ -68,7 +67,6 @@ const VerticalList: React.FC = () => {
 	}
 	
 	useEffect(() => {
-		dataProvider.getStableId = index => data[index].id
 		setDataProvider(dataProvider.cloneWithRows(data))
 	}, [data])
 	
