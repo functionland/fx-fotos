@@ -4,39 +4,24 @@ import {Data, ItemType, SectionType, story} from "../../types/interfaces";
 
 export function dataMapper(medias: Media[], sectionType: SectionType): Data[] {
 	let result: Data[] = [];
-	let LastBig = null;
 	medias.forEach((media, index, all) => {
 		switch (index) {
 			case 0: {
-				// const stories = storyMapper(medias)
-				// stories.length > 0 && result.push({
-				// 	id: "Stories",
-				// 	type: ItemType.Stories,
-				// 	value: stories
-				// })
-				break;
-			}
-			case 1: {
-				const currTimeStamp = new Date(media.creationTime)
-				result.push({
-					id: media.creationTime.toString(),
-					type: isBig(currTimeStamp) ? ItemType.SectionHeaderBig : ItemType.SectionHeader,
-					value: {timeStamp: currTimeStamp}
-				})
-				result.push({
-					id: media.id,
-					type: ItemTypeFromMediaType(media.mediaType),
-					value: media
+				const stories = storyMapper(medias)
+				stories.length > 0 && result.push({
+					id: "Stories",
+					type: ItemType.Stories,
+					value: stories
 				})
 				break;
 			}
 			default : {
-				const lastTimeStamp = new Date(all[index - 1].creationTime)
+				const lastTimeStamp = index == 1 ? new Date() : new Date(all[index - 1].creationTime) 
 				const currTimeStamp = new Date(media.creationTime)
-				if (!getDiffFunc(sectionType)(lastTimeStamp, currTimeStamp)) {
+				if (!getDiffFunc(sectionType)(lastTimeStamp, currTimeStamp) || index == 1 ) {
 					result.push({
 						id: media.creationTime.toString(),
-						type: !getDiffFunc(SectionType.Month)(lastTimeStamp, currTimeStamp) ? ItemType.SectionHeaderBig : ItemType.SectionHeader,
+						type: SectionHeaderType(lastTimeStamp,currTimeStamp,sectionType),
 						value: {timeStamp: currTimeStamp}
 					})
 				}
@@ -150,13 +135,6 @@ export function getDiffFunc(sectionType: SectionType) {
 	}
 }
 
-function isBig(timeStamp: Date) {
-	const now = new Date()
-	const showYear = !getDiffFunc(SectionType.Year)(now, timeStamp)
-	const showMonth = !getDiffFunc(SectionType.Month)(now, timeStamp)
-	return showMonth || showYear
-}
-
 export function ItemTypeFromMediaType(mediaType:MediaTypeValue){
 	switch (mediaType){
 		case "photo":
@@ -168,4 +146,18 @@ export function ItemTypeFromMediaType(mediaType:MediaTypeValue){
 	}
 }
 
+function SectionHeaderType(lastTimeStamp:Date,currTimeStamp:Date,sectionType:SectionType){
+	switch (sectionType) {
+		case SectionType.Month:
+			return ItemType.SectionHeaderMedium
+		default:
+			return isBig(lastTimeStamp, currTimeStamp) ? ItemType.SectionHeaderBig : ItemType.SectionHeader
+		
+	}
+}
 
+function isBig(timeStamp1: Date,timeStamp2=new Date()) {
+	const showYear = !getDiffFunc(SectionType.Year)(timeStamp1, timeStamp2)
+	const showMonth = !getDiffFunc(SectionType.Month)(timeStamp1, timeStamp2)
+	return showMonth || showYear
+}

@@ -7,6 +7,7 @@ import moment from 'moment';
 interface Props {
 	data:SectionHeader
 	big:boolean;
+	detail:boolean
 }
 
 const SectionHeaderItem: React.FC<Props> = (props:Props)=>{
@@ -19,28 +20,37 @@ const SectionHeaderItem: React.FC<Props> = (props:Props)=>{
 		}
 		else {
 			const showYear = !getDiffFunc(SectionType.Year)(now,props.data.timeStamp)
-			let format = `ddd, MMM D${showYear?',YYYY':''}`
-			let bigFormat = `MMMM${showYear?',YYYY':''}`
+			let format = `ddd, MMM D${showYear?', YYYY':''}`
+			let bigFormat = `MMMM${showYear?', YYYY':''}`
 			setText(moment(props.data.timeStamp).format(format))
 			setBigText(moment(props.data.timeStamp).format(bigFormat))
 		}
 	})
 
 	return (
-		<View style={{flex: 1, marginLeft:20, marginTop:10}}>
+		<View style={styles.container}>
 			{props.big && <Text style={styles.bigText}>{bigText}</Text>}
-			<Text style={styles.smallText} >{text}</Text>
+			{props.detail && <Text style={styles.smallText} >{text}</Text>}
 		</View>
 	)
 }
 
 const styles = StyleSheet.create({
+	container : {
+		flex: 1,
+		display:"flex",
+		flexDirection:"column",
+		alignItems:"flex-start",
+		justifyContent:"center",
+		marginLeft:10,
+		// marginTop:10
+	},
 	bigText:{
-		fontSize:25,
-		fontWeight:'bold'
+		fontSize:30,
+		fontWeight:'bold',
 	},
 	smallText:{
-		fontSize:20
+		fontSize:23
 	}
 })
 

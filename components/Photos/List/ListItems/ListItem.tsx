@@ -42,10 +42,13 @@ const ListItem: React.FC<Props> = (props) => {
 				return (<StoriesItem data={data.value as story[]}/>)
 			}
 			case ItemType.SectionHeader: {
-				return (<SectionHeaderItem data={data.value as SectionHeader} big={false}/>)
+				return (<SectionHeaderItem data={data.value as SectionHeader} big={false} detail={true}/>)
 			}
 			case ItemType.SectionHeaderBig: {
-				return (<SectionHeaderItem data={data.value as SectionHeader} big={true}/>)
+				return (<SectionHeaderItem data={data.value as SectionHeader} big={true} detail={true}/>)
+			}
+			case ItemType.SectionHeaderMedium: {
+				return (<SectionHeaderItem data={data.value as SectionHeader} big={true} detail={false}/>)
 			}
 			default:
 				throw Error("Type Not provided")
