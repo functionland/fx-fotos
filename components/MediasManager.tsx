@@ -6,7 +6,7 @@ import * as MediaLibrary from "expo-media-library";
 import {MediaRepository} from "../repositories/MediaRepository";
 import {storagePermission} from "../utils/permissions";
 import {uploadListState} from "./Sync/SyncState";
-import {Media} from "../domian";
+import {Media} from "../types/interfaces";
 
 const MediasManager = () => {
 	type Action = { type: "insert" | "delete" | "refresh" | "loading", payload: Asset[] }

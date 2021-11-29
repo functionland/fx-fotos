@@ -1,6 +1,6 @@
 import React from "react";
 import FastImage from "react-native-fast-image";
-import {Media} from "../../../../domian";
+import {Media} from "../../../../types/interfaces";
 import {StyleSheet, View} from "react-native";
 import {MaterialIcons} from "@expo/vector-icons";
 
