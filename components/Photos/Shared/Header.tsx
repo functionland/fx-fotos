@@ -2,11 +2,10 @@ import * as React from 'react';
 import {Appbar} from 'react-native-paper';
 import {Image, StyleSheet, useWindowDimensions, View} from 'react-native';
 import {ReText} from 'react-native-redash';
-import {useRecoilState, useRecoilValue} from "recoil";
-import {HeaderOptionsState, SelectModeState} from "../SharedState";
-import {useEffect} from "react";
+import {useRecoilValue} from "recoil";
+import {HeaderOptionsState} from "../SharedState";
 import {HeaderHeight} from "../Constants";
-import {default as Reanimated, useDerivedValue, useAnimatedStyle, useSharedValue} from 'react-native-reanimated';
+
 
 interface Props {
 }

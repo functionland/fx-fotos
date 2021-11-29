@@ -1,4 +1,3 @@
-import {DeviceEventEmitter} from "react-native";
 import {Media} from "../../domian";
 
 
@@ -10,6 +9,7 @@ export class SyncEngine {
 	private safetyMap: Map<string, 'pending' | 'queue' | 'done'>
 	private borgConnected: boolean;
 	private borgReady: boolean;
+	
 	private uploadRunner:any;
 	private readonly maxConcurrent:number;
 	private onUploadComplete: Function;
@@ -62,7 +62,7 @@ export class SyncEngine {
 					this._failedUploadMedia(pending)
 				}
 			}
-		}, 5000);
+		}, 10000);
 		(async () => {
 			setTimeout(async () => {
 				// @ts-ignore

@@ -1,15 +1,10 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import Photo from "../components/Photos/Photos";
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {StyleSheet} from "react-native";
 import Header from "../components/Photos/Shared/Header";
 
-
-interface Props {
-	navigation:any;
-}
-
-const HomePage: React.FC<Props> = ({navigation}) => {
+const HomePage: React.FC = () => {
 	return (
 		<SafeAreaView style={styles.homeContainer}>
 			<Header/>
