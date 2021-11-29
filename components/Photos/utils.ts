@@ -7,6 +7,11 @@ export function dataMapper(medias: Media[], sectionType: SectionType): Data[] {
 	medias.forEach((media, index, all) => {
 		switch (index) {
 			case 0: {
+				result.push({
+					id: "Header",
+					type: ItemType.Header,
+					value: []
+				})
 				const stories = storyMapper(medias)
 				stories.length > 0 && result.push({
 					id: "Stories",

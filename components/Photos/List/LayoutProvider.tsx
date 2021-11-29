@@ -1,6 +1,6 @@
 import { GridLayoutProvider } from 'recyclerlistview';
 import {ItemType} from "../../../types/interfaces";
-import {SectionHeaderBigHeight, SectionHeaderHeight, StoriesHeight} from "../Constants";
+import {HeaderHeight, SectionHeaderBigHeight, SectionHeaderHeight, StoriesHeight} from "../Constants";
 import {DataProvider} from "recyclerlistview";
 const MAX_SPAN = 12;
 export default class LayoutProvider extends GridLayoutProvider {
@@ -13,6 +13,9 @@ export default class LayoutProvider extends GridLayoutProvider {
 				let type = props.dp.getDataForIndex(index).type;
 				let col = props.col
 				switch (type) {
+					case ItemType.Header: {
+						return MAX_SPAN
+					}
 					case ItemType.Stories: {
 						return MAX_SPAN
 					}
@@ -39,6 +42,9 @@ export default class LayoutProvider extends GridLayoutProvider {
 			(index:number) => {
 				let type = props.dp.getDataForIndex(index).type;
 				switch (type) {
+					case ItemType.Header: {
+						return HeaderHeight
+					}
 					case ItemType.Stories: {
 						return StoriesHeight
 					}

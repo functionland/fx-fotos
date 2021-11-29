@@ -95,7 +95,8 @@ export enum ItemType {
 	Stories,
 	SectionHeader,
 	SectionHeaderBig,
-	SectionHeaderMedium
+	SectionHeaderMedium,
+	Header
 }
 
 export interface Data {

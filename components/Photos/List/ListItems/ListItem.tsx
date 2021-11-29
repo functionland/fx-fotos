@@ -9,6 +9,7 @@ import SectionHeaderItem from "./SectionHeader";
 import {MaterialIcons} from "@expo/vector-icons";
 import {useRecoilState, useRecoilValue} from "recoil";
 import {IsSelectedState, SelectModeState} from "../../SharedState";
+import Header from "../../Shared/Header";
 
 interface Props {
 	type: ReactText,
@@ -25,6 +26,7 @@ const ListItem: React.FC<Props> = (props) => {
 	}
 
 	const onPress = () => {
+		console.log("wtf")
 		if(selectModeState){
 			setSelected(!selected)
 		}
@@ -32,6 +34,9 @@ const ListItem: React.FC<Props> = (props) => {
 	
 	const getItemByType = (type: React.ReactText, data: Data) => {
 		switch (type) {
+			case ItemType.Header: {
+				return (<Header/>)
+			}
 			case ItemType.Photo: {
 				return (<PhotoItem data={data.value as Media}/>)
 			}
@@ -62,7 +67,7 @@ const ListItem: React.FC<Props> = (props) => {
 	return (
 		<View style={{flex:1}}>
 			{
-				props.type === ItemType.Stories ?
+				props.type === ItemType.Stories || props.type === ItemType.Header ?
 					getItemByType(props.type, props.data) :
 					<TouchableHighlight
 						style={{flex: 1}}
