@@ -15,6 +15,7 @@ const VerticalList: React.FC = () => {
 	const data = useRecoilValue(VerticalDataState)
 	const col = useRecoilValue(ColumnState)
 	const selectMode = useRecoilValue(SelectModeState)
+	
 	const [dataProvider, setDataProvider] = useState(new DataProvider(
 			(r1, r2) => r1.id !== r2.id,
 			index => data[index].id
@@ -23,7 +24,7 @@ const VerticalList: React.FC = () => {
 	const recyclerRef = useRef<RecyclerListView<any, any>>()
 	const layoutProvider = new LayoutProvider({dp: dataProvider, col})
 	const animator = new ItemAnimator()
-	layoutProvider.shouldRefreshWithAnchoring = false;
+	
 
 	const rowRenderer = (type: ReactText, data: Data, index:number) => {
 		return (<ListItem data={data} type={type}/>)
@@ -36,8 +37,10 @@ const VerticalList: React.FC = () => {
 	}
 
 	useEffect(() => {
+		layoutProvider.shouldRefreshWithAnchoring = true;
 		setDataProvider(dataProvider.cloneWithRows(data))
 		// TODO fix scroll
+		layoutProvider.shouldRefreshWithAnchoring = false;
 	}, [data])
 
 	const _setRef = (recycler: RecyclerListView<any, any> | undefined) => {

@@ -8,7 +8,7 @@ import {
 	withTiming, runOnJS, useSharedValue, useAnimatedStyle, interpolate,
 } from 'react-native-reanimated';
 import {ColumnState} from "../SharedState";
-import {StatusBar, StyleSheet, useWindowDimensions} from "react-native";
+import {StyleSheet, useWindowDimensions} from "react-native";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 
 interface Props {
@@ -111,7 +111,7 @@ const PinchZoom: React.FC<Props> = (props) => {
 				{
 					translateY: (
 						(
-							(_scale * (width - (StatusBar.currentHeight || 0))) - (width - (StatusBar.currentHeight || 0))
+							(_scale * (width)) - (width)
 						)
 						/ (2 * _scale))
 				}
