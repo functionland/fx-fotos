@@ -1,5 +1,5 @@
 import {atom, selector} from "recoil";
-import {Media} from "../domian";
+import {Media} from "../types/interfaces";
 import {MediaRepository} from '../repositories/MediaRepository'
 
 
@@ -19,10 +19,3 @@ export const mediasState = atom<Media[]>({
 		mediaLoadEffect()
 	]
 });
-
-// const getAllMedias = selector({
-// 	key: 'Medias',
-// 	get: async ({get}) => {
-// 		// let media = await getStorageMedia()
-// 	}
-// })

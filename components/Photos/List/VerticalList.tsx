@@ -25,12 +25,12 @@ const VerticalList: React.FC = () => {
 	const animator = new ItemAnimator()
 	layoutProvider.shouldRefreshWithAnchoring = false;
 
-	const rowRenderer = (type: ReactText, data: Data) => {
+	const rowRenderer = (type: ReactText, data: Data, index:number) => {
 		return (<ListItem data={data} type={type}/>)
 	}
 
-	const _overrideRowRenderer = (type, data, index) => {
-		if (index === 0)
+	const _overrideRowRenderer = (type:any, data:Data, index:number) => {
+		if (index === 0 && type)
 			return rowRenderer(type, data, index);
 		return null
 	}
@@ -40,7 +40,7 @@ const VerticalList: React.FC = () => {
 		// TODO fix scroll
 	}, [data])
 
-	const _setRef = (recycler) => {
+	const _setRef = (recycler: RecyclerListView<any, any> | undefined) => {
 		recyclerRef.current = recycler;
 	}
 
@@ -48,8 +48,9 @@ const VerticalList: React.FC = () => {
 		dataProvider.getSize() > 0
 			? <>
 				<SelectedItems/>
-				<StickyContainer stickyHeaderIndices={selectMode ? [0] : [0, 5]}
-								 overrideRowRenderer={_overrideRowRenderer}>
+				<StickyContainer 
+					stickyHeaderIndices={selectMode ? [0] : [0, 5]}
+					overrideRowRenderer={_overrideRowRenderer}>
 					<RecyclerListView
 						ref={_setRef}
 						optimizeForInsertDeleteAnimations={true}

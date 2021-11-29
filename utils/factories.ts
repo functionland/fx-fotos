@@ -1,4 +1,4 @@
-import {Media} from "../domian";
+import {Media} from "../types/interfaces";
 import {headerIndex, story, layout, FlatSection} from "../types/interfaces";
 import {timestampToDate} from "./functions";
 import uuid from 'react-native-uuid';

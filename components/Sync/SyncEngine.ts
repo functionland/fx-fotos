@@ -1,4 +1,4 @@
-import {Media} from "../../domian";
+import {Media} from "../../types/interfaces";
 
 
 export class SyncEngine {

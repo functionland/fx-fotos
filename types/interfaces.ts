@@ -1,5 +1,4 @@
 import {Asset} from 'expo-media-library';
-import {Media} from "../domian";
 
 
 export interface album {
@@ -78,6 +77,12 @@ export interface headerIndex {
 // new one's
 
 export declare type Column = 2 | 3 | 4
+
+export interface Media extends Asset{
+	hasCid:Boolean
+	cid:string,
+	preview:string
+}
 
 export enum SectionType {
 	Day = "DAY",

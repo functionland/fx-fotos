@@ -1,5 +1,5 @@
 import {atom, selector, selectorFamily} from "recoil";
-import {mediasState} from '../../states/scan'
+import {mediasState} from '../../states/Medias'
 import {dataMapper} from "./utils";
 import {Column, Data, SectionType} from "../../types/interfaces";
 import {DefaultCol} from "./Constants";

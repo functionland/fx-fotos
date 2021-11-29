@@ -2,7 +2,7 @@ import React, {ReactText, useEffect, useState} from "react";
 import {Data, ItemType, SectionHeader, story} from "../../../../types/interfaces";
 import {TouchableHighlight, View, StyleSheet} from "react-native";
 import PhotoItem from "./PhotoItem";
-import {Media} from "../../../../domian";
+import {Media} from "../../../../types/interfaces";
 import VideoItem from "./VideoItem";
 import StoriesItem from "./StoriesItem";
 import SectionHeaderItem from "./SectionHeader";

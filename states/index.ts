@@ -25,5 +25,5 @@ export const albumsState = atom<Array<album>>({
 
 
 
-import {mediasState} from './scan'
+import {mediasState} from './Medias'
 export {mediasState}

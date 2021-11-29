@@ -3,7 +3,7 @@ import {StyleSheet, Text, View} from "react-native";
 import {prettyTime} from "../../../../utils/functions";
 import {MaterialIcons} from "@expo/vector-icons";
 import React from "react";
-import {Media} from "../../../../domian";
+import {Media} from "../../../../types/interfaces";
 
 
 interface Props {

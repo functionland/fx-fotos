@@ -1,6 +1,5 @@
-import {atom, selector} from "recoil";
-import {Media} from "../../domian";
-import {mediasState} from "../../states";
+import {atom} from "recoil";
+import {Media} from "../../types/interfaces";
 
 export const uploadListState = atom<Media[]>({
 	key: 'uploadListState',

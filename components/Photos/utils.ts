@@ -1,44 +1,37 @@
-import {Media} from "../../domian";
+import {Media} from "../../types/interfaces";
 import {MediaTypeValue} from "expo-media-library";
 import {Data, ItemType, SectionType, story} from "../../types/interfaces";
 
 export function dataMapper(medias: Media[], sectionType: SectionType): Data[] {
 	let result: Data[] = [];
 	medias.forEach((media, index, all) => {
-		switch (index) {
-			case 0: {
-				result.push({
-					id: "Header",
-					type: ItemType.Header,
-					value: []
-				})
-				const stories = storyMapper(medias)
-				stories.length > 0 && result.push({
-					id: "Stories",
-					type: ItemType.Stories,
-					value: stories
-				})
-				break;
-			}
-			default : {
-				const lastTimeStamp = index == 1 ? new Date() : new Date(all[index - 1].creationTime) 
-				const currTimeStamp = new Date(media.creationTime)
-				if (!getDiffFunc(sectionType)(lastTimeStamp, currTimeStamp) || index == 1 ) {
-					result.push({
-						id: media.creationTime.toString(),
-						type: SectionHeaderType(lastTimeStamp,currTimeStamp,sectionType),
-						value: {timeStamp: currTimeStamp}
-					})
-				}
-				result.push({
-					id: media.id,
-					type: ItemTypeFromMediaType(media.mediaType),
-					value: media
-				})
-			}
+		if(index === 0){
+			result.push({
+				id: "Header",
+				type: ItemType.Header,
+				value: []
+			})
+			const stories = storyMapper(medias)
+			stories.length > 0 && result.push({
+				id: "Stories",
+				type: ItemType.Stories,
+				value: stories
+			})
 		}
-
-
+		const lastTimeStamp = index <= 1  ? new Date() : new Date(all[index - 1].creationTime)
+		const currTimeStamp = new Date(media.creationTime)
+		if (!getDiffFunc(sectionType)(lastTimeStamp, currTimeStamp) || index <= 1 ) {
+			result.push({
+				id: media.creationTime.toString(),
+				type: SectionHeaderType(lastTimeStamp,currTimeStamp,sectionType),
+				value: {timeStamp: currTimeStamp}
+			})
+		}
+		result.push({
+			id: media.id,
+			type: ItemTypeFromMediaType(media.mediaType),
+			value: media
+		})
 	})
 	return result;
 }
