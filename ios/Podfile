@@ -1,14 +1,29 @@
-require_relative '../node_modules/react-native/scripts/react_native_pods'
-require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
 
-platform :ios, '10.0'
+# React Native Colo Loco autolinks native files colocated next to your JS files
+# More info here: https://github.com/jamonholmgren/react-native-colo-loco
+require_relative '../node_modules/react-native-colo-loco/scripts/ios.rb'
+link_colocated_native_files(app_name: 'Photos', app_path: "../app")
 
-target 'TheBox' do
+
+require File.join(File.dirname(`node --print "require.resolve('expo/package.json')"`), "scripts/autolinking")
+require File.join(File.dirname(`node --print "require.resolve('react-native/package.json')"`), "scripts/react_native_pods")
+require File.join(File.dirname(`node --print "require.resolve('@react-native-community/cli-platform-ios/package.json')"`), "native_modules")
+
+platform :ios, '12.0'
+
+require 'json'
+podfile_properties = JSON.parse(File.read('./Podfile.properties.json')) rescue {}
+
+target 'photos' do
+  use_expo_modules!
   config = use_native_modules!
 
-  use_react_native!(:path => config["reactNativePath"])
+  use_react_native!(
+    :path => config[:reactNativePath],
+    :hermes_enabled => podfile_properties['expo.jsEngine'] == 'hermes'
+  )
 
-  target 'TheBoxTests' do
+  target 'photosTests' do
     inherit! :complete
     # Pods for testing
   end
@@ -17,17 +32,11 @@ target 'TheBox' do
   #
   # Note that if you have use_frameworks! enabled, Flipper will not work and
   # you should disable these next few lines.
-  use_flipper!
+  use_flipper!()
+
   post_install do |installer|
     flipper_post_install(installer)
-  end
-end
-
-target 'TheBox-tvOS' do
-  # Pods for TheBox-tvOS
-
-  target 'TheBox-tvOSTests' do
-    inherit! :search_paths
-    # Pods for testing
+    react_native_post_install(installer)
+    __apply_Xcode_12_5_M1_post_install_workaround(installer)
   end
 end
