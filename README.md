@@ -2,9 +2,9 @@
 
 # Latest 2 Updates
 
-**November-15-2021:** A lot of updates! Many performance optimizations. Connected to backend of Box. Auto-upload photos to backend. Presented in Dfinity community!
+**December-06-2021:** Speed improvement is being done in rn-borg branch and merged here after completion
 
-**September-10-2021:** Added import from Google Photos feature
+**November-15-2021:** A lot of updates! Many performance optimizations. Connected to backend of Box. Auto-upload photos to backend. Presented in Dfinity community!
 
 # Discussions
 
