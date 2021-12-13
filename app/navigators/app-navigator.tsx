@@ -42,6 +42,7 @@ const AppStack = () => {
       initialRouteName="home"
     >
       <Stack.Screen name="home" component={HomeScreen} />
+      <Stack.Screen name="welcome" component={WelcomeScreen} />
     </Stack.Navigator>
   )
 }
