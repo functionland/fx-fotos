@@ -1,4 +1,3 @@
-import { BooleanLiteral } from "@babel/types"
 import { Dimensions, Platform } from "react-native"
 
 const { height, width } = Dimensions.get("window")
@@ -11,7 +10,7 @@ const deviceUtils: {
   isNarrowPhone: boolean
   isSmallPhone: boolean
   isLargePhone: boolean
-  isTallPhone: BooleanLiteral
+  isTallPhone: boolean
   isTinyPhone: boolean
   isIOS14: boolean
   dimensions: {
@@ -31,7 +30,7 @@ deviceUtils.isLargePhone = width >= deviceUtils.iPhoneXWidth
 
 deviceUtils.isTallPhone = height >= deviceUtils.iPhoneXHeight
 deviceUtils.isTinyPhone = height <= deviceUtils.iphoneSEHeight
-deviceUtils.isIOS14 = ios && parseFloat(Platform.Version) >= 14
+deviceUtils.isIOS14 = Platform.OS==="ios" && parseFloat(Platform.Version) >= 14
 
 deviceUtils.dimensions = {
   height,

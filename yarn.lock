@@ -13988,6 +13988,11 @@ react-native-colo-loco@^1.0.0:
   resolved "https://registry.yarnpkg.com/react-native-colo-loco/-/react-native-colo-loco-1.0.0.tgz#1576847922bdbf3a9120f81b95f45c682d641491"
   integrity sha512-C8utH0z47xaQU/6Nn4igTi4jGwnyosTi/bXE8zWE2cOk6A3uDpvT0Qj9o8PgX6Lu8PlKxOYVhWDQdZFyp/4Cww==
 
+react-native-fast-image@^8.5.11:
+  version "8.5.11"
+  resolved "https://registry.yarnpkg.com/react-native-fast-image/-/react-native-fast-image-8.5.11.tgz#e3dc969d0e4e8df026646bf18194465aa55cbc2b"
+  integrity sha512-cNW4bIJg3nvKaheG8vGMfqCt5LMWX9MS5+wMudgKIHbGO51spRr4sgnlhVgwHLcZ5aeNOVJ8CPRxDIWKRq/0QA==
+
 react-native-flipper@^0.34.0:
   version "0.34.0"
   resolved "https://registry.yarnpkg.com/react-native-flipper/-/react-native-flipper-0.34.0.tgz#7df1f38ba5d97a9321125fe0fccbe47d99e6fa1d"

@@ -7,7 +7,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { View, RefreshControl, ScrollViewProps, LayoutChangeEvent, StyleSheet } from "react-native"
+import { View, RefreshControl, ScrollViewProps, LayoutChangeEvent, StyleSheet, Platform } from "react-native"
 import {
   DataProvider,
   LayoutProvider,
@@ -125,11 +125,14 @@ const RecyclerAssetList = ({
   ]);
   layoutProvider.shouldRefreshWithAnchoring = false;
   const dataProvider = useMemo(() => {
-    const provider = new DataProvider(
-      (r1, r2) => r1.id !== r2.id,
-      index => sections[index]?.id
+    console.log("dataProvider",sections?.length)
+    let provider = new DataProvider(
+      (r1:RecyclerAssetListSection, r2:RecyclerAssetListSection) => r1.data.id !== r2.data.id,
+      index => sections[index]?.data?.id
     );
-    provider.cloneWithRows(sections);
+    provider=provider.cloneWithRows(sections);
+    //provider.getStableId = index => sections[index].id;
+    console.log("provider.getSize()",provider.getSize())
     return provider;
   }, [sections]);
   const scrollViewProps = useMemo(
@@ -140,7 +143,7 @@ const RecyclerAssetList = ({
           refreshControl: (
             <RefreshControl
               onRefresh={handleRefresh}
-              progressViewOffset={android ? 30 : 0}
+              progressViewOffset={Platform.OS==="android" ? 30 : 0}
               refreshing={isRefreshing}
               tintColor={color.primary}
             />

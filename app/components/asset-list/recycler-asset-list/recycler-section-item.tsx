@@ -1,4 +1,4 @@
-import React, { ReactText, useEffect, useState } from "react";
+import React, { memo, ReactText, useEffect, useState } from "react";
 import { TouchableHighlight, View, StyleSheet } from "react-native";
 import { RecyclerAssetListSection, ViewType } from '../../../types'
 import StoryListItem from "./story-list-item"
@@ -33,7 +33,7 @@ const RecyclerSectionItem: React.FC<Props> = (props) => {
 
 	const backStyle = {
 		flex: 1,
-		margin: selected ? 8 : 0
+		//margin: selected ? 8 : 0
 	}
 
 	return (
@@ -56,4 +56,5 @@ const styles = StyleSheet.create({
 	}
 })
 
-export default RecyclerSectionItem;
+//export default RecyclerSectionItem;
+export default memo(RecyclerSectionItem,(prev,next)=>prev?.section.id===next?.section.id);
