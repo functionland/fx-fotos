@@ -4,7 +4,8 @@ export type Asset = ExpoAsset & {
 
 }
 export type AssetStory={
+    id:string;
     data:Asset[];
     title: string | undefined;
 }
-export type RecyclerAssetListSectionData = AssetStory[] | Asset | Date
+export type RecyclerAssetListSectionData = AssetStory[] | Asset | string

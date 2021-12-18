@@ -1,6 +1,6 @@
-import React, { memo, ReactText, useEffect, useState } from "react";
+import React, { memo } from "react";
 import { TouchableHighlight, View, StyleSheet } from "react-native";
-import { RecyclerAssetListSection, ViewType } from '../../../types'
+import { RecyclerAssetListSection, ViewType } from '../../../../types'
 import StoryListItem from "./story-list-item"
 import AssetItem from "./asset-item"
 import HeaderItem from "./header-item"
@@ -17,10 +17,10 @@ const getSectionByType = (section: RecyclerAssetListSection) => {
 			return (<AssetItem asset={section.data} />)
 		}
 		case ViewType.MONTH: {
-			return (<HeaderItem title={"Month"} textStyle={styles.monthText} />)
+			return (<HeaderItem title={section.data} textStyle={styles.monthText} />)
 		}
 		case ViewType.DAY: {
-			return (<HeaderItem title={"day"} />)
+			return (<HeaderItem title={section.data} textStyle={styles.dayText} />)
 		}
 
 		default:
@@ -33,7 +33,6 @@ const RecyclerSectionItem: React.FC<Props> = (props) => {
 
 	const backStyle = {
 		flex: 1,
-		//margin: selected ? 8 : 0
 	}
 
 	return (
@@ -51,10 +50,20 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1
 	},
+	dayText: {
+		fontSize: 14,
+		fontWeight: "100",
+		padding: 10,
+		marginTop:10,
+		color: "black",
+	},
 	monthText: {
-		fontSize: 24
+		color: "black",
+		fontSize: 28,
+		fontWeight: "300",
+		padding: 10,
+		paddingTop:50,
 	}
 })
 
-//export default RecyclerSectionItem;
-export default memo(RecyclerSectionItem,(prev,next)=>prev?.section.id===next?.section.id);
+export default memo(RecyclerSectionItem, (prev, next) => prev?.section.id === next?.section.id);

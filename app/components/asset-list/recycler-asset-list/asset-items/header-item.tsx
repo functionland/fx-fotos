@@ -8,7 +8,7 @@ interface Props {
 }
 
 const HeaderItem: React.FC<Props> = (props) => {
-    const { title, children } = props;
+    const { title, children,containerStyle,textStyle } = props;
     return (
         <View style={[styles.container, containerStyle]}>
             {title ? <Text style={[styles.text, textStyle]} >{title}</Text> : null}
@@ -20,8 +20,6 @@ const HeaderItem: React.FC<Props> = (props) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        marginLeft: 20,
-        marginTop: 10
     },
     text: {
         fontSize: 18

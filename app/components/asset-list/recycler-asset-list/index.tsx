@@ -16,7 +16,7 @@ import {
 import { RecyclerAssetListSection, ViewType } from "../../../types"
 import deviceUtils from '../../../utils/deviceUtils'
 import { color } from "../../../theme"
-import RecyclerSectionItem from "./recycler-section-item"
+import RecyclerSectionItem from "./asset-items/recycler-section-item"
 
 export interface Props {
   refreshData: () => Promise<void>;
@@ -88,9 +88,6 @@ const RecyclerAssetList = ({
 
   const layoutProvider = useMemo(() => {
     return new LayoutProvider(
-      // The LayoutProvider expects us to return ReactText, however internally
-      // we use custom layout description objects, so we can ignore this error.
-      // @ts-ignore
       (index: number) => sections[index]?.type,
       (type, dim) => {
         const colWidth = Math.floor(deviceUtils.dimensions.width / numCols);
@@ -127,8 +124,8 @@ const RecyclerAssetList = ({
   const dataProvider = useMemo(() => {
     console.log("dataProvider",sections?.length)
     let provider = new DataProvider(
-      (r1:RecyclerAssetListSection, r2:RecyclerAssetListSection) => r1.data.id !== r2.data.id,
-      index => sections[index]?.data?.id
+      (r1:RecyclerAssetListSection, r2:RecyclerAssetListSection) => r1.id !== r2.id,
+      index => sections[index]?.id
     );
     provider=provider.cloneWithRows(sections);
     //provider.getStableId = index => sections[index].id;
