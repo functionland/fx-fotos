@@ -62,7 +62,7 @@ function App() {
         <SafeAreaProvider initialMetrics={initialWindowMetrics}>
           <ErrorBoundary catchErrors={"always"}>
             <AppNavigator
-              initialState={initialNavigationState}
+              //initialState={initialNavigationState}
               onStateChange={onNavigationStateChange}
             />
           </ErrorBoundary>

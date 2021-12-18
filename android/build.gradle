@@ -23,6 +23,7 @@ buildscript {
 
 allprojects {
     repositories {
+        google()
         mavenCentral()
         mavenLocal()
         maven {
@@ -34,7 +35,6 @@ allprojects {
             url(new File(["node", "--print", "require.resolve('jsc-android/package.json')"].execute().text.trim(), "../dist"))
         }
 
-        google()
         maven { url 'https://www.jitpack.io' }
     }
 }

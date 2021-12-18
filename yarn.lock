@@ -216,6 +216,11 @@
   resolved "https://registry.yarnpkg.com/@babel/helper-plugin-utils/-/helper-plugin-utils-7.14.5.tgz#5ac822ce97eec46741ab70a517971e443a70c5a9"
   integrity sha512-/37qQCE3K0vvZKwoK4XU/irIJQdIfCJuhU5eKnNxpFDsOkgFaUAwbv+RYw6eYgsC0E4hS7r5KqGULUogqui0fQ==
 
+"@babel/helper-plugin-utils@^7.16.5":
+  version "7.16.5"
+  resolved "https://registry.yarnpkg.com/@babel/helper-plugin-utils/-/helper-plugin-utils-7.16.5.tgz#afe37a45f39fce44a3d50a7958129ea5b1a5c074"
+  integrity sha512-59KHWHXxVA9K4HNF4sbHCf+eJeFe0Te/ZFGqBT4OjXhrwvA04sGfaEGsVTdsjoszq0YTP49RC9UKe5g8uN2RwQ==
+
 "@babel/helper-remap-async-to-generator@^7.16.0", "@babel/helper-remap-async-to-generator@^7.16.4":
   version "7.16.4"
   resolved "https://registry.yarnpkg.com/@babel/helper-remap-async-to-generator/-/helper-remap-async-to-generator-7.16.4.tgz#5d7902f61349ff6b963e07f06a389ce139fbfe6e"
@@ -389,6 +394,14 @@
   integrity sha512-CjI4nxM/D+5wCnhD11MHB1AwRSAYeDT+h8gCdcVJZ/OK7+wRzFsf7PFPWVpVpNRkHMmMkQWAHpTq+15IXQ1diA==
   dependencies:
     "@babel/helper-plugin-utils" "^7.14.5"
+    "@babel/plugin-syntax-export-namespace-from" "^7.8.3"
+
+"@babel/plugin-proposal-export-namespace-from@^7.16.5":
+  version "7.16.5"
+  resolved "https://registry.yarnpkg.com/@babel/plugin-proposal-export-namespace-from/-/plugin-proposal-export-namespace-from-7.16.5.tgz#3b4dd28378d1da2fea33e97b9f25d1c2f5bf1ac9"
+  integrity sha512-i+sltzEShH1vsVydvNaTRsgvq2vZsfyrd7K7vPLUU/KgS0D5yZMe6uipM0+izminnkKrEfdUnz7CxMRb6oHZWw==
+  dependencies:
+    "@babel/helper-plugin-utils" "^7.16.5"
     "@babel/plugin-syntax-export-namespace-from" "^7.8.3"
 
 "@babel/plugin-proposal-json-strings@^7.12.13", "@babel/plugin-proposal-json-strings@^7.16.0":
@@ -7661,6 +7674,19 @@ expo-font@~10.0.3:
     expo-modules-core "~0.4.4"
     fontfaceobserver "^2.1.0"
 
+expo-image-loader@~3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/expo-image-loader/-/expo-image-loader-3.0.0.tgz#5ada47a0f90f8dec1777520d36e35c65155d9ea9"
+  integrity sha512-r4D+uLCf5vm5A2JIbF1Bc9FjYKrYGSLShbFB1MUvZ4BpSXJPRsprYZ9veUBVzzhh8hr23ahTFjMzp3nC57iREw==
+
+expo-image-manipulator@^10.1.2:
+  version "10.1.2"
+  resolved "https://registry.yarnpkg.com/expo-image-manipulator/-/expo-image-manipulator-10.1.2.tgz#1053d26f30d5c690ebe2d012b98ac3f0ae57b51a"
+  integrity sha512-biMGVL7kzCVFIUpNVVf8FHcPzKPHK8RPooe8R9mjBIPV+FimVF6mIBdtTGe9Fw7iFm+jyRJONG2lZOrdBEUk+A==
+  dependencies:
+    expo-image-loader "~3.0.0"
+    expo-modules-core "~0.4.4"
+
 expo-keep-awake@~10.0.0:
   version "10.0.0"
   resolved "https://registry.yarnpkg.com/expo-keep-awake/-/expo-keep-awake-10.0.0.tgz#275a3e02f99bc0429790047add126c1dcce60d63"
@@ -11897,7 +11923,7 @@ mockdate@^3.0.2:
   resolved "https://registry.yarnpkg.com/mockdate/-/mockdate-3.0.5.tgz#789be686deb3149e7df2b663d2bc4392bc3284fb"
   integrity sha512-iniQP4rj1FhBdBYS/+eQv7j1tadJ9lJtdzgOpvsOHng/GbcDh2Fhdeq+ZRldrPYdXvCyfFUmFeEwEGXZB5I/AQ==
 
-moment@^2.19.3:
+moment@^2.19.3, moment@^2.29.1:
   version "2.29.1"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.1.tgz#b2be769fa31940be9eeea6469c075e35006fa3d3"
   integrity sha512-kHmoybcPV8Sqy59DwNDY3Jefr64lK/by/da0ViFcuA4DH0vQg5Q6Ze5VimxkfQNSC+Mls/Kx53s7TjP1RhFEDQ==
@@ -13987,6 +14013,11 @@ react-native-colo-loco@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/react-native-colo-loco/-/react-native-colo-loco-1.0.0.tgz#1576847922bdbf3a9120f81b95f45c682d641491"
   integrity sha512-C8utH0z47xaQU/6Nn4igTi4jGwnyosTi/bXE8zWE2cOk6A3uDpvT0Qj9o8PgX6Lu8PlKxOYVhWDQdZFyp/4Cww==
+
+react-native-fast-image@^8.5.11:
+  version "8.5.11"
+  resolved "https://registry.yarnpkg.com/react-native-fast-image/-/react-native-fast-image-8.5.11.tgz#e3dc969d0e4e8df026646bf18194465aa55cbc2b"
+  integrity sha512-cNW4bIJg3nvKaheG8vGMfqCt5LMWX9MS5+wMudgKIHbGO51spRr4sgnlhVgwHLcZ5aeNOVJ8CPRxDIWKRq/0QA==
 
 react-native-flipper@^0.34.0:
   version "0.34.0"
