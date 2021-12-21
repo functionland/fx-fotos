@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from "react"
 import { DevSettings } from "react-native"
 import { loadString, saveString } from "../app/utils/storage"
-import { DEFAULT_REACTOTRON_WS_URI } from "../app/services/reactotron/reactotron-config"
-
+const DEFAULT_REACTOTRON_WS_URI = "ws://localhost:9090"
 /**
  * Toggle Storybook mode, in __DEV__ mode only.
  *
