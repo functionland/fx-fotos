@@ -8,4 +8,8 @@ export type AssetStory={
     data:Asset[];
     title: string | undefined;
 }
-export type RecyclerAssetListSectionData = AssetStory[] | Asset | string
+export type GroupHeader={
+    title: string | undefined;
+    subGroupIds:string[]
+}
+export type RecyclerAssetListSectionData = AssetStory[] | Asset | GroupHeader

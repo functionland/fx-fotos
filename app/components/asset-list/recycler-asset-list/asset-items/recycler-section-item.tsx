@@ -1,47 +1,59 @@
-import React, { memo } from "react";
+import React, { memo, useState } from "react";
 import { TouchableHighlight, View, StyleSheet } from "react-native";
-import { RecyclerAssetListSection, ViewType } from '../../../../types'
+import { GroupHeader, RecyclerAssetListSection, ViewType } from '../../../../types'
 import StoryListItem from "./story-list-item"
 import AssetItem from "./asset-item"
 import HeaderItem from "./header-item"
 
 interface Props {
-	section: RecyclerAssetListSection
+	section: RecyclerAssetListSection;
+	selectionMode: boolean;
+	selected:boolean;
+	onLongPress: (section: RecyclerAssetListSection) => void;
+	onPress: (section: RecyclerAssetListSection) => void;
 }
-const getSectionByType = (section: RecyclerAssetListSection) => {
+const getSectionByType = (section: RecyclerAssetListSection, selectionMode: boolean, selected: boolean) => {
 	switch (section.type) {
 		case ViewType.STORY: {
-			return (<StoryListItem stories={section.data} />)
+			return (<StoryListItem stories={section.data} selectionMode={selectionMode} />)
 		}
 		case ViewType.ASSET: {
-			return (<AssetItem asset={section.data} />)
+			return (<AssetItem asset={section.data} selectionMode={selectionMode} selected={selected} />)
 		}
 		case ViewType.MONTH: {
-			return (<HeaderItem title={section.data} textStyle={styles.monthText} />)
+			const groupHeader: GroupHeader = section.data;
+			return (<HeaderItem title={groupHeader.title} selectionMode={selectionMode} selected={selected} textStyle={styles.monthText} />)
 		}
 		case ViewType.DAY: {
-			return (<HeaderItem title={section.data} textStyle={styles.dayText} />)
+			const groupHeader: GroupHeader = section.data;
+			return (<HeaderItem title={groupHeader.title} selectionMode={selectionMode} selected={selected} textStyle={styles.dayText} />)
 		}
 
 		default:
 			return null;
 	}
 }
-const RecyclerSectionItem: React.FC<Props> = (props) => {
-	const { section } = props;
-
-
-	const backStyle = {
-		flex: 1,
+const RecyclerSectionItem: React.FC<Props> = ({ section, selectionMode, selected, onLongPress, onPress }) => {
+	const onPressItem = () => {
+		if (onPress) {
+			setTimeout(() => {
+				onPress?.(section);
+			}, 0);
+		}
 	}
-
+	const onLongPressItem = () => {
+		setTimeout(() => {
+			onLongPress?.(section);
+		}, 0);
+	}
 	return (
 		<TouchableHighlight
 			style={styles.container}
-			underlayColor='#dddddd'>
-			<View style={backStyle}>
-				{getSectionByType(section)}
-			</View>
+			underlayColor='#dddddd'
+			onLongPress={onLongPressItem}
+			onPress={onPressItem}
+		>
+			{getSectionByType(section, selectionMode, selected)}
 		</TouchableHighlight>
 	);
 
@@ -51,10 +63,10 @@ const styles = StyleSheet.create({
 		flex: 1
 	},
 	dayText: {
-		fontSize: 14,
-		fontWeight: "100",
-		padding: 10,
-		marginTop:10,
+		fontSize: 16,
+		fontWeight: "600",
+		//padding: 10,
+		//marginTop: 10,
 		color: "black",
 	},
 	monthText: {
@@ -62,8 +74,12 @@ const styles = StyleSheet.create({
 		fontSize: 28,
 		fontWeight: "300",
 		padding: 10,
-		paddingTop:50,
+		paddingTop: 50,
 	}
 })
-
-export default memo(RecyclerSectionItem, (prev, next) => prev?.section.id === next?.section.id);
+const areEqual = (prev: Props, next: Props) => {
+	return (prev?.section?.id === next?.section?.id
+		&& prev?.selectionMode === next?.selectionMode
+		&& prev?.selected === next?.selected)
+}
+export default memo(RecyclerSectionItem, areEqual);

@@ -13,11 +13,10 @@ import {
   LayoutProvider,
   RecyclerListView,
 } from 'recyclerlistview';
-import { RecyclerAssetListSection, ViewType } from "../../../types"
+import { RecyclerAssetListSection, RecyclerAssetListSectionData, ViewType, GroupHeader } from "../../../types"
 import deviceUtils from '../../../utils/deviceUtils'
 import { color } from "../../../theme"
 import RecyclerSectionItem from "./asset-items/recycler-section-item"
-
 export interface Props {
   refreshData: () => Promise<void>;
   sections: RecyclerAssetListSection[];
@@ -27,7 +26,11 @@ export interface Props {
   disableRefreshControl?: boolean;
 };
 
-
+export interface ExtendedState {
+  selectedGroups: { [key: string]: boolean };
+  selectedAssets: { [key: string]: boolean };
+  selectionMode: boolean;
+}
 const RecyclerAssetList = ({
   refreshData,
   sections,
@@ -39,6 +42,11 @@ const RecyclerAssetList = ({
 }: Props): JSX.Element => {
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [globalDeviceDimensions, setGlobalDeviceDimensions] = useState<number>(0);
+  const [extendedState, setExtendedState] = useState<ExtendedState>({
+    selectedAssets: {},
+    selectedGroups: {},
+    selectionMode: false
+  });
   const handleRefresh = useCallback(async () => {
     if (isRefreshing || !refreshData) {
       return;
@@ -48,7 +56,7 @@ const RecyclerAssetList = ({
       setIsBlockingUpdate(true);
       await refreshData();
     } catch (e) {
-      //logger.error(e);
+      // logger.error(e);
     } finally {
       setIsRefreshing(false);
     }
@@ -66,22 +74,71 @@ const RecyclerAssetList = ({
     },
     [setGlobalDeviceDimensions]
   );
-
-
   const onScroll = useCallback(
     (e: unknown, f: unknown, offsetY: number) => {
       // TODO: use to manage sticky header
     },
     []
   );
-
+  const toggleSelectionMode=()=>{
+    setExtendedState(prevState => {
+      return {
+        ...prevState,
+        selectedAssets: {},
+        selectionMode: !prevState.selectionMode
+      }
+    });
+  };
+  const toggleSelection = (section: RecyclerAssetListSection) => {
+    setExtendedState(prevState => {
+      if (!prevState.selectionMode)
+        return prevState;
+      if (section.type === ViewType.MONTH) {
+        // TODO: toggle all subgroups
+        prevState.selectedAssets[section.id] = !prevState.selectedAssets[section.id];
+        return {
+          ...prevState,
+          selectedAssets: { ...prevState.selectedAssets }
+        };
+      } else if (section.type === ViewType.DAY) {
+        const data: GroupHeader = section.data;
+        data.subGroupIds?.forEach(id => {
+          prevState.selectedAssets[id] = !prevState.selectedAssets[section.id];
+        });
+        prevState.selectedAssets[section.id] = !prevState.selectedAssets[section.id];
+        return {
+          ...prevState,
+          selectedAssets: { ...prevState.selectedAssets }
+        };
+      } else if (section.type === ViewType.ASSET) {
+        prevState.selectedAssets[section.id] = !prevState.selectedAssets[section.id];
+        return {
+          ...prevState,
+          selectedAssets: { ...prevState.selectedAssets }
+        };
+      }
+      return prevState;
+    });
+  }
+  const onLongPress = useCallback((section: RecyclerAssetListSection) => {
+    toggleSelectionMode();
+    toggleSelection(section);
+  }, []);
+  const onPress = useCallback((section: RecyclerAssetListSection) => {
+    toggleSelection(section);
+  }, [])
   const rowRenderer = useCallback(
-    (type: ViewType, data: RecyclerAssetListSection, index: number): JSX.Element | null => {
+    (type: ViewType, data: RecyclerAssetListSection, index: number, extendedState: ExtendedState): JSX.Element | null => {
       // Checks if value is *nullish*.
       if (data == null || index == null) {
         return null;
       }
-      return <RecyclerSectionItem section={data}/>;
+      return <RecyclerSectionItem
+        section={data}
+        selectionMode={extendedState?.selectionMode}
+        selected={!!extendedState.selectedAssets[data.id]}
+        onLongPress={onLongPress}
+        onPress={onPress} />;
     },
     []
   );
@@ -122,14 +179,14 @@ const RecyclerAssetList = ({
   ]);
   layoutProvider.shouldRefreshWithAnchoring = false;
   const dataProvider = useMemo(() => {
-    console.log("dataProvider",sections?.length)
+    console.log("dataProvider", sections?.length)
     let provider = new DataProvider(
-      (r1:RecyclerAssetListSection, r2:RecyclerAssetListSection) => r1.id !== r2.id,
+      (r1: RecyclerAssetListSection, r2: RecyclerAssetListSection) => r1.id !== r2.id,
       index => sections[index]?.id
     );
-    provider=provider.cloneWithRows(sections);
-    //provider.getStableId = index => sections[index].id;
-    console.log("provider.getSize()",provider.getSize())
+    provider = provider.cloneWithRows(sections);
+    // provider.getStableId = index => sections[index].id;
+    console.log("provider.getSize()", provider.getSize())
     return provider;
   }, [sections]);
   const scrollViewProps = useMemo(
@@ -140,7 +197,7 @@ const RecyclerAssetList = ({
           refreshControl: (
             <RefreshControl
               onRefresh={handleRefresh}
-              progressViewOffset={Platform.OS==="android" ? 30 : 0}
+              progressViewOffset={Platform.OS === "android" ? 30 : 0}
               refreshing={isRefreshing}
               tintColor={color.primary}
             />
@@ -153,6 +210,7 @@ const RecyclerAssetList = ({
     <View style={styles.container} onLayout={onLayout}>
       <RecyclerListView
         dataProvider={dataProvider}
+        extendedState={extendedState}
         layoutProvider={layoutProvider}
         onScroll={onScroll}
         renderAheadOffset={renderAheadOffset}
