@@ -10,22 +10,23 @@ const ROOT: ViewStyle = {
   alignSelf: "flex-start",
 }
 
-const DIMENSIONS = { width: 16, height: 16 }
+const DIMENSIONS = { width: 20, height: 20 }
 
 const OUTLINE: ViewStyle = {
   ...DIMENSIONS,
   marginTop: 2, // finicky and will depend on font/line-height/baseline/weather
   justifyContent: "center",
   alignItems: "center",
-  borderWidth: 1,
-  borderColor: color.primaryDarker,
-  borderRadius: 1,
+  borderWidth: 2,
+  borderColor: color.dim,
+  borderRadius: DIMENSIONS.width/2,
 }
 
 const FILL: ViewStyle = {
   width: DIMENSIONS.width - 4,
   height: DIMENSIONS.height - 4,
   backgroundColor: color.primary,
+  borderRadius: (DIMENSIONS.width - 4)/2
 }
 
 const LABEL: TextStyle = { paddingLeft: spacing[2] }

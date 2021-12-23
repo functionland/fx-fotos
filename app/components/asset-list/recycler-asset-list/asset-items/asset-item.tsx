@@ -3,15 +3,19 @@ import { StyleSheet, Image, View } from "react-native";
 import FastImage from "react-native-fast-image";
 
 import { Asset } from "../../../../types"
+import { Checkbox } from "../../.."
 
 interface Props {
-    asset: Asset
+    asset: Asset,
+    selected:boolean;
+    selectionMode:boolean;
 }
 
 const AssetItem = (props: Props): JSX.Element => {
-    const { asset } = props;
+    const { asset,selected,selectionMode } = props;
     return (
         <View style={styles.container}>
+            {selectionMode?<Checkbox value={selected} style={{position:"absolute",top:5,left:5,zIndex:99}}/>:null}
             <Image
                 style={styles.image}
                 source={{
