@@ -37,7 +37,7 @@ const RecyclerSectionItem: React.FC<Props> = ({ section, selectionMode, selected
 	const onPressItem = () => {
 		if (onPress) {
 			setTimeout(() => {
-				onPress?.(section);
+				onPress(section);
 			}, 0);
 		}
 	}
@@ -64,8 +64,8 @@ const styles = StyleSheet.create({
 	},
 	dayText: {
 		fontSize: 16,
-		fontWeight: "600",
-		//padding: 10,
+		fontWeight: "400",
+		padding: 5,
 		//marginTop: 10,
 		color: "black",
 	},
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
 		fontSize: 28,
 		fontWeight: "300",
 		padding: 10,
-		paddingTop: 50,
+		//paddingTop: 50,
 	}
 })
 const areEqual = (prev: Props, next: Props) => {

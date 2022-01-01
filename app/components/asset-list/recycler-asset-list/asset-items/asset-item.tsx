@@ -7,15 +7,14 @@ import { Checkbox } from "../../.."
 
 interface Props {
     asset: Asset,
-    selected:boolean;
-    selectionMode:boolean;
+    selected: boolean;
+    selectionMode: boolean;
 }
 
 const AssetItem = (props: Props): JSX.Element => {
-    const { asset,selected,selectionMode } = props;
+    const { asset, selected, selectionMode } = props;
     return (
         <View style={styles.container}>
-            {selectionMode?<Checkbox value={selected} style={{position:"absolute",top:5,left:5,zIndex:99}}/>:null}
             <Image
                 style={styles.image}
                 source={{
@@ -25,10 +24,11 @@ const AssetItem = (props: Props): JSX.Element => {
                 resizeMode="cover"
                 fadeDuration={100}
             />
+            {selectionMode ? <Checkbox value={selected} style={{ position: "absolute", top: 5, left: 5, zIndex: 999 }} /> : null}
             {/* <FastImage
 				style={styles.image}
 				source={{
-					uri: asset.uri,
+                    uri: asset.uri,
 					priority: FastImage.priority.high,
                     cache:FastImage.cacheControl.immutable
 				}}
@@ -46,7 +46,8 @@ const styles = StyleSheet.create({
     image: {
         flex: 1,
         height: undefined,
-        width: undefined
+        width: undefined,
+        zIndex: 0
     },
 })
 

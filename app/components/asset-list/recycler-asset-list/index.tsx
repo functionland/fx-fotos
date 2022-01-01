@@ -7,7 +7,12 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { View, RefreshControl, ScrollViewProps, LayoutChangeEvent, StyleSheet, Platform } from "react-native"
+import { NativeSyntheticEvent, View, NativeScrollEvent, ScrollViewProps, LayoutChangeEvent, StyleSheet, Platform } from "react-native"
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  useAnimatedScrollHandler
+} from 'react-native-reanimated';
 import {
   DataProvider,
   LayoutProvider,
@@ -17,13 +22,16 @@ import { RecyclerAssetListSection, RecyclerAssetListSectionData, ViewType, Group
 import deviceUtils from '../../../utils/deviceUtils'
 import { color } from "../../../theme"
 import RecyclerSectionItem from "./asset-items/recycler-section-item"
+import ExternalScrollView from '../external-scroll-view'
+
 export interface Props {
-  refreshData: () => Promise<void>;
   sections: RecyclerAssetListSection[];
   numCols: 2 | 3 | 4 | 5;
   renderAheadOffset?: number;
   disableAutoScrolling?: boolean;
   disableRefreshControl?: boolean;
+  scrollRef?:any,
+  scrollHandler:(event: NativeSyntheticEvent<NativeScrollEvent>) => void
 };
 
 export interface ExtendedState {
@@ -32,12 +40,14 @@ export interface ExtendedState {
   selectionMode: boolean;
 }
 const RecyclerAssetList = ({
-  refreshData,
+  //refreshData,
   sections,
   numCols,
   renderAheadOffset,
   disableAutoScrolling,
   disableRefreshControl,
+  scrollHandler,
+  scrollRef,
   ...extras
 }: Props): JSX.Element => {
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
@@ -47,20 +57,6 @@ const RecyclerAssetList = ({
     selectedGroups: {},
     selectionMode: false
   });
-  const handleRefresh = useCallback(async () => {
-    if (isRefreshing || !refreshData) {
-      return;
-    }
-    try {
-      setIsRefreshing(true);
-      setIsBlockingUpdate(true);
-      await refreshData();
-    } catch (e) {
-      // logger.error(e);
-    } finally {
-      setIsRefreshing(false);
-    }
-  }, [isRefreshing, refreshData]);
   const onLayout = useCallback(
     ({ nativeEvent }: LayoutChangeEvent) => {
       // set globalDeviceDimensions
@@ -74,13 +70,7 @@ const RecyclerAssetList = ({
     },
     [setGlobalDeviceDimensions]
   );
-  const onScroll = useCallback(
-    (e: unknown, f: unknown, offsetY: number) => {
-      // TODO: use to manage sticky header
-    },
-    []
-  );
-  const toggleSelectionMode=()=>{
+  const toggleSelectionMode = () => {
     setExtendedState(prevState => {
       return {
         ...prevState,
@@ -93,19 +83,22 @@ const RecyclerAssetList = ({
     setExtendedState(prevState => {
       if (!prevState.selectionMode)
         return prevState;
+      
+
       if (section.type === ViewType.MONTH) {
-        // TODO: toggle all subgroups
         prevState.selectedAssets[section.id] = !prevState.selectedAssets[section.id];
+        // TODO: toggle all subgroups
         return {
           ...prevState,
           selectedAssets: { ...prevState.selectedAssets }
         };
       } else if (section.type === ViewType.DAY) {
         const data: GroupHeader = section.data;
-        data.subGroupIds?.forEach(id => {
-          prevState.selectedAssets[id] = !prevState.selectedAssets[section.id];
-        });
         prevState.selectedAssets[section.id] = !prevState.selectedAssets[section.id];
+        data.subGroupIds?.forEach(id => {
+          if(id!==section.id)
+          prevState.selectedAssets[id] = prevState.selectedAssets[section.id];
+        });
         return {
           ...prevState,
           selectedAssets: { ...prevState.selectedAssets }
@@ -164,7 +157,7 @@ const RecyclerAssetList = ({
             break;
           case ViewType.DAY:
             dim.width = deviceUtils.dimensions.width;
-            dim.height = 50;
+            dim.height = 70;
             break;
           default:
             dim.width = deviceUtils.dimensions.width;
@@ -189,33 +182,20 @@ const RecyclerAssetList = ({
     console.log("provider.getSize()", provider.getSize())
     return provider;
   }, [sections]);
-  const scrollViewProps = useMemo(
-    (): Partial<ScrollViewProps> =>
-      disableRefreshControl
-        ? {}
-        : {
-          refreshControl: (
-            <RefreshControl
-              onRefresh={handleRefresh}
-              progressViewOffset={Platform.OS === "android" ? 30 : 0}
-              refreshing={isRefreshing}
-              tintColor={color.primary}
-            />
-          ),
-        },
-    [handleRefresh, isRefreshing]
-  );
-
   return (
     <View style={styles.container} onLayout={onLayout}>
       <RecyclerListView
         dataProvider={dataProvider}
         extendedState={extendedState}
         layoutProvider={layoutProvider}
-        onScroll={onScroll}
         renderAheadOffset={renderAheadOffset}
         rowRenderer={rowRenderer}
-        scrollViewProps={scrollViewProps}
+        externalScrollView={ExternalScrollView}
+        scrollViewProps={{
+          scrollRefExternal:scrollRef,
+          _onScrollExternal:scrollHandler,
+        }}
+        contentContainerStyle={{paddingTop:50}}
         {...extras}
       />
     </View>
