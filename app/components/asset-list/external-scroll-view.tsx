@@ -21,7 +21,7 @@ export default class ExternalScrollView extends BaseScrollView {
                 scrollEventThrottle={16}
                 nestedScrollEnabled={true}
                 removeClippedSubviews={true}
-                showsVerticalScrollIndicator={false}
+                showsVerticalScrollIndicator={true}
                 contentInsetAdjustmentBehavior="automatic"
             >
                 {this.props.children}

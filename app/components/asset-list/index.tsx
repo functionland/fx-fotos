@@ -31,6 +31,7 @@ const AssetList = ({
     scrollY,
 }: Props): JSX.Element => {
     const [numCols, setColNums] = useState(4);
+    const [counter, setCounter] = useState(3);
     const translationY = useSharedValue(0);
     const scrollRefExternal = useAnimatedRef<Reanimated.ScrollView>();
     
@@ -52,7 +53,6 @@ const AssetList = ({
             
             if(scrollY)
                 scrollY.value=translationY.value;
-            console.log("event.contentOffset.y:",scrollY?.value)
         },
         onBeginDrag: (e) => {
             //isScrolling.value = true;
@@ -89,15 +89,14 @@ const AssetList = ({
     });
 
     return (<View style={styles.container}>
-        {/* <TouchableHighlight style={{ width: "100%", height: 50, justifyContent: "center", alignItems: "center", backgroundColor: "grey" }} onPress={() => {
-            if (numCols < 5)
-                setColNums(numCols + 1)
-            else
-                setColNums(1)
-
+        <TouchableHighlight  style={{zIndex:99, height:80,width:80,borderRadius:40,top:80,right:0, justifyContent: "center", alignItems: "center", backgroundColor: "grey" }} onPress={() => {
+            const loop=[1,2,3,4,5,4,3,2];
+            const index=(counter+1) % 8;
+            setColNums(loop[index]);
+            setCounter(counter+1);
         }}>
-            <Text style={{ fontSize: 20 }} >Change the view: {numCols}</Text>
-        </TouchableHighlight> */}
+            <Text style={{ fontSize: 20 }} >{numCols}</Text>
+        </TouchableHighlight>
         {/* <PanGestureHandler onGestureEvent={gestureHandler}>
             <Animated.View style={[styles.box, stylez]} />
         </PanGestureHandler> */}
@@ -113,6 +112,7 @@ const AssetList = ({
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor:"transparent"
     },
     box: {
         position:"absolute",
