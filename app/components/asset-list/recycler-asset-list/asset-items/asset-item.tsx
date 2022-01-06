@@ -6,6 +6,8 @@ import { Asset } from "../../../../types"
 import { Checkbox } from "../../.."
 import { palette } from "../../../../theme/palette"
 
+import Animated, { useSharedValue } from "react-native-reanimated"
+
 interface Props {
   asset: Asset
   selected: boolean
