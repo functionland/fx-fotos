@@ -7,11 +7,14 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { NativeSyntheticEvent, View, NativeScrollEvent, ScrollViewProps, LayoutChangeEvent, StyleSheet, Platform } from "react-native"
+import { StatusBar, NativeSyntheticEvent, View, NativeScrollEvent, ScrollViewProps, LayoutChangeEvent, StyleSheet, Platform } from "react-native"
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  useAnimatedScrollHandler
+  useAnimatedScrollHandler,
+  interpolate,
+  Transitioning,
+  Transition
 } from 'react-native-reanimated';
 import {
   DataProvider,
@@ -27,11 +30,12 @@ import ExternalScrollView from '../external-scroll-view'
 export interface Props {
   sections: RecyclerAssetListSection[];
   numCols: 2 | 3 | 4 | 5;
+  scale?: SharedValue<number>,
   renderAheadOffset?: number;
   disableAutoScrolling?: boolean;
   disableRefreshControl?: boolean;
-  scrollRef?:any,
-  scrollHandler:(event: NativeSyntheticEvent<NativeScrollEvent>) => void
+  scrollRef?: any,
+  scrollHandler: (event: NativeSyntheticEvent<NativeScrollEvent>) => void
 };
 
 export interface ExtendedState {
@@ -39,10 +43,15 @@ export interface ExtendedState {
   selectedAssets: { [key: string]: boolean };
   selectionMode: boolean;
 }
+const transition = (
+  <Transition.Together >
+    <Transition.Change delayMs={0} durationMs={700} interpolation="easeInOut" />
+  </Transition.Together>
+);
 const RecyclerAssetList = ({
-  //refreshData,
   sections,
   numCols,
+  scale,
   renderAheadOffset,
   disableAutoScrolling,
   disableRefreshControl,
@@ -50,6 +59,8 @@ const RecyclerAssetList = ({
   scrollRef,
   ...extras
 }: Props): JSX.Element => {
+  const transitionRef = useRef();
+  const [cols, setCols] = useState(numCols);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [globalDeviceDimensions, setGlobalDeviceDimensions] = useState<number>(0);
   const [extendedState, setExtendedState] = useState<ExtendedState>({
@@ -57,6 +68,39 @@ const RecyclerAssetList = ({
     selectedGroups: {},
     selectionMode: false
   });
+  const zoomInStyle = useAnimatedStyle(() => {
+    if (!scale)
+      return {};
+
+    return {
+      height: scale.value !== 1 ? deviceUtils.dimensions.height * 4 : deviceUtils.dimensions.height,
+      //width:scale.value>1?deviceUtils.dimensions.width/2:scale.value<1?deviceUtils.dimensions.width*2:deviceUtils.dimensions.width,
+      transform: [{
+        scale: scale.value
+      }, {
+        translateX: (
+          (
+            (
+              scale.value * deviceUtils.dimensions.width) -
+            deviceUtils.dimensions.width)
+          / (2 * scale.value))
+      },
+      {
+        translateY: (
+          (
+            (
+              scale.value * (deviceUtils.dimensions.height * 4 - (StatusBar.currentHeight || 0))
+            ) - (deviceUtils.dimensions.height * 4 - (StatusBar.currentHeight || 0))
+          )
+          / (2 * scale.value))
+      }],
+      opacity: interpolate(
+        scale.value,
+        [0, 1, 4],
+        [0, 1, 0]
+      )
+    }
+  })
   const onLayout = useCallback(
     ({ nativeEvent }: LayoutChangeEvent) => {
       // set globalDeviceDimensions
@@ -83,7 +127,7 @@ const RecyclerAssetList = ({
     setExtendedState(prevState => {
       if (!prevState.selectionMode)
         return prevState;
-      
+
 
       if (section.type === ViewType.MONTH) {
         prevState.selectedAssets[section.id] = !prevState.selectedAssets[section.id];
@@ -96,8 +140,8 @@ const RecyclerAssetList = ({
         const data: GroupHeader = section.data;
         prevState.selectedAssets[section.id] = !prevState.selectedAssets[section.id];
         data.subGroupIds?.forEach(id => {
-          if(id!==section.id)
-          prevState.selectedAssets[id] = prevState.selectedAssets[section.id];
+          if (id !== section.id)
+            prevState.selectedAssets[id] = prevState.selectedAssets[section.id];
         });
         return {
           ...prevState,
@@ -135,12 +179,15 @@ const RecyclerAssetList = ({
     },
     []
   );
-
+  useEffect(() => {
+    transitionRef.current?.animateNextTransition();
+    setCols(numCols);
+  }, [numCols])
   const layoutProvider = useMemo(() => {
     return new LayoutProvider(
       (index: number) => sections[index]?.type,
       (type, dim) => {
-        const colWidth = Math.floor(deviceUtils.dimensions.width / numCols);
+        const colWidth = Math.floor(deviceUtils.dimensions.width / cols);
         const StoriesHeight = Math.floor(1.618 * deviceUtils.dimensions.width / 3 + 10)
         switch (type) {
           case ViewType.STORY:
@@ -168,7 +215,7 @@ const RecyclerAssetList = ({
     );
   }, [
     sections,
-    numCols
+    cols
   ]);
   layoutProvider.shouldRefreshWithAnchoring = false;
   const dataProvider = useMemo(() => {
@@ -183,7 +230,7 @@ const RecyclerAssetList = ({
     return provider;
   }, [sections]);
   return (
-    <View style={styles.container} onLayout={onLayout}>
+    <Animated.View style={[zoomInStyle, styles.container]} collapsable={false} onLayout={onLayout}>
       <RecyclerListView
         dataProvider={dataProvider}
         extendedState={extendedState}
@@ -192,18 +239,32 @@ const RecyclerAssetList = ({
         rowRenderer={rowRenderer}
         externalScrollView={ExternalScrollView}
         scrollViewProps={{
-          scrollRefExternal:scrollRef,
-          _onScrollExternal:scrollHandler,
+          scrollRefExternal: scrollRef,
+          _onScrollExternal: scrollHandler,
         }}
-        contentContainerStyle={{paddingTop:50}}
+        contentContainerStyle={{ paddingTop: 50 }}
+        renderContentContainer={(props, children) => {
+          return (
+            <Transitioning.View ref={transitionRef} transition={transition} {...props}>
+              {children}
+            </Transitioning.View>
+          );
+        }}
         {...extras}
       />
-    </View>
+    </Animated.View>
   );
 }
 export default RecyclerAssetList;
 const styles = StyleSheet.create({
   container: {
+    bottom: 0,
     flex: 1,
+    height: deviceUtils.dimensions.height,
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    width: deviceUtils.dimensions.width,
   },
 });

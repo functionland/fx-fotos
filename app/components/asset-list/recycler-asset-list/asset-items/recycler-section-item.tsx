@@ -8,7 +8,7 @@ import HeaderItem from "./header-item"
 interface Props {
 	section: RecyclerAssetListSection;
 	selectionMode: boolean;
-	selected:boolean;
+	selected: boolean;
 	onLongPress: (section: RecyclerAssetListSection) => void;
 	onPress: (section: RecyclerAssetListSection) => void;
 }
