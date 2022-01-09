@@ -119,6 +119,7 @@ const AssetList = ({
                     </TouchableHighlight>
                     <RecyclerAssetList
                         refreshData={refreshData}
+                        renderAheadOffset={1000/numCols}
                         numCols={(numCols)}
                         sections={sections}
                         scrollHandler={scrollHandler}
