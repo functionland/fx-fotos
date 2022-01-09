@@ -12,6 +12,6 @@ module.exports = {
     ],
     ["@babel/plugin-proposal-optional-catch-binding"],
     ["@babel/plugin-proposal-export-namespace-from"],
-    ["react-native-reanimated/plugin"],
+    "react-native-reanimated/plugin"
   ],
 }

@@ -11,13 +11,14 @@
  */
 import "./i18n"
 import "./utils/ignore-warnings"
-import React, { useState, useEffect } from "react"
+import * as React from "react"
 import { SafeAreaProvider, initialWindowMetrics } from "react-native-safe-area-context"
 import { initFonts } from "./theme/fonts" // expo
 import * as storage from "./utils/storage"
 import { useBackButtonHandler, AppNavigator, canExit, useNavigationPersistence } from "./navigators"
 import { ToggleStorybook } from "../storybook/toggle-storybook"
 import { ErrorBoundary } from "./screens/error/error-boundary"
+import * as MediaLibrary from "expo-media-library"
 
 // This puts screens in a native ViewController or Activity. If you want fully native
 // stack navigation, use `createNativeStackNavigator` in place of `createStackNavigator`:
@@ -29,18 +30,18 @@ export const NAVIGATION_PERSISTENCE_KEY = "NAVIGATION_STATE"
  * This is the root component of our app.
  */
 function App() {
-
   useBackButtonHandler(canExit)
   const {
-    initialNavigationState,
     onNavigationStateChange,
     isRestored: isNavigationStateRestored,
   } = useNavigationPersistence(storage, NAVIGATION_PERSISTENCE_KEY)
 
+  const [, getPermissions] = MediaLibrary.usePermissions()
   // Kick off initial async loading actions, like loading fonts and RootStore
-  useEffect(() => {
+  React.useEffect(() => {
     ;(async () => {
-      await initFonts() // expo
+      await getPermissions()
+      await initFonts()
     })()
   }, [])
 
@@ -55,14 +56,11 @@ function App() {
   // otherwise, we're ready to render the app
   return (
     <ToggleStorybook>
-        <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-          <ErrorBoundary catchErrors={"always"}>
-            <AppNavigator
-              //initialState={initialNavigationState}
-              onStateChange={onNavigationStateChange}
-            />
-          </ErrorBoundary>
-        </SafeAreaProvider>
+      <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+        <ErrorBoundary catchErrors={"always"}>
+          <AppNavigator onStateChange={onNavigationStateChange} />
+        </ErrorBoundary>
+      </SafeAreaProvider>
     </ToggleStorybook>
   )
 }
