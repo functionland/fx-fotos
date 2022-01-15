@@ -16,6 +16,7 @@ export const HomeScreen: FC<BottomTabScreenProps<NavigatorParamList, "home">> =
     ({ navigation }) => {
         const [assets, setAssets] = useState<RecyclerAssetListSection[]>(null);
         const [isReady, setIsReady] = useState(false);
+        const [mediaLibraryStatus] = MediaLibrary.usePermissions()
 
         // Get a custom hook to animate the header
         const [scrollY, headerStyles] = useFloatHederAnimation(60);

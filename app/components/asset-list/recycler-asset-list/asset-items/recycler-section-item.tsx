@@ -49,7 +49,7 @@ const RecyclerSectionItem: React.FC<Props> = ({ section, selectionMode, selected
 	return (
 		<TouchableHighlight
 			style={styles.container}
-			underlayColor='#dddddd'
+			underlayColor='transparent'
 			onLongPress={onLongPressItem}
 			onPress={onPressItem}
 		>
