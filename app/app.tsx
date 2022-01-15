@@ -57,7 +57,7 @@ function App() {
   return (
     <ToggleStorybook>
       <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-        <ErrorBoundary catchErrors={"always"}>
+        <ErrorBoundary catchErrors={"prod"}>
           <AppNavigator onStateChange={onNavigationStateChange} />
         </ErrorBoundary>
       </SafeAreaProvider>
