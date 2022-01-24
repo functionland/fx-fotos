@@ -1,25 +1,29 @@
-import React from "react"
-import { StyleSheet, View, LayoutChangeEvent } from "react-native"
-import FastImage from "react-native-fast-image"
+import React from "react";
+import { StyleSheet, View, LayoutChangeEvent } from "react-native";
+import FastImage from "react-native-fast-image";
 
-import { Asset } from "../../../../types"
-import { palette } from "../../../../theme/palette"
-import { Checkbox } from "../../../checkbox/checkbox"
+import { Asset } from "../../../../types";
+import { palette } from "../../../../theme/palette";
+import { Checkbox } from "../../../checkbox/checkbox";
 
-import Animated, { useSharedValue, useAnimatedStyle, withTiming } from "react-native-reanimated"
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+} from "react-native-reanimated";
 
 interface Props {
-  asset: Asset
-  selected: boolean
-  selectionMode: boolean
+  asset: Asset;
+  selected: boolean;
+  selectionMode: boolean;
 }
 
 const AssetItem = (props: Props): JSX.Element => {
-  const { asset, selected, selectionMode } = props
+  const { asset, selected, selectionMode } = props;
 
-  const imageHeightRef = React.useRef(0)
-  const imageSharedValue = useSharedValue<number>(0)
-  const borderRadiusSharedValue = useSharedValue<number>(0)
+  const imageHeightRef = React.useRef(0);
+  const imageSharedValue = useSharedValue<number>(0);
+  const borderRadiusSharedValue = useSharedValue<number>(0);
 
   const imageAnimatedStyle = useAnimatedStyle(() => {
     return {
@@ -27,29 +31,31 @@ const AssetItem = (props: Props): JSX.Element => {
       width: imageSharedValue.value,
       borderRadius: borderRadiusSharedValue.value,
       resizeMode: "cover",
-    }
-  })
+    };
+  });
 
   const onLayout = (event: LayoutChangeEvent) => {
-    const { height } = event.nativeEvent.layout
-    imageSharedValue.value = height
-    imageHeightRef.current = height
-  }
+    const { height } = event.nativeEvent.layout;
+    imageSharedValue.value = height;
+    imageHeightRef.current = height;
+  };
 
   React.useEffect(() => {
     if (!selected) {
       imageSharedValue.value = withTiming(imageHeightRef.current, {
         duration: 500,
-      })
+      });
       borderRadiusSharedValue.value = withTiming(0, {
         duration: 500,
-      })
-      return
+      });
+      return;
     }
 
-    imageSharedValue.value = withTiming((imageSharedValue.value * 60) / 100, { duration: 500 })
-    borderRadiusSharedValue.value = withTiming(10, { duration: 500 })
-  }, [selected])
+    imageSharedValue.value = withTiming((imageSharedValue.value * 60) / 100, {
+      duration: 500,
+    });
+    borderRadiusSharedValue.value = withTiming(10, { duration: 500 });
+  }, [selected]);
 
   return (
     <View onLayout={onLayout} style={styles.container}>
@@ -65,8 +71,8 @@ const AssetItem = (props: Props): JSX.Element => {
         />
       </Animated.View>
     </View>
-  )
-}
+  );
+};
 const styles = StyleSheet.create({
   checkbox: {
     left: 5,
@@ -91,6 +97,6 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     width: "100%",
   },
-})
+});
 
-export default AssetItem
+export default AssetItem;

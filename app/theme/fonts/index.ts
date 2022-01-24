@@ -9,4 +9,4 @@ export const initFonts = async () => {
   //   Montserrat: require("./Montserrat-Regular.ttf"),
   //   "Montserrat-Regular": require("./Montserrat-Regular.ttf"),
   // })
-}
+};

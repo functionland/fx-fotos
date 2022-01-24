@@ -1,18 +1,18 @@
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable react-native/no-color-literals */
 
-import * as React from "react"
-import { View, ViewStyle } from "react-native"
-import { storiesOf } from "@storybook/react-native"
-import { StoryScreen, Story, UseCase } from "../../../storybook/views"
-import { Checkbox } from "./checkbox"
-import { Toggle } from "react-powerplug"
+import * as React from "react";
+import { View, ViewStyle } from "react-native";
+import { storiesOf } from "@storybook/react-native";
+import { StoryScreen, Story, UseCase } from "../../../storybook/views";
+import { Checkbox } from "./checkbox";
+import { Toggle } from "react-powerplug";
 
-declare let module
+declare let module;
 
-const arrayStyle: ViewStyle[] = [{ paddingVertical: 40 }, { alignSelf: "flex-end" }]
-const arrayOutlineStyle: ViewStyle[] = [{ borderColor: "#b443c9" }, { borderWidth: 25 }]
-const arrayFillStyle: ViewStyle[] = [{ backgroundColor: "#55e0ff" }]
+const arrayStyle: ViewStyle[] = [{ paddingVertical: 40 }, { alignSelf: "flex-end" }];
+const arrayOutlineStyle: ViewStyle[] = [{ borderColor: "#b443c9" }, { borderWidth: 25 }];
+const arrayFillStyle: ViewStyle[] = [{ backgroundColor: "#55e0ff" }];
 
 storiesOf("Checkbox", module)
   .addDecorator((fn) => <StoryScreen>{fn()}</StoryScreen>)
@@ -118,4 +118,4 @@ storiesOf("Checkbox", module)
         </Toggle>
       </UseCase>
     </Story>
-  ))
+  ));

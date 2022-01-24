@@ -1,19 +1,19 @@
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable react-native/no-color-literals */
 
-import * as React from "react"
-import { storiesOf } from "@storybook/react-native"
-import { StoryScreen, Story, UseCase } from "../../../storybook/views"
-import { Text, FormRow } from "../"
-import { color } from "../../theme/color"
-import { ViewStyle } from "react-native"
+import * as React from "react";
+import { storiesOf } from "@storybook/react-native";
+import { StoryScreen, Story, UseCase } from "../../../storybook/views";
+import { Text, FormRow } from "../";
+import { color } from "../../theme/color";
+import { ViewStyle } from "react-native";
 
-declare let module
+declare let module;
 
 const TEXT_STYLE_OVERRIDE = {
   color: color.storybookTextColor,
-}
-const arrayStyle: ViewStyle[] = [{ borderWidth: 5 }, { borderColor: "#32cd32" }]
+};
+const arrayStyle: ViewStyle[] = [{ borderWidth: 5 }, { borderColor: "#32cd32" }];
 
 storiesOf("FormRow", module)
   .addDecorator((fn) => <StoryScreen>{fn()}</StoryScreen>)
@@ -30,9 +30,9 @@ storiesOf("FormRow", module)
         </FormRow>
         <FormRow preset="middle">
           <Text style={TEXT_STYLE_OVERRIDE}>
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Commodi officia quo rerum
-            impedit asperiores hic ex quae, quam dolores vel odit doloribus, tempore atque deserunt
-            possimus incidunt, obcaecati numquam officiis.
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Commodi officia quo
+            rerum impedit asperiores hic ex quae, quam dolores vel odit doloribus, tempore
+            atque deserunt possimus incidunt, obcaecati numquam officiis.
           </Text>
         </FormRow>
         <FormRow preset="middle">
@@ -47,8 +47,8 @@ storiesOf("FormRow", module)
       <UseCase text="Alternatives" usage="Less commonly used presets.">
         <FormRow preset="clear">
           <Text style={TEXT_STYLE_OVERRIDE}>
-            My borders are still there, but they are clear. This causes the text to still align
-            properly due to the box model of flexbox.
+            My borders are still there, but they are clear. This causes the text to still
+            align properly due to the box model of flexbox.
           </Text>
         </FormRow>
         <FormRow preset="soloRound">
@@ -104,4 +104,4 @@ storiesOf("FormRow", module)
         </FormRow>
       </UseCase>
     </Story>
-  ))
+  ));

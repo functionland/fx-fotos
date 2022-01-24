@@ -1,4 +1,3 @@
-
 import React, {
   useCallback,
   useContext,
@@ -6,17 +5,25 @@ import React, {
   useMemo,
   useRef,
   useState,
-} from 'react';
-import { View, RefreshControl, ScrollViewProps, LayoutChangeEvent, StyleSheet, Platform } from "react-native"
+} from "react";
 import {
-  DataProvider,
-  LayoutProvider,
-  RecyclerListView,
-} from 'recyclerlistview';
-import { RecyclerAssetListSection, RecyclerAssetListSectionData, ViewType, GroupHeader } from "../../../types"
-import deviceUtils from '../../../utils/deviceUtils'
-import { color } from "../../../theme"
-import RecyclerSectionItem from "./asset-items/recycler-section-item"
+  View,
+  RefreshControl,
+  ScrollViewProps,
+  LayoutChangeEvent,
+  StyleSheet,
+  Platform,
+} from "react-native";
+import { DataProvider, LayoutProvider, RecyclerListView } from "recyclerlistview";
+import {
+  RecyclerAssetListSection,
+  RecyclerAssetListSectionData,
+  ViewType,
+  GroupHeader,
+} from "../../../types";
+import deviceUtils from "../../../utils/deviceUtils";
+import { color } from "../../../theme";
+import RecyclerSectionItem from "./asset-items/recycler-section-item";
 export interface Props {
   refreshData: () => Promise<void>;
   sections: RecyclerAssetListSection[];
@@ -24,7 +31,7 @@ export interface Props {
   renderAheadOffset?: number;
   disableAutoScrolling?: boolean;
   disableRefreshControl?: boolean;
-};
+}
 
 export interface ExtendedState {
   selectedGroups: { [key: string]: boolean };
@@ -45,7 +52,7 @@ const RecyclerAssetList = ({
   const [extendedState, setExtendedState] = useState<ExtendedState>({
     selectedAssets: {},
     selectedGroups: {},
-    selectionMode: false
+    selectionMode: false,
   });
   const handleRefresh = useCallback(async () => {
     if (isRefreshing || !refreshData) {
@@ -67,78 +74,80 @@ const RecyclerAssetList = ({
       const topMargin = nativeEvent.layout.y;
       const additionalPadding = 10;
       setGlobalDeviceDimensions(
-        deviceUtils.dimensions.height -
-        topMargin -
-        additionalPadding
+        deviceUtils.dimensions.height - topMargin - additionalPadding
       );
     },
     [setGlobalDeviceDimensions]
   );
-  const onScroll = useCallback(
-    (e: unknown, f: unknown, offsetY: number) => {
-      // TODO: use to manage sticky header
-    },
-    []
-  );
-  const toggleSelectionMode=()=>{
-    setExtendedState(prevState => {
+  const onScroll = useCallback((e: unknown, f: unknown, offsetY: number) => {
+    // TODO: use to manage sticky header
+  }, []);
+  const toggleSelectionMode = () => {
+    setExtendedState((prevState) => {
       return {
         ...prevState,
         selectedAssets: {},
-        selectionMode: !prevState.selectionMode
-      }
+        selectionMode: !prevState.selectionMode,
+      };
     });
   };
   const toggleSelection = (section: RecyclerAssetListSection) => {
-    setExtendedState(prevState => {
-      if (!prevState.selectionMode)
-        return prevState;
+    setExtendedState((prevState) => {
+      if (!prevState.selectionMode) return prevState;
       if (section.type === ViewType.MONTH) {
         // TODO: toggle all subgroups
         prevState.selectedAssets[section.id] = !prevState.selectedAssets[section.id];
         return {
           ...prevState,
-          selectedAssets: { ...prevState.selectedAssets }
+          selectedAssets: { ...prevState.selectedAssets },
         };
       } else if (section.type === ViewType.DAY) {
         const data: GroupHeader = section.data;
-        data.subGroupIds?.forEach(id => {
+        data.subGroupIds?.forEach((id) => {
           prevState.selectedAssets[id] = !prevState.selectedAssets[section.id];
         });
         prevState.selectedAssets[section.id] = !prevState.selectedAssets[section.id];
         return {
           ...prevState,
-          selectedAssets: { ...prevState.selectedAssets }
+          selectedAssets: { ...prevState.selectedAssets },
         };
       } else if (section.type === ViewType.ASSET) {
         prevState.selectedAssets[section.id] = !prevState.selectedAssets[section.id];
         return {
           ...prevState,
-          selectedAssets: { ...prevState.selectedAssets }
+          selectedAssets: { ...prevState.selectedAssets },
         };
       }
       return prevState;
     });
-  }
+  };
   const onLongPress = useCallback((section: RecyclerAssetListSection) => {
     toggleSelectionMode();
     toggleSelection(section);
   }, []);
   const onPress = useCallback((section: RecyclerAssetListSection) => {
     toggleSelection(section);
-  }, [])
+  }, []);
   const rowRenderer = useCallback(
-    (type: ViewType, data: RecyclerAssetListSection, index: number, extendedState: ExtendedState): JSX.Element | null => {
+    (
+      type: ViewType,
+      data: RecyclerAssetListSection,
+      index: number,
+      extendedState: ExtendedState
+    ): JSX.Element | null => {
       // Checks if value is *nullish*.
       if (data == null || index == null) {
         return null;
       }
-      return <RecyclerSectionItem
-        section={data}
-        selectionMode={extendedState?.selectionMode}
-        selected={!!extendedState.selectedAssets[data.id]}
-        onLongPress={onLongPress}
-        onPress={onPress} />;
+      return (
+        <RecyclerSectionItem
+          section={data}
+          selectionMode={extendedState?.selectionMode}
+          selected={!!extendedState.selectedAssets[data.id]}
+          onLongPress={onLongPress}
+          onPress={onPress}
+        />
+      );
     },
     []
   );
@@ -148,7 +157,7 @@ const RecyclerAssetList = ({
       (index: number) => sections[index]?.type,
       (type, dim) => {
         const colWidth = Math.floor(deviceUtils.dimensions.width / numCols);
-        const StoriesHeight = Math.floor(1.618 * deviceUtils.dimensions.width / 3 + 10)
+        const StoriesHeight = Math.floor((1.618 * deviceUtils.dimensions.width) / 3 + 10);
         switch (type) {
           case ViewType.STORY:
             dim.width = deviceUtils.dimensions.width / 3;
@@ -173,20 +182,17 @@ const RecyclerAssetList = ({
         }
       }
     );
-  }, [
-    sections,
-    numCols
-  ]);
+  }, [sections, numCols]);
   layoutProvider.shouldRefreshWithAnchoring = false;
   const dataProvider = useMemo(() => {
-    console.log("dataProvider", sections?.length)
+    console.log("dataProvider", sections?.length);
     let provider = new DataProvider(
       (r1: RecyclerAssetListSection, r2: RecyclerAssetListSection) => r1.id !== r2.id,
-      index => sections[index]?.id
+      (index) => sections[index]?.id
     );
     provider = provider.cloneWithRows(sections);
     // provider.getStableId = index => sections[index].id;
-    console.log("provider.getSize()", provider.getSize())
+    console.log("provider.getSize()", provider.getSize());
     return provider;
   }, [sections]);
   const scrollViewProps = useMemo(
@@ -194,15 +200,15 @@ const RecyclerAssetList = ({
       disableRefreshControl
         ? {}
         : {
-          refreshControl: (
-            <RefreshControl
-              onRefresh={handleRefresh}
-              progressViewOffset={Platform.OS === "android" ? 30 : 0}
-              refreshing={isRefreshing}
-              tintColor={color.primary}
-            />
-          ),
-        },
+            refreshControl: (
+              <RefreshControl
+                onRefresh={handleRefresh}
+                progressViewOffset={Platform.OS === "android" ? 30 : 0}
+                refreshing={isRefreshing}
+                tintColor={color.primary}
+              />
+            ),
+          },
     [handleRefresh, isRefreshing]
   );
 
@@ -220,7 +226,7 @@ const RecyclerAssetList = ({
       />
     </View>
   );
-}
+};
 export default RecyclerAssetList;
 const styles = StyleSheet.create({
   container: {

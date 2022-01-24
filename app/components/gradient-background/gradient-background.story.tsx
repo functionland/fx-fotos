@@ -1,9 +1,9 @@
-import * as React from "react"
-import { storiesOf } from "@storybook/react-native"
-import { StoryScreen, Story, UseCase } from "../../../storybook/views"
-import { GradientBackground } from "./gradient-background"
+import * as React from "react";
+import { storiesOf } from "@storybook/react-native";
+import { StoryScreen, Story, UseCase } from "../../../storybook/views";
+import { GradientBackground } from "./gradient-background";
 
-declare let module
+declare let module;
 
 storiesOf("GradientBackground", module)
   .addDecorator((fn) => <StoryScreen>{fn()}</StoryScreen>)
@@ -13,4 +13,4 @@ storiesOf("GradientBackground", module)
         <GradientBackground colors={["#422443", "#281b34"]} />
       </UseCase>
     </Story>
-  ))
+  ));

@@ -1,4 +1,4 @@
-import { palette } from "./palette"
+import { palette } from "./palette";
 
 /**
  * Roles for colors.  Prefer using these over the palette.  It makes it easier
@@ -61,4 +61,4 @@ export const color = {
    * white background
    */
   storybookTextColor: palette.black,
-}
+};

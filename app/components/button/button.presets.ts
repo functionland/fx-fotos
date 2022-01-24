@@ -1,5 +1,5 @@
-import { ViewStyle, TextStyle } from "react-native"
-import { color, spacing } from "../../theme"
+import { ViewStyle, TextStyle } from "react-native";
+import { color, spacing } from "../../theme";
 
 /**
  * All text will start off looking like this.
@@ -10,11 +10,11 @@ const BASE_VIEW: ViewStyle = {
   borderRadius: 4,
   justifyContent: "center",
   alignItems: "center",
-}
+};
 
 const BASE_TEXT: TextStyle = {
   paddingHorizontal: spacing[3],
-}
+};
 
 /**
  * All the variations of text styling within the app.
@@ -36,7 +36,7 @@ export const viewPresets: Record<string, ViewStyle> = {
     paddingVertical: 0,
     alignItems: "flex-start",
   } as ViewStyle,
-}
+};
 
 export const textPresets: Record<ButtonPresetNames, TextStyle> = {
   primary: { ...BASE_TEXT, fontSize: 9, color: color.palette.white } as TextStyle,
@@ -46,9 +46,9 @@ export const textPresets: Record<ButtonPresetNames, TextStyle> = {
     paddingHorizontal: 0,
     paddingVertical: 0,
   } as TextStyle,
-}
+};
 
 /**
  * A list of preset names.
  */
-export type ButtonPresetNames = keyof typeof viewPresets
+export type ButtonPresetNames = keyof typeof viewPresets;

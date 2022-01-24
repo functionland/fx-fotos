@@ -1,17 +1,17 @@
-import { storiesOf } from "@storybook/react-native"
-import * as React from "react"
-import { View } from "react-native"
-import { Story, StoryScreen, UseCase } from "../../../storybook/views"
-import { color } from "../../theme"
-import { BulletItem } from "./bullet-item"
+import { storiesOf } from "@storybook/react-native";
+import * as React from "react";
+import { View } from "react-native";
+import { Story, StoryScreen, UseCase } from "../../../storybook/views";
+import { color } from "../../theme";
+import { BulletItem } from "./bullet-item";
 
-declare let module
+declare let module;
 
 const VIEWSTYLE = {
   flex: 1,
   backgroundColor: color.storybookDarkBg,
   borderWidth: 5,
-}
+};
 
 storiesOf("Bullet Item", module)
   .addDecorator((fn) => <StoryScreen>{fn()}</StoryScreen>)
@@ -30,4 +30,4 @@ storiesOf("Bullet Item", module)
         </View>
       </UseCase>
     </Story>
-  ))
+  ));

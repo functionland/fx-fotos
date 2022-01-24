@@ -1,24 +1,24 @@
-import React from "react"
-import { ViewStyle, Animated, Easing, TouchableWithoutFeedback } from "react-native"
-import { color } from "../../theme"
-import { SwitchProps } from "./switch.props"
+import React from "react";
+import { ViewStyle, Animated, Easing, TouchableWithoutFeedback } from "react-native";
+import { color } from "../../theme";
+import { SwitchProps } from "./switch.props";
 
 // dimensions
-const THUMB_SIZE = 30
-const WIDTH = 56
-const MARGIN = 2
-const OFF_POSITION = -0.5
-const ON_POSITION = WIDTH - THUMB_SIZE - MARGIN
-const BORDER_RADIUS = (THUMB_SIZE * 3) / 4
+const THUMB_SIZE = 30;
+const WIDTH = 56;
+const MARGIN = 2;
+const OFF_POSITION = -0.5;
+const ON_POSITION = WIDTH - THUMB_SIZE - MARGIN;
+const BORDER_RADIUS = (THUMB_SIZE * 3) / 4;
 
 // colors
-const ON_COLOR = color.primary
-const OFF_COLOR = color.palette.offWhite
-const BORDER_ON_COLOR = ON_COLOR
-const BORDER_OFF_COLOR = "rgba(0, 0, 0, 0.1)"
+const ON_COLOR = color.primary;
+const OFF_COLOR = color.palette.offWhite;
+const BORDER_ON_COLOR = ON_COLOR;
+const BORDER_OFF_COLOR = "rgba(0, 0, 0, 0.1)";
 
 // animation
-const DURATION = 250
+const DURATION = 250;
 
 // the track always has these props
 const TRACK = {
@@ -27,7 +27,7 @@ const TRACK = {
   borderRadius: BORDER_RADIUS,
   borderWidth: MARGIN / 2,
   backgroundColor: color.background,
-}
+};
 
 // the thumb always has these props
 const THUMB: ViewStyle = {
@@ -43,49 +43,49 @@ const THUMB: ViewStyle = {
   shadowOpacity: 1,
   shadowRadius: 2,
   elevation: 2,
-}
+};
 
-const makeAnimatedValue = (switchOn) => new Animated.Value(switchOn ? 1 : 0)
+const makeAnimatedValue = (switchOn) => new Animated.Value(switchOn ? 1 : 0);
 
 export function Switch(props: SwitchProps) {
-  const [timer] = React.useState<Animated.Value>(makeAnimatedValue(props.value))
+  const [timer] = React.useState<Animated.Value>(makeAnimatedValue(props.value));
   const startAnimation = React.useMemo(
     () => (newValue: boolean) => {
-      const toValue = newValue ? 1 : 0
-      const easing = Easing.out(Easing.circle)
+      const toValue = newValue ? 1 : 0;
+      const easing = Easing.out(Easing.circle);
       Animated.timing(timer, {
         toValue,
         duration: DURATION,
         easing,
         useNativeDriver: true,
-      }).start()
+      }).start();
     },
-    [timer],
-  )
+    [timer]
+  );
 
-  const [previousValue, setPreviousValue] = React.useState<boolean>(props.value)
+  const [previousValue, setPreviousValue] = React.useState<boolean>(props.value);
   React.useEffect(() => {
     if (props.value !== previousValue) {
-      startAnimation(props.value)
-      setPreviousValue(props.value)
+      startAnimation(props.value);
+      setPreviousValue(props.value);
     }
-  }, [props.value])
+  }, [props.value]);
 
   const handlePress = React.useMemo(
     () => () => props.onToggle && props.onToggle(!props.value),
-    [props.onToggle, props.value],
-  )
+    [props.onToggle, props.value]
+  );
 
   if (!timer) {
-    return null
+    return null;
   }
 
   const translateX = timer.interpolate({
     inputRange: [0, 1],
     outputRange: [OFF_POSITION, ON_POSITION],
-  })
+  });
 
-  const style = props.style
+  const style = props.style;
 
   const trackStyle = [
     TRACK,
@@ -94,7 +94,7 @@ export function Switch(props: SwitchProps) {
       borderColor: props.value ? BORDER_ON_COLOR : BORDER_OFF_COLOR,
     },
     props.value ? props.trackOnStyle : props.trackOffStyle,
-  ]
+  ];
 
   const thumbStyle = [
     THUMB,
@@ -102,7 +102,7 @@ export function Switch(props: SwitchProps) {
       transform: [{ translateX }],
     },
     props.value ? props.thumbOnStyle : props.thumbOffStyle,
-  ]
+  ];
 
   return (
     <TouchableWithoutFeedback onPress={handlePress} style={style}>
@@ -110,5 +110,5 @@ export function Switch(props: SwitchProps) {
         <Animated.View style={thumbStyle} />
       </Animated.View>
     </TouchableWithoutFeedback>
-  )
+  );
 }

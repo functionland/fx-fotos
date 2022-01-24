@@ -1,10 +1,10 @@
-import { ViewStyle } from "react-native"
-import { color, spacing } from "../../theme"
+import { ViewStyle } from "react-native";
+import { color, spacing } from "../../theme";
 
 /**
  * The size of the border radius.
  */
-const RADIUS = 8
+const RADIUS = 8;
 
 /**
  * The default style of the container.
@@ -13,7 +13,7 @@ const ROOT: ViewStyle = {
   borderWidth: 1,
   borderColor: color.line,
   padding: spacing[2],
-}
+};
 
 /**
  * What each of the presets look like.
@@ -63,9 +63,9 @@ export const PRESETS = {
     ...ROOT,
     borderColor: color.transparent,
   },
-}
+};
 
 /**
  * The names of the presets supported by FormRow.
  */
-export type FormRowPresets = keyof typeof PRESETS
+export type FormRowPresets = keyof typeof PRESETS;
