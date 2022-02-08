@@ -131,7 +131,7 @@ yarn run ios
 ```
 #### Android
 ```
-npm run android
+yarn run android
 ```
 
 
