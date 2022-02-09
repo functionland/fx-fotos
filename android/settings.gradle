@@ -1,13 +1,14 @@
 
 // React Native Colo Loco autolinks native files colocated next to your JS files
 // More info here: https://github.com/jamonholmgren/react-native-colo-loco
-apply from: '../node_modules/react-native-colo-loco/scripts/android.groovy'
-linkColocatedNativeFiles([
-  appName: "Photos",
-  appPath: "../app",
-  appPackageName: "com.photos",
-  androidPath: "./android/app/src/main/java/com/photos"
-])
+
+// apply from: '../node_modules/react-native-colo-loco/scripts/android.groovy'
+// linkColocatedNativeFiles([
+//   appName: "Photos",
+//   appPath: "../app",
+//   appPackageName: "com.photos",
+//   androidPath: "./android/app/src/main/java/com/photos"
+// ])
 
 
 rootProject.name = 'photos'

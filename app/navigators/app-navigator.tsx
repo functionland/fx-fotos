@@ -5,11 +5,18 @@
  * and a "main" flow which the user will use once logged in.
  */
 import React from "react"
-import { useColorScheme } from "react-native"
+import { useColorScheme, View, Text } from "react-native"
 import { NavigationContainer, DefaultTheme, DarkTheme } from "@react-navigation/native"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { enableScreens } from "react-native-screens"
+
 import { HomeScreen } from "../screens"
 import { navigationRef } from "./navigation-utilities"
+import Animated from "react-native-reanimated"
+import { AnimatedHeader } from "../components/header/animated-header"
+import { TabHeader } from "../components/header/tab-header"
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 
 /**
  * This type allows TypeScript to know what routes are defined in this navigator
@@ -23,10 +30,9 @@ import { navigationRef } from "./navigation-utilities"
  *   https://reactnavigation.org/docs/params/
  *   https://reactnavigation.org/docs/typescript#type-checking-the-navigator
  */
+
+enableScreens();
 export type NavigatorParamList = {
-  welcome: undefined
-  demo: undefined
-  demoList: undefined
   home: undefined
 }
 
@@ -38,26 +44,103 @@ const AppStack = () => {
     <Stack.Navigator
       screenOptions={{
         headerShown: true,
+        headerTransparent: true,
+        headerHideShadow: true,
       }}
-      initialRouteName="home"
+      initialRouteName="homeTabs"
     >
-      <Stack.Screen name="home" component={HomeScreen} />
+      <Stack.Screen
+        name="homeTabs"
+        options={{
+          headerShown: false,
+          headerTransparent: true,
+        }}
+        component={HomeTabsNavigator}
+      />
+      <Stack.Screen
+        name="settings2"
+        options={{
+          headerShown: true,
+          
+        }}
+        component={SettingsScreen}
+      />
     </Stack.Navigator>
+
   )
 }
+function SettingsScreen() {
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text>Settings!</Text>
+    </View>
+  );
+}
 
-interface NavigationProps extends Partial<React.ComponentProps<typeof NavigationContainer>> {}
+const HomeTabs = createBottomTabNavigator();
+
+function HomeTabsNavigator() {
+  return (
+    <HomeTabs.Navigator
+      screenOptions={{
+        headerTransparent: true,
+        headerShown: true,
+        header: (props) => <TabHeader {...props} />,
+        tabBarStyle: {
+          height: 70,
+          backgroundColor:"white"
+        },
+        tabBarLabelStyle: {
+          fontSize: 15,
+          color: "black",
+          fontWeight: "600",
+          padding: 5,
+        },
+        
+      }}
+    >
+      <HomeTabs.Screen
+        options={{
+          tabBarLabel: "Photos",
+          tabBarIcon: (props) => <FontAwesome5 name={'images'} size={25} color={props?.focused ? "blue" : "gray"} style={{}} />
+        }}
+
+        name="Home" component={HomeScreen} />
+      <HomeTabs.Screen
+        name="Search"
+        options={{
+          tabBarIcon: (props) => <FontAwesome5 name={'search'} color={props?.focused ? "blue" : "gray"} size={25} style={{}} />
+        }}
+        component={SettingsScreen} />
+      <HomeTabs.Screen
+        name="Sharing"
+        options={{
+          tabBarIcon: (props) => <FontAwesome5 name={'user-friends'} color={props?.focused ? "blue" : "gray"} size={25} style={{}} />
+        }}
+        component={SettingsScreen} />
+      <HomeTabs.Screen
+        name="Library"
+        options={{
+          tabBarIcon: (props) => <FontAwesome5 name={'swatchbook'} color={props?.focused ? "blue" : "gray"} size={25} style={{}} />
+        }}
+        component={SettingsScreen} />
+    </HomeTabs.Navigator>
+  );
+}
+interface NavigationProps extends Partial<React.ComponentProps<typeof NavigationContainer>> { }
 
 export const AppNavigator = (props: NavigationProps) => {
   const colorScheme = useColorScheme()
   return (
-    <NavigationContainer
-      ref={navigationRef}
-      theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-      {...props}
-    >
-      <AppStack />
-    </NavigationContainer>
+    <Animated.View style={{ flex: 1 }}>
+      <NavigationContainer
+        ref={navigationRef}
+        theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+        {...props}
+      >
+        <AppStack />
+      </NavigationContainer>
+    </Animated.View>
   )
 }
 

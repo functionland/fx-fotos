@@ -7,7 +7,7 @@ import com.facebook.react.ReactRootView;
 import com.swmansion.gesturehandler.react.RNGestureHandlerEnabledRootView;
 
 import expo.modules.ReactActivityDelegateWrapper;
-
+import android.os.Bundle;
 public class MainActivity extends ReactActivity {
 
   /**
@@ -18,7 +18,10 @@ public class MainActivity extends ReactActivity {
   protected String getMainComponentName() {
     return "photos";
   }
-
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(null);
+  }
   /**
    * Required for proper react-native-gesture-handler touch handling
    * https://docs.swmansion.com/react-native-gesture-handler/docs/#updating-mainactivityjava
