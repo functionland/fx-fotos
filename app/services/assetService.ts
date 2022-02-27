@@ -3,7 +3,6 @@ import { manipulateAsync, SaveFormat, ImageResult } from "expo-image-manipulator
 import moment from "moment"
 
 import { RecyclerAssetListSection, ViewType, GroupHeader } from "../types"
-
 export const generateThumbnail = async (assets: MediaLibrary.Asset[]) => {
   const result: ImageResult[] = []
   for (let index = 0; index < assets.length; index++) {
