@@ -29,6 +29,7 @@ import { color } from "../../../theme"
 import RecyclerSectionItem from "./asset-items/recycler-section-item"
 import ExternalScrollView from "../external-scroll-view"
 import { HomeNavigation, HomeNavigationTypes } from "../../../navigators/HomeNavigation"
+import { SharedElement } from "react-navigation-shared-element"
 
 export interface Props {
   sections: RecyclerAssetListSection[]

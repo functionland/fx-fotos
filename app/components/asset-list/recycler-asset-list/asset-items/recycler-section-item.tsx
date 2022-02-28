@@ -86,7 +86,7 @@ const RecyclerSectionItem: React.FC<Props> = ({
       onLongPress={onLongPressItem}
       onPress={() => {
         if (!selected && !selectionMode) {
-          navigation.navigate(HomeNavigationTypes.PhotoScreen)
+          navigation.push(HomeNavigationTypes.PhotoScreen, { section: section })
         }
         onPressItem()
       }}
