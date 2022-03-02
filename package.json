@@ -48,6 +48,8 @@
     "react-native-gesture-handler": "^2.0.0",
     "react-native-keychain": "6.2.0",
     "react-native-reanimated": "^2.3.1",
+    "react-native-redash": "^16.2.3",
+    "react-native-responsive-screen": "^1.4.2",
     "react-native-safe-area-context": "3.1.8",
     "react-native-screens": "^3.10.1",
     "react-native-shared-element": "^0.8.4",

@@ -1,7 +1,7 @@
 import React from "react"
 import { useColorScheme, View, Text } from "react-native"
 import { NavigationContainer, DefaultTheme, DarkTheme } from "@react-navigation/native"
-import { createNativeStackNavigator } from "@react-navigation/native-stack"
+import { createStackNavigator } from "@react-navigation/stack"
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import { enableScreens } from "react-native-screens"
 
@@ -18,7 +18,7 @@ export type NavigatorParamList = {
 }
 
 // Documentation: https://reactnavigation.org/docs/stack-navigator/
-const Stack = createNativeStackNavigator<NavigatorParamList>()
+const Stack = createStackNavigator<NavigatorParamList>()
 
 const AppStack = () => {
   return (

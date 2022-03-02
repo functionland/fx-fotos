@@ -1,6 +1,7 @@
 import React from "react"
-import { HomeScreen, PhotoScreen } from "../screens"
 import { createSharedElementStackNavigator } from "react-navigation-shared-element"
+
+import { HomeScreen, PhotoScreen } from "../screens"
 import { RecyclerAssetListSection } from "../types"
 
 export type HomeNavigationParamList = {
@@ -19,12 +20,20 @@ export const HomeNavigation = () => {
   const { Navigator, Screen } = HomeNavigationStack
 
   return (
-    <Navigator initialRouteName="HomeScreen">
+    <Navigator
+      screenOptions={{
+        gestureEnabled: false,
+        headerShown: false,
+        cardOverlayEnabled: true,
+        cardStyle: { backgroundColor: "transparent" },
+        animationEnabled: true,
+      }}
+    >
       <Screen name={HomeNavigationTypes.HomeScreen} component={HomeScreen} />
       <Screen
         name={HomeNavigationTypes.PhotoScreen}
         component={PhotoScreen}
-        sharedElements={(route, otherRoute, showing) => {
+        sharedElements={(route) => {
           const { section } = route.params
           return [section.data.uri]
         }}
