@@ -14,19 +14,30 @@ import Animated, {
   useAnimatedScrollHandler,
   interpolate,
   Transitioning,
-  Transition
+  Transition,
+  scrollTo,
+  useDerivedValue,
+  runOnJS,
+  useAnimatedReaction
 } from 'react-native-reanimated';
 import {
   DataProvider,
   LayoutProvider,
   RecyclerListView,
 } from 'recyclerlistview';
+import {
+  useRecoilState,
+} from 'recoil';
+import { numColumnsState } from '../../../store';
 import { RecyclerAssetListSection, RecyclerAssetListSectionData, ViewType, GroupHeader } from "../../../types"
 import deviceUtils from '../../../utils/deviceUtils'
 import { color } from "../../../theme"
 import RecyclerSectionItem from "./asset-items/recycler-section-item"
 import ExternalScrollView from '../external-scroll-view'
+import Cell from '../../../components/PhotoGrid/cell'
+import { useColumnsNumber, useScale } from '../../../components/PhotoGrid/GridContext';
 
+import GridLayoutProvider from '../../../components/PhotoGrid/GridLayoutProvider'
 export interface Props {
   sections: RecyclerAssetListSection[];
   numCols: 2 | 3 | 4 | 5;
@@ -35,7 +46,8 @@ export interface Props {
   disableAutoScrolling?: boolean;
   disableRefreshControl?: boolean;
   scrollRef?: any,
-  scrollHandler: (event: NativeSyntheticEvent<NativeScrollEvent>) => void
+  scrollHandler: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
+  scrollY: SharedValue<number> | undefined;
 };
 
 export interface ExtendedState {
@@ -57,16 +69,23 @@ const RecyclerAssetList = ({
   disableRefreshControl,
   scrollHandler,
   scrollRef,
+  scrollY,
   ...extras
 }: Props): JSX.Element => {
   const transitionRef = useRef();
+  const rclRef = useRef<RecyclerListView>();
+  const [numColumns] = useColumnsNumber();
+  const lastScrollY = useSharedValue(scrollY.value);
+  const scale1 = useScale();
   const [cols, setCols] = useState(numCols);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+  const [containerSize, setContainerSize] = useState();
+  const [currentColumns] = useRecoilState(numColumnsState);
   const [globalDeviceDimensions, setGlobalDeviceDimensions] = useState<number>(0);
   const [extendedState, setExtendedState] = useState<ExtendedState>({
     selectedAssets: {},
     selectedGroups: {},
-    selectionMode: false
+    selectionMode: false,
   });
   const zoomInStyle = useAnimatedStyle(() => {
     if (!scale)
@@ -183,6 +202,25 @@ const RecyclerAssetList = ({
     transitionRef.current?.animateNextTransition();
     setCols(numCols);
   }, [numCols])
+  const getLayoutType = useCallback((index) => {
+    return sections[index].type
+    // if (index === 0) return 'story';
+    // else if (data[index]?.deleted) return 'hidden';
+    // else if (data[index]?.sortCondition === groupBy || data[index]?.sortCondition === '') {
+    //     if (typeof data[index]?.value === 'string') return 'header';
+    //     return 'image';
+    // }
+    // return 'unknown'
+  }, [sections])
+  const gridLayoutProvider = useMemo(() => (new GridLayoutProvider(numColumns, scale1, getLayoutType)), [getLayoutType])
+  const renderItemContainer = useCallback((props: any, parentProps: any, children: React.ReactNode) => {
+    return (
+      <Cell {...props} scale={scale1} columnNumber={numColumns.value} layoutProvider={gridLayoutProvider} index={parentProps.index}>
+        {children}
+      </Cell>
+    );
+  }, [gridLayoutProvider])
+  gridLayoutProvider.shouldRefreshWithAnchoring = false;
   const layoutProvider = useMemo(() => {
     return new LayoutProvider(
       (index: number) => sections[index]?.type,
@@ -229,30 +267,114 @@ const RecyclerAssetList = ({
     console.log("provider.getSize()", provider.getSize())
     return provider;
   }, [sections]);
+  const onScaleChange = (value) => {
+    //const layouts = gridLayoutProvider.getLayoutManager()?.getContentDimension();
+    //scrollTo(scrollRef,0,scale1.value,true);
+  }
+  // useDerivedValue(() => {
+  //   const s=scale1.value;
+  //   runOnJS(onScaleChange)(scale1.value-Math.floor(scale1.value));
+  //   if(scale1.value-Math.floor(scale1.value)!==0)
+  //     scrollTo(scrollRef,0,scrollY.value +  100*(scale1.value-Math.floor(scale1.value)),false);
+  // },[scale1])
+  useAnimatedReaction(() => {
+    return scrollY.value;
+  }, (result, previous) => {
+    if (numColumns.value - scale1.value === 0) {
+      lastScrollY.value = result;
+    }
+  });
+
+  useAnimatedReaction(
+    () => scale1.value,
+    (scrolling) => {
+      const scaleCeil = Math.ceil(scale1.value)
+      const scaleFloor = Math.floor(scale1.value)
+      //runOnJS(onScaleChange)(numColumns.value - scrolling);
+      if (containerSize && numColumns.value - scrolling !== 0) {
+        let heightDif = 0
+        if (numColumns.value > scale1.value) {
+          heightDif = Math.abs(containerSize.height[scaleFloor] - containerSize.height[numColumns.value]);
+          const scrollDif = interpolate(scale1.value, [scaleFloor, numColumns.value], [heightDif/50 ,0])
+          //console.log("scrollDif1", scale1.value, scrollY.value, scrollDif, heightDif)
+          scrollTo(scrollRef, 0, lastScrollY.value + scrollDif, false)
+        }
+        else if (numColumns.value < scale1.value) {
+          heightDif = Math.abs(containerSize.height[numColumns.value] - containerSize.height[scaleCeil]);
+          const scrollDif = interpolate(scale1.value, [numColumns.value, scaleCeil], [0, heightDif/50])
+          //console.log("scrollDif2", lastScrollY.value, scrollDif, heightDif)
+          scrollTo(scrollRef, 0, lastScrollY.value - scrollDif, false)
+        }
+      }
+    },
+    [containerSize]
+  );
+  const containerStyle = useAnimatedStyle(() => {
+
+    if (!containerSize)
+      return {};
+    const scaleCeil = Math.ceil(scale1.value)
+    const scaleFloor = Math.floor(scale1.value)
+    let style = {}
+    if (numColumns.value > scale1.value) {
+      style = {
+        height: interpolate(scale1.value, [scaleFloor, numColumns.value], [containerSize.height[scaleFloor], containerSize.height[numColumns.value]])
+      }
+    }
+    else if (numColumns.value < scale1.value) {
+      style = {
+        height: interpolate(scale1.value, [numColumns.value, scaleCeil], [containerSize.height[numColumns.value], containerSize.height[scaleCeil]])
+      }
+    }
+    return style;
+  }, [containerSize])
+  useEffect(()=>{
+    
+    console.log("useEffect",rclRef.current?._checkAndChangeLayouts)
+    rclRef.current?._checkAndChangeLayouts(rclRef.current.props,true);
+  },[currentColumns])
+  console.log("Render: Recycle-Asset-List")
   return (
-    <Animated.View style={[zoomInStyle, styles.container]} collapsable={false} onLayout={onLayout}>
-      <RecyclerListView
-        dataProvider={dataProvider}
-        extendedState={extendedState}
-        layoutProvider={layoutProvider}
-        renderAheadOffset={renderAheadOffset}
-        rowRenderer={rowRenderer}
-        externalScrollView={ExternalScrollView}
-        scrollViewProps={{
-          scrollRefExternal: scrollRef,
-          _onScrollExternal: scrollHandler,
-        }}
-        contentContainerStyle={{ paddingTop: 50 }}
-        renderContentContainer={(props, children) => {
-          return (
-            <Transitioning.View ref={transitionRef} transition={transition} {...props}>
-              {children}
-            </Transitioning.View>
-          );
-        }}
-        {...extras}
-      />
-    </Animated.View>
+    <RecyclerListView
+      ref={rclRef}
+      dataProvider={dataProvider}
+      extendedState={extendedState}
+      layoutProvider={gridLayoutProvider}
+      renderAheadOffset={1000}
+      //renderAheadOffset={renderAheadOffset}
+      rowRenderer={rowRenderer}
+      externalScrollView={ExternalScrollView}
+      canChangeSize={true}
+      scrollViewProps={{
+        scrollRefExternal: scrollRef,
+        _onScrollExternal: scrollHandler,
+        onContentSizeChange: (contentWidth, contentHeight) => {
+
+          //console.log("onSizeChanged", contentWidth, contentHeight)
+        }
+      }}
+      contentContainerStyle={{ paddingTop: 50 }}
+      renderItemContainer={renderItemContainer}
+      renderContentContainer={(props, children) => {
+        return (
+          <Animated.View {...props} style={[props.style,containerStyle]} onLayout={() => {
+            //console.log("onLayout")
+            if (!containerSize) {
+              const heights = gridLayoutProvider?.getLayoutManager?.()?.getAllContentDimension()
+              setContainerSize(heights);
+              console.log("onLayout containerSize", heights)
+            }
+            if(numColumns.value-scale1.value===0){
+              rclRef.current?._checkAndChangeLayouts(rclRef.current.props,true);
+              console.log("_checkAndChangeLayouts:",rclRef.current?._checkAndChangeLayouts) 
+            }
+          }}>
+            {children}
+          </Animated.View>
+        );
+      }}
+      {...extras}
+    />
   );
 }
 export default RecyclerAssetList;

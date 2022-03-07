@@ -82,7 +82,7 @@ export const categorizeAssets = (assets: MediaLibrary.Asset[]) => {
 export const getAllMedias = async () => {
   try {
     const medias = await MediaLibrary.getAssetsAsync({
-      first: 9999,
+      first: 1000,
       sortBy: "creationTime",
     })
     return medias

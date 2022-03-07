@@ -19,6 +19,8 @@ import { PinchGestureHandler, State, PinchGestureHandlerGestureEvent } from 'rea
 import deviceUtils from '../../utils/deviceUtils'
 
 import RecyclerAssetList from './recycler-asset-list';
+import GridProvider from '../../components/PhotoGrid/GridContext'
+import PinchZoom from '../../components/PhotoGrid/PinchZoom';
 
 import { RecyclerAssetListSection } from "../../types"
 interface Props {
@@ -82,7 +84,7 @@ const AssetList = ({
         if (pinchStarted.value && !changingView.value) {
             const diff = scale.value - lastScale.value;
             if (scale.value !== 1 && Math.abs(diff) > 0.3) {
-                
+
                 changingView.value = 1;
                 runOnJS(changeView)(diff > 0 ? -1 : 1);
                 lastScale.value = scale.value;
@@ -94,7 +96,7 @@ const AssetList = ({
             pinchStarted.value = 1;
         },
         onActive: (event) => {
-            if(!changingView.value)
+            if (!changingView.value)
                 scale.value = event.scale;
         },
         onEnd: () => {
@@ -103,31 +105,22 @@ const AssetList = ({
             scale.value = withTiming(1);
         },
     });
-
+    
     return (
-        <PinchGestureHandler
-            onGestureEvent={pinchHandler}>
-            <Animated.View style={styles.container} collapsable={false}>
-                <Animated.View style={styles.container} collapsable={false}>
-                    <TouchableHighlight style={{ zIndex: 99, height: 80, width: 80, borderRadius: 40, top: 80, right: 0, justifyContent: "center", alignItems: "center", backgroundColor: "grey" }} onPress={() => {
-                        const loop = [2, 3, 4, 5, 4, 3];
-                        const index = (counter + 1) % 6;
-                        setColNums(loop[index]);
-                        setCounter(counter + 1);
-                    }}>
-                        <Text style={{ fontSize: 20 }} >{numCols}</Text>
-                    </TouchableHighlight>
-                    <RecyclerAssetList
-                        refreshData={refreshData}
-                        renderAheadOffset={1000/numCols}
-                        numCols={(numCols)}
-                        sections={sections}
-                        scrollHandler={scrollHandler}
-                        scrollRef={scrollRefExternal}
-                    />
-                </Animated.View>
-            </Animated.View>
-        </PinchGestureHandler>);
+        <GridProvider>
+            <PinchZoom>
+                <RecyclerAssetList
+                    refreshData={refreshData}
+                    renderAheadOffset={1000 / numCols}
+                    numCols={(numCols)}
+                    sections={sections}
+                    scrollHandler={scrollHandler}
+                    scrollRef={scrollRefExternal}
+                    scrollY={scrollY}
+                />
+            </PinchZoom>
+        </GridProvider>
+    );
 };
 const styles = StyleSheet.create({
     container: {
