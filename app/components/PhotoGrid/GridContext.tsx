@@ -22,9 +22,12 @@ export function useColumnsNumber() {
 
 export function useScale() {
   const { scale } = useContext(GridContext);
-  return scale as Reanimated.SharedValue<number>;
+  return scale as Reanimated.SharedValue<boolean>;
 }
-
+export function usePinching() {
+  const { pinching } = useContext(GridContext);
+  return pinching as Reanimated.SharedValue<number>;
+}
 interface Props { }
 
 const GridProvider: React.FC<Props> = (props) => {
@@ -32,8 +35,9 @@ const GridProvider: React.FC<Props> = (props) => {
   const [columns1, setColumns] = useState(2);
   const columns = useSharedValue(3);
   const scale = useSharedValue(3);
+  const pinching = useSharedValue(false);
   return (
-    <GridContext.Provider value={{ columns, scale }}>
+    <GridContext.Provider value={{ columns, scale, pinching }}>
       {props.children}
     </GridContext.Provider>
   );

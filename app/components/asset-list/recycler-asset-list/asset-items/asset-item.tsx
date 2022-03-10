@@ -1,4 +1,4 @@
-import React from "react"
+import React, { memo } from "react"
 import { StyleSheet, View, LayoutChangeEvent, Image } from "react-native"
 import FastImage from "react-native-fast-image"
 
@@ -45,14 +45,14 @@ const AssetItem = (props: Props): JSX.Element => {
   return (
     <View style={styles.container}>
       <Animated.View style={[styles.imageContainer, imageContainerAnimatedStyle]}>
-          <Image
-            style={styles.image}
-            source={{
-              uri: asset.uri,
-            }}
-            fadeDuration={100}
-            resizeMode="cover"
-          />
+        <Image
+          style={styles.image}
+          source={{
+            uri: asset.uri,
+          }}
+          fadeDuration={100}
+          resizeMode="cover"
+        />
       </Animated.View>
       {selectionMode ? <Checkbox value={selected} style={styles.checkbox} /> : null}
     </View>
@@ -77,10 +77,15 @@ const styles = StyleSheet.create({
     width: undefined,
   },
   imageContainer: {
-    flex:1,
+    flex: 1,
     overflow: "hidden",
     zIndex: 0
   }
 })
 
-export default AssetItem
+const areEqual = (prev: Props, next: Props) => {
+	return (prev?.asset?.id === next?.asset?.id
+		&& prev?.selectionMode === next?.selectionMode
+		&& prev?.selected === next?.selected)
+}
+export default memo(AssetItem, areEqual);

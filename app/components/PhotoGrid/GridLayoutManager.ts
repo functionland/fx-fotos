@@ -55,12 +55,16 @@ export default class GridLayoutManager extends LayoutManager {
     return this._allLayouts[this._columnNumber.value - MIN_COLUMNS]
   }
 
-  public getLayoutsForIndex(index: number): Array<{ layout: Layout; colNum: number }> {
+  public getLayoutsForIndex(index: number): Record<number, Layout> {
     if (this._allLayouts.every((layout) => index < layout.length)) {
-      return this._allLayouts.map((layouts, idx) => ({
-        layout: layouts[index],
-        colNum: idx + MIN_COLUMNS,
-      }))
+      return this._allLayouts.reduce((obj, layout, idx) => {
+        obj[idx + MIN_COLUMNS] = layout[index]
+        return obj
+      }, {})
+      // .map((layouts, idx) => ({
+      //   layout: layouts[index],
+      //   colNum: idx + MIN_COLUMNS,
+      // }))
     } else {
       throw new Error("Layouts unavalaible")
     }

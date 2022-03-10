@@ -1,6 +1,6 @@
 import { Dimension, Layout, LayoutManager, BaseLayoutProvider } from "recyclerlistview";
 import Reanimated,{SharedValue} from 'react-native-reanimated'
-import { getStoryHeight, HEADER_HEIGHT, MAIN_HEADER_HEIGHT } from "./constants";
+import { getStoryHeight, MAIN_HEADER_HEIGHT,DAY_HEADER_HEIGHT,MONTH_HEADER_HEIGHT } from "./constants";
 import GridLayoutManager from "./GridLayoutManager";
 import {ViewType} from '../../types'
 /*
@@ -51,11 +51,11 @@ export default class GridLayoutProvider extends BaseLayoutProvider {
                     break;
                 case ViewType.MONTH:
                     dim.width = this._renderWindowSize.width;
-                    dim.height = HEADER_HEIGHT;
+                    dim.height = MONTH_HEADER_HEIGHT;
                     break;
                 case ViewType.DAY:
                     dim.width = this._renderWindowSize.width;
-                    dim.height = HEADER_HEIGHT;
+                    dim.height = DAY_HEADER_HEIGHT;
                     break;
                 default:
                     dim.width = 0;

@@ -24,7 +24,7 @@ export const HomeScreen: FC<BottomTabScreenProps<NavigatorParamList, "home">> =
         useEffect(() => {
             navigation.setOptions({
                 headerStyle: [{
-                }, headerStyles]
+                },headerStyles]
             })
         }, []);
         const requestAndroidPermission = async () => {

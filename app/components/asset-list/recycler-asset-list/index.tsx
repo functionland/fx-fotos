@@ -35,7 +35,7 @@ import { color } from "../../../theme"
 import RecyclerSectionItem from "./asset-items/recycler-section-item"
 import ExternalScrollView from '../external-scroll-view'
 import Cell from '../../../components/PhotoGrid/cell'
-import { useColumnsNumber, useScale } from '../../../components/PhotoGrid/GridContext';
+import { useColumnsNumber, useScale, usePinching } from '../../../components/PhotoGrid/GridContext';
 
 import GridLayoutProvider from '../../../components/PhotoGrid/GridLayoutProvider'
 export interface Props {
@@ -74,13 +74,19 @@ const RecyclerAssetList = ({
 }: Props): JSX.Element => {
   const transitionRef = useRef();
   const rclRef = useRef<RecyclerListView>();
+  const timerRef = useRef<number>();
   const [numColumns] = useColumnsNumber();
   const lastScrollY = useSharedValue(scrollY.value);
+  const dyanmicScrollY = useSharedValue(scrollY.value);
+  const visibleIndex = useSharedValue(0);
+  const visibleIndexs = useRef<{ all: number[], notNow: number[], now: number[] }>({ all: [], notNow: [], now: [] });
   const scale1 = useScale();
+  const pinching = usePinching();
   const [cols, setCols] = useState(numCols);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [containerSize, setContainerSize] = useState();
-  const [currentColumns] = useRecoilState(numColumnsState);
+  //const [currentColumns] = useRecoilState(numColumnsState);
+  const [currentColumns,setCurrentColumns]=useState(numColumns);
   const [globalDeviceDimensions, setGlobalDeviceDimensions] = useState<number>(0);
   const [extendedState, setExtendedState] = useState<ExtendedState>({
     selectedAssets: {},
@@ -215,7 +221,7 @@ const RecyclerAssetList = ({
   const gridLayoutProvider = useMemo(() => (new GridLayoutProvider(numColumns, scale1, getLayoutType)), [getLayoutType])
   const renderItemContainer = useCallback((props: any, parentProps: any, children: React.ReactNode) => {
     return (
-      <Cell {...props} scale={scale1} columnNumber={numColumns.value} layoutProvider={gridLayoutProvider} index={parentProps.index}>
+      <Cell {...props} visibleIndex={visibleIndex} pinching={pinching} dynamicScrollY={dyanmicScrollY} lastScrollY={lastScrollY} scale={scale1} columnNumber={numColumns.value} layoutProvider={gridLayoutProvider} index={parentProps.index}>
         {children}
       </Cell>
     );
@@ -277,46 +283,42 @@ const RecyclerAssetList = ({
   //   if(scale1.value-Math.floor(scale1.value)!==0)
   //     scrollTo(scrollRef,0,scrollY.value +  100*(scale1.value-Math.floor(scale1.value)),false);
   // },[scale1])
+  const animatedReactionWrapper = () => {
+    forcRenderRCL();
+  };
   useAnimatedReaction(() => {
-    return scrollY.value;
-  }, (result, previous) => {
-    if (numColumns.value - scale1.value === 0) {
-      lastScrollY.value = result;
+    return { pinchingValue: pinching.value, numColumnsValue: numColumns.value, scaleValue: scale1.value };
+  }, (next, prev) => {
+    if (next.pinchingValue && !prev?.pinchingValue) {
+      lastScrollY.value = scrollY.value;
+      dyanmicScrollY.value = 0;
+    } else if (!next.pinchingValue && prev?.pinchingValue && next.numColumnsValue !== prev.numColumnsValue) {
+      console.log("pinchingValue runOnJS", prev?.pinchingValue, next.pinchingValue,  prev?.numColumnsValue, next.numColumnsValue,prev?.scaleValue, next.scaleValue, )
+      runOnJS(animatedReactionWrapper)();
+      //numColumns.value = next.scaleValue;
+    } else if (!next.pinchingValue && prev?.pinchingValue && next.numColumnsValue === next.scaleValue) {
+      console.log("pinchingValue scrollTo", prev?.pinchingValue, next.pinchingValue,  prev?.numColumnsValue, next.numColumnsValue,prev?.scaleValue, next.scaleValue, )
+      scrollTo?.(scrollRef, 0, lastScrollY.value, false)
     }
   });
-
   useAnimatedReaction(
-    () => scale1.value,
-    (scrolling) => {
-      const scaleCeil = Math.ceil(scale1.value)
-      const scaleFloor = Math.floor(scale1.value)
-      //runOnJS(onScaleChange)(numColumns.value - scrolling);
-      if (containerSize && numColumns.value - scrolling !== 0) {
-        let heightDif = 0
-        if (numColumns.value > scale1.value) {
-          heightDif = Math.abs(containerSize.height[scaleFloor] - containerSize.height[numColumns.value]);
-          const scrollDif = interpolate(scale1.value, [scaleFloor, numColumns.value], [heightDif/50 ,0])
-          //console.log("scrollDif1", scale1.value, scrollY.value, scrollDif, heightDif)
-          scrollTo(scrollRef, 0, lastScrollY.value + scrollDif, false)
-        }
-        else if (numColumns.value < scale1.value) {
-          heightDif = Math.abs(containerSize.height[numColumns.value] - containerSize.height[scaleCeil]);
-          const scrollDif = interpolate(scale1.value, [numColumns.value, scaleCeil], [0, heightDif/50])
-          //console.log("scrollDif2", lastScrollY.value, scrollDif, heightDif)
-          scrollTo(scrollRef, 0, lastScrollY.value - scrollDif, false)
-        }
-      }
+    () => {
+      return { scrolling: dyanmicScrollY.value }
     },
-    [containerSize]
+    (next) => {
+      if (pinching.value && scale1.value !== Math.floor(scale1.value)) {
+        //console.log("scrolling", next.scrolling)
+        scrollTo?.(scrollRef, 0, next.scrolling + lastScrollY.value, false)
+      }
+    }
   );
   const containerStyle = useAnimatedStyle(() => {
-
     if (!containerSize)
       return {};
     const scaleCeil = Math.ceil(scale1.value)
     const scaleFloor = Math.floor(scale1.value)
     let style = {}
-    if (numColumns.value > scale1.value) {
+    if (numColumns.value >= scale1.value) {
       style = {
         height: interpolate(scale1.value, [scaleFloor, numColumns.value], [containerSize.height[scaleFloor], containerSize.height[numColumns.value]])
       }
@@ -326,47 +328,70 @@ const RecyclerAssetList = ({
         height: interpolate(scale1.value, [numColumns.value, scaleCeil], [containerSize.height[numColumns.value], containerSize.height[scaleCeil]])
       }
     }
+    //console.log("containerStyle",style.height,scale1.value,pinching?.value)
     return style;
   }, [containerSize])
-  useEffect(()=>{
-    
-    console.log("useEffect",rclRef.current?._checkAndChangeLayouts)
-    rclRef.current?._checkAndChangeLayouts(rclRef.current.props,true);
-  },[currentColumns])
+  // useEffect(() => {
+  //     forcRenderRCL();
+  // }, [currentColumns])
   console.log("Render: Recycle-Asset-List")
+  const forcRenderRCL = () => {
+    clearTimeout(timerRef.current)
+    console.log("forcRenderRCL", timerRef.current,numColumns.value);
+    rclRef.current?.getVirtualRenderer()?._updateRenderStack(visibleIndexs.current.all);
+    rclRef.current?.getVirtualRenderer()?._onEngagedItemsChanged([],visibleIndexs.current.all,[]);
+    rclRef.current?.getVirtualRenderer()?._prepareViewabilityTracker();
+    rclRef.current?._onScroll(0,dyanmicScrollY.value+lastScrollY.value)
+
+    //rclRef.current?._checkAndChangeLayouts(rclRef.current.props, false);
+    timerRef.current = setTimeout(() => {
+      //setCurrentColumns(numColumns.value)
+      timerRef.current = 0;
+
+      //getVirtualRenderer()?.refresh();
+      //._refreshViewability()
+      //._checkAndChangeLayouts(rclRef.current.props, true);
+    }, 0);
+  }
   return (
     <RecyclerListView
       ref={rclRef}
       dataProvider={dataProvider}
       extendedState={extendedState}
       layoutProvider={gridLayoutProvider}
-      renderAheadOffset={1000}
+      //renderAheadOffset={1000}
       //renderAheadOffset={renderAheadOffset}
       rowRenderer={rowRenderer}
       externalScrollView={ExternalScrollView}
-      canChangeSize={true}
       scrollViewProps={{
         scrollRefExternal: scrollRef,
         _onScrollExternal: scrollHandler,
         onContentSizeChange: (contentWidth, contentHeight) => {
-
-          //console.log("onSizeChanged", contentWidth, contentHeight)
+          if (!pinching.value) {
+            //forcRenderRCL();
+          }
         }
       }}
+      onVisibleIndicesChanged={(all, now, notNow) => {
+        if (!pinching.value && all) {
+          visibleIndexs.current.all = all;
+          visibleIndexs.current.now = now;
+          visibleIndexs.current.notNow = notNow;
+          visibleIndex.value = all[Math.floor(all.length / 2)];
+        }
+      }}
+      pinching={pinching}
       contentContainerStyle={{ paddingTop: 50 }}
       renderItemContainer={renderItemContainer}
       renderContentContainer={(props, children) => {
         return (
-          <Animated.View {...props} style={[props.style,containerStyle]} onLayout={() => {
-            //console.log("onLayout")
+          <Animated.View {...props} style={[props.style, containerStyle]} onLayout={(event: LayoutChangeEvent) => {
             if (!containerSize) {
               const heights = gridLayoutProvider?.getLayoutManager?.()?.getAllContentDimension()
               setContainerSize(heights);
-              console.log("onLayout containerSize", heights)
-            }
-            if(numColumns.value-scale1.value===0){
-              rclRef.current?._checkAndChangeLayouts(rclRef.current.props,true);
-              console.log("_checkAndChangeLayouts:",rclRef.current?._checkAndChangeLayouts) 
+            } else if (!pinching.value) {
+              console.log("onLayout", event.nativeEvent.layout.height)
+              // forcRenderRCL();
             }
           }}>
             {children}
