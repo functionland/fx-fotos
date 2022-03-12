@@ -75,9 +75,6 @@ const RecyclerSectionItem: React.FC<Props> = ({
       onLongPress?.(section)
     }, 0)
   }
-  React.useEffect(() => {
-    console.log("else here", navigation)
-  }, [navigation])
 
   return (
     <TouchableHighlight
@@ -106,11 +103,11 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   monthText: {
-    color: "black",
+    color: palette.black,
     fontSize: 28,
     fontWeight: "300",
     padding: 10,
-    //paddingTop: 50,
+    // paddingTop: 50,
   },
 })
 const areEqual = (prev: Props, next: Props) => {

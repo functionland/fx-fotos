@@ -1,7 +1,6 @@
 import React from "react"
 import { useColorScheme, View, Text } from "react-native"
 import { NavigationContainer, DefaultTheme, DarkTheme } from "@react-navigation/native"
-import { createStackNavigator } from "@react-navigation/stack"
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import { enableScreens } from "react-native-screens"
 
@@ -10,6 +9,7 @@ import Animated from "react-native-reanimated"
 import { TabHeader } from "../components/header/tab-header"
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5"
 import { HomeNavigation } from "./HomeNavigation"
+import { createNativeStackNavigator } from "@react-navigation/native-stack"
 
 enableScreens()
 export type NavigatorParamList = {
@@ -18,7 +18,7 @@ export type NavigatorParamList = {
 }
 
 // Documentation: https://reactnavigation.org/docs/stack-navigator/
-const Stack = createStackNavigator<NavigatorParamList>()
+const Stack = createNativeStackNavigator<NavigatorParamList>()
 
 const AppStack = () => {
   return (
