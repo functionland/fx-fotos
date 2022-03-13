@@ -1,12 +1,17 @@
 import { Dimension, Layout, LayoutManager } from "recyclerlistview"
 import Reanimated, { SharedValue } from "react-native-reanimated"
 import GridLayoutProvider from "./GridLayoutProvider"
-
+import { translateOrigin } from "../../utils/helper"
 const MAX_COLUMNS = 4
 const MIN_COLUMNS = 2
 
 type gridLayout = "upper" | "current" | "lower"
-
+export interface LayoutTransitionRange {
+  colsRange: number[]
+  translateX: number[]
+  translateY: number[]
+  scale: number[]
+}
 // We are basically recreating WrapGridLayoutManager here
 export default class GridLayoutManager extends LayoutManager {
   // k is the number of columns
@@ -45,22 +50,25 @@ export default class GridLayoutManager extends LayoutManager {
       width: this._totalWidth[this._columnNumber.value] || this._window.width,
     }
   }
+
   public getAllContentDimension(): Dimension {
     return {
       height: this._totalHeight,
       width: this._totalWidth,
     }
   }
+
   public getLayouts(): Layout[] {
     return this._allLayouts[this._columnNumber.value - MIN_COLUMNS]
   }
+  
+  public getAllLayouts(): Layout[][] {
+    return this._allLayouts
+  }
 
-  public getLayoutsForIndex(index: number): Record<number, Layout> {
+  public getLayoutsForIndex(index: number): Layout[] {
     if (this._allLayouts.every((layout) => index < layout.length)) {
-      return this._allLayouts.reduce((obj, layout, idx) => {
-        obj[idx + MIN_COLUMNS] = layout[index]
-        return obj
-      }, {})
+      return this._allLayouts.map((layouts) => layouts[index])
       // .map((layouts, idx) => ({
       //   layout: layouts[index],
       //   colNum: idx + MIN_COLUMNS,
@@ -70,8 +78,41 @@ export default class GridLayoutManager extends LayoutManager {
     }
   }
 
+  public getGirdColumnsRange(): number[] {
+    return this._allLayouts.map((_, idx) => idx + MIN_COLUMNS)
+  }
+
+  public getLayoutTransitionRangeForIndex(
+    index: number,
+    currentNumColumns: number,
+  ): LayoutTransitionRange {
+    const layouts = this.getLayoutsForIndex(index)
+    const colsRange = this.getGirdColumnsRange()
+    const currentLayout = layouts[currentNumColumns - MIN_COLUMNS]
+    return layouts.reduce(
+      (obj, layout) => {
+        obj.translateX.push(
+          translateOrigin(layout.x - currentLayout.x, currentLayout.width - layout.width),
+        )
+        obj.translateY.push(
+          translateOrigin(layout.y - currentLayout.y, currentLayout.width - layout.width),
+        )
+        if (layout.width && currentLayout.width) {
+          obj.scale.push(layout.width / currentLayout.width)
+        } else obj.scale.push(1)
+
+        return obj
+      },
+      {
+        translateX: [],
+        translateY: [],
+        scale: [],
+        colsRange
+      },
+    )
+  }
+
   public overrideLayout(index: number, dim: Dimension): boolean {
-    console.log("overrideLayout")
     // We may look into GridLayoutManager for a better algorithm
     const layout = this.getLayouts()[index]
     if (layout) {
@@ -118,7 +159,6 @@ export default class GridLayoutManager extends LayoutManager {
           startX = startVal.x
           startY = startVal.y
           this._pointDimensionsToRect(startVal, columnNumber)
-          //this._totalHeight[columnNumber] = startY // We know the above rows are good
         }
 
         // initializing
@@ -191,13 +231,11 @@ export default class GridLayoutManager extends LayoutManager {
           // Some elements have been removed from the data provider, so we're trimming the layouts
           layouts.splice(itemCount, oldItemCount - itemCount)
         }
-        console.log("relayoutFromIndex end", startIndex, itemCount, columnNumber, layouts.length)
         this._setFinalDimensions(maxBound, columnNumber)
       })
   }
 
   private _locateFirstNeighbourIndex(startIndex: number, layouts = this.getLayouts()): number {
-    console.log("_locateFirstNeighbourIndex")
     if (startIndex === 0) {
       return 0
     }

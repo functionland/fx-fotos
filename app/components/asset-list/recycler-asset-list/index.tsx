@@ -18,12 +18,15 @@ import Animated, {
   scrollTo,
   useDerivedValue,
   runOnJS,
-  useAnimatedReaction
+  useAnimatedReaction,
+  withTiming,
+  Extrapolate
 } from 'react-native-reanimated';
 import {
   DataProvider,
   LayoutProvider,
   RecyclerListView,
+  Layout
 } from 'recyclerlistview';
 import {
   useRecoilState,
@@ -36,8 +39,10 @@ import RecyclerSectionItem from "./asset-items/recycler-section-item"
 import ExternalScrollView from '../external-scroll-view'
 import Cell from '../../../components/PhotoGrid/cell'
 import { useColumnsNumber, useScale, usePinching } from '../../../components/PhotoGrid/GridContext';
+import { translateOrigin } from '../../../utils/helper'
 
 import GridLayoutProvider from '../../../components/PhotoGrid/GridLayoutProvider'
+import { LayoutTransitionRange } from '../../../components/PhotoGrid/GridLayoutManager'
 export interface Props {
   sections: RecyclerAssetListSection[];
   numCols: 2 | 3 | 4 | 5;
@@ -74,19 +79,17 @@ const RecyclerAssetList = ({
 }: Props): JSX.Element => {
   const transitionRef = useRef();
   const rclRef = useRef<RecyclerListView>();
-  const timerRef = useRef<number>();
   const [numColumns] = useColumnsNumber();
   const lastScrollY = useSharedValue(scrollY.value);
   const dyanmicScrollY = useSharedValue(scrollY.value);
-  const visibleIndex = useSharedValue(0);
-  const visibleIndexs = useRef<{ all: number[], notNow: number[], now: number[] }>({ all: [], notNow: [], now: [] });
   const scale1 = useScale();
   const pinching = usePinching();
   const [cols, setCols] = useState(numCols);
-  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [containerSize, setContainerSize] = useState();
+  const [allLayouts, setAllLayouts] = useState<Layout[][]>(null);
+  const layoutTransitionRange = useSharedValue<LayoutTransitionRange>(null);
   //const [currentColumns] = useRecoilState(numColumnsState);
-  const [currentColumns,setCurrentColumns]=useState(numColumns);
+  const [currentColumns, setCurrentColumns] = useState(numColumns);
   const [globalDeviceDimensions, setGlobalDeviceDimensions] = useState<number>(0);
   const [extendedState, setExtendedState] = useState<ExtendedState>({
     selectedAssets: {},
@@ -221,7 +224,7 @@ const RecyclerAssetList = ({
   const gridLayoutProvider = useMemo(() => (new GridLayoutProvider(numColumns, scale1, getLayoutType)), [getLayoutType])
   const renderItemContainer = useCallback((props: any, parentProps: any, children: React.ReactNode) => {
     return (
-      <Cell {...props} visibleIndex={visibleIndex} pinching={pinching} dynamicScrollY={dyanmicScrollY} lastScrollY={lastScrollY} scale={scale1} columnNumber={numColumns.value} layoutProvider={gridLayoutProvider} index={parentProps.index}>
+      <Cell {...props} pinching={pinching} dynamicScrollY={dyanmicScrollY} lastScrollY={lastScrollY} scale={scale1} columnNumber={numColumns.value} layoutProvider={gridLayoutProvider} index={parentProps.index}>
         {children}
       </Cell>
     );
@@ -287,71 +290,106 @@ const RecyclerAssetList = ({
     forcRenderRCL();
   };
   useAnimatedReaction(() => {
-    return { pinchingValue: pinching.value, numColumnsValue: numColumns.value, scaleValue: scale1.value };
+    return { pinchingValue: pinching.value, numColumnsValue: numColumns.value };
   }, (next, prev) => {
+
+    console.log("pinchingValue lastScrollY", next.pinchingValue, prev?.pinchingValue, lastScrollY.value, scrollY.value)
     if (next.pinchingValue && !prev?.pinchingValue) {
-      lastScrollY.value = scrollY.value;
-      dyanmicScrollY.value = 0;
-    } else if (!next.pinchingValue && prev?.pinchingValue && next.numColumnsValue !== prev.numColumnsValue) {
-      console.log("pinchingValue runOnJS", prev?.pinchingValue, next.pinchingValue,  prev?.numColumnsValue, next.numColumnsValue,prev?.scaleValue, next.scaleValue, )
+      //lastScrollY.value = scrollY.value;
+    } else if (prev && next.numColumnsValue !== prev?.numColumnsValue) {
+      console.log("pinchingValue runOnJS", prev?.pinchingValue, next.pinchingValue, prev?.numColumnsValue, next.numColumnsValue, prev?.scaleValue, next.scaleValue,)
       runOnJS(animatedReactionWrapper)();
       //numColumns.value = next.scaleValue;
-    } else if (!next.pinchingValue && prev?.pinchingValue && next.numColumnsValue === next.scaleValue) {
-      console.log("pinchingValue scrollTo", prev?.pinchingValue, next.pinchingValue,  prev?.numColumnsValue, next.numColumnsValue,prev?.scaleValue, next.scaleValue, )
-      scrollTo?.(scrollRef, 0, lastScrollY.value, false)
     }
+    //  else if (!next.pinchingValue && prev?.pinchingValue && next.numColumnsValue === next.scaleValue) {
+    //   console.log("pinchingValue scrollTo", prev?.pinchingValue, next.pinchingValue,  prev?.numColumnsValue, next.numColumnsValue,prev?.scaleValue, next.scaleValue, )
+    //   scrollTo?.(scrollRef, 0, lastScrollY.value, false)
+    // }
   });
   useAnimatedReaction(
     () => {
-      return { scrolling: dyanmicScrollY.value }
+      return { scaleValue: scale1.value, pinchingValue: pinching.value }
     },
-    (next) => {
-      if (pinching.value && scale1.value !== Math.floor(scale1.value)) {
-        //console.log("scrolling", next.scrolling)
-        scrollTo?.(scrollRef, 0, next.scrolling + lastScrollY.value, false)
+    (next, prev) => {
+      //console.log("scrolling", next.pinchingValue, prev?.pinchingValue, next.scaleValue, lastScrollY.value, visibleIndex.value)
+
+      if (next.pinchingValue && !prev?.pinchingValue)
+        lastScrollY.value = scrollY.value;
+
+      if (next.pinchingValue && layoutTransitionRange.value) {
+        const extrapolation = {
+          extrapolateLeft: Extrapolate.CLAMP,
+          extrapolateRight: Extrapolate.CLAMP,
+        };
+        // const scaleCeil = Math.ceil(next.scaleValue)
+        // const scaleFloor = Math.floor(next.scaleValue)
+
+        // const currentLayout = allLayouts[numColumns.value - 2][visibleIndex.value];
+        // let diffScrollY = 0
+        // // Zoom in (+)
+        // if (numColumns.value >= next.scaleValue) {
+        //   const nextLayout = allLayouts[scaleFloor - 2][visibleIndex.value];
+
+        //   diffScrollY = interpolate(next.scaleValue, [scaleFloor, numColumns.value],
+        //     [nextLayout.y - currentLayout.y, 0], extrapolation)
+
+        // }
+        // // Zoom out (-)
+        // else if (numColumns.value < next.scaleValue) {
+        //   const nextLayout = allLayouts[scaleCeil - 2][visibleIndex.value];
+
+        //   diffScrollY = interpolate(next.scaleValue, [numColumns.value, scaleCeil],
+        //     [0, nextLayout.y - currentLayout.y], extrapolation)
+        // }
+      
+        const diffScrollY=interpolate(next.scaleValue, layoutTransitionRange.value.colsRange, layoutTransitionRange.value.translateY, extrapolation)
+        console.log("diffScrollY",diffScrollY,next.scaleValue,layoutTransitionRange.value.translateY)
+        scrollTo?.(scrollRef, 0, diffScrollY+lastScrollY.value , false)
+        dyanmicScrollY.value = diffScrollY;
       }
-    }
+    },
+    [allLayouts]
   );
   const containerStyle = useAnimatedStyle(() => {
-    if (!containerSize)
+    if (!containerSize || !allLayouts || !pinching.value || !layoutTransitionRange.value)
       return {};
+    console.log("containerStyle", pinching.value, scale1.value)
+    const extrapolation = {
+      extrapolateLeft: Extrapolate.CLAMP,
+      extrapolateRight: Extrapolate.CLAMP,
+    };
     const scaleCeil = Math.ceil(scale1.value)
     const scaleFloor = Math.floor(scale1.value)
     let style = {}
+    // style = {
+    //   height: interpolate(scale1.value, layoutTransitionRange.value.colsRange, layoutTransitionRange.value.translateY, extrapolation)
+    // }
+    // Zoom in (+)
     if (numColumns.value >= scale1.value) {
       style = {
-        height: interpolate(scale1.value, [scaleFloor, numColumns.value], [containerSize.height[scaleFloor], containerSize.height[numColumns.value]])
+        height: interpolate(scale1.value, [scaleFloor, numColumns.value], [containerSize.height[scaleFloor], containerSize.height[numColumns.value]], extrapolation)
       }
     }
+    // Zoom out (-)
     else if (numColumns.value < scale1.value) {
       style = {
-        height: interpolate(scale1.value, [numColumns.value, scaleCeil], [containerSize.height[numColumns.value], containerSize.height[scaleCeil]])
+        height: interpolate(scale1.value, [numColumns.value, scaleCeil], [containerSize.height[numColumns.value], containerSize.height[scaleCeil]], extrapolation)
       }
     }
-    //console.log("containerStyle",style.height,scale1.value,pinching?.value)
     return style;
   }, [containerSize])
-  // useEffect(() => {
-  //     forcRenderRCL();
-  // }, [currentColumns])
-  console.log("Render: Recycle-Asset-List")
+
+  console.log("Render: Recycle-Asset-List", currentColumns)
   const forcRenderRCL = () => {
-    clearTimeout(timerRef.current)
-    console.log("forcRenderRCL", timerRef.current,numColumns.value);
-    rclRef.current?.getVirtualRenderer()?._updateRenderStack(visibleIndexs.current.all);
-    rclRef.current?.getVirtualRenderer()?._onEngagedItemsChanged([],visibleIndexs.current.all,[]);
+    console.log("forcRenderRCL", numColumns.value);
+    // rclRef.current?.getVirtualRenderer()?._updateRenderStack(visibleIndexs.current.all);
+    // rclRef.current?.getVirtualRenderer()?._onEngagedItemsChanged([], visibleIndexs.current.all, []);
     rclRef.current?.getVirtualRenderer()?._prepareViewabilityTracker();
-    rclRef.current?._onScroll(0,dyanmicScrollY.value+lastScrollY.value)
-
+    rclRef.current?._onScroll(0, dyanmicScrollY.value + lastScrollY.value)
+    //rclRef.current?.getVirtualRenderer()?.refresh();
+    setCurrentColumns(numColumns.value)
     //rclRef.current?._checkAndChangeLayouts(rclRef.current.props, false);
-    timerRef.current = setTimeout(() => {
-      //setCurrentColumns(numColumns.value)
-      timerRef.current = 0;
 
-      //getVirtualRenderer()?.refresh();
-      //._refreshViewability()
-      //._checkAndChangeLayouts(rclRef.current.props, true);
-    }, 0);
   }
   return (
     <RecyclerListView
@@ -372,12 +410,10 @@ const RecyclerAssetList = ({
           }
         }
       }}
-      onVisibleIndicesChanged={(all, now, notNow) => {
+      onVisibleIndicesChanged={(all=[], now, notNow) => {
+        const visibleIndexValue=all[Math.floor(all.length / 2)]||0;
         if (!pinching.value && all) {
-          visibleIndexs.current.all = all;
-          visibleIndexs.current.now = now;
-          visibleIndexs.current.notNow = notNow;
-          visibleIndex.value = all[Math.floor(all.length / 2)];
+          layoutTransitionRange.value=gridLayoutProvider.getLayoutManager()?.getLayoutTransitionRangeForIndex(visibleIndexValue,numColumns.value)
         }
       }}
       pinching={pinching}
@@ -389,6 +425,7 @@ const RecyclerAssetList = ({
             if (!containerSize) {
               const heights = gridLayoutProvider?.getLayoutManager?.()?.getAllContentDimension()
               setContainerSize(heights);
+              setAllLayouts(gridLayoutProvider?.getLayoutManager?.()?.getAllLayouts())
             } else if (!pinching.value) {
               console.log("onLayout", event.nativeEvent.layout.height)
               // forcRenderRCL();

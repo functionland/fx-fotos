@@ -33,9 +33,8 @@ const PinchZoom: React.FC<Props> = (props) => {
         console.log([Date.now() + ': component PinchZoom' + numColumns.value + ' rendered']);
     }, []);
     const updateColumn = (newValue: number) => {
-
+        pinching.value = false;
         //setNumColumnsState(newValue);
-
     }
 
     const _onPinchGestureEvent = useAnimatedGestureHandler<PinchGestureHandlerGestureEvent, {}>({
@@ -52,38 +51,39 @@ const PinchZoom: React.FC<Props> = (props) => {
                 scale.value = result;
             }
         },
-        onEnd: (event) => {
-            // scale.value = Math.round(scale.value);
-            // pinching.value = false;
-            // runOnJS(updateColumn)(scale.value)
+        onEnd: () => {
             scale.value = withTiming(
                 Math.round(scale.value),
                 {
                     duration: 500,
-                    //easing: Easing.bezier(0.25, 0.1, 0.25, 1),
                 },
                 () => {
                     numColumns.value = scale.value;
-                    // switching to the correct number of columns when the animation ends
-                    pinching.value=false;
-                    runOnJS(updateColumn)(scale.value)
-                    // we reset the scale as we have modified the columns
-                    // let _pinchOrZoom: "pinch" | "zoom" | undefined;
-                    // if (event.scale > 1) {
-                    //   _pinchOrZoom = 'pinch';
-                    // } else if (event.scale < 1) {
-                    //   _pinchOrZoom = 'zoom';
-                    // }
-                    // let endValue = Math.round(numColumns.value);
-                    // if (endValue > 4) endValue = 4;
-                    // else if (endValue < 2) endValue = 2;
-                    // let _sortCondition = changeSortCondition(
-                    //   sortCondition.current,
-                    //   _pinchOrZoom,
-                    //   endValue as 2 | 3 | 4,
-                    // );
-
-                    // sortCondition.current = _sortCondition.sortCondition;
+                    pinching.value = false;
+                }
+            );
+        },
+        onFail: () => {
+            scale.value = withTiming(
+                Math.round(scale.value),
+                {
+                    duration: 300,
+                },
+                () => {
+                    numColumns.value = scale.value;
+                    pinching.value = false;
+                }
+            );
+        },
+        onCancel: () => {
+            scale.value = withTiming(
+                Math.round(scale.value),
+                {
+                    duration: 300,
+                },
+                () => {
+                    numColumns.value = scale.value;
+                    pinching.value = false;
                 }
             );
         }
