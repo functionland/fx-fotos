@@ -1,4 +1,4 @@
-import { Dimension, Layout, LayoutManager } from "recyclerlistview"
+import { Dimension, Layout, LayoutManager } from 'fula-recyclerlistview'
 import Reanimated, { SharedValue } from "react-native-reanimated"
 import GridLayoutProvider from "./GridLayoutProvider"
 import { translateOrigin } from "../../utils/helper"

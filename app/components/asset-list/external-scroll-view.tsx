@@ -7,7 +7,7 @@ import {
     FlatList,
     SafeAreaView,
 } from 'react-native';
-import { BaseScrollView } from 'recyclerlistview';
+import { BaseScrollView } from 'fula-recyclerlistview';
 import Animated from 'react-native-reanimated';
 export default class ExternalScrollView extends BaseScrollView {
     constructor(props) {

@@ -23,7 +23,7 @@ import {
   LayoutProvider,
   RecyclerListView,
   Layout
-} from 'recyclerlistview';
+} from 'fula-recyclerlistview';
 import { RecyclerAssetListSection, ViewType, GroupHeader } from "../../../types"
 import deviceUtils from '../../../utils/deviceUtils'
 import RecyclerSectionItem from "./asset-items/recycler-section-item"
@@ -250,7 +250,7 @@ const RecyclerAssetList = ({
           layoutTransitionRange.value = gridLayoutProvider.getLayoutManager()?.getLayoutTransitionRangeForIndex(visibleIndexValue, numColumns.value)
         }
       }}
-      pinching={pinching}
+      stopRenderingOnAnimation={pinching}
       contentContainerStyle={{ paddingTop: 100 }}
       renderItemContainer={renderItemContainer}
       renderContentContainer={(props, children) => {

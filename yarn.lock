@@ -8479,6 +8479,15 @@ fsevents@^2.1.2, fsevents@~2.3.2:
   resolved "https://registry.yarnpkg.com/fsevents/-/fsevents-2.3.2.tgz#8a526f78b8fdf4623b709e0b975c52c24c02fd1a"
   integrity sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==
 
+fula-recyclerlistview@^3.1.0-beta.7:
+  version "3.1.0-beta.7"
+  resolved "https://registry.yarnpkg.com/fula-recyclerlistview/-/fula-recyclerlistview-3.1.0-beta.7.tgz#5ec0c17ea2d2091749ba78c0366ab726fd852e3c"
+  integrity sha512-YjEMITUBOaV+9j4AEkp8ZLAeAd9evEljAL69tP5oL1dMRG5IQbN1Ie+dHkvoW/gJTGIHCQ9ma67mW4nmcgZkZQ==
+  dependencies:
+    lodash.debounce "4.0.8"
+    prop-types "15.5.8"
+    ts-object-utils "0.0.5"
+
 function-bind@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/function-bind/-/function-bind-1.1.1.tgz#a56899d3ea3c9bab874bb9773b7c5ede92f4895d"
@@ -14518,15 +14527,6 @@ recursive-readdir@2.2.2:
   integrity sha512-nRCcW9Sj7NuZwa2XvH9co8NPeXUBhZP7CRKJtU+cS6PW9FpCIFoI5ib0NT1ZrbNuPoRy0ylyCaUL8Gih4LSyFg==
   dependencies:
     minimatch "3.0.4"
-
-recyclerlistview@3.1.0-beta.5:
-  version "3.1.0-beta.5"
-  resolved "https://registry.yarnpkg.com/recyclerlistview/-/recyclerlistview-3.1.0-beta.5.tgz#ef379cc51f4e73d1ccae68b5b95f459b3d665a98"
-  integrity sha512-9s75KHbOxuSejAS76Th8tSW1youTHQXnJR+oI1rYoesaHqie3JdvQZww6akinydSAJ4s0SeMto2pTq1IiapYSQ==
-  dependencies:
-    lodash.debounce "4.0.8"
-    prop-types "15.5.8"
-    ts-object-utils "0.0.5"
 
 refractor@^2.4.1:
   version "2.10.1"

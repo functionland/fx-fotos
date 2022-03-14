@@ -1,7 +1,7 @@
 import { atom } from 'recoil'
 import { Asset } from 'expo-media-library';
 import { FlatSection, story, album } from '../types/interfaces';
-import { DataProvider } from 'recyclerlistview';
+import { DataProvider } from 'fula-recyclerlistview';
 
 export const photosState = atom<Array<Asset>>({
     key: 'photosState',
