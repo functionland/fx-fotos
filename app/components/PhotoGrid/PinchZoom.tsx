@@ -1,4 +1,4 @@
-import React, { createRef, memo, useEffect, useRef } from 'react';
+import React, { memo, useRef } from 'react';
 import { Dimensions } from 'react-native';
 import {
     PinchGestureHandler,
@@ -6,17 +6,12 @@ import {
 } from 'react-native-gesture-handler';
 import Reanimated, {
     useAnimatedGestureHandler,
-    Easing,
     withTiming,
-    runOnJS
 } from 'react-native-reanimated';
 import { useRecoilState } from 'recoil';
 import { numColumnsState } from '../../store'
 import { useScale, useColumnsNumber, usePinching } from './GridContext'
 import { sortCondition } from '../types/interfaces';
-
-
-
 interface Props {
 }
 
@@ -29,17 +24,9 @@ const PinchZoom: React.FC<Props> = (props) => {
     const [, setNumColumnsState] = useRecoilState(numColumnsState);
     const [numColumns, setColumns] = useColumnsNumber();
 
-    useEffect(() => {
-        console.log([Date.now() + ': component PinchZoom' + numColumns.value + ' rendered']);
-    }, []);
-    const updateColumn = (newValue: number) => {
-        pinching.value = false;
-        //setNumColumnsState(newValue);
-    }
 
     const _onPinchGestureEvent = useAnimatedGestureHandler<PinchGestureHandlerGestureEvent, {}>({
         onStart: (_, ctx) => {
-            //console.log("Start pinching")
             pinching.value = false;
         },
         onActive: (event, ctx) => {

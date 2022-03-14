@@ -44,9 +44,6 @@ const Cell: React.FC<CellProps> = React.forwardRef(({ layoutProvider, columnNumb
                 extrapolation
             );
 
-            // if (pinching.value && visibleIndex.value === index) {
-            //     dynamicScrollY.value = finalTranslateY;
-            // }
             return {
                 transform: [{
                     translateX: interpolate(

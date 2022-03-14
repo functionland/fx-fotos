@@ -7,19 +7,15 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { StatusBar, NativeSyntheticEvent, View, NativeScrollEvent, ScrollViewProps, LayoutChangeEvent, StyleSheet, Platform } from "react-native"
+import { StatusBar, NativeSyntheticEvent, NativeScrollEvent, LayoutChangeEvent, StyleSheet } from "react-native"
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  useAnimatedScrollHandler,
   interpolate,
-  Transitioning,
   Transition,
   scrollTo,
-  useDerivedValue,
   runOnJS,
   useAnimatedReaction,
-  withTiming,
   Extrapolate
 } from 'react-native-reanimated';
 import {
@@ -28,18 +24,12 @@ import {
   RecyclerListView,
   Layout
 } from 'recyclerlistview';
-import {
-  useRecoilState,
-} from 'recoil';
-import { numColumnsState } from '../../../store';
-import { RecyclerAssetListSection, RecyclerAssetListSectionData, ViewType, GroupHeader } from "../../../types"
+import { RecyclerAssetListSection, ViewType, GroupHeader } from "../../../types"
 import deviceUtils from '../../../utils/deviceUtils'
-import { color } from "../../../theme"
 import RecyclerSectionItem from "./asset-items/recycler-section-item"
 import ExternalScrollView from '../external-scroll-view'
 import Cell from '../../../components/PhotoGrid/cell'
 import { useColumnsNumber, useScale, usePinching } from '../../../components/PhotoGrid/GridContext';
-import { translateOrigin } from '../../../utils/helper'
 
 import GridLayoutProvider from '../../../components/PhotoGrid/GridLayoutProvider'
 import { LayoutTransitionRange, MIN_COLUMNS } from '../../../components/PhotoGrid/GridLayoutManager'
@@ -60,89 +50,32 @@ export interface ExtendedState {
   selectedAssets: { [key: string]: boolean };
   selectionMode: boolean;
 }
-const transition = (
-  <Transition.Together >
-    <Transition.Change delayMs={0} durationMs={700} interpolation="easeInOut" />
-  </Transition.Together>
-);
+
 const RecyclerAssetList = ({
   sections,
-  numCols,
-  scale,
-  renderAheadOffset,
-  disableAutoScrolling,
-  disableRefreshControl,
   scrollHandler,
   scrollRef,
   scrollY,
   ...extras
 }: Props): JSX.Element => {
-  const transitionRef = useRef();
   const rclRef = useRef<RecyclerListView>();
   const [numColumns] = useColumnsNumber();
   const lastScrollY = useSharedValue(scrollY.value);
   const dyanmicScrollY = useSharedValue(scrollY.value);
   const scale1 = useScale();
   const pinching = usePinching();
-  const [cols, setCols] = useState(numCols);
   const [containerSize, setContainerSize] = useState<number[]>(null);
-  const [allLayouts, setAllLayouts] = useState<Layout[][]>(null);
+  const [, setAllLayouts] = useState<Layout[][]>(null);
   const layoutTransitionRange = useSharedValue<LayoutTransitionRange>(null);
   const visibileIndices = useSharedValue<number[]>(null);
-  //const [currentColumns] = useRecoilState(numColumnsState);
   const [currentColumns, setCurrentColumns] = useState(numColumns);
-  const [globalDeviceDimensions, setGlobalDeviceDimensions] = useState<number>(0);
+  
   const [extendedState, setExtendedState] = useState<ExtendedState>({
     selectedAssets: {},
     selectedGroups: {},
     selectionMode: false,
   });
-  const zoomInStyle = useAnimatedStyle(() => {
-    if (!scale)
-      return {};
-
-    return {
-      height: scale.value !== 1 ? deviceUtils.dimensions.height * 4 : deviceUtils.dimensions.height,
-      //width:scale.value>1?deviceUtils.dimensions.width/2:scale.value<1?deviceUtils.dimensions.width*2:deviceUtils.dimensions.width,
-      transform: [{
-        scale: scale.value
-      }, {
-        translateX: (
-          (
-            (
-              scale.value * deviceUtils.dimensions.width) -
-            deviceUtils.dimensions.width)
-          / (2 * scale.value))
-      },
-      {
-        translateY: (
-          (
-            (
-              scale.value * (deviceUtils.dimensions.height * 4 - (StatusBar.currentHeight || 0))
-            ) - (deviceUtils.dimensions.height * 4 - (StatusBar.currentHeight || 0))
-          )
-          / (2 * scale.value))
-      }],
-      opacity: interpolate(
-        scale.value,
-        [0, 1, 4],
-        [0, 1, 0]
-      )
-    }
-  })
-  const onLayout = useCallback(
-    ({ nativeEvent }: LayoutChangeEvent) => {
-      // set globalDeviceDimensions
-      const topMargin = nativeEvent.layout.y;
-      const additionalPadding = 10;
-      setGlobalDeviceDimensions(
-        deviceUtils.dimensions.height -
-        topMargin -
-        additionalPadding
-      );
-    },
-    [setGlobalDeviceDimensions]
-  );
+ 
   const toggleSelectionMode = () => {
     setExtendedState(prevState => {
       return {
@@ -152,6 +85,7 @@ const RecyclerAssetList = ({
       }
     });
   };
+
   const toggleSelection = (section: RecyclerAssetListSection) => {
     setExtendedState(prevState => {
       if (!prevState.selectionMode)
@@ -208,20 +142,11 @@ const RecyclerAssetList = ({
     },
     []
   );
-  useEffect(() => {
-    transitionRef.current?.animateNextTransition();
-    setCols(numCols);
-  }, [numCols])
+
   const getLayoutType = useCallback((index) => {
     return sections[index].type
-    // if (index === 0) return 'story';
-    // else if (data[index]?.deleted) return 'hidden';
-    // else if (data[index]?.sortCondition === groupBy || data[index]?.sortCondition === '') {
-    //     if (typeof data[index]?.value === 'string') return 'header';
-    //     return 'image';
-    // }
-    // return 'unknown'
   }, [sections])
+
   const gridLayoutProvider = useMemo(() => (new GridLayoutProvider(numColumns, scale1, getLayoutType)), [getLayoutType])
   const renderItemContainer = useCallback((props: any, parentProps: any, children: React.ReactNode) => {
     return (
@@ -230,42 +155,9 @@ const RecyclerAssetList = ({
       </Cell>
     );
   }, [gridLayoutProvider])
+
   gridLayoutProvider.shouldRefreshWithAnchoring = false;
-  const layoutProvider = useMemo(() => {
-    return new LayoutProvider(
-      (index: number) => sections[index]?.type,
-      (type, dim) => {
-        const colWidth = Math.floor(deviceUtils.dimensions.width / cols);
-        const StoriesHeight = Math.floor(1.618 * deviceUtils.dimensions.width / 3 + 10)
-        switch (type) {
-          case ViewType.STORY:
-            dim.width = deviceUtils.dimensions.width / 3;
-            dim.height = StoriesHeight;
-            break;
-          case ViewType.ASSET:
-            dim.width = colWidth;
-            dim.height = colWidth;
-            break;
-          case ViewType.MONTH:
-            dim.width = deviceUtils.dimensions.width;
-            dim.height = 100;
-            break;
-          case ViewType.DAY:
-            dim.width = deviceUtils.dimensions.width;
-            dim.height = 70;
-            break;
-          default:
-            dim.width = deviceUtils.dimensions.width;
-            dim.height = 0;
-            break;
-        }
-      }
-    );
-  }, [
-    sections,
-    cols
-  ]);
-  layoutProvider.shouldRefreshWithAnchoring = false;
+  
   const dataProvider = useMemo(() => {
     console.log("dataProvider", sections?.length)
     let provider = new DataProvider(
@@ -382,15 +274,3 @@ const RecyclerAssetList = ({
   );
 }
 export default RecyclerAssetList;
-const styles = StyleSheet.create({
-  container: {
-    bottom: 0,
-    flex: 1,
-    height: deviceUtils.dimensions.height,
-    left: 0,
-    position: 'absolute',
-    right: 0,
-    top: 0,
-    width: deviceUtils.dimensions.width,
-  },
-});

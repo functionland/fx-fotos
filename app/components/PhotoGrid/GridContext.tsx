@@ -1,13 +1,6 @@
 import React, { useContext, useEffect, createContext, useState } from 'react';
-import {
-  useRecoilState,
-} from 'recoil';
-import { numColumnsState } from '../../store';
 import Reanimated, {
-  useAnimatedGestureHandler,
-  Easing,
   useSharedValue,
-  withTiming,
   SharedValue,
 } from 'react-native-reanimated';
 
@@ -31,8 +24,6 @@ export function usePinching() {
 interface Props { }
 
 const GridProvider: React.FC<Props> = (props) => {
-  const [numColumns, setNumColumns] = useRecoilState(numColumnsState);
-  const [columns1, setColumns] = useState(2);
   const columns = useSharedValue(3);
   const scale = useSharedValue(3);
   const pinching = useSharedValue(false);
