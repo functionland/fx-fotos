@@ -2,10 +2,8 @@ import { Dimension, Layout, LayoutManager } from "recyclerlistview"
 import Reanimated, { SharedValue } from "react-native-reanimated"
 import GridLayoutProvider from "./GridLayoutProvider"
 import { translateOrigin } from "../../utils/helper"
-const MAX_COLUMNS = 4
-const MIN_COLUMNS = 2
-
-type gridLayout = "upper" | "current" | "lower"
+export const MAX_COLUMNS = 4
+export const MIN_COLUMNS = 2
 export interface LayoutTransitionRange {
   colsRange: number[]
   translateX: number[]
