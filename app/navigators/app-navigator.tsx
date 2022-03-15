@@ -1,15 +1,15 @@
 import React from "react"
-import { useColorScheme, View, Text } from "react-native"
-import { NavigationContainer, DefaultTheme, DarkTheme } from "@react-navigation/native"
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
-import { enableScreens } from "react-native-screens"
-
-import { navigationRef } from "./navigation-utilities"
 import Animated from "react-native-reanimated"
-import { TabHeader } from "../components/header/tab-header"
+import { enableScreens } from "react-native-screens"
+import { useColorScheme, View, Text } from "react-native"
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5"
-import { HomeNavigation } from "./HomeNavigation"
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
+import { NavigationContainer, DefaultTheme, DarkTheme, useRoute } from "@react-navigation/native"
+
+import { HomeNavigation } from "./HomeNavigation"
+import { navigationRef } from "./navigation-utilities"
+import { TabHeader } from "../components/header/tab-header"
 
 enableScreens()
 export type NavigatorParamList = {
@@ -51,7 +51,7 @@ function SettingsScreen() {
 
 const HomeTabs = createBottomTabNavigator()
 
-function HomeTabsNavigator() {
+function HomeTabsNavigator({ navigation }) {
   return (
     <HomeTabs.Navigator
       screenOptions={{

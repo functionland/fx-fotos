@@ -1,8 +1,10 @@
 import React from "react"
+import { getFocusedRouteNameFromRoute } from "@react-navigation/native"
 import { createSharedElementStackNavigator } from "react-navigation-shared-element"
 
 import { HomeScreen, PhotoScreen } from "../screens"
 import { RecyclerAssetListSection } from "../types"
+import { Constants } from "../theme"
 
 export type HomeNavigationParamList = {
   HomeScreen: undefined
@@ -16,8 +18,17 @@ export enum HomeNavigationTypes {
 
 const HomeNavigationStack = createSharedElementStackNavigator<HomeNavigationParamList>()
 
-export const HomeNavigation = () => {
+export const HomeNavigation = ({ route, navigation }) => {
   const { Navigator, Screen } = HomeNavigationStack
+  const routeName = getFocusedRouteNameFromRoute(route)
+
+  React.useLayoutEffect(() => {
+    if (routeName === HomeNavigationTypes.PhotoScreen) {
+      navigation.setOptions({ tabBarStyle: { display: "none" } })
+    } else {
+      navigation.setOptions({ tabBarStyle: { display: "flex", height: Constants.TabBarHeight } })
+    }
+  }, [route, navigation, routeName])
 
   return (
     <Navigator
