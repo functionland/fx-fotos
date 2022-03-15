@@ -32,9 +32,9 @@ const PinchZoom: React.FC<Props> = (props) => {
         onEnd: (event) => {
             let result = numColumns.value + 1 - event.scale; // linear scale, not geometric, we revert to 0 as the origin
             if (event.scale > 1)
-                result -= 0.25;
+                result -= 0.3;
             else
-                result += 0.25;
+                result += 0.3;
             result = Math.max(MIN_COLUMNS, Math.min(MAX_COLUMNS, result));
             scale.value = withTiming(
                 Math.round(result),
