@@ -6,6 +6,7 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   useAnimatedGestureHandler,
+  runOnJS,
 } from "react-native-reanimated"
 import { snapPoint } from "react-native-redash"
 import { Dimensions, StyleSheet } from "react-native"
@@ -57,7 +58,9 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
       transform: [{ translateX: translateX.value }, { translateY: translateY.value }, { scale }],
     }
   })
-
+  const goBack = () => {
+    navigation.goBack()
+  }
   const onPanGesture = useAnimatedGestureHandler({
     onStart: () => {
       if (isPanGestureActive.value) return
@@ -71,7 +74,7 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
     onEnd: ({ velocityY }) => {
       const shouldGoBack = snapPoint(translateY.value, velocityY, [0, height]) === height
       if (shouldGoBack) {
-        // navigation.goBack()
+        runOnJS(goBack)();
       } else {
         translateX.value = withTiming(0, { duration: 100 })
         translateY.value = withTiming(0, { duration: 100 })
@@ -106,7 +109,7 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
   return (
     <PanGestureHandler maxPointers={1} minPointers={1} onGestureEvent={onPanGesture}>
       <Animated.View style={wrapperAnimatedStyle}>
-        <PhotoScreenHeader goBack={() => navigation.goBack()} />
+        <PhotoScreenHeader goBack={() => goBack()} />
         <Animated.View style={animatedStyle}>
           <SharedElement style={styles.container} id={img.uri}>
             <PinchGestureHandler onGestureEvent={onPinchHandler}>
