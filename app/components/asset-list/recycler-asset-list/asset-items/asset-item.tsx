@@ -50,6 +50,7 @@ const AssetItem = (props: Props): JSX.Element => {
               uri: asset.uri,
             }}
             fadeDuration={100}
+            resizeMode="cover"
           />
         </SharedElement>
       </Animated.View>
@@ -82,8 +83,7 @@ const styles = StyleSheet.create({
     zIndex: 0,
   },
   sharedElementContainer: {
-    height: "100%",
-    width: "100%",
+    flex:1,
   },
 })
 
