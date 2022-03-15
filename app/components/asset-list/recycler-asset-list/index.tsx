@@ -235,8 +235,6 @@ const RecyclerAssetList = ({
     style = {
       height: interpolate(scale1.value, layoutTransitionRange.value.colsRange, containerSize, extrapolation)
     }
-
-    console.log("containerStyle", style.height)
     return style;
   }, [containerSize])
 

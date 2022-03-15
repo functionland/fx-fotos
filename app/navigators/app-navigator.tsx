@@ -146,7 +146,7 @@ export const AppNavigator = (props: NavigationProps) => {
     <Animated.View style={{ flex: 1 }}>
       <NavigationContainer
         ref={navigationRef}
-        theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+        //theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}
         {...props}
       >
         <AppStack />
