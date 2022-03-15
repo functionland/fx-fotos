@@ -16,11 +16,11 @@ import {
   PinchGestureHandler,
   PinchGestureHandlerGestureEvent,
 } from "react-native-gesture-handler"
-import { heightPercentageToDP, widthPercentageToDP } from "react-native-responsive-screen"
+import { widthPercentageToDP } from "react-native-responsive-screen"
 import { RouteProp, NavigationProp } from "@react-navigation/native"
 
 import { palette } from "../../theme/palette"
-import { RecyclerAssetListSectionData } from "../../types"
+import { Asset } from "../../types"
 import { HomeNavigationParamList } from "../../navigators/HomeNavigation"
 import { PhotoScreenHeader } from "../../components"
 
@@ -28,11 +28,11 @@ const { height } = Dimensions.get("window")
 
 interface PhotoScreenProps {
   navigation: NavigationProp<HomeNavigationParamList>
-  route: RouteProp<{ params: { section: RecyclerAssetListSectionData } }>
+  route: RouteProp<{ params: { section: Asset } }>
 }
 
 export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) => {
-  const img: RecyclerAssetListSectionData = route.params.section.data
+  const img = route.params.section.data as Asset;
 
   const translateX = useSharedValue(0)
   const translateY = useSharedValue(0)
@@ -40,7 +40,7 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
   const isPanGestureActive = useSharedValue(false)
   const isPinchGestureActive = useSharedValue(false)
   const animatedOpacity = useSharedValue(1)
-
+  
   const wrapperAnimatedStyle = useAnimatedStyle(() => {
     return {
       backgroundColor: palette.black,
@@ -48,7 +48,7 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
       opacity: animatedOpacity.value,
     }
   })
-
+  
   const animatedStyle = useAnimatedStyle(() => {
     const scale = interpolate(translateY.value, [0, height], [1, 0.5], Extrapolate.CLAMP)
     return {
@@ -105,15 +105,18 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
       }
     },
   })
-
+  const imageContainerStyle= {
+    height: (widthPercentageToDP(100) * img.height)/img.width,
+    width: widthPercentageToDP(100),
+  }
   return (
     <PanGestureHandler maxPointers={1} minPointers={1} onGestureEvent={onPanGesture}>
       <Animated.View style={wrapperAnimatedStyle}>
         <PhotoScreenHeader goBack={() => goBack()} />
         <Animated.View style={animatedStyle}>
-          <SharedElement style={styles.container} id={img.uri}>
+          <SharedElement style={imageContainerStyle} id={img.uri}>
             <PinchGestureHandler onGestureEvent={onPinchHandler}>
-              <Animated.Image source={{ uri: img.uri }} style={[styles.image, animatedImage]} />
+              <Animated.Image source={{ uri: img.uri }} fadeDuration={0} resizeMode="contain" style={[styles.image, animatedImage]} />
             </PinchGestureHandler>
           </SharedElement>
         </Animated.View>
@@ -123,14 +126,7 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
 }
 
 const styles = StyleSheet.create({
-  container: {
-    height: heightPercentageToDP(70),
-    width: widthPercentageToDP(100),
-  },
   image: {
     ...StyleSheet.absoluteFillObject,
-    height: "100%",
-    resizeMode: "contain",
-    width: "100%",
   },
 })
