@@ -46,12 +46,12 @@ export interface Props {
 };
 
 export interface ExtendedState {
-  selectedGroups: { [key: string]: boolean };
-  selectedAssets: { [key: string]: boolean };
-  selectionMode: boolean;
+  selectedGroups: { [key: string]: boolean }
+  selectedAssets: { [key: string]: boolean }
+  selectionMode: boolean
 }
-
 const RecyclerAssetList = ({
+  navigation,
   sections,
   scrollHandler,
   scrollRef,
@@ -77,68 +77,77 @@ const RecyclerAssetList = ({
   });
  
   const toggleSelectionMode = () => {
-    setExtendedState(prevState => {
+    setExtendedState((prevState) => {
       return {
         ...prevState,
         selectedAssets: {},
-        selectionMode: !prevState.selectionMode
+        selectionMode: !prevState.selectionMode,
       }
     });
   };
 
   const toggleSelection = (section: RecyclerAssetListSection) => {
-    setExtendedState(prevState => {
-      if (!prevState.selectionMode)
-        return prevState;
-
+    setExtendedState((prevState) => {
+      if (!prevState.selectionMode) return prevState
 
       if (section.type === ViewType.MONTH) {
-        prevState.selectedAssets[section.id] = !prevState.selectedAssets[section.id];
+        prevState.selectedAssets[section.id] = !prevState.selectedAssets[section.id]
         // TODO: toggle all subgroups
         return {
           ...prevState,
-          selectedAssets: { ...prevState.selectedAssets }
-        };
+          selectedAssets: { ...prevState.selectedAssets },
+        }
       } else if (section.type === ViewType.DAY) {
-        const data: GroupHeader = section.data;
-        prevState.selectedAssets[section.id] = !prevState.selectedAssets[section.id];
-        data.subGroupIds?.forEach(id => {
-          if (id !== section.id)
-            prevState.selectedAssets[id] = prevState.selectedAssets[section.id];
-        });
+        const data: GroupHeader = section.data
+        prevState.selectedAssets[section.id] = !prevState.selectedAssets[section.id]
+        data.subGroupIds?.forEach((id) => {
+          if (id !== section.id) prevState.selectedAssets[id] = prevState.selectedAssets[section.id]
+        })
         return {
           ...prevState,
-          selectedAssets: { ...prevState.selectedAssets }
-        };
+          selectedAssets: { ...prevState.selectedAssets },
+        }
       } else if (section.type === ViewType.ASSET) {
-        prevState.selectedAssets[section.id] = !prevState.selectedAssets[section.id];
+        prevState.selectedAssets[section.id] = !prevState.selectedAssets[section.id]
         return {
           ...prevState,
-          selectedAssets: { ...prevState.selectedAssets }
-        };
+          selectedAssets: { ...prevState.selectedAssets },
+        }
       }
-      return prevState;
-    });
+      return prevState
+    })
   }
   const onLongPress = useCallback((section: RecyclerAssetListSection) => {
-    toggleSelectionMode();
-    toggleSelection(section);
-  }, []);
-  const onPress = useCallback((section: RecyclerAssetListSection) => {
-    toggleSelection(section);
+    toggleSelectionMode()
+    toggleSelection(section)
   }, [])
+
+  const onPress = useCallback((section: RecyclerAssetListSection) => {
+    toggleSelection(section)
+  }, [])
+
   const rowRenderer = useCallback(
-    (type: ViewType, data: RecyclerAssetListSection, index: number, extendedState: ExtendedState): JSX.Element | null => {
+    (
+      type: ViewType,
+      data: RecyclerAssetListSection,
+      index: number,
+      extendedState: ExtendedState,
+    ): JSX.Element | null => {
       // Checks if value is *nullish*.
       if (data == null || index == null) {
-        return null;
+        return null
       }
-      return <RecyclerSectionItem
-        section={data}
-        selectionMode={extendedState?.selectionMode}
-        selected={!!extendedState.selectedAssets[data.id]}
-        onLongPress={onLongPress}
-        onPress={onPress} />;
+
+      return (
+        <RecyclerSectionItem
+          section={data}
+          selectionMode={extendedState?.selectionMode}
+          selected={!!extendedState.selectedAssets[data.id]}
+          onLongPress={onLongPress}
+          onPress={onPress}
+          navigation={navigation}
+        />
+      )
     },
     []
   );
@@ -162,9 +171,9 @@ const RecyclerAssetList = ({
     console.log("dataProvider", sections?.length)
     let provider = new DataProvider(
       (r1: RecyclerAssetListSection, r2: RecyclerAssetListSection) => r1.id !== r2.id,
-      index => sections[index]?.id
-    );
-    provider = provider.cloneWithRows(sections);
+      (index) => sections[index]?.id,
+    )
+    provider = provider.cloneWithRows(sections)
     // provider.getStableId = index => sections[index].id;
     console.log("provider.getSize()", provider.getSize())
     return provider;
