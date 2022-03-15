@@ -45,6 +45,7 @@ const AssetList = ({ refreshData, sections, scrollY, navigation }: Props): JSX.E
         <GridProvider>
             <PinchZoom>
                 <RecyclerAssetList
+                    navigation={navigation}
                     refreshData={refreshData}
                     sections={sections}
                     scrollHandler={scrollHandler}

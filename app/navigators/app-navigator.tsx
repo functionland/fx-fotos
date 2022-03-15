@@ -51,7 +51,7 @@ function SettingsScreen() {
 
 const HomeTabs = createBottomTabNavigator()
 
-function HomeTabsNavigator({ navigation }) {
+function HomeTabsNavigator({ route, navigation }) {
   return (
     <HomeTabs.Navigator
       screenOptions={{
@@ -67,7 +67,7 @@ function HomeTabsNavigator({ navigation }) {
           color: "black",
           fontWeight: "600",
           padding: 5,
-        },
+        }
       }}
     >
       <HomeTabs.Screen
@@ -138,7 +138,7 @@ function HomeTabsNavigator({ navigation }) {
     </HomeTabs.Navigator>
   )
 }
-interface NavigationProps extends Partial<React.ComponentProps<typeof NavigationContainer>> {}
+interface NavigationProps extends Partial<React.ComponentProps<typeof NavigationContainer>> { }
 
 export const AppNavigator = (props: NavigationProps) => {
   const colorScheme = useColorScheme()

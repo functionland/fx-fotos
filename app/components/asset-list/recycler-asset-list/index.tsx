@@ -24,16 +24,21 @@ import {
   RecyclerListView,
   Layout
 } from 'fula-recyclerlistview';
+import { useNavigation } from '@react-navigation/native';
+
 import { RecyclerAssetListSection, ViewType, GroupHeader } from "../../../types"
 import deviceUtils from '../../../utils/deviceUtils'
 import RecyclerSectionItem from "./asset-items/recycler-section-item"
 import ExternalScrollView from '../external-scroll-view'
 import Cell from '../../../components/PhotoGrid/cell'
 import { useColumnsNumber, useScale, usePinching } from '../../../components/PhotoGrid/GridContext';
+import { StackNavigationProp } from "@react-navigation/stack"
+import { HomeNavigationParamList, HomeNavigationTypes } from "../../../navigators/HomeNavigation"
 
 import GridLayoutProvider from '../../../components/PhotoGrid/GridLayoutProvider'
 import { LayoutTransitionRange, MIN_COLUMNS } from '../../../components/PhotoGrid/GridLayoutManager'
 export interface Props {
+  navigation: StackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>;
   sections: RecyclerAssetListSection[];
   numCols: 2 | 3 | 4 | 5;
   scale?: SharedValue<number>,
@@ -69,13 +74,13 @@ const RecyclerAssetList = ({
   const layoutTransitionRange = useSharedValue<LayoutTransitionRange>(null);
   const visibileIndices = useSharedValue<number[]>(null);
   const [currentColumns, setCurrentColumns] = useState(numColumns);
-  
+
   const [extendedState, setExtendedState] = useState<ExtendedState>({
     selectedAssets: {},
     selectedGroups: {},
     selectionMode: false,
   });
- 
+
   const toggleSelectionMode = () => {
     setExtendedState((prevState) => {
       return {
@@ -123,7 +128,10 @@ const RecyclerAssetList = ({
   }, [])
 
   const onPress = useCallback((section: RecyclerAssetListSection) => {
-    toggleSelection(section)
+    if (!extendedState.selectionMode && section.type === ViewType.ASSET) {
+      navigation.push(HomeNavigationTypes.PhotoScreen, { section: section })
+    } else
+      toggleSelection(section)
   }, [])
 
   const rowRenderer = useCallback(
@@ -166,7 +174,7 @@ const RecyclerAssetList = ({
   }, [gridLayoutProvider])
 
   gridLayoutProvider.shouldRefreshWithAnchoring = false;
-  
+
   const dataProvider = useMemo(() => {
     console.log("dataProvider", sections?.length)
     let provider = new DataProvider(
@@ -216,18 +224,18 @@ const RecyclerAssetList = ({
   );
   const containerStyle = useAnimatedStyle(() => {
     let style = {}
-    
+
     if (!containerSize || !layoutTransitionRange.value)
       return style;
     const extrapolation = {
       extrapolateLeft: Extrapolate.CLAMP,
       extrapolateRight: Extrapolate.CLAMP,
     };
-    
+
     style = {
       height: interpolate(scale1.value, layoutTransitionRange.value.colsRange, containerSize, extrapolation)
     }
-   
+
     console.log("containerStyle", style.height)
     return style;
   }, [containerSize])
@@ -260,7 +268,7 @@ const RecyclerAssetList = ({
         }
       }}
       stopRenderingOnAnimation={pinching}
-      contentContainerStyle={{ paddingTop: 100 }}
+      contentContainerStyle={{ paddingTop: 80 }}
       renderItemContainer={renderItemContainer}
       renderContentContainer={(props, children) => {
         return (
