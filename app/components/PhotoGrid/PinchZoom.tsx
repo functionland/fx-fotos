@@ -1,5 +1,5 @@
-import React, { memo, useRef } from 'react';
-import { Dimensions } from 'react-native';
+import React from 'react';
+import { StyleSheet } from 'react-native';
 import {
     PinchGestureHandler,
     PinchGestureHandlerGestureEvent,
@@ -8,39 +8,36 @@ import Reanimated, {
     useAnimatedGestureHandler,
     withTiming,
 } from 'react-native-reanimated';
-import { useRecoilState } from 'recoil';
-import { numColumnsState } from '../../store'
 import { useScale, useColumnsNumber, usePinching } from './GridContext'
-import { sortCondition } from '../types/interfaces';
+import { MIN_COLUMNS, MAX_COLUMNS } from "./GridLayoutManager"
 interface Props {
 }
 
 const PinchZoom: React.FC<Props> = (props) => {
-    const SCREEN_WIDTH = Dimensions.get('window').width;
-    const SCREEN_HEIGHT = Dimensions.get('window').height;
-    const sortCondition = useRef<sortCondition>('day');
     const scale = useScale();
     const pinching = usePinching();
-    const [, setNumColumnsState] = useRecoilState(numColumnsState);
-    const [numColumns, setColumns] = useColumnsNumber();
+    const [numColumns] = useColumnsNumber();
 
 
     const _onPinchGestureEvent = useAnimatedGestureHandler<PinchGestureHandlerGestureEvent, {}>({
-        onStart: (_, ctx) => {
+        onStart: () => {
             pinching.value = false;
         },
-        onActive: (event, ctx) => {
-            let result = numColumns.value + 1 - event.scale; // linear scale, not geometric, we revert to 0 as the origin
-            if (result <= 2) result = 2;
-            else if (result >= 4) result = 4;
-            else {
-                pinching.value = true;
-                scale.value = result;
-            }
+        onActive: (event) => {
+            const result = numColumns.value + 1 - event.scale; // linear scale, not geometric, we revert to 0 as the origin
+            scale.value = Math.max(MIN_COLUMNS, Math.min(MAX_COLUMNS, result));
+            pinching.value = true;
+
         },
-        onEnd: () => {
+        onEnd: (event) => {
+            let result = numColumns.value + 1 - event.scale; // linear scale, not geometric, we revert to 0 as the origin
+            if (event.scale > 1)
+                result -= 0.25;
+            else
+                result += 0.25;
+            result = Math.max(MIN_COLUMNS, Math.min(MAX_COLUMNS, result));
             scale.value = withTiming(
-                Math.round(scale.value),
+                Math.round(result),
                 {
                     duration: 500,
                 },
@@ -80,15 +77,15 @@ const PinchZoom: React.FC<Props> = (props) => {
         <PinchGestureHandler
             onGestureEvent={_onPinchGestureEvent}>
             <Reanimated.View
-                style={{
-                    width: SCREEN_WIDTH,
-                    height: SCREEN_HEIGHT,
-                    zIndex: 3,
-                }}>
+                style={styles.container}>
                 {props.children}
             </Reanimated.View>
         </PinchGestureHandler>
     );
 };
-
-export default memo(PinchZoom, () => true);
+const styles = StyleSheet.create({
+    container: {
+        flex: 1
+    }
+})
+export default PinchZoom;
