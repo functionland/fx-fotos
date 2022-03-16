@@ -1,8 +1,8 @@
 import { Dimension, Layout, LayoutManager, BaseLayoutProvider } from 'fula-recyclerlistview';
 import Reanimated,{SharedValue} from 'react-native-reanimated'
 import { getStoryHeight, MAIN_HEADER_HEIGHT,DAY_HEADER_HEIGHT,MONTH_HEADER_HEIGHT } from "./constants";
-import GridLayoutManager from "./GridLayoutManager";
-import {ViewType} from '../../types'
+import GridLayoutManager from "./gridLayoutManager";
+import {ViewType} from '../../../types'
 /*
  * This class determines the type of the current row and can estimate its current size
  */

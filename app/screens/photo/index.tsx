@@ -21,7 +21,7 @@ import { RouteProp, NavigationProp } from "@react-navigation/native"
 
 import { palette } from "../../theme/palette"
 import { Asset } from "../../types"
-import { HomeNavigationParamList } from "../../navigators/HomeNavigation"
+import { HomeNavigationParamList } from "../../navigators/home-navigation"
 import { PhotoScreenHeader } from "../../components"
 
 const { height } = Dimensions.get("window")

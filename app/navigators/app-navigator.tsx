@@ -7,7 +7,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import { NavigationContainer, DefaultTheme, DarkTheme, useRoute } from "@react-navigation/native"
 
-import { HomeNavigation } from "./HomeNavigation"
+import { HomeNavigation } from "./home-navigation"
 import { navigationRef } from "./navigation-utilities"
 import { TabHeader } from "../components/header/tab-header"
 

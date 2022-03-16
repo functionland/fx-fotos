@@ -12,4 +12,4 @@ export * from "./text-field/text-field"
 export * from "./wallpaper/wallpaper"
 export * from "./auto-image/auto-image"
 export * from './text'
-export * from './PhotoScreenHeader'
+export * from './photo-screen-header'

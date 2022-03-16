@@ -1,7 +1,7 @@
 import { Dimension, Layout, LayoutManager } from 'fula-recyclerlistview'
 import Reanimated, { SharedValue } from "react-native-reanimated"
-import GridLayoutProvider from "./GridLayoutProvider"
-import { translateOrigin } from "../../utils/helper"
+import GridLayoutProvider from "./gridLayoutProvider"
+import { translateOrigin } from "../../../utils/helper"
 export const MAX_COLUMNS = 4
 export const MIN_COLUMNS = 2
 export interface LayoutTransitionRange {

@@ -8,8 +8,8 @@ import Reanimated, {
     useAnimatedGestureHandler,
     withTiming,
 } from 'react-native-reanimated';
-import { useScale, useColumnsNumber, usePinching } from './GridContext'
-import { MIN_COLUMNS, MAX_COLUMNS } from "./GridLayoutManager"
+import { useScale, useColumnsNumber, usePinching } from './gridContext'
+import { MIN_COLUMNS, MAX_COLUMNS } from "./gridLayoutManager"
 interface Props {
 }
 

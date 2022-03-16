@@ -1,1 +1,1 @@
-export * as AssetService from "./assetService"
+export * as AssetService from "./asset-service"

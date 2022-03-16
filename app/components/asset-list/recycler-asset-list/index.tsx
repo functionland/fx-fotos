@@ -30,13 +30,13 @@ import { RecyclerAssetListSection, ViewType, GroupHeader } from "../../../types"
 import deviceUtils from '../../../utils/deviceUtils'
 import RecyclerSectionItem from "./asset-items/recycler-section-item"
 import ExternalScrollView from '../external-scroll-view'
-import Cell from '../../../components/PhotoGrid/cell'
-import { useColumnsNumber, useScale, usePinching } from '../../../components/PhotoGrid/GridContext';
+import Cell from '../gridProvider/cell'
+import { useColumnsNumber, useScale, usePinching } from '../gridProvider/gridContext';
 import { StackNavigationProp } from "@react-navigation/stack"
-import { HomeNavigationParamList, HomeNavigationTypes } from "../../../navigators/HomeNavigation"
+import { HomeNavigationParamList, HomeNavigationTypes } from "../../../navigators/home-navigation"
 
-import GridLayoutProvider from '../../../components/PhotoGrid/GridLayoutProvider'
-import { LayoutTransitionRange, MIN_COLUMNS } from '../../../components/PhotoGrid/GridLayoutManager'
+import GridLayoutProvider from '../gridProvider/gridLayoutProvider'
+import { LayoutTransitionRange, MIN_COLUMNS } from '../gridProvider/gridLayoutManager'
 export interface Props {
   navigation: StackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>;
   sections: RecyclerAssetListSection[];

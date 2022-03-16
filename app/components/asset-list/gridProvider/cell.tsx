@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import Reanimated, { Extrapolate, interpolate, SharedValue, useAnimatedStyle, ExtrapolationType } from 'react-native-reanimated';
-import GridLayoutProvider from './GridLayoutProvider';
+import GridLayoutProvider from './gridLayoutProvider';
 interface CellProps {
     layoutProvider: GridLayoutProvider
     style: any,

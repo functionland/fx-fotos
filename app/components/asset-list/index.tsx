@@ -11,12 +11,12 @@ import Animated, {
 } from "react-native-reanimated"
 
 import RecyclerAssetList from './recycler-asset-list';
-import GridProvider from '../../components/PhotoGrid/GridContext'
-import PinchZoom from '../../components/PhotoGrid/PinchZoom';
+import GridProvider from './gridProvider/gridContext'
+import PinchZoom from './gridProvider/pinchZoom';
 
 import { RecyclerAssetListSection } from "../../types"
 import { StackNavigationProp } from "@react-navigation/stack"
-import { HomeNavigationParamList, HomeNavigationTypes } from "../../navigators/HomeNavigation"
+import { HomeNavigationParamList, HomeNavigationTypes } from "../../navigators/home-navigation"
 interface Props {
     refreshData: () => Promise<void>
     sections: RecyclerAssetListSection[]

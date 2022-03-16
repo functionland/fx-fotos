@@ -6,7 +6,7 @@ import { getFocusedRouteNameFromRoute } from "@react-navigation/native"
 
 import { Text } from "../text"
 import { palette, Constants } from "../../theme"
-import { HomeNavigationTypes } from "../../navigators/HomeNavigation"
+import { HomeNavigationTypes } from "../../navigators/home-navigation"
 
 interface Props extends BottomTabHeaderProps {}
 
