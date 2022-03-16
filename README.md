@@ -113,27 +113,22 @@ cd photos
 
 ## Install requirements
 
-You can install dependencies with `yarn` by running:
+you can install the requirements with command:
 ```bash
-yarn 
+yarn install
+```
+or (do not use both)
+```bash
+npm install
 ```
 
 ## Run
-Then you can start the debug server using the command below:
-```bash
-yarn run start
-```
-At last but not least, for installing the debug version and starting the development process on the emulator or a real device you should run commands below:
-<br>
-#### IOS
-```
-yarn run ios
-```
-#### Android
-```
-yarn run android
-```
 
+You can run the application in expo-cli using the below command. It gives you a QR code which you can use on your phone(in expo GO application) to open and test the application on your phone(both iOS and Android). Or you can build the android or iOS installation files.
+
+```bash
+expo start
+```
 
 ## Packages
 

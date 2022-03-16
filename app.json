@@ -1,26 +1,38 @@
 {
-  "name": "photos",
-  "displayName": "photos",
   "expo": {
-    "name": "photos",
-    "slug": "photos",
-    "version": "1.0.0",
+    "name": "BoxPhotos",
+    "slug": "BoxPhotos",
+    "version": "0.8.5",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/icon.png",
     "splash": {
-      "image": "./assets/images/splash.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true
     },
+    "android": {
+	  "jsEngine": "jsc",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FFFFFF"
+      },
+      "package": "land.fx.BoxPhotos",
+      "versionCode": 5
+    },
     "web": {
-      "favicon": "./assets/images/favicon.png"
-    }
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-dev-client"
+    ]
   }
 }
