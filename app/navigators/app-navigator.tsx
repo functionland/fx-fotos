@@ -10,7 +10,7 @@ import { NavigationContainer, DefaultTheme, DarkTheme, useRoute } from "@react-n
 import { HomeNavigation } from "./home-navigation"
 import { navigationRef } from "./navigation-utilities"
 import { TabHeader } from "../components/header/tab-header"
-
+import { UnderConstruction } from '../components'
 enableScreens()
 export type NavigatorParamList = {
   home: undefined
@@ -36,15 +36,15 @@ const AppStack = () => {
         options={{
           headerShown: true,
         }}
-        component={SettingsScreen}
+        component={UnderConstructionScreen}
       />
     </Stack.Navigator>
   )
 }
-function SettingsScreen() {
+function UnderConstructionScreen() {
   return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <Text>Settings!</Text>
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center",backgroundColor:"white" }}>
+      <UnderConstruction />
     </View>
   )
 }
@@ -101,7 +101,7 @@ function HomeTabsNavigator({ route, navigation }) {
             )
           },
         }}
-        component={SettingsScreen}
+        component={UnderConstructionScreen}
       />
       <HomeTabs.Screen
         name="Sharing"
@@ -117,7 +117,7 @@ function HomeTabsNavigator({ route, navigation }) {
             )
           },
         }}
-        component={SettingsScreen}
+        component={UnderConstructionScreen}
       />
       <HomeTabs.Screen
         name="Library"
@@ -133,7 +133,7 @@ function HomeTabsNavigator({ route, navigation }) {
             )
           },
         }}
-        component={SettingsScreen}
+        component={UnderConstructionScreen}
       />
     </HomeTabs.Navigator>
   )

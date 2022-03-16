@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react"
-import { StyleSheet, Text, Alert } from "react-native"
+import { StyleSheet, Text, Alert, View } from "react-native"
 import * as MediaLibrary from "expo-media-library"
+import LottieView from 'lottie-react-native';
+
 import { Screen } from "../../components"
 import { AssetService } from "../../services"
 import { color } from "../../theme"
@@ -60,8 +62,14 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       style={styles.screen}
       backgroundColor={color.transparent}
     >
-      {!assets ? (
-        <Text style={styles.loadingText}>Loading photos...</Text>
+      {!assets ? (<View style={styles.loaderContainer}>
+        <LottieView
+          autoPlay={true}
+          loop={true}
+          source={require('../../../assets/lotties/photo-loading.json')}
+        />
+        <Text style={styles.loadingText}>Gathering photos</Text>
+      </View>
       ) : !assets?.length ? (
         <Text style={styles.emptyText}>Gallery is empty!</Text>
       ) : (
@@ -80,12 +88,17 @@ const styles = StyleSheet.create({
   loadingText: {
     alignSelf: "center",
     color: palette.lightGrey,
-    fontSize: 24,
-    fontWeight: "800",
+    fontSize: 16,
+    marginTop:250
   },
   screen: {
     backgroundColor: palette.white,
     flex: 1,
     justifyContent: "center",
   },
+  loaderContainer:{
+    flex:1,
+    justifyContent:"center",
+    alignContent:"center"
+  }
 })
