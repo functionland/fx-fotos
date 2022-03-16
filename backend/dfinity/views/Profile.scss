@@ -1,0 +1,196 @@
+#alt-header {
+  display: flex;
+  position: absolute;
+  align-items: center;
+  justify-content: center;
+  height: 4.4rem;
+  width: 100%;
+
+  button#back {
+    position: absolute;
+    left: 0.4rem;
+    width: 3.2rem;
+    height: 3.2rem;
+    padding: 0;
+    margin: 0;
+    background-color: transparent;
+    border: none;
+
+    img {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  h2 {
+    font-size: 2.2rem;
+    margin: 0.2rem 0 0;
+  }
+}
+
+.profile-pic {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 1.6rem 0;
+
+  img,
+  .placeholder-profile-pic {
+    display: block;
+    width: 20rem;
+    height: 20rem;
+    border: 2px solid #fff;
+    border-radius: 50%;
+  }
+}
+
+.profile-header {
+  .follow-button {
+    color: #fff;
+    border-color: #fff;
+    background-color: #292a2e80;
+    margin-bottom: -0.5rem;
+
+    &.primary {
+      border: 1px solid #fff;
+    }
+  }
+
+  h2 {
+    text-align: center;
+    margin: 1.8rem 0;
+  }
+}
+
+.profile-nav {
+  display: flex;
+  width: 100%;
+  justify-content: space-evenly;
+  padding-bottom: 1.4rem;
+
+  button {
+    flex: 1;
+    text-align: center;
+    font-size: 1.3rem;
+
+    &.active {
+      pointer-events: none;
+    }
+    &.active span {
+      padding-bottom: 0.3rem;
+      margin-bottom: -0.3rem;
+      border-bottom: 2px solid #fff;
+    }
+
+    .nav-count {
+      font-size: 1.8rem;
+    }
+  }
+}
+
+.profile-videos {
+  display: flex;
+  flex-wrap: wrap;
+  background-color: #d9d9da;
+  padding: 1px 0 0;
+  height: 40rem;
+  overflow: auto;
+
+  img {
+    width: calc((100% - 2px) / 3);
+    align-self: start;
+    margin-bottom: 1px;
+    border-radius: 8px;
+    margin-right: 1px;
+    cursor: pointer;
+
+    &:nth-child(3n) {
+      margin-right: 0;
+    }
+  }
+}
+
+.no-results {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  background-color: #d9d9da;
+  color: #333;
+  font-size: 1.8rem;
+
+  > * {
+    margin-top: 2rem;
+  }
+}
+
+.followers,
+.following {
+  display: flex;
+  flex-direction: column;
+  background-color: #d9d9da;
+  height: 40rem;
+  overflow: auto;
+}
+
+.placeholder-profile-pic {
+  position: relative;
+  background-color: #6cb2ff;
+
+  .left-eye,
+  .right-eye,
+  .smile,
+  .mouth,
+  .tongue {
+    display: inline-block;
+    position: absolute;
+    border-radius: 50%;
+  }
+
+  .left-eye,
+  .right-eye {
+    top: 10rem;
+    width: 3rem;
+    height: 3rem;
+    background-color: #fff;
+  }
+
+  .left-eye {
+    left: 6rem;
+  }
+
+  .right-eye {
+    right: 1rem;
+  }
+
+  .smile,
+  .mouth {
+    border-bottom: 5px solid #fff;
+  }
+
+  .smile {
+    bottom: 4rem;
+    left: 2.5rem;
+    width: 14rem;
+    height: 3rem;
+    transform: rotate(3deg);
+  }
+
+  .mouth {
+    bottom: 2.5rem;
+    left: 4rem;
+    width: 3rem;
+    height: 5rem;
+    transform: rotate(15deg);
+  }
+
+  .tongue {
+    bottom: 3.5rem;
+    left: 5rem;
+    width: 0.8rem;
+    height: 1.2rem;
+    border-left: 2px solid #fff;
+    transform: rotate(22deg);
+  }
+}
