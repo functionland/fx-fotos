@@ -30,7 +30,7 @@ export const TabHeader = ({ route, options, ...props }: Props) => {
         />
       )}
       <View style={styles.endSection}>
-        <FontAwesome5 name={"user-circle"} size={35} color="blue" />
+        {/* <FontAwesome5 name={"user-circle"} size={35} color="blue" /> */}
       </View>
     </View>
   )
