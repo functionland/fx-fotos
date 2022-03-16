@@ -13,6 +13,9 @@ import "./i18n"
 import "./utils/ignore-warnings"
 import * as React from "react"
 import { SafeAreaProvider, initialWindowMetrics } from "react-native-safe-area-context"
+import {
+  RecoilRoot,
+} from 'recoil';
 import { initFonts } from "./theme/fonts" // expo
 import * as storage from "./utils/storage"
 import { useBackButtonHandler, AppNavigator, canExit, useNavigationPersistence } from "./navigators"
@@ -39,7 +42,7 @@ function App() {
   const [, getPermissions] = MediaLibrary.usePermissions()
   // Kick off initial async loading actions, like loading fonts and RootStore
   React.useEffect(() => {
-    ;(async () => {
+    ; (async () => {
       await getPermissions()
       await initFonts()
     })()
@@ -58,7 +61,9 @@ function App() {
     <ToggleStorybook>
       <SafeAreaProvider initialMetrics={initialWindowMetrics}>
         <ErrorBoundary catchErrors={"prod"}>
-          <AppNavigator onStateChange={onNavigationStateChange} />
+          <RecoilRoot>
+            <AppNavigator onStateChange={onNavigationStateChange} />
+          </RecoilRoot>
         </ErrorBoundary>
       </SafeAreaProvider>
     </ToggleStorybook>

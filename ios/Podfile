@@ -24,6 +24,8 @@ target 'photos' do
     :hermes_enabled => podfile_properties['expo.jsEngine'] == 'hermes'
   )
 
+  pod 'RNSharedElement', :path => '../node_modules/react-native-shared-element'
+
   target 'photosTests' do
     inherit! :complete
     # Pods for testing

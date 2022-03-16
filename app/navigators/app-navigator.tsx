@@ -1,39 +1,20 @@
-/**
- * The app navigator (formerly "AppNavigator" and "MainNavigator") is used for the primary
- * navigation flows of your app.
- * Generally speaking, it will contain an auth flow (registration, login, forgot password)
- * and a "main" flow which the user will use once logged in.
- */
 import React from "react"
-import { useColorScheme, View, Text } from "react-native"
-import { NavigationContainer, DefaultTheme, DarkTheme } from "@react-navigation/native"
-import { createNativeStackNavigator } from "@react-navigation/native-stack"
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { enableScreens } from "react-native-screens"
-
-import { HomeScreen } from "../screens"
-import { navigationRef } from "./navigation-utilities"
 import Animated from "react-native-reanimated"
-import { AnimatedHeader } from "../components/header/animated-header"
+import { enableScreens } from "react-native-screens"
+import { useColorScheme, View, Text } from "react-native"
+import FontAwesome5 from "react-native-vector-icons/FontAwesome5"
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
+import { createNativeStackNavigator } from "@react-navigation/native-stack"
+import { NavigationContainer, DefaultTheme, DarkTheme, useRoute } from "@react-navigation/native"
+
+import { HomeNavigation } from "./home-navigation"
+import { navigationRef } from "./navigation-utilities"
 import { TabHeader } from "../components/header/tab-header"
-import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
-
-/**
- * This type allows TypeScript to know what routes are defined in this navigator
- * as well as what properties (if any) they might take when navigating to them.
- *
- * If no params are allowed, pass through `undefined`. Generally speaking, we
- * recommend using your MobX-State-Tree store(s) to keep application state
- * rather than passing state through navigation params.
- *
- * For more information, see this documentation:
- *   https://reactnavigation.org/docs/params/
- *   https://reactnavigation.org/docs/typescript#type-checking-the-navigator
- */
-
-enableScreens();
+import { UnderConstruction } from '../components'
+enableScreens()
 export type NavigatorParamList = {
   home: undefined
+  settings: undefined
 }
 
 // Documentation: https://reactnavigation.org/docs/stack-navigator/
@@ -41,16 +22,9 @@ const Stack = createNativeStackNavigator<NavigatorParamList>()
 
 const AppStack = () => {
   return (
-    <Stack.Navigator
-      screenOptions={{
-        headerShown: true,
-        headerTransparent: true,
-        headerHideShadow: true,
-      }}
-      initialRouteName="homeTabs"
-    >
+    <Stack.Navigator initialRouteName="home">
       <Stack.Screen
-        name="homeTabs"
+        name="home"
         options={{
           headerShown: false,
           headerTransparent: true,
@@ -58,28 +32,26 @@ const AppStack = () => {
         component={HomeTabsNavigator}
       />
       <Stack.Screen
-        name="settings2"
+        name="settings"
         options={{
           headerShown: true,
-          
         }}
-        component={SettingsScreen}
+        component={UnderConstructionScreen}
       />
     </Stack.Navigator>
-
   )
 }
-function SettingsScreen() {
+function UnderConstructionScreen() {
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Settings!</Text>
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center",backgroundColor:"white" }}>
+      <UnderConstruction />
     </View>
-  );
+  )
 }
 
-const HomeTabs = createBottomTabNavigator();
+const HomeTabs = createBottomTabNavigator()
 
-function HomeTabsNavigator() {
+function HomeTabsNavigator({ route, navigation }) {
   return (
     <HomeTabs.Navigator
       screenOptions={{
@@ -88,44 +60,83 @@ function HomeTabsNavigator() {
         header: (props) => <TabHeader {...props} />,
         tabBarStyle: {
           height: 70,
-          backgroundColor:"white"
+          backgroundColor: "white",
         },
         tabBarLabelStyle: {
           fontSize: 15,
           color: "black",
           fontWeight: "600",
           padding: 5,
-        },
-        
+        }
       }}
     >
       <HomeTabs.Screen
         options={{
           tabBarLabel: "Photos",
-          tabBarIcon: (props) => <FontAwesome5 name={'images'} size={25} color={props?.focused ? "blue" : "gray"} style={{}} />
+          tabBarIcon: function tabIcon(props) {
+            return (
+              <FontAwesome5
+                name={"images"}
+                size={25}
+                color={props?.focused ? "blue" : "gray"}
+                style={{}}
+              />
+            )
+          },
         }}
-
-        name="Home" component={HomeScreen} />
+        name="Home"
+        component={HomeNavigation}
+      />
       <HomeTabs.Screen
         name="Search"
         options={{
-          tabBarIcon: (props) => <FontAwesome5 name={'search'} color={props?.focused ? "blue" : "gray"} size={25} style={{}} />
+          tabBarIcon: function tabIcon(props) {
+            return (
+              <FontAwesome5
+                name={"search"}
+                color={props?.focused ? "blue" : "gray"}
+                size={25}
+                style={{}}
+              />
+            )
+          },
         }}
-        component={SettingsScreen} />
+        component={UnderConstructionScreen}
+      />
       <HomeTabs.Screen
         name="Sharing"
         options={{
-          tabBarIcon: (props) => <FontAwesome5 name={'user-friends'} color={props?.focused ? "blue" : "gray"} size={25} style={{}} />
+          tabBarIcon: function tabIcon(props) {
+            return (
+              <FontAwesome5
+                name={"user-friends"}
+                color={props?.focused ? "blue" : "gray"}
+                size={25}
+                style={{}}
+              />
+            )
+          },
         }}
-        component={SettingsScreen} />
+        component={UnderConstructionScreen}
+      />
       <HomeTabs.Screen
         name="Library"
         options={{
-          tabBarIcon: (props) => <FontAwesome5 name={'swatchbook'} color={props?.focused ? "blue" : "gray"} size={25} style={{}} />
+          tabBarIcon: function tabIcon(props) {
+            return (
+              <FontAwesome5
+                name={"swatchbook"}
+                color={props?.focused ? "blue" : "gray"}
+                size={25}
+                style={{}}
+              />
+            )
+          },
         }}
-        component={SettingsScreen} />
+        component={UnderConstructionScreen}
+      />
     </HomeTabs.Navigator>
-  );
+  )
 }
 interface NavigationProps extends Partial<React.ComponentProps<typeof NavigationContainer>> { }
 
@@ -135,7 +146,7 @@ export const AppNavigator = (props: NavigationProps) => {
     <Animated.View style={{ flex: 1 }}>
       <NavigationContainer
         ref={navigationRef}
-        theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+        //theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}
         {...props}
       >
         <AppStack />
