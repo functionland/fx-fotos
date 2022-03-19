@@ -4,17 +4,14 @@ import { GroupHeader, RecyclerAssetListSection, ViewType } from "../../../../typ
 import StoryListItem from "./story-list-item"
 import AssetItem from "./asset-item"
 import HeaderItem from "./header-item"
-import { HomeNavigationParamList, HomeNavigationTypes } from "../../../../navigators/HomeNavigation"
-import { StackNavigationProp } from "@react-navigation/stack"
-import { palette } from "../../../../theme/palette"
 
+import { palette } from "../../../../theme/palette"
 interface Props {
   section: RecyclerAssetListSection
   selectionMode: boolean
   selected: boolean
   onLongPress: (section: RecyclerAssetListSection) => void
   onPress: (section: RecyclerAssetListSection) => void
-  navigation: StackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>
 }
 const getSectionByType = (
   section: RecyclerAssetListSection,
@@ -61,8 +58,8 @@ const RecyclerSectionItem: React.FC<Props> = ({
   selected,
   onLongPress,
   onPress,
-  navigation,
 }) => {
+
   const onPressItem = () => {
     if (onPress) {
       setTimeout(() => {
@@ -82,9 +79,6 @@ const RecyclerSectionItem: React.FC<Props> = ({
       underlayColor="transparent"
       onLongPress={onLongPressItem}
       onPress={() => {
-        if (!selected && !selectionMode) {
-          navigation.push(HomeNavigationTypes.PhotoScreen, { section: section })
-        }
         onPressItem()
       }}
     >

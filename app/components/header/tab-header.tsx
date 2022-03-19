@@ -6,7 +6,7 @@ import { getFocusedRouteNameFromRoute } from "@react-navigation/native"
 
 import { Text } from "../text"
 import { palette, Constants } from "../../theme"
-import { HomeNavigationTypes } from "../../navigators/HomeNavigation"
+import { HomeNavigationTypes } from "../../navigators/home-navigation"
 
 interface Props extends BottomTabHeaderProps {}
 
@@ -30,7 +30,7 @@ export const TabHeader = ({ route, options, ...props }: Props) => {
         />
       )}
       <View style={styles.endSection}>
-        <FontAwesome5 name={"user-circle"} size={35} color="blue" />
+        {/* <FontAwesome5 name={"user-circle"} size={35} color="blue" /> */}
       </View>
     </View>
   )

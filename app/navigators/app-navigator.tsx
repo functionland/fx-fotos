@@ -7,10 +7,10 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import { NavigationContainer, DefaultTheme, DarkTheme, useRoute } from "@react-navigation/native"
 
-import { HomeNavigation } from "./HomeNavigation"
+import { HomeNavigation } from "./home-navigation"
 import { navigationRef } from "./navigation-utilities"
 import { TabHeader } from "../components/header/tab-header"
-
+import { UnderConstruction } from '../components'
 enableScreens()
 export type NavigatorParamList = {
   home: undefined
@@ -36,22 +36,22 @@ const AppStack = () => {
         options={{
           headerShown: true,
         }}
-        component={SettingsScreen}
+        component={UnderConstructionScreen}
       />
     </Stack.Navigator>
   )
 }
-function SettingsScreen() {
+function UnderConstructionScreen() {
   return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <Text>Settings!</Text>
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center",backgroundColor:"white" }}>
+      <UnderConstruction />
     </View>
   )
 }
 
 const HomeTabs = createBottomTabNavigator()
 
-function HomeTabsNavigator({ navigation }) {
+function HomeTabsNavigator({ route, navigation }) {
   return (
     <HomeTabs.Navigator
       screenOptions={{
@@ -67,7 +67,7 @@ function HomeTabsNavigator({ navigation }) {
           color: "black",
           fontWeight: "600",
           padding: 5,
-        },
+        }
       }}
     >
       <HomeTabs.Screen
@@ -101,7 +101,7 @@ function HomeTabsNavigator({ navigation }) {
             )
           },
         }}
-        component={SettingsScreen}
+        component={UnderConstructionScreen}
       />
       <HomeTabs.Screen
         name="Sharing"
@@ -117,7 +117,7 @@ function HomeTabsNavigator({ navigation }) {
             )
           },
         }}
-        component={SettingsScreen}
+        component={UnderConstructionScreen}
       />
       <HomeTabs.Screen
         name="Library"
@@ -133,12 +133,12 @@ function HomeTabsNavigator({ navigation }) {
             )
           },
         }}
-        component={SettingsScreen}
+        component={UnderConstructionScreen}
       />
     </HomeTabs.Navigator>
   )
 }
-interface NavigationProps extends Partial<React.ComponentProps<typeof NavigationContainer>> {}
+interface NavigationProps extends Partial<React.ComponentProps<typeof NavigationContainer>> { }
 
 export const AppNavigator = (props: NavigationProps) => {
   const colorScheme = useColorScheme()
@@ -146,7 +146,7 @@ export const AppNavigator = (props: NavigationProps) => {
     <Animated.View style={{ flex: 1 }}>
       <NavigationContainer
         ref={navigationRef}
-        theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+        //theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}
         {...props}
       >
         <AppStack />

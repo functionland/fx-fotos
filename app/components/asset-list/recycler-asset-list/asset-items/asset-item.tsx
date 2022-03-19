@@ -1,5 +1,6 @@
-import React from "react"
-import { StyleSheet, View, Image } from "react-native"
+import React, { memo } from "react"
+import { StyleSheet, View, LayoutChangeEvent, Image } from "react-native"
+import FastImage from "react-native-fast-image"
 
 import { Asset } from "../../../../types"
 import { palette } from "../../../../theme/palette"
@@ -49,6 +50,7 @@ const AssetItem = (props: Props): JSX.Element => {
               uri: asset.uri,
             }}
             fadeDuration={100}
+            resizeMode="cover"
           />
         </SharedElement>
       </Animated.View>
@@ -81,9 +83,13 @@ const styles = StyleSheet.create({
     zIndex: 0,
   },
   sharedElementContainer: {
-    height: "100%",
-    width: "100%",
+    flex:1,
   },
 })
 
-export default AssetItem
+const areEqual = (prev: Props, next: Props) => {
+	return (prev?.asset?.id === next?.asset?.id
+		&& prev?.selectionMode === next?.selectionMode
+		&& prev?.selected === next?.selected)
+}
+export default memo(AssetItem, areEqual);

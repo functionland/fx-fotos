@@ -7,12 +7,17 @@ import {
     FlatList,
     SafeAreaView,
 } from 'react-native';
-import { BaseScrollView } from 'recyclerlistview';
+import { BaseScrollView } from 'fula-recyclerlistview';
 import Animated from 'react-native-reanimated';
 export default class ExternalScrollView extends BaseScrollView {
+    constructor(props) {
+        super(props);
+    }
+
     scrollTo(...args: any[]) {
         (this.props as any).scrollRefExternal?.current?.scrollTo(...args);
     }
+    
     render() {
         return (
             <Animated.ScrollView {...this.props}
@@ -23,6 +28,7 @@ export default class ExternalScrollView extends BaseScrollView {
                 removeClippedSubviews={true}
                 showsVerticalScrollIndicator={true}
                 contentInsetAdjustmentBehavior="automatic"
+
             >
                 {this.props.children}
             </Animated.ScrollView>
