@@ -1,3 +1,3 @@
 export * as Schemas from './schemas';
-export * as Types from './types';
+export * as Entities from './entities';
 export * from './realm';

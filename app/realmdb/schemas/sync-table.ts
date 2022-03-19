@@ -2,7 +2,7 @@ export const SyncTable = {
   name: "SyncTable",
   primaryKey: "id",
   properties: {
-    id: "uuid",
+    id: "int",
     /**
      * Sync date with box
      */

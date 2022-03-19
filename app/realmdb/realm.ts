@@ -5,5 +5,6 @@ export const RealmDB = async () => {
   return await Realm.open({
     schema: [Asset, SyncTable],
     schemaVersion: 1,
+    deleteRealmIfMigrationNeeded:true
   })
 }

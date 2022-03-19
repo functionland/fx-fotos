@@ -1,4 +1,4 @@
-export type AssetType = {
+export type AssetEntity = {
   id: string
   /**
    * Filename of the asset.
