@@ -39,7 +39,7 @@ const PinchZoom: React.FC<Props> = (props) => {
             scale.value = withTiming(
                 Math.round(result),
                 {
-                    duration: 500,
+                    duration: 250,
                 },
                 () => {
                     numColumns.value = scale.value;
@@ -51,7 +51,7 @@ const PinchZoom: React.FC<Props> = (props) => {
             scale.value = withTiming(
                 Math.round(scale.value),
                 {
-                    duration: 300,
+                    duration: 250,
                 },
                 () => {
                     numColumns.value = scale.value;
@@ -63,7 +63,7 @@ const PinchZoom: React.FC<Props> = (props) => {
             scale.value = withTiming(
                 Math.round(scale.value),
                 {
-                    duration: 300,
+                    duration: 250,
                 },
                 () => {
                     numColumns.value = scale.value;
