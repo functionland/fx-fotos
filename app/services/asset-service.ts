@@ -41,7 +41,7 @@ export const categorizeAssets = (assets: MediaLibrary.Asset[]) => {
       sections.push({
         id: month,
         data: {
-          ...lastMonthHeader
+          ...lastMonthHeader,
         },
         type: ViewType.MONTH,
       })
@@ -56,7 +56,7 @@ export const categorizeAssets = (assets: MediaLibrary.Asset[]) => {
       const daySection: RecyclerAssetListSection = {
         id: `${month}-${day}`,
         data: {
-          ...lastDayHeader
+          ...lastDayHeader,
         },
         type: ViewType.DAY,
       }
@@ -79,10 +79,17 @@ export const categorizeAssets = (assets: MediaLibrary.Asset[]) => {
   return sections
 }
 
-export const getAllMedias = async () => {
+export const getMedias = async (
+  pageSize = 100,
+  afterAssetId :string,
+): Promise<MediaLibrary.PagedInfo<MediaLibrary.Asset>> => {
   try {
-    const medias = await MediaLibrary.getAssetsAsync({
-      first: 500,
+    const medias = await MediaLibrary.getAssetsAsync(afterAssetId?{
+      first: pageSize,
+      after: afterAssetId,
+      sortBy: "creationTime",
+    }:{
+      first: pageSize,
       sortBy: "creationTime",
     })
     return medias

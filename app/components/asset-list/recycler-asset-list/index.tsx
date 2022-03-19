@@ -190,7 +190,12 @@ const RecyclerAssetList = ({
   const animatedReactionWrapper = () => {
     forcRenderRCL();
   };
-
+  useEffect(() => {
+    const heights = Object.values(gridLayoutProvider.getLayoutManager?.()?.getAllContentDimension()?.height||{});
+    if (heights.length) {
+      setContainerSize(heights);
+    }
+  }, [gridLayoutProvider]);
   useAnimatedReaction(() => {
     return { pinchingValue: pinching.value, numColumnsValue: numColumns.value };
   }, (next, prev) => {
@@ -205,6 +210,8 @@ const RecyclerAssetList = ({
       return { scaleValue: scale1.value, pinchingValue: pinching.value }
     },
     (next, prev) => {
+      if (!next.pinchingValue && !prev?.pinchingValue)
+        return;
       if (next.pinchingValue && !prev?.pinchingValue)
         lastScrollY.value = scrollY.value;
 
@@ -214,13 +221,11 @@ const RecyclerAssetList = ({
           extrapolateRight: Extrapolate.CLAMP,
         };
         const diffScrollY = interpolate(next.scaleValue, layoutTransitionRange.value.colsRange, layoutTransitionRange.value.translateY, extrapolation)
-        const dynamicHeight = interpolate(next.scaleValue, layoutTransitionRange.value.colsRange, containerSize, extrapolation)
-        console.log("diffScrollY", dynamicHeight, diffScrollY + lastScrollY.value)
+        console.log("diffScrollY",next,prev)
         scrollTo?.(scrollRef, 0, diffScrollY + lastScrollY.value, false)
         dyanmicScrollY.value = diffScrollY;
       }
-    },
-    [containerSize]
+    }
   );
   const containerStyle = useAnimatedStyle(() => {
     let style = {}
@@ -271,11 +276,7 @@ const RecyclerAssetList = ({
       renderContentContainer={(props, children) => {
         return (
           <Animated.View {...props} style={[props.style, containerStyle]} onLayout={(event: LayoutChangeEvent) => {
-            if (!containerSize) {
-              const heights = Object.values(gridLayoutProvider?.getLayoutManager?.()?.getAllContentDimension()?.height);
-              setContainerSize(heights);
-              setAllLayouts(gridLayoutProvider?.getLayoutManager?.()?.getAllLayouts())
-            } else if (!pinching.value) {
+            if (!pinching.value) {
               console.log("onLayout", event.nativeEvent.layout.height)
               //forcRenderRCL();
             }

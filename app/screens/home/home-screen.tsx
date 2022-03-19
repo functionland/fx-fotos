@@ -17,7 +17,7 @@ interface HomeScreenProps {
 }
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
-  const [assets, setAssets] = useState<RecyclerAssetListSection[]>(null)
+  const [categorizedAssets, setCategorizedAssets] = useState<RecyclerAssetListSection[]>(null)
   const [isReady, setIsReady] = useState(false)
 
   // Get a custom hook to animate the header
@@ -47,10 +47,19 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     if (isReady) prepareAssets()
   }, [isReady])
   const prepareAssets = async () => {
-    console.log("prepareAssets")
     try {
-      const allMedias = await AssetService.getAllMedias()
-      setAssets(AssetService.categorizeAssets(allMedias.assets))
+      let first = 20;
+      const assetsArray=[]
+      let allMedias : MediaLibrary.PagedInfo<MediaLibrary.Asset>=null;
+      do {
+        allMedias = await AssetService.getMedias(first, allMedias?.endCursor);
+        assetsArray.push(...allMedias.assets);
+        setCategorizedAssets([...AssetService.categorizeAssets(assetsArray)]);
+        console.log("allMedias",assetsArray.length, allMedias.assets.length, allMedias.hasNextPage, allMedias.endCursor, assetsArray[assetsArray.length - 1]?.id)
+        if (!allMedias.hasNextPage)
+          break;
+        first = first * 4;
+      } while (true)
     } catch (error) {
       console.error("prepareAssets:", error)
     }
@@ -62,7 +71,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       style={styles.screen}
       backgroundColor={color.transparent}
     >
-      {!assets ? (<View style={styles.loaderContainer}>
+      {!categorizedAssets ? (<View style={styles.loaderContainer}>
         <LottieView
           autoPlay={true}
           loop={true}
@@ -70,10 +79,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         />
         <Text style={styles.loadingText}>Gathering photos</Text>
       </View>
-      ) : !assets?.length ? (
+      ) : !categorizedAssets?.length ? (
         <Text style={styles.emptyText}>Gallery is empty!</Text>
       ) : (
-        <AssetList sections={assets} scrollY={scrollY} navigation={navigation} />
+        <AssetList sections={categorizedAssets} scrollY={scrollY} navigation={navigation} />
       )}
     </Screen>
   )
@@ -89,16 +98,16 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     color: palette.lightGrey,
     fontSize: 16,
-    marginTop:250
+    marginTop: 250
   },
   screen: {
     backgroundColor: palette.white,
     flex: 1,
     justifyContent: "center",
   },
-  loaderContainer:{
-    flex:1,
-    justifyContent:"center",
-    alignContent:"center"
+  loaderContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignContent: "center"
   }
 })
