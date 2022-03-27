@@ -1,5 +1,5 @@
-import React, { memo } from 'react';
-import Reanimated, { Extrapolate, interpolate, SharedValue, useAnimatedStyle, ExtrapolationType } from 'react-native-reanimated';
+import React, { memo, useEffect, useRef, useState } from 'react';
+import Reanimated, { Extrapolate, interpolate, SharedValue, useAnimatedStyle, ExtrapolationType, useSharedValue } from 'react-native-reanimated';
 import GridLayoutProvider from './gridLayoutProvider';
 interface CellProps {
     layoutProvider: GridLayoutProvider
@@ -9,31 +9,22 @@ interface CellProps {
     scale: Reanimated.SharedValue<number>
     pinching: Reanimated.SharedValue<boolean>
     lastScrollY: SharedValue<number> | undefined;
-    dynamicScrollY: SharedValue<number> | undefined;
 }
 
 // eslint-disable-next-line react/display-name
-const Cell: React.FC<CellProps> = React.forwardRef(({ layoutProvider, columnNumber, index, scale, style, pinching, ...props }, ref) => {
-    const finalRangeValues = layoutProvider.getLayoutManager()?.getLayoutTransitionRangeForIndex(index, columnNumber);
-    const colsRange = finalRangeValues.colsRange;
+const Cell: React.FC<CellProps> = React.forwardRef(({ layoutProvider, columnNumber, index, scale, style, ...props }, ref) => {
+    const sharedFinalRangeValues = useSharedValue(null);
+    const timerId = useRef(null);
     const animationStyle = useAnimatedStyle(() => {
-
         const extrapolation = {
             extrapolateLeft: Extrapolate.CLAMP,
             extrapolateRight: Extrapolate.CLAMP,
         };
-        if (!pinching.value && scale.value === columnNumber) {
-            return {
-                transform: [
-                    {
-                        scale: 1
-                    }
-                ]
-            };
-        }
-
+        if (!sharedFinalRangeValues.value)
+            return {}
+        const finalRangeValues = sharedFinalRangeValues.value;
+        const colsRange = finalRangeValues.colsRange;
         if (colsRange.length) {
-
             if (colsRange.length === 1) return {};
 
             const finalScale = interpolate(scale.value, colsRange, finalRangeValues.scale);
@@ -60,7 +51,14 @@ const Cell: React.FC<CellProps> = React.forwardRef(({ layoutProvider, columnNumb
             }
         }
         return {}
-    })
+    }, [])
+    useEffect(() => {
+        clearTimeout(timerId.current)
+        timerId.current = setTimeout(() => {
+            timerId.current = null;
+            sharedFinalRangeValues.value = layoutProvider.getLayoutManager()?.getLayoutTransitionRangeForIndex(index, columnNumber);
+        }, 500);
+    }, [index])
     return (
         <Reanimated.View  {...props} style={[style, animationStyle]}>
             {props.children}
