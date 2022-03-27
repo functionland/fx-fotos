@@ -15,13 +15,13 @@ import GridProvider from './gridProvider/gridContext'
 import PinchZoom from './gridProvider/pinchZoom';
 
 import { RecyclerAssetListSection } from "../../types"
-import { StackNavigationProp } from "@react-navigation/stack"
+import { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { HomeNavigationParamList, HomeNavigationTypes } from "../../navigators/home-navigation"
 interface Props {
     refreshData: () => Promise<void>
     sections: RecyclerAssetListSection[]
     scrollY: SharedValue<number> | undefined
-    navigation: StackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>
+    navigation: NativeStackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>
 }
 
 const AssetList = ({ refreshData, sections, scrollY, navigation }: Props): JSX.Element => {
