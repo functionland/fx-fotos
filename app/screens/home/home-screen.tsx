@@ -10,10 +10,10 @@ import AssetList from "../../components/asset-list"
 import { RecyclerAssetListSection } from "../../types"
 import { useFloatHederAnimation } from "../../utils/hooks"
 import { palette } from "../../theme/palette"
-import { StackNavigationProp } from "@react-navigation/stack"
+import { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { HomeNavigationParamList, HomeNavigationTypes } from "../../navigators/home-navigation"
 interface HomeScreenProps {
-  navigation: StackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>
+  navigation: NativeStackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>
 }
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
