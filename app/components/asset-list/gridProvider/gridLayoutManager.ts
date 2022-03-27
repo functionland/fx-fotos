@@ -3,7 +3,7 @@ import Reanimated, { SharedValue } from "react-native-reanimated"
 import GridLayoutProvider from "./gridLayoutProvider"
 import { translateOrigin } from "../../../utils/helper"
 export const MAX_COLUMNS = 4
-export const MIN_COLUMNS = 2
+export const MIN_COLUMNS = 1
 export interface LayoutTransitionRange {
   colsRange: number[]
   translateX: number[]
@@ -33,7 +33,7 @@ export default class GridLayoutManager extends LayoutManager {
     this._totalHeight = { [columnsNumber.value]: 0 }
     this._totalWidth = { [columnsNumber.value]: 0 }
     this._columnNumber = columnsNumber
-    this._allLayouts = [[], [], []]
+    this._allLayouts = [[], [], [],[]]
     this._allLayouts[this._columnNumber.value - MIN_COLUMNS] = cachedLayouts ? cachedLayouts : []
   }
 
