@@ -32,13 +32,13 @@ import RecyclerSectionItem from "./asset-items/recycler-section-item"
 import ExternalScrollView from '../external-scroll-view'
 import Cell from '../gridProvider/cell'
 import { useColumnsNumber, useScale, usePinching } from '../gridProvider/gridContext';
-import { StackNavigationProp } from "@react-navigation/stack"
+import { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { HomeNavigationParamList, HomeNavigationTypes } from "../../../navigators/home-navigation"
 
 import GridLayoutProvider from '../gridProvider/gridLayoutProvider'
 import { LayoutTransitionRange, MIN_COLUMNS } from '../gridProvider/gridLayoutManager'
 export interface Props {
-  navigation: StackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>;
+  navigation: NativeStackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>;
   sections: RecyclerAssetListSection[];
   numCols: 2 | 3 | 4 | 5;
   scale?: SharedValue<number>,
@@ -66,11 +66,9 @@ const RecyclerAssetList = ({
   const rclRef = useRef<RecyclerListView>();
   const [numColumns] = useColumnsNumber();
   const lastScrollY = useSharedValue(scrollY.value);
-  const dyanmicScrollY = useSharedValue(scrollY.value);
   const scale1 = useScale();
   const pinching = usePinching();
   const [containerSize, setContainerSize] = useState<number[]>(null);
-  const [, setAllLayouts] = useState<Layout[][]>(null);
   const layoutTransitionRange = useSharedValue<LayoutTransitionRange>(null);
   const visibileIndices = useSharedValue<number[]>(null);
   const [currentColumns, setCurrentColumns] = useState(numColumns);
@@ -167,7 +165,7 @@ const RecyclerAssetList = ({
   const gridLayoutProvider = useMemo(() => (new GridLayoutProvider(numColumns, scale1, getLayoutType)), [getLayoutType])
   const renderItemContainer = useCallback((props: any, parentProps: any, children: React.ReactNode) => {
     return (
-      <Cell {...props} pinching={pinching} dynamicScrollY={dyanmicScrollY} lastScrollY={lastScrollY} scale={scale1} columnNumber={numColumns.value} layoutProvider={gridLayoutProvider} index={parentProps.index}>
+      <Cell {...props} pinching={pinching} lastScrollY={lastScrollY} scale={scale1} columnNumber={numColumns.value} layoutProvider={gridLayoutProvider} index={parentProps.index}>
         {children}
       </Cell>
     );
@@ -221,9 +219,7 @@ const RecyclerAssetList = ({
           extrapolateRight: Extrapolate.CLAMP,
         };
         const diffScrollY = interpolate(next.scaleValue, layoutTransitionRange.value.colsRange, layoutTransitionRange.value.translateY, extrapolation)
-        console.log("diffScrollY",next,prev)
         scrollTo?.(scrollRef, 0, diffScrollY + lastScrollY.value, false)
-        dyanmicScrollY.value = diffScrollY;
       }
     }
   );
@@ -248,7 +244,7 @@ const RecyclerAssetList = ({
   const forcRenderRCL = () => {
     console.log("forcRenderRCL", numColumns.value);
     rclRef.current?.getVirtualRenderer()?._prepareViewabilityTracker();
-    rclRef.current?._onScroll(0, dyanmicScrollY.value + lastScrollY.value)
+    //rclRef.current?._onScroll(0, dyanmicScrollY.value + lastScrollY.value)
     setCurrentColumns(numColumns.value)
   }
   return (
@@ -260,6 +256,7 @@ const RecyclerAssetList = ({
       rowRenderer={rowRenderer}
       externalScrollView={ExternalScrollView}
       scrollViewProps={{
+        disableScrollViewPanResponder: false,
         scrollRefExternal: scrollRef,
         _onScrollExternal: scrollHandler,
       }}
@@ -275,12 +272,7 @@ const RecyclerAssetList = ({
       renderItemContainer={renderItemContainer}
       renderContentContainer={(props, children) => {
         return (
-          <Animated.View {...props} style={[props.style, containerStyle]} onLayout={(event: LayoutChangeEvent) => {
-            if (!pinching.value) {
-              console.log("onLayout", event.nativeEvent.layout.height)
-              //forcRenderRCL();
-            }
-          }}>
+          <Animated.View {...props} style={[props.style, containerStyle]}>
             {children}
           </Animated.View>
         );
