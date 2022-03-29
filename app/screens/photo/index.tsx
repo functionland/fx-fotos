@@ -37,9 +37,9 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
   const translateX = useSharedValue(0)
   const translateY = useSharedValue(0)
   const imageScale = useSharedValue(1)
+  const animatedOpacity = useSharedValue(1)
   const isPanGestureActive = useSharedValue(false)
   const isPinchGestureActive = useSharedValue(false)
-  const animatedOpacity = useSharedValue(1)
   
   const wrapperAnimatedStyle = useAnimatedStyle(() => {
     return {
@@ -52,8 +52,8 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
   const animatedStyle = useAnimatedStyle(() => {
     const scale = interpolate(translateY.value, [0, height], [1, 0.5], Extrapolate.CLAMP)
     return {
-      alignItems: "center",
       flex: 1,
+      alignItems: "center",
       justifyContent: "center",
       transform: [{ translateX: translateX.value }, { translateY: translateY.value }, { scale }],
     }
@@ -63,15 +63,22 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
   }
   const onPanGesture = useAnimatedGestureHandler({
     onStart: () => {
-      if (isPanGestureActive.value) return
+      if (isPanGestureActive.value) {
+        return
+      } 
       isPanGestureActive.value = true
     },
     onActive: ({ translationX, translationY }) => {
       translateX.value = translationX
       translateY.value = translationY
+      if (!isPinchGestureActive) {
       animatedOpacity.value = interpolate(translationY, [0, 400], [1, 0.5], Extrapolate.CLAMP)
+      }
     },
     onEnd: ({ velocityY }) => {
+      if (isPinchGestureActive) {
+        return
+      }
       const shouldGoBack = snapPoint(translateY.value, velocityY, [0, height]) === height
       if (shouldGoBack) {
         runOnJS(goBack)();
@@ -99,11 +106,21 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
       animatedOpacity.value = interpolate(imageScale.value, [1, 0.5], [1, 0], Extrapolate.CLAMP)
     },
     onEnd: ({ scale }) => {
+      if (scale > 1) {
+        imageScale.value = scale;
+        return;
+      }
       if (scale > 0.5) {
         imageScale.value = withTiming(1, { duration: 100 })
         animatedOpacity.value = withTiming(1, { duration: 100 })
       }
+      imageScale.value = scale
     },
+    onFinish: ({scale}) => {
+      if (scale < 0.7) {
+        runOnJS(goBack)()
+      }
+    }
   })
   const imageContainerStyle= {
     height: (widthPercentageToDP(100) * img.height)/img.width,
