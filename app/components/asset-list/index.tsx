@@ -11,8 +11,8 @@ import Animated, {
 } from "react-native-reanimated"
 
 import RecyclerAssetList from './recycler-asset-list';
-import GridProvider from './gridProvider/gridContext'
-import PinchZoom from './gridProvider/pinchZoom';
+import GridProvider from './grid-provider/gridContext'
+import PinchZoom from './grid-provider/pinchZoom';
 
 import { RecyclerAssetListSection } from "../../types"
 import { NativeStackNavigationProp } from "@react-navigation/native-stack"

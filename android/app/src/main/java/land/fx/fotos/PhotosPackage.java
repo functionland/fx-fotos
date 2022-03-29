@@ -1,14 +1,15 @@
 
 // ./android/app/src/main/java/com/myapp/PhotosPackage.java
-package com.photos;
+package land.fx.fotos;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.uimanager.ViewManager;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+
+import land.fx.fotos.ColoLoco;
 
 public class PhotosPackage implements ReactPackage {
     @Override

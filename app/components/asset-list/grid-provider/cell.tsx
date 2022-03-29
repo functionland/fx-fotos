@@ -1,5 +1,6 @@
 import React, { memo, useEffect, useRef, useState } from 'react';
-import Reanimated, { Extrapolate, interpolate, SharedValue, useAnimatedStyle, ExtrapolationType, useSharedValue } from 'react-native-reanimated';
+import { Animated, StyleSheet } from "react-native"
+import Reanimated, { Extrapolate, interpolate, SharedValue, useAnimatedStyle, ExtrapolationType, useSharedValue, withTiming, Easing } from 'react-native-reanimated';
 import GridLayoutProvider from './gridLayoutProvider';
 interface CellProps {
     layoutProvider: GridLayoutProvider
@@ -14,6 +15,7 @@ interface CellProps {
 // eslint-disable-next-line react/display-name
 const Cell: React.FC<CellProps> = React.forwardRef(({ layoutProvider, columnNumber, index, scale, style, ...props }, ref) => {
     const sharedFinalRangeValues = useSharedValue(null);
+    const opacity = useRef<Animated.Value>(new Animated.Value(1)).current;
     const timerId = useRef(null);
     const animationStyle = useAnimatedStyle(() => {
         const extrapolation = {
@@ -52,20 +54,29 @@ const Cell: React.FC<CellProps> = React.forwardRef(({ layoutProvider, columnNumb
         }
         return {}
     }, [])
+    opacity.setValue(0);
     useEffect(() => {
         clearTimeout(timerId.current)
         timerId.current = setTimeout(() => {
             timerId.current = null;
             sharedFinalRangeValues.value = layoutProvider.getLayoutManager()?.getLayoutTransitionRangeForIndex(index, columnNumber);
-        }, 500);
+            opacity.setValue(1);
+        }, 50);
     }, [index])
     return (
         <Reanimated.View  {...props} style={[style, animationStyle]}>
-            {props.children}
+            <Animated.View style={[styles.internalContainer, { opacity: opacity }]}>
+                {props.children}
+            </Animated.View>
         </Reanimated.View >
     );
 })
 const areEqual = (prev: Props, next: Props) => {
     return (prev.index === next.index) || (prev?.pinching.value === true && next.pinching.value === true)
 }
+const styles = StyleSheet.create({
+    internalContainer: {
+        flex: 1
+    }
+});
 export default memo(Cell, areEqual);
