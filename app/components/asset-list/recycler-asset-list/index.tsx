@@ -30,13 +30,13 @@ import { RecyclerAssetListSection, ViewType, GroupHeader } from "../../../types"
 import deviceUtils from '../../../utils/deviceUtils'
 import RecyclerSectionItem from "./asset-items/recycler-section-item"
 import ExternalScrollView from '../external-scroll-view'
-import Cell from '../gridProvider/cell'
-import { useColumnsNumber, useScale, usePinching } from '../gridProvider/gridContext';
+import Cell from '../grid-provider/cell'
+import { useColumnsNumber, useScale, usePinching } from '../grid-provider/gridContext';
 import { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { HomeNavigationParamList, HomeNavigationTypes } from "../../../navigators/home-navigation"
 
-import GridLayoutProvider from '../gridProvider/gridLayoutProvider'
-import { LayoutTransitionRange, MIN_COLUMNS } from '../gridProvider/gridLayoutManager'
+import GridLayoutProvider from '../grid-provider/gridLayoutProvider'
+import { LayoutTransitionRange, MIN_COLUMNS } from '../grid-provider/gridLayoutManager'
 export interface Props {
   navigation: NativeStackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>;
   sections: RecyclerAssetListSection[];
