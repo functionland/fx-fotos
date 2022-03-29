@@ -1,4 +1,4 @@
-package com.photos;
+package land.fx.fotos;
 
 import com.facebook.react.ReactActivity;
 
@@ -16,7 +16,7 @@ public class MainActivity extends ReactActivity {
    */
   @Override
   protected String getMainComponentName() {
-    return "photos";
+    return "fotos";
   }
   @Override
   protected void onCreate(Bundle savedInstanceState) {

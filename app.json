@@ -1,9 +1,9 @@
 {
-  "name": "photos",
-  "displayName": "photos",
+  "name": "fotos",
+  "displayName": "fotos",
   "expo": {
-    "name": "photos",
-    "slug": "photos",
+    "name": "fotos",
+    "slug": "fotos",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",

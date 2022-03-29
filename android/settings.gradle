@@ -8,12 +8,12 @@ project(':react-native-shared-element').projectDir = new File(rootProject.projec
 // linkColocatedNativeFiles([
 //   appName: "Photos",
 //   appPath: "../app",
-//   appPackageName: "com.photos",
-//   androidPath: "./android/app/src/main/java/com/photos"
+//   appPackageName: "land.fx.fotos",
+//   androidPath: "./android/app/src/main/java/land/fx/fotos"
 // ])
 
 
-rootProject.name = 'photos'
+rootProject.name = 'fotos'
 apply from: new File(["node", "--print", "require.resolve('expo/package.json')"].execute().text.trim(), "../scripts/autolinking.gradle");
 useExpoModules()
 

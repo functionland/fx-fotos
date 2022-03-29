@@ -15,7 +15,7 @@ platform :ios, '12.0'
 require 'json'
 podfile_properties = JSON.parse(File.read('./Podfile.properties.json')) rescue {}
 
-target 'photos' do
+target 'fotos' do
   use_expo_modules!
   config = use_native_modules!
 
