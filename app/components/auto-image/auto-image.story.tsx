@@ -6,7 +6,7 @@ import { AutoImage } from "./auto-image"
 
 declare let module
 
-const bowser = require("../../../assets/images/icon.png")
+const bowser = require("../../../assets/images/logo.png")
 const morty = { uri: "https://rickandmortyapi.com/api/character/avatar/2.jpeg" }
 
 storiesOf("AutoImage", module)
