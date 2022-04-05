@@ -18,7 +18,7 @@ Note: Project is still in alpha phase and not production ready. We aim to releas
 
 ## Project Description
 
-![](https://github.com/functionland/photos/blob/main/assets/images/Photos-integrations.png)
+![](https://github.com/functionland/photos/blob/main_old/assets/images/Photos-integrations.png)
 
 Photos is a react-native(expo)+typescript application to replace Google Photos/Apple Photos, and give freedom in hosting your photos on any platform, either centralized servers like Amazon or Microsoft, or decentralized solutions such as Dfinity or IPFS-based "box". It is optimized for decentralized platforms, but is backend agnostic. Your can easily use it with the IPFS-based "box" or "Dfinity" to host your files and photos with the same experience you had using Google Photos, however, with full privacy.
 
@@ -39,15 +39,15 @@ Checkout full demo video at: https://youtu.be/wDxaC1HF5PQ
 
 Or checkout individual features below:
 - Pinch/zoom to switch between modes: 
-- ![https://youtu.be/ioK0zkew--w](https://github.com/functionland/photos/blob/main/assets/demo/BOX_Photos_pinchzoom_to_switch_between_modes.gif)
+- ![https://youtu.be/ioK0zkew--w](https://github.com/functionland/photos/blob/main_old/assets/demo/BOX_Photos_pinchzoom_to_switch_between_modes.gif)
 - Opening a single image in fullscreen mode: 
-- ![https://youtu.be/jPVqxPoNH9M](https://github.com/functionland/photos/blob/main/assets/demo/Single%20image%20modal%20scroll%20and%20zoom.gif)
+- ![https://youtu.be/jPVqxPoNH9M](https://github.com/functionland/photos/blob/main_old/assets/demo/Single%20image%20modal%20scroll%20and%20zoom.gif)
 - Header animation(hide on scroll down and show on scroll up): 
-- ![https://youtu.be/qjfiukClHqQ](https://github.com/functionland/photos/blob/main/assets/demo/Header%20hide%20on%20scroll%20down%20and%20show%20on%20scroll%20up.gif)
+- ![https://youtu.be/qjfiukClHqQ](https://github.com/functionland/photos/blob/main_old/assets/demo/Header%20hide%20on%20scroll%20down%20and%20show%20on%20scroll%20up.gif)
 - Highlights/Story: 
-- ![https://youtu.be/yEOnDtT3cX0](https://github.com/functionland/photos/blob/main/assets/demo/Highlights.gif)
+- ![https://youtu.be/yEOnDtT3cX0](https://github.com/functionland/photos/blob/main_old/assets/demo/Highlights.gif)
 - Fast scroll/Thumb scroll feature: 
-- ![https://youtu.be/QsDzOGyj9cM](https://github.com/functionland/photos/blob/main/assets/demo/Fast%20scroll_thumb%20scroll.gif))
+- ![https://youtu.be/QsDzOGyj9cM](https://github.com/functionland/photos/blob/main_old/assets/demo/Fast%20scroll_thumb%20scroll.gif))
 - Image Edit feature
 - ![https://youtu.be/SDyCdE_aUso](https://github.com/functionland/photos/blob/0c52d3a1d73f3bfe045d939eef324270b1cd7f73/assets/demo/imageEdit.gif)
 - Image select feature
