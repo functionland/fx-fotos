@@ -16,7 +16,6 @@ interface CellProps {
 const Cell: React.FC<CellProps> = React.forwardRef(({ layoutProvider, columnNumber, index, scale, style, ...props }, ref) => {
     const sharedFinalRangeValues = useSharedValue(null);
     const externalStyle = useSharedValue<ViewStyle>(style);
-    const timerId = useRef(null);
     const animationStyle = useAnimatedStyle(() => {
         const extrapolation = {
             extrapolateLeft: Extrapolate.CLAMP,
@@ -61,16 +60,7 @@ const Cell: React.FC<CellProps> = React.forwardRef(({ layoutProvider, columnNumb
     }, [layoutProvider])
 
     useEffect(() => {
-        if (!timerId.current) {
-            updateDependencies(index, columnNumber, style);
-        } else {
-            clearTimeout(timerId.current)
-            timerId.current = setTimeout(() => {
-                timerId.current = null;
-                updateDependencies(index, columnNumber, style);
-            }, 50);
-        }
-
+        updateDependencies(index, columnNumber, style);
     }, [index])
 
     return (
