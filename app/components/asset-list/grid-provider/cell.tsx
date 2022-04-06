@@ -1,10 +1,10 @@
-import React, { memo, useEffect, useRef, useState } from 'react';
-import { Animated, StyleSheet } from "react-native"
+import React, { memo, useEffect, useRef, useCallback } from 'react';
+import { ViewStyle } from "react-native"
 import Reanimated, { Extrapolate, interpolate, SharedValue, useAnimatedStyle, ExtrapolationType, useSharedValue, withTiming, Easing } from 'react-native-reanimated';
 import GridLayoutProvider from './gridLayoutProvider';
 interface CellProps {
     layoutProvider: GridLayoutProvider
-    style: any,
+    style: ViewStyle,
     index: number,
     columnNumber: number,
     scale: Reanimated.SharedValue<number>
@@ -15,19 +15,18 @@ interface CellProps {
 // eslint-disable-next-line react/display-name
 const Cell: React.FC<CellProps> = React.forwardRef(({ layoutProvider, columnNumber, index, scale, style, ...props }, ref) => {
     const sharedFinalRangeValues = useSharedValue(null);
-    const opacity = useRef<Animated.Value>(new Animated.Value(1)).current;
-    const timerId = useRef(null);
+    const externalStyle = useSharedValue<ViewStyle>(style);
     const animationStyle = useAnimatedStyle(() => {
         const extrapolation = {
             extrapolateLeft: Extrapolate.CLAMP,
             extrapolateRight: Extrapolate.CLAMP,
         };
         if (!sharedFinalRangeValues.value)
-            return {}
+            return { ...externalStyle.value }
         const finalRangeValues = sharedFinalRangeValues.value;
         const colsRange = finalRangeValues.colsRange;
         if (colsRange.length) {
-            if (colsRange.length === 1) return {};
+            if (colsRange.length === 1) return { ...externalStyle.value };
 
             const finalScale = interpolate(scale.value, colsRange, finalRangeValues.scale);
             const finalTranslateY = interpolate(
@@ -38,6 +37,7 @@ const Cell: React.FC<CellProps> = React.forwardRef(({ layoutProvider, columnNumb
             );
 
             return {
+                ...externalStyle.value,
                 transform: [{
                     translateX: interpolate(
                         scale.value,
@@ -52,31 +52,25 @@ const Cell: React.FC<CellProps> = React.forwardRef(({ layoutProvider, columnNumb
                 }]
             }
         }
-        return {}
+        return { ...externalStyle.value }
     }, [])
-    opacity.setValue(0);
+    const updateDependencies = useCallback((index, columnNumber, style) => {
+        sharedFinalRangeValues.value = layoutProvider.getLayoutManager()?.getLayoutTransitionRangeForIndex(index, columnNumber);
+        externalStyle.value = style;
+    }, [layoutProvider])
+
     useEffect(() => {
-        clearTimeout(timerId.current)
-        timerId.current = setTimeout(() => {
-            timerId.current = null;
-            sharedFinalRangeValues.value = layoutProvider.getLayoutManager()?.getLayoutTransitionRangeForIndex(index, columnNumber);
-            opacity.setValue(1);
-        }, 50);
+        updateDependencies(index, columnNumber, style);
     }, [index])
+
     return (
-        <Reanimated.View  {...props} style={[style, animationStyle]}>
-            <Animated.View style={[styles.internalContainer, { opacity: opacity }]}>
-                {props.children}
-            </Animated.View>
+        <Reanimated.View ref={ref} {...props} style={animationStyle}>
+            {props.children}
         </Reanimated.View >
     );
 })
 const areEqual = (prev: Props, next: Props) => {
     return (prev.index === next.index) || (prev?.pinching.value === true && next.pinching.value === true)
 }
-const styles = StyleSheet.create({
-    internalContainer: {
-        flex: 1
-    }
-});
+
 export default memo(Cell, areEqual);
