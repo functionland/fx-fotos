@@ -81,17 +81,21 @@ export const categorizeAssets = (assets: MediaLibrary.Asset[]) => {
 
 export const getMedias = async (
   pageSize = 100,
-  afterAssetId :string,
+  afterAssetId: string,
 ): Promise<MediaLibrary.PagedInfo<MediaLibrary.Asset>> => {
   try {
-    const medias = await MediaLibrary.getAssetsAsync(afterAssetId?{
-      first: pageSize,
-      after: afterAssetId,
-      sortBy: "creationTime",
-    }:{
-      first: pageSize,
-      sortBy: "creationTime",
-    })
+    const medias = await MediaLibrary.getAssetsAsync(
+      afterAssetId
+        ? {
+            first: pageSize,
+            after: afterAssetId,
+            sortBy: "creationTime",
+          }
+        : {
+            first: pageSize,
+            sortBy: "creationTime",
+          },
+    )
     return medias
   } catch (error) {
     console.error("error", error)

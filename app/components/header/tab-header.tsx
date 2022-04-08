@@ -1,6 +1,5 @@
 import React from "react"
 import { View, Image, StyleSheet } from "react-native"
-import FontAwesome5 from "react-native-vector-icons/FontAwesome5"
 import { BottomTabHeaderProps } from "@react-navigation/bottom-tabs"
 import { getFocusedRouteNameFromRoute } from "@react-navigation/native"
 
@@ -8,7 +7,7 @@ import { Text } from "../text"
 import { palette, Constants } from "../../theme"
 import { HomeNavigationTypes } from "../../navigators/home-navigation"
 
-interface Props extends BottomTabHeaderProps {}
+type Props = BottomTabHeaderProps
 
 export const TabHeader = ({ route, options, ...props }: Props) => {
   const routeName = getFocusedRouteNameFromRoute(route)

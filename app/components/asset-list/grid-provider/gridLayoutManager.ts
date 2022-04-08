@@ -1,4 +1,4 @@
-import { Dimension, Layout, LayoutManager } from 'fula-recyclerlistview'
+import { Dimension, Layout, LayoutManager } from "fula-recyclerlistview"
 import Reanimated, { SharedValue } from "react-native-reanimated"
 import GridLayoutProvider from "./gridLayoutProvider"
 import { translateOrigin } from "../../../utils/helper"
@@ -33,7 +33,7 @@ export default class GridLayoutManager extends LayoutManager {
     this._totalHeight = { [columnsNumber.value]: 0 }
     this._totalWidth = { [columnsNumber.value]: 0 }
     this._columnNumber = columnsNumber
-    this._allLayouts = [[], [], [],[]]
+    this._allLayouts = [[], [], [], []]
     this._allLayouts[this._columnNumber.value - MIN_COLUMNS] = cachedLayouts ? cachedLayouts : []
   }
 
@@ -59,7 +59,7 @@ export default class GridLayoutManager extends LayoutManager {
   public getLayouts(): Layout[] {
     return this._allLayouts[this._columnNumber.value - MIN_COLUMNS]
   }
-  
+
   public getAllLayouts(): Layout[][] {
     return this._allLayouts
   }
@@ -105,7 +105,7 @@ export default class GridLayoutManager extends LayoutManager {
         translateX: [],
         translateY: [],
         scale: [],
-        colsRange
+        colsRange,
       },
     )
   }

@@ -1,3 +1,3 @@
 export const translateOrigin = (center: number, d: number) => {
-    return center - d / 2;
+  return center - d / 2
 }

@@ -129,7 +129,7 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
       imageScale.value = withTiming(1.5, { duration: 150 })
     } else {
       imageScale.value = withTiming(1, { duration: 150 })
-    } 
+    }
   }
 
   const imageContainerStyle = {
