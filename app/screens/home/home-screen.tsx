@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react"
 import { StyleSheet, Text, Alert, View } from "react-native"
 import * as MediaLibrary from "expo-media-library"
-import LottieView from 'lottie-react-native';
+import LottieView from "lottie-react-native"
 
 import { Screen } from "../../components"
 import { AssetService } from "../../services"
@@ -39,26 +39,31 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   }, [])
   useEffect(() => {
     navigation.setOptions({
-      headerStyle: [{
-      }, headerStyles]
+      headerStyle: [{}, headerStyles],
     })
-  }, []);
+  }, [])
   useEffect(() => {
     if (isReady) prepareAssets()
   }, [isReady])
   const prepareAssets = async () => {
     try {
-      let first = 20;
-      const assetsArray=[]
-      let allMedias : MediaLibrary.PagedInfo<MediaLibrary.Asset>=null;
+      let first = 20
+      const assetsArray = []
+      let allMedias: MediaLibrary.PagedInfo<MediaLibrary.Asset> = null
       do {
-        allMedias = await AssetService.getMedias(first, allMedias?.endCursor);
-        assetsArray.push(...allMedias.assets);
-        setCategorizedAssets([...AssetService.categorizeAssets(assetsArray)]);
-        console.log("allMedias",assetsArray.length, allMedias.assets.length, allMedias.hasNextPage, allMedias.endCursor, assetsArray[assetsArray.length - 1]?.id)
-        if (!allMedias.hasNextPage)
-          break;
-        first = first * 4;
+        allMedias = await AssetService.getMedias(first, allMedias?.endCursor)
+        assetsArray.push(...allMedias.assets)
+        setCategorizedAssets([...AssetService.categorizeAssets(assetsArray)])
+        console.log(
+          "allMedias",
+          assetsArray.length,
+          allMedias.assets.length,
+          allMedias.hasNextPage,
+          allMedias.endCursor,
+          assetsArray[assetsArray.length - 1]?.id,
+        )
+        if (!allMedias.hasNextPage) break
+        first = first * 4
       } while (true)
     } catch (error) {
       console.error("prepareAssets:", error)
@@ -71,14 +76,15 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       style={styles.screen}
       backgroundColor={color.transparent}
     >
-      {!categorizedAssets ? (<View style={styles.loaderContainer}>
-        <LottieView
-          autoPlay={true}
-          loop={true}
-          source={require('../../../assets/lotties/photo-loading.json')}
-        />
-        <Text style={styles.loadingText}>Gathering photos</Text>
-      </View>
+      {!categorizedAssets ? (
+        <View style={styles.loaderContainer}>
+          <LottieView
+            autoPlay={true}
+            loop={true}
+            source={require("../../../assets/lotties/photo-loading.json")}
+          />
+          <Text style={styles.loadingText}>Gathering photos</Text>
+        </View>
       ) : !categorizedAssets?.length ? (
         <Text style={styles.emptyText}>Gallery is empty!</Text>
       ) : (
@@ -98,7 +104,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     color: palette.lightGrey,
     fontSize: 16,
-    marginTop: 250
+    marginTop: 250,
   },
   screen: {
     backgroundColor: palette.white,
@@ -108,6 +114,6 @@ const styles = StyleSheet.create({
   loaderContainer: {
     flex: 1,
     justifyContent: "center",
-    alignContent: "center"
-  }
+    alignContent: "center",
+  },
 })

@@ -59,7 +59,6 @@ const RecyclerSectionItem: React.FC<Props> = ({
   onLongPress,
   onPress,
 }) => {
-
   const onPressItem = () => {
     if (onPress) {
       setTimeout(() => {

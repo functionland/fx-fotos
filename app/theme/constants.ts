@@ -1,4 +1,4 @@
 export enum Constants {
-    HeaderHeight = 60,
-    TabBarHeight = 70
+  HeaderHeight = 60,
+  TabBarHeight = 70,
 }

@@ -5,7 +5,7 @@ const { height, width } = Dimensions.get("window")
 const deviceUtils: {
   iPhoneXHeight: number
   iPhoneXWidth: number
-  iPhone6Height: numnber
+  iPhone6Height: number
   iphoneSEHeight: number
   isNarrowPhone: boolean
   isSmallPhone: boolean
@@ -30,12 +30,11 @@ deviceUtils.isLargePhone = width >= deviceUtils.iPhoneXWidth
 
 deviceUtils.isTallPhone = height >= deviceUtils.iPhoneXHeight
 deviceUtils.isTinyPhone = height <= deviceUtils.iphoneSEHeight
-deviceUtils.isIOS14 = Platform.OS==="ios" && parseFloat(Platform.Version) >= 14
+deviceUtils.isIOS14 = Platform.OS === "ios" && parseFloat(Platform.Version.toString()) >= 14
 
 deviceUtils.dimensions = {
   height,
   width,
 }
-
 
 export default deviceUtils

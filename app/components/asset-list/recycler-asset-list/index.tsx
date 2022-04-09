@@ -1,54 +1,41 @@
-
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
-import { StatusBar, NativeSyntheticEvent, NativeScrollEvent, LayoutChangeEvent, StyleSheet } from "react-native"
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import {
+  NativeSyntheticEvent,
+  NativeScrollEvent,
+} from "react-native"
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   interpolate,
-  Transition,
   scrollTo,
   runOnJS,
   useAnimatedReaction,
-  Extrapolate
-} from 'react-native-reanimated';
-import {
-  DataProvider,
-  LayoutProvider,
-  RecyclerListView,
-  Layout
-} from 'fula-recyclerlistview';
-import { useNavigation } from '@react-navigation/native';
+  Extrapolate,
+} from "react-native-reanimated"
+import { DataProvider, RecyclerListView } from "fula-recyclerlistview"
 
 import { RecyclerAssetListSection, ViewType, GroupHeader } from "../../../types"
-import deviceUtils from '../../../utils/deviceUtils'
 import RecyclerSectionItem from "./asset-items/recycler-section-item"
-import ExternalScrollView from '../external-scroll-view'
-import Cell from '../grid-provider/cell'
-import { useColumnsNumber, useScale, usePinching } from '../grid-provider/gridContext';
+import ExternalScrollView from "../external-scroll-view"
+import Cell from "../grid-provider/cell"
+import { useColumnsNumber, useScale, usePinching } from "../grid-provider/gridContext"
 import { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { HomeNavigationParamList, HomeNavigationTypes } from "../../../navigators/home-navigation"
 
-import GridLayoutProvider from '../grid-provider/gridLayoutProvider'
-import { LayoutTransitionRange, MIN_COLUMNS } from '../grid-provider/gridLayoutManager'
+import GridLayoutProvider from "../grid-provider/gridLayoutProvider"
+import { LayoutTransitionRange } from "../grid-provider/gridLayoutManager"
 export interface Props {
-  navigation: NativeStackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>;
-  sections: RecyclerAssetListSection[];
-  numCols: 2 | 3 | 4 | 5;
-  scale?: SharedValue<number>,
-  renderAheadOffset?: number;
-  disableAutoScrolling?: boolean;
-  disableRefreshControl?: boolean;
-  scrollRef?: any,
-  scrollHandler: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
-  scrollY: SharedValue<number> | undefined;
-};
+  navigation: NativeStackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>
+  sections: RecyclerAssetListSection[]
+  numCols: 2 | 3 | 4 | 5
+  scale?: SharedValue<number>
+  renderAheadOffset?: number
+  disableAutoScrolling?: boolean
+  disableRefreshControl?: boolean
+  scrollRef?: any
+  scrollHandler: (event: NativeSyntheticEvent<NativeScrollEvent>) => void
+  scrollY: SharedValue<number> | undefined
+}
 
 export interface ExtendedState {
   selectedGroups: { [key: string]: boolean }
@@ -63,21 +50,21 @@ const RecyclerAssetList = ({
   scrollY,
   ...extras
 }: Props): JSX.Element => {
-  const rclRef = useRef<RecyclerListView>();
-  const [numColumns] = useColumnsNumber();
-  const lastScrollY = useSharedValue(scrollY.value);
-  const scale1 = useScale();
-  const pinching = usePinching();
-  const [containerSize, setContainerSize] = useState<number[]>(null);
-  const layoutTransitionRange = useSharedValue<LayoutTransitionRange>(null);
-  const visibileIndices = useSharedValue<number[]>(null);
-  const [currentColumns, setCurrentColumns] = useState(numColumns);
+  const rclRef = useRef<RecyclerListView>()
+  const [numColumns] = useColumnsNumber()
+  const lastScrollY = useSharedValue(scrollY.value)
+  const scale1 = useScale()
+  const pinching = usePinching()
+  const [containerSize, setContainerSize] = useState<number[]>(null)
+  const layoutTransitionRange = useSharedValue<LayoutTransitionRange>(null)
+  const visibileIndices = useSharedValue<number[]>(null)
+  const [currentColumns, setCurrentColumns] = useState(numColumns)
 
   const [extendedState, setExtendedState] = useState<ExtendedState>({
     selectedAssets: {},
     selectedGroups: {},
     selectionMode: false,
-  });
+  })
 
   const toggleSelectionMode = () => {
     setExtendedState((prevState) => {
@@ -86,8 +73,8 @@ const RecyclerAssetList = ({
         selectedAssets: {},
         selectionMode: !prevState.selectionMode,
       }
-    });
-  };
+    })
+  }
 
   const toggleSelection = (section: RecyclerAssetListSection) => {
     setExtendedState((prevState) => {
@@ -128,8 +115,7 @@ const RecyclerAssetList = ({
   const onPress = useCallback((section: RecyclerAssetListSection) => {
     if (!extendedState.selectionMode && section.type === ViewType.ASSET) {
       navigation.push(HomeNavigationTypes.PhotoScreen, { section: section })
-    } else
-      toggleSelection(section)
+    } else toggleSelection(section)
   }, [])
 
   const rowRenderer = useCallback(
@@ -155,23 +141,40 @@ const RecyclerAssetList = ({
         />
       )
     },
-    []
-  );
+    [],
+  )
 
-  const getLayoutType = useCallback((index) => {
-    return sections[index].type
-  }, [sections])
+  const getLayoutType = useCallback(
+    (index) => {
+      return sections[index].type
+    },
+    [sections],
+  )
 
-  const gridLayoutProvider = useMemo(() => (new GridLayoutProvider(numColumns, scale1, getLayoutType)), [getLayoutType])
-  const renderItemContainer = useCallback((props: any, parentProps: any, children: React.ReactNode) => {
-    return (
-      <Cell {...props} pinching={pinching} lastScrollY={lastScrollY} scale={scale1} columnNumber={numColumns.value} layoutProvider={gridLayoutProvider} index={parentProps.index}>
-        {children}
-      </Cell>
-    );
-  }, [gridLayoutProvider])
+  const gridLayoutProvider = useMemo(
+    () => new GridLayoutProvider(numColumns, scale1, getLayoutType),
+    [getLayoutType],
+  )
+  const renderItemContainer = useCallback(
+    (props: any, parentProps: any, children: React.ReactNode) => {
+      return (
+        <Cell
+          {...props}
+          pinching={pinching}
+          lastScrollY={lastScrollY}
+          scale={scale1}
+          columnNumber={numColumns.value}
+          layoutProvider={gridLayoutProvider}
+          index={parentProps.index}
+        >
+          {children}
+        </Cell>
+      )
+    },
+    [gridLayoutProvider],
+  )
 
-  gridLayoutProvider.shouldRefreshWithAnchoring = false;
+  gridLayoutProvider.shouldRefreshWithAnchoring = false
 
   const dataProvider = useMemo(() => {
     console.log("dataProvider", sections?.length)
@@ -182,68 +185,83 @@ const RecyclerAssetList = ({
     provider = provider.cloneWithRows(sections)
     // provider.getStableId = index => sections[index].id;
     console.log("provider.getSize()", provider.getSize())
-    return provider;
-  }, [sections]);
+    return provider
+  }, [sections])
 
   const animatedReactionWrapper = () => {
-    forcRenderRCL();
-  };
+    forcRenderRCL()
+  }
   useEffect(() => {
-    const heights = Object.values(gridLayoutProvider.getLayoutManager?.()?.getAllContentDimension()?.height||{});
+    const heights = Object.values(
+      gridLayoutProvider.getLayoutManager?.()?.getAllContentDimension()?.height || {},
+    )
     if (heights.length) {
-      setContainerSize(heights);
+      setContainerSize(heights)
     }
-  }, [gridLayoutProvider]);
-  useAnimatedReaction(() => {
-    return { pinchingValue: pinching.value, numColumnsValue: numColumns.value };
-  }, (next, prev) => {
-
-    if (prev && !(next.pinchingValue && !prev?.pinchingValue) && next.numColumnsValue !== prev?.numColumnsValue) {
-      runOnJS(animatedReactionWrapper)();
-    }
-  });
+  }, [gridLayoutProvider])
+  useAnimatedReaction(
+    () => {
+      return { pinchingValue: pinching.value, numColumnsValue: numColumns.value }
+    },
+    (next, prev) => {
+      if (
+        prev &&
+        !(next.pinchingValue && !prev?.pinchingValue) &&
+        next.numColumnsValue !== prev?.numColumnsValue
+      ) {
+        runOnJS(animatedReactionWrapper)()
+      }
+    },
+  )
 
   useAnimatedReaction(
     () => {
       return { scaleValue: scale1.value, pinchingValue: pinching.value }
     },
     (next, prev) => {
-      if (!next.pinchingValue && !prev?.pinchingValue)
-        return;
-      if (next.pinchingValue && !prev?.pinchingValue)
-        lastScrollY.value = scrollY.value;
+      if (!next.pinchingValue && !prev?.pinchingValue) return
+      if (next.pinchingValue && !prev?.pinchingValue) lastScrollY.value = scrollY.value
 
       if (layoutTransitionRange.value) {
         const extrapolation = {
           extrapolateLeft: Extrapolate.CLAMP,
           extrapolateRight: Extrapolate.CLAMP,
-        };
-        const diffScrollY = interpolate(next.scaleValue, layoutTransitionRange.value.colsRange, layoutTransitionRange.value.translateY, extrapolation)
+        }
+        const diffScrollY = interpolate(
+          next.scaleValue,
+          layoutTransitionRange.value.colsRange,
+          layoutTransitionRange.value.translateY,
+          extrapolation,
+        )
         scrollTo?.(scrollRef, 0, diffScrollY + lastScrollY.value, false)
       }
-    }
-  );
+    },
+  )
   const containerStyle = useAnimatedStyle(() => {
     let style = {}
 
-    if (!containerSize || !layoutTransitionRange.value)
-      return style;
+    if (!containerSize || !layoutTransitionRange.value) return style
     const extrapolation = {
       extrapolateLeft: Extrapolate.CLAMP,
       extrapolateRight: Extrapolate.CLAMP,
-    };
+    }
 
     style = {
-      height: interpolate(scale1.value, layoutTransitionRange.value.colsRange, containerSize, extrapolation)
+      height: interpolate(
+        scale1.value,
+        layoutTransitionRange.value.colsRange,
+        containerSize,
+        extrapolation,
+      ),
     }
-    return style;
+    return style
   }, [containerSize])
 
   console.log("Render: Recycle-Asset-List", currentColumns)
 
   const forcRenderRCL = () => {
-    console.log("forcRenderRCL", numColumns.value);
-    rclRef.current?.getVirtualRenderer()?._prepareViewabilityTracker();
+    console.log("forcRenderRCL", numColumns.value)
+    rclRef.current?.getVirtualRenderer()?._prepareViewabilityTracker()
     //rclRef.current?._onScroll(0, dyanmicScrollY.value + lastScrollY.value)
     setCurrentColumns(numColumns.value)
   }
@@ -261,10 +279,12 @@ const RecyclerAssetList = ({
         _onScrollExternal: scrollHandler,
       }}
       onVisibleIndicesChanged={(all = [], now, notNow) => {
-        const visibleIndexValue = all[Math.floor(all.length / 2)] || 0;
+        const visibleIndexValue = all[Math.floor(all.length / 2)] || 0
         if (!pinching.value && all && all.length) {
-          visibileIndices.value = [...all];
-          layoutTransitionRange.value = gridLayoutProvider.getLayoutManager()?.getLayoutTransitionRangeForIndex(visibleIndexValue, numColumns.value)
+          visibileIndices.value = [...all]
+          layoutTransitionRange.value = gridLayoutProvider
+            .getLayoutManager()
+            ?.getLayoutTransitionRangeForIndex(visibleIndexValue, numColumns.value)
         }
       }}
       stopRenderingOnAnimation={pinching}
@@ -275,10 +295,10 @@ const RecyclerAssetList = ({
           <Animated.View {...props} style={[props.style, containerStyle]}>
             {children}
           </Animated.View>
-        );
+        )
       }}
       {...extras}
     />
-  );
+  )
 }
-export default RecyclerAssetList;
+export default RecyclerAssetList

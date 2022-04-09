@@ -13,9 +13,7 @@ import "./i18n"
 import "./utils/ignore-warnings"
 import * as React from "react"
 import { SafeAreaProvider, initialWindowMetrics } from "react-native-safe-area-context"
-import {
-  RecoilRoot,
-} from 'recoil';
+import { RecoilRoot } from "recoil"
 import { initFonts } from "./theme/fonts" // expo
 import * as storage from "./utils/storage"
 import { useBackButtonHandler, AppNavigator, canExit, useNavigationPersistence } from "./navigators"
@@ -34,15 +32,13 @@ export const NAVIGATION_PERSISTENCE_KEY = "NAVIGATION_STATE"
  */
 function App() {
   useBackButtonHandler(canExit)
-  const {
-    onNavigationStateChange,
-    isRestored: isNavigationStateRestored,
-  } = useNavigationPersistence(storage, NAVIGATION_PERSISTENCE_KEY)
+  const { onNavigationStateChange, isRestored: isNavigationStateRestored } =
+    useNavigationPersistence(storage, NAVIGATION_PERSISTENCE_KEY)
 
   const [, getPermissions] = MediaLibrary.usePermissions()
   // Kick off initial async loading actions, like loading fonts and RootStore
   React.useEffect(() => {
-    ; (async () => {
+    ;(async () => {
       await getPermissions()
       await initFonts()
     })()
