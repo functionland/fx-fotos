@@ -116,7 +116,7 @@ const RecyclerAssetList = ({
     if (!extendedState.selectionMode && section.type === ViewType.ASSET) {
       navigation.push(HomeNavigationTypes.PhotoScreen, { section: section })
     } else toggleSelection(section)
-  }, [])
+  }, [extendedState.selectionMode])
 
   const rowRenderer = useCallback(
     (
@@ -129,7 +129,6 @@ const RecyclerAssetList = ({
       if (data == null || index == null) {
         return null
       }
-
       return (
         <RecyclerSectionItem
           section={data}
@@ -137,11 +136,10 @@ const RecyclerAssetList = ({
           selected={!!extendedState.selectedAssets[data.id]}
           onLongPress={onLongPress}
           onPress={onPress}
-          navigation={navigation}
         />
       )
     },
-    [],
+    [extendedState],
   )
 
   const getLayoutType = useCallback(

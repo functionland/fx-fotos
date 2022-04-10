@@ -1,4 +1,4 @@
-import React, { memo } from "react"
+import React from "react"
 import { TouchableHighlight, StyleSheet } from "react-native"
 import { GroupHeader, RecyclerAssetListSection, ViewType } from "../../../../types"
 import StoryListItem from "./story-list-item"
@@ -71,7 +71,6 @@ const RecyclerSectionItem: React.FC<Props> = ({
       onLongPress?.(section)
     }, 0)
   }
-
   return (
     <TouchableHighlight
       style={styles.container}
@@ -103,11 +102,4 @@ const styles = StyleSheet.create({
     // paddingTop: 50,
   },
 })
-const areEqual = (prev: Props, next: Props) => {
-  return (
-    prev?.section?.id === next?.section?.id &&
-    prev?.selectionMode === next?.selectionMode &&
-    prev?.selected === next?.selected
-  )
-}
-export default memo(RecyclerSectionItem, areEqual)
+export default RecyclerSectionItem

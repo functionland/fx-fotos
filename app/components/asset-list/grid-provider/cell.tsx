@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useCallback } from "react"
+import React, { useEffect, useCallback } from "react"
 import { ViewStyle } from "react-native"
 import Reanimated, {
   Extrapolate,
@@ -19,7 +19,7 @@ interface CellProps {
 }
 
 // eslint-disable-next-line react/display-name
-const Cell: React.FC<CellProps> = React.forwardRef(
+const Cell = React.forwardRef<unknown, CellProps>(
   ({ layoutProvider, columnNumber, index, scale, style, ...props }, ref) => {
     const sharedFinalRangeValues = useSharedValue(null)
     const externalStyle = useSharedValue<ViewStyle>(style)
@@ -77,7 +77,6 @@ const Cell: React.FC<CellProps> = React.forwardRef(
     useEffect(() => {
       updateDependencies(index, columnNumber, style)
     }, [index])
-
     return (
       <Reanimated.View ref={ref} {...props} style={animationStyle}>
         {props.children}
@@ -85,10 +84,5 @@ const Cell: React.FC<CellProps> = React.forwardRef(
     )
   },
 )
-const areEqual = (prev: Props, next: Props) => {
-  return (
-    prev.index === next.index || (prev?.pinching.value === true && next.pinching.value === true)
-  )
-}
 
-export default memo(Cell, areEqual)
+export default Cell
