@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react"
 import { StyleSheet, Text, Alert, View } from "react-native"
 import * as MediaLibrary from "expo-media-library"
 import LottieView from "lottie-react-native"
-
+import { useSetRecoilState, useRecoilState } from "recoil"
 import { Screen } from "../../components"
 import { AssetService } from "../../services"
 import { color } from "../../theme"
@@ -12,14 +12,15 @@ import { useFloatHederAnimation } from "../../utils/hooks"
 import { palette } from "../../theme/palette"
 import { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { HomeNavigationParamList, HomeNavigationTypes } from "../../navigators/home-navigation"
+import { mediasState, recyclerSectionsState } from "../../store"
 interface HomeScreenProps {
   navigation: NativeStackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>
 }
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
-  const [categorizedAssets, setCategorizedAssets] = useState<RecyclerAssetListSection[]>(null)
   const [isReady, setIsReady] = useState(false)
-
+  const setMedias = useSetRecoilState(mediasState)
+  const [recyclerSections, setRecyclerSections] = useRecoilState(recyclerSectionsState);
   // Get a custom hook to animate the header
   const [scrollY, headerStyles] = useFloatHederAnimation(60)
 
@@ -53,7 +54,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       do {
         allMedias = await AssetService.getMedias(first, allMedias?.endCursor)
         assetsArray.push(...allMedias.assets)
-        setCategorizedAssets([...AssetService.categorizeAssets(assetsArray)])
+        setRecyclerSections([...AssetService.categorizeAssets(assetsArray)]);
+        setMedias([...assetsArray])
         console.log(
           "allMedias",
           assetsArray.length,
@@ -76,7 +78,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       style={styles.screen}
       backgroundColor={color.transparent}
     >
-      {!categorizedAssets ? (
+      {!recyclerSections ? (
         <View style={styles.loaderContainer}>
           <LottieView
             autoPlay={true}
@@ -85,10 +87,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           />
           <Text style={styles.loadingText}>Gathering photos</Text>
         </View>
-      ) : !categorizedAssets?.length ? (
+      ) : !recyclerSections?.length ? (
         <Text style={styles.emptyText}>Gallery is empty!</Text>
       ) : (
-        <AssetList sections={categorizedAssets} scrollY={scrollY} navigation={navigation} />
+        <AssetList sections={recyclerSections} scrollY={scrollY} navigation={navigation} />
       )}
     </Screen>
   )
