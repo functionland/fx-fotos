@@ -23,7 +23,7 @@ export const useFloatHederAnimation = (maxHeight: number) => {
         )
       }
     },
-    [scrollY],
+    [maxHeight],
   )
   const styles = useAnimatedStyle(() => {
     return {
@@ -33,6 +33,7 @@ export const useFloatHederAnimation = (maxHeight: number) => {
         },
       ],
     }
-  })
+  },[])
+  
   return [scrollY, styles]
 }

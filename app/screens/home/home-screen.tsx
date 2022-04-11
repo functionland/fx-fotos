@@ -11,7 +11,7 @@ import { RecyclerAssetListSection } from "../../types"
 import { useFloatHederAnimation } from "../../utils/hooks"
 import { palette } from "../../theme/palette"
 import { NativeStackNavigationProp } from "@react-navigation/native-stack"
-import { HomeNavigationParamList, HomeNavigationTypes } from "../../navigators/home-navigation"
+import { HomeNavigationParamList, HomeNavigationTypes } from "../../navigators/home-navigator"
 import { mediasState, recyclerSectionsState } from "../../store"
 interface HomeScreenProps {
   navigation: NativeStackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>
@@ -40,7 +40,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   }, [])
   useEffect(() => {
     navigation.setOptions({
-      headerStyle: [{}, headerStyles],
+      headerStyle: [headerStyles],
     })
   }, [])
   useEffect(() => {

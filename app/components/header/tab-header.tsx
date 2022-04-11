@@ -2,22 +2,17 @@ import React from "react"
 import { View, Image, StyleSheet } from "react-native"
 import { BottomTabHeaderProps } from "@react-navigation/bottom-tabs"
 import { getFocusedRouteNameFromRoute } from "@react-navigation/native"
-
+import Animated from "react-native-reanimated"
 import { Text } from "../text"
 import { palette, Constants } from "../../theme"
-import { HomeNavigationTypes } from "../../navigators/home-navigation"
+import { HomeNavigationTypes } from "../../navigators/home-navigator"
 
 type Props = BottomTabHeaderProps
 
 export const TabHeader = ({ route, options, ...props }: Props) => {
-  const routeName = getFocusedRouteNameFromRoute(route)
-
-  if (routeName === HomeNavigationTypes.PhotoScreen) {
-    return null
-  }
-
+  console.log("options headerStyle", options?.headerStyle)
   return (
-    <View {...props} style={[styles.container, options?.headerStyle]}>
+    <Animated.View {...props} style={[styles.container, options?.headerStyle]}>
       {options?.title ? (
         <Text>{options?.title}</Text>
       ) : (
@@ -31,7 +26,7 @@ export const TabHeader = ({ route, options, ...props }: Props) => {
       <View style={styles.endSection}>
         {/* <FontAwesome5 name={"user-circle"} size={35} color="blue" /> */}
       </View>
-    </View>
+    </Animated.View>
   )
 }
 

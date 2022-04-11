@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: palette.offWhite,
     borderColor: palette.white,
-    borderWidth: 1,
+    borderWidth: 2,
     flex: 1,
   },
   image: {

@@ -20,7 +20,8 @@ import ExternalScrollView from "../external-scroll-view"
 import Cell from "../grid-provider/cell"
 import { useColumnsNumber, useScale, usePinching } from "../grid-provider/gridContext"
 import { NativeStackNavigationProp } from "@react-navigation/native-stack"
-import { HomeNavigationParamList, HomeNavigationTypes } from "../../../navigators/home-navigation"
+import { HomeNavigationParamList, HomeNavigationTypes } from "../../../navigators/home-navigator"
+import { AppNavigationNames } from "../../../navigators/app-navigator"
 
 import GridLayoutProvider from "../grid-provider/gridLayoutProvider"
 import { LayoutTransitionRange } from "../grid-provider/gridLayoutManager"
@@ -114,7 +115,7 @@ const RecyclerAssetList = ({
 
   const onPress = useCallback((section: RecyclerAssetListSection) => {
     if (!extendedState.selectionMode && section.type === ViewType.ASSET) {
-      navigation.push(HomeNavigationTypes.PhotoScreen, { section: section })
+      navigation.push(AppNavigationNames.PhotoScreen, { section: section })
     } else toggleSelection(section)
   }, [extendedState.selectionMode])
 
@@ -286,7 +287,7 @@ const RecyclerAssetList = ({
         }
       }}
       stopRenderingOnAnimation={pinching}
-      contentContainerStyle={{ paddingTop: 80 }}
+      contentContainerStyle={{ paddingTop: 70 }}
       renderItemContainer={renderItemContainer}
       renderContentContainer={(props, children) => {
         return (
