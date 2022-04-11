@@ -12,7 +12,7 @@ import PinchZoom from "./grid-provider/pinchZoom"
 
 import { RecyclerAssetListSection } from "../../types"
 import { NativeStackNavigationProp } from "@react-navigation/native-stack"
-import { HomeNavigationParamList, HomeNavigationTypes } from "../../navigators/home-navigation"
+import { HomeNavigationParamList, HomeNavigationTypes } from "../../navigators/home-navigator"
 interface Props {
   refreshData: () => Promise<void>
   sections: RecyclerAssetListSection[]
