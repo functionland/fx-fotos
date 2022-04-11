@@ -7,7 +7,6 @@ import { Screen } from "../../components"
 import { AssetService } from "../../services"
 import { color } from "../../theme"
 import AssetList from "../../components/asset-list"
-import { RecyclerAssetListSection } from "../../types"
 import { useFloatHederAnimation } from "../../utils/hooks"
 import { palette } from "../../theme/palette"
 import { NativeStackNavigationProp } from "@react-navigation/native-stack"
@@ -20,7 +19,7 @@ interface HomeScreenProps {
 export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [isReady, setIsReady] = useState(false)
   const setMedias = useSetRecoilState(mediasState)
-  const [recyclerSections, setRecyclerSections] = useRecoilState(recyclerSectionsState);
+  const [recyclerSections, setRecyclerSections] = useRecoilState(recyclerSectionsState)
   // Get a custom hook to animate the header
   const [scrollY, headerStyles] = useFloatHederAnimation(60)
 
@@ -54,7 +53,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       do {
         allMedias = await AssetService.getMedias(first, allMedias?.endCursor)
         assetsArray.push(...allMedias.assets)
-        setRecyclerSections([...AssetService.categorizeAssets(assetsArray)]);
+        setRecyclerSections([...AssetService.categorizeAssets(assetsArray)])
         setMedias([...assetsArray])
         console.log(
           "allMedias",
@@ -90,7 +89,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       ) : !recyclerSections?.length ? (
         <Text style={styles.emptyText}>Gallery is empty!</Text>
       ) : (
-        <AssetList sections={recyclerSections} scrollY={scrollY} navigation={navigation} />
+        <>
+          <AssetList sections={recyclerSections} scrollY={scrollY} navigation={navigation} />
+        </>
       )}
     </Screen>
   )

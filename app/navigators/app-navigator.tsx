@@ -16,17 +16,13 @@ export type NavigatorParamList = {
 }
 export enum AppNavigationNames {
   HomeScreen = "home",
-  PhotoScreen = "photo"
+  PhotoScreen = "photo",
 }
 const Stack = createSharedElementStackNavigator<NavigatorParamList>()
 
 const AppStack = () => {
   return (
-    <Stack.Navigator
-      nitialRouteName={AppNavigationNames.HomeScreen}
-      screenOptions={{
-      }}
-    >
+    <Stack.Navigator nitialRouteName={AppNavigationNames.HomeScreen} screenOptions={{}}>
       <Stack.Screen
         name={AppNavigationNames.HomeScreen}
         options={{
@@ -66,12 +62,10 @@ const AppStack = () => {
           const { section } = route.params
           return [section.data.uri]
         }}
-
       />
     </Stack.Navigator>
   )
 }
-
 
 type NavigationProps = Partial<React.ComponentProps<typeof NavigationContainer>>
 

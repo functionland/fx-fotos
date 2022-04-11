@@ -1,8 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import {
-  NativeSyntheticEvent,
-  NativeScrollEvent,
-} from "react-native"
+import { NativeSyntheticEvent, NativeScrollEvent } from "react-native"
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -25,6 +22,8 @@ import { AppNavigationNames } from "../../../navigators/app-navigator"
 
 import GridLayoutProvider from "../grid-provider/gridLayoutProvider"
 import { LayoutTransitionRange } from "../grid-provider/gridLayoutManager"
+import { StoryContainer } from "../../story"
+import { Constants } from "../../../theme"
 export interface Props {
   navigation: NativeStackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>
   sections: RecyclerAssetListSection[]
@@ -113,11 +112,14 @@ const RecyclerAssetList = ({
     toggleSelection(section)
   }, [])
 
-  const onPress = useCallback((section: RecyclerAssetListSection) => {
-    if (!extendedState.selectionMode && section.type === ViewType.ASSET) {
-      navigation.push(AppNavigationNames.PhotoScreen, { section: section })
-    } else toggleSelection(section)
-  }, [extendedState.selectionMode])
+  const onPress = useCallback(
+    (section: RecyclerAssetListSection) => {
+      if (!extendedState.selectionMode && section.type === ViewType.ASSET) {
+        navigation.push(AppNavigationNames.PhotoScreen, { section: section })
+      } else toggleSelection(section)
+    },
+    [extendedState.selectionMode],
+  )
 
   const rowRenderer = useCallback(
     (
@@ -287,13 +289,16 @@ const RecyclerAssetList = ({
         }
       }}
       stopRenderingOnAnimation={pinching}
-      contentContainerStyle={{ paddingTop: 70 }}
+      contentContainerStyle={{ paddingTop: Constants.HeaderHeight }}
       renderItemContainer={renderItemContainer}
       renderContentContainer={(props, children) => {
         return (
-          <Animated.View {...props} style={[props.style, containerStyle]}>
-            {children}
-          </Animated.View>
+          <>
+            <StoryContainer />
+            <Animated.View {...props} style={[props.style, containerStyle]}>
+              {children}
+            </Animated.View>
+          </>
         )
       }}
       {...extras}

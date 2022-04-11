@@ -6,6 +6,7 @@ import { Text } from "../text/text"
 import { Icon } from "../icon/icon"
 import { spacing } from "../../theme"
 import { translate } from "../../i18n/"
+import { StoryContainer } from "../story"
 
 // static styles
 const ROOT: ViewStyle = {
@@ -56,6 +57,7 @@ export function Header(props: HeaderProps) {
       ) : (
         <View style={RIGHT} />
       )}
+      <StoryContainer />
     </View>
   )
 }

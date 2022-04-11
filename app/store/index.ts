@@ -1,5 +1,5 @@
 import { atom } from "recoil"
-import { Asset,RecyclerAssetListSection } from "../types"
+import { Asset, RecyclerAssetListSection } from "../types"
 
 export const mediasState = atom<Asset[]>({
   key: "mediasState",

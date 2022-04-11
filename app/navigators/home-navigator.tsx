@@ -17,7 +17,7 @@ export enum HomeNavigationTypes {
 function UnderConstructionScreen() {
   return (
     <View
-    style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "white" }}
+      style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "white" }}
     >
       <UnderConstruction />
     </View>
