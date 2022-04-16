@@ -17,10 +17,11 @@ interface Props {
   refreshData: () => Promise<void>
   sections: RecyclerAssetListSection[]
   scrollY: SharedValue<number> | undefined
+  onSelectedItemsChange?: (assetIds: string[], selectionMode: boolean) => void
   navigation: NativeStackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>
 }
 
-const AssetList = ({ refreshData, sections, scrollY, navigation }: Props): JSX.Element => {
+const AssetList = ({ refreshData, sections, scrollY, navigation, onSelectedItemsChange }: Props): JSX.Element => {
   const translationY = useSharedValue(0)
   const scrollRefExternal = useAnimatedRef<Animated.ScrollView>()
 
@@ -47,6 +48,7 @@ const AssetList = ({ refreshData, sections, scrollY, navigation }: Props): JSX.E
           scrollHandler={scrollHandler}
           scrollRef={scrollRefExternal}
           scrollY={scrollY}
+          onSelectedItemsChange={onSelectedItemsChange}
         />
       </PinchZoom>
     </GridProvider>

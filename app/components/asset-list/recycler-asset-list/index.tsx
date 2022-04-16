@@ -36,6 +36,7 @@ export interface Props {
   scrollRef?: any
   scrollHandler: (event: NativeSyntheticEvent<NativeScrollEvent>) => void
   scrollY: SharedValue<number> | undefined
+  onSelectedItemsChange?: (assetIds: string[], selectionMode: boolean) => void
 }
 
 export interface ExtendedState {
@@ -49,6 +50,7 @@ const RecyclerAssetList = ({
   scrollHandler,
   scrollRef,
   scrollY,
+  onSelectedItemsChange,
   ...extras
 }: Props): JSX.Element => {
   const rclRef = useRef<RecyclerListView>()
@@ -108,6 +110,12 @@ const RecyclerAssetList = ({
       return prevState
     })
   }
+  useEffect(() => {
+    if (onSelectedItemsChange) {
+      const assetIds = Object.keys(extendedState.selectedAssets).filter(key => extendedState.selectedAssets[key]);
+      onSelectedItemsChange(assetIds, extendedState.selectionMode);
+    }
+  }, [extendedState])
   const onLongPress = useCallback((section: RecyclerAssetListSection) => {
     toggleSelectionMode()
     toggleSelection(section)
