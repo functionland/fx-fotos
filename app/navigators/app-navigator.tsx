@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useContext } from "react"
 import Animated from "react-native-reanimated"
 import { enableScreens } from "react-native-screens"
 import { NavigationContainer } from "@react-navigation/native"
@@ -7,7 +7,7 @@ import { createSharedElementStackNavigator } from "react-navigation-shared-eleme
 import { navigationRef } from "./navigation-utilities"
 import { PhotoScreen } from "../screens"
 import { HomeNavigator } from "./home-navigator"
-
+import { ThemeContext } from '../theme';
 enableScreens()
 export type NavigatorParamList = {
   home: undefined
@@ -76,9 +76,11 @@ const AppStack = () => {
 type NavigationProps = Partial<React.ComponentProps<typeof NavigationContainer>>
 
 export const AppNavigator = (props: NavigationProps) => {
+  const { theme } = useContext(ThemeContext);
   return (
     <Animated.View style={{ flex: 1 }}>
       <NavigationContainer
+        theme={theme}
         ref={navigationRef}
         //theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}
         {...props}
