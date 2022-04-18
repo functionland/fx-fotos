@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { StyleSheet, Alert, View } from "react-native"
 import * as MediaLibrary from "expo-media-library"
 import LottieView from "lottie-react-native"
@@ -7,7 +7,7 @@ import { useRecoilState } from "recoil"
 import { Screen } from "../../components"
 import { AssetService } from "../../services"
 import { color } from "../../theme"
-import AssetList from "../../components/asset-list"
+import AssetList, { AssetListHandle } from "../../components/asset-list"
 import { useFloatHederAnimation } from "../../utils/hooks"
 import { palette } from "../../theme/palette"
 import { NativeStackNavigationProp } from "@react-navigation/native-stack"
@@ -27,7 +27,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [scrollY, headerStyles] = useFloatHederAnimation(60)
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedItems, setSelectedItems] = useState<stringp[]>([]);
-
+  const assetListRef = useRef<AssetListHandle>()
   const requestAndroidPermission = async () => {
     try {
       console.log("requestAndroidPermission")
@@ -49,7 +49,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         headerStyle: [styles.selectModeHeader],
         headerLeft: () =>
           <View style={styles.headerLeftContainer}>
-            <Icon type="material-community" name="close" onPress={() => alert("close")} />
+            <Icon type="material-community" name="close" onPress={cancelSelectionMode} />
             <Text style={{ fontSize: 16, marginStart: 20 }}>{selectedItems?.length}</Text>
           </View>,
         headerRight: () =>
@@ -70,6 +70,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   useEffect(() => {
     if (isReady) prepareAssets()
   }, [isReady])
+
+  const cancelSelectionMode = () => {
+    assetListRef?.current?.toggleSelectionMode();
+  }
+
   const deleteAssets = () => {
     Alert.alert("Delete", "Are you sure want to delete these assets?",
       [
@@ -81,10 +86,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           text: "Yes",
           onPress: async () => {
             const deleted = await AssetService.deleteAssets(selectedItems);
-            if (deleted){
-              setMedias(prev=>{
+            if (deleted) {
+              setMedias(prev => {
                 return prev.filter(item => !selectedItems.some(selectedId => selectedId === item.id))
               })
+              assetListRef?.current?.resetSelectedItems();
             }
           }
         }
@@ -136,6 +142,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         <Text style={styles.emptyText}>Gallery is empty!</Text>
       ) : (
         <AssetList
+          ref={assetListRef}
           sections={recyclerSections}
           scrollY={scrollY}
           onSelectedItemsChange={onSelectedItemsChange}
@@ -177,9 +184,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     paddingEnd: 5
   },
-  selectModeHeader:{
-    transform:[{
-      translateY:0
+  selectModeHeader: {
+    transform: [{
+      translateY: 0
     }]
   }
 })

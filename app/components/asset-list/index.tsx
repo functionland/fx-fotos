@@ -1,4 +1,4 @@
-import React from "react"
+import React, { forwardRef, useImperativeHandle, useRef } from "react"
 import Animated, {
   useSharedValue,
   useAnimatedScrollHandler,
@@ -6,7 +6,7 @@ import Animated, {
   SharedValue,
 } from "react-native-reanimated"
 
-import RecyclerAssetList from "./recycler-asset-list"
+import RecyclerAssetList, { RecyclerAssetListHandler } from "./recycler-asset-list"
 import GridProvider from "./grid-provider/gridContext"
 import PinchZoom from "./grid-provider/pinchZoom"
 
@@ -20,11 +20,23 @@ interface Props {
   onSelectedItemsChange?: (assetIds: string[], selectionMode: boolean) => void
   navigation: NativeStackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>
 }
-
-const AssetList = ({ refreshData, sections, scrollY, navigation, onSelectedItemsChange }: Props): JSX.Element => {
+export interface AssetListHandle {
+  resetSelectedItems: () => void,
+  toggleSelectionMode: () => void
+}
+// eslint-disable-next-line react/display-name
+const AssetList = forwardRef<AssetListHandle, Props>(({ refreshData, sections, scrollY, navigation, onSelectedItemsChange }, ref): JSX.Element => {
   const translationY = useSharedValue(0)
   const scrollRefExternal = useAnimatedRef<Animated.ScrollView>()
-
+  const recyclerAssetListRef = useRef<RecyclerAssetListHandler>();
+  useImperativeHandle<AssetListHandle>(ref, () => ({
+    resetSelectedItems: () => {
+      recyclerAssetListRef.current?.resetSelectedItems()
+    },
+    toggleSelectionMode: () => {
+      recyclerAssetListRef.current?.toggleSelectionMode()
+    }
+  }));
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
       translationY.value = event.contentOffset.y
@@ -42,6 +54,7 @@ const AssetList = ({ refreshData, sections, scrollY, navigation, onSelectedItems
     <GridProvider>
       <PinchZoom>
         <RecyclerAssetList
+          ref={recyclerAssetListRef}
           navigation={navigation}
           refreshData={refreshData}
           sections={sections}
@@ -53,6 +66,6 @@ const AssetList = ({ refreshData, sections, scrollY, navigation, onSelectedItems
       </PinchZoom>
     </GridProvider>
   )
-}
+})
 
 export default AssetList
