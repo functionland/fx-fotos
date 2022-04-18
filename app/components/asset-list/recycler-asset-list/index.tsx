@@ -186,10 +186,9 @@ const RecyclerAssetList = ({
   const dataProvider = useMemo(() => {
     console.log("dataProvider", sections?.length)
     let provider = new DataProvider(
-      (r1: RecyclerAssetListSection, r2: RecyclerAssetListSection) => r1.id !== r2.id,
-      (index) => sections[index]?.id,
+      (r1: RecyclerAssetListSection, r2: RecyclerAssetListSection) => r1.id !== r2.id
     )
-    provider = provider.cloneWithRows(sections)
+    provider = provider.cloneWithRows(sections,0)
     // provider.getStableId = index => sections[index].id;
     console.log("provider.getSize()", provider.getSize())
     return provider

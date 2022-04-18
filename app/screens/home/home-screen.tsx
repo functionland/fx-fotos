@@ -1,28 +1,32 @@
 import React, { useEffect, useState } from "react"
-import { StyleSheet, Text, Alert, View } from "react-native"
+import { StyleSheet, Alert, View } from "react-native"
 import * as MediaLibrary from "expo-media-library"
 import LottieView from "lottie-react-native"
-import { useSetRecoilState, useRecoilState } from "recoil"
+import { useRecoilState } from "recoil"
+
 import { Screen } from "../../components"
 import { AssetService } from "../../services"
 import { color } from "../../theme"
 import AssetList from "../../components/asset-list"
-import { RecyclerAssetListSection } from "../../types"
 import { useFloatHederAnimation } from "../../utils/hooks"
 import { palette } from "../../theme/palette"
 import { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { HomeNavigationParamList, HomeNavigationTypes } from "../../navigators/home-navigator"
 import { mediasState, recyclerSectionsState } from "../../store"
+import { Icon, Text } from "react-native-elements"
+
 interface HomeScreenProps {
   navigation: NativeStackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>
 }
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [isReady, setIsReady] = useState(false)
-  const setMedias = useSetRecoilState(mediasState)
+  const [medias, setMedias] = useRecoilState(mediasState)
   const [recyclerSections, setRecyclerSections] = useRecoilState(recyclerSectionsState);
   // Get a custom hook to animate the header
   const [scrollY, headerStyles] = useFloatHederAnimation(60)
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedItems, setSelectedItems] = useState<stringp[]>([]);
 
   const requestAndroidPermission = async () => {
     try {
@@ -39,37 +43,78 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     requestAndroidPermission()
   }, [])
   useEffect(() => {
-    navigation.setOptions({
-      headerStyle: [headerStyles],
-    })
-  }, [])
+    if (selectionMode) {
+      navigation.setOptions({
+        headerTitle: () => null,
+        headerStyle: [styles.selectModeHeader],
+        headerLeft: () =>
+          <View style={styles.headerLeftContainer}>
+            <Icon type="material-community" name="close" onPress={() => alert("close")} />
+            <Text style={{ fontSize: 16, marginStart: 20 }}>{selectedItems?.length}</Text>
+          </View>,
+        headerRight: () =>
+          <View style={styles.headerRightContainer}>
+            <Icon type="material-community" name="delete" onPress={() => deleteAssets("delete")} />
+          </View>
+      })
+    }
+    else {
+      navigation.setOptions({
+        headerTitle: null,
+        headerLeft: () => null,
+        headerRight: () => null,
+        headerStyle: [headerStyles],
+      })
+    }
+  }, [selectionMode, selectedItems])
   useEffect(() => {
     if (isReady) prepareAssets()
   }, [isReady])
+  const deleteAssets = () => {
+    Alert.alert("Delete", "Are you sure want to delete these assets?",
+      [
+        {
+          text: "No",
+          style: "cancel"
+        },
+        {
+          text: "Yes",
+          onPress: async () => {
+            const deleted = await AssetService.deleteAssets(selectedItems);
+            if (deleted){
+              setMedias(prev=>{
+                return prev.filter(item => !selectedItems.some(selectedId => selectedId === item.id))
+              })
+            }
+          }
+        }
+      ]
+    )
+  }
   const prepareAssets = async () => {
     try {
       let first = 20
-      const assetsArray = []
       let allMedias: MediaLibrary.PagedInfo<MediaLibrary.Asset> = null
       do {
-        allMedias = await AssetService.getMedias(first, allMedias?.endCursor)
-        assetsArray.push(...allMedias.assets)
-        setRecyclerSections([...AssetService.categorizeAssets(assetsArray)]);
-        setMedias([...assetsArray])
-        console.log(
-          "allMedias",
-          assetsArray.length,
-          allMedias.assets.length,
-          allMedias.hasNextPage,
-          allMedias.endCursor,
-          assetsArray[assetsArray.length - 1]?.id,
-        )
+        allMedias = await AssetService.getAssets(first, allMedias?.endCursor)
+        setMedias(prev => {
+          return [...prev, ...allMedias.assets]
+        })
         if (!allMedias.hasNextPage) break
         first = first * 4
       } while (true)
     } catch (error) {
       console.error("prepareAssets:", error)
     }
+  }
+  useEffect(() => {
+    if (medias && medias.length)
+      setRecyclerSections([...AssetService.categorizeAssets([...medias])]);
+  }, [medias])
+  const onSelectedItemsChange = (assetIds: string[], selectionMode: boolean) => {
+    console.log("onSelectedItemsChange:", assetIds, selectionMode)
+    setSelectionMode(selectionMode);
+    setSelectedItems(assetIds);
   }
   return (
     <Screen
@@ -90,7 +135,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       ) : !recyclerSections?.length ? (
         <Text style={styles.emptyText}>Gallery is empty!</Text>
       ) : (
-        <AssetList sections={recyclerSections} scrollY={scrollY} navigation={navigation} />
+        <AssetList
+          sections={recyclerSections}
+          scrollY={scrollY}
+          onSelectedItemsChange={onSelectedItemsChange}
+          navigation={navigation} />
       )}
     </Screen>
   )
@@ -118,4 +167,19 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignContent: "center",
   },
+  headerLeftContainer: {
+    flex: 1,
+    flexDirection: "row",
+    paddingStart: 5
+  },
+  headerRightContainer: {
+    flex: 1,
+    flexDirection: "row",
+    paddingEnd: 5
+  },
+  selectModeHeader:{
+    transform:[{
+      translateY:0
+    }]
+  }
 })

@@ -6,7 +6,6 @@ import FontAwesome5 from "react-native-vector-icons/FontAwesome5"
 import { HomeScreen } from "../screens"
 import { TabHeader } from "../components/header/tab-header"
 import { UnderConstruction } from "../components"
-
 export type HomeNavigationParamList = {
   HomeScreen: undefined
 }
@@ -17,7 +16,7 @@ export enum HomeNavigationTypes {
 function UnderConstructionScreen() {
   return (
     <View
-    style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "white" }}
+      style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "white" }}
     >
       <UnderConstruction />
     </View>
