@@ -10,5 +10,5 @@
 import App from "./app/app.tsx"
 import { AppRegistry } from "react-native"
 
-AppRegistry.registerComponent("photos", () => App)
+AppRegistry.registerComponent("fotos", () => App)
 export default App

@@ -1,12 +1,12 @@
-import React from "react"
-import { StyleSheet, View, LayoutChangeEvent, Image } from "react-native"
-import FastImage from "react-native-fast-image"
+import React, { memo } from "react"
+import { StyleSheet, View, Image } from "react-native"
 
 import { Asset } from "../../../../types"
 import { palette } from "../../../../theme/palette"
 import { Checkbox } from "../../../checkbox/checkbox"
 
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSpring } from "react-native-reanimated"
+import Animated, { useSharedValue, useAnimatedStyle, withTiming } from "react-native-reanimated"
+import { SharedElement } from "react-navigation-shared-element"
 
 interface Props {
   asset: Asset
@@ -23,28 +23,26 @@ const AssetItem = (props: Props): JSX.Element => {
     return {
       transform: [
         {
-          scale: withSpring(scaleSharedValue.value, {
-            velocity: 1
-          })
-        }
+          scale: withTiming(scaleSharedValue.value, {
+            duration: 100,
+          }),
+        },
       ],
-      // TODO: chnage the image radius on animation
-      // borderRadius: withTiming(borderRadiusSharedValue.value, { duration: 100 }),
     }
   })
+
   React.useEffect(() => {
     if (selected) {
       scaleSharedValue.value = 0.8
-      // borderRadiusSharedValue.value = 10
     } else {
       scaleSharedValue.value = 1
-      // borderRadiusSharedValue.value = 0
     }
   }, [selected])
 
   return (
     <View style={styles.container}>
       <Animated.View style={[styles.imageContainer, imageContainerAnimatedStyle]}>
+        <SharedElement style={styles.sharedElementContainer} id={asset.uri}>
           <Image
             style={styles.image}
             source={{
@@ -53,6 +51,7 @@ const AssetItem = (props: Props): JSX.Element => {
             fadeDuration={100}
             resizeMode="cover"
           />
+        </SharedElement>
       </Animated.View>
       {selectionMode ? <Checkbox value={selected} style={styles.checkbox} /> : null}
     </View>
@@ -68,19 +67,30 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: palette.offWhite,
     borderColor: palette.white,
-    borderWidth: 1,
-    flex: 1
+    borderWidth: 2,
+    flex: 1,
   },
   image: {
+    ...StyleSheet.absoluteFillObject,
     flex: 1,
-    height: undefined,
-    width: undefined,
+    height: "100%",
+    width: "100%",
   },
   imageContainer: {
-    flex:1,
+    flex: 1,
     overflow: "hidden",
-    zIndex: 0
-  }
+    zIndex: 0,
+  },
+  sharedElementContainer: {
+    flex: 1,
+  },
 })
 
-export default AssetItem
+const areEqual = (prev: Props, next: Props) => {
+  return (
+    prev?.asset?.id === next?.asset?.id &&
+    prev?.selectionMode === next?.selectionMode &&
+    prev?.selected === next?.selected
+  )
+}
+export default memo(AssetItem, areEqual)

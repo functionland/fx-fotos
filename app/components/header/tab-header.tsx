@@ -1,31 +1,32 @@
 import React from "react"
-import { View, ViewStyle, TextStyle, Image, StyleSheet } from "react-native"
-import { HeaderProps } from "./header.props"
-import { Button } from "../button/button"
-import { Text } from "../text/text"
-//import { Icon } from "../icon/icon"
-import { spacing } from "../../theme"
-import { translate } from "../../i18n/"
-import Animated from "react-native-reanimated"
-import { NativeStackHeaderProps } from '@react-navigation/native-stack'
+import { View, Image, StyleSheet } from "react-native"
 import { BottomTabHeaderProps } from "@react-navigation/bottom-tabs"
-import Icon from 'react-native-vector-icons/FontAwesome';
-import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
-/**
- * Header that appears on many screens. Will hold navigation buttons and screen title.
- */
-interface Props extends BottomTabHeaderProps {
+import { getFocusedRouteNameFromRoute } from "@react-navigation/native"
+import Animated from "react-native-reanimated"
+import { Text } from "../text"
+import { palette, Constants } from "../../theme"
+import { HomeNavigationTypes } from "../../navigators/home-navigator"
 
-}
-export function TabHeader({ navigation, route, options, ...props }: Props) {
+type Props = BottomTabHeaderProps
+
+export const TabHeader = ({ route, options, ...props }: Props) => {
   return (
-    <Animated.View {...props} style={[styles.container, options?.headerStyle]} >
-      {options?.title ?
+    <Animated.View {...props} style={[styles.container, options?.headerStyle]}>
+      <View style={styles.startSection}>
+        {options.headerLeft ? options.headerLeft() : null}
+      </View>
+      {options?.title ? (
         <Text>{options?.title}</Text>
-        : <Image style={styles.logo} fadeDuration={0} resizeMode="contain" source={require("../../../assets/images/logo.png")} />
-      }
+      ) : (options.headerTitle ? options.headerTitle() :
+        <Image
+          style={styles.logo}
+          fadeDuration={0}
+          resizeMode="contain"
+          source={require("../../../assets/images/logo.png")}
+        />
+      )}
       <View style={styles.endSection}>
-        <FontAwesome5 name={'user-circle'} size={35} color="blue" style={{ paddingEnd: 15 }} />
+        {options.headerRight ? options.headerRight() : null}
       </View>
     </Animated.View>
   )
@@ -34,16 +35,23 @@ export function TabHeader({ navigation, route, options, ...props }: Props) {
 const styles = StyleSheet.create({
   container: {
     alignItems: "center",
-    backgroundColor: "white",
+    backgroundColor: palette.white,
     flexDirection: "row",
-    height: 60,
+    height: Constants.HeaderHeight,
     justifyContent: "space-around",
   },
-  endSection:{ 
+  endSection: {
     end: 0,
-    position: "absolute" 
+    paddingEnd: 3,
+    position: "absolute",
+
+  },
+  startSection: {
+    start: 0,
+    paddingStart: 3,
+    position: "absolute",
   },
   logo: {
-    height: 30
-  }
+    height: 30,
+  },
 })
