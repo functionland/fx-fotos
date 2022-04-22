@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState, useImperativeHandle } from "react"
 import {
   NativeSyntheticEvent,
   NativeScrollEvent,
@@ -36,6 +36,7 @@ export interface Props {
   scrollRef?: any
   scrollHandler: (event: NativeSyntheticEvent<NativeScrollEvent>) => void
   scrollY: SharedValue<number> | undefined
+  onSelectedItemsChange?: (assetIds: string[], selectionMode: boolean) => void
 }
 
 export interface ExtendedState {
@@ -43,14 +44,20 @@ export interface ExtendedState {
   selectedAssets: { [key: string]: boolean }
   selectionMode: boolean
 }
-const RecyclerAssetList = ({
+export interface RecyclerAssetListHandler {
+  resetSelectedItems: () => void,
+  toggleSelectionMode: () => void
+}
+// eslint-disable-next-line react/display-name
+const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(({
   navigation,
   sections,
   scrollHandler,
   scrollRef,
   scrollY,
+  onSelectedItemsChange,
   ...extras
-}: Props): JSX.Element => {
+}, ref): JSX.Element => {
   const rclRef = useRef<RecyclerListView>()
   const [numColumns] = useColumnsNumber()
   const lastScrollY = useSharedValue(scrollY.value)
@@ -66,7 +73,17 @@ const RecyclerAssetList = ({
     selectedGroups: {},
     selectionMode: false,
   })
-
+  useImperativeHandle(ref, () => ({
+    resetSelectedItems: () => {
+      setExtendedState(prev => ({
+        ...prev,
+        selectedAssets: {}
+      }))
+    },
+    toggleSelectionMode: () => {
+      toggleSelectionMode()
+    }
+  }));
   const toggleSelectionMode = () => {
     setExtendedState((prevState) => {
       return {
@@ -108,6 +125,12 @@ const RecyclerAssetList = ({
       return prevState
     })
   }
+  useEffect(() => {
+    if (onSelectedItemsChange) {
+      const assetIds = Object.keys(extendedState.selectedAssets).filter(key => extendedState.selectedAssets[key]);
+      onSelectedItemsChange(assetIds, extendedState.selectionMode);
+    }
+  }, [extendedState])
   const onLongPress = useCallback((section: RecyclerAssetListSection) => {
     toggleSelectionMode()
     toggleSelection(section)
@@ -178,10 +201,9 @@ const RecyclerAssetList = ({
   const dataProvider = useMemo(() => {
     console.log("dataProvider", sections?.length)
     let provider = new DataProvider(
-      (r1: RecyclerAssetListSection, r2: RecyclerAssetListSection) => r1.id !== r2.id,
-      (index) => sections[index]?.id,
+      (r1: RecyclerAssetListSection, r2: RecyclerAssetListSection) => r1.id !== r2.id
     )
-    provider = provider.cloneWithRows(sections)
+    provider = provider.cloneWithRows(sections, 0)
     // provider.getStableId = index => sections[index].id;
     console.log("provider.getSize()", provider.getSize())
     return provider
@@ -299,5 +321,5 @@ const RecyclerAssetList = ({
       {...extras}
     />
   )
-}
+})
 export default RecyclerAssetList

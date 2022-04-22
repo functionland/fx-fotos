@@ -79,7 +79,7 @@ export const categorizeAssets = (assets: MediaLibrary.Asset[]) => {
   return sections
 }
 
-export const getMedias = async (
+export const getAssets = async (
   pageSize = 100,
   afterAssetId: string,
 ): Promise<MediaLibrary.PagedInfo<MediaLibrary.Asset>> => {
@@ -97,6 +97,15 @@ export const getMedias = async (
           },
     )
     return medias
+  } catch (error) {
+    console.error("error", error)
+    throw error
+  }
+}
+export const deleteAssets = async (assetIds: string[]): Promise<boolean> => {
+  try {
+    const deleted = await MediaLibrary.deleteAssetsAsync(assetIds)
+    return deleted
   } catch (error) {
     console.error("error", error)
     throw error

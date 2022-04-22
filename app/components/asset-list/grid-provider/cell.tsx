@@ -76,7 +76,7 @@ const Cell = React.forwardRef<unknown, CellProps>(
 
     useEffect(() => {
       updateDependencies(index, columnNumber, style)
-    }, [index])
+    }, [index,layoutProvider])
     return (
       <Reanimated.View ref={ref} {...props} style={animationStyle}>
         {props.children}
