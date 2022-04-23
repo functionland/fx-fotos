@@ -2,6 +2,7 @@ import React, { forwardRef, useCallback, useEffect, useMemo, useRef, useState, u
 import {
   NativeSyntheticEvent,
   NativeScrollEvent,
+  View,
 } from "react-native"
 import Animated, {
   useSharedValue,
@@ -13,7 +14,7 @@ import Animated, {
   Extrapolate,
 } from "react-native-reanimated"
 import { DataProvider, RecyclerListView } from "fula-recyclerlistview"
-
+import { Constants } from "../../../theme/constants"
 import { RecyclerAssetListSection, ViewType, GroupHeader } from "../../../types"
 import RecyclerSectionItem from "./asset-items/recycler-section-item"
 import ExternalScrollView from "../external-scroll-view"
@@ -24,7 +25,9 @@ import { HomeNavigationParamList, HomeNavigationTypes } from "../../../navigator
 import { AppNavigationNames } from "../../../navigators/app-navigator"
 
 import GridLayoutProvider from "../grid-provider/gridLayoutProvider"
-import { LayoutTransitionRange } from "../grid-provider/gridLayoutManager"
+import { LayoutTransitionRange, MIN_COLUMNS } from "../grid-provider/gridLayoutManager"
+import { ThumbScroll } from "../../index"
+
 export interface Props {
   navigation: NativeStackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>
   sections: RecyclerAssetListSection[]
@@ -33,7 +36,7 @@ export interface Props {
   renderAheadOffset?: number
   disableAutoScrolling?: boolean
   disableRefreshControl?: boolean
-  scrollRef?: any
+  scrollRef?: React.RefObject<Animated.ScrollView>
   scrollHandler: (event: NativeSyntheticEvent<NativeScrollEvent>) => void
   scrollY: SharedValue<number> | undefined
   onSelectedItemsChange?: (assetIds: string[], selectionMode: boolean) => void
@@ -66,8 +69,8 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(({
   const [containerSize, setContainerSize] = useState<number[]>(null)
   const layoutTransitionRange = useSharedValue<LayoutTransitionRange>(null)
   const visibileIndices = useSharedValue<number[]>(null)
-  const [currentColumns, setCurrentColumns] = useState(numColumns)
-
+  const [currentColumns, setCurrentColumns] = useState(numColumns.value)
+  const [viewPortHeight, setViewPortHeight] = useState(0);
   const [extendedState, setExtendedState] = useState<ExtendedState>({
     selectedAssets: {},
     selectedGroups: {},
@@ -287,39 +290,54 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(({
     setCurrentColumns(numColumns.value)
   }
   return (
-    <RecyclerListView
-      ref={rclRef}
-      dataProvider={dataProvider}
-      extendedState={extendedState}
-      layoutProvider={gridLayoutProvider}
-      rowRenderer={rowRenderer}
-      externalScrollView={ExternalScrollView}
-      scrollViewProps={{
-        disableScrollViewPanResponder: false,
-        scrollRefExternal: scrollRef,
-        _onScrollExternal: scrollHandler,
-      }}
-      onVisibleIndicesChanged={(all = [], now, notNow) => {
-        const visibleIndexValue = all[Math.floor(all.length / 2)] || 0
-        if (!pinching.value && all && all.length) {
-          visibileIndices.value = [...all]
-          layoutTransitionRange.value = gridLayoutProvider
-            .getLayoutManager()
-            ?.getLayoutTransitionRangeForIndex(visibleIndexValue, numColumns.value)
-        }
-      }}
-      stopRenderingOnAnimation={pinching}
-      contentContainerStyle={{ paddingTop: 70 }}
-      renderItemContainer={renderItemContainer}
-      renderContentContainer={(props, children) => {
-        return (
-          <Animated.View {...props} style={[props.style, containerStyle]}>
-            {children}
-          </Animated.View>
-        )
-      }}
-      {...extras}
-    />
+    <View style={{ flex: 1 }} onLayout={(e) => {
+      setViewPortHeight(e.nativeEvent.layout.height)
+    }}>
+      <ThumbScroll
+        scrollY={scrollY}
+        hideTimeout={2000}
+        headerHeight={Constants.HeaderHeight}
+        footerHeight={Constants.TabBarHeight}
+        indicatorHeight={50}
+        viewPortHeight={viewPortHeight}
+        layoutHeight={containerSize?.[currentColumns - MIN_COLUMNS] || viewPortHeight}
+        shouldIndicatorHide={false}
+        scrollRef={scrollRef}
+      />
+      <RecyclerListView
+        ref={rclRef}
+        dataProvider={dataProvider}
+        extendedState={extendedState}
+        layoutProvider={gridLayoutProvider}
+        rowRenderer={rowRenderer}
+        externalScrollView={ExternalScrollView}
+        scrollViewProps={{
+          disableScrollViewPanResponder: false,
+          scrollRefExternal: scrollRef,
+          _onScrollExternal: scrollHandler,
+        }}
+        onVisibleIndicesChanged={(all = [], now, notNow) => {
+          const visibleIndexValue = all[Math.floor(all.length / 2)] || 0
+          if (!pinching.value && all && all.length) {
+            visibileIndices.value = [...all]
+            layoutTransitionRange.value = gridLayoutProvider
+              .getLayoutManager()
+              ?.getLayoutTransitionRangeForIndex(visibleIndexValue, numColumns.value)
+          }
+        }}
+        stopRenderingOnAnimation={pinching}
+        contentContainerStyle={{ paddingTop: 70 }}
+        renderItemContainer={renderItemContainer}
+        renderContentContainer={(props, children) => {
+          return (
+            <Animated.View {...props} style={[props.style, containerStyle]}>
+              {children}
+            </Animated.View>
+          )
+        }}
+        {...extras}
+      />
+    </View>
   )
 })
 export default RecyclerAssetList
