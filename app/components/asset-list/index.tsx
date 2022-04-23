@@ -43,12 +43,6 @@ const AssetList = forwardRef<AssetListHandle, Props>(({ refreshData, sections, s
 
       if (scrollY) scrollY.value = translationY.value
     },
-    onBeginDrag: (e) => {
-      //isScrolling.value = true;
-    },
-    onEndDrag: (e) => {
-      //isScrolling.value = false;
-    },
   })
   return (
     <GridProvider>
