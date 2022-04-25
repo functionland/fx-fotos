@@ -8,6 +8,7 @@ export type AssetStory = {
 }
 export type GroupHeader = {
   title: string | undefined
+  date?:Date
   subGroupIds: string[]
 }
 export type RecyclerAssetListSectionData = AssetStory[] | Asset | GroupHeader

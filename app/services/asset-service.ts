@@ -36,6 +36,7 @@ export const categorizeAssets = (assets: MediaLibrary.Asset[]) => {
       lastMonth = month
       lastMonthHeader = {
         title: month,
+        date:new Date(asset.creationTime),
         subGroupIds: [],
       }
       sections.push({
@@ -51,6 +52,7 @@ export const categorizeAssets = (assets: MediaLibrary.Asset[]) => {
       lastDay = day
       lastDayHeader = {
         title: day,
+        date:new Date(asset.creationTime),
         subGroupIds: [],
       }
       const daySection: RecyclerAssetListSection = {

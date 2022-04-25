@@ -1,6 +1,7 @@
-import React, { useEffect, createRef } from "react"
+import React, { useEffect, useState } from "react"
 
-import { StyleSheet, useWindowDimensions, StyleProp, Image, Text, View } from "react-native"
+import { StyleSheet, Image, View } from "react-native"
+import { Text } from "react-native-elements"
 
 import { PanGestureHandler, PanGestureHandlerGestureEvent } from "react-native-gesture-handler"
 import Animated, {
@@ -13,9 +14,13 @@ import Animated, {
   interpolate,
   useSharedValue,
   scrollTo,
-  useAnimatedReaction
+  useAnimatedReaction,
+  runOnJS,
+  FadeIn,
+  FadeOut
 } from "react-native-reanimated"
-
+import { RecyclerAssetListSection, ViewType, GroupHeader } from "../../types"
+import GridLayoutProvider from "../asset-list/grid-provider/gridLayoutProvider"
 interface Props {
   indicatorHeight: number
   hideTimeout: number
@@ -26,10 +31,35 @@ interface Props {
   headerHeight: number
   footerHeight: number
   scrollRef?: React.RefObject<Animated.ScrollView>
+  showYearFilter?: boolean
+  sections?: RecyclerAssetListSection[]
+  layoutProvider?: GridLayoutProvider
+
 }
 export const ThumbScroll: React.FC<Props> = (props) => {
   const opacity = useSharedValue<number>(1);
+  const [yearIndices, setYearIndices] = useState<number[]>([])
+  const [dragging, setDragging] = useState(false);
   Reanimated.addWhitelistedNativeProps({ text: true })
+  useEffect(() => {
+    if (props.showYearFilter && props.sections) {
+      const indices = [];
+      let lastYear = null;
+
+      // Prepare the year filter indices
+      for (let index = 0; index < props.sections.length; index++) {
+        const item = props.sections[index];
+        if (item.type === ViewType.DAY) {
+          const data = item.data as GroupHeader;
+          if (!lastYear || (data.date && data.date.getFullYear() != lastYear)) {
+            indices.push(index);
+            lastYear = data.date?.getFullYear()
+          }
+        }
+      }
+      setYearIndices(indices);
+    }
+  }, [props.sections])
   const _onPanGestureEvent = useAnimatedGestureHandler<
     PanGestureHandlerGestureEvent,
     { prevScrollY: number }
@@ -37,6 +67,7 @@ export const ThumbScroll: React.FC<Props> = (props) => {
     onStart: (_, ctx) => {
       opacity.value = withTiming(1, { duration: 1000 })
       ctx.prevScrollY = props.scrollY.value
+      runOnJS(setDragging)(true)
     },
     onActive: (event, ctx) => {
       const diff = ctx.prevScrollY +
@@ -48,15 +79,19 @@ export const ThumbScroll: React.FC<Props> = (props) => {
     },
     onEnd: () => {
       opacity.value = withDelay(props.hideTimeout, withTiming(0, { duration: 0 }))
+      runOnJS(setDragging)(false)
     },
     onCancel: () => {
       opacity.value = withDelay(props.hideTimeout, withTiming(0, { duration: 0 }))
+      runOnJS(setDragging)(false)
     },
     onFail: () => {
       opacity.value = withDelay(props.hideTimeout, withTiming(0, { duration: 0 }))
+      runOnJS(setDragging)(false)
     },
     onFinish: () => {
       opacity.value = withDelay(props.hideTimeout, withTiming(0, { duration: 0 }))
+      runOnJS(setDragging)(false)
     },
   })
   useAnimatedReaction(() => props.scrollY.value,
@@ -72,8 +107,8 @@ export const ThumbScroll: React.FC<Props> = (props) => {
       transform: [
         {
           translateY: interpolate(
-            props.scrollY.value * (props.viewPortHeight / (props.layoutHeight - props.viewPortHeight)),
-            [0, props.viewPortHeight],
+            props.scrollY.value,//* (props.viewPortHeight / (props.layoutHeight - props.viewPortHeight)),
+            [0, props.layoutHeight],
             [props.headerHeight, props.viewPortHeight - props.footerHeight],
             Extrapolate.CLAMP,
           ),
@@ -84,16 +119,58 @@ export const ThumbScroll: React.FC<Props> = (props) => {
       ],
     }
   })
+  const renderYearFilter = () => {
+    let lastItemY = 0;
+    let lastYIndex = 0;
+    return (<Reanimated.View
+      entering={FadeIn.duration(200)}
+      exiting={FadeOut.duration(200)}>
+      {yearIndices.map((sectionIndex, index) => {
+
+        const section = props.sections[sectionIndex];
+        const layout = props.layoutProvider?.getLayoutManager()?.getLayouts()?.[sectionIndex];
+        if (!section?.data || !layout)
+          return null
+        const data = section.data as GroupHeader;
+        const tY = interpolate(
+          layout.y + props.viewPortHeight / 2,// * (props.viewPortHeight / (props.layoutHeight - props.viewPortHeight)),
+          [0, props.layoutHeight],
+          [props.headerHeight, props.viewPortHeight - props.footerHeight],
+          Extrapolate.CLAMP,
+        ) + 10;
+
+        // If years overlap then will increase the lastYIndex
+        if (lastItemY + 20 >= tY)
+          lastYIndex++
+        else
+          lastYIndex = 0
+        lastItemY = tY;
+        return (<Text
+          key={index}
+          style={[{
+            right: 80,
+            transform: [
+              {
+                translateY: tY + lastYIndex * 20
+              }
+            ]
+          }, styles.yearFilterText]} >
+          {data?.date.getFullYear()}
+        </Text>)
+      })}
+
+    </Reanimated.View>)
+  }
   if (!props.viewPortHeight || !props.layoutHeight)
     return null;
   return (
-    <Reanimated.View style={[styles.scrollIndicatorContainer, { height: props.indicatorHeight }, animatedStyle]}>
+    <Reanimated.View style={[styles.scrollIndicatorContainer, { height: props.indicatorHeight }]}>
+      {dragging ? renderYearFilter() : null}
       <PanGestureHandler
         onGestureEvent={_onPanGestureEvent}
         maxPointers={1}
         minPointers={1}
         shouldCancelWhenOutside={false}
-        ////hitSlop={{ right: 0, width:140 }}
         avgTouches={false}
         enableTrackpadTwoFingerGesture={false}
       >
@@ -104,7 +181,7 @@ export const ThumbScroll: React.FC<Props> = (props) => {
               height: props.indicatorHeight,
               zIndex: 5,
             },
-            props.scrollIndicatorStyle,
+            animatedStyle
           ]}
         >
           <View style={styles.scrollBar}>
@@ -137,7 +214,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     backgroundColor: "whitesmoke",
     height: 50,
-    width: 50,
+    width: 80,
     flexWrap: "wrap",
   },
   image: {
@@ -151,15 +228,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
   },
-  scrollBarText: {
-    position: "absolute",
-    right: 30,
-    top: 10,
-    backgroundColor: "white",
+  yearFilterText: {
+    top: 0,
+    backgroundColor: "gray",
     opacity: 0.8,
-    color: "black",
-    width: 100,
-    borderRadius: 100,
-    alignItems: "center",
-  },
+    padding: 1,
+    paddingHorizontal: 5,
+    borderRadius: 10,
+    position: "absolute",
+    color: "white",
+  }
+
 })
