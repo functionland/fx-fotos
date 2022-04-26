@@ -12,6 +12,7 @@
 import "./i18n"
 import "./utils/ignore-warnings"
 import React from "react"
+import { GestureHandlerRootView } from "react-native-gesture-handler"
 import { SafeAreaProvider, initialWindowMetrics } from "react-native-safe-area-context"
 import { RecoilRoot } from "recoil"
 import { initFonts } from "./theme/fonts" // expo
@@ -32,7 +33,7 @@ export const NAVIGATION_PERSISTENCE_KEY = "NAVIGATION_STATE"
  */
 
 function App() {
-  
+
   useBackButtonHandler(canExit)
   const { onNavigationStateChange, isRestored: isNavigationStateRestored } =
     useNavigationPersistence(storage, NAVIGATION_PERSISTENCE_KEY)
@@ -56,17 +57,20 @@ function App() {
 
   // otherwise, we're ready to render the app
   return (
-    <ToggleStorybook>
-      <ThemeProvider>
-        <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-          <ErrorBoundary catchErrors={"prod"}>
-            <RecoilRoot>
-              <AppNavigator onStateChange={onNavigationStateChange} />
-            </RecoilRoot>
-          </ErrorBoundary>
-        </SafeAreaProvider>
-      </ThemeProvider>
-    </ToggleStorybook>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ToggleStorybook>
+        <ThemeProvider>
+          <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+            <ErrorBoundary catchErrors={"prod"}>
+              <RecoilRoot>
+                <AppNavigator onStateChange={onNavigationStateChange} />
+              </RecoilRoot>
+            </ErrorBoundary>
+          </SafeAreaProvider>
+        </ThemeProvider>
+      </ToggleStorybook>
+    </GestureHandlerRootView>
+
   )
 }
 
