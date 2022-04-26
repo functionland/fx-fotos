@@ -303,6 +303,9 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(({
         layoutHeight={containerSize?.[currentColumns - MIN_COLUMNS] || viewPortHeight}
         shouldIndicatorHide={false}
         scrollRef={scrollRef}
+        showYearFilter={true}
+        sections={sections}
+        layoutProvider={gridLayoutProvider}
       />
       <RecyclerListView
         ref={rclRef}
