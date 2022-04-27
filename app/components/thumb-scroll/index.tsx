@@ -22,7 +22,6 @@ import Animated, {
 import { RecyclerAssetListSection, ViewType, GroupHeader } from "../../types"
 import GridLayoutProvider from "../asset-list/grid-provider/gridLayoutProvider"
 interface Props {
-  indicatorHeight: number
   hideTimeout: number
   dragY?: Reanimated.SharedValue<number>
   scrollY: Reanimated.SharedValue<number>
@@ -114,7 +113,7 @@ export const ThumbScroll: React.FC<Props> = (props) => {
           ),
         },
         {
-          translateX: withTiming(interpolate(opacity.value, [0, 1], [40, 0], Extrapolate.CLAMP), { duration: 500 })
+          translateX: withTiming(interpolate(opacity.value, [0, 1], [60, 0], Extrapolate.CLAMP), { duration: 500 })
         },
       ],
     }
@@ -164,7 +163,7 @@ export const ThumbScroll: React.FC<Props> = (props) => {
   if (!props.viewPortHeight || !props.layoutHeight)
     return null;
   return (
-    <Reanimated.View style={[styles.scrollIndicatorContainer, { height: props.indicatorHeight }]}>
+    <Reanimated.View style={styles.scrollIndicatorContainer}>
       {dragging ? renderYearFilter() : null}
       <PanGestureHandler
         onGestureEvent={_onPanGestureEvent}
@@ -177,10 +176,6 @@ export const ThumbScroll: React.FC<Props> = (props) => {
         <Reanimated.View
           style={[
             styles.scrollIndicator,
-            {
-              height: props.indicatorHeight,
-              zIndex: 5,
-            },
             animatedStyle
           ]}
         >
@@ -203,19 +198,13 @@ const styles = StyleSheet.create({
     top: 0,
     position: "absolute",
     right: 0,
-    width: 50,
+    width: 60,
     height: 50,
     opacity: 1,
     zIndex: 99,
   },
   scrollIndicator: {
-    right: -15,
-    zIndex: 4,
-    borderRadius: 50,
-    backgroundColor: "whitesmoke",
-    height: 50,
-    width: 80,
-    flexWrap: "wrap",
+    flex:1,
   },
   image: {
     marginLeft: 12,
@@ -224,7 +213,12 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
   scrollBar: {
-    flex: 1,
+    position:"absolute",
+    right: -15,
+    borderRadius: 50,
+    backgroundColor: "whitesmoke",
+    height: 50,
+    width: 50,
     flexDirection: "row",
     flexWrap: "wrap",
   },

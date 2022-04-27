@@ -298,7 +298,6 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(({
         hideTimeout={2000}
         headerHeight={Constants.HeaderHeight}
         footerHeight={Constants.TabBarHeight}
-        indicatorHeight={50}
         viewPortHeight={viewPortHeight}
         layoutHeight={containerSize?.[currentColumns - MIN_COLUMNS] || viewPortHeight}
         shouldIndicatorHide={false}
