@@ -26,7 +26,7 @@ export const categorizeAssets = (assets: MediaLibrary.Asset[]) => {
   let lastMonthHeader: GroupHeader = null
   let lastDayHeader: GroupHeader = null
   for (const asset of assets) {
-    const times = moment(asset.creationTime).format("MMMM YYYY|dddd, MMM D, YYYY")
+    const times = moment(asset.modificationTime).format("MMMM YYYY|dddd, MMM D, YYYY")
     const month = times.split("|")[0]
     const day = times.split("|")[1]
 
@@ -35,12 +35,13 @@ export const categorizeAssets = (assets: MediaLibrary.Asset[]) => {
       lastMonth = month
       lastMonthHeader = {
         title: month,
+        date:new Date(asset.modificationTime),
         subGroupIds: [],
       }
       sections.push({
         id: month,
         data: {
-          ...lastMonthHeader
+          ...lastMonthHeader,
         },
         type: ViewType.MONTH,
       })
@@ -50,12 +51,13 @@ export const categorizeAssets = (assets: MediaLibrary.Asset[]) => {
       lastDay = day
       lastDayHeader = {
         title: day,
+        date:new Date(asset.modificationTime),
         subGroupIds: [],
       }
       const daySection: RecyclerAssetListSection = {
         id: `${month}-${day}`,
         data: {
-          ...lastDayHeader
+          ...lastDayHeader,
         },
         type: ViewType.DAY,
       }
@@ -78,13 +80,33 @@ export const categorizeAssets = (assets: MediaLibrary.Asset[]) => {
   return sections
 }
 
-export const getAllMedias = async () => {
+export const getAssets = async (
+  pageSize = 100,
+  afterAssetId: string,
+): Promise<MediaLibrary.PagedInfo<MediaLibrary.Asset>> => {
   try {
-    const medias = await MediaLibrary.getAssetsAsync({
-      first: 500,
-      sortBy: "creationTime",
-    })
+    const medias = await MediaLibrary.getAssetsAsync(
+      afterAssetId
+        ? {
+            first: pageSize,
+            after: afterAssetId,
+            sortBy: "modificationTime",
+          }
+        : {
+            first: pageSize,
+            sortBy: "modificationTime",
+          },
+    )
     return medias
+  } catch (error) {
+    console.error("error", error)
+    throw error
+  }
+}
+export const deleteAssets = async (assetIds: string[]): Promise<boolean> => {
+  try {
+    const deleted = await MediaLibrary.deleteAssetsAsync(assetIds)
+    return deleted
   } catch (error) {
     console.error("error", error)
     throw error

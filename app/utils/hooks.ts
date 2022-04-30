@@ -3,7 +3,7 @@ import Animated, {
   useAnimatedStyle,
   interpolate,
   useAnimatedReaction,
-  withSpring
+  withSpring,
 } from "react-native-reanimated"
 export const useFloatHederAnimation = (maxHeight: number) => {
   const scrollY = useSharedValue(0)
@@ -23,16 +23,17 @@ export const useFloatHederAnimation = (maxHeight: number) => {
         )
       }
     },
-    [scrollY],
+    [maxHeight],
   )
   const styles = useAnimatedStyle(() => {
     return {
       transform: [
         {
-            translateY: diffY.value
+          translateY: diffY.value,
         },
       ],
     }
-  })
+  },[])
+  
   return [scrollY, styles]
 }

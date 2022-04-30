@@ -11,18 +11,17 @@
  */
 import "./i18n"
 import "./utils/ignore-warnings"
-import * as React from "react"
+import React from "react"
+import { GestureHandlerRootView } from "react-native-gesture-handler"
 import { SafeAreaProvider, initialWindowMetrics } from "react-native-safe-area-context"
-import {
-  RecoilRoot,
-} from 'recoil';
+import { RecoilRoot } from "recoil"
 import { initFonts } from "./theme/fonts" // expo
 import * as storage from "./utils/storage"
 import { useBackButtonHandler, AppNavigator, canExit, useNavigationPersistence } from "./navigators"
 import { ToggleStorybook } from "../storybook/toggle-storybook"
 import { ErrorBoundary } from "./screens/error/error-boundary"
 import * as MediaLibrary from "expo-media-library"
-
+import { ThemeProvider } from './theme';
 // This puts screens in a native ViewController or Activity. If you want fully native
 // stack navigation, use `createNativeStackNavigator` in place of `createStackNavigator`:
 // https://github.com/kmagiera/react-native-screens#using-native-stack-navigator
@@ -32,12 +31,12 @@ export const NAVIGATION_PERSISTENCE_KEY = "NAVIGATION_STATE"
 /**
  * This is the root component of our app.
  */
+
 function App() {
+
   useBackButtonHandler(canExit)
-  const {
-    onNavigationStateChange,
-    isRestored: isNavigationStateRestored,
-  } = useNavigationPersistence(storage, NAVIGATION_PERSISTENCE_KEY)
+  const { onNavigationStateChange, isRestored: isNavigationStateRestored } =
+    useNavigationPersistence(storage, NAVIGATION_PERSISTENCE_KEY)
 
   const [, getPermissions] = MediaLibrary.usePermissions()
   // Kick off initial async loading actions, like loading fonts and RootStore
@@ -58,15 +57,20 @@ function App() {
 
   // otherwise, we're ready to render the app
   return (
-    <ToggleStorybook>
-      <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-        <ErrorBoundary catchErrors={"prod"}>
-          <RecoilRoot>
-            <AppNavigator onStateChange={onNavigationStateChange} />
-          </RecoilRoot>
-        </ErrorBoundary>
-      </SafeAreaProvider>
-    </ToggleStorybook>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ToggleStorybook>
+        <ThemeProvider>
+          <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+            <ErrorBoundary catchErrors={"prod"}>
+              <RecoilRoot>
+                <AppNavigator onStateChange={onNavigationStateChange} />
+              </RecoilRoot>
+            </ErrorBoundary>
+          </SafeAreaProvider>
+        </ThemeProvider>
+      </ToggleStorybook>
+    </GestureHandlerRootView>
+
   )
 }
 

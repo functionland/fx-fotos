@@ -1,60 +1,65 @@
-import React from "react"
-import {
-    StyleSheet,
-    Animated as RAnimated,
-} from "react-native"
+import React, { forwardRef, useImperativeHandle, useRef } from "react"
 import Animated, {
-    useSharedValue,
-    useAnimatedScrollHandler,
-    useAnimatedRef,
-    SharedValue,
+  useSharedValue,
+  useAnimatedScrollHandler,
+  useAnimatedRef,
+  SharedValue,
 } from "react-native-reanimated"
 
-import RecyclerAssetList from './recycler-asset-list';
-import GridProvider from './gridProvider/gridContext'
-import PinchZoom from './gridProvider/pinchZoom';
+import RecyclerAssetList, { RecyclerAssetListHandler } from "./recycler-asset-list"
+import GridProvider from "./grid-provider/gridContext"
+import PinchZoom from "./grid-provider/pinchZoom"
 
 import { RecyclerAssetListSection } from "../../types"
-import { StackNavigationProp } from "@react-navigation/stack"
-import { HomeNavigationParamList, HomeNavigationTypes } from "../../navigators/home-navigation"
+import { NativeStackNavigationProp } from "@react-navigation/native-stack"
+import { HomeNavigationParamList, HomeNavigationTypes } from "../../navigators/home-navigator"
 interface Props {
-    refreshData: () => Promise<void>
-    sections: RecyclerAssetListSection[]
-    scrollY: SharedValue<number> | undefined
-    navigation: StackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>
+  refreshData: () => Promise<void>
+  sections: RecyclerAssetListSection[]
+  scrollY: SharedValue<number> | undefined
+  onSelectedItemsChange?: (assetIds: string[], selectionMode: boolean) => void
+  navigation: NativeStackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>
 }
-
-const AssetList = ({ refreshData, sections, scrollY, navigation }: Props): JSX.Element => {
-    const translationY = useSharedValue(0)
-    const scrollRefExternal = useAnimatedRef<Animated.ScrollView>()
-
-    const scrollHandler = useAnimatedScrollHandler({
-        onScroll: (event) => {
-            translationY.value = event.contentOffset.y
-
-            if (scrollY) scrollY.value = translationY.value
-        },
-        onBeginDrag: (e) => {
-            //isScrolling.value = true;
-        },
-        onEndDrag: (e) => {
-            //isScrolling.value = false;
-        },
-    })
-    return (
-        <GridProvider>
-            <PinchZoom>
-                <RecyclerAssetList
-                    navigation={navigation}
-                    refreshData={refreshData}
-                    sections={sections}
-                    scrollHandler={scrollHandler}
-                    scrollRef={scrollRefExternal}
-                    scrollY={scrollY}
-                />
-            </PinchZoom>
-        </GridProvider>
-    );
+export interface AssetListHandle {
+  resetSelectedItems: () => void,
+  toggleSelectionMode: () => void
 }
+// eslint-disable-next-line react/display-name
+const AssetList = forwardRef<AssetListHandle, Props>(({ refreshData, sections, scrollY, navigation, onSelectedItemsChange }, ref): JSX.Element => {
+  const translationY = useSharedValue(0)
+  const scrollRefExternal = useAnimatedRef<Animated.ScrollView>()
+  const recyclerAssetListRef = useRef<RecyclerAssetListHandler>();
+  useImperativeHandle<AssetListHandle>(ref, () => ({
+    resetSelectedItems: () => {
+      recyclerAssetListRef.current?.resetSelectedItems()
+    },
+    toggleSelectionMode: () => {
+      recyclerAssetListRef.current?.toggleSelectionMode()
+    }
+  }));
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      translationY.value = event.contentOffset.y
 
-export default AssetList;
+      if (scrollY) scrollY.value = translationY.value
+    },
+  })
+  return (
+    <GridProvider>
+      <PinchZoom>
+        <RecyclerAssetList
+          ref={recyclerAssetListRef}
+          navigation={navigation}
+          refreshData={refreshData}
+          sections={sections}
+          scrollHandler={scrollHandler}
+          scrollRef={scrollRefExternal}
+          scrollY={scrollY}
+          onSelectedItemsChange={onSelectedItemsChange}
+        />
+      </PinchZoom>
+    </GridProvider>
+  )
+})
+
+export default AssetList

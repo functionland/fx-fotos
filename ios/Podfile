@@ -3,7 +3,7 @@
 # More info here: https://github.com/jamonholmgren/react-native-colo-loco
 
 # require_relative '../node_modules/react-native-colo-loco/scripts/ios.rb'
-# link_colocated_native_files(app_name: 'Photos', app_path: "../app")
+# link_colocated_native_files(app_name: 'Fotos', app_path: "../app")
 
 
 require File.join(File.dirname(`node --print "require.resolve('expo/package.json')"`), "scripts/autolinking")
@@ -15,7 +15,7 @@ platform :ios, '12.0'
 require 'json'
 podfile_properties = JSON.parse(File.read('./Podfile.properties.json')) rescue {}
 
-target 'photos' do
+target 'fotos' do
   use_expo_modules!
   config = use_native_modules!
 
@@ -26,7 +26,7 @@ target 'photos' do
 
   pod 'RNSharedElement', :path => '../node_modules/react-native-shared-element'
 
-  target 'photosTests' do
+  target 'fotosTests' do
     inherit! :complete
     # Pods for testing
   end

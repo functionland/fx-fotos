@@ -1,6 +1,5 @@
 import React, { memo } from "react"
-import { StyleSheet, View, LayoutChangeEvent, Image } from "react-native"
-import FastImage from "react-native-fast-image"
+import { StyleSheet, View, Image } from "react-native"
 
 import { Asset } from "../../../../types"
 import { palette } from "../../../../theme/palette"
@@ -68,7 +67,7 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: palette.offWhite,
     borderColor: palette.white,
-    borderWidth: 1,
+    borderWidth: 2,
     flex: 1,
   },
   image: {
@@ -83,13 +82,15 @@ const styles = StyleSheet.create({
     zIndex: 0,
   },
   sharedElementContainer: {
-    flex:1,
+    flex: 1,
   },
 })
 
 const areEqual = (prev: Props, next: Props) => {
-	return (prev?.asset?.id === next?.asset?.id
-		&& prev?.selectionMode === next?.selectionMode
-		&& prev?.selected === next?.selected)
+  return (
+    prev?.asset?.id === next?.asset?.id &&
+    prev?.selectionMode === next?.selectionMode &&
+    prev?.selected === next?.selected
+  )
 }
-export default memo(AssetItem, areEqual);
+export default memo(AssetItem, areEqual)

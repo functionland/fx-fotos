@@ -1,27 +1,23 @@
 import React from "react"
 import { View, Image, StyleSheet } from "react-native"
-import FontAwesome5 from "react-native-vector-icons/FontAwesome5"
 import { BottomTabHeaderProps } from "@react-navigation/bottom-tabs"
 import { getFocusedRouteNameFromRoute } from "@react-navigation/native"
-
+import Animated from "react-native-reanimated"
 import { Text } from "../text"
 import { palette, Constants } from "../../theme"
-import { HomeNavigationTypes } from "../../navigators/home-navigation"
+import { HomeNavigationTypes } from "../../navigators/home-navigator"
 
-interface Props extends BottomTabHeaderProps {}
+type Props = BottomTabHeaderProps
 
 export const TabHeader = ({ route, options, ...props }: Props) => {
-  const routeName = getFocusedRouteNameFromRoute(route)
-
-  if (routeName === HomeNavigationTypes.PhotoScreen) {
-    return null
-  }
-
   return (
-    <View {...props} style={[styles.container, options?.headerStyle]}>
+    <Animated.View {...props} style={[styles.container, options?.headerStyle]}>
+      <View style={styles.startSection}>
+        {options.headerLeft ? options.headerLeft() : null}
+      </View>
       {options?.title ? (
         <Text>{options?.title}</Text>
-      ) : (
+      ) : (options.headerTitle ? options.headerTitle() :
         <Image
           style={styles.logo}
           fadeDuration={0}
@@ -30,9 +26,9 @@ export const TabHeader = ({ route, options, ...props }: Props) => {
         />
       )}
       <View style={styles.endSection}>
-        {/* <FontAwesome5 name={"user-circle"} size={35} color="blue" /> */}
+        {options.headerRight ? options.headerRight() : null}
       </View>
-    </View>
+    </Animated.View>
   )
 }
 
@@ -46,7 +42,13 @@ const styles = StyleSheet.create({
   },
   endSection: {
     end: 0,
-    paddingEnd: 15,
+    paddingEnd: 3,
+    position: "absolute",
+
+  },
+  startSection: {
+    start: 0,
+    paddingStart: 3,
     position: "absolute",
   },
   logo: {

@@ -1,6 +1,5 @@
 import React from "react"
 import { View, StyleSheet, TouchableNativeFeedback } from "react-native"
-import { TouchableOpacity } from "react-native-gesture-handler"
 import Icon from "react-native-vector-icons/AntDesign"
 
 import { widthPercentageToDP } from "react-native-responsive-screen"
