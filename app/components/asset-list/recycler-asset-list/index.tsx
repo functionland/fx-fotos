@@ -215,14 +215,7 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(({
   const animatedReactionWrapper = () => {
     forcRenderRCL()
   }
-  useEffect(() => {
-    const heights = Object.values(
-      gridLayoutProvider.getLayoutManager?.()?.getAllContentDimension()?.height || {},
-    )
-    if (heights.length) {
-      setContainerSize(heights)
-    }
-  }, [gridLayoutProvider])
+
   useAnimatedReaction(
     () => {
       return { pinchingValue: pinching.value, numColumnsValue: numColumns.value }
@@ -281,7 +274,7 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(({
     return style
   }, [containerSize])
 
-  console.log("Render: Recycle-Asset-List", currentColumns)
+  console.log("Render: Recycle-Asset-List", currentColumns, containerSize)
 
   const forcRenderRCL = () => {
     console.log("forcRenderRCL", numColumns.value)
@@ -317,6 +310,14 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(({
           disableScrollViewPanResponder: false,
           scrollRefExternal: scrollRef,
           _onScrollExternal: scrollHandler,
+          onLayout: () => {
+            const heights = Object.values(
+              gridLayoutProvider.getLayoutManager?.()?.getAllContentDimension()?.height || {},
+            )
+            if (heights.length) {
+              setContainerSize(heights)
+            }
+          }
         }}
         onVisibleIndicesChanged={(all = [], now, notNow) => {
           const visibleIndexValue = all[Math.floor(all.length / 2)] || 0

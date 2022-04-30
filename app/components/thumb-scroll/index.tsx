@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
     zIndex: 99,
   },
   scrollIndicator: {
-    flex:1,
+    flex: 1,
   },
   image: {
     marginLeft: 12,
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
   scrollBar: {
-    position:"absolute",
+    position: "absolute",
     right: -15,
     borderRadius: 50,
     backgroundColor: "whitesmoke",

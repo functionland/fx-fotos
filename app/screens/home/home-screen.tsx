@@ -14,7 +14,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { HomeNavigationParamList, HomeNavigationTypes } from "../../navigators/home-navigator"
 import { mediasState, recyclerSectionsState } from "../../store"
 import { Icon, Text } from "react-native-elements"
-
+import { Assets } from "../../services/localdb"
 interface HomeScreenProps {
   navigation: NativeStackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>
 }
@@ -68,7 +68,19 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     }
   }, [selectionMode, selectedItems])
   useEffect(() => {
-    if (isReady) prepareAssets()
+
+    if (isReady) {
+      (async () => {
+        const ass = await Assets.getAll();
+        setMedias(prev => {
+          return [...prev, ...ass]
+        })
+        //prepareAssets()
+        console.log("localdb assets", ass.length,ass.length?ass[0]:"")
+      })();
+
+
+    }
   }, [isReady])
 
   const cancelSelectionMode = () => {
@@ -106,9 +118,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         setMedias(prev => {
           return [...prev, ...allMedias.assets]
         })
+        Assets.addOrUpdate(allMedias.assets);
         if (!allMedias.hasNextPage) break
         first = first * 4
-      } while (true)
+      } while (true && first < 80)
     } catch (error) {
       console.error("prepareAssets:", error)
     }

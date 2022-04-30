@@ -1,12 +1,14 @@
 import { Entities, RealmDB, Schemas } from "../../realmdb"
 
-export const getAll = (orderby: "asc" | "desc" = "desc"): Promise<Entities.AssetEntity[]> => {
+export const getAll = (
+  descriptor = "modificationTime",
+  orderby: "asc" | "desc" = "desc",
+): Promise<Entities.AssetEntity[]> => {
   return RealmDB()
     .then((realm) => {
       const assets = realm
         .objects<Entities.AssetEntity>(Schemas.Asset.name)
-        .sorted("creationTime", orderby === "desc")
-        .map((asset) => ({ ...asset }))
+        .sorted(descriptor, orderby === "desc")
       return assets
     })
     .catch((error) => {
@@ -34,6 +36,7 @@ export const addOrUpdate = (assets: Entities.AssetEntity[]): Promise<Entities.As
                 ),
               )
             }
+            console.log("addOrUpdate result", result.length)
             resolve(result)
           })
         } catch (error) {
