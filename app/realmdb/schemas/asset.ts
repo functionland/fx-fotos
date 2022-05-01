@@ -46,7 +46,7 @@ export const Asset = {
     /**
      * Sync statis with box
      */
-    isSynced: "bool",
+    isSynced:  { type: "bool", default: false },
     /**
      * Sync date with box
      */

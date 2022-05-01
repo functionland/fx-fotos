@@ -15,12 +15,14 @@ import { HomeNavigationParamList, HomeNavigationTypes } from "../../navigators/h
 import { mediasState, recyclerSectionsState } from "../../store"
 import { Icon, Text } from "react-native-elements"
 import { Assets } from "../../services/localdb"
+import { Entities } from "../../realmdb"
 interface HomeScreenProps {
   navigation: NativeStackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>
 }
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [isReady, setIsReady] = useState(false)
+  const realmAssets = useRef<Realm.Results<Entities.AssetEntity & Realm.Object>>(null);
   const [medias, setMedias] = useRecoilState(mediasState)
   const [recyclerSections, setRecyclerSections] = useRecoilState(recyclerSectionsState);
   // Get a custom hook to animate the header
@@ -71,18 +73,25 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
     if (isReady) {
       (async () => {
-        const ass = await Assets.getAll();
-        setMedias(prev => {
-          return [...prev, ...ass]
-        })
-        //prepareAssets()
-        console.log("localdb assets", ass.length,ass.length?ass[0]:"")
+        realmAssets.current = await Assets.getAll();
+        const assets = [...realmAssets.current.snapshot()]
+        setMedias(assets)
+        realmAssets.current.addListener(onDbAssetChange)
+        syncAssets(assets.length ? assets?.[0].modificationTime : 0)
       })();
-
-
+    }
+    // remove listener after screen disposed
+    return () => {
+      if (realmAssets.current)
+        realmAssets.current.removeAllListeners();
     }
   }, [isReady])
-
+  const onDbAssetChange = (collection: Realm.Collection<Entities.AssetEntity>, changes: Realm.CollectionChangeSet) => {
+    console.log("onDbAssetChange", collection?.length, changes)
+    setMedias(() => {
+      return [...collection.snapshot()]
+    })
+  }
   const cancelSelectionMode = () => {
     assetListRef?.current?.toggleSelectionMode();
   }
@@ -109,21 +118,20 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       ]
     )
   }
-  const prepareAssets = async () => {
+  const syncAssets = async (lastTime = 0) => {
     try {
       let first = 20
       let allMedias: MediaLibrary.PagedInfo<MediaLibrary.Asset> = null
+      let lastAsset: MediaLibrary.Asset = null;
       do {
         allMedias = await AssetService.getAssets(first, allMedias?.endCursor)
-        setMedias(prev => {
-          return [...prev, ...allMedias.assets]
-        })
-        Assets.addOrUpdate(allMedias.assets);
+        await Assets.addOrUpdate(allMedias.assets);
         if (!allMedias.hasNextPage) break
         first = first * 4
-      } while (true && first < 80)
+        lastAsset = allMedias.assets?.[allMedias.assets.length - 1];
+      } while (!allMedias.hasNextPage && lastAsset.modificationTime < lastTime)
     } catch (error) {
-      console.error("prepareAssets:", error)
+      console.error("syncAssets:", error)
     }
   }
   useEffect(() => {
@@ -131,7 +139,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       setRecyclerSections([...AssetService.categorizeAssets([...medias])]);
   }, [medias])
   const onSelectedItemsChange = (assetIds: string[], selectionMode: boolean) => {
-    console.log("onSelectedItemsChange:", assetIds, selectionMode)
     setSelectionMode(selectionMode);
     setSelectedItems(assetIds);
   }

@@ -3,7 +3,7 @@ import { Entities, RealmDB, Schemas } from "../../realmdb"
 export const getAll = (
   descriptor = "modificationTime",
   orderby: "asc" | "desc" = "desc",
-): Promise<Entities.AssetEntity[]> => {
+): Promise<Realm.Results<Entities.AssetEntity & Realm.Object>> => {
   return RealmDB()
     .then((realm) => {
       const assets = realm
@@ -29,18 +29,16 @@ export const addOrUpdate = (assets: Entities.AssetEntity[]): Promise<Entities.As
                 realm.create<Entities.AssetEntity>(
                   Schemas.Asset.name,
                   {
-                    isSynced: false,
                     ...asset,
                   },
                   Realm.UpdateMode.Modified,
                 ),
               )
             }
-            console.log("addOrUpdate result", result.length)
             resolve(result)
           })
         } catch (error) {
-          console.error("addOrUpdate error!", error)
+          console.error("addOrUpdateAssets error!", error)
           reject(error)
         }
       })
