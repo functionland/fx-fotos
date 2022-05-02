@@ -42,8 +42,16 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     }
   }
   useEffect(() => {
-    requestAndroidPermission()
+    requestAndroidPermission();
+
+    // remove listener after screen disposed
+    return () => {
+      if (realmAssets.current) {
+        realmAssets.current.removeAllListeners();
+      }
+    }
   }, [])
+
   useEffect(() => {
     if (selectionMode) {
       navigation.setOptions({
@@ -69,29 +77,42 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       })
     }
   }, [selectionMode, selectedItems])
+
   useEffect(() => {
 
     if (isReady) {
       (async () => {
         realmAssets.current = await Assets.getAll();
-        const assets = [...realmAssets.current.snapshot()]
+
+        // toJSON takes long time to response need to optimize this
+        const assets = realmAssets.current.toJSON()
         setMedias(assets)
         realmAssets.current.addListener(onDbAssetChange)
-        syncAssets(assets.length ? assets?.[0].modificationTime : 0)
+        await syncAssets(assets.length ? assets?.[0].modificationTime : 0)
       })();
     }
-    // remove listener after screen disposed
-    return () => {
-      if (realmAssets.current)
-        realmAssets.current.removeAllListeners();
-    }
+
   }, [isReady])
+
+  useEffect(() => {
+    if (medias && medias.length)
+      setRecyclerSections([...AssetService.categorizeAssets([...medias])]);
+  }, [medias])
+
   const onDbAssetChange = (collection: Realm.Collection<Entities.AssetEntity>, changes: Realm.CollectionChangeSet) => {
-    console.log("onDbAssetChange", collection?.length, changes)
-    setMedias(() => {
-      return [...collection.snapshot()]
+    setMedias(prev => {
+      let assets=[...prev];
+      if (changes.deletions?.length) {
+        assets = assets.filter((_, index) => !changes.deletions.some(i=>i===index))
+        return [...assets]
+      }
+      if (changes.insertions?.length)
+        // toJSON takes long time to response need to optimize this
+        return collection.toJSON()
+      return prev
     })
   }
+
   const cancelSelectionMode = () => {
     assetListRef?.current?.toggleSelectionMode();
   }
@@ -106,18 +127,25 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         {
           text: "Yes",
           onPress: async () => {
-            const deleted = await AssetService.deleteAssets(selectedItems);
-            if (deleted) {
-              setMedias(prev => {
-                return prev.filter(item => !selectedItems.some(selectedId => selectedId === item.id))
-              })
-              assetListRef?.current?.resetSelectedItems();
+            try {
+              const deleted = await AssetService.deleteAssets(selectedItems);
+              if (deleted) {
+                setMedias(prev => {
+                  return prev.filter(item => !selectedItems.some(selectedId => selectedId === item.id))
+                })
+                assetListRef?.current?.resetSelectedItems();
+                await Assets.remove(selectedItems);
+              }
+            } catch (error) {
+              console.log("deleteAssets: ", error)
             }
+
           }
         }
       ]
     )
   }
+
   const syncAssets = async (lastTime = 0) => {
     try {
       let first = 20
@@ -134,10 +162,18 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       console.error("syncAssets:", error)
     }
   }
-  useEffect(() => {
-    if (medias && medias.length)
-      setRecyclerSections([...AssetService.categorizeAssets([...medias])]);
-  }, [medias])
+
+  const onAssetLoadError = (error: NativeSyntheticEvent<ImageErrorEventData>) => {
+    if (error?.nativeEvent?.error) {
+      // Error is something like "/storage/emulated/0/DCIM/Camera/20220501_200313.jpg: open failed: ENOENT (No such file or directory)"
+      const errorParts = (error.nativeEvent.error as string)?.split(':');
+      if (errorParts?.[1]?.includes("open failed")) {
+        console.log("onAssetLoadError:", errorParts?.[0])
+        Assets.removeByUri(errorParts?.[0].trim())
+      }
+    }
+  }
+
   const onSelectedItemsChange = (assetIds: string[], selectionMode: boolean) => {
     setSelectionMode(selectionMode);
     setSelectedItems(assetIds);
@@ -166,7 +202,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           sections={recyclerSections}
           scrollY={scrollY}
           onSelectedItemsChange={onSelectedItemsChange}
-          navigation={navigation} />
+          navigation={navigation}
+          onAssetLoadError={onAssetLoadError}
+        />
       )}
     </Screen>
   )

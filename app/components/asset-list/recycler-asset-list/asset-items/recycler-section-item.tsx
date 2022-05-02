@@ -1,5 +1,5 @@
 import React from "react"
-import { TouchableHighlight, StyleSheet } from "react-native"
+import { TouchableHighlight, StyleSheet, NativeSyntheticEvent, ImageErrorEventData } from "react-native"
 import { GroupHeader, RecyclerAssetListSection, ViewType } from "../../../../types"
 import StoryListItem from "./story-list-item"
 import AssetItem from "./asset-item"
@@ -12,18 +12,20 @@ interface Props {
   selected: boolean
   onLongPress: (section: RecyclerAssetListSection) => void
   onPress: (section: RecyclerAssetListSection) => void
+  onAssetLoadError?: (error: NativeSyntheticEvent<ImageErrorEventData>) => void
 }
 const getSectionByType = (
   section: RecyclerAssetListSection,
   selectionMode: boolean,
   selected: boolean,
+  onAssetLoadError?: (error: NativeSyntheticEvent<ImageErrorEventData>) => void
 ) => {
   switch (section.type) {
     case ViewType.STORY: {
       return <StoryListItem stories={section.data} selectionMode={selectionMode} />
     }
     case ViewType.ASSET: {
-      return <AssetItem asset={section.data} selectionMode={selectionMode} selected={selected} />
+      return <AssetItem onError={onAssetLoadError} asset={section.data} selectionMode={selectionMode} selected={selected} />
     }
     case ViewType.MONTH: {
       const groupHeader: GroupHeader = section.data
@@ -58,6 +60,7 @@ const RecyclerSectionItem: React.FC<Props> = ({
   selected,
   onLongPress,
   onPress,
+  onAssetLoadError
 }) => {
   const onPressItem = () => {
     if (onPress) {
@@ -78,7 +81,7 @@ const RecyclerSectionItem: React.FC<Props> = ({
       onLongPress={onLongPressItem}
       onPress={onPressItem}
     >
-      {getSectionByType(section, selectionMode, selected)}
+      {getSectionByType(section, selectionMode, selected, onAssetLoadError)}
     </TouchableHighlight>
   )
 }

@@ -3,6 +3,7 @@ import {
   NativeSyntheticEvent,
   NativeScrollEvent,
   View,
+  ImageErrorEventData
 } from "react-native"
 import Animated, {
   useSharedValue,
@@ -40,6 +41,7 @@ export interface Props {
   scrollHandler: (event: NativeSyntheticEvent<NativeScrollEvent>) => void
   scrollY: SharedValue<number> | undefined
   onSelectedItemsChange?: (assetIds: string[], selectionMode: boolean) => void
+  onAssetLoadError?: (error: NativeSyntheticEvent<ImageErrorEventData>) => void
 }
 
 export interface ExtendedState {
@@ -59,6 +61,7 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(({
   scrollRef,
   scrollY,
   onSelectedItemsChange,
+  onAssetLoadError,
   ...extras
 }, ref): JSX.Element => {
   const rclRef = useRef<RecyclerListView>()
@@ -163,6 +166,7 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(({
           selected={!!extendedState.selectedAssets[data.id]}
           onLongPress={onLongPress}
           onPress={onPress}
+          onAssetLoadError={onAssetLoadError}
         />
       )
     },
