@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from "react"
-import { StyleSheet, Alert, View,TouchableOpacity } from "react-native"
+import { StyleSheet, Alert, View, TouchableOpacity, Image } from "react-native"
 import * as MediaLibrary from "expo-media-library"
 import LottieView from "lottie-react-native"
 import { useRecoilState } from "recoil"
-import {  Header as HeaderRNE, HeaderProps, Icon, Text } from "@rneui/themed"
+import { Header as HeaderRNE, HeaderProps, Icon, Text } from "@rneui/themed"
+import Animation from "react-native-reanimated"
 
 import { Screen } from "../../components"
 import { AssetService } from "../../services"
@@ -16,6 +17,7 @@ import { HomeNavigationParamList, HomeNavigationTypes } from "../../navigators/h
 import { mediasState, recyclerSectionsState } from "../../store"
 import { Assets } from "../../services/localdb"
 import { Entities } from "../../realmdb"
+import { Header } from "../../components/header"
 interface HomeScreenProps {
   navigation: NativeStackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>
 }
@@ -188,24 +190,14 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       style={styles.screen}
       backgroundColor={color.transparent}
     >
-      <HeaderRNE
-        leftComponent={{
-          icon: 'menu',
-        }}
-        rightComponent={
-          <View style={styles.headerRight}>
-            <TouchableOpacity onPress={()=>null}>
-              <Icon name="description"  />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={{ marginLeft: 10 }}
-              onPress={()=>null}
-            >
-              <Icon type="antdesign" name="rocket1" />
-            </TouchableOpacity>
-          </View>
-        }
-        centerComponent={{ text: 'Header', style: styles.heading }}
+      <Header
+        style={[headerStyles]}
+        centerComponent={<Image
+          style={styles.logo}
+          fadeDuration={0}
+          resizeMode="contain"
+          source={require("../../../assets/images/logo.png")}
+        />}
       />
       {!recyclerSections ? (
         <View style={styles.loaderContainer}>
@@ -219,14 +211,14 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       ) : !recyclerSections?.length ? (
         <Text style={styles.emptyText}>Gallery is empty!</Text>
       ) : (
-        <AssetList
-          ref={assetListRef}
-          sections={recyclerSections}
-          scrollY={scrollY}
-          onSelectedItemsChange={onSelectedItemsChange}
-          navigation={navigation}
-          onAssetLoadError={onAssetLoadError}
-        />
+          <AssetList
+            ref={assetListRef}
+            sections={recyclerSections}
+            scrollY={scrollY}
+            onSelectedItemsChange={onSelectedItemsChange}
+            navigation={navigation}
+            onAssetLoadError={onAssetLoadError}
+          />
       )}
     </Screen>
   )
@@ -283,5 +275,8 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  logo: {
+    height: 30,
   },
 })
