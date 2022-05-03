@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from "react"
-import { StyleSheet, Alert, View } from "react-native"
+import { StyleSheet, Alert, View,TouchableOpacity } from "react-native"
 import * as MediaLibrary from "expo-media-library"
 import LottieView from "lottie-react-native"
 import { useRecoilState } from "recoil"
+import {  Header as HeaderRNE, HeaderProps, Icon, Text } from "@rneui/themed"
 
 import { Screen } from "../../components"
 import { AssetService } from "../../services"
@@ -13,7 +14,6 @@ import { palette } from "../../theme/palette"
 import { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { HomeNavigationParamList, HomeNavigationTypes } from "../../navigators/home-navigator"
 import { mediasState, recyclerSectionsState } from "../../store"
-import { Icon, Text } from "@rneui/themed"
 import { Assets } from "../../services/localdb"
 import { Entities } from "../../realmdb"
 interface HomeScreenProps {
@@ -188,6 +188,25 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       style={styles.screen}
       backgroundColor={color.transparent}
     >
+      <HeaderRNE
+        leftComponent={{
+          icon: 'menu',
+        }}
+        rightComponent={
+          <View style={styles.headerRight}>
+            <TouchableOpacity onPress={()=>null}>
+              <Icon name="description"  />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{ marginLeft: 10 }}
+              onPress={()=>null}
+            >
+              <Icon type="antdesign" name="rocket1" />
+            </TouchableOpacity>
+          </View>
+        }
+        centerComponent={{ text: 'Header', style: styles.heading }}
+      />
       {!recyclerSections ? (
         <View style={styles.loaderContainer}>
           <LottieView
@@ -249,5 +268,20 @@ const styles = StyleSheet.create({
     transform: [{
       translateY: 0
     }]
-  }
+  },
+  heading: {
+    color: 'white',
+    fontSize: 22,
+    fontWeight: 'bold',
+  },
+  headerRight: {
+    display: 'flex',
+    flexDirection: 'row',
+    marginTop: 5,
+  },
+  subheaderText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
 })
