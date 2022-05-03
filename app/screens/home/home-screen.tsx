@@ -13,7 +13,7 @@ import { palette } from "../../theme/palette"
 import { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { HomeNavigationParamList, HomeNavigationTypes } from "../../navigators/home-navigator"
 import { mediasState, recyclerSectionsState } from "../../store"
-import { Icon, Text } from "react-native-elements"
+import { Icon, Text } from "@rneui/themed"
 import { Assets } from "../../services/localdb"
 import { Entities } from "../../realmdb"
 interface HomeScreenProps {
@@ -107,7 +107,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         return [...assets]
       }
       if (changes.insertions?.length) {
-        changes.insertions.map(index=>{
+        changes.insertions.map(index => {
           assets.push(collection[index])
         })
         return assets;

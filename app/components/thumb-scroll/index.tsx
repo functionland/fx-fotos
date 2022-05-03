@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react"
 
 import { StyleSheet, Image, View } from "react-native"
-import { Text } from "react-native-elements"
+import { Text } from "@rneui/themed"
 
 import { PanGestureHandler, PanGestureHandlerGestureEvent } from "react-native-gesture-handler"
 import Animated, {
