@@ -87,7 +87,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         // toJSON takes long time to response need to optimize this
         const assets = realmAssets.current.toJSON()
         setMedias(assets)
-        realmAssets.current.addListener(onDbAssetChange)
+        realmAssets.current.addListener(onLocalDbAssetChange)
         await syncAssets(assets.length ? assets?.[0].modificationTime : 0)
       })();
     }
@@ -99,16 +99,19 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       setRecyclerSections([...AssetService.categorizeAssets([...medias])]);
   }, [medias])
 
-  const onDbAssetChange = (collection: Realm.Collection<Entities.AssetEntity>, changes: Realm.CollectionChangeSet) => {
+  const onLocalDbAssetChange = (collection: Realm.Collection<Entities.AssetEntity>, changes: Realm.CollectionChangeSet) => {
     setMedias(prev => {
-      let assets=[...prev];
+      let assets = [...prev];
       if (changes.deletions?.length) {
-        assets = assets.filter((_, index) => !changes.deletions.some(i=>i===index))
+        assets = assets.filter((_, index) => !changes.deletions.some(i => i === index))
         return [...assets]
       }
-      if (changes.insertions?.length)
-        // toJSON takes long time to response need to optimize this
-        return collection.toJSON()
+      if (changes.insertions?.length) {
+        changes.insertions.map(index=>{
+          assets.push(collection[index])
+        })
+        return assets;
+      }
       return prev
     })
   }
