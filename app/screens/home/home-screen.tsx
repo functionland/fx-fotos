@@ -1,14 +1,12 @@
 import React, { useEffect, useRef, useState } from "react"
-import { StyleSheet, Alert, View, TouchableOpacity, Image } from "react-native"
+import { StyleSheet, Alert, View, Image } from "react-native"
 import * as MediaLibrary from "expo-media-library"
 import LottieView from "lottie-react-native"
 import { useRecoilState } from "recoil"
-import { Header as HeaderRNE, HeaderProps, Icon, Text } from "@rneui/themed"
-import Animation from "react-native-reanimated"
+import { Icon, Text } from "@rneui/themed"
 
 import { Screen } from "../../components"
 import { AssetService } from "../../services"
-import { color } from "../../theme"
 import AssetList, { AssetListHandle } from "../../components/asset-list"
 import { useFloatHederAnimation } from "../../utils/hooks"
 import { palette } from "../../theme/palette"
@@ -54,46 +52,20 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     }
   }, [])
 
-  useEffect(() => {
-    if (selectionMode) {
-      navigation.setOptions({
-        headerTitle: () => null,
-        headerStyle: [styles.selectModeHeader],
-        headerLeft: () =>
-          <View style={styles.headerLeftContainer}>
-            <Icon type="material-community" name="close" onPress={cancelSelectionMode} />
-            <Text style={{ fontSize: 16, marginStart: 20 }}>{selectedItems?.length}</Text>
-          </View>,
-        headerRight: () =>
-          <View style={styles.headerRightContainer}>
-            <Icon type="material-community" name="delete" onPress={() => deleteAssets("delete")} />
-          </View>
-      })
-    }
-    else {
-      navigation.setOptions({
-        headerTitle: null,
-        headerLeft: () => null,
-        headerRight: () => null,
-        headerStyle: [headerStyles],
-      })
-    }
-  }, [selectionMode, selectedItems])
 
   useEffect(() => {
-
     if (isReady) {
       (async () => {
         realmAssets.current = await Assets.getAll();
-
-        // toJSON takes long time to response need to optimize this
-        const assets = realmAssets.current.toJSON()
+        const assets = []
+        for (const asset of realmAssets.current) {
+          assets.push(asset)
+        }
         setMedias(assets)
         realmAssets.current.addListener(onLocalDbAssetChange)
         await syncAssets(assets.length ? assets?.[0].modificationTime : 0)
       })();
     }
-
   }, [isReady])
 
   useEffect(() => {
@@ -140,6 +112,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                 })
                 assetListRef?.current?.resetSelectedItems();
                 await Assets.remove(selectedItems);
+                cancelSelectionMode()
               }
             } catch (error) {
               console.log("deleteAssets: ", error)
@@ -183,22 +156,39 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     setSelectionMode(selectionMode);
     setSelectedItems(assetIds);
   }
-  return (
-    <Screen
-      scrollEventThrottle={16}
-      automaticallyAdjustContentInsets
-      style={styles.screen}
-      backgroundColor={color.transparent}
-    >
-      <Header
-        style={[headerStyles]}
+  const renderHeader = () => {
+    if (selectionMode) {
+      return (<Header
+        style={headerStyles}
+        centerComponent={{ text: "" }}
+        leftComponent={<View style={styles.headerLeftContainer}>
+          <Icon type="material-community" name="close" onPress={cancelSelectionMode} />
+          <Text style={{ fontSize: 16, marginStart: 20 }}>{selectedItems?.length}</Text>
+        </View>}
+        rightComponent={<View style={styles.headerRightContainer}>
+          <Icon type="material-community" name="delete" onPress={() => deleteAssets("delete")} />
+        </View>}
+      />)
+    }
+    else {
+      return (<Header
+        style={headerStyles}
         centerComponent={<Image
           style={styles.logo}
           fadeDuration={0}
           resizeMode="contain"
           source={require("../../../assets/images/logo.png")}
         />}
-      />
+      />)
+    }
+  }
+  return (
+    <Screen
+      scrollEventThrottle={16}
+      automaticallyAdjustContentInsets
+      style={styles.screen}
+    >
+      {renderHeader()}
       {!recyclerSections ? (
         <View style={styles.loaderContainer}>
           <LottieView
@@ -211,14 +201,14 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       ) : !recyclerSections?.length ? (
         <Text style={styles.emptyText}>Gallery is empty!</Text>
       ) : (
-          <AssetList
-            ref={assetListRef}
-            sections={recyclerSections}
-            scrollY={scrollY}
-            onSelectedItemsChange={onSelectedItemsChange}
-            navigation={navigation}
-            onAssetLoadError={onAssetLoadError}
-          />
+        <AssetList
+          ref={assetListRef}
+          sections={recyclerSections}
+          scrollY={scrollY}
+          onSelectedItemsChange={onSelectedItemsChange}
+          navigation={navigation}
+          onAssetLoadError={onAssetLoadError}
+        />
       )}
     </Screen>
   )
@@ -237,7 +227,6 @@ const styles = StyleSheet.create({
     marginTop: 250,
   },
   screen: {
-    backgroundColor: palette.white,
     flex: 1,
     justifyContent: "center",
   },
@@ -278,5 +267,7 @@ const styles = StyleSheet.create({
   },
   logo: {
     height: 30,
+    alignSelf: "center",
+    backgroundColor: "transparent"
   },
 })

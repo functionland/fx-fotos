@@ -1,6 +1,6 @@
 import React, { memo } from "react"
 import { StyleSheet, View, Image, NativeSyntheticEvent, ImageErrorEventData } from "react-native"
-
+import { useTheme } from "@rneui/themed"
 import { Asset } from "../../../../types"
 import { palette } from "../../../../theme/palette"
 import { Checkbox } from "../../../checkbox/checkbox"
@@ -16,7 +16,7 @@ interface Props {
 }
 const AssetItem = (props: Props): JSX.Element => {
   const { asset, selected, selectionMode } = props
-
+  const { theme } = useTheme()
   const scaleSharedValue = useSharedValue<number>(1)
   // const borderRadiusSharedValue = useSharedValue<number>(0)
 
@@ -40,7 +40,10 @@ const AssetItem = (props: Props): JSX.Element => {
     }
   }, [selected])
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, {
+      backgroundColor: theme.colors.grey5,
+      borderColor: theme.colors.background
+    }]}>
       <Animated.View style={[styles.imageContainer, imageContainerAnimatedStyle]}>
         <SharedElement style={styles.sharedElementContainer} id={asset.uri}>
           <Image
@@ -66,8 +69,6 @@ const styles = StyleSheet.create({
     zIndex: 99,
   },
   container: {
-    backgroundColor: palette.offWhite,
-    borderColor: palette.white,
     borderWidth: 2,
     flex: 1,
   },
