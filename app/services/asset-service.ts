@@ -27,7 +27,7 @@ export const categorizeAssets = (assets: MediaLibrary.Asset[]) => {
   let lastMonthHeader: GroupHeader = null
   let lastDayHeader: GroupHeader = null
   for (const asset of assets) {
-    const times = moment(asset.creationTime).format("MMMM YYYY|dddd, MMM D, YYYY")
+    const times = moment(asset.modificationTime).format("MMMM YYYY|dddd, MMM D, YYYY")
     const month = times.split("|")[0]
     const day = times.split("|")[1]
 
@@ -36,7 +36,7 @@ export const categorizeAssets = (assets: MediaLibrary.Asset[]) => {
       lastMonth = month
       lastMonthHeader = {
         title: month,
-        date:new Date(asset.creationTime),
+        date:new Date(asset.modificationTime),
         subGroupIds: [],
       }
       sections.push({
@@ -52,7 +52,7 @@ export const categorizeAssets = (assets: MediaLibrary.Asset[]) => {
       lastDay = day
       lastDayHeader = {
         title: day,
-        date:new Date(asset.creationTime),
+        date:new Date(asset.modificationTime),
         subGroupIds: [],
       }
       const daySection: RecyclerAssetListSection = {
@@ -91,11 +91,11 @@ export const getAssets = async (
         ? {
             first: pageSize,
             after: afterAssetId,
-            sortBy: "creationTime",
+            sortBy: "modificationTime",
           }
         : {
             first: pageSize,
-            sortBy: "creationTime",
+            sortBy: "modificationTime",
           },
     )
     return medias
