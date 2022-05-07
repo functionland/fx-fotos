@@ -1,5 +1,5 @@
 import React, { memo } from "react"
-import { StyleSheet, View, Image } from "react-native"
+import { StyleSheet, View, Image, NativeSyntheticEvent, ImageErrorEventData } from "react-native"
 
 import { Asset } from "../../../../types"
 import { palette } from "../../../../theme/palette"
@@ -12,6 +12,7 @@ interface Props {
   asset: Asset
   selected: boolean
   selectionMode: boolean
+  onError?: (error: NativeSyntheticEvent<ImageErrorEventData>) => void
 }
 const AssetItem = (props: Props): JSX.Element => {
   const { asset, selected, selectionMode } = props
@@ -38,7 +39,6 @@ const AssetItem = (props: Props): JSX.Element => {
       scaleSharedValue.value = 1
     }
   }, [selected])
-
   return (
     <View style={styles.container}>
       <Animated.View style={[styles.imageContainer, imageContainerAnimatedStyle]}>
@@ -50,6 +50,7 @@ const AssetItem = (props: Props): JSX.Element => {
             }}
             fadeDuration={100}
             resizeMode="cover"
+            onError={props.onError}
           />
         </SharedElement>
       </Animated.View>

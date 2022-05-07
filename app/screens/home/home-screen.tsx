@@ -14,13 +14,15 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { HomeNavigationParamList, HomeNavigationTypes } from "../../navigators/home-navigator"
 import { mediasState, recyclerSectionsState } from "../../store"
 import { Icon, Text } from "react-native-elements"
-
+import { Assets } from "../../services/localdb"
+import { Entities } from "../../realmdb"
 interface HomeScreenProps {
   navigation: NativeStackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>
 }
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [isReady, setIsReady] = useState(false)
+  const realmAssets = useRef<Realm.Results<Entities.AssetEntity & Realm.Object>>(null);
   const [medias, setMedias] = useRecoilState(mediasState)
   const [recyclerSections, setRecyclerSections] = useRecoilState(recyclerSectionsState);
   // Get a custom hook to animate the header
@@ -40,8 +42,16 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     }
   }
   useEffect(() => {
-    requestAndroidPermission()
+    requestAndroidPermission();
+
+    // remove listener after screen disposed
+    return () => {
+      if (realmAssets.current) {
+        realmAssets.current.removeAllListeners();
+      }
+    }
   }, [])
+
   useEffect(() => {
     if (selectionMode) {
       navigation.setOptions({
@@ -67,9 +77,44 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       })
     }
   }, [selectionMode, selectedItems])
+
   useEffect(() => {
-    if (isReady) prepareAssets()
+
+    if (isReady) {
+      (async () => {
+        realmAssets.current = await Assets.getAll();
+
+        // toJSON takes long time to response need to optimize this
+        const assets = realmAssets.current.toJSON()
+        setMedias(assets)
+        realmAssets.current.addListener(onLocalDbAssetChange)
+        await syncAssets(assets.length ? assets?.[0].modificationTime : 0)
+      })();
+    }
+
   }, [isReady])
+
+  useEffect(() => {
+    if (medias && medias.length)
+      setRecyclerSections([...AssetService.categorizeAssets([...medias])]);
+  }, [medias])
+
+  const onLocalDbAssetChange = (collection: Realm.Collection<Entities.AssetEntity>, changes: Realm.CollectionChangeSet) => {
+    setMedias(prev => {
+      let assets = [...prev];
+      if (changes.deletions?.length) {
+        assets = assets.filter((_, index) => !changes.deletions.some(i => i === index))
+        return [...assets]
+      }
+      if (changes.insertions?.length) {
+        changes.insertions.map(index=>{
+          assets.push(collection[index])
+        })
+        return assets;
+      }
+      return prev
+    })
+  }
 
   const cancelSelectionMode = () => {
     assetListRef?.current?.toggleSelectionMode();
@@ -85,40 +130,54 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         {
           text: "Yes",
           onPress: async () => {
-            const deleted = await AssetService.deleteAssets(selectedItems);
-            if (deleted) {
-              setMedias(prev => {
-                return prev.filter(item => !selectedItems.some(selectedId => selectedId === item.id))
-              })
-              assetListRef?.current?.resetSelectedItems();
+            try {
+              const deleted = await AssetService.deleteAssets(selectedItems);
+              if (deleted) {
+                setMedias(prev => {
+                  return prev.filter(item => !selectedItems.some(selectedId => selectedId === item.id))
+                })
+                assetListRef?.current?.resetSelectedItems();
+                await Assets.remove(selectedItems);
+              }
+            } catch (error) {
+              console.log("deleteAssets: ", error)
             }
+
           }
         }
       ]
     )
   }
-  const prepareAssets = async () => {
+
+  const syncAssets = async (lastTime = 0) => {
     try {
       let first = 20
       let allMedias: MediaLibrary.PagedInfo<MediaLibrary.Asset> = null
+      let lastAsset: MediaLibrary.Asset = null;
       do {
         allMedias = await AssetService.getAssets(first, allMedias?.endCursor)
-        setMedias(prev => {
-          return [...prev, ...allMedias.assets]
-        })
+        await Assets.addOrUpdate(allMedias.assets);
         if (!allMedias.hasNextPage) break
         first = first * 4
-      } while (true)
+        lastAsset = allMedias.assets?.[allMedias.assets.length - 1];
+      } while (!allMedias.hasNextPage && lastAsset.modificationTime < lastTime)
     } catch (error) {
-      console.error("prepareAssets:", error)
+      console.error("syncAssets:", error)
     }
   }
-  useEffect(() => {
-    if (medias && medias.length)
-      setRecyclerSections([...AssetService.categorizeAssets([...medias])]);
-  }, [medias])
+
+  const onAssetLoadError = (error: NativeSyntheticEvent<ImageErrorEventData>) => {
+    if (error?.nativeEvent?.error) {
+      // Error is something like "/storage/emulated/0/DCIM/Camera/20220501_200313.jpg: open failed: ENOENT (No such file or directory)"
+      const errorParts = (error.nativeEvent.error as string)?.split(':');
+      if (errorParts?.[1]?.includes("open failed")) {
+        console.log("onAssetLoadError:", errorParts?.[0])
+        Assets.removeByUri(errorParts?.[0].trim())
+      }
+    }
+  }
+
   const onSelectedItemsChange = (assetIds: string[], selectionMode: boolean) => {
-    console.log("onSelectedItemsChange:", assetIds, selectionMode)
     setSelectionMode(selectionMode);
     setSelectedItems(assetIds);
   }
@@ -146,7 +205,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           sections={recyclerSections}
           scrollY={scrollY}
           onSelectedItemsChange={onSelectedItemsChange}
-          navigation={navigation} />
+          navigation={navigation}
+          onAssetLoadError={onAssetLoadError}
+        />
       )}
     </Screen>
   )
