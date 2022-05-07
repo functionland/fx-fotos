@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react"
 
-import { StyleSheet, Image, View } from "react-native"
-import { Text } from "@rneui/themed"
+import { StyleSheet, View } from "react-native"
+import { Icon, Text, useTheme } from "@rneui/themed"
 
 import { PanGestureHandler, PanGestureHandlerGestureEvent } from "react-native-gesture-handler"
 import Animated, {
@@ -39,6 +39,7 @@ export const ThumbScroll: React.FC<Props> = (props) => {
   const opacity = useSharedValue<number>(1);
   const [yearIndices, setYearIndices] = useState<number[]>([])
   const [dragging, setDragging] = useState(false);
+  const { theme } = useTheme()
   Reanimated.addWhitelistedNativeProps({ text: true })
   useEffect(() => {
     if (props.showYearFilter && props.sections) {
@@ -179,13 +180,8 @@ export const ThumbScroll: React.FC<Props> = (props) => {
             animatedStyle
           ]}
         >
-          <View style={styles.scrollBar}>
-            <Image
-              source={require("../../../assets/images/scroll.png")}
-              style={[styles.image]}
-              resizeMethod="resize"
-              resizeMode="stretch"
-            />
+          <View style={[styles.scrollBar, { backgroundColor: theme.colors.grey4 }]}>
+            <Icon type="font-awesome" name="sort" />
           </View>
         </Reanimated.View>
       </PanGestureHandler>
@@ -214,13 +210,18 @@ const styles = StyleSheet.create({
   },
   scrollBar: {
     position: "absolute",
-    right: -15,
+    right: -20,
     borderRadius: 50,
     backgroundColor: "whitesmoke",
     height: 50,
     width: 50,
     flexDirection: "row",
     flexWrap: "wrap",
+    justifyContent: "center",
+    alignItems: "center",
+    alignContent: "center",
+    paddingRight: 15
+
   },
   yearFilterText: {
     top: 0,

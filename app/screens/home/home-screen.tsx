@@ -1,9 +1,9 @@
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useRef, useState, useContext } from "react"
 import { StyleSheet, Alert, View, Image } from "react-native"
 import * as MediaLibrary from "expo-media-library"
 import LottieView from "lottie-react-native"
 import { useRecoilState } from "recoil"
-import { Icon, Text } from "@rneui/themed"
+import { Icon, Switch, Text, useTheme } from "@rneui/themed"
 
 import { Screen } from "../../components"
 import { AssetService } from "../../services"
@@ -16,6 +16,7 @@ import { mediasState, recyclerSectionsState } from "../../store"
 import { Assets } from "../../services/localdb"
 import { Entities } from "../../realmdb"
 import { Header } from "../../components/header"
+import { ThemeContext } from "../../theme"
 interface HomeScreenProps {
   navigation: NativeStackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>
 }
@@ -30,6 +31,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedItems, setSelectedItems] = useState<stringp[]>([]);
   const assetListRef = useRef<AssetListHandle>()
+  const { toggleTheme } = useContext(ThemeContext);
+  const { theme , updateTheme} = useTheme();
   const requestAndroidPermission = async () => {
     try {
       console.log("requestAndroidPermission")
@@ -179,6 +182,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           resizeMode="contain"
           source={require("../../../assets/images/logo.png")}
         />}
+        leftComponent={<View style={styles.headerLeftContainer}>
+          <Switch value={theme.mode != "dark"} onValueChange={(value) => {
+            toggleTheme()
+          }} />
+          <Icon type="material-community" name="white-balance-sunny" />
+        </View>}
       />)
     }
   }
