@@ -1,21 +1,22 @@
-import React, { useEffect, useRef, useState } from "react"
-import { StyleSheet, Alert, View } from "react-native"
+import React, { useEffect, useRef, useState, useContext } from "react"
+import { StyleSheet, Alert, View, Image } from "react-native"
 import * as MediaLibrary from "expo-media-library"
 import LottieView from "lottie-react-native"
 import { useRecoilState } from "recoil"
+import { Icon, Switch, Text, useTheme } from "@rneui/themed"
 
 import { Screen } from "../../components"
 import { AssetService } from "../../services"
-import { color } from "../../theme"
 import AssetList, { AssetListHandle } from "../../components/asset-list"
 import { useFloatHederAnimation } from "../../utils/hooks"
 import { palette } from "../../theme/palette"
 import { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { HomeNavigationParamList, HomeNavigationTypes } from "../../navigators/home-navigator"
 import { mediasState, recyclerSectionsState } from "../../store"
-import { Icon, Text } from "react-native-elements"
 import { Assets } from "../../services/localdb"
 import { Entities } from "../../realmdb"
+import { Header } from "../../components/header"
+import { ThemeContext } from "../../theme"
 interface HomeScreenProps {
   navigation: NativeStackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>
 }
@@ -30,6 +31,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedItems, setSelectedItems] = useState<stringp[]>([]);
   const assetListRef = useRef<AssetListHandle>()
+  const { toggleTheme } = useContext(ThemeContext);
+  const { theme , updateTheme} = useTheme();
   const requestAndroidPermission = async () => {
     try {
       console.log("requestAndroidPermission")
@@ -52,46 +55,20 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     }
   }, [])
 
-  useEffect(() => {
-    if (selectionMode) {
-      navigation.setOptions({
-        headerTitle: () => null,
-        headerStyle: [styles.selectModeHeader],
-        headerLeft: () =>
-          <View style={styles.headerLeftContainer}>
-            <Icon type="material-community" name="close" onPress={cancelSelectionMode} />
-            <Text style={{ fontSize: 16, marginStart: 20 }}>{selectedItems?.length}</Text>
-          </View>,
-        headerRight: () =>
-          <View style={styles.headerRightContainer}>
-            <Icon type="material-community" name="delete" onPress={() => deleteAssets("delete")} />
-          </View>
-      })
-    }
-    else {
-      navigation.setOptions({
-        headerTitle: null,
-        headerLeft: () => null,
-        headerRight: () => null,
-        headerStyle: [headerStyles],
-      })
-    }
-  }, [selectionMode, selectedItems])
 
   useEffect(() => {
-
     if (isReady) {
       (async () => {
         realmAssets.current = await Assets.getAll();
-
-        // toJSON takes long time to response need to optimize this
-        const assets = realmAssets.current.toJSON()
+        const assets = []
+        for (const asset of realmAssets.current) {
+          assets.push(asset)
+        }
         setMedias(assets)
         realmAssets.current.addListener(onLocalDbAssetChange)
         await syncAssets(assets.length ? assets?.[0].modificationTime : 0)
       })();
     }
-
   }, [isReady])
 
   useEffect(() => {
@@ -107,7 +84,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         return [...assets]
       }
       if (changes.insertions?.length) {
-        changes.insertions.map(index=>{
+        changes.insertions.map(index => {
           assets.push(collection[index])
         })
         return assets;
@@ -138,6 +115,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                 })
                 assetListRef?.current?.resetSelectedItems();
                 await Assets.remove(selectedItems);
+                cancelSelectionMode()
               }
             } catch (error) {
               console.log("deleteAssets: ", error)
@@ -181,13 +159,45 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     setSelectionMode(selectionMode);
     setSelectedItems(assetIds);
   }
+  const renderHeader = () => {
+    if (selectionMode) {
+      return (<Header
+        style={headerStyles}
+        centerComponent={{ text: "" }}
+        leftComponent={<View style={styles.headerLeftContainer}>
+          <Icon type="material-community" name="close" onPress={cancelSelectionMode} />
+          <Text style={{ fontSize: 16, marginStart: 20 }}>{selectedItems?.length}</Text>
+        </View>}
+        rightComponent={<View style={styles.headerRightContainer}>
+          <Icon type="material-community" name="delete" onPress={() => deleteAssets("delete")} />
+        </View>}
+      />)
+    }
+    else {
+      return (<Header
+        style={headerStyles}
+        centerComponent={<Image
+          style={styles.logo}
+          fadeDuration={0}
+          resizeMode="contain"
+          source={require("../../../assets/images/logo.png")}
+        />}
+        leftComponent={<View style={styles.headerLeftContainer}>
+          <Switch value={theme.mode != "dark"} onValueChange={(value) => {
+            toggleTheme()
+          }} />
+          <Icon type="material-community" name="white-balance-sunny" />
+        </View>}
+      />)
+    }
+  }
   return (
     <Screen
       scrollEventThrottle={16}
       automaticallyAdjustContentInsets
       style={styles.screen}
-      backgroundColor={color.transparent}
     >
+      {renderHeader()}
       {!recyclerSections ? (
         <View style={styles.loaderContainer}>
           <LottieView
@@ -226,7 +236,6 @@ const styles = StyleSheet.create({
     marginTop: 250,
   },
   screen: {
-    backgroundColor: palette.white,
     flex: 1,
     justifyContent: "center",
   },
@@ -249,5 +258,25 @@ const styles = StyleSheet.create({
     transform: [{
       translateY: 0
     }]
-  }
+  },
+  heading: {
+    color: 'white',
+    fontSize: 22,
+    fontWeight: 'bold',
+  },
+  headerRight: {
+    display: 'flex',
+    flexDirection: 'row',
+    marginTop: 5,
+  },
+  subheaderText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  logo: {
+    height: 30,
+    alignSelf: "center",
+    backgroundColor: "transparent"
+  },
 })

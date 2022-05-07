@@ -5,7 +5,6 @@ import StoryListItem from "./story-list-item"
 import AssetItem from "./asset-item"
 import HeaderItem from "./header-item"
 
-import { palette } from "../../../../theme/palette"
 interface Props {
   section: RecyclerAssetListSection
   selectionMode: boolean
@@ -90,17 +89,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   dayText: {
-    color: palette.black,
     fontSize: 16,
     fontWeight: "400",
     padding: 5,
   },
   monthText: {
-    color: palette.black,
     fontSize: 28,
     fontWeight: "300",
     padding: 10,
-    // paddingTop: 50,
   },
 })
 export default RecyclerSectionItem

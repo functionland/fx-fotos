@@ -1,6 +1,7 @@
 import React from "react"
 import { View } from "react-native"
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
+import { useTheme } from "@react-navigation/native"
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5"
 
 import { HomeScreen } from "../screens"
@@ -24,19 +25,18 @@ function UnderConstructionScreen() {
 }
 const HomeTabs = createBottomTabNavigator()
 export function HomeNavigator() {
+  const { colors } = useTheme();
   return (
     <HomeTabs.Navigator
       screenOptions={{
         headerTransparent: true,
-        headerShown: true,
+        headerShown: false,
         header: (props) => <TabHeader {...props} />,
         tabBarStyle: {
           height: 70,
-          backgroundColor: "white",
         },
         tabBarLabelStyle: {
           fontSize: 15,
-          color: "black",
           fontWeight: "600",
           padding: 5,
         },
@@ -50,14 +50,13 @@ export function HomeNavigator() {
               <FontAwesome5
                 name={"images"}
                 size={25}
-                color={props?.focused ? "blue" : "gray"}
-                style={{}}
+                color={props?.focused ? colors.text : "gray"}
               />
-            )
+      )
           },
         }}
-        name={HomeNavigationTypes.PhotosTab}
-        component={HomeScreen}
+      name={HomeNavigationTypes.PhotosTab}
+      component={HomeScreen}
       />
       <HomeTabs.Screen
         name="Search"
@@ -66,7 +65,7 @@ export function HomeNavigator() {
             return (
               <FontAwesome5
                 name={"search"}
-                color={props?.focused ? "blue" : "gray"}
+                color={props?.focused ? colors.text : "gray"}
                 size={25}
                 style={{}}
               />
@@ -82,7 +81,7 @@ export function HomeNavigator() {
             return (
               <FontAwesome5
                 name={"user-friends"}
-                color={props?.focused ? "blue" : "gray"}
+                color={props?.focused ? colors.text : "gray"}
                 size={25}
                 style={{}}
               />
@@ -98,7 +97,7 @@ export function HomeNavigator() {
             return (
               <FontAwesome5
                 name={"swatchbook"}
-                color={props?.focused ? "blue" : "gray"}
+                color={props?.focused ? colors.text : "gray"}
                 size={25}
                 style={{}}
               />
