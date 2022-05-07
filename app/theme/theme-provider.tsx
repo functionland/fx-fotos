@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { useColorScheme } from "react-native"
 import { DefaultTheme, DarkTheme, Theme, } from '@react-navigation/native';
-import { ThemeProvider as RneThemeProvider, createTheme, lightColors, darkColors } from '@rneui/themed';
+import { useTheme } from '@rneui/themed';
 import { RneLightTheme, RneDarkTheme } from "./"
 export interface ThemeContextType {
     theme: Theme,
@@ -14,13 +14,13 @@ export const ThemeContext: React.Context<ThemeContextType> = React.createContext
 
 export const ThemeProvider: React.FC = ({ children }) => {
     const scheme = useColorScheme();
-    const [theme, setTheme] = useState(scheme === "dark" ? DarkTheme: DefaultTheme);
-    const [rneTheme, setRneTheme] = useState(scheme === "dark" ? RneDarkTheme : RneLightTheme);
+    const [theme, setTheme] = useState(scheme === "dark" ? DarkTheme : DefaultTheme);
+    const rneTheme = useTheme()
 
     const toggleTheme = useCallback(() => {
         const nextTheme = theme === DefaultTheme ? DarkTheme : DefaultTheme;
         setTheme(nextTheme);
-        setRneTheme(rneTheme.mode === "dark" ? RneLightTheme : RneDarkTheme)
+        rneTheme.replaceTheme(rneTheme.theme.mode === "dark" ? RneLightTheme : RneDarkTheme)
     }, [theme, rneTheme]);
 
     return (
@@ -30,9 +30,7 @@ export const ThemeProvider: React.FC = ({ children }) => {
                 toggleTheme,
             }}
         >
-            <RneThemeProvider theme={rneTheme}>
-                {children}
-            </RneThemeProvider>
+            {children}
         </ThemeContext.Provider>
     );
 };
