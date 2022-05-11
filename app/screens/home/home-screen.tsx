@@ -138,7 +138,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         if (!allMedias.hasNextPage) break
         first = first * 4
         lastAsset = allMedias.assets?.[allMedias.assets.length - 1];
-      } while (!allMedias.hasNextPage && lastAsset.modificationTime < lastTime)
+      } while (allMedias.hasNextPage && lastAsset.modificationTime < lastTime)
     } catch (error) {
       console.error("syncAssets:", error)
     }
