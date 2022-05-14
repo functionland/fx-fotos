@@ -17,6 +17,25 @@ export const getAll = (
     })
 }
 
+export const removeAll = (): Promise<void> => {
+  return RealmDB()
+    .then((realm) => {
+      return realm.write(() => {
+       
+        const assets = realm
+        .objects<Entities.AssetEntity>(Schemas.Asset.name);
+        
+        // Delete all instances of Assets from the realm.
+        return realm.delete(assets);
+      });
+      
+    })
+    .catch((error) => {
+      console.error("RealmDB removeAll error!", error)
+      throw error
+    })
+}
+
 export const addOrUpdate = (assets: Entities.AssetEntity[]): Promise<Entities.AssetEntity[]> => {
   return RealmDB()
     .then((realm) => {

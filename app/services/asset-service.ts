@@ -35,7 +35,7 @@ export const categorizeAssets = (assets: MediaLibrary.Asset[]) => {
       lastMonth = month
       lastMonthHeader = {
         title: month,
-        date:new Date(asset.modificationTime),
+        date: new Date(asset.modificationTime),
         subGroupIds: [],
       }
       sections.push({
@@ -51,7 +51,7 @@ export const categorizeAssets = (assets: MediaLibrary.Asset[]) => {
       lastDay = day
       lastDayHeader = {
         title: day,
-        date:new Date(asset.modificationTime),
+        date: new Date(asset.modificationTime),
         subGroupIds: [],
       }
       const daySection: RecyclerAssetListSection = {
@@ -83,6 +83,7 @@ export const categorizeAssets = (assets: MediaLibrary.Asset[]) => {
 export const getAssets = async (
   pageSize = 100,
   afterAssetId: string,
+  sortBy : MediaLibrary.SortByValue[] | MediaLibrary.SortByValue = "modificationTime",
 ): Promise<MediaLibrary.PagedInfo<MediaLibrary.Asset>> => {
   try {
     const medias = await MediaLibrary.getAssetsAsync(
@@ -90,11 +91,11 @@ export const getAssets = async (
         ? {
             first: pageSize,
             after: afterAssetId,
-            sortBy: "modificationTime",
+            sortBy: sortBy,
           }
         : {
             first: pageSize,
-            sortBy: "modificationTime",
+            sortBy: sortBy,
           },
     )
     return medias

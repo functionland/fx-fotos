@@ -32,7 +32,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [selectedItems, setSelectedItems] = useState<stringp[]>([]);
   const assetListRef = useRef<AssetListHandle>()
   const { toggleTheme } = useContext(ThemeContext);
-  const { theme , updateTheme} = useTheme();
+  const { theme, updateTheme } = useTheme();
   const requestAndroidPermission = async () => {
     try {
       console.log("requestAndroidPermission")
@@ -66,7 +66,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         }
         setMedias(assets)
         realmAssets.current.addListener(onLocalDbAssetChange)
-        await syncAssets(assets.length ? assets?.[0].modificationTime : 0)
+        await syncAssets(assets?.[0]?.modificationTime, assets?.[assets.length - 1]?.modificationTime)
       })();
     }
   }, [isReady])
@@ -127,18 +127,24 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     )
   }
 
-  const syncAssets = async (lastTime = 0) => {
+  const syncAssets = async (lastAssetTime = 0, firstAssetTime = new Date().getTime()) => {
     try {
       let first = 20
       let allMedias: MediaLibrary.PagedInfo<MediaLibrary.Asset> = null
       let lastAsset: MediaLibrary.Asset = null;
+      let fitstAsset: MediaLibrary.Asset = null;
       do {
         allMedias = await AssetService.getAssets(first, allMedias?.endCursor)
         await Assets.addOrUpdate(allMedias.assets);
-        if (!allMedias.hasNextPage) break
+        if (first === 20) {
+          //Get the first assets that is created
+          fitstAsset = (await AssetService.getAssets(1, null, [["modificationTime", true]]))?.assets?.[0];
+        }
         first = first * 4
         lastAsset = allMedias.assets?.[allMedias.assets.length - 1];
-      } while (allMedias.hasNextPage && lastAsset.modificationTime < lastTime)
+
+        // Repeat the loop if the first asset's date in the storage is less than the first asset's date in the local DB
+      } while (allMedias.hasNextPage && (lastAsset?.modificationTime > lastAssetTime || fitstAsset?.modificationTime < firstAssetTime))
     } catch (error) {
       console.error("syncAssets:", error)
     }
