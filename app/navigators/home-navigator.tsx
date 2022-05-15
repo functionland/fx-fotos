@@ -4,7 +4,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import { useTheme } from "@react-navigation/native"
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5"
 
-import { HomeScreen } from "../screens"
+import { HomeScreen, LibraryScreen } from "../screens"
 import { TabHeader } from "../components/header/tab-header"
 import { UnderConstruction } from "../components"
 export type HomeNavigationParamList = {
@@ -13,6 +13,7 @@ export type HomeNavigationParamList = {
 
 export enum HomeNavigationTypes {
   PhotosTab = "PhotosTab",
+  LibraryTab = "LibraryTab",
 }
 function UnderConstructionScreen() {
   return (
@@ -52,11 +53,11 @@ export function HomeNavigator() {
                 size={25}
                 color={props?.focused ? colors.text : "gray"}
               />
-      )
+            )
           },
         }}
-      name={HomeNavigationTypes.PhotosTab}
-      component={HomeScreen}
+        name={HomeNavigationTypes.PhotosTab}
+        component={HomeScreen}
       />
       <HomeTabs.Screen
         name="Search"
@@ -91,8 +92,9 @@ export function HomeNavigator() {
         component={UnderConstructionScreen}
       />
       <HomeTabs.Screen
-        name="Library"
+        name={HomeNavigationTypes.LibraryTab}
         options={{
+          tabBarLabel: "Library",
           tabBarIcon: function tabIcon(props) {
             return (
               <FontAwesome5
@@ -104,7 +106,7 @@ export function HomeNavigator() {
             )
           },
         }}
-        component={UnderConstructionScreen}
+        component={LibraryScreen}
       />
     </HomeTabs.Navigator>
   )
