@@ -11,7 +11,7 @@ import { palette } from "../../theme/palette"
 import { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { HomeNavigationParamList, HomeNavigationTypes } from "../../navigators/home-navigator"
 import { Assets } from "../../services/localdb"
-import { Header } from "../../components/header"
+import { Header, HeaderLogo, HeaderLeftContainer, HeaderRightContainer, HeaderCenterContainer } from "../../components/header"
 import { ThemeContext } from "../../theme"
 interface Props {
   navigation: NativeStackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>;
@@ -85,30 +85,24 @@ export const AssetListScreen: React.FC<Props> = ({ navigation, medias, defaultHe
     if (selectionMode) {
       return (<Header
         style={headerStyles}
-        leftComponent={<View style={styles.headerLeftContainer}>
+        leftComponent={<HeaderLeftContainer>
           <Icon type="material-community" name="close" onPress={cancelSelectionMode} />
           <Text style={{ fontSize: 16, marginStart: 20 }}>{selectedItems?.length}</Text>
-        </View>}
-        rightComponent={<View style={styles.headerRightContainer}>
+        </HeaderLeftContainer>}
+        rightComponent={<HeaderRightContainer>
           <Icon type="material-community" name="delete" onPress={() => deleteAssets("delete")} />
-        </View>}
+        </HeaderRightContainer>}
       />)
     }
     else {
       return (defaultHeader?.(headerStyles) || <Header
         style={headerStyles}
-        centerComponent={<Image
-          style={styles.logo}
-          fadeDuration={0}
-          resizeMode="contain"
-          source={require("../../../assets/images/logo.png")}
-        />}
-        leftComponent={<View style={styles.headerLeftContainer}>
-          <Switch value={theme.mode != "dark"} onValueChange={(value) => {
-            toggleTheme()
+        centerComponent={<HeaderLogo />}
+        leftComponent={<HeaderLeftContainer>
+          <Icon type="material-community" name="white-balance-sunny" onPress={()=>{
+             toggleTheme()
           }} />
-          <Icon type="material-community" name="white-balance-sunny" />
-        </View>}
+        </HeaderLeftContainer>}
       />)
     }
   }
@@ -164,40 +158,5 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignContent: "center",
-  },
-  headerLeftContainer: {
-    flex: 1,
-    flexDirection: "row",
-    paddingStart: 5
-  },
-  headerRightContainer: {
-    flex: 1,
-    flexDirection: "row",
-    paddingEnd: 5
-  },
-  selectModeHeader: {
-    transform: [{
-      translateY: 0
-    }]
-  },
-  heading: {
-    color: 'white',
-    fontSize: 22,
-    fontWeight: 'bold',
-  },
-  headerRight: {
-    display: 'flex',
-    flexDirection: 'row',
-    marginTop: 5,
-  },
-  subheaderText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  logo: {
-    height: 30,
-    alignSelf: "center",
-    backgroundColor: "transparent"
-  },
+  }
 })

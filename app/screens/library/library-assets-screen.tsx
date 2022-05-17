@@ -1,13 +1,15 @@
 import React from "react"
-import { StyleSheet, View } from "react-native"
-import { Icon, Text } from "@rneui/themed"
+import { StyleProp, StyleSheet, View, ViewStyle } from "react-native"
+import { Text } from "@rneui/themed"
 import { useRecoilState } from "recoil"
+import Animated from "react-native-reanimated"
 
 import { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { HomeNavigationParamList, HomeNavigationTypes } from "../../navigators/home-navigator"
 import { selectedLibraryState } from "../../store"
 import { AssetListScreen } from "../index"
-import { Header } from "../../components/header"
+import { Header, HeaderLeftContainer, HeaderArrowBack } from "../../components/header"
+import { StyleProps } from "react-native-reanimated"
 
 interface Props {
   navigation: NativeStackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>
@@ -15,24 +17,15 @@ interface Props {
 
 export const LibraryAssetsScreen: React.FC<Props> = ({ navigation }) => {
   const [selectedLibrary] = useRecoilState(selectedLibraryState)
-  const renderHeader = (style: any) => {
+  const renderHeader = (style?: StyleProp<Animated.AnimateStyle<StyleProp<ViewStyle>>>) => {
     return (<Header
+      placement="left"
       style={[style]}
-      centerComponent={<Text h4 style={{alignSelf:"center"}}>{selectedLibrary?.title}</Text>}
-      leftComponent={<View style={styles.headerLeftContainer}>
-        <Icon type="Ionicons" name="arrow-back" size={30} />
-      </View>}
+      centerComponent={<Text lineBreakMode="tail" h4 >{selectedLibrary?.title}</Text>}
+      leftComponent={<HeaderArrowBack navigation={navigation} />}
     />)
   }
   return (
     <AssetListScreen navigation={navigation} medias={selectedLibrary?.assets} defaultHeader={renderHeader} />
   )
 }
-
-const styles = StyleSheet.create({
-  headerLeftContainer: {
-    flex: 1,
-    flexDirection: "row",
-    paddingStart: 5
-  },
-})

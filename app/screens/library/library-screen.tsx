@@ -9,7 +9,7 @@ import { Library } from "../../types"
 import { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { HomeNavigationParamList, HomeNavigationTypes } from "../../navigators/home-navigator"
 import { mediasState, selectedLibraryState } from "../../store"
-import { Header } from "../../components/header"
+import { Header, HeaderLogo } from "../../components/header"
 import { Constants } from "../../theme"
 import { FlatList } from "react-native-gesture-handler"
 import Animated, { useAnimatedScrollHandler } from "react-native-reanimated"
@@ -37,12 +37,7 @@ export const LibraryScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const renderHeader = () => {
     return (<Header
       style={headerStyles}
-      centerComponent={<Image
-        style={styles.logo}
-        fadeDuration={0}
-        resizeMode="contain"
-        source={require("../../../assets/images/logo.png")}
-      />}
+      centerComponent={<HeaderLogo />}
     />)
   }
   
@@ -94,41 +89,6 @@ const styles = StyleSheet.create({
   listContainer: {
     paddingTop: Constants.HeaderHeight,
     paddingHorizontal: 5
-  },
-  headerLeftContainer: {
-    flex: 1,
-    flexDirection: "row",
-    paddingStart: 5
-  },
-  headerRightContainer: {
-    flex: 1,
-    flexDirection: "row",
-    paddingEnd: 5
-  },
-  selectModeHeader: {
-    transform: [{
-      translateY: 0
-    }]
-  },
-  heading: {
-    color: 'white',
-    fontSize: 22,
-    fontWeight: 'bold',
-  },
-  headerRight: {
-    display: 'flex',
-    flexDirection: 'row',
-    marginTop: 5,
-  },
-  subheaderText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  logo: {
-    height: 30,
-    alignSelf: "center",
-    backgroundColor: "transparent"
   },
   card: {
     flex: 1,
