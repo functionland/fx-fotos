@@ -5,7 +5,7 @@ import { NavigationContainer } from "@react-navigation/native"
 import { createSharedElementStackNavigator } from "react-navigation-shared-element"
 
 import { navigationRef } from "./navigation-utilities"
-import { PhotoScreen } from "../screens"
+import { PhotoScreen, LibraryAssetsScreen } from "../screens"
 import { HomeNavigator } from "./home-navigator"
 import { ThemeContext } from '../theme';
 enableScreens()
@@ -16,7 +16,8 @@ export type NavigatorParamList = {
 }
 export enum AppNavigationNames {
   HomeScreen = "home",
-  PhotoScreen = "photo"
+  PhotoScreen = "photo",
+  LibraryAssets = "LibraryAssets"
 }
 const Stack = createSharedElementStackNavigator<NavigatorParamList>()
 
@@ -25,15 +26,17 @@ const AppStack = () => {
     <Stack.Navigator
       nitialRouteName={AppNavigationNames.HomeScreen}
       screenOptions={{
+        headerShown: false,
+        headerTransparent: true,
       }}
     >
       <Stack.Screen
         name={AppNavigationNames.HomeScreen}
-        options={{
-          headerShown: false,
-          headerTransparent: true,
-        }}
         component={HomeNavigator}
+      />
+      <Stack.Screen
+        name={AppNavigationNames.LibraryAssets}
+        component={LibraryAssetsScreen}
       />
       <Stack.Screen
         name={AppNavigationNames.PhotoScreen}

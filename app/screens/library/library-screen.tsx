@@ -8,18 +8,20 @@ import { AssetService } from "../../services"
 import { Library } from "../../types"
 import { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { HomeNavigationParamList, HomeNavigationTypes } from "../../navigators/home-navigator"
-import { mediasState } from "../../store"
+import { mediasState, selectedLibraryState } from "../../store"
 import { Header } from "../../components/header"
 import { Constants } from "../../theme"
 import { FlatList } from "react-native-gesture-handler"
 import Animated, { useAnimatedScrollHandler } from "react-native-reanimated"
 import { useFloatHederAnimation } from "../../utils/hooks"
+import { AppNavigationNames } from "../../navigators"
 interface HomeScreenProps {
   navigation: NativeStackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>
 }
-const AnimatedFlatList= Animated.createAnimatedComponent(FlatList)
+const AnimatedFlatList = Animated.createAnimatedComponent(FlatList)
 export const LibraryScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [medias] = useRecoilState(mediasState)
+  const [, setSelectedLibrary] = useRecoilState(selectedLibraryState)
   const { theme } = useTheme();
   const [libraies, setLibraries] = useState<Library[]>(null)
   // Get a custom hook to animate the header
@@ -43,11 +45,17 @@ export const LibraryScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       />}
     />)
   }
+  
+  const onLibraryPress = (item: Library) => {
+    setSelectedLibrary(item);
+    navigation.push(AppNavigationNames.LibraryAssets)
+  }
+
   const renderItem = (info: ListRenderItemInfo<Library>) => {
     return <View style={styles.card}>
       <Pressable
         android_ripple={{ color: theme.colors.background, foreground: true }}
-        onPress={() => null}
+        onPress={() => onLibraryPress(info.item)}
       >
         <Image
           style={styles.cardImage}

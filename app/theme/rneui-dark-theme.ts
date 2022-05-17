@@ -23,9 +23,11 @@ export const RneDarkTheme = createTheme({
       zIndex: 9999,
       position: "absolute",
       marginTop: StatusBar.currentHeight,
-      borderBottomWidth:0,
+      borderBottomWidth: 0,
     },
-    
+    centerContainerStyle: {
+      height: Constants.HeaderHeight - StatusBar.currentHeight,
+    },
   },
   mode: "dark",
 })
