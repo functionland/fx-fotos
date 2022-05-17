@@ -12,3 +12,8 @@ export type GroupHeader = {
   subGroupIds: string[]
 }
 export type RecyclerAssetListSectionData = AssetStory[] | Asset | GroupHeader
+
+export type Library = {
+  title: string | undefined
+  assets:Asset[]
+}

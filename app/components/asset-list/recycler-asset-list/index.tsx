@@ -286,6 +286,15 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(({
     //rclRef.current?._onScroll(0, dyanmicScrollY.value + lastScrollY.value)
     setCurrentColumns(numColumns.value)
   }
+
+  const updateContainerSize=()=>{
+    const heights = Object.values(
+      gridLayoutProvider.getLayoutManager?.()?.getAllContentDimension()?.height || {},
+    )
+    if (heights.length) {
+      setContainerSize(heights)
+    }
+  }
   return (
     <View style={{ flex: 1 }} onLayout={(e) => {
       setViewPortHeight(e.nativeEvent.layout.height)
@@ -308,6 +317,7 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(({
         dataProvider={dataProvider}
         extendedState={extendedState}
         layoutProvider={gridLayoutProvider}
+        
         rowRenderer={rowRenderer}
         externalScrollView={ExternalScrollView}
         scrollViewProps={{
@@ -315,12 +325,7 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(({
           scrollRefExternal: scrollRef,
           _onScrollExternal: scrollHandler,
           onLayout: () => {
-            const heights = Object.values(
-              gridLayoutProvider.getLayoutManager?.()?.getAllContentDimension()?.height || {},
-            )
-            if (heights.length) {
-              setContainerSize(heights)
-            }
+            updateContainerSize();
           }
         }}
         onVisibleIndicesChanged={(all = [], now, notNow) => {
@@ -337,7 +342,11 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(({
         renderItemContainer={renderItemContainer}
         renderContentContainer={(props, children) => {
           return (
-            <Animated.View {...props} style={[props.style, containerStyle]}>
+            <Animated.View {...props} style={[props.style, containerStyle]} onLayout={()=>{
+              if(!pinching.value){
+                updateContainerSize()
+              }
+            }}>
               {children}
             </Animated.View>
           )

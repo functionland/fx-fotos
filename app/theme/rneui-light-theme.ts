@@ -23,6 +23,9 @@ export const RneLightTheme = createTheme({
       marginTop: StatusBar.currentHeight,
       borderBottomWidth:0,
     },
+    centerContainerStyle: {
+      height: Constants.HeaderHeight - StatusBar.currentHeight,
+    },
     statusBarProps: {
       backgroundColor: palette.white,
       barStyle: "dark-content",

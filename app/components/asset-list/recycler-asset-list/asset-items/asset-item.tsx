@@ -49,7 +49,7 @@ const AssetItem = (props: Props): JSX.Element => {
           <Image
             style={styles.image}
             source={{
-              uri: asset.uri,
+              uri: asset?.uri,
             }}
             fadeDuration={100}
             resizeMode="cover"
