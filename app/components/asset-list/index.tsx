@@ -19,14 +19,15 @@ interface Props {
   scrollY: SharedValue<number> | undefined
   onSelectedItemsChange?: (assetIds: string[], selectionMode: boolean) => void
   navigation: NativeStackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>
-  onAssetLoadError?: (error: NativeSyntheticEvent<ImageErrorEventData>) => void
+  onAssetLoadError?: (error: NativeSyntheticEvent<ImageErrorEventData>) => void;
+  renderFooter?: () => JSX.Element | JSX.Element[]
 }
 export interface AssetListHandle {
   resetSelectedItems: () => void,
   toggleSelectionMode: () => void
 }
 // eslint-disable-next-line react/display-name
-const AssetList = forwardRef<AssetListHandle, Props>(({ refreshData, sections, scrollY, navigation, onSelectedItemsChange, onAssetLoadError }, ref): JSX.Element => {
+const AssetList = forwardRef<AssetListHandle, Props>(({ refreshData, sections, scrollY, navigation, onSelectedItemsChange, onAssetLoadError , renderFooter }, ref): JSX.Element => {
   const translationY = useSharedValue(0)
   const scrollRefExternal = useAnimatedRef<Animated.ScrollView>()
   const recyclerAssetListRef = useRef<RecyclerAssetListHandler>();
@@ -59,6 +60,7 @@ const AssetList = forwardRef<AssetListHandle, Props>(({ refreshData, sections, s
           scrollY={scrollY}
           onSelectedItemsChange={onSelectedItemsChange}
           onAssetLoadError={onAssetLoadError}
+          renderFooter={renderFooter}
         />
       </PinchZoom>
     </GridProvider>

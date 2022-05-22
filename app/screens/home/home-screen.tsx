@@ -22,7 +22,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [isReady, setIsReady] = useState(false)
   const realmAssets = useRef<Realm.Results<Entities.AssetEntity & Realm.Object>>(null);
   const [medias, setMedias] = useRecoilState(mediasState)
-
+  const [loading, setLoading] = useState(true)
   const requestAndroidPermission = async () => {
     try {
       console.log("requestAndroidPermission")
@@ -95,10 +95,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       } while (allMedias.hasNextPage && (lastAsset?.modificationTime > lastAssetTime || fitstAsset?.modificationTime < firstAssetTime))
     } catch (error) {
       console.error("syncAssets:", error)
+    } finally {
+      setLoading(false)
     }
   }
 
   return (
-    <AssetListScreen navigation={navigation} medias={isReady ? medias : null} />
+    <AssetListScreen navigation={navigation} medias={isReady ? medias : null} loading={loading} />
   )
 }
