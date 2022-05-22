@@ -2,17 +2,13 @@ import React, { useEffect, useRef, useState, useContext } from "react"
 import { Alert } from "react-native"
 import * as MediaLibrary from "expo-media-library"
 import { useRecoilState } from "recoil"
-import { useTheme } from "@rneui/themed"
 
 import { AssetService } from "../../services"
-import { AssetListHandle } from "../../components/asset-list"
-import { useFloatHederAnimation } from "../../utils/hooks"
 import { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { HomeNavigationParamList, HomeNavigationTypes } from "../../navigators/home-navigator"
-import { mediasState, recyclerSectionsState } from "../../store"
+import { mediasState } from "../../store"
 import { Assets } from "../../services/localdb"
 import { Entities } from "../../realmdb"
-import { ThemeContext } from "../../theme"
 import { AssetListScreen } from "../index"
 interface HomeScreenProps {
   navigation: NativeStackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>
