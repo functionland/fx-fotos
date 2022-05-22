@@ -113,10 +113,12 @@ export const getAssets = async (
             first: pageSize,
             after: afterAssetId,
             sortBy: sortBy,
+            mediaType: ["photo", "video"],
           }
         : {
             first: pageSize,
             sortBy: sortBy,
+            mediaType: ["photo", "video"],
           },
     )
     return medias
