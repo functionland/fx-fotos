@@ -42,7 +42,7 @@ function ScreenWithScrolling(props: ScreenProps) {
       <StatusBar barStyle={props.statusBar || "light-content"} />
       <View style={[preset.outer, backgroundStyle, insetStyle]}>
         <ScrollView
-          style={[preset.outer, backgroundStyle]}
+          style={[preset.outer,{ backgroundColor: theme.colors.background, }, backgroundStyle]}
           contentContainerStyle={[preset.inner, style]}
           keyboardShouldPersistTaps={props.keyboardShouldPersistTaps || "handled"}
         >
