@@ -1,0 +1,10 @@
+{
+  "$schema": "./node_modules/nx/schemas/workspace-schema.json",
+  "version": 2,
+  "projects": {
+    "box": "apps/box",
+    "box-e2e": "apps/box-e2e",
+    "file-manager": "apps/file-manager",
+    "file-manager-e2e": "apps/file-manager-e2e"
+  }
+}
