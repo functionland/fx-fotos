@@ -1,5 +1,5 @@
 import { Entities, RealmDB, Schemas } from "../../realmdb"
-
+const { UUID } = Realm.BSON;
 export const getAll = (): Promise<Realm.Results<Entities.BoxEntity & Realm.Object>> => {
   return RealmDB()
     .then((realm) => {
@@ -33,6 +33,7 @@ export const removeAll = (): Promise<void> => {
 }
 
 export const addOrUpdate = (boxs: Entities.BoxEntity[]): Promise<Entities.BoxEntity[]> => {
+ 
   return RealmDB()
     .then((realm) => {
       try {
@@ -44,6 +45,7 @@ export const addOrUpdate = (boxs: Entities.BoxEntity[]): Promise<Entities.BoxEnt
                 Schemas.Box.name,
                 {
                   ...box,
+                  peerId:box.peerId?box.peerId:new UUID().toHexString(),
                 },
                 Realm.UpdateMode.Modified,
               ),

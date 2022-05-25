@@ -1,4 +1,5 @@
 import { atom } from "recoil"
+import { BoxEntity } from "../realmdb/entities"
 import { Asset, RecyclerAssetListSection, Library } from "../types"
 
 export const mediasState = atom<Asset[]>({
@@ -13,5 +14,10 @@ export const recyclerSectionsState = atom<RecyclerAssetListSection[]>({
 
 export const selectedLibraryState = atom<Library>({
   key: "selectedLibraryState",
+  default: null,
+})
+
+export const boxsState = atom<BoxEntity[]>({
+  key: "boxsState",
   default: null,
 })
