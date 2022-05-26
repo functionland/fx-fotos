@@ -17,7 +17,11 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@functionland/component-library": [
+        "libs/component-library/src/index.ts"
+      ]
+    }
   },
   "exclude": [
     "node_modules",
