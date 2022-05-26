@@ -5,7 +5,10 @@
   "scripts": {
     "start": "nx serve",
     "build": "nx build",
-    "test": "nx test"
+    "test": "nx test",
+    "lint": "nx run-many --all --target=lint",
+    "check": "yarn lint",
+    "check-ci": "yarn run check"
   },
   "private": true,
   "dependencies": {
@@ -41,6 +44,7 @@
     "eslint-config-prettier": "8.1.0",
     "eslint-plugin-import": "2.26.0",
     "eslint-plugin-jsx-a11y": "6.5.1",
+    "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-react": "7.29.4",
     "eslint-plugin-react-hooks": "4.5.0",
     "jest": "27.5.1",

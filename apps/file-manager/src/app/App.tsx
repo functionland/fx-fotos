@@ -1,10 +1,6 @@
 import React from 'react';
-import {
-  SafeAreaView,
-  StatusBar,
-} from 'react-native';
-
-import {FxButton} from "@functionland/component-library";
+import { SafeAreaView, StatusBar } from 'react-native';
+import { FxButton } from '@functionland/component-library';
 
 export const App = () => {
   return (
