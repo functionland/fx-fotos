@@ -6,6 +6,8 @@ describe('FileManager', () => {
   });
 
   it('should display welcome message', async () => {
-    await expect(element(by.id('heading'))).toHaveText('Welcome FileManager 👋');
+    await expect(element(by.id('heading'))).toHaveText(
+      'Welcome FileManager 👋'
+    );
   });
 });

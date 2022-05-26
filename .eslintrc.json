@@ -4,7 +4,8 @@
     "**/*"
   ],
   "plugins": [
-    "@nrwl/nx"
+    "@nrwl/nx",
+    "prettier"
   ],
   "overrides": [
     {
@@ -38,7 +39,9 @@
         "*.tsx"
       ],
       "extends": [
-        "plugin:@nrwl/nx/typescript"
+        "plugin:@nrwl/nx/typescript",
+        "plugin:prettier/recommended",
+        "prettier"
       ],
       "rules": {}
     },
@@ -48,7 +51,9 @@
         "*.jsx"
       ],
       "extends": [
-        "plugin:@nrwl/nx/javascript"
+        "plugin:@nrwl/nx/javascript",
+        "plugin:prettier/recommended",
+        "prettier"
       ],
       "rules": {}
     }
