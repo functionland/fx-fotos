@@ -1,15 +1,15 @@
 import React from 'react';
-import { SafeAreaView, StatusBar } from 'react-native';
-import { FxButton } from '@functionland/component-library';
+import { NavigationContainer } from '@react-navigation/native';
+import { SafeAreaView, Text } from 'react-native';
 
 export const App = () => {
   return (
-    <>
-      <StatusBar barStyle="dark-content" />
+    <NavigationContainer>
       <SafeAreaView>
-        <FxButton title="Sample Button" />
+        <Text>File Manager App</Text>
       </SafeAreaView>
-    </>
+    </NavigationContainer>
   );
 };
+
 export default App;
