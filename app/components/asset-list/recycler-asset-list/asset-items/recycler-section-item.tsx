@@ -24,7 +24,13 @@ const getSectionByType = (
       return <StoryListItem stories={section.data} selectionMode={selectionMode} />
     }
     case ViewType.ASSET: {
-      return <AssetItem onError={onAssetLoadError} asset={section.data} selectionMode={selectionMode} selected={selected} isSynced={section?.data?.isSynced} />
+      return <AssetItem 
+        onError={onAssetLoadError} 
+        asset={section.data} 
+        selectionMode={selectionMode} 
+        selected={selected} 
+        isSynced={section?.data?.isSynced}
+        isDeleted={section?.data?.isDeleted} />
     }
     case ViewType.MONTH: {
       const groupHeader: GroupHeader = section.data

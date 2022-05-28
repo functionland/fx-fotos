@@ -92,7 +92,6 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
       setLoading(true);
       setTimeout(async () => {
         try {
-
           const _filePath = asset.uri?.split('file:')[1];
           const result = await file.send(decodeURI(_filePath))
           Assets.addOrUpdate([{
@@ -111,6 +110,23 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
         } catch (error) {
           console.log("uploadOrDownload", error)
           Alert.alert("Error", "Unable to send the file")
+        } finally {
+          setLoading(false)
+        }
+      }, 0);
+    } else if (asset?.isSynced && asset?.isDeleted) {
+      setLoading(true);
+      setTimeout(async () => {
+        try {
+          const result = await file.receive(asset?.cid, false)
+          setAsset(prev => ({
+            ...prev,
+            uri: result.uri,
+            isDeleted: false
+          }))
+        } catch (error) {
+          console.log("uploadOrDownload", error)
+          Alert.alert("Error", "Unable to receive the file")
         } finally {
           setLoading(false)
         }

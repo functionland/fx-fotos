@@ -13,6 +13,7 @@ interface Props {
   selected: boolean
   selectionMode: boolean,
   isSynced: boolean,
+  isDeleted: boolean,
   onError?: (error: NativeSyntheticEvent<ImageErrorEventData>) => void
 }
 const AssetItem = (props: Props): JSX.Element => {
@@ -40,7 +41,7 @@ const AssetItem = (props: Props): JSX.Element => {
       scaleSharedValue.value = 1
     }
   }, [selected])
-  
+
   return (
     <View style={[styles.container, {
       backgroundColor: theme.colors.grey5,
@@ -48,15 +49,17 @@ const AssetItem = (props: Props): JSX.Element => {
     }]}>
       <Animated.View style={[styles.imageContainer, imageContainerAnimatedStyle]}>
         <SharedElement style={styles.sharedElementContainer} id={asset.uri}>
-          <Image
-            style={styles.image}
-            source={{
-              uri: asset?.uri,
-            }}
-            fadeDuration={100}
-            resizeMode="cover"
-            onError={props.onError}
-          />
+          {props?.isDeleted && props?.isSynced ?
+            <Icon type="material-community" name="alpha-f-box-outline" size={50} color="gray" />
+            : <Image
+              style={styles.image}
+              source={{
+                uri: asset?.uri,
+              }}
+              fadeDuration={100}
+              resizeMode="cover"
+              onError={props.onError}
+            />}
         </SharedElement>
       </Animated.View>
       {asset?.mediaType === "video" &&
@@ -96,6 +99,7 @@ const styles = StyleSheet.create({
   },
   sharedElementContainer: {
     flex: 1,
+    justifyContent:"center"
   },
   videoIconContainer: {
     right: 10,
@@ -105,9 +109,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor:"white",
-    borderRadius:5,
-    opacity:.8
+    backgroundColor: "white",
+    borderRadius: 5,
+    opacity: .8
   },
   videoDurationText: {
     color: "gray",
@@ -122,10 +126,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor:"white",
-    borderRadius:5,
-    padding:1,
-    opacity:.7
+    backgroundColor: "white",
+    borderRadius: 5,
+    padding: 1,
+    opacity: .7
   },
 })
 
@@ -134,7 +138,8 @@ const areEqual = (prev: Props, next: Props) => {
     prev?.asset?.id === next?.asset?.id &&
     prev?.selectionMode === next?.selectionMode &&
     prev?.selected === next?.selected &&
-    prev?.isSynced === next?.isSynced
+    prev?.isSynced === next?.isSynced &&
+    prev?.isDeleted === next?.isDeleted
   )
 }
 export default memo(AssetItem, areEqual)
