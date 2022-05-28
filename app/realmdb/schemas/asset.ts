@@ -55,5 +55,9 @@ export const Asset = {
      * content id in the box
      */
     cid: "string?",
+    /**
+     * Deleted form storage
+     */
+    isDeleted:{ type: "bool", default: false },
   },
 }

@@ -52,4 +52,8 @@ export type AssetEntity = {
    * content id in the box
    */
   cid: string | undefined
+  /**
+   * Deleted from storage
+   */
+  isDeleted: boolean
 }
