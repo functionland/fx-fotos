@@ -8,7 +8,7 @@ import HeaderItem from "./header-item"
 interface Props {
   section: RecyclerAssetListSection
   selectionMode: boolean
-  selected: boolean
+  selected: boolean,
   onLongPress: (section: RecyclerAssetListSection) => void
   onPress: (section: RecyclerAssetListSection) => void
   onAssetLoadError?: (error: NativeSyntheticEvent<ImageErrorEventData>) => void
@@ -24,7 +24,7 @@ const getSectionByType = (
       return <StoryListItem stories={section.data} selectionMode={selectionMode} />
     }
     case ViewType.ASSET: {
-      return <AssetItem onError={onAssetLoadError} asset={section.data} selectionMode={selectionMode} selected={selected} />
+      return <AssetItem onError={onAssetLoadError} asset={section.data} selectionMode={selectionMode} selected={selected} isSynced={section?.data?.isSynced} />
     }
     case ViewType.MONTH: {
       const groupHeader: GroupHeader = section.data

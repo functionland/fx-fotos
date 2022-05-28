@@ -55,7 +55,10 @@ export const AssetListScreen: React.FC<Props> = ({ navigation, medias, defaultHe
               const deleted = await AssetService.deleteAssets(selectedItems);
               if (deleted) {
                 assetListRef?.current?.resetSelectedItems();
-                await Assets.remove(selectedItems);
+                await Assets.addOrUpdate(selectedItems.map(id=>({
+                  id,
+                  isDeleted:true
+                })));
                 cancelSelectionMode()
               }
             } catch (error) {

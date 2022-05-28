@@ -11,7 +11,8 @@ import { convertDurationToTime } from "../../../../utils/helper"
 interface Props {
   asset: Asset
   selected: boolean
-  selectionMode: boolean
+  selectionMode: boolean,
+  isSynced: boolean,
   onError?: (error: NativeSyntheticEvent<ImageErrorEventData>) => void
 }
 const AssetItem = (props: Props): JSX.Element => {
@@ -39,6 +40,7 @@ const AssetItem = (props: Props): JSX.Element => {
       scaleSharedValue.value = 1
     }
   }, [selected])
+  
   return (
     <View style={[styles.container, {
       backgroundColor: theme.colors.grey5,
@@ -61,6 +63,10 @@ const AssetItem = (props: Props): JSX.Element => {
         <View style={styles.videoIconContainer}>
           <Text style={styles.videoDurationText}>{convertDurationToTime(asset?.duration)}</Text>
           <Icon name="play-circle" type="material-community" size={20} color="gray" />
+        </View>}
+      {asset?.isSynced &&
+        <View style={styles.syncIconContainer}>
+          <Icon name="cloud-check" type="material-community" size={15} color="gray" />
         </View>}
       {selectionMode ? <Checkbox value={selected} style={styles.checkbox} /> : null}
     </View>
@@ -94,24 +100,41 @@ const styles = StyleSheet.create({
   videoIconContainer: {
     right: 10,
     position: "absolute",
-    top: 10,
+    bottom: 10,
     zIndex: 99,
     flexDirection: "row",
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
+    backgroundColor:"white",
+    borderRadius:5,
+    opacity:.8
   },
   videoDurationText: {
     color: "gray",
     fontSize: 10,
     padding: 1
-  }
+  },
+  syncIconContainer: {
+    right: 10,
+    position: "absolute",
+    top: 10,
+    zIndex: 99,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor:"white",
+    borderRadius:5,
+    padding:1,
+    opacity:.7
+  },
 })
 
 const areEqual = (prev: Props, next: Props) => {
   return (
     prev?.asset?.id === next?.asset?.id &&
     prev?.selectionMode === next?.selectionMode &&
-    prev?.selected === next?.selected
+    prev?.selected === next?.selected &&
+    prev?.isSynced === next?.isSynced
   )
 }
 export default memo(AssetItem, areEqual)

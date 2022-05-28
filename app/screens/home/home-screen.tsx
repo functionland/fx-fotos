@@ -67,6 +67,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         })
         return assets;
       }
+      if(changes.newModifications?.length){
+        assets = []
+        for (const asset of collection) {
+          assets.push(asset)
+        }
+        return assets;
+      }
       return prev
     })
   }
