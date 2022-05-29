@@ -1,9 +1,9 @@
 import React, { memo } from "react"
 import { StyleSheet, View, Image, NativeSyntheticEvent, ImageErrorEventData } from "react-native"
 import { Icon, Text, useTheme } from "@rneui/themed"
+
 import { Asset } from "../../../../types"
 import { Checkbox } from "../../../checkbox/checkbox"
-
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from "react-native-reanimated"
 import { SharedElement } from "react-navigation-shared-element"
 import { convertDurationToTime } from "../../../../utils/helper"
@@ -48,19 +48,17 @@ const AssetItem = (props: Props): JSX.Element => {
       borderColor: theme.colors.background
     }]}>
       <Animated.View style={[styles.imageContainer, imageContainerAnimatedStyle]}>
-        <SharedElement style={styles.sharedElementContainer} id={asset.uri}>
-          {props?.isDeleted && props?.isSynced ?
-            <Icon type="material-community" name="alpha-f-box-outline" size={50} color="gray" />
-            : <Image
-              style={styles.image}
-              source={{
-                uri: asset?.uri,
-              }}
-              fadeDuration={100}
-              resizeMode="cover"
-              onError={props.onError}
-            />}
-        </SharedElement>
+        {props?.isDeleted && props?.isSynced ? <Icon type="material-community" name="alpha-f-box-outline" size={50} color="gray" /> : <SharedElement style={styles.sharedElementContainer} id={asset.uri}>
+          <Image
+            style={styles.image}
+            source={{
+              uri: asset?.uri,
+            }}
+            fadeDuration={100}
+            resizeMode="cover"
+            onError={props.onError}
+          />
+        </SharedElement>}
       </Animated.View>
       {asset?.mediaType === "video" &&
         <View style={styles.videoIconContainer}>
@@ -96,10 +94,11 @@ const styles = StyleSheet.create({
     flex: 1,
     overflow: "hidden",
     zIndex: 0,
+    justifyContent:"center"
   },
   sharedElementContainer: {
     flex: 1,
-    justifyContent:"center"
+    justifyContent: "center"
   },
   videoIconContainer: {
     right: 10,
