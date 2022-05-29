@@ -34,7 +34,7 @@
     "@react-native-community/cli": "7.0.3",
     "@react-native-community/cli-platform-android": "7.0.1",
     "@react-native-community/cli-platform-ios": "7.0.1",
-    "@testing-library/jest-dom": "5.16.4",
+    "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/jest-native": "4.0.4",
     "@testing-library/react-native": "9.1.0",
     "@types/jest": "27.4.1",
