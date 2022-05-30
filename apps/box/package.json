@@ -9,6 +9,11 @@
     "react-native": "*",
     "react-native-config": "*",
     "react-native-svg": "*",
-    "@react-native-async-storage/async-storage": "*"
+    "@react-native-async-storage/async-storage": "*",
+    "@react-navigation/native": "*",
+    "react-native-screens": "*",
+    "@react-navigation/native-stack": "*",
+    "react-native-safe-area-context": "*",
+    "zustand": "*"
   }
 }
