@@ -56,12 +56,17 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
     try {
       const boxs = await Boxs.getAll();
       if (boxs && boxs.length) {
-        boxs.map(item => {
-          fula.addBox(item.address)
+        boxs.map(async item => {
+          try {
+            await fula.addBox(item.address)
+          } catch (error) {
+            console.log(error)
+          }
         })
       }
       setBoxs(boxs.map(m => m.toJSON()));
     } catch (error) {
+      console.log(error)
       Alert.alert("Error", "Unable to connect to the box!")
     }
 
@@ -107,7 +112,7 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
           }]);
         } catch (error) {
           console.log("uploadOrDownload", error)
-          Alert.alert("Error", "Unable to receive the file")
+          Alert.alert("Error", "Unable to receive the file, make sure your box is available!")
         } finally {
           setLoading(false)
         }
@@ -136,7 +141,7 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
 
         } catch (error) {
           console.log("uploadOrDownload", error)
-          Alert.alert("Error", "Unable to send the file")
+          Alert.alert("Error", "Unable to send the file, make sure your box is available!")
         } finally {
           setLoading(false)
         }

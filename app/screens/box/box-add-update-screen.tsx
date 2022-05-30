@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react"
 import { Alert, StyleProp, StyleSheet, View, ViewStyle } from "react-native"
 import { Icon, Input, Text } from "@rneui/themed"
-import Animated from "react-native-reanimated"
+import {fula} from "react-native-fula"
 
 import { NativeStackNavigationProp, NativeStackScreenProps } from "@react-navigation/native-stack"
 import { HomeNavigationParamList, HomeNavigationTypes } from "../../navigators/home-navigator"
@@ -51,6 +51,7 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
         Alert.alert("Warning", "Please fill all the fields!")
         return
       }
+      await fula.addBox(form.address);
       const box = {
         name: form.name,
         address: form.address,
@@ -60,6 +61,7 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
       navigation.pop();
     } catch (error) {
       console.log(error)
+      Alert.alert("Error", "Make sure the address format is correct!")
     } finally {
       pressed.current = false
     }
