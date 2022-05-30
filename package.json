@@ -49,6 +49,7 @@
     "moment": "^2.29.1",
     "react": "17.0.2",
     "react-native": "0.66.3",
+    "react-native-background-actions": "^2.6.7",
     "react-native-fast-image": "^8.5.11",
     "react-native-fula": "^0.2.2",
     "react-native-gesture-handler": "^2.4.1",
