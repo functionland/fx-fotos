@@ -20,7 +20,7 @@ import {
 import { widthPercentageToDP } from "react-native-responsive-screen"
 import { RouteProp, NavigationProp } from "@react-navigation/native"
 import { file, fula } from "react-native-fula"
-import { Asset } from "../../types"
+import { Asset, SyncStatus } from "../../types"
 import { Constants, palette } from "../../theme"
 import { Header } from "../../components"
 import { HomeNavigationParamList } from "../../navigators"
@@ -94,12 +94,12 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
     navigation.goBack()
   }
   const downloadFromBox = async () => {
-    if (asset?.isSynced && asset?.isDeleted) {
+    if (asset?.syncStatus === SyncStatus.SYNCED && asset?.isDeleted) {
       setLoading(true);
       setTimeout(async () => {
         try {
           const result = await file.receive(asset?.cid, false)
-          console.log("downloadFromBox:",result)
+          console.log("downloadFromBox:", result)
           setAsset(prev => ({
             ...prev,
             uri: result.uri,
@@ -107,8 +107,8 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
           }))
           Assets.addOrUpdate([{
             id: asset.id,
-            uri:result.uri,
-            isDeleted:false
+            uri: result.uri,
+            isDeleted: false
           }]);
         } catch (error) {
           console.log("uploadOrDownload", error)
@@ -120,21 +120,22 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
     }
   }
   const uploadToBox = async () => {
-    if (!asset?.isSynced && !asset?.isDeleted) {
+    if (asset?.syncStatus === SyncStatus.NOTSYNCED && !asset?.isDeleted) {
       setLoading(true);
       setTimeout(async () => {
         try {
           const _filePath = asset.uri?.split('file:')[1];
           const result = await file.send(decodeURI(_filePath))
+          console.log("result:",result)
           Assets.addOrUpdate([{
             id: asset.id,
             cid: result,
-            isSynced: true,
+            syncStatus: SyncStatus.SYNCED,
             syncDate: new Date(),
           }]);
           setAsset(prev => ({
             ...prev,
-            isSynced: true,
+            syncStatus: SyncStatus.SYNCED,
             cid: result
           }))
           console.log("CID:", result)
@@ -226,8 +227,8 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
     return (<Header
       leftComponent={<HeaderArrowBack navigation={navigation} />}
       rightComponent={loading ? <ActivityIndicator size="small" /> :
-        (asset?.isSynced ? <Icon type="material-community" name="cloud-check" />
-          : (!asset?.isSynced && !asset?.isDeleted ? <Icon type="material-community" name="cloud-upload-outline" onPress={uploadToBox} /> : null))
+        (asset?.syncStatus === SyncStatus.SYNCED ? <Icon type="material-community" name="cloud-check" />
+          : (asset?.syncStatus === SyncStatus.NOTSYNCED && !asset?.isDeleted ? <Icon type="material-community" name="cloud-upload-outline" onPress={uploadToBox} /> : null))
       } />)
   }
   const renderDownloadSection = () => {
@@ -243,7 +244,7 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
         <Animated.View style={animatedStyle}>
           <TapGestureHandler onActivated={() => onDoubleTap()} numberOfTaps={2}>
             <View>
-              {asset?.isSynced && asset?.isDeleted && renderDownloadSection()}
+              {asset?.syncStatus===SyncStatus.SYNCED && asset?.isDeleted && renderDownloadSection()}
               {!asset?.isDeleted && <SharedElement style={imageContainerStyle} id={asset.uri}>
                 <PinchGestureHandler onGestureEvent={onPinchHandler}>
                   <Animated.Image

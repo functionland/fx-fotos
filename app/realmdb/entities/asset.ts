@@ -1,3 +1,5 @@
+import { SyncStatus } from "../../types"
+
 export type AssetEntity = {
   id: string
   /**
@@ -43,7 +45,7 @@ export type AssetEntity = {
   /**
    * Sync statis with box
    */
-  isSynced: boolean
+   syncStatus: SyncStatus
   /**
    * Sync date with box
    */

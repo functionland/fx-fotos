@@ -65,7 +65,7 @@ const AssetItem = (props: Props): JSX.Element => {
           <Text style={styles.videoDurationText}>{convertDurationToTime(asset?.duration)}</Text>
           <Icon name="play-circle" type="material-community" size={20} color="gray" />
         </View>}
-      {asset?.isSynced &&
+      {props?.isSynced &&
         <View style={styles.syncIconContainer}>
           <Icon name="cloud-check" type="material-community" size={15} color="gray" />
         </View>}

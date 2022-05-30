@@ -3,7 +3,7 @@ import { Entities, RealmDB, Schemas } from "../../realmdb"
 export const getAll = (
   descriptor = "modificationTime",
   orderby: "asc" | "desc" = "desc",
-  filter = "isDeleted=false or isSynced=true",
+  filter = "isDeleted=false or syncStatus=2",
 ): Promise<Realm.Results<Entities.AssetEntity & Realm.Object>> => {
   return RealmDB()
     .then((realm) => {
