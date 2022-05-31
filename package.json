@@ -5,9 +5,11 @@
   "scripts": {
     "start": "nx serve",
     "build": "nx build",
-    "test": "nx test",
-    "lint": "nx run-many --all --target=lint",
-    "check": "yarn lint",
+    "test": "nx run-many --all --skip-nx-cache --target=test",
+    "lint": "nx run-many --all --skip-nx-cache --target=lint",
+    "check-app-types": "tsc --noEmit --project apps/box/tsconfig.app.json && tsc --noEmit --project apps/file-manager/tsconfig.app.json",
+    "check-lib-types": "tsc --noEmit --project libs/component-library/tsconfig.lib.json",
+    "check": "yarn lint && yarn test && yarn check-app-types && yarn check-lib-types",
     "check-ci": "yarn run check"
   },
   "private": true,

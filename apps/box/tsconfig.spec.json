@@ -4,7 +4,8 @@
     "outDir": "../../dist/out-tsc",
     "module": "commonjs",
     "types": ["jest", "node", "@testing-library/jest-dom"],
-    "composite": true
+    "composite": true,
+    "declaration": true
   },
   "include": [
     "jest.config.ts",

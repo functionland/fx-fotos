@@ -6,7 +6,7 @@ export const App = () => {
   return (
     <NavigationContainer>
       <SafeAreaView>
-        <Text>File Manager App</Text>
+        <Text testID="app-name">File Manager App</Text>
       </SafeAreaView>
     </NavigationContainer>
   );
