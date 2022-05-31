@@ -6,7 +6,7 @@ export const App = () => {
   return (
     <NavigationContainer>
       <SafeAreaView>
-        <Text>Box App</Text>
+        <Text testID="app-name">Box App</Text>
       </SafeAreaView>
     </NavigationContainer>
   );
