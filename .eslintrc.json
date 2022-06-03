@@ -5,7 +5,8 @@
   ],
   "plugins": [
     "@nrwl/nx",
-    "prettier"
+    "prettier",
+    "jest"
   ],
   "overrides": [
     {
@@ -41,6 +42,7 @@
       "extends": [
         "plugin:@nrwl/nx/typescript",
         "plugin:prettier/recommended",
+        "@react-native-community",
         "prettier"
       ],
       "rules": {}
