@@ -11,10 +11,8 @@ type FxButtonProps = ButtonProps & ColorProps<FxTheme>;
 
 const FxButton = ({ color = 'primary', ...rest }: FxButtonProps) => {
   const theme = useTheme<FxTheme>();
-  let buttonColor = undefined;
-  if (color) {
-    buttonColor = theme.colors[color];
-  }
+  const buttonColor = color ? theme.colors[color] : undefined;
+
   return <Button color={buttonColor} {...rest} />;
 };
 
