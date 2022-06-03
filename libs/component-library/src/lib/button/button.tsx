@@ -3,13 +3,7 @@
  */
 
 import React from 'react';
-import {
-  color,
-  ColorProps,
-  composeRestyleFunctions,
-  useRestyle,
-  useTheme,
-} from '@shopify/restyle';
+import { ColorProps, useTheme } from '@shopify/restyle';
 import { Button, ButtonProps } from 'react-native';
 import { FxTheme } from '../theme';
 
