@@ -8,6 +8,7 @@ import Animated, {
   useAnimatedStyle,
   useAnimatedGestureHandler,
 } from "react-native-reanimated"
+import Toast from 'react-native-toast-message'
 import { snapPoint } from "react-native-redash"
 import { ActivityIndicator, Alert, Dimensions, StyleSheet, View } from "react-native"
 import { SharedElement } from "react-navigation-shared-element"
@@ -18,6 +19,7 @@ import {
   PinchGestureHandlerGestureEvent,
 } from "react-native-gesture-handler"
 import { widthPercentageToDP } from "react-native-responsive-screen"
+import { useNetInfo } from "@react-native-community/netinfo"
 import { RouteProp, NavigationProp } from "@react-navigation/native"
 import { file, fula } from "react-native-fula"
 import { Asset, SyncStatus } from "../../types"
@@ -29,6 +31,7 @@ import { HeaderArrowBack } from "../../components/header"
 import { useRecoilState } from "recoil"
 import { boxsState } from "../../store"
 import { Assets, Boxs } from "../../services/localdb"
+import { AddBoxs, downloadAsset, uploadAsset, uploadAssetsInBackground } from "../../services/sync-service"
 
 const { height } = Dimensions.get("window")
 
@@ -47,31 +50,12 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
   const animatedOpacity = useSharedValue(1)
   const [, setBoxs] = useRecoilState(boxsState)
   const [loading, setLoading] = useState(false)
-
+  const netInfoState = useNetInfo()
   useEffect(() => {
-    loadBoxs();
-  }, []);
-
-  const loadBoxs = async () => {
-    try {
-      const boxs = await Boxs.getAll();
-      if (boxs && boxs.length) {
-        boxs.map(async item => {
-          try {
-            await fula.addBox(item.address)
-          } catch (error) {
-            console.log(error)
-          }
-        })
-      }
-      setBoxs(boxs.map(m => m.toJSON()));
-    } catch (error) {
-      console.log(error)
-      Alert.alert("Error", "Unable to connect to the box!")
+    return () => {
+      Toast.hide();
     }
-
-  }
-
+  })
   const wrapperAnimatedStyle = useAnimatedStyle(() => {
     return {
       paddingTop: Constants.HeaderHeight,
@@ -98,7 +82,13 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
       setLoading(true);
       setTimeout(async () => {
         try {
-          const result = await file.receive(asset?.cid, false)
+          try {
+            await AddBoxs()
+          } catch (error) {
+            Alert.alert("Warning", error)
+            return;
+          }
+          const result = await downloadAsset(asset?.cid)
           console.log("downloadFromBox:", result)
           setAsset(prev => ({
             ...prev,
@@ -124,22 +114,60 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
       setLoading(true);
       setTimeout(async () => {
         try {
-          const _filePath = asset.uri?.split('file:')[1];
-          const result = await file.send(decodeURI(_filePath))
-          console.log("result:",result)
-          Assets.addOrUpdate([{
+          // const _filePath = asset.uri?.split('file:')[1];
+          // const result = await file.send(decodeURI(_filePath))
+          // console.log("result:",result)
+          await Assets.addOrUpdate([{
             id: asset.id,
-            cid: result,
-            syncStatus: SyncStatus.SYNCED,
-            syncDate: new Date(),
+            syncStatus: SyncStatus.SYNC,
           }]);
           setAsset(prev => ({
             ...prev,
-            syncStatus: SyncStatus.SYNCED,
-            cid: result
+            syncStatus: SyncStatus.SYNC,
           }))
-          console.log("CID:", result)
+          if (!netInfoState.isConnected) {
+            Toast.show({
+              type: 'info',
+              text1: 'Will upload when connected',
+              position: "bottom",
+              bottomOffset: 0,
+            });
+            return
+          }
+          try {
+            await AddBoxs()
+          } catch (error) {
+            Alert.alert("Warning", error)
+            return;
+          }
+          try {
+            Toast.show({
+              type: 'info',
+              text1: 'Upload...',
+              position: "bottom",
+              bottomOffset: 0,
+            });
+            await uploadAssetsInBackground({
+              callback: (success) => {
+                if (success)
+                  setAsset(prev => ({
+                    ...prev,
+                    syncStatus: SyncStatus.SYNCED,
+                  }))
+                else
+                  Toast.show({
+                    type: 'error',
+                    text1: 'Will upload when connected',
+                    position: "bottom",
+                    bottomOffset: 0,
+                  });
 
+              }
+            });
+
+          } catch (error) {
+            Alert.alert("Error", "Unable to send the file now, will upload when connected")
+          }
         } catch (error) {
           console.log("uploadOrDownload", error)
           Alert.alert("Error", "Unable to send the file, make sure your box is available!")
@@ -147,7 +175,26 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
           setLoading(false)
         }
       }, 0);
+    } else if (asset?.syncStatus === SyncStatus.SYNC) {
+      cancelUpdate();
     }
+  }
+  const cancelUpdate = () => {
+    Alert.alert("Waiting for connection", "Will upload when connected", [{
+      text: "Cancel update",
+      onPress: async () => {
+        await Assets.addOrUpdate([{
+          id: asset.id,
+          syncStatus: SyncStatus.NOTSYNCED,
+        }]);
+        setAsset(prev => ({
+          ...prev,
+          syncStatus: SyncStatus.NOTSYNCED,
+        }))
+      }
+    }, {
+      text: "OK"
+    }])
   }
   const onPanGesture = useAnimatedGestureHandler({
     onStart: () => {
@@ -227,8 +274,9 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
     return (<Header
       leftComponent={<HeaderArrowBack navigation={navigation} />}
       rightComponent={loading ? <ActivityIndicator size="small" /> :
-        (asset?.syncStatus === SyncStatus.SYNCED ? <Icon type="material-community" name="cloud-check" />
-          : (asset?.syncStatus === SyncStatus.NOTSYNCED && !asset?.isDeleted ? <Icon type="material-community" name="cloud-upload-outline" onPress={uploadToBox} /> : null))
+        (asset?.syncStatus === SyncStatus.SYNCED && !asset?.isDeleted ? <Icon type="material-community" name="cloud-check" />
+          : (asset?.syncStatus === SyncStatus.NOTSYNCED && !asset?.isDeleted ? <Icon type="material-community" name="cloud-upload-outline" onPress={uploadToBox} />
+            : asset?.syncStatus === SyncStatus.SYNC ? <Icon type="material-community" name="refresh" onPress={uploadToBox} /> : null))
       } />)
   }
   const renderDownloadSection = () => {
@@ -244,7 +292,7 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
         <Animated.View style={animatedStyle}>
           <TapGestureHandler onActivated={() => onDoubleTap()} numberOfTaps={2}>
             <View>
-              {asset?.syncStatus===SyncStatus.SYNCED && asset?.isDeleted && renderDownloadSection()}
+              {asset?.syncStatus === SyncStatus.SYNCED && asset?.isDeleted && renderDownloadSection()}
               {!asset?.isDeleted && <SharedElement style={imageContainerStyle} id={asset.uri}>
                 <PinchGestureHandler onGestureEvent={onPinchHandler}>
                   <Animated.Image

@@ -3,6 +3,7 @@ import Animated from "react-native-reanimated"
 import { enableScreens } from "react-native-screens"
 import { NavigationContainer } from "@react-navigation/native"
 import { createSharedElementStackNavigator } from "react-navigation-shared-element"
+import Toast from 'react-native-toast-message'
 
 import { navigationRef } from "./navigation-utilities"
 import { PhotoScreen, LibraryAssetsScreen, BoxListScreen, BoxAddUpdateScreen } from "../screens"
@@ -103,6 +104,7 @@ export const AppNavigator = (props: NavigationProps) => {
       >
         <AppStack />
       </NavigationContainer>
+      <Toast/>
     </Animated.View>
   )
 }

@@ -10,8 +10,18 @@ export const getAll = (
       let assets = realm
         .objects<Entities.AssetEntity>(Schemas.Asset.name)
         .sorted(descriptor, orderby === "desc")
-      if (filter) 
-        assets = assets.filtered(filter)
+      if (filter) assets = assets.filtered(filter)
+      return assets
+    })
+    .catch((error) => {
+      console.error("RealmDB getAllAssets error!", error)
+      throw error
+    })
+}
+export const getAllNeedToSync = (): Promise<Realm.Results<Entities.AssetEntity & Realm.Object>> => {
+  return RealmDB()
+    .then((realm) => {
+      const assets = realm.objects<Entities.AssetEntity>(Schemas.Asset.name).filtered("syncStatus=1")
       return assets
     })
     .catch((error) => {

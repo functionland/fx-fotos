@@ -11,7 +11,7 @@
  */
 import "./i18n"
 import "./utils/ignore-warnings"
-import React from "react"
+import React, { useRef } from "react"
 import { useColorScheme } from "react-native"
 import { GestureHandlerRootView } from "react-native-gesture-handler"
 import { SafeAreaProvider, initialWindowMetrics } from "react-native-safe-area-context"
@@ -26,6 +26,8 @@ import { ErrorBoundary } from "./screens/error/error-boundary"
 import * as MediaLibrary from "expo-media-library"
 import { ThemeProvider } from './theme';
 import { RneLightTheme, RneDarkTheme } from "./theme"
+import NetInfo from "@react-native-community/netinfo";
+import { AddBoxs, uploadAssetsInBackground } from "./services/sync-service"
 
 // This puts screens in a native ViewController or Activity. If you want fully native
 // stack navigation, use `createNativeStackNavigator` in place of `createStackNavigator`:
@@ -39,7 +41,7 @@ export const NAVIGATION_PERSISTENCE_KEY = "NAVIGATION_STATE"
 
 function App() {
   const scheme = useColorScheme();
-
+  const netInfoTimer = useRef(null);
   useBackButtonHandler(canExit)
   const { onNavigationStateChange, isRestored: isNavigationStateRestored } =
     useNavigationPersistence(storage, NAVIGATION_PERSISTENCE_KEY)
@@ -50,8 +52,26 @@ function App() {
     ; (async () => {
       await getPermissions()
       await initFonts()
-    })()
+    })();
+    // Subscribe
+    const unsubscribeNetInfo = subscribeNetInfo();
+    return () => {
+      // Unsubscribe
+      unsubscribeNetInfo();
+    }
   }, [])
+  const subscribeNetInfo = () => {
+    return NetInfo.addEventListener(state => {
+      if (netInfoTimer.current)
+        clearTimeout(netInfoTimer.current);
+      netInfoTimer.current = setTimeout(async () => {
+        if (state.isConnected)
+          await AddBoxs();
+          uploadAssetsInBackground();
+      }, 1000);
+    });
+  }
+
 
   // Before we show the app, we have to wait for our state to be ready.
   // In the meantime, don't render anything. This will be the background
