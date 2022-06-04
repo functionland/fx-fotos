@@ -2,17 +2,13 @@ import React, { useEffect, useRef, useState, useContext } from "react"
 import { Alert } from "react-native"
 import * as MediaLibrary from "expo-media-library"
 import { useRecoilState } from "recoil"
-import { useTheme } from "@rneui/themed"
 
 import { AssetService } from "../../services"
-import { AssetListHandle } from "../../components/asset-list"
-import { useFloatHederAnimation } from "../../utils/hooks"
 import { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { HomeNavigationParamList, HomeNavigationTypes } from "../../navigators/home-navigator"
-import { mediasState, recyclerSectionsState } from "../../store"
+import { mediasState } from "../../store"
 import { Assets } from "../../services/localdb"
 import { Entities } from "../../realmdb"
-import { ThemeContext } from "../../theme"
 import { AssetListScreen } from "../index"
 interface HomeScreenProps {
   navigation: NativeStackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>
@@ -22,7 +18,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [isReady, setIsReady] = useState(false)
   const realmAssets = useRef<Realm.Results<Entities.AssetEntity & Realm.Object>>(null);
   const [medias, setMedias] = useRecoilState(mediasState)
-
+  const [loading, setLoading] = useState(true)
   const requestAndroidPermission = async () => {
     try {
       console.log("requestAndroidPermission")
@@ -95,10 +91,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       } while (allMedias.hasNextPage && (lastAsset?.modificationTime > lastAssetTime || fitstAsset?.modificationTime < firstAssetTime))
     } catch (error) {
       console.error("syncAssets:", error)
+    } finally {
+      setLoading(false)
     }
   }
 
   return (
-    <AssetListScreen navigation={navigation} medias={isReady ? medias : null} />
+    <AssetListScreen navigation={navigation} medias={isReady ? medias : null} loading={loading} />
   )
 }

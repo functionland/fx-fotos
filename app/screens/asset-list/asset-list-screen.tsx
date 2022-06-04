@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useContext } from "react"
-import { StyleSheet, Alert, View, Image } from "react-native"
+import { StyleSheet, Alert, View, Image, ActivityIndicator } from "react-native"
 import LottieView from "lottie-react-native"
-import { Icon, Switch, Text, useTheme } from "@rneui/themed"
+import { Icon, Switch, Text, useTheme, } from "@rneui/themed"
 
 import { Screen } from "../../components"
 import { AssetService } from "../../services"
@@ -16,10 +16,11 @@ import { ThemeContext } from "../../theme"
 interface Props {
   navigation: NativeStackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>;
   medias: Asset[];
-  defaultHeader?: (style: any) => JSX.Element | undefined
+  defaultHeader?: (style: any) => JSX.Element | undefined;
+  loading: boolean
 }
 
-export const AssetListScreen: React.FC<Props> = ({ navigation, medias, defaultHeader }) => {
+export const AssetListScreen: React.FC<Props> = ({ navigation, medias, defaultHeader, loading }) => {
   const [recyclerSections, setRecyclerSections] = useState<RecyclerAssetListSection[]>(null);
   // Get a custom hook to animate the header
   const [scrollY, headerStyles] = useFloatHederAnimation(60)
@@ -99,12 +100,20 @@ export const AssetListScreen: React.FC<Props> = ({ navigation, medias, defaultHe
         style={headerStyles}
         centerComponent={<HeaderLogo />}
         leftComponent={<HeaderLeftContainer>
-          <Icon type="material-community" name="white-balance-sunny" onPress={()=>{
-             toggleTheme()
+          <Icon type="material-community" name="white-balance-sunny" onPress={() => {
+            toggleTheme()
           }} />
         </HeaderLeftContainer>}
       />)
     }
+  }
+  const renderFooter = () => {
+    if (loading) {
+      return (<View style={styles.footerContainer}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+      </View>)
+    }
+    return null;
   }
   return (
     <Screen
@@ -132,6 +141,7 @@ export const AssetListScreen: React.FC<Props> = ({ navigation, medias, defaultHe
           onSelectedItemsChange={onSelectedItemsChange}
           navigation={navigation}
           onAssetLoadError={onAssetLoadError}
+          renderFooter={renderFooter}
         />
       )}
     </Screen>
@@ -158,5 +168,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignContent: "center",
+  },
+  footerContainer: {
+    padding: 5
   }
 })

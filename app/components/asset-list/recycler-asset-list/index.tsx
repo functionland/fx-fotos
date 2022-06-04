@@ -3,7 +3,8 @@ import {
   NativeSyntheticEvent,
   NativeScrollEvent,
   View,
-  ImageErrorEventData
+  ImageErrorEventData,
+  ActivityIndicator
 } from "react-native"
 import Animated, {
   useSharedValue,
@@ -42,12 +43,12 @@ export interface Props {
   scrollY: SharedValue<number> | undefined
   onSelectedItemsChange?: (assetIds: string[], selectionMode: boolean) => void
   onAssetLoadError?: (error: NativeSyntheticEvent<ImageErrorEventData>) => void
+  renderFooter?: () => JSX.Element | JSX.Element[]
 }
 
 export interface ExtendedState {
   selectedGroups: { [key: string]: boolean }
   selectedAssets: { [key: string]: boolean }
-  selectionMode: boolean
 }
 export interface RecyclerAssetListHandler {
   resetSelectedItems: () => void,
@@ -62,6 +63,7 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(({
   scrollY,
   onSelectedItemsChange,
   onAssetLoadError,
+  renderFooter,
   ...extras
 }, ref): JSX.Element => {
   const rclRef = useRef<RecyclerListView>()
@@ -287,7 +289,7 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(({
     setCurrentColumns(numColumns.value)
   }
 
-  const updateContainerSize=()=>{
+  const updateContainerSize = () => {
     const heights = Object.values(
       gridLayoutProvider.getLayoutManager?.()?.getAllContentDimension()?.height || {},
     )
@@ -317,7 +319,7 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(({
         dataProvider={dataProvider}
         extendedState={extendedState}
         layoutProvider={gridLayoutProvider}
-        
+
         rowRenderer={rowRenderer}
         externalScrollView={ExternalScrollView}
         scrollViewProps={{
@@ -342,8 +344,8 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(({
         renderItemContainer={renderItemContainer}
         renderContentContainer={(props, children) => {
           return (
-            <Animated.View {...props} style={[props.style, containerStyle]} onLayout={()=>{
-              if(!pinching.value){
+            <Animated.View {...props} style={[props.style, containerStyle]} onLayout={() => {
+              if (!pinching.value) {
                 updateContainerSize()
               }
             }}>
@@ -351,6 +353,7 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(({
             </Animated.View>
           )
         }}
+        renderFooter={renderFooter}
         {...extras}
       />
     </View>

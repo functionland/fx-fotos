@@ -1,12 +1,12 @@
 import React, { memo } from "react"
 import { StyleSheet, View, Image, NativeSyntheticEvent, ImageErrorEventData } from "react-native"
-import { useTheme } from "@rneui/themed"
+import { Icon, Text, useTheme } from "@rneui/themed"
 import { Asset } from "../../../../types"
-import { palette } from "../../../../theme/palette"
 import { Checkbox } from "../../../checkbox/checkbox"
 
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from "react-native-reanimated"
 import { SharedElement } from "react-navigation-shared-element"
+import { convertDurationToTime } from "../../../../utils/helper"
 
 interface Props {
   asset: Asset
@@ -57,6 +57,11 @@ const AssetItem = (props: Props): JSX.Element => {
           />
         </SharedElement>
       </Animated.View>
+      {asset?.mediaType === "video" &&
+        <View style={styles.videoIconContainer}>
+          <Text style={styles.videoDurationText}>{convertDurationToTime(asset?.duration)}</Text>
+          <Icon name="play-circle" type="material-community" size={20} color="gray" />
+        </View>}
       {selectionMode ? <Checkbox value={selected} style={styles.checkbox} /> : null}
     </View>
   )
@@ -86,6 +91,20 @@ const styles = StyleSheet.create({
   sharedElementContainer: {
     flex: 1,
   },
+  videoIconContainer: {
+    right: 10,
+    position: "absolute",
+    top: 10,
+    zIndex: 99,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center"
+  },
+  videoDurationText: {
+    color: "gray",
+    fontSize: 10,
+    padding: 1
+  }
 })
 
 const areEqual = (prev: Props, next: Props) => {
