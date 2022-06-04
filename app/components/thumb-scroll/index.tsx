@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react"
 
-import { StyleSheet, Image, View } from "react-native"
-import { Text } from "react-native-elements"
+import { StyleSheet, View } from "react-native"
+import { Icon, Text, useTheme } from "@rneui/themed"
 
 import { PanGestureHandler, PanGestureHandlerGestureEvent } from "react-native-gesture-handler"
 import Animated, {
@@ -22,7 +22,6 @@ import Animated, {
 import { RecyclerAssetListSection, ViewType, GroupHeader } from "../../types"
 import GridLayoutProvider from "../asset-list/grid-provider/gridLayoutProvider"
 interface Props {
-  indicatorHeight: number
   hideTimeout: number
   dragY?: Reanimated.SharedValue<number>
   scrollY: Reanimated.SharedValue<number>
@@ -40,6 +39,7 @@ export const ThumbScroll: React.FC<Props> = (props) => {
   const opacity = useSharedValue<number>(1);
   const [yearIndices, setYearIndices] = useState<number[]>([])
   const [dragging, setDragging] = useState(false);
+  const { theme } = useTheme()
   Reanimated.addWhitelistedNativeProps({ text: true })
   useEffect(() => {
     if (props.showYearFilter && props.sections) {
@@ -114,7 +114,7 @@ export const ThumbScroll: React.FC<Props> = (props) => {
           ),
         },
         {
-          translateX: withTiming(interpolate(opacity.value, [0, 1], [40, 0], Extrapolate.CLAMP), { duration: 500 })
+          translateX: withTiming(interpolate(opacity.value, [0, 1], [60, 0], Extrapolate.CLAMP), { duration: 500 })
         },
       ],
     }
@@ -164,7 +164,7 @@ export const ThumbScroll: React.FC<Props> = (props) => {
   if (!props.viewPortHeight || !props.layoutHeight)
     return null;
   return (
-    <Reanimated.View style={[styles.scrollIndicatorContainer, { height: props.indicatorHeight }]}>
+    <Reanimated.View style={styles.scrollIndicatorContainer}>
       {dragging ? renderYearFilter() : null}
       <PanGestureHandler
         onGestureEvent={_onPanGestureEvent}
@@ -177,20 +177,11 @@ export const ThumbScroll: React.FC<Props> = (props) => {
         <Reanimated.View
           style={[
             styles.scrollIndicator,
-            {
-              height: props.indicatorHeight,
-              zIndex: 5,
-            },
             animatedStyle
           ]}
         >
-          <View style={styles.scrollBar}>
-            <Image
-              source={require("../../../assets/images/scroll.png")}
-              style={[styles.image]}
-              resizeMethod="resize"
-              resizeMode="stretch"
-            />
+          <View style={[styles.scrollBar, { backgroundColor: theme.colors.grey4 }]}>
+            <Icon type="font-awesome" name="sort" />
           </View>
         </Reanimated.View>
       </PanGestureHandler>
@@ -203,19 +194,13 @@ const styles = StyleSheet.create({
     top: 0,
     position: "absolute",
     right: 0,
-    width: 50,
+    width: 60,
     height: 50,
     opacity: 1,
     zIndex: 99,
   },
   scrollIndicator: {
-    right: -15,
-    zIndex: 4,
-    borderRadius: 50,
-    backgroundColor: "whitesmoke",
-    height: 50,
-    width: 80,
-    flexWrap: "wrap",
+    flex: 1,
   },
   image: {
     marginLeft: 12,
@@ -224,9 +209,19 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
   scrollBar: {
-    flex: 1,
+    position: "absolute",
+    right: -20,
+    borderRadius: 50,
+    backgroundColor: "whitesmoke",
+    height: 50,
+    width: 50,
     flexDirection: "row",
     flexWrap: "wrap",
+    justifyContent: "center",
+    alignItems: "center",
+    alignContent: "center",
+    paddingRight: 15
+
   },
   yearFilterText: {
     top: 0,

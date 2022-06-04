@@ -1,5 +1,6 @@
 import React from "react"
-import { Text, View, StyleSheet, ViewStyle, TextStyle } from "react-native"
+import { View, StyleSheet, ViewStyle, TextStyle } from "react-native"
+import { Text } from "@rneui/themed"
 import { Checkbox } from "../../.."
 
 interface Props {

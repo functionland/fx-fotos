@@ -3,37 +3,54 @@ import Animated from "react-native-reanimated"
 import { enableScreens } from "react-native-screens"
 import { NavigationContainer } from "@react-navigation/native"
 import { createSharedElementStackNavigator } from "react-navigation-shared-element"
+import Toast from 'react-native-toast-message'
 
 import { navigationRef } from "./navigation-utilities"
-import { PhotoScreen } from "../screens"
+import { PhotoScreen, LibraryAssetsScreen, BoxListScreen, BoxAddUpdateScreen } from "../screens"
 import { HomeNavigator } from "./home-navigator"
 import { ThemeContext } from '../theme';
+import { BoxEntity } from "../realmdb/entities"
 enableScreens()
-export type NavigatorParamList = {
-  home: undefined
-  photo: { section: RecyclerAssetListSection }
-  settings: undefined
+export type RootStackParamList = {
+  Home: undefined
+  Photo: { section: RecyclerAssetListSection }
+  Settings: undefined,
+  BoxList: undefined,
+  BoxAddUpdate: { box: BoxEntity }
 }
 export enum AppNavigationNames {
-  HomeScreen = "home",
-  PhotoScreen = "photo"
+  HomeScreen = "Home",
+  PhotoScreen = "Photo",
+  LibraryAssets = "LibraryAssets",
+  BoxList = "BoxList",
+  BoxAddUpdate = "BoxAddUpdate"
 }
-const Stack = createSharedElementStackNavigator<NavigatorParamList>()
+const Stack = createSharedElementStackNavigator<RootStackParamList>()
 
 const AppStack = () => {
   return (
     <Stack.Navigator
       nitialRouteName={AppNavigationNames.HomeScreen}
       screenOptions={{
+        headerShown: false,
+        headerTransparent: true,
       }}
     >
       <Stack.Screen
         name={AppNavigationNames.HomeScreen}
-        options={{
-          headerShown: false,
-          headerTransparent: true,
-        }}
         component={HomeNavigator}
+      />
+      <Stack.Screen
+        name={AppNavigationNames.LibraryAssets}
+        component={LibraryAssetsScreen}
+      />
+      <Stack.Screen
+        name={AppNavigationNames.BoxList}
+        component={BoxListScreen}
+      />
+      <Stack.Screen
+        name={AppNavigationNames.BoxAddUpdate}
+        component={BoxAddUpdateScreen}
       />
       <Stack.Screen
         name={AppNavigationNames.PhotoScreen}
@@ -87,6 +104,7 @@ export const AppNavigator = (props: NavigationProps) => {
       >
         <AppStack />
       </NavigationContainer>
+      <Toast/>
     </Animated.View>
   )
 }

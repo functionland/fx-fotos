@@ -3,6 +3,8 @@ import {
   NativeSyntheticEvent,
   NativeScrollEvent,
   View,
+  ImageErrorEventData,
+  ActivityIndicator
 } from "react-native"
 import Animated, {
   useSharedValue,
@@ -40,12 +42,13 @@ export interface Props {
   scrollHandler: (event: NativeSyntheticEvent<NativeScrollEvent>) => void
   scrollY: SharedValue<number> | undefined
   onSelectedItemsChange?: (assetIds: string[], selectionMode: boolean) => void
+  onAssetLoadError?: (error: NativeSyntheticEvent<ImageErrorEventData>) => void
+  renderFooter?: () => JSX.Element | JSX.Element[]
 }
 
 export interface ExtendedState {
   selectedGroups: { [key: string]: boolean }
   selectedAssets: { [key: string]: boolean }
-  selectionMode: boolean
 }
 export interface RecyclerAssetListHandler {
   resetSelectedItems: () => void,
@@ -59,6 +62,8 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(({
   scrollRef,
   scrollY,
   onSelectedItemsChange,
+  onAssetLoadError,
+  renderFooter,
   ...extras
 }, ref): JSX.Element => {
   const rclRef = useRef<RecyclerListView>()
@@ -163,6 +168,7 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(({
           selected={!!extendedState.selectedAssets[data.id]}
           onLongPress={onLongPress}
           onPress={onPress}
+          onAssetLoadError={onAssetLoadError}
         />
       )
     },
@@ -215,14 +221,7 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(({
   const animatedReactionWrapper = () => {
     forcRenderRCL()
   }
-  useEffect(() => {
-    const heights = Object.values(
-      gridLayoutProvider.getLayoutManager?.()?.getAllContentDimension()?.height || {},
-    )
-    if (heights.length) {
-      setContainerSize(heights)
-    }
-  }, [gridLayoutProvider])
+
   useAnimatedReaction(
     () => {
       return { pinchingValue: pinching.value, numColumnsValue: numColumns.value }
@@ -281,13 +280,22 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(({
     return style
   }, [containerSize])
 
-  console.log("Render: Recycle-Asset-List", currentColumns)
+  console.log("Render: Recycle-Asset-List", currentColumns, containerSize)
 
   const forcRenderRCL = () => {
     console.log("forcRenderRCL", numColumns.value)
     rclRef.current?.getVirtualRenderer()?._prepareViewabilityTracker()
     //rclRef.current?._onScroll(0, dyanmicScrollY.value + lastScrollY.value)
     setCurrentColumns(numColumns.value)
+  }
+
+  const updateContainerSize = () => {
+    const heights = Object.values(
+      gridLayoutProvider.getLayoutManager?.()?.getAllContentDimension()?.height || {},
+    )
+    if (heights.length) {
+      setContainerSize(heights)
+    }
   }
   return (
     <View style={{ flex: 1 }} onLayout={(e) => {
@@ -298,7 +306,6 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(({
         hideTimeout={2000}
         headerHeight={Constants.HeaderHeight}
         footerHeight={Constants.TabBarHeight}
-        indicatorHeight={50}
         viewPortHeight={viewPortHeight}
         layoutHeight={containerSize?.[currentColumns - MIN_COLUMNS] || viewPortHeight}
         shouldIndicatorHide={false}
@@ -312,12 +319,16 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(({
         dataProvider={dataProvider}
         extendedState={extendedState}
         layoutProvider={gridLayoutProvider}
+
         rowRenderer={rowRenderer}
         externalScrollView={ExternalScrollView}
         scrollViewProps={{
           disableScrollViewPanResponder: false,
           scrollRefExternal: scrollRef,
           _onScrollExternal: scrollHandler,
+          onLayout: () => {
+            updateContainerSize();
+          }
         }}
         onVisibleIndicesChanged={(all = [], now, notNow) => {
           const visibleIndexValue = all[Math.floor(all.length / 2)] || 0
@@ -333,11 +344,16 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(({
         renderItemContainer={renderItemContainer}
         renderContentContainer={(props, children) => {
           return (
-            <Animated.View {...props} style={[props.style, containerStyle]}>
+            <Animated.View {...props} style={[props.style, containerStyle]} onLayout={() => {
+              if (!pinching.value) {
+                updateContainerSize()
+              }
+            }}>
               {children}
             </Animated.View>
           )
         }}
+        renderFooter={renderFooter}
         {...extras}
       />
     </View>

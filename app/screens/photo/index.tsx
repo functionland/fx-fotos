@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useEffect, useState } from "react"
 import Animated, {
   runOnJS,
   withTiming,
@@ -8,8 +8,9 @@ import Animated, {
   useAnimatedStyle,
   useAnimatedGestureHandler,
 } from "react-native-reanimated"
+import Toast from 'react-native-toast-message'
 import { snapPoint } from "react-native-redash"
-import { Dimensions, StyleSheet } from "react-native"
+import { ActivityIndicator, Alert, Dimensions, StyleSheet, View } from "react-native"
 import { SharedElement } from "react-navigation-shared-element"
 import {
   TapGestureHandler,
@@ -18,12 +19,19 @@ import {
   PinchGestureHandlerGestureEvent,
 } from "react-native-gesture-handler"
 import { widthPercentageToDP } from "react-native-responsive-screen"
+import { useNetInfo } from "@react-native-community/netinfo"
 import { RouteProp, NavigationProp } from "@react-navigation/native"
-
-import { Asset } from "../../types"
-import { palette } from "../../theme"
-import { PhotoScreenHeader } from "../../components"
+import { file, fula } from "react-native-fula"
+import { Asset, SyncStatus } from "../../types"
+import { Constants, palette } from "../../theme"
+import { Header } from "../../components"
 import { HomeNavigationParamList } from "../../navigators"
+import { Card, Icon } from "@rneui/themed"
+import { HeaderArrowBack } from "../../components/header"
+import { useRecoilState } from "recoil"
+import { boxsState } from "../../store"
+import { Assets } from "../../services/localdb"
+import { AddBoxs, downloadAsset, uploadAssetsInBackground } from "../../services/sync-service"
 
 const { height } = Dimensions.get("window")
 
@@ -33,17 +41,24 @@ interface PhotoScreenProps {
 }
 
 export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) => {
-  const img = route.params.section.data as Asset
-
+  const [asset, setAsset] = useState(JSON.parse(JSON.stringify(route.params.section?.data)) as Asset)
   const translateX = useSharedValue(0)
   const translateY = useSharedValue(0)
   const imageScale = useSharedValue(1)
   const isPanGestureActive = useSharedValue(false)
   const isPinchGestureActive = useSharedValue(false)
   const animatedOpacity = useSharedValue(1)
-
+  const [, setBoxs] = useRecoilState(boxsState)
+  const [loading, setLoading] = useState(false)
+  const netInfoState = useNetInfo()
+  useEffect(() => {
+    return () => {
+      Toast.hide();
+    }
+  })
   const wrapperAnimatedStyle = useAnimatedStyle(() => {
     return {
+      paddingTop: Constants.HeaderHeight,
       backgroundColor: palette.black,
       flex: 1,
       opacity: animatedOpacity.value,
@@ -61,6 +76,125 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
   })
   const goBack = () => {
     navigation.goBack()
+  }
+  const downloadFromBox = async () => {
+    if (asset?.syncStatus === SyncStatus.SYNCED && asset?.isDeleted) {
+      setLoading(true);
+      setTimeout(async () => {
+        try {
+          try {
+            await AddBoxs()
+          } catch (error) {
+            Alert.alert("Warning", error)
+            return;
+          }
+          const result = await downloadAsset(asset?.cid)
+          console.log("downloadFromBox:", result)
+          setAsset(prev => ({
+            ...prev,
+            uri: result.uri,
+            isDeleted: false
+          }))
+          Assets.addOrUpdate([{
+            id: asset.id,
+            uri: result.uri,
+            isDeleted: false
+          }]);
+        } catch (error) {
+          console.log("uploadOrDownload", error)
+          Alert.alert("Error", "Unable to receive the file, make sure your box is available!")
+        } finally {
+          setLoading(false)
+        }
+      }, 0);
+    }
+  }
+  const uploadToBox = async () => {
+    if (asset?.syncStatus === SyncStatus.NOTSYNCED && !asset?.isDeleted) {
+      setLoading(true);
+      setTimeout(async () => {
+        try {
+          // const _filePath = asset.uri?.split('file:')[1];
+          // const result = await file.send(decodeURI(_filePath))
+          // console.log("result:",result)
+          await Assets.addOrUpdate([{
+            id: asset.id,
+            syncStatus: SyncStatus.SYNC,
+          }]);
+          setAsset(prev => ({
+            ...prev,
+            syncStatus: SyncStatus.SYNC,
+          }))
+          if (!netInfoState.isConnected) {
+            Toast.show({
+              type: 'info',
+              text1: 'Will upload when connected',
+              position: "bottom",
+              bottomOffset: 0,
+            });
+            return
+          }
+          try {
+            await AddBoxs()
+          } catch (error) {
+            Alert.alert("Warning", error)
+            return;
+          }
+          try {
+            Toast.show({
+              type: 'info',
+              text1: 'Upload...',
+              position: "bottom",
+              bottomOffset: 0,
+            });
+            await uploadAssetsInBackground({
+              callback: (success) => {
+                if (success)
+                  setAsset(prev => ({
+                    ...prev,
+                    syncStatus: SyncStatus.SYNCED,
+                  }))
+                else
+                  Toast.show({
+                    type: 'error',
+                    text1: 'Will upload when connected',
+                    position: "bottom",
+                    bottomOffset: 0,
+                  });
+
+              }
+            });
+
+          } catch (error) {
+            Alert.alert("Error", "Unable to send the file now, will upload when connected")
+          }
+        } catch (error) {
+          console.log("uploadOrDownload", error)
+          Alert.alert("Error", "Unable to send the file, make sure your box is available!")
+        } finally {
+          setLoading(false)
+        }
+      }, 0);
+    } else if (asset?.syncStatus === SyncStatus.SYNC) {
+      cancelUpdate();
+    }
+  }
+  const cancelUpdate = () => {
+    Alert.alert("Waiting for connection", "Will upload when connected", [{
+      text: "Cancel update",
+      onPress: async () => {
+        await Assets.addOrUpdate([{
+          id: asset.id,
+          syncStatus: SyncStatus.NOTSYNCED,
+        }]);
+        setAsset(prev => ({
+          ...prev,
+          syncStatus: SyncStatus.NOTSYNCED,
+        }))
+      }
+    }, {
+      text: "OK"
+    }])
   }
   const onPanGesture = useAnimatedGestureHandler({
     onStart: () => {
@@ -133,26 +267,43 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
   }
 
   const imageContainerStyle = {
-    height: (widthPercentageToDP(100) * img.height) / img.width,
+    height: (widthPercentageToDP(100) * asset.height) / asset.width,
     width: widthPercentageToDP(100),
   }
-
+  const renderHeader = () => {
+    return (<Header
+      leftComponent={<HeaderArrowBack navigation={navigation} />}
+      rightComponent={loading ? <ActivityIndicator size="small" /> :
+        (asset?.syncStatus === SyncStatus.SYNCED && !asset?.isDeleted ? <Icon type="material-community" name="cloud-check" />
+          : (asset?.syncStatus === SyncStatus.NOTSYNCED && !asset?.isDeleted ? <Icon type="material-community" name="cloud-upload-outline" onPress={uploadToBox} />
+            : asset?.syncStatus === SyncStatus.SYNC ? <Icon type="material-community" name="refresh" onPress={uploadToBox} /> : null))
+      } />)
+  }
+  const renderDownloadSection = () => {
+    return (<Card containerStyle={{ borderWidth: 0 }} >
+      <Icon type="material-community" name="cloud-download-outline" size={78} onPress={downloadFromBox} />
+      <Card.Title>Tap to download</Card.Title>
+    </Card>)
+  }
   return (
     <PanGestureHandler maxPointers={1} minPointers={1} onGestureEvent={onPanGesture}>
       <Animated.View style={wrapperAnimatedStyle}>
-        <PhotoScreenHeader goBack={() => goBack()} />
+        {renderHeader()}
         <Animated.View style={animatedStyle}>
           <TapGestureHandler onActivated={() => onDoubleTap()} numberOfTaps={2}>
-            <SharedElement style={imageContainerStyle} id={img.uri}>
-              <PinchGestureHandler onGestureEvent={onPinchHandler}>
-                <Animated.Image
-                  source={{ uri: img.uri }}
-                  fadeDuration={0}
-                  resizeMode="contain"
-                  style={[styles.image, animatedImage]}
-                />
-              </PinchGestureHandler>
-            </SharedElement>
+            <View>
+              {asset?.syncStatus === SyncStatus.SYNCED && asset?.isDeleted && renderDownloadSection()}
+              {!asset?.isDeleted && <SharedElement style={imageContainerStyle} id={asset.uri}>
+                <PinchGestureHandler onGestureEvent={onPinchHandler}>
+                  <Animated.Image
+                    source={{ uri: asset.uri }}
+                    fadeDuration={0}
+                    resizeMode="contain"
+                    style={[styles.image, animatedImage]}
+                  />
+                </PinchGestureHandler>
+              </SharedElement>}
+            </View>
           </TapGestureHandler>
         </Animated.View>
       </Animated.View>

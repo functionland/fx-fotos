@@ -2,8 +2,7 @@ import * as MediaLibrary from "expo-media-library"
 import { manipulateAsync, SaveFormat, ImageResult } from "expo-image-manipulator"
 import moment from "moment"
 
-import { RecyclerAssetListSection, ViewType, GroupHeader } from "../types"
-
+import { RecyclerAssetListSection, ViewType, GroupHeader, Library } from "../types"
 export const generateThumbnail = async (assets: MediaLibrary.Asset[]) => {
   const result: ImageResult[] = []
   for (let index = 0; index < assets.length; index++) {
@@ -27,7 +26,7 @@ export const categorizeAssets = (assets: MediaLibrary.Asset[]) => {
   let lastMonthHeader: GroupHeader = null
   let lastDayHeader: GroupHeader = null
   for (const asset of assets) {
-    const times = moment(asset.creationTime).format("MMMM YYYY|dddd, MMM D, YYYY")
+    const times = moment(asset.modificationTime).format("MMMM YYYY|dddd, MMM D, YYYY")
     const month = times.split("|")[0]
     const day = times.split("|")[1]
 
@@ -36,7 +35,7 @@ export const categorizeAssets = (assets: MediaLibrary.Asset[]) => {
       lastMonth = month
       lastMonthHeader = {
         title: month,
-        date:new Date(asset.creationTime),
+        date: new Date(asset.modificationTime),
         subGroupIds: [],
       }
       sections.push({
@@ -52,7 +51,7 @@ export const categorizeAssets = (assets: MediaLibrary.Asset[]) => {
       lastDay = day
       lastDayHeader = {
         title: day,
-        date:new Date(asset.creationTime),
+        date: new Date(asset.modificationTime),
         subGroupIds: [],
       }
       const daySection: RecyclerAssetListSection = {
@@ -80,10 +79,32 @@ export const categorizeAssets = (assets: MediaLibrary.Asset[]) => {
   }
   return sections
 }
+export const getLibraries = (assets: MediaLibrary.Asset[]): Library[] => {
+  const librariesObj: Record<string, MediaLibrary.Asset[]> = {}
+
+  //Group assets based on last directory name
+  for (const asset of assets) {
+    if (!asset || !asset.uri) continue
+    const uriParts = asset?.uri?.split("/")
+    const title = uriParts?.[uriParts.length - 2]
+    if (!librariesObj[title]) librariesObj[title] = []
+    librariesObj[title].push(asset)
+  }
+
+  const libraries = Object.keys(librariesObj).map((title) => {
+    return {
+      title,
+      assets: librariesObj[title],
+    } as Library
+  })
+
+  return libraries
+}
 
 export const getAssets = async (
   pageSize = 100,
   afterAssetId: string,
+  sortBy: MediaLibrary.SortByValue[] | MediaLibrary.SortByValue = "modificationTime",
 ): Promise<MediaLibrary.PagedInfo<MediaLibrary.Asset>> => {
   try {
     const medias = await MediaLibrary.getAssetsAsync(
@@ -91,11 +112,13 @@ export const getAssets = async (
         ? {
             first: pageSize,
             after: afterAssetId,
-            sortBy: "creationTime",
+            sortBy: sortBy,
+            mediaType: ["photo", "video"],
           }
         : {
             first: pageSize,
-            sortBy: "creationTime",
+            sortBy: sortBy,
+            mediaType: ["photo", "video"],
           },
     )
     return medias

@@ -1,29 +1,37 @@
 import React from "react"
-import { TouchableHighlight, StyleSheet } from "react-native"
-import { GroupHeader, RecyclerAssetListSection, ViewType } from "../../../../types"
+import { TouchableHighlight, StyleSheet, NativeSyntheticEvent, ImageErrorEventData } from "react-native"
+import { Asset, GroupHeader, RecyclerAssetListSection, SyncStatus, ViewType } from "../../../../types"
 import StoryListItem from "./story-list-item"
 import AssetItem from "./asset-item"
 import HeaderItem from "./header-item"
 
-import { palette } from "../../../../theme/palette"
 interface Props {
   section: RecyclerAssetListSection
   selectionMode: boolean
-  selected: boolean
+  selected: boolean,
   onLongPress: (section: RecyclerAssetListSection) => void
   onPress: (section: RecyclerAssetListSection) => void
+  onAssetLoadError?: (error: NativeSyntheticEvent<ImageErrorEventData>) => void
 }
 const getSectionByType = (
   section: RecyclerAssetListSection,
   selectionMode: boolean,
   selected: boolean,
+  onAssetLoadError?: (error: NativeSyntheticEvent<ImageErrorEventData>) => void
 ) => {
   switch (section.type) {
     case ViewType.STORY: {
       return <StoryListItem stories={section.data} selectionMode={selectionMode} />
     }
     case ViewType.ASSET: {
-      return <AssetItem asset={section.data} selectionMode={selectionMode} selected={selected} />
+      const data = section?.data as Asset
+      return <AssetItem
+        onError={onAssetLoadError}
+        asset={section.data}
+        selectionMode={selectionMode}
+        selected={selected}
+        isSynced={data.syncStatus === SyncStatus.SYNCED}
+        isDeleted={section?.data?.isDeleted} />
     }
     case ViewType.MONTH: {
       const groupHeader: GroupHeader = section.data
@@ -58,6 +66,7 @@ const RecyclerSectionItem: React.FC<Props> = ({
   selected,
   onLongPress,
   onPress,
+  onAssetLoadError
 }) => {
   const onPressItem = () => {
     if (onPress) {
@@ -78,7 +87,7 @@ const RecyclerSectionItem: React.FC<Props> = ({
       onLongPress={onLongPressItem}
       onPress={onPressItem}
     >
-      {getSectionByType(section, selectionMode, selected)}
+      {getSectionByType(section, selectionMode, selected, onAssetLoadError)}
     </TouchableHighlight>
   )
 }
@@ -87,17 +96,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   dayText: {
-    color: palette.black,
     fontSize: 16,
     fontWeight: "400",
     padding: 5,
   },
   monthText: {
-    color: palette.black,
     fontSize: 28,
     fontWeight: "300",
     padding: 10,
-    // paddingTop: 50,
   },
 })
 export default RecyclerSectionItem
