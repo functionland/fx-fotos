@@ -30,8 +30,8 @@ import { Card, Icon } from "@rneui/themed"
 import { HeaderArrowBack } from "../../components/header"
 import { useRecoilState } from "recoil"
 import { boxsState } from "../../store"
-import { Assets, Boxs } from "../../services/localdb"
-import { AddBoxs, downloadAsset, uploadAsset, uploadAssetsInBackground } from "../../services/sync-service"
+import { Assets } from "../../services/localdb"
+import { AddBoxs, downloadAsset, uploadAssetsInBackground } from "../../services/sync-service"
 
 const { height } = Dimensions.get("window")
 

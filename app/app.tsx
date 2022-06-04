@@ -28,6 +28,7 @@ import { ThemeProvider } from './theme';
 import { RneLightTheme, RneDarkTheme } from "./theme"
 import NetInfo from "@react-native-community/netinfo";
 import { AddBoxs, uploadAssetsInBackground } from "./services/sync-service"
+import { SyncService } from "./services"
 
 // This puts screens in a native ViewController or Activity. If you want fully native
 // stack navigation, use `createNativeStackNavigator` in place of `createStackNavigator`:
@@ -52,6 +53,7 @@ function App() {
     ; (async () => {
       await getPermissions()
       await initFonts()
+      await SyncService.initBackgroundFetch();
     })();
     // Subscribe
     const unsubscribeNetInfo = subscribeNetInfo();

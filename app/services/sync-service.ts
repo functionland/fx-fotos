@@ -1,5 +1,6 @@
 import { Platform } from "react-native"
 import BackgroundJob, { BackgroundTaskOptions } from "react-native-background-actions"
+import BackgroundFetch, { HeadlessEvent } from "react-native-background-fetch"
 import { file, fula } from "react-native-fula"
 import { AssetEntity } from "../realmdb/entities"
 
@@ -21,19 +22,16 @@ const defaultOptions = {
   linkingURI: "exampleScheme://chat/jane",
 } as BackgroundTaskOptions
 
-const backgroundTask = async (taskParameters:TaskParams) => {
+const backgroundTask = async (taskParameters: TaskParams) => {
   if (Platform.OS === "ios") {
     console.warn(
       "This task will not keep your app alive in the background by itself, use other library like react-native-track-player that use audio,",
       "geolocalization, etc. to keep your app alive in the background while you excute the JS from this library.",
     )
   }
-  const { callback = null,assets=[] } = taskParameters
+  const { callback = null, assets = [] } = taskParameters
   await new Promise(async (resolve) => {
     try {
-      // const assets = await (await Assets.getAllNeedToSync()).toJSON()
-      console.log("syncAssets assets.length", assets.length, callback)
-
       for (let index = 0; index < assets.length; index++) {
         const asset = assets[index]
         BackgroundJob.updateNotification({
@@ -57,7 +55,6 @@ const backgroundTask = async (taskParameters:TaskParams) => {
         try {
           callback?.(true)
         } catch {}
-        console.log("result:", result)
       }
     } catch (error) {
       console.log("backgroundTask:", error)
@@ -70,7 +67,7 @@ const backgroundTask = async (taskParameters:TaskParams) => {
 }
 /**
  * You need to make sure the box addresses are added and then call this method
- * @param options 
+ * @param options
  */
 export const uploadAssetsInBackground = async (options: {
   callback?: (success: boolean) => void
@@ -121,4 +118,55 @@ export const AddBoxs = async () => {
     console.log(error)
     throw error
   }
+}
+
+/// Configure BackgroundFetch.
+///
+export const initBackgroundFetch = async () => {
+  return await BackgroundFetch.configure(
+    {
+      minimumFetchInterval: 15, // <-- minutes (15 is minimum allowed)
+      stopOnTerminate: false,
+      enableHeadless: true,
+      startOnBoot: true,
+      // Android options
+      forceAlarmManager: false, // <-- Set true to bypass JobScheduler.
+      requiredNetworkType: BackgroundFetch.NETWORK_TYPE_ANY, // Default
+      requiresCharging: false, // Default
+      requiresDeviceIdle: false, // Default
+      requiresBatteryNotLow: true, // Default
+      requiresStorageNotLow: false, // Default
+    },
+    async (taskId: string) => {
+      console.log("[BackgroundFetch (configure)] taskId", taskId)
+      await backgroundFetchHeadlessTask({ taskId, timeout: false })
+
+      BackgroundFetch.finish(taskId)
+    },
+    (taskId: string) => {
+      // Oh No!  Our task took too long to complete and the OS has signalled
+      // that this task must be finished immediately.
+      console.log("[Fetch] TIMEOUT taskId:", taskId)
+      BackgroundFetch.finish(taskId)
+    },
+  )
+}
+
+/// BackgroundFetch Android Headless Event Receiver.
+/// Called when the Android app is terminated.
+///
+export const backgroundFetchHeadlessTask = async (event: HeadlessEvent) => {
+  if (event.timeout) {
+    console.log("[BackgroundFetch] 💀 HeadlessTask TIMEOUT: ", event.taskId)
+    BackgroundFetch.finish(event.taskId)
+    return
+  }
+
+  console.log("[BackgroundFetch] 💀 HeadlessTask start: ", event.taskId)
+  await uploadAssetsInBackground()
+
+  // Required:  Signal to native code that your task is complete.
+  // If you don't do this, your app could be terminated and/or assigned
+  // battery-blame for consuming too much time in background.
+  BackgroundFetch.finish(event.taskId)
 }
