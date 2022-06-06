@@ -13,6 +13,7 @@ import { HomeNavigationParamList, HomeNavigationTypes } from "../../navigators/h
 import { Assets } from "../../services/localdb"
 import { Header, HeaderLogo, HeaderLeftContainer, HeaderRightContainer, HeaderCenterContainer } from "../../components/header"
 import { ThemeContext } from "../../theme"
+import { AppNavigationNames } from "../../navigators"
 interface Props {
   navigation: NativeStackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>;
   medias: Asset[];
@@ -54,7 +55,10 @@ export const AssetListScreen: React.FC<Props> = ({ navigation, medias, defaultHe
               const deleted = await AssetService.deleteAssets(selectedItems);
               if (deleted) {
                 assetListRef?.current?.resetSelectedItems();
-                await Assets.remove(selectedItems);
+                await Assets.addOrUpdate(selectedItems.map(id=>({
+                  id,
+                  isDeleted:true
+                })));
                 cancelSelectionMode()
               }
             } catch (error) {
@@ -104,6 +108,9 @@ export const AssetListScreen: React.FC<Props> = ({ navigation, medias, defaultHe
             toggleTheme()
           }} />
         </HeaderLeftContainer>}
+        rightComponent={<HeaderRightContainer>
+          <Icon type="material-community" name="alpha-f-box-outline" onPress={() => navigation.navigate(AppNavigationNames.BoxList)} />
+        </HeaderRightContainer>}
       />)
     }
   }

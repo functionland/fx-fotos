@@ -1,6 +1,6 @@
 import { Asset as ExpoAsset } from "expo-media-library"
-
-export type Asset = ExpoAsset & {}
+import { AssetEntity} from "../realmdb/entities"
+export type Asset = ExpoAsset & AssetEntity
 export type AssetStory = {
   id: string
   data: Asset[]

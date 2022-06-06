@@ -16,14 +16,19 @@ export const PhotoScreenHeader: React.FC<PhotoScreenHeaderProps> = ({ goBack }) 
       <TouchableNativeFeedback onPress={goBack}>
         <Icon name="arrowleft" size={28} style={{ color: palette.white }} />
       </TouchableNativeFeedback>
+      <TouchableNativeFeedback onPress={goBack}>
+        <Icon name="cloud" size={28} style={{ color: palette.white }} />
+      </TouchableNativeFeedback>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
+    flexDirection:"row",
+    paddingTop:30,
     height: Constants.HeaderHeight,
-    justifyContent: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 15,
     position: "absolute",
     width: widthPercentageToDP(100),
