@@ -1,6 +1,6 @@
 import React from "react"
 import { TouchableHighlight, StyleSheet, NativeSyntheticEvent, ImageErrorEventData } from "react-native"
-import { GroupHeader, RecyclerAssetListSection, ViewType } from "../../../../types"
+import { Asset, GroupHeader, RecyclerAssetListSection, SyncStatus, ViewType } from "../../../../types"
 import StoryListItem from "./story-list-item"
 import AssetItem from "./asset-item"
 import HeaderItem from "./header-item"
@@ -8,7 +8,7 @@ import HeaderItem from "./header-item"
 interface Props {
   section: RecyclerAssetListSection
   selectionMode: boolean
-  selected: boolean
+  selected: boolean,
   onLongPress: (section: RecyclerAssetListSection) => void
   onPress: (section: RecyclerAssetListSection) => void
   onAssetLoadError?: (error: NativeSyntheticEvent<ImageErrorEventData>) => void
@@ -24,7 +24,14 @@ const getSectionByType = (
       return <StoryListItem stories={section.data} selectionMode={selectionMode} />
     }
     case ViewType.ASSET: {
-      return <AssetItem onError={onAssetLoadError} asset={section.data} selectionMode={selectionMode} selected={selected} />
+      const data = section?.data as Asset
+      return <AssetItem
+        onError={onAssetLoadError}
+        asset={section.data}
+        selectionMode={selectionMode}
+        selected={selected}
+        isSynced={data.syncStatus === SyncStatus.SYNCED}
+        isDeleted={section?.data?.isDeleted} />
     }
     case ViewType.MONTH: {
       const groupHeader: GroupHeader = section.data

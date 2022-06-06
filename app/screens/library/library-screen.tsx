@@ -21,13 +21,19 @@ interface HomeScreenProps {
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList)
 export const LibraryScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [medias] = useRecoilState(mediasState)
-  const [, setSelectedLibrary] = useRecoilState(selectedLibraryState)
+  const [selectedLibrary, setSelectedLibrary] = useRecoilState(selectedLibraryState)
   const { theme } = useTheme();
   const [libraies, setLibraries] = useState<Library[]>(null)
   // Get a custom hook to animate the header
   const [scrollY, headerStyles] = useFloatHederAnimation(60)
   useEffect(() => {
-    setLibraries(AssetService.getLibraries(medias))
+    const libs = AssetService.getLibraries(medias)
+    setLibraries(libs)
+    if (selectedLibrary){
+      const lib=libs.find(lib=>lib.title === selectedLibrary.title)
+      if(lib)
+        setSelectedLibrary(lib)
+    }
   }, [medias]);
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
@@ -40,7 +46,7 @@ export const LibraryScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       centerComponent={<HeaderLogo />}
     />)
   }
-  
+
   const onLibraryPress = (item: Library) => {
     setSelectedLibrary(item);
     navigation.push(AppNavigationNames.LibraryAssets)

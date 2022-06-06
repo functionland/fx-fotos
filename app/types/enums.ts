@@ -4,3 +4,9 @@ export enum ViewType {
   MONTH = "MONTH",
   DAY = "DAY",
 }
+
+export enum SyncStatus {
+  NOTSYNCED = 0,
+  SYNC = 1, // Selected for sync
+  SYNCED = 2,
+}

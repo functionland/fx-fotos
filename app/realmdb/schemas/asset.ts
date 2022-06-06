@@ -46,7 +46,7 @@ export const Asset = {
     /**
      * Sync statis with box
      */
-    isSynced:  { type: "bool", default: false },
+    syncStatus:  { type: "int", default: 0 },
     /**
      * Sync date with box
      */
@@ -55,5 +55,9 @@ export const Asset = {
      * content id in the box
      */
     cid: "string?",
+    /**
+     * Deleted form storage
+     */
+    isDeleted:{ type: "bool", default: false },
   },
 }
