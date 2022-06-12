@@ -10,6 +10,7 @@ import { PhotoScreen, LibraryAssetsScreen, BoxListScreen, BoxAddUpdateScreen } f
 import { HomeNavigator } from "./home-navigator"
 import { ThemeContext } from '../theme';
 import { BoxEntity } from "../realmdb/entities"
+
 enableScreens()
 export type RootStackParamList = {
   Home: undefined
