@@ -24,8 +24,8 @@ const os = require("os")
   { command: "jetify" },
 
   // nodeify the project for web3
-  { command: "rn-nodeify --install fs,dgram,process,path,console"},
-  { command: "./node_modules/.bin/rn-nodeify --hack --install"},
+  { command: "rn-nodeify --install --hack"},
+  //{ command: "./node_modules/.bin/rn-nodeify --hack --install"},
 
   // on iOS, make sure our native modules are installed
   //{ command: "pod install", cwd: "ios", onlyPlatforms: ["darwin"] },

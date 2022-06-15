@@ -6,7 +6,7 @@ import { createSharedElementStackNavigator } from "react-navigation-shared-eleme
 import Toast from 'react-native-toast-message'
 
 import { navigationRef } from "./navigation-utilities"
-import { PhotoScreen, LibraryAssetsScreen, BoxListScreen, BoxAddUpdateScreen } from "../screens"
+import { PhotoScreen, LibraryAssetsScreen, BoxListScreen, BoxAddUpdateScreen, AccountScreen } from "../screens"
 import { HomeNavigator } from "./home-navigator"
 import { ThemeContext } from '../theme';
 import { BoxEntity } from "../realmdb/entities"
@@ -14,13 +14,15 @@ import { BoxEntity } from "../realmdb/entities"
 enableScreens()
 export type RootStackParamList = {
   Home: undefined
-  Photo: { section: RecyclerAssetListSection }
+  Photo: { section: RecyclerAssetListSection },
+  Account: undefined,
   Settings: undefined,
   BoxList: undefined,
   BoxAddUpdate: { box: BoxEntity }
 }
 export enum AppNavigationNames {
   HomeScreen = "Home",
+  AccountScrenn = "AccountScreen",
   PhotoScreen = "Photo",
   LibraryAssets = "LibraryAssets",
   BoxList = "BoxList",
@@ -83,6 +85,43 @@ const AppStack = () => {
         sharedElements={(route) => {
           const { section } = route.params
           return [section.data.uri]
+        }}
+
+      />
+      <Stack.Screen
+        name={AppNavigationNames.AccountScrenn}
+        options={{
+          headerShown: false,
+          headerTransparent: true,
+          gestureEnabled: false,
+          headerShown: false,
+          cardOverlayEnabled: true,
+          cardStyle: { backgroundColor: "transparent" },
+          animationEnabled: true,
+          cardStyleInterpolator: ({ current: { progress } }) => ({
+            cardStyle: {
+              opacity: progress.interpolate({
+                inputRange: [0, 0.5, 0.9, 1],
+                outputRange: [0, 0.25, 0.7, 1],
+              }),
+            },
+            overlayStyle: {
+              opacity: progress.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, 0],
+                extrapolate: "clamp",
+              }),
+            },
+          }),
+        }}
+        component={AccountScreen}
+        sharedElements={(route) => {
+          return [
+            {
+              id: `AccountAvatar`,
+              animation: 'move',
+            },
+          ];
         }}
 
       />

@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState, useContext } from "react"
 import { StyleSheet, Alert, View, Image, ActivityIndicator } from "react-native"
 import LottieView from "lottie-react-native"
-import { Icon, Text, useTheme, } from "@rneui/themed"
+import { Avatar, Icon, Text, useTheme, } from "@rneui/themed"
 import Toast from 'react-native-toast-message'
+import { useWalletConnect } from '@walletconnect/react-native-dapp';
 
 import { Screen } from "../../components"
 import { AssetService } from "../../services"
@@ -16,6 +17,9 @@ import { Header, HeaderLogo, HeaderLeftContainer, HeaderRightContainer, HeaderCe
 import { ThemeContext } from "../../theme"
 import { AppNavigationNames } from "../../navigators"
 import { uploadAssetsInBackground } from "../../services/sync-service"
+import { SharedElement } from "react-navigation-shared-element"
+import * as helper from "../../utils/helper"
+
 interface Props {
   navigation: NativeStackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>;
   medias: Asset[];
@@ -32,6 +36,7 @@ export const AssetListScreen: React.FC<Props> = ({ navigation, medias, defaultHe
   const assetListRef = useRef<AssetListHandle>()
   const { toggleTheme } = useContext(ThemeContext);
   const { theme } = useTheme();
+  const walletConnector = useWalletConnect();
 
   useEffect(() => {
     if (medias) {
@@ -140,7 +145,30 @@ export const AssetListScreen: React.FC<Props> = ({ navigation, medias, defaultHe
           }} />
         </HeaderLeftContainer>}
         rightComponent={<HeaderRightContainer>
-          <Icon type="material-community" name="alpha-f-box-outline" onPress={() => navigation.navigate(AppNavigationNames.BoxList)} />
+          <SharedElement id="AccountAvatar">
+            {walletConnector.connected ? <Avatar
+              containerStyle={styles.avatar}
+
+              ImageComponent={() => <Image
+                source={walletConnector.peerMeta?.icons?.[0].endsWith(".svg")
+                  ? helper.getWalletImage(walletConnector.peerMeta?.name) :
+                  { uri: walletConnector.peerMeta?.icons?.[0] }
+                }
+                style={{
+                  height: 35,
+                  width: 35,
+                }}
+                resizeMode="contain"
+              />}
+              onPress={() => navigation.navigate(AppNavigationNames.AccountScrenn)}
+            /> : <Avatar
+              containerStyle={{ backgroundColor: "gray" }}
+              icon={{ name: "account-alert", type: "material-community", size: 28 }}
+              size="small" rounded={true}
+              onPress={() => navigation.navigate(AppNavigationNames.AccountScrenn)}
+            />}
+
+          </SharedElement>
         </HeaderRightContainer>}
       />)
     }
@@ -212,5 +240,13 @@ const styles = StyleSheet.create({
   },
   headerIcon: {
     marginStart: 10
+  },
+  avatar: {
+    backgroundColor: "gray",
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center"
   }
 })
