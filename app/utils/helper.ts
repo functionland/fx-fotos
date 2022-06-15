@@ -9,3 +9,12 @@ export const convertDurationToTime = (duration: number): string => {
     ? `${h.toString().padStart(2, "0")}:`
     : "" + `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`
 }
+
+export const getWalletImage = (walletName: string) => {
+  switch (walletName) {
+    case "MetaMask":
+      return require("../../assets/images/wallets/MetaMask.png")
+    default:
+      return null
+  }
+}

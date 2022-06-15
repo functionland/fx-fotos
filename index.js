@@ -7,6 +7,7 @@
 // side effect of breaking other tooling like mobile-center and react-native-rename.
 //
 // It's easier just to leave it here.
+import "./shim.js"
 import App from "./app/app.tsx"
 import { AppRegistry } from "react-native"
 import BackgroundFetch from "react-native-background-fetch"
