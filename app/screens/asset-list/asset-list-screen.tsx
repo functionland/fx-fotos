@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState, useContext } from "react"
 import { StyleSheet, Alert, View, Image, ActivityIndicator } from "react-native"
 import LottieView from "lottie-react-native"
-import { Icon, Switch, Text, useTheme, } from "@rneui/themed"
+import { Avatar, Icon, Text, useTheme, } from "@rneui/themed"
+import Toast from 'react-native-toast-message'
+import { useWalletConnect } from '@walletconnect/react-native-dapp';
 
 import { Screen } from "../../components"
 import { AssetService } from "../../services"
@@ -14,6 +16,10 @@ import { Assets } from "../../services/localdb"
 import { Header, HeaderLogo, HeaderLeftContainer, HeaderRightContainer, HeaderCenterContainer } from "../../components/header"
 import { ThemeContext } from "../../theme"
 import { AppNavigationNames } from "../../navigators"
+import { uploadAssetsInBackground } from "../../services/sync-service"
+import { SharedElement } from "react-navigation-shared-element"
+import * as helper from "../../utils/helper"
+
 interface Props {
   navigation: NativeStackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>;
   medias: Asset[];
@@ -30,6 +36,7 @@ export const AssetListScreen: React.FC<Props> = ({ navigation, medias, defaultHe
   const assetListRef = useRef<AssetListHandle>()
   const { toggleTheme } = useContext(ThemeContext);
   const { theme } = useTheme();
+  const walletConnector = useWalletConnect();
 
   useEffect(() => {
     if (medias) {
@@ -55,9 +62,9 @@ export const AssetListScreen: React.FC<Props> = ({ navigation, medias, defaultHe
               const deleted = await AssetService.deleteAssets(selectedItems);
               if (deleted) {
                 assetListRef?.current?.resetSelectedItems();
-                await Assets.addOrUpdate(selectedItems.map(id=>({
+                await Assets.addOrUpdate(selectedItems.map(id => ({
                   id,
-                  isDeleted:true
+                  isDeleted: true
                 })));
                 cancelSelectionMode()
               }
@@ -70,7 +77,35 @@ export const AssetListScreen: React.FC<Props> = ({ navigation, medias, defaultHe
       ]
     )
   }
+  const batchUpload = () => {
+    Alert.alert("Upload", "Are you sure want to upload these assets?",
+      [
+        {
+          text: "No",
+          style: "cancel"
+        },
+        {
+          text: "Yes",
+          onPress: async () => {
+            try {
+              await Assets.markAsSYNC(selectedItems);
+              cancelSelectionMode()
+              Toast.show({
+                type: 'success',
+                text1: 'Marked to sync as soon as possible',
+                position: "bottom",
+                bottomOffset: 0,
+              });
+              uploadAssetsInBackground();
 
+            } catch (error) {
+              console.log(error)
+            }
+          }
+        }
+      ]
+    )
+  }
   const onAssetLoadError = (error: NativeSyntheticEvent<ImageErrorEventData>) => {
     if (error?.nativeEvent?.error) {
       // Error is something like "/storage/emulated/0/DCIM/Camera/20220501_200313.jpg: open failed: ENOENT (No such file or directory)"
@@ -95,7 +130,8 @@ export const AssetListScreen: React.FC<Props> = ({ navigation, medias, defaultHe
           <Text style={{ fontSize: 16, marginStart: 20 }}>{selectedItems?.length}</Text>
         </HeaderLeftContainer>}
         rightComponent={<HeaderRightContainer>
-          <Icon type="material-community" name="delete" onPress={() => deleteAssets("delete")} />
+          <Icon style={styles.headerIcon} type="material-community" name="upload-multiple" onPress={batchUpload} />
+          <Icon style={styles.headerIcon} type="material-community" name="delete" onPress={() => deleteAssets("delete")} />
         </HeaderRightContainer>}
       />)
     }
@@ -109,7 +145,30 @@ export const AssetListScreen: React.FC<Props> = ({ navigation, medias, defaultHe
           }} />
         </HeaderLeftContainer>}
         rightComponent={<HeaderRightContainer>
-          <Icon type="material-community" name="alpha-f-box-outline" onPress={() => navigation.navigate(AppNavigationNames.BoxList)} />
+          <SharedElement id="AccountAvatar">
+            {walletConnector.connected ? <Avatar
+              containerStyle={styles.avatar}
+
+              ImageComponent={() => <Image
+                source={walletConnector.peerMeta?.icons?.[0].endsWith(".svg")
+                  ? helper.getWalletImage(walletConnector.peerMeta?.name) :
+                  { uri: walletConnector.peerMeta?.icons?.[0] }
+                }
+                style={{
+                  height: 35,
+                  width: 35,
+                }}
+                resizeMode="contain"
+              />}
+              onPress={() => navigation.navigate(AppNavigationNames.AccountScrenn)}
+            /> : <Avatar
+              containerStyle={{ backgroundColor: "gray" }}
+              icon={{ name: "account-alert", type: "material-community", size: 28 }}
+              size="small" rounded={true}
+              onPress={() => navigation.navigate(AppNavigationNames.AccountScrenn)}
+            />}
+
+          </SharedElement>
         </HeaderRightContainer>}
       />)
     }
@@ -178,5 +237,16 @@ const styles = StyleSheet.create({
   },
   footerContainer: {
     padding: 5
+  },
+  headerIcon: {
+    marginStart: 10
+  },
+  avatar: {
+    backgroundColor: "gray",
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center"
   }
 })
