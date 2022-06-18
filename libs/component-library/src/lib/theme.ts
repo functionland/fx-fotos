@@ -9,7 +9,10 @@ const fxLightTheme = createTheme({
   colors: {
     primary: palette.purple,
   },
-  spacing: {},
+  spacing: {
+    s: 8,
+    m: 16,
+  },
   breakpoints: {},
 });
 
