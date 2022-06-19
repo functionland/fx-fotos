@@ -1,4 +1,4 @@
-import React, { useContext } from "react"
+import React, { useContext, useEffect, useState } from "react"
 import Animated from "react-native-reanimated"
 import { enableScreens } from "react-native-screens"
 import { NavigationContainer } from "@react-navigation/native"
@@ -6,7 +6,7 @@ import { createSharedElementStackNavigator } from "react-navigation-shared-eleme
 import Toast from 'react-native-toast-message'
 
 import { navigationRef } from "./navigation-utilities"
-import { PhotoScreen, LibraryAssetsScreen, BoxListScreen, BoxAddUpdateScreen, AccountScreen } from "../screens"
+import { PhotoScreen, LibraryAssetsScreen, BoxListScreen, BoxAddUpdateScreen, AccountScreen, ShareViewerScreen } from "../screens"
 import { HomeNavigator } from "./home-navigator"
 import { ThemeContext } from '../theme';
 import { BoxEntity } from "../realmdb/entities"
@@ -18,7 +18,8 @@ export type RootStackParamList = {
   Account: undefined,
   Settings: undefined,
   BoxList: undefined,
-  BoxAddUpdate: { box: BoxEntity }
+  BoxAddUpdate: { box: BoxEntity },
+  SharedViewer: { assetURI: string }
 }
 export enum AppNavigationNames {
   HomeScreen = "Home",
@@ -26,7 +27,8 @@ export enum AppNavigationNames {
   PhotoScreen = "Photo",
   LibraryAssets = "LibraryAssets",
   BoxList = "BoxList",
-  BoxAddUpdate = "BoxAddUpdate"
+  BoxAddUpdate = "BoxAddUpdate",
+  SharedViewer = "SharedViewer"
 }
 const Stack = createSharedElementStackNavigator<RootStackParamList>()
 
@@ -96,7 +98,6 @@ const AppStack = () => {
           gestureEnabled: false,
           headerShown: false,
           cardOverlayEnabled: true,
-          cardStyle: { backgroundColor: "transparent" },
           animationEnabled: true,
           cardStyleInterpolator: ({ current: { progress } }) => ({
             cardStyle: {
@@ -125,6 +126,10 @@ const AppStack = () => {
         }}
 
       />
+      <Stack.Screen
+        name={AppNavigationNames.SharedViewer}
+        component={ShareViewerScreen}
+      />
     </Stack.Navigator>
   )
 }
@@ -134,17 +139,32 @@ type NavigationProps = Partial<React.ComponentProps<typeof NavigationContainer>>
 
 export const AppNavigator = (props: NavigationProps) => {
   const { theme } = useContext(ThemeContext);
+  const [toastVisible, setToastVisible] = useState(false)
+  useEffect(() => {
+    setTimeout(() => {
+      setToastVisible(true)
+    }, 1000);
+  }, [])
   return (
     <Animated.View style={{ flex: 1 }}>
       <NavigationContainer
         theme={theme}
         ref={navigationRef}
+        linking={{
+          prefixes: ["https://fotos.fx.land", "http://fotos.fx.land", "fotos://fotos.fx.land"],
+          config: {
+            initialRouteName: AppNavigationNames.HomeScreen,
+            screens: {
+              [AppNavigationNames.SharedViewer]: "shared/:assetURI"
+            }
+          }
+        }}
         //theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}
         {...props}
       >
         <AppStack />
       </NavigationContainer>
-      <Toast/>
+      {toastVisible && <Toast/>}
     </Animated.View>
   )
 }

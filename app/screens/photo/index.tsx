@@ -10,7 +10,7 @@ import Animated, {
 } from "react-native-reanimated"
 import Toast from 'react-native-toast-message'
 import { snapPoint } from "react-native-redash"
-import { ActivityIndicator, Alert, Dimensions, StyleSheet, View } from "react-native"
+import { ActivityIndicator, Alert, Dimensions, Share, StyleSheet, View } from "react-native"
 import { SharedElement } from "react-navigation-shared-element"
 import {
   TapGestureHandler,
@@ -27,11 +27,12 @@ import { Constants, palette } from "../../theme"
 import { Header } from "../../components"
 import { HomeNavigationParamList } from "../../navigators"
 import { Card, Icon } from "@rneui/themed"
-import { HeaderArrowBack } from "../../components/header"
+import { HeaderArrowBack, HeaderRightContainer } from "../../components/header"
 import { useRecoilState } from "recoil"
 import { boxsState } from "../../store"
 import { Assets } from "../../services/localdb"
 import { AddBoxs, downloadAsset, uploadAssetsInBackground } from "../../services/sync-service"
+import { Buffer } from "buffer"
 
 const { height } = Dimensions.get("window")
 
@@ -265,6 +266,18 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
       imageScale.value = withTiming(1, { duration: 150 })
     }
   }
+  // This method is just for demo
+  const shareAsset = async () => {
+    try {
+      await Share.share({
+        title: 'Fotos | Just shared an asset',
+        message: `https://fotos.fx.land/shared/${ Buffer.from(asset.uri, 'utf-8').toString('base64')}`
+      });
+     
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   const imageContainerStyle = {
     height: (widthPercentageToDP(100) * asset.height) / asset.width,
@@ -273,10 +286,15 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
   const renderHeader = () => {
     return (<Header
       leftComponent={<HeaderArrowBack navigation={navigation} />}
-      rightComponent={loading ? <ActivityIndicator size="small" /> :
-        (asset?.syncStatus === SyncStatus.SYNCED && !asset?.isDeleted ? <Icon type="material-community" name="cloud-check" />
-          : (asset?.syncStatus === SyncStatus.NOTSYNCED && !asset?.isDeleted ? <Icon type="material-community" name="cloud-upload-outline" onPress={uploadToBox} />
-            : asset?.syncStatus === SyncStatus.SYNC ? <Icon type="material-community" name="refresh" onPress={uploadToBox} /> : null))
+      rightComponent={
+        <HeaderRightContainer>
+          <Icon type="material-community" style={styles.headerIcon} name="share-variant" onPress={shareAsset} />
+          {loading ? <ActivityIndicator size="small" /> :
+            (asset?.syncStatus === SyncStatus.SYNCED && !asset?.isDeleted ? <Icon type="material-community" name="cloud-check" />
+              : (asset?.syncStatus === SyncStatus.NOTSYNCED && !asset?.isDeleted ? <Icon type="material-community" name="cloud-upload-outline" onPress={uploadToBox} />
+                : asset?.syncStatus === SyncStatus.SYNC ? <Icon type="material-community" name="refresh" onPress={uploadToBox} /> : null))}
+
+        </HeaderRightContainer>
       } />)
   }
   const renderDownloadSection = () => {
@@ -315,4 +333,7 @@ const styles = StyleSheet.create({
   image: {
     ...StyleSheet.absoluteFillObject,
   },
+  headerIcon:{
+    marginHorizontal:10
+  }
 })
