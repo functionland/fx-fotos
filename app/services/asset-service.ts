@@ -1,6 +1,7 @@
+import moment from "moment"
+import * as dateFns from "date-fns"
 import * as MediaLibrary from "expo-media-library"
 import { manipulateAsync, SaveFormat, ImageResult } from "expo-image-manipulator"
-import moment from "moment"
 
 import { RecyclerAssetListSection, ViewType, GroupHeader, Library } from "../types"
 export const generateThumbnail = async (assets: MediaLibrary.Asset[]) => {
@@ -19,13 +20,47 @@ export const generateThumbnail = async (assets: MediaLibrary.Asset[]) => {
   return result
 }
 
+const TODAY = new Date()
+const startOfMonth = dateFns.startOfMonth(TODAY)
+const storyTimeLine = (() => {
+  const timeLineCount = 13
+  const temp = []
+  for (let i = 0; i < timeLineCount; i++) {
+    if (i === 0) { 
+      temp.push(startOfMonth)
+      continue;
+    }
+
+    temp.push(dateFns.subMonths(temp[i - 1], 1))
+  }
+
+  return temp.map((item) => {
+    return { id: item.toString(), title: item.toString(), data: [] }
+  })
+})()
+
+const categorizeStoryies = (asset: MediaLibrary.Asset) => {
+  for (let i = 0; i < storyTimeLine.length; i++) {
+    if (dateFns.isSameMonth(new Date(storyTimeLine[i].id), asset.modificationTime)) {
+      storyTimeLine[i].data.push(asset)
+    }
+  }
+}
+
 export const categorizeAssets = (assets: MediaLibrary.Asset[]) => {
-  const sections: RecyclerAssetListSection[] = []
+  const stories = {
+    id: ViewType.STORY,
+    type: ViewType.STORY,
+    data: storyTimeLine,
+  }
+
+  const sections: RecyclerAssetListSection[] = [stories]
   let lastMonth = moment().format("MMMM YYYY")
   let lastDay = null
   let lastMonthHeader: GroupHeader = null
   let lastDayHeader: GroupHeader = null
   for (const asset of assets) {
+    categorizeStoryies(asset)
     const times = moment(asset.modificationTime).format("MMMM YYYY|dddd, MMM D, YYYY")
     const month = times.split("|")[0]
     const day = times.split("|")[1]
