@@ -24,13 +24,13 @@ enableScreens()
 export type RootStackParamList = {
   Home: undefined
   LibraryAssets: undefined,
-  HighlightScreen: { highlights:  AssetStory }
   Photo: { section: RecyclerAssetListSection },
   Account: undefined,
   Settings: undefined,
   BoxList: undefined,
   BoxAddUpdate: { box: BoxEntity },
   SharedViewer: { assetURI: string }
+  HighlightScreen: { highlights:  AssetStory }
 }
 export enum AppNavigationNames {
   HomeScreen = "Home",
@@ -39,8 +39,8 @@ export enum AppNavigationNames {
   LibraryAssets = "LibraryAssets",
   BoxList = "BoxList",
   BoxAddUpdate = "BoxAddUpdate",
-  HighlightScreen = "HighlightScreen",
-  SharedViewer = "SharedViewer"
+  SharedViewer = "SharedViewer",
+  HighlightScreen = "HighlightScreen"
 }
 
 const Stack = createSharedElementStackNavigator<RootStackParamList>()
