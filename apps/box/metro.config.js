@@ -18,9 +18,10 @@ module.exports = (async () => {
         babelTransformerPath: require.resolve('react-native-svg-transformer'),
       },
       resolver: {
+        extraNodeModules: require('node-libs-react-native'),
         assetExts: assetExts.filter((ext) => ext !== 'svg'),
         sourceExts: [...sourceExts, 'svg'],
-        resolverMainFields: ['sbmodern', 'browser', 'main'],
+        resolverMainFields: ['sbmodern', 'react-native', 'browser', 'main'],
         blacklistRE: exclusionList([/\.\/dist\/.*/]),
       },
     },
