@@ -38,9 +38,9 @@ type AppContentProps = {
 const AppContent = ({ onPress }: AppContentProps) => {
   const walletConnect = useWalletConnect();
 
-  const connectWallet = () => {
+  const connectWallet = async () => {
     try {
-      walletConnect.connect();
+      await walletConnect.connect();
     } catch (error) {}
   };
 
