@@ -9,11 +9,7 @@ export const App = () => {
     <ThemeProvider theme={fxLightTheme}>
       <NavigationContainer>
         <SafeAreaView>
-          <FxButton
-            testID="app-name"
-            title="File Manager App"
-            color="primary"
-          />
+          <FxButton testID="app-name">File Manager App</FxButton>
         </SafeAreaView>
       </NavigationContainer>
     </ThemeProvider>

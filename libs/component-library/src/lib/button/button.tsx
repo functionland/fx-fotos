@@ -3,17 +3,37 @@
  */
 
 import React from 'react';
-import { ColorProps, useTheme } from '@shopify/restyle';
-import { Button, ButtonProps } from 'react-native';
+import { createBox } from '@shopify/restyle';
+import { Pressable, PressableProps } from 'react-native';
 import { FxTheme } from '../theme';
+import { FxText } from '../text/text';
 
-type FxButtonProps = ButtonProps & ColorProps<FxTheme>;
+const FxButtonBase = createBox<FxTheme, PressableProps>(Pressable);
 
-const FxButton = ({ color = 'primary', ...rest }: FxButtonProps) => {
-  const theme = useTheme<FxTheme>();
-  const buttonColor = color ? theme.colors[color] : undefined;
+type FxButtonProps = React.ComponentProps<typeof FxButtonBase> & {
+  children?: React.ReactNode | string;
+};
 
-  return <Button color={buttonColor} {...rest} />;
+const FxButton = ({ children, style, ...rest }: FxButtonProps) => {
+  return (
+    <FxButtonBase
+      padding="m"
+      margin="m"
+      backgroundColor="primary"
+      borderRadius={8}
+      style={(args) => [
+        typeof style === 'function' ? style(args) : style,
+        args.pressed && {
+          opacity: 0.5,
+        },
+      ]}
+      {...rest}
+    >
+      <FxText variant="body" color="white">
+        {children}
+      </FxText>
+    </FxButtonBase>
+  );
 };
 
 export { FxButton };
