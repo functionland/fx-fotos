@@ -65,7 +65,7 @@
     "react-native-background-fetch": "^4.1.0",
     "react-native-crypto": "^2.1.0",
     "react-native-fast-image": "^8.5.11",
-    "react-native-fula": "^0.2.2",
+    "react-native-fula": "^0.2.3",
     "react-native-gesture-handler": "^2.4.1",
     "react-native-get-random-values": "^1.8.0",
     "react-native-keychain": "^8.0.0",

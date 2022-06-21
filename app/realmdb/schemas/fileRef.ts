@@ -1,7 +1,7 @@
 /**
  * When an asset stored in the box by encryption we get a fileRef to able to decrypt asset in the future
  */
-export const FileRefSchema = {
+export const FileRef = {
   name: "FileRef",
   embedded: true, // default: false
   properties: {
