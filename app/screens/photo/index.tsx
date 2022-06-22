@@ -21,18 +21,21 @@ import {
 import { widthPercentageToDP } from "react-native-responsive-screen"
 import { useNetInfo } from "@react-native-community/netinfo"
 import { RouteProp, NavigationProp } from "@react-navigation/native"
-import { file, fula } from "react-native-fula"
+import { FulaDID } from "@functionland/fula-sec"
+import * as Keychain from 'react-native-keychain';
+
 import { Asset, SyncStatus } from "../../types"
 import { Constants, palette } from "../../theme"
 import { Header } from "../../components"
 import { HomeNavigationParamList } from "../../navigators"
-import { Card, Icon } from "@rneui/themed"
+import { BottomSheet, Button, Card, Icon, Input } from "@rneui/themed"
 import { HeaderArrowBack, HeaderRightContainer } from "../../components/header"
 import { useRecoilState } from "recoil"
 import { boxsState } from "../../store"
 import { Assets } from "../../services/localdb"
-import { AddBoxs, downloadAsset, uploadAssetsInBackground } from "../../services/sync-service"
+import { AddBoxs, downloadAndDecryptAsset, downloadAsset, uploadAssetsInBackground } from "../../services/sync-service"
 import { Buffer } from "buffer"
+import { TaggedEncryption } from "@functionland/fula-sec"
 
 const { height } = Dimensions.get("window")
 
@@ -51,6 +54,8 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
   const animatedOpacity = useSharedValue(1)
   const [, setBoxs] = useRecoilState(boxsState)
   const [loading, setLoading] = useState(false)
+  const [showShareBottomSheet, setShowShareBottomSheet] = useState(false);
+  const [DID, setDID] = useState("")
   const netInfoState = useNetInfo()
   useEffect(() => {
     return () => {
@@ -89,18 +94,24 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
             Alert.alert("Warning", error)
             return;
           }
-          const result = await downloadAsset(asset?.cid)
-          console.log("downloadFromBox:", result)
-          setAsset(prev => ({
-            ...prev,
-            uri: result.uri,
-            isDeleted: false
-          }))
-          Assets.addOrUpdate([{
-            id: asset.id,
-            uri: result.uri,
-            isDeleted: false
-          }]);
+          let result = null;
+          if (asset.fileRef) {
+            result = await downloadAndDecryptAsset(asset?.fileRef)
+          } else {
+            result = await downloadAsset(asset?.cid)
+          }
+          if (result) {
+            setAsset(prev => ({
+              ...prev,
+              uri: result.uri,
+              isDeleted: false
+            }))
+            Assets.addOrUpdate([{
+              id: asset.id,
+              uri: result.uri,
+              isDeleted: false
+            }]);
+          }
         } catch (error) {
           console.log("uploadOrDownload", error)
           Alert.alert("Error", "Unable to receive the file, make sure your box is available!")
@@ -269,16 +280,36 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
   // This method is just for demo
   const shareAsset = async () => {
     try {
-      await Share.share({
-        title: 'Fotos | Just shared an asset',
-        message: `https://fotos.fx.land/shared/${ Buffer.from(asset.uri, 'utf-8').toString('base64')}`
-      });
-     
+      setShowShareBottomSheet(true);
+      // await Share.share({
+      //   title: 'Fotos | Just shared an asset',
+      //   message: `https://fotos.fx.land/shared/${Buffer.from(asset.uri, 'utf-8').toString('base64')}`
+      // });
+
     } catch (error) {
       console.log(error)
     }
   }
-
+  const shareWithDID = async () => {
+    if (!DID)
+      return
+    setShowShareBottomSheet(false)
+    try {
+      const gPassword = await Keychain.getGenericPassword();
+      if (gPassword) {
+        const myDID = new FulaDID();
+        await myDID.create(gPassword.password, gPassword.password);
+        const myTag = new TaggedEncryption(myDID.did);
+        const jwe = await myTag.encrypt(asset?.fileRef, asset?.fileRef?.id, [DID])
+        await Share.share({
+          title: 'Fotos | Just shared an asset',
+          message: `https://fotos.fx.land/shared/${Buffer.from(JSON.stringify(jwe), 'utf-8').toString('base64')}`
+        });
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
   const imageContainerStyle = {
     height: (widthPercentageToDP(100) * asset.height) / asset.width,
     width: widthPercentageToDP(100),
@@ -288,12 +319,11 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
       leftComponent={<HeaderArrowBack navigation={navigation} />}
       rightComponent={
         <HeaderRightContainer>
-          <Icon type="material-community" style={styles.headerIcon} name="share-variant" onPress={shareAsset} />
           {loading ? <ActivityIndicator size="small" /> :
             (asset?.syncStatus === SyncStatus.SYNCED && !asset?.isDeleted ? <Icon type="material-community" name="cloud-check" />
               : (asset?.syncStatus === SyncStatus.NOTSYNCED && !asset?.isDeleted ? <Icon type="material-community" name="cloud-upload-outline" onPress={uploadToBox} />
                 : asset?.syncStatus === SyncStatus.SYNC ? <Icon type="material-community" name="refresh" onPress={uploadToBox} /> : null))}
-
+          <Icon type="material-community" style={styles.headerIcon} name="share-variant" onPress={shareAsset} />
         </HeaderRightContainer>
       } />)
   }
@@ -321,6 +351,17 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
                   />
                 </PinchGestureHandler>
               </SharedElement>}
+              <BottomSheet isVisible={showShareBottomSheet}
+                onBackdropPress={() => setShowShareBottomSheet(false)}
+                modalProps={{ transparent: true, animationType: "fade" }}
+
+              >
+                <Card containerStyle={{ borderWidth: 0, margin: 0 }}>
+                  <Card.Title>Share with (enter DID)</Card.Title>
+                  <Input onChangeText={(txt) => setDID(txt)} />
+                </Card>
+                <Button title="Share" onPress={shareWithDID} />
+              </BottomSheet>
             </View>
           </TapGestureHandler>
         </Animated.View>
@@ -333,7 +374,7 @@ const styles = StyleSheet.create({
   image: {
     ...StyleSheet.absoluteFillObject,
   },
-  headerIcon:{
-    marginHorizontal:10
+  headerIcon: {
+    marginHorizontal: 10
   }
 })
