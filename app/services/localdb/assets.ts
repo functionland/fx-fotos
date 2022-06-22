@@ -111,7 +111,7 @@ export const remove = (assetIds: string[]): Promise<void> => {
         const idsQuery = assetIds.map((id) => `id = '${id}'`).join(" OR ")
         const assets = realm.objects<Entities.AssetEntity>(Schemas.Asset.name).filtered(idsQuery)
         realm.write(() => {
-          realm.delete(assets)
+          for (const asset of assets) asset.isDeleted = true
         })
       } catch (error) {
         console.error("removeAssets error!", error)
@@ -131,9 +131,8 @@ export const removeByUri = (uri: string): Promise<void> => {
         const assets = realm
           .objects<Entities.AssetEntity>(Schemas.Asset.name)
           .filtered(`uri endsWith '${uri}'`)
-        console.log("removeByUri", assets.length)
         realm.write(() => {
-          realm.delete(assets)
+          for (const asset of assets) asset.isDeleted = true
         })
       } catch (error) {
         console.error("removeAssets error!", error)
