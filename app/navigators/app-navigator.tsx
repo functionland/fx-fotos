@@ -155,7 +155,7 @@ export const AppNavigator = (props: NavigationProps) => {
           config: {
             initialRouteName: AppNavigationNames.HomeScreen,
             screens: {
-              [AppNavigationNames.SharedViewer]: "shared/:assetURI"
+              [AppNavigationNames.SharedViewer]: "shared/:jwe"
             }
           }
         }}

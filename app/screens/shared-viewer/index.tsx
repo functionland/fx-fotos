@@ -10,16 +10,16 @@ import Animated, {
 } from "react-native-reanimated"
 import Toast from 'react-native-toast-message'
 import { snapPoint } from "react-native-redash"
-import { StyleSheet, View, Dimensions } from "react-native"
+import { StyleSheet, View, Dimensions, ActivityIndicator, Alert } from "react-native"
 import {
   TapGestureHandler,
   PanGestureHandler,
   PinchGestureHandler,
   PinchGestureHandlerGestureEvent,
 } from "react-native-gesture-handler"
-import { widthPercentageToDP } from "react-native-responsive-screen"
-
+import * as Keychain from "react-native-keychain"
 import { RouteProp, NavigationProp } from "@react-navigation/native"
+
 import { Asset } from "../../types"
 import { Constants, palette } from "../../theme"
 import { Header } from "../../components"
@@ -27,6 +27,9 @@ import { HomeNavigationParamList } from "../../navigators"
 import { HeaderArrowBack } from "../../components/header"
 import { Buffer } from "buffer"
 import { Text } from "@rneui/themed"
+import { FulaDID, TaggedEncryption } from "@functionland/fula-sec"
+import { file } from "react-native-fula"
+import { AddBoxs, downloadAndDecryptAsset } from "../../services/sync-service"
 
 const { height, width } = Dimensions.get("window")
 
@@ -36,21 +39,76 @@ interface Props {
 }
 
 export const ShareViewerScreen: React.FC<Props> = ({ navigation, route }) => {
-  const [assetURI, setAsset] = useState(route.params?.assetURI ? Buffer.from(route.params?.assetURI, 'base64').toString('utf8') : "")
+  const [assetURI, setAssetURI] = useState(null)
+  const [loading, setLoading] = useState(false);
   const translateX = useSharedValue(0)
   const translateY = useSharedValue(0)
   const imageScale = useSharedValue(1)
   const isPanGestureActive = useSharedValue(false)
   const isPinchGestureActive = useSharedValue(false)
   const animatedOpacity = useSharedValue(1)
-  console.log("route.params:", route.params)
-  console.log("assetURI:", assetURI)
 
   useEffect(() => {
+    try {
+      const jwe = JSON.parse(route.params?.jwe ? Buffer.from(route.params?.jwe, 'base64').toString('utf8') : null);
+      downloadFromBox(jwe);
+    } catch (error) {
+      console.log(error)
+      Toast.show({
+        type: "error",
+        text1: "Unable to get the shared credentials!",
+        bottomOffset: 0,
+        position: "bottom"
+      })
+    }
     return () => {
       Toast.hide();
     }
   }, [])
+  const decryptJWE = async (jwe: string): { CID: string, symetricKey: { id: string, iv: SVGFESpecularLightingElement, key: string } } => {
+    try {
+      const gPassword = await Keychain.getGenericPassword();
+      if (gPassword) {
+        const myDID = new FulaDID();
+        await myDID.create(gPassword.password, gPassword.password);
+        const myTag = new TaggedEncryption(myDID.did);
+        const dec_jwe = await myTag.decrypt(jwe);
+        return dec_jwe;
+      }
+    } catch (error) {
+      console.log("decryptJWE", error)
+      Toast.show({
+        type: "error",
+        text1: "Something is wrong!",
+        bottomOffset: 0,
+        position: "bottom"
+      })
+    }
+  }
+  const downloadFromBox = async (jwe: string) => {
+    setLoading(true);
+    try {
+      try {
+        await AddBoxs()
+      } catch (error) {
+        Alert.alert("Warning", error)
+        return;
+      }
+      let result = null;
+      const fileRef = (await decryptJWE(jwe))?.symetricKey
+      console.log("fileRef",fileRef)
+      if (fileRef) {
+        result = await downloadAndDecryptAsset(fileRef)
+        console.log("downloadFromBox:", result)
+        setAssetURI(result.uri)
+      }
+    } catch (error) {
+      console.log("uploadOrDownload", error)
+      Alert.alert("Error", "Unable to receive the file, make sure your box is available!")
+    } finally {
+      setLoading(false)
+    }
+  }
   const wrapperAnimatedStyle = useAnimatedStyle(() => {
     return {
       paddingTop: Constants.HeaderHeight,
@@ -158,13 +216,13 @@ export const ShareViewerScreen: React.FC<Props> = ({ navigation, route }) => {
           <TapGestureHandler onActivated={() => onDoubleTap()} numberOfTaps={2}>
             <View style={{ flex: 1 }} >
               <PinchGestureHandler onGestureEvent={onPinchHandler}>
-                <View style={{ flex: 1 }} >
-                  <Animated.Image
+                <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }} >
+                  {loading ? <ActivityIndicator size="large" /> : <Animated.Image
                     source={{ uri: assetURI }}
                     fadeDuration={0}
                     resizeMode="contain"
                     style={[styles.image, animatedImage]}
-                  />
+                  />}
                 </View>
               </PinchGestureHandler>
             </View>
