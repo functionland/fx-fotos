@@ -7,5 +7,7 @@ export * from "./box/box-list-screen"
 export * from "./box/box-add-update-screen"
 export * from "./error/error-boundary"
 export * from "./photo"
+export * from "./shared-viewer"
+
 
 // export other screens here

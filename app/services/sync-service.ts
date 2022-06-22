@@ -2,8 +2,9 @@ import { Platform } from "react-native"
 import BackgroundJob, { BackgroundTaskOptions } from "react-native-background-actions"
 import BackgroundFetch, { HeadlessEvent } from "react-native-background-fetch"
 import { file, fula } from "react-native-fula"
-import { AssetEntity } from "../realmdb/entities"
+import * as Keychain from "react-native-keychain"
 
+import { AssetEntity } from "../realmdb/entities"
 import { SyncStatus } from "../types"
 import { Assets, Boxs } from "./localdb/index"
 type TaskParams = {
@@ -30,6 +31,7 @@ const backgroundTask = async (taskParameters: TaskParams) => {
     )
   }
   const { callback = null, assets = [] } = taskParameters
+  const gPassword = await Keychain.getGenericPassword()
   await new Promise(async (resolve) => {
     try {
       for (let index = 0; index < assets.length; index++) {
@@ -43,15 +45,30 @@ const backgroundTask = async (taskParameters: TaskParams) => {
             indeterminate: assets.length == 1,
           },
         })
-        const result = await uploadAsset(asset)
-        Assets.addOrUpdate([
-          {
-            id: asset.id,
-            cid: result,
-            syncDate: new Date(),
-            syncStatus: SyncStatus.SYNCED,
-          },
-        ])
+
+        if (gPassword) {
+          const result = await encryptAndUploadAsset(asset)
+          console.info("encryptAndUploadAsset", result)
+          Assets.addOrUpdate([
+            {
+              id: asset.id,
+              cid: result.id,
+              fileRef: result,
+              syncDate: new Date(),
+              syncStatus: SyncStatus.SYNCED,
+            },
+          ])
+        } else {
+          const result = await uploadAsset(asset)
+          Assets.addOrUpdate([
+            {
+              id: asset.id,
+              cid: result,
+              syncDate: new Date(),
+              syncStatus: SyncStatus.SYNCED,
+            },
+          ])
+        }
         try {
           callback?.(true)
         } catch {}
@@ -95,10 +112,17 @@ export const uploadAsset = async (asset: AssetEntity) => {
   return await file.send(decodeURI(_filePath))
 }
 
+export const encryptAndUploadAsset = async (asset: AssetEntity): Promise<file.FileRef> => {
+  const _filePath = asset.uri?.split("file:")[1]
+  return await file.encryptSend(decodeURI(_filePath))
+}
+
 export const downloadAsset = async (cid: string) => {
   return await file.receive(cid, false)
 }
-
+export const downloadAndDecryptAsset = async (fileRef: file.FileRef) => {
+  return await file.receiveDecrypt(fileRef, false)
+}
 export const AddBoxs = async () => {
   try {
     const boxs = await Boxs.getAll()

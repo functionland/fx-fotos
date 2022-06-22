@@ -8,6 +8,7 @@
 //
 // It's easier just to leave it here.
 import "./shim.js"
+import 'react-native-get-random-values'
 import App from "./app/app.tsx"
 import { AppRegistry } from "react-native"
 import BackgroundFetch from "react-native-background-fetch"

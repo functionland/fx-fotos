@@ -28,7 +28,7 @@
     "clean-all": "npx react-native clean-project-auto"
   },
   "dependencies": {
-    "@functionland/fula-sec": "^0.6.5",
+    "@functionland/fula-sec": "0.6.6",
     "@react-native-async-storage/async-storage": "^1.17.6",
     "@react-native-community/masked-view": "0.1.10",
     "@react-native-community/netinfo": "^8.3.1",
@@ -65,8 +65,9 @@
     "react-native-background-fetch": "^4.1.0",
     "react-native-crypto": "^2.1.0",
     "react-native-fast-image": "^8.5.11",
-    "react-native-fula": "^0.2.2",
+    "react-native-fula": "^0.2.3",
     "react-native-gesture-handler": "^2.4.1",
+    "react-native-get-random-values": "^1.8.0",
     "react-native-keychain": "^8.0.0",
     "react-native-level-fs": "^3.0.0",
     "react-native-os": "^1.2.6",

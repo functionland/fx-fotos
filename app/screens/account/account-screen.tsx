@@ -1,13 +1,15 @@
 import React, { useEffect, useState, } from "react"
-import { StyleSheet, View, Image, Alert, ActivityIndicator } from "react-native"
+import { StyleSheet, View, Image, Alert, ActivityIndicator, Share } from "react-native"
 import { Avatar, Button, Card, Icon, ListItem, Text } from "@rneui/themed"
 import { useWalletConnect } from "@walletconnect/react-native-dapp"
 import * as Keychain from 'react-native-keychain';
 import Toast from "react-native-toast-message"
+import { FulaDID } from "@functionland/fula-sec"
+
 
 import { Screen } from "../../components"
 import { NativeStackScreenProps } from "@react-navigation/native-stack"
-import { Header, HeaderArrowBack } from "../../components/header"
+import { Header, HeaderArrowBack, HeaderRightContainer } from "../../components/header"
 import { AppNavigationNames, RootStackParamList } from "../../navigators"
 import { SharedElement } from "react-navigation-shared-element"
 import * as helper from "../../utils/helper"
@@ -16,23 +18,23 @@ type ConnectToWalletStep = "None" | "Connecting" | "Signing"
 
 export const AccountScreen: React.FC<Props> = ({ navigation }) => {
   const walletConnector = useWalletConnect()
-  const [signature, setSignature] = useState(null);
+  const [userCredentials, setUserCredentials] = useState<Keychain.UserCredentials | undefined | null>(null);
   const [connectToWalletStep, setConnectToWalletStep] = useState<ConnectToWalletStep>("None");
 
   useEffect(() => {
     getGenericPassword()
   }, [])
   useEffect(() => {
-    if (walletConnector.session.connected && signature === "") {
+    if (walletConnector.session.connected && userCredentials === undefined) {
       signWalletAddress();
     }
   }, [walletConnector])
   const getGenericPassword = async () => {
     const gPassword = await Keychain.getGenericPassword();
     if (gPassword) {
-      setSignature((gPassword as Keychain.UserCredentials).password)
+      setUserCredentials((gPassword as Keychain.UserCredentials))
     } else
-      setSignature("")
+      setUserCredentials(undefined)
   }
 
   const connectToWallet = async () => {
@@ -62,15 +64,24 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
       const messageBytes = new TextEncoder().encode(walletConnector?.accounts[0]);
       if (!walletConnector.session?.connected)
         await walletConnector.createSession()
-      const signature = await walletConnector.signPersonalMessage([messageBytes, walletConnector?.accounts[0]])
-      Keychain.setGenericPassword("signature", signature);
-      setSignature(signature)
-      Toast.show({
-        type: 'success',
-        text1: 'Your DID created successfully!',
-        position: "bottom",
-        bottomOffset: 0,
-      });
+      const walletSignature = await walletConnector.signPersonalMessage([messageBytes, walletConnector?.accounts[0]])
+
+      const fulaDID = new FulaDID();
+      await fulaDID.create(walletSignature, walletSignature);
+
+      const credentials = Keychain.setGenericPassword(fulaDID?.did?.id, walletSignature);
+      if (credentials) {
+        setUserCredentials({
+          username: fulaDID?.did?.id,
+          password: walletSignature
+        })
+        Toast.show({
+          type: 'success',
+          text1: 'Your DID created successfully!',
+          position: "bottom",
+          bottomOffset: 0,
+        });
+      }
     } catch (error) {
       console.log(error)
       Toast.show({
@@ -106,17 +117,34 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
               bottomOffset: 0,
             });
           } finally {
-            setSignature("")
+            setUserCredentials(undefined)
             setConnectToWalletStep("None")
           }
         }
       }])
 
   }
+  const shareDID = async () => {
+    try {
+
+      if (userCredentials?.username) {
+        await Share.share({
+          title: 'Fotos | Did identity',
+          message: userCredentials.username
+        });
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
   const renderHeader = () => {
     return (<Header
       centerComponent={<Text lineBreakMode="tail" h4 >Account</Text>}
       leftComponent={<HeaderArrowBack navigation={navigation} />}
+      rightComponent={<HeaderRightContainer>
+        {walletConnector?.connected && <Icon type="material-community" size={28} style={styles.headerIcon} name="account-off-outline" onPress={disconnectWallet} />}
+        {userCredentials?.username && <Icon type="material-community" size={26} style={styles.headerIcon} name="share-variant-outline" onPress={shareDID} />}
+      </HeaderRightContainer>}
     />)
   }
   return (
@@ -167,8 +195,7 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
             <Text>{walletConnector.peerMeta?.name}</Text>
             <Text ellipsizeMode="tail">{walletConnector.accounts?.[0]}</Text>
             <View style={styles.section}>
-              {!signature ? <Button title="Sign your address" onPress={signWalletAddress} /> : null}
-              <Button title="Disconnect" onPress={disconnectWallet} />
+              {!userCredentials ? <Button title="Sign your address" onPress={signWalletAddress} /> : null}
             </View>
           </View>
           :
@@ -227,5 +254,9 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50
+  },
+  headerIcon: {
+    marginHorizontal: 5
   }
+
 })

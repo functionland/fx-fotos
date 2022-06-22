@@ -162,8 +162,8 @@ export const AssetListScreen: React.FC<Props> = ({ navigation, medias, defaultHe
               />}
               onPress={() => navigation.navigate(AppNavigationNames.AccountScrenn)}
             /> : <Avatar
-              containerStyle={{ backgroundColor: "gray" }}
-              icon={{ name: "account-alert", type: "material-community", size: 28 }}
+              containerStyle={styles.disconnectedAvatar }
+              icon={{ name: "account-alert", type: "material-community", size: 34 }}
               size="small" rounded={true}
               onPress={() => navigation.navigate(AppNavigationNames.AccountScrenn)}
             />}
@@ -247,6 +247,15 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
     justifyContent: "center",
-    alignItems: "center"
+    //alignItems: "center",
+    marginHorizontal: 5
+  },
+  disconnectedAvatar: {
+    backgroundColor: "gray",
+    marginHorizontal: 5,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: "center",
   }
 })

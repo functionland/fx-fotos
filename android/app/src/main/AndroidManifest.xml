@@ -15,6 +15,10 @@
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="wc"/>
         </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https"/>
+        </intent>
     </queries>
 
     <application
@@ -43,6 +47,9 @@
               <category android:name="android.intent.category.DEFAULT" />
               <category android:name="android.intent.category.BROWSABLE" />
               <data android:scheme="fotos" />
+              <data android:scheme="https"/>
+              <data android:scheme="http"/>
+              <data android:host="fotos.fx.land" />
           </intent-filter>
       </activity>
       <service android:name="com.asterinet.react.bgactions.RNBackgroundActionsTask" />
