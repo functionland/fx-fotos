@@ -20,7 +20,7 @@ const FxButton = ({ children, style, ...rest }: FxButtonProps) => {
       padding="m"
       margin="m"
       backgroundColor="primary"
-      borderRadius={8}
+      borderRadius="s"
       style={(args) => [
         typeof style === 'function' ? style(args) : style,
         args.pressed && {

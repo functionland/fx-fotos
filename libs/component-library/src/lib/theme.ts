@@ -23,6 +23,10 @@ const fxLightTheme = createTheme({
       color: 'primary',
     },
   },
+  borderRadii: {
+    s: 8,
+    m: 16,
+  },
 });
 
 type FxTheme = typeof fxLightTheme;
