@@ -1,4 +1,4 @@
 import { createBox } from '@shopify/restyle';
-import { FxTheme } from '@functionland/component-library';
+import { FxTheme } from '../theme';
 
 export const FxBox = createBox<FxTheme>();
