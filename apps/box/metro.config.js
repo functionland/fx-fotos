@@ -22,7 +22,7 @@ module.exports = (async () => {
         assetExts: assetExts.filter((ext) => ext !== 'svg'),
         sourceExts: [...sourceExts, 'svg'],
         resolverMainFields: ['sbmodern', 'react-native', 'browser', 'main'],
-        blacklistRE: exclusionList([/\.\/dist\/.*/]),
+        blockList: exclusionList([/\.\/dist\/.*/]),
       },
     },
     {
