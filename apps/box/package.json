@@ -18,6 +18,7 @@
     "@shopify/restyle": "*",
     "node-libs-react-native": "*",
     "@walletconnect/react-native-dapp": "*",
-    "react-native-randombytes": "*"
+    "react-native-randombytes": "*",
+    "@react-navigation/bottom-tabs": "*"
   }
 }
