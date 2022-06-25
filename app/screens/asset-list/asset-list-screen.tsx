@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
     justifyContent: "center",
-    //alignItems: "center",
+    alignItems: "center",
     marginHorizontal: 5
   },
   disconnectedAvatar: {
