@@ -23,10 +23,6 @@ const os = require("os")
   // Make sure our native modules are androidX-happy
   { command: "jetify" },
 
-  // nodeify the project for web3
-  { command: "rn-nodeify --install --hack"},
-  //{ command: "./node_modules/.bin/rn-nodeify --hack --install"},
-
   // on iOS, make sure our native modules are installed
   //{ command: "pod install", cwd: "ios", onlyPlatforms: ["darwin"] },
 ]
