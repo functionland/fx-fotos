@@ -1,10 +1,10 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
 import { ThemeProvider } from '@shopify/restyle';
 import { fxLightTheme, fxDarkTheme } from '@functionland/component-library';
 import { RootNavigator } from '../navigation/Root.navigator';
 import { WalletConnectProvider } from '@walletconnect/react-native-dapp/dist/providers';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { NavContainer } from '../navigation/NavContainer';
 
 export const App = () => {
   const [isDarkTheme] = React.useState<boolean>(false);
@@ -26,9 +26,9 @@ export const App = () => {
 
 const AppContent = () => {
   return (
-    <NavigationContainer>
+    <NavContainer>
       <RootNavigator />
-    </NavigationContainer>
+    </NavContainer>
   );
 };
 

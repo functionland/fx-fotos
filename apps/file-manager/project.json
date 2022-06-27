@@ -52,7 +52,9 @@
     },
     "sync-deps": {
       "executor": "@nrwl/react-native:sync-deps",
-      "options": {}
+      "options": {
+        "include": "react-native-reanimated"
+      }
     },
     "ensure-symlink": {
       "executor": "@nrwl/react-native:ensure-symlink",
