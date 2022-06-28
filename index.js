@@ -7,6 +7,7 @@
 // side effect of breaking other tooling like mobile-center and react-native-rename.
 //
 // It's easier just to leave it here.
+import "node-libs-react-native/globals.js";
 import "./shim.js"
 import 'react-native-get-random-values'
 import App from "./app/app.tsx"
