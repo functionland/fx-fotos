@@ -85,8 +85,8 @@ const AppStack = () => {
         }}
         component={PhotoScreen}
         sharedElements={(route) => {
-          const { assetUri = "" } = route.params
-          return [assetUri]
+          const { assetId = "" } = route.params
+          return [assetId]
         }}
 
       />

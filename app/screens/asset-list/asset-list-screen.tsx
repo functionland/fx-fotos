@@ -4,7 +4,7 @@ import LottieView from "lottie-react-native"
 import { Avatar, Icon, Text, useTheme, } from "@rneui/themed"
 import Toast from 'react-native-toast-message'
 import { useWalletConnect } from '@walletconnect/react-native-dapp';
-import { useRecoilState } from "recoil"
+import { useSetRecoilState } from "recoil"
 import { Screen } from "../../components"
 import { AssetService } from "../../services"
 import AssetList, { AssetListHandle } from "../../components/asset-list"
@@ -38,7 +38,7 @@ export const AssetListScreen: React.FC<Props> = ({ navigation, medias, defaultHe
   const { toggleTheme } = useContext(ThemeContext);
   const { theme } = useTheme();
   const walletConnector = useWalletConnect();
-  const [, setSingleAsset] = useRecoilState(singleAssetState)
+  const  setSingleAsset = useSetRecoilState(singleAssetState)
   useEffect(() => {
     if (medias) {
       setRecyclerSections([...AssetService.categorizeAssets([...medias])]);
@@ -121,8 +121,8 @@ export const AssetListScreen: React.FC<Props> = ({ navigation, medias, defaultHe
   const onItemPress = (section: RecyclerAssetListSection) => {
     if (section.type === ViewType.ASSET) {
       const asset: Asset = section.data
-      setSingleAsset(asset);
-      navigation.push(AppNavigationNames.PhotoScreen, { assetUri: asset.uri })
+      setSingleAsset(JSON.parse(JSON.stringify(asset)));
+      navigation.push(AppNavigationNames.PhotoScreen, { assetId: asset.id })
     }
   }
 

@@ -45,7 +45,7 @@ interface PhotoScreenProps {
 }
 
 export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation }) => {
-  const [asset,setAsset] = useRecoilState(singleAssetState)
+  const [asset, setAsset] = useRecoilState(singleAssetState)
   const translateX = useSharedValue(0)
   const translateY = useSharedValue(0)
   const imageScale = useSharedValue(1)
@@ -60,7 +60,8 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation }) => {
     return () => {
       Toast.hide();
     }
-  })
+  },[])
+  console.log("PhotoScreen",asset.id)
   const wrapperAnimatedStyle = useAnimatedStyle(() => {
     return {
       paddingTop: Constants.HeaderHeight,
@@ -315,7 +316,7 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation }) => {
     }
   }
   const imageContainerStyle = {
-    height: (widthPercentageToDP(100) * asset.height) / asset.width,
+    height: (widthPercentageToDP(100) * asset?.height) / asset?.width,
     width: widthPercentageToDP(100),
   }
   const renderHeader = () => {
@@ -345,16 +346,18 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation }) => {
           <TapGestureHandler onActivated={() => onDoubleTap()} numberOfTaps={2}>
             <View>
               {asset?.syncStatus === SyncStatus.SYNCED && asset?.isDeleted && renderDownloadSection()}
-              {!asset?.isDeleted && <SharedElement style={imageContainerStyle} id={asset.uri}>
-                <PinchGestureHandler onGestureEvent={onPinchHandler}>
-                  <Animated.Image
-                    source={{ uri: asset.uri }}
-                    fadeDuration={0}
-                    resizeMode="contain"
-                    style={[styles.image, animatedImage]}
-                  />
-                </PinchGestureHandler>
-              </SharedElement>}
+              {!asset?.isDeleted &&
+                <SharedElement style={imageContainerStyle} id={asset?.id}>
+                  <PinchGestureHandler onGestureEvent={onPinchHandler}>
+                    <Animated.Image
+                      source={{ uri: asset.uri }}
+                      fadeDuration={0}
+                      resizeMode="contain"
+                      style={[styles.image, animatedImage]}
+                    />
+                  </PinchGestureHandler>
+                </SharedElement>
+              }
               <BottomSheet isVisible={showShareBottomSheet}
                 onBackdropPress={() => setShowShareBottomSheet(false)}
                 modalProps={{ transparent: true, animationType: "fade" }}
