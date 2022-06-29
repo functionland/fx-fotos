@@ -85,8 +85,8 @@ const AppStack = () => {
         }}
         component={PhotoScreen}
         sharedElements={(route) => {
-          const { section } = route.params
-          return [section.data.uri]
+          const { assetUri = "" } = route.params
+          return [assetUri]
         }}
 
       />
@@ -164,7 +164,7 @@ export const AppNavigator = (props: NavigationProps) => {
       >
         <AppStack />
       </NavigationContainer>
-      {toastVisible && <Toast/>}
+      {toastVisible && <Toast />}
     </Animated.View>
   )
 }

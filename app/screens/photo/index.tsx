@@ -21,8 +21,7 @@ import {
 import { widthPercentageToDP } from "react-native-responsive-screen"
 import { useNetInfo } from "@react-native-community/netinfo"
 import { RouteProp, NavigationProp } from "@react-navigation/native"
-import { FulaDID } from "@functionland/fula-sec"
-import * as Keychain from 'react-native-keychain';
+import { useRecoilState } from "recoil"
 
 import { Asset, SyncStatus } from "../../types"
 import { Constants, palette } from "../../theme"
@@ -30,14 +29,14 @@ import { Header } from "../../components"
 import { HomeNavigationParamList } from "../../navigators"
 import { BottomSheet, Button, Card, Icon, Input } from "@rneui/themed"
 import { HeaderArrowBack, HeaderRightContainer } from "../../components/header"
-import { useRecoilState } from "recoil"
-import { boxsState } from "../../store"
+import { singleAssetState } from "../../store"
 import { Assets } from "../../services/localdb"
 import { AddBoxs, downloadAndDecryptAsset, downloadAsset, uploadAssetsInBackground } from "../../services/sync-service"
 import { Buffer } from "buffer"
 import { TaggedEncryption } from "@functionland/fula-sec"
 import { getAssetMeta } from "../../services/remote-db-service"
 import * as helper from "../../utils/helper"
+
 const { height } = Dimensions.get("window")
 
 interface PhotoScreenProps {
@@ -45,15 +44,14 @@ interface PhotoScreenProps {
   route: RouteProp<{ params: { section: Asset } }>
 }
 
-export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) => {
-  const [asset, setAsset] = useState(JSON.parse(JSON.stringify(route.params.section?.data)) as Asset)
+export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation }) => {
+  const [asset,setAsset] = useRecoilState(singleAssetState)
   const translateX = useSharedValue(0)
   const translateY = useSharedValue(0)
   const imageScale = useSharedValue(1)
   const isPanGestureActive = useSharedValue(false)
   const isPinchGestureActive = useSharedValue(false)
   const animatedOpacity = useSharedValue(1)
-  const [, setBoxs] = useRecoilState(boxsState)
   const [loading, setLoading] = useState(false)
   const [showShareBottomSheet, setShowShareBottomSheet] = useState(false);
   const [DID, setDID] = useState("")
@@ -312,6 +310,7 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
         });
       }
     } catch (error) {
+      Alert.alert("Error", error.toString())
       console.log(error)
     }
   }

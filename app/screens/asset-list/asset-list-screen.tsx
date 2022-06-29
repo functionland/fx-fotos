@@ -4,7 +4,7 @@ import LottieView from "lottie-react-native"
 import { Avatar, Icon, Text, useTheme, } from "@rneui/themed"
 import Toast from 'react-native-toast-message'
 import { useWalletConnect } from '@walletconnect/react-native-dapp';
-
+import { useRecoilState } from "recoil"
 import { Screen } from "../../components"
 import { AssetService } from "../../services"
 import AssetList, { AssetListHandle } from "../../components/asset-list"
@@ -13,14 +13,14 @@ import { palette } from "../../theme/palette"
 import { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { HomeNavigationParamList, HomeNavigationTypes } from "../../navigators/home-navigator"
 import { Assets } from "../../services/localdb"
-import { Header, HeaderLogo, HeaderLeftContainer, HeaderRightContainer, HeaderCenterContainer } from "../../components/header"
+import { Header, HeaderLogo, HeaderLeftContainer, HeaderRightContainer } from "../../components/header"
 import { ThemeContext } from "../../theme"
 import { AppNavigationNames } from "../../navigators"
 import { uploadAssetsInBackground } from "../../services/sync-service"
 import { SharedElement } from "react-navigation-shared-element"
 import * as helper from "../../utils/helper"
-import { RecyclerAssetListSection, ViewType } from "../../types"
-
+import { Asset, RecyclerAssetListSection, ViewType } from "../../types"
+import { singleAssetState } from "../../store"
 interface Props {
   navigation: NativeStackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>;
   medias: Asset[];
@@ -38,7 +38,7 @@ export const AssetListScreen: React.FC<Props> = ({ navigation, medias, defaultHe
   const { toggleTheme } = useContext(ThemeContext);
   const { theme } = useTheme();
   const walletConnector = useWalletConnect();
-
+  const [, setSingleAsset] = useRecoilState(singleAssetState)
   useEffect(() => {
     if (medias) {
       setRecyclerSections([...AssetService.categorizeAssets([...medias])]);
@@ -119,10 +119,13 @@ export const AssetListScreen: React.FC<Props> = ({ navigation, medias, defaultHe
   }
 
   const onItemPress = (section: RecyclerAssetListSection) => {
-    if (section.type === ViewType.ASSET)
-      navigation.push(AppNavigationNames.PhotoScreen, { section: section })
+    if (section.type === ViewType.ASSET) {
+      const asset: Asset = section.data
+      setSingleAsset(asset);
+      navigation.push(AppNavigationNames.PhotoScreen, { assetUri: asset.uri })
+    }
   }
-  
+
   const onSelectedItemsChange = (assetIds: string[], selectionMode: boolean) => {
     setSelectionMode(selectionMode);
     setSelectedItems(assetIds);
