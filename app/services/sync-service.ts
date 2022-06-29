@@ -2,14 +2,13 @@ import { Platform } from "react-native"
 import BackgroundJob, { BackgroundTaskOptions } from "react-native-background-actions"
 import BackgroundFetch, { HeadlessEvent } from "react-native-background-fetch"
 import { file, fula } from "react-native-fula"
-import * as Keychain from "react-native-keychain"
 
 import { AssetEntity } from "../realmdb/entities"
 import { SyncStatus } from "../types"
 import { Assets, Boxs } from "./localdb/index"
 import { addAssetMeta } from "./remote-db-service"
-import { FulaDID, TaggedEncryption } from "@functionland/fula-sec"
-
+import { TaggedEncryption } from "@functionland/fula-sec"
+import * as helper from "../utils/helper"
 type TaskParams = {
   callback: (success: boolean) => void
   assets: AssetEntity[]
@@ -34,14 +33,11 @@ const backgroundTask = async (taskParameters: TaskParams) => {
     )
   }
   const { callback = null, assets = [] } = taskParameters
-  const gPassword = await Keychain.getGenericPassword()
   let taggedEncryption: TaggedEncryption = null
-  const myDID = new FulaDID()
-  if (gPassword) {
-    await myDID.create(gPassword.password, gPassword.password)
+  const myDID = await helper.getMyDID()
+  if (myDID) {
     taggedEncryption = new TaggedEncryption(myDID?.did)
   }
-
   await new Promise(async (resolve) => {
     try {
       for (let index = 0; index < assets.length; index++) {
@@ -56,9 +52,9 @@ const backgroundTask = async (taskParameters: TaskParams) => {
           },
         })
 
-        if (gPassword) {
+        if (myDID) {
           const result = await encryptAndUploadAsset(asset)
-          const jwe = await taggedEncryption.encrypt(result, result?.id, [myDID?.did?.id])
+          const jwe = await taggedEncryption.encrypt(result, result?.id, [myDID?.authDID])
           await addAssetMeta({
             id: result.id,
             name: asset.filename,
@@ -70,7 +66,6 @@ const backgroundTask = async (taskParameters: TaskParams) => {
             {
               id: asset.id,
               cid: result.id,
-              fileRef: result,
               syncDate: new Date(),
               syncStatus: SyncStatus.SYNCED,
             },

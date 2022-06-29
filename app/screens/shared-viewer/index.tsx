@@ -27,9 +27,8 @@ import { HomeNavigationParamList } from "../../navigators"
 import { HeaderArrowBack } from "../../components/header"
 import { Buffer } from "buffer"
 import { Text } from "@rneui/themed"
-import { FulaDID, TaggedEncryption } from "@functionland/fula-sec"
-import { file } from "react-native-fula"
 import { AddBoxs, downloadAndDecryptAsset } from "../../services/sync-service"
+import * as helper from "../../utils/helper"
 
 const { height, width } = Dimensions.get("window")
 
@@ -65,26 +64,7 @@ export const ShareViewerScreen: React.FC<Props> = ({ navigation, route }) => {
       Toast.hide();
     }
   }, [])
-  const decryptJWE = async (jwe: string): { CID: string, symetricKey: { id: string, iv: SVGFESpecularLightingElement, key: string } } => {
-    try {
-      const gPassword = await Keychain.getGenericPassword();
-      if (gPassword) {
-        const myDID = new FulaDID();
-        await myDID.create(gPassword.password, gPassword.password);
-        const myTag = new TaggedEncryption(myDID.did);
-        const dec_jwe = await myTag.decrypt(jwe);
-        return dec_jwe;
-      }
-    } catch (error) {
-      console.log("decryptJWE", error)
-      Toast.show({
-        type: "error",
-        text1: "Something is wrong!",
-        bottomOffset: 0,
-        position: "bottom"
-      })
-    }
-  }
+  
   const downloadFromBox = async (jwe: string) => {
     setLoading(true);
     try {
@@ -95,16 +75,20 @@ export const ShareViewerScreen: React.FC<Props> = ({ navigation, route }) => {
         return;
       }
       let result = null;
-      const fileRef = (await decryptJWE(jwe))?.symetricKey
-      console.log("fileRef",fileRef)
+      const myDID = await helper.getMyDID();
+      const fileRef = (await helper.decryptJWE(myDID?.did, jwe))?.symetricKey
       if (fileRef) {
         result = await downloadAndDecryptAsset(fileRef)
-        console.log("downloadFromBox:", result)
         setAssetURI(result.uri)
       }
     } catch (error) {
       console.log("uploadOrDownload", error)
-      Alert.alert("Error", "Unable to receive the file, make sure your box is available!")
+      Toast.show({
+        type: "error",
+        text1: "Something is wrong!",
+        bottomOffset: 0,
+        position: "bottom"
+      })
     } finally {
       setLoading(false)
     }

@@ -36,7 +36,8 @@ import { Assets } from "../../services/localdb"
 import { AddBoxs, downloadAndDecryptAsset, downloadAsset, uploadAssetsInBackground } from "../../services/sync-service"
 import { Buffer } from "buffer"
 import { TaggedEncryption } from "@functionland/fula-sec"
-
+import { getAssetMeta } from "../../services/remote-db-service"
+import * as helper from "../../utils/helper"
 const { height } = Dimensions.get("window")
 
 interface PhotoScreenProps {
@@ -94,9 +95,15 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
             Alert.alert("Warning", error)
             return;
           }
+          const myDID = await helper.getMyDID()
+          let fileRef = null;
+          if (myDID) {
+            const meta = await getAssetMeta(myDID.did?.id, asset.cid);
+            fileRef = (await helper.decryptJWE(myDID.did, meta?.jwe))?.symetricKey;
+          }
           let result = null;
-          if (asset.fileRef) {
-            result = await downloadAndDecryptAsset(asset?.fileRef)
+          if (fileRef) {
+            result = await downloadAndDecryptAsset(fileRef)
           } else {
             result = await downloadAsset(asset?.cid)
           }
@@ -295,10 +302,8 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
       return
     setShowShareBottomSheet(false)
     try {
-      const gPassword = await Keychain.getGenericPassword();
-      if (gPassword) {
-        const myDID = new FulaDID();
-        await myDID.create(gPassword.password, gPassword.password);
+      const myDID = await helper.getMyDID();
+      if (myDID) {
         const myTag = new TaggedEncryption(myDID.did);
         const jwe = await myTag.encrypt(asset?.fileRef, asset?.fileRef?.id, [DID])
         await Share.share({
