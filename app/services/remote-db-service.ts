@@ -1,4 +1,5 @@
 import { graph, file } from "react-native-fula"
+import { AssetMeta } from "../types"
 
 const ASSET_META_QUERY = `
   query getAssetsMetas($filter:JSON){
@@ -28,13 +29,8 @@ const ADD_ASSET_META = `
     }
   }
 `
-export const addAssetMeta = async (meta: {
-  id: string
-  name: string
-  jwe: file.FileRef
-  ownerId: string
-  date: string
-}) => {
+
+export const addAssetMeta = async (meta: AssetMeta): Promise<AssetMeta> => {
   const result = await graph.graphql(ADD_ASSET_META, {
     values: [
       {
@@ -45,9 +41,18 @@ export const addAssetMeta = async (meta: {
   return result?.data?.create?.[0]
 }
 
-export const getAssetsMetas = async (ownerId: string) => {
+export const getAssetMeta = async (ownerId: string, id: string): Promise<AssetMeta> => {
   const result = await graph.graphql(ASSET_META_QUERY, {
-    filter: { ownerId: { eq: `${ownerId}` } },
+    filter: {
+      and: [
+        {
+          ownerId: { eq: `${ownerId}` },
+        },
+        {
+          id: { eq: `${id}` },
+        },
+      ],
+    },
   })
-  return result?.data?.read
+  return result?.data?.read?.[0]
 }

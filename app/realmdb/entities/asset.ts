@@ -1,5 +1,4 @@
 import { SyncStatus } from "../../types"
-import { FileRef } from "./fileRef"
 export type AssetEntity = {
   id: string
   /**
@@ -55,9 +54,9 @@ export type AssetEntity = {
    */
   cid: string | undefined
   /**
-   * When an asset stored in the box by encryption we get a fileRef to able to decrypt asset in the future
+   * When an asset stored in the box by encryption we generate the user a jwe to able to decrypt asset in the future
    */
-  fileRef: FileRef | undefined
+  jwe: string | undefined
   /**
    * Deleted from storage
    */

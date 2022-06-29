@@ -19,6 +19,19 @@ export const getAll = (
       throw error
     })
 }
+export const getById = (id:string): Promise<Realm.Results<Entities.AssetEntity & Realm.Object>> => {
+  return RealmDB()
+    .then((realm) => {
+      const assets = realm
+        .objects<Entities.AssetEntity>(Schemas.Asset.name)
+        .filtered(`id = '${id}'`)
+      return assets
+    })
+    .catch((error) => {
+      console.error("RealmDB getById error!", error)
+      throw error
+    })
+}
 export const getAllNeedToSync = (): Promise<Realm.Results<Entities.AssetEntity & Realm.Object>> => {
   return RealmDB()
     .then((realm) => {
