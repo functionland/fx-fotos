@@ -56,9 +56,9 @@ export const Asset = {
      */
     cid: "string?",
     /**
-     * When an asset stored in the box by encryption we get a fileRef to able to decrypt asset in the future
+     * When an asset stored in the box by encryption we generate jwe to able to decrypt asset in the future
      */
-    fileRef: "FileRef?", // Embed a single object
+    jwe: "string?", // Embed a single object
     /**
      * Deleted form storage
      */

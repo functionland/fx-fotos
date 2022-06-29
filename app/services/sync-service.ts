@@ -66,6 +66,7 @@ const backgroundTask = async (taskParameters: TaskParams) => {
             {
               id: asset.id,
               cid: result.id,
+              jwe: JSON.stringify(jwe),
               syncDate: new Date(),
               syncStatus: SyncStatus.SYNCED,
             },
