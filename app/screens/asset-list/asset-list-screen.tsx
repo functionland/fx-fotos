@@ -19,6 +19,7 @@ import { AppNavigationNames } from "../../navigators"
 import { uploadAssetsInBackground } from "../../services/sync-service"
 import { SharedElement } from "react-navigation-shared-element"
 import * as helper from "../../utils/helper"
+import { RecyclerAssetListSection, ViewType } from "../../types"
 
 interface Props {
   navigation: NativeStackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>;
@@ -117,6 +118,11 @@ export const AssetListScreen: React.FC<Props> = ({ navigation, medias, defaultHe
     }
   }
 
+  const onItemPress = (section: RecyclerAssetListSection) => {
+    if (section.type === ViewType.ASSET)
+      navigation.push(AppNavigationNames.PhotoScreen, { section: section })
+  }
+  
   const onSelectedItemsChange = (assetIds: string[], selectionMode: boolean) => {
     setSelectionMode(selectionMode);
     setSelectedItems(assetIds);
@@ -162,7 +168,7 @@ export const AssetListScreen: React.FC<Props> = ({ navigation, medias, defaultHe
               />}
               onPress={() => navigation.navigate(AppNavigationNames.AccountScrenn)}
             /> : <Avatar
-              containerStyle={styles.disconnectedAvatar }
+              containerStyle={styles.disconnectedAvatar}
               icon={{ name: "account-alert", type: "material-community", size: 34 }}
               size="small" rounded={true}
               onPress={() => navigation.navigate(AppNavigationNames.AccountScrenn)}
@@ -208,6 +214,7 @@ export const AssetListScreen: React.FC<Props> = ({ navigation, medias, defaultHe
           navigation={navigation}
           onAssetLoadError={onAssetLoadError}
           renderFooter={renderFooter}
+          onItemPress={onItemPress}
         />
       )}
     </Screen>
