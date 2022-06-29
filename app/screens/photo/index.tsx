@@ -60,8 +60,7 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation }) => {
     return () => {
       Toast.hide();
     }
-  },[])
-  console.log("PhotoScreen",asset.id)
+  }, [])
   const wrapperAnimatedStyle = useAnimatedStyle(() => {
     return {
       paddingTop: Constants.HeaderHeight,
@@ -284,27 +283,18 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation }) => {
     }
   }
   // This method is just for demo
-  const shareAsset = async () => {
-    try {
-      setShowShareBottomSheet(true);
-      // await Share.share({
-      //   title: 'Fotos | Just shared an asset',
-      //   message: `https://fotos.fx.land/shared/${Buffer.from(asset.uri, 'utf-8').toString('base64')}`
-      // });
 
-    } catch (error) {
-      console.log(error)
-    }
-  }
   const shareWithDID = async () => {
     if (!DID)
       return
     setShowShareBottomSheet(false)
     try {
+      const shareAsset = (await Assets.getById(asset.id))?.[0];
       const myDID = await helper.getMyDID();
-      if (myDID) {
+      if (myDID && shareAsset) {
         const myTag = new TaggedEncryption(myDID.did);
-        const jwe = await myTag.encrypt(asset?.fileRef, asset?.fileRef?.id, [DID])
+        const symetricKey = (await helper.decryptJWE(myDID.did, JSON.parse(shareAsset?.jwe)))?.symetricKey;
+        const jwe = await myTag.encrypt(symetricKey, symetricKey?.id, [DID])
         await Share.share({
           title: 'Fotos | Just shared an asset',
           message: `https://fotos.fx.land/shared/${Buffer.from(JSON.stringify(jwe), 'utf-8').toString('base64')}`
@@ -328,7 +318,7 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation }) => {
             (asset?.syncStatus === SyncStatus.SYNCED && !asset?.isDeleted ? <Icon type="material-community" name="cloud-check" />
               : (asset?.syncStatus === SyncStatus.NOTSYNCED && !asset?.isDeleted ? <Icon type="material-community" name="cloud-upload-outline" onPress={uploadToBox} />
                 : asset?.syncStatus === SyncStatus.SYNC ? <Icon type="material-community" name="refresh" onPress={uploadToBox} /> : null))}
-          <Icon type="material-community" style={styles.headerIcon} name="share-variant" onPress={shareAsset} />
+          {asset?.syncStatus === SyncStatus.SYNCED && <Icon type="material-community" style={styles.headerIcon} name="share-variant" onPress={()=>setShowShareBottomSheet(true)} />}
         </HeaderRightContainer>
       } />)
   }
