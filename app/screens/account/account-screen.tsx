@@ -69,10 +69,10 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
       const fulaDID = new FulaDID();
       await fulaDID.create(walletSignature, walletSignature);
 
-      const credentials = Keychain.setGenericPassword(fulaDID?.did?.id, walletSignature);
+      const credentials = Keychain.setGenericPassword(fulaDID?.authDID, walletSignature);
       if (credentials) {
         setUserCredentials({
-          username: fulaDID?.did?.id,
+          username: fulaDID?.authDID,
           password: walletSignature
         })
         Toast.show({

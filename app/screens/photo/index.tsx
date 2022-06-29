@@ -98,7 +98,7 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
           const myDID = await helper.getMyDID()
           let fileRef = null;
           if (myDID) {
-            const meta = await getAssetMeta(myDID.did?.id, asset.cid);
+            const meta = await getAssetMeta(myDID.authDID, asset.cid);
             fileRef = (await helper.decryptJWE(myDID.did, meta?.jwe))?.symetricKey;
           }
           let result = null;

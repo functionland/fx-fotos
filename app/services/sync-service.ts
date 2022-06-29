@@ -60,7 +60,7 @@ const backgroundTask = async (taskParameters: TaskParams) => {
             name: asset.filename,
             jwe,
             date: asset.modificationTime,
-            ownerId: myDID?.did?.id,
+            ownerId: myDID?.authDID,
           })
           Assets.addOrUpdate([
             {
