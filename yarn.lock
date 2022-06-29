@@ -3541,10 +3541,10 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react-native@0.63.40":
-  version "0.63.40"
-  resolved "https://registry.yarnpkg.com/@types/react-native/-/react-native-0.63.40.tgz#66b11824a6aadb0dde0db87bd8aff58165c7a8f8"
-  integrity sha512-y98TQBjfncIrdDrwIhxcmcad1gHKNfUKFnCBk3heYy0Gvt6BNcBeSKRvACV4cf6R1K/cNJMoS3rjaMvYhQyAgw==
+"@types/react-native@^0.67.9":
+  version "0.67.9"
+  resolved "https://registry.yarnpkg.com/@types/react-native/-/react-native-0.67.9.tgz#8b0406b3b9557f9f2b560bee7c8a33ace35a9993"
+  integrity sha512-8s0v539mHd2qPIDp1rL0ChVvQh+QYUANSQhhccFbaI/D9E/b43L9lWBXItjGpSo1Jqkkcaahlrj9Ls6JiXGm7Q==
   dependencies:
     "@types/react" "*"
 
@@ -3578,12 +3578,13 @@
     "@types/scheduler" "*"
     csstype "^3.0.2"
 
-"@types/react@16.14.0":
-  version "16.14.0"
-  resolved "https://registry.yarnpkg.com/@types/react/-/react-16.14.0.tgz#bc022cfe1609899b0f2196376b267724e7300f0e"
-  integrity sha512-jJjHo1uOe+NENRIBvF46tJimUvPnmbQ41Ax0pEm7pRvhPg+wuj8VMOHHiMvaGmZRzRrCtm7KnL5OOE/6kHPK8w==
+"@types/react@^18.0.14":
+  version "18.0.14"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-18.0.14.tgz#e016616ffff51dba01b04945610fe3671fdbe06d"
+  integrity sha512-x4gGuASSiWmo0xjDLpm5mPb52syZHJx02VKbqUKdLmKtAwIh63XClGsiTI1K6DO5q7ox4xAsQrU+Gl3+gGXF9Q==
   dependencies:
     "@types/prop-types" "*"
+    "@types/scheduler" "*"
     csstype "^3.0.2"
 
 "@types/reactcss@*":
@@ -13715,9 +13716,9 @@ react-native-fula@^0.2.2:
     fastestsmallesttextencoderdecoder "^1.0.22"
 
 react-native-gesture-handler@^2.4.1:
-  version "2.4.1"
-  resolved "https://registry.yarnpkg.com/react-native-gesture-handler/-/react-native-gesture-handler-2.4.1.tgz#f4cb1784b6dcdf41ae35b4fff6022ec21038e2cd"
-  integrity sha512-qJHkZAWyuvZvEm8jV6TsYKeTgkYmoNsKrO/CEx0YaisAcHSiaiMx2Dy/0/QQ7oZr3t5aL4rJqWtOEZCADNbfeQ==
+  version "2.4.2"
+  resolved "https://registry.yarnpkg.com/react-native-gesture-handler/-/react-native-gesture-handler-2.4.2.tgz#de93760b0bc251d94e8ae692f9850ec3ed2e4f27"
+  integrity sha512-K3oMiQV7NOVB5RvNlxkyJxU1Gn6m1cYu53MoFA542FVDSTR491d1eQkWDdqy4lW52rfF7IK7eE1LCi+kTJx7jw==
   dependencies:
     "@egjs/hammerjs" "^2.0.17"
     hoist-non-react-statics "^3.3.0"
