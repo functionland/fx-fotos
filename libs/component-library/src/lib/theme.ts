@@ -17,16 +17,18 @@ type RestyleProps = BackgroundColorProps<FxTheme> &
   VariantProps<FxTheme, 'textVariants'>;
 
 const palette = {
-  purple: '#5A31F4',
-  green: '#0A906E',
+  green: '#06B597',
+  blue: '#187AF9',
   white: 'white',
+  gray0: '#212529',
 };
 
 const fxLightTheme = createTheme({
   colors: {
     white: palette.white,
-    primary: palette.purple,
-    secondary: palette.green,
+    primary: palette.green,
+    secondary: palette.blue,
+    background: palette.gray0,
   },
   spacing: {
     s: 8,
@@ -52,7 +54,8 @@ const fxDarkTheme: FxTheme = {
   colors: {
     white: 'white',
     primary: palette.green,
-    secondary: palette.purple,
+    secondary: palette.blue,
+    background: palette.gray0,
   },
 };
 

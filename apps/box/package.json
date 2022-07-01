@@ -23,6 +23,9 @@
     "axios": "*",
     "@react-navigation/bottom-tabs": "*",
     "@react-native-picker/picker": "*",
-    "react-native-localize": "*"
+    "react-native-localize": "*",
+    "react-native-reanimated": "*",
+    "react-native-gesture-handler": "*",
+    "react-native-redash": "*"
   }
 }

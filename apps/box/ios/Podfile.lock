@@ -386,6 +386,35 @@ PODS:
     - React-Core
   - RNLocalize (2.2.2):
     - React-Core
+  - RNGestureHandler (2.5.0):
+    - React-Core
+  - RNReanimated (3.0.0-rc.0):
+    - DoubleConversion
+    - FBLazyVector
+    - FBReactNativeSpec
+    - glog
+    - RCT-Folly
+    - RCTRequired
+    - RCTTypeSafety
+    - React-callinvoker
+    - React-Core
+    - React-Core/DevSupport
+    - React-Core/RCTWebSocket
+    - React-CoreModules
+    - React-cxxreact
+    - React-jsi
+    - React-jsiexecutor
+    - React-jsinspector
+    - React-RCTActionSheet
+    - React-RCTAnimation
+    - React-RCTBlob
+    - React-RCTImage
+    - React-RCTLinking
+    - React-RCTNetwork
+    - React-RCTSettings
+    - React-RCTText
+    - ReactCommon/turbomodule/core
+    - Yoga
   - RNScreens (3.13.1):
     - React-Core
     - React-RCTImage
@@ -463,6 +492,8 @@ DEPENDENCIES:
   - "RNCAsyncStorage (from `../../../node_modules/@react-native-async-storage/async-storage`)"
   - "RNCPicker (from `../../../node_modules/@react-native-picker/picker`)"
   - RNLocalize (from `../../../node_modules/react-native-localize`)
+  - RNGestureHandler (from `../../../node_modules/react-native-gesture-handler`)
+  - RNReanimated (from `../../../node_modules/react-native-reanimated`)
   - RNScreens (from `../../../node_modules/react-native-screens`)
   - RNSVG (from `../../../node_modules/react-native-svg`)
   - RNWifi (from `../../../node_modules/react-native-wifi-reborn`)
@@ -565,6 +596,10 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/@react-native-picker/picker"
   RNLocalize:
     :path: "../../../node_modules/react-native-localize"
+  RNGestureHandler:
+    :path: "../../../node_modules/react-native-gesture-handler"
+  RNReanimated:
+    :path: "../../../node_modules/react-native-reanimated"
   RNScreens:
     :path: "../../../node_modules/react-native-screens"
   RNSVG:
@@ -627,6 +662,8 @@ SPEC CHECKSUMS:
   RNCAsyncStorage: 13d3b40c7fae0796d10b23fbec382e7a76807a0f
   RNCPicker: 0250e95ad170569a96f5b0555cdd5e65b9084dca
   RNLocalize: 95a43f85e41a966be7bc9cff2437128911c52da0
+  RNGestureHandler: bad495418bcbd3ab47017a38d93d290ebd406f50
+  RNReanimated: 89886d02e4748077c0dd3c645286b15a9bca097b
   RNScreens: 40a2cb40a02a609938137a1e0acfbf8fc9eebf19
   RNSVG: 302bfc9905bd8122f08966dc2ce2d07b7b52b9f8
   RNWifi: ded802f25cbf2ddd1f7529203d10738261f7902d
