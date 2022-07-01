@@ -75,7 +75,7 @@ export const SetupWifiScreen = () => {
             value={password}
             onChangeText={onPasswordChange}
           />
-          <FxButton testID="app-name" onPress={onConnect} alignItems="center">
+          <FxButton testID="app-name" onPress={onConnect}>
             Connect
           </FxButton>
         </>

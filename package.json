@@ -14,7 +14,7 @@
   },
   "private": true,
   "dependencies": {
-    "@react-native-async-storage/async-storage": "1.16.3",
+    "@react-native-async-storage/async-storage": "1.17.6",
     "@react-native-picker/picker": "^2.4.2",
     "@react-navigation/bottom-tabs": "^6.3.1",
     "@react-navigation/native": "^6.0.10",
@@ -25,6 +25,7 @@
     "node-libs-react-native": "^1.2.1",
     "react": "18.1.0",
     "react-native": "0.69.0",
+    "react-native-device-info": "^9.0.2",
     "react-native-gesture-handler": "^2.5.0",
     "react-native-localize": "^2.2.2",
     "react-native-qrcode-svg": "^6.1.2",

@@ -1,6 +1,11 @@
 import { FxBox, FxButton, FxText } from '@functionland/component-library';
 import React, { useState, useEffect } from 'react';
-import { Platform, PermissionsAndroid, SafeAreaView, StyleSheet } from 'react-native';
+import {
+  Platform,
+  PermissionsAndroid,
+  SafeAreaView,
+  StyleSheet,
+} from 'react-native';
 import Reanimated, {
   useAnimatedGestureHandler,
   useAnimatedStyle,
@@ -13,6 +18,7 @@ import {
   PanGestureHandlerGestureEvent,
 } from 'react-native-gesture-handler';
 import { clamp, withBouncing } from 'react-native-redash';
+import { isEmulator } from 'react-native-device-info';
 import { useIsConnectedToBox } from '../../hooks/useIsConnectedToBox';
 import { useInitialSetupNavigation } from '../../hooks/useTypedNavigation';
 
@@ -37,6 +43,10 @@ export const WelcomeScreen = () => {
   const isConnectedToBox = useIsConnectedToBox();
 
   const onConnectToBox = () => {
+    if (isEmulator()) {
+      alert('Emulators cannot connect to the Box');
+      return;
+    }
     if (hasLocationPermission) {
       if (isConnectedToBox) {
         navigation.navigate('Setup Wifi');
@@ -188,13 +198,13 @@ export const WelcomeScreen = () => {
         </FxButton>
       </ReanimatedBox>
       <ReanimatedBox>
-      <FxButton
-        testID="app-name"
-        onPress={onConnectToBox}
-        disabled={!hasCheckedLocationPermission}
-      >
-        Connect To Box
-      </FxButton>
+        <FxButton
+          testID="app-name"
+          onPress={onConnectToBox}
+          disabled={!hasCheckedLocationPermission}
+        >
+          Connect To Box
+        </FxButton>
       </ReanimatedBox>
     </SafeAreaView>
   );

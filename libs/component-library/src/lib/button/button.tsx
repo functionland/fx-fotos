@@ -19,6 +19,7 @@ const FxButton = ({ children, style, ...rest }: FxButtonProps) => {
     <FxButtonBase
       padding="m"
       margin="m"
+      alignItems="center"
       backgroundColor="primary"
       borderRadius="s"
       style={(args) => [

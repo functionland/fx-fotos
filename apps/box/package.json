@@ -26,6 +26,7 @@
     "react-native-localize": "*",
     "react-native-reanimated": "*",
     "react-native-gesture-handler": "*",
-    "react-native-redash": "*"
+    "react-native-redash": "*",
+    "react-native-device-info": "*"
   }
 }

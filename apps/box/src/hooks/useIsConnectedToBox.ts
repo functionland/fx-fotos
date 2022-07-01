@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { isEmulator } from 'react-native-device-info';
 import { getCurrentWifiSSID } from 'react-native-wifi-reborn';
 
 export const DEFAULT_NETWORK_NAME = 'Box';
@@ -22,7 +23,7 @@ export function useIsConnectedToBox() {
           timeout = setTimeout(checkNetwork, TIMEOUT);
         });
     };
-    checkNetwork();
+    if (!isEmulator()) checkNetwork();
 
     return () => {
       if (timeout) clearTimeout(timeout);
