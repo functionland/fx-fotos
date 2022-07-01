@@ -15,6 +15,7 @@
     "@react-navigation/native-stack": "*",
     "react-native-safe-area-context": "*",
     "zustand": "*",
-    "@shopify/restyle": "*"
+    "@shopify/restyle": "*",
+    "react-native-reanimated": "*"
   }
 }

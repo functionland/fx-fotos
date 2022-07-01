@@ -19,6 +19,9 @@
     "node-libs-react-native": "*",
     "@walletconnect/react-native-dapp": "*",
     "react-native-randombytes": "*",
-    "@react-navigation/bottom-tabs": "*"
+    "@react-navigation/bottom-tabs": "*",
+    "react-native-reanimated": "*",
+    "react-native-gesture-handler": "*",
+    "react-native-redash": "*"
   }
 }

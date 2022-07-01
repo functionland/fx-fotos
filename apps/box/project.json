@@ -51,7 +51,7 @@
     "sync-deps": {
       "executor": "@nrwl/react-native:sync-deps",
       "options": {
-        "include": "@walletconnect/react-native-dapp,react-native-randombytes"
+        "include": "@walletconnect/react-native-dapp,react-native-randombytes,react-native-reanimated"
       }
     },
     "ensure-symlink": {
