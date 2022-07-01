@@ -1,4 +1,20 @@
-import { createTheme } from '@shopify/restyle';
+import {
+  createTheme,
+  BackgroundColorProps,
+  ColorProps,
+  TextProps,
+  SpacingProps,
+  BorderProps,
+  VariantProps,
+} from '@shopify/restyle';
+
+type RestyleProps = BackgroundColorProps<FxTheme> &
+  ColorProps<FxTheme> &
+  TextProps<FxTheme> &
+  SpacingProps<FxTheme> &
+  BorderProps<FxTheme> &
+  VariantProps<FxTheme, 'breakpoints'> &
+  VariantProps<FxTheme, 'textVariants'>;
 
 const palette = {
   purple: '#5A31F4',
@@ -40,4 +56,4 @@ const fxDarkTheme: FxTheme = {
   },
 };
 
-export { FxTheme, fxLightTheme, fxDarkTheme };
+export { FxTheme, fxLightTheme, fxDarkTheme, RestyleProps };

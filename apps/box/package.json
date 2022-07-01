@@ -18,6 +18,11 @@
     "@shopify/restyle": "*",
     "node-libs-react-native": "*",
     "@walletconnect/react-native-dapp": "*",
-    "react-native-randombytes": "*"
+    "react-native-randombytes": "*",
+    "react-native-wifi-reborn": "*",
+    "axios": "*",
+    "@react-navigation/bottom-tabs": "*",
+    "@react-native-picker/picker": "*",
+    "react-native-localize": "*"
   }
 }
