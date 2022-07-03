@@ -21,7 +21,17 @@ export type Library = {
 export type AssetMeta = {
   id: string
   name: string
-  jwe: file.FileRef
+  jwe: unknown
   ownerId: string
+  date: string
+}
+
+export type ShareMeta = {
+  id: string //uid
+  fileName: string
+  ownerId: string //did
+  cid: string
+  shareWithId: string // did
+  jwe: unknown
   date: string
 }
