@@ -18,7 +18,7 @@ import {
   PanGestureHandlerGestureEvent,
 } from 'react-native-gesture-handler';
 import { clamp, withBouncing } from 'react-native-redash';
-import { isEmulator } from 'react-native-device-info';
+import { isEmulatorSync } from 'react-native-device-info';
 import { useIsConnectedToBox } from '../../hooks/useIsConnectedToBox';
 import { useInitialSetupNavigation } from '../../hooks/useTypedNavigation';
 
@@ -43,7 +43,7 @@ export const WelcomeScreen = () => {
   const isConnectedToBox = useIsConnectedToBox();
 
   const onConnectToBox = () => {
-    if (isEmulator()) {
+    if (isEmulatorSync()) {
       alert('Emulators cannot connect to the Box');
       return;
     }

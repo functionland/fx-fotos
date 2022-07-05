@@ -1,10 +1,7 @@
 import { FxText } from '@functionland/component-library';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { SafeAreaView } from 'react-native';
-import {
-  connectToProtectedSSID,
-  getCurrentWifiSSID,
-} from 'react-native-wifi-reborn';
+import WifiManager from 'react-native-wifi-reborn';
 import { getWifiStatus, putApDisable } from '../../api/wifi';
 import { DEFAULT_NETWORK_NAME } from '../../hooks';
 
@@ -36,12 +33,12 @@ export const CheckConnectionScreen = ({ route }) => {
   }, [setStatus]);
 
   const connectToBox = useCallback(async (callback: () => void) => {
-    await connectToProtectedSSID(DEFAULT_NETWORK_NAME, null, false);
+    await WifiManager.connectToProtectedSSID(DEFAULT_NETWORK_NAME, null, false);
     callback();
   }, []);
 
   const checkNetwork = useCallback(async () => {
-    getCurrentWifiSSID().then((actualSsid) => {
+    WifiManager.getCurrentWifiSSID().then((actualSsid) => {
       if (actualSsid === DEFAULT_NETWORK_NAME) {
         setStatus(NetworkStatus.CheckConnection);
         confirmNetworkConnection();

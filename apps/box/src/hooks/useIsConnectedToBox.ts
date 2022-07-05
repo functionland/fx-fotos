@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { isEmulator } from 'react-native-device-info';
-import { getCurrentWifiSSID } from 'react-native-wifi-reborn';
+import { isEmulatorSync } from 'react-native-device-info';
+import WifiManager from 'react-native-wifi-reborn';
 
 export const DEFAULT_NETWORK_NAME = 'Box';
 const TIMEOUT = 5000;
@@ -11,7 +11,7 @@ export function useIsConnectedToBox() {
   useEffect(() => {
     let timeout = null;
     const checkNetwork = () => {
-      getCurrentWifiSSID()
+      WifiManager.getCurrentWifiSSID()
         .then((actualSsid) => {
           if (actualSsid === DEFAULT_NETWORK_NAME) setIsConnected(true);
           else setIsConnected(false);
@@ -23,7 +23,7 @@ export function useIsConnectedToBox() {
           timeout = setTimeout(checkNetwork, TIMEOUT);
         });
     };
-    if (!isEmulator()) checkNetwork();
+    if (!isEmulatorSync()) checkNetwork();
 
     return () => {
       if (timeout) clearTimeout(timeout);
