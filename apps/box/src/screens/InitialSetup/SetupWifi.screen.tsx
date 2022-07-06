@@ -20,7 +20,7 @@ export const SetupWifiScreen = () => {
     error,
     data: networks,
   } = useFetch({ apiMethod: getWifiList });
-  const ssids = networks?.data.map(({ ssid }) => ssid);
+  const ssids = networks?.data.map(({ ssid: network }) => network);
   const uniqueSsids = [...new Set(ssids)];
 
   const onNetworkChange = (value) => setSsid(value);
@@ -59,8 +59,8 @@ export const SetupWifiScreen = () => {
             selectedValue={ssid ?? uniqueSsids[0]}
             onValueChange={onNetworkChange}
           >
-            {uniqueSsids.map((ssid) => (
-              <FxPickerItem key={ssid} label={ssid} value={ssid} />
+            {uniqueSsids.map((network) => (
+              <FxPickerItem key={network} label={network} value={network} />
             ))}
           </FxPicker>
           <FxTextInput

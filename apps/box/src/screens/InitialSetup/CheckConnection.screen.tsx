@@ -20,14 +20,16 @@ export const CheckConnectionScreen = ({ route }) => {
   const confirmNetworkConnection = useCallback(async () => {
     try {
       const {
-        data: { status },
+        data: { status: wifiStatus },
       } = await getWifiStatus();
-      setStatus(status);
-      if (status === NetworkStatus.Connected) {
+      setStatus(wifiStatus);
+      if (wifiStatus === NetworkStatus.Connected) {
+        // eslint-disable-next-line no-alert
         alert('All done\nYour device is connected with success!');
         putApDisable();
       }
     } catch (error) {
+      // eslint-disable-next-line no-alert
       alert(error.response ? error.response.data.message : error.message);
     }
   }, [setStatus]);

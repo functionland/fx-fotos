@@ -2,14 +2,14 @@ import { useEffect, useRef, useState } from 'react';
 
 export interface IUseFetchProps<TData, TParams> {
   initialLoading?: boolean;
-  initialError?: any;
+  initialError?: Error;
   initialData?: TData | null;
   apiMethod: (params: TParams | null) => Promise<TData | null>;
   params?: TParams | null;
   mungResponse?: (data: Awaited<TData>) => undefined | null;
 }
 
-export const useFetch = <TData = any, TParams = any>({
+export const useFetch = <TData, TParams>({
   initialLoading = true,
   initialError = null,
   initialData = null,
@@ -18,7 +18,7 @@ export const useFetch = <TData = any, TParams = any>({
   mungResponse = null,
 }: IUseFetchProps<TData, TParams>) => {
   const [loading, setLoading] = useState<boolean>(initialLoading);
-  const [error, setError] = useState<any>(initialError);
+  const [error, setError] = useState<Error>(initialError);
   const [data, setData] = useState<TData | null>(initialData);
   const params = useRef(initialParams);
 
@@ -32,8 +32,8 @@ export const useFetch = <TData = any, TParams = any>({
       } else {
         setData(response);
       }
-    } catch (error) {
-      setError(error);
+    } catch (err) {
+      setError(err);
       setData(null);
     }
   };
