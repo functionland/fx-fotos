@@ -54,8 +54,8 @@ export const SetupWifiScreen = () => {
       {!loading && !error && (
         <>
           <FxPicker
-            backgroundColor="white"
-            itemStyleColor="primary"
+            margin="s"
+            color="primary"
             selectedValue={ssid ?? uniqueSsids[0]}
             onValueChange={onNetworkChange}
           >

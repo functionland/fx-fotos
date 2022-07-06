@@ -36,6 +36,7 @@ const fxLightTheme = createTheme({
   },
   breakpoints: {},
   textVariants: {
+    defaults: {},
     body: {
       fontSize: 16,
       color: 'primary',
@@ -45,6 +46,7 @@ const fxLightTheme = createTheme({
     s: 8,
     m: 16,
   },
+  zIndices: {},
 });
 
 type FxTheme = typeof fxLightTheme;
