@@ -71,7 +71,7 @@ export const WelcomeScreen = () => {
         setHasCheckedLocationPermission(true);
       })();
     }
-  }, [isAndroid, hasLocationPermission, hasCheckedLocationPermission]);
+  }, [isAndroid, hasLocationPermission]);
 
   const boundsX = useSharedValue<Bounds>({ low: 0, high: 0 });
   const boundsY = useSharedValue<Bounds>({ low: 0, high: 0 });
