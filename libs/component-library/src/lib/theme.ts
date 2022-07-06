@@ -1,20 +1,4 @@
-import {
-  createTheme,
-  BackgroundColorProps,
-  ColorProps,
-  TextProps,
-  SpacingProps,
-  BorderProps,
-  VariantProps,
-} from '@shopify/restyle';
-
-type RestyleProps = BackgroundColorProps<FxTheme> &
-  ColorProps<FxTheme> &
-  TextProps<FxTheme> &
-  SpacingProps<FxTheme> &
-  BorderProps<FxTheme> &
-  VariantProps<FxTheme, 'breakpoints'> &
-  VariantProps<FxTheme, 'textVariants'>;
+import { createTheme } from '@shopify/restyle';
 
 const palette = {
   green: '#06B597',
@@ -61,4 +45,4 @@ const fxDarkTheme: FxTheme = {
   },
 };
 
-export { FxTheme, fxLightTheme, fxDarkTheme, RestyleProps };
+export { FxTheme, fxLightTheme, fxDarkTheme };
