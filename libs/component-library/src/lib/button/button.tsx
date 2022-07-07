@@ -42,6 +42,7 @@ const FxButton = ({
       {...FxButtonClasses[buttonClass].button}
       padding="m"
       margin="m"
+      alignItems="center"
       borderRadius="s"
       style={(args) => [
         typeof style === 'function' ? style(args) : style,

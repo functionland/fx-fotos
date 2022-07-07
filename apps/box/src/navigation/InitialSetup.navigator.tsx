@@ -1,8 +1,13 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
-import { SetupCompleteScreen } from '../screens/InitialSetup/SetupComplete.screen';
-import { WalletConnectScreen } from '../screens/InitialSetup/WalletConnect.screen';
-import { WelcomeScreen } from '../screens/InitialSetup/Welcome.screen';
+import {
+  WelcomeScreen,
+  WalletConnectScreen,
+  ConnectToBoxScreen,
+  SetupWifiScreen,
+  SetupCompleteScreen,
+  CheckConnectionScreen,
+} from '../screens/InitialSetup';
 import { InitialSetupStackParamList } from './navigatonConfig';
 
 export const InitialSetupNavigator = () => {
@@ -12,6 +17,15 @@ export const InitialSetupNavigator = () => {
       <InitialSetupStack.Screen
         name="Wallet Connect"
         component={WalletConnectScreen}
+      />
+      <InitialSetupStack.Screen
+        name="Connect To Box"
+        component={ConnectToBoxScreen}
+      />
+      <InitialSetupStack.Screen name="Setup Wifi" component={SetupWifiScreen} />
+      <InitialSetupStack.Screen
+        name="Check Connection"
+        component={CheckConnectionScreen}
       />
       <InitialSetupStack.Screen
         name="Setup Complete"

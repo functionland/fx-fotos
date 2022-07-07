@@ -16,5 +16,8 @@ export type MainTabsParamList = {
 export type InitialSetupStackParamList = {
   Welcome: undefined;
   'Wallet Connect': undefined;
+  'Setup Wifi': undefined;
+  'Connect To Box': undefined;
+  'Check Connection': { ssid: string };
   'Setup Complete': undefined;
 };
