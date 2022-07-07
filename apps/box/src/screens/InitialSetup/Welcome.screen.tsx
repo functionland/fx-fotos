@@ -1,7 +1,11 @@
 import { FxBox, FxButton, FxText } from '@functionland/component-library';
-import React from 'react';
-import { SafeAreaView, StyleSheet } from 'react-native';
-import { useInitialSetupNavigation } from '../../hooks/useTypedNavigation';
+import React, { useState, useEffect } from 'react';
+import {
+  Platform,
+  PermissionsAndroid,
+  SafeAreaView,
+  StyleSheet,
+} from 'react-native';
 import Reanimated, {
   useAnimatedGestureHandler,
   useAnimatedStyle,
@@ -14,6 +18,9 @@ import {
   PanGestureHandlerGestureEvent,
 } from 'react-native-gesture-handler';
 import { clamp, withBouncing } from 'react-native-redash';
+import { isEmulatorSync } from 'react-native-device-info';
+import { useIsConnectedToBox } from '../../hooks/useIsConnectedToBox';
+import { useInitialSetupNavigation } from '../../hooks/useTypedNavigation';
 
 const ReanimatedBox = Reanimated.createAnimatedComponent(FxBox);
 
@@ -27,6 +34,44 @@ const LOGO_HEIGHT = 102;
 
 export const WelcomeScreen = () => {
   const navigation = useInitialSetupNavigation();
+  const isAndroid = Platform.OS === 'android';
+  const [hasLocationPermission, setHasLocationPermission] = useState(
+    !isAndroid
+  );
+  const [hasCheckedLocationPermission, setHasCheckedLocationPermission] =
+    useState(!isAndroid);
+  const isConnectedToBox = useIsConnectedToBox();
+
+  const onConnectToBox = () => {
+    if (isEmulatorSync()) {
+      alert('Emulators cannot connect to the Box');
+      return;
+    }
+    if (hasLocationPermission) {
+      if (isConnectedToBox) {
+        navigation.navigate('Setup Wifi');
+      } else {
+        navigation.navigate('Connect To Box');
+      }
+    } else {
+      /**
+       * @todo: Add Location Permission screen or dialogue for android
+       */
+      // navigation.navigate('Location Permission');
+    }
+  };
+
+  useEffect(() => {
+    if (isAndroid && !hasLocationPermission) {
+      (async () => {
+        const isGranted = await PermissionsAndroid.check(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+        );
+        setHasLocationPermission(isGranted);
+        setHasCheckedLocationPermission(true);
+      })();
+    }
+  }, [isAndroid, hasLocationPermission]);
 
   const boundsX = useSharedValue<Bounds>({ low: 0, high: 0 });
   const boundsY = useSharedValue<Bounds>({ low: 0, high: 0 });
@@ -150,6 +195,15 @@ export const WelcomeScreen = () => {
           onPress={() => navigation.navigate('Wallet Connect')}
         >
           Setup Wallet
+        </FxButton>
+      </ReanimatedBox>
+      <ReanimatedBox>
+        <FxButton
+          testID="app-name"
+          onPress={onConnectToBox}
+          disabled={!hasCheckedLocationPermission}
+        >
+          Connect To Box
         </FxButton>
       </ReanimatedBox>
     </SafeAreaView>
