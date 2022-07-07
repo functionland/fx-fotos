@@ -8,7 +8,7 @@ import {
   BoxProps,
 } from '@shopify/restyle';
 import { TextInput, TextInputProps } from 'react-native';
-import { FxTheme } from '../theme';
+import { FxTheme } from '../theme/theme';
 
 type FxTextInputProps = TextProps<FxTheme> & BoxProps<FxTheme> & TextInputProps;
 

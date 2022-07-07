@@ -1,5 +1,5 @@
 import React from 'react';
-import { FxTheme } from '../theme';
+import { FxTheme } from '../theme/theme';
 import { Picker, PickerProps } from '@react-native-picker/picker';
 import {
   TextProps,

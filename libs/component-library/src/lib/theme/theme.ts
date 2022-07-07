@@ -30,6 +30,16 @@ const fxLightTheme = createTheme({
     s: 8,
     m: 16,
   },
+  buttonVariants: {
+    defaults: {
+      backgroundColor: 'primary',
+    },
+    inverted: {
+      backgroundColor: undefined,
+      borderColor: 'primary',
+      borderWidth: 2,
+    },
+  },
   zIndices: {},
 });
 
