@@ -10,8 +10,9 @@ import {
   VariantProps,
 } from '@shopify/restyle';
 import { Pressable, PressableProps } from 'react-native';
-import { FxTheme } from '../theme';
+import { FxTheme } from '../theme/theme';
 import { FxText } from '../text/text';
+import { FxButtonClasses } from '../theme/buttonClasses';
 
 const buttonVariant = createVariant({ themeKey: 'buttonVariants' });
 const PressableBox = createBox<FxTheme, PressableProps>(Pressable);
@@ -26,19 +27,19 @@ type FxButtonProps = Omit<
   React.ComponentProps<typeof FxButtonBase>,
   'variant'
 > & {
-  variant?: keyof typeof ButtonVariants;
+  buttonClass?: keyof typeof FxButtonClasses;
   children?: React.ReactNode | string;
 };
 
 const FxButton = ({
-  variant = 'default',
+  buttonClass = 'default',
   children,
   style,
   ...rest
 }: FxButtonProps) => {
   return (
     <FxButtonBase
-      variant={ButtonVariants[variant].buttonVariant}
+      {...FxButtonClasses[buttonClass].button}
       padding="m"
       margin="m"
       borderRadius="s"
@@ -50,33 +51,9 @@ const FxButton = ({
       ]}
       {...rest}
     >
-      <FxText {...ButtonVariants[variant].text}>{children}</FxText>
+      <FxText {...FxButtonClasses[buttonClass].text}>{children}</FxText>
     </FxButtonBase>
   );
-};
-
-type ButtonVariantType = {
-  buttonVariant: React.ComponentProps<typeof FxButtonBase>['variant'];
-  text: Pick<React.ComponentProps<typeof FxText>, 'variant' | 'color'>;
-};
-
-// BUTTON VARIANTS DEFINITIONS
-
-const ButtonVariants: Record<'default' | 'inverted', ButtonVariantType> = {
-  default: {
-    buttonVariant: undefined,
-    text: {
-      variant: 'body',
-      color: 'white',
-    },
-  },
-  inverted: {
-    buttonVariant: 'inverted',
-    text: {
-      variant: 'body',
-      color: 'primary',
-    },
-  },
 };
 
 export { FxButton };
