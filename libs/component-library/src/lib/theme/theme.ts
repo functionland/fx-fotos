@@ -7,12 +7,24 @@ const palette = {
   gray0: '#212529',
 };
 
+const paletteDark = {
+  grayscale700: '#F8F9FA',
+  grayscale500: '#CED4DA',
+};
+
+const paletteLight = {
+  grayscale700: '#343A40',
+  grayscale500: '#6F767D',
+};
+
 const fxLightTheme = createTheme({
   colors: {
     white: palette.white,
     primary: palette.green,
     secondary: palette.blue,
     background: palette.gray0,
+    content1: paletteLight.grayscale700,
+    content3: paletteLight.grayscale500,
   },
   spacing: {
     s: 8,
@@ -52,6 +64,8 @@ const fxDarkTheme: FxTheme = {
     primary: palette.green,
     secondary: palette.blue,
     background: palette.gray0,
+    content1: paletteDark.grayscale700,
+    content3: paletteDark.grayscale500,
   },
 };
 
