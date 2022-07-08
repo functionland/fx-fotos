@@ -18,6 +18,7 @@ import Reanimated, {
 import { FxChevronDownIcon } from '../icons/icons';
 
 type FxFoldableContentProps = {
+  onPress?: (expanded: boolean) => void;
   header: React.ReactElement;
   children: React.ReactElement;
 };
@@ -26,6 +27,7 @@ const ANIMATION_DURATION = 300;
 const RestyledPressable = createBox<FxTheme, PressableProps>(Pressable);
 
 export const FxFoldableContent = ({
+  onPress,
   header,
   children,
 }: FxFoldableContentProps) => {
@@ -39,20 +41,20 @@ export const FxFoldableContent = ({
     };
   });
 
+  const pressHandler = () => {
+    const expandedUpdated = !expanded;
+    const rotationValue = expandedUpdated ? -180 : 0;
+    onPress && onPress(expandedUpdated);
+    setExpanded(expandedUpdated);
+    configureEaseInOutLayoutAnimation(ANIMATION_DURATION);
+    rotation.value = withTiming(rotationValue, {
+      duration: ANIMATION_DURATION,
+      easing: Easing.ease,
+    });
+  };
+
   return (
-    <RestyledPressable
-      padding="m"
-      onPress={() => {
-        const expandedUpdated = !expanded;
-        const rotationValue = expandedUpdated ? -180 : 0;
-        setExpanded(expandedUpdated);
-        configureEaseInOutLayoutAnimation(ANIMATION_DURATION);
-        rotation.value = withTiming(rotationValue, {
-          duration: ANIMATION_DURATION,
-          easing: Easing.ease,
-        });
-      }}
-    >
+    <RestyledPressable padding="m" onPress={pressHandler}>
       <FxBox flexDirection="row">
         <Reanimated.View style={[styles.icon, iconAnimatedStyles]}>
           <FxChevronDownIcon color={theme.colors.content1} size={18} />
