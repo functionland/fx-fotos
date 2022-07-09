@@ -1,5 +1,4 @@
 import { SyncStatus } from "../../types"
-
 export type AssetEntity = {
   id: string
   /**
@@ -45,7 +44,7 @@ export type AssetEntity = {
   /**
    * Sync statis with box
    */
-   syncStatus: SyncStatus
+  syncStatus: SyncStatus
   /**
    * Sync date with box
    */
@@ -54,6 +53,10 @@ export type AssetEntity = {
    * content id in the box
    */
   cid: string | undefined
+  /**
+   * When an asset stored in the box by encryption we generate the user a jwe to able to decrypt asset in the future
+   */
+  jwe: string | undefined
   /**
    * Deleted from storage
    */

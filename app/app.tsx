@@ -17,6 +17,8 @@ import { GestureHandlerRootView } from "react-native-gesture-handler"
 import { SafeAreaProvider, initialWindowMetrics } from "react-native-safe-area-context"
 import { RecoilRoot } from "recoil"
 import { ThemeProvider as RneThemeProvider } from '@rneui/themed';
+import WalletConnectProvider from '@walletconnect/react-native-dapp';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { initFonts } from "./theme/fonts" // expo
 import * as storage from "./utils/storage"
@@ -70,7 +72,7 @@ function App() {
       netInfoTimer.current = setTimeout(async () => {
         if (state.isConnected)
           await AddBoxs();
-          uploadAssetsInBackground();
+        uploadAssetsInBackground();
       }, 1000);
     });
   }
@@ -93,7 +95,13 @@ function App() {
             <SafeAreaProvider initialMetrics={initialWindowMetrics}>
               <ErrorBoundary catchErrors={"prod"}>
                 <RecoilRoot>
-                  <AppNavigator onStateChange={onNavigationStateChange} />
+                  <WalletConnectProvider
+                    redirectUrl='fotos://'
+                    storageOptions={{
+                      asyncStorage: AsyncStorage,
+                    }}>
+                    <AppNavigator onStateChange={onNavigationStateChange} />
+                  </WalletConnectProvider>
                 </RecoilRoot>
               </ErrorBoundary>
             </SafeAreaProvider>

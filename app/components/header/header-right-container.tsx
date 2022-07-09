@@ -15,7 +15,7 @@ export const HeaderRightContainer: React.FC<Props> = ({ style, children }) => {
 const styles = StyleSheet.create({
     headerRightContainer: {
         flex: 1,
-        flexDirection: "row",
+        flexDirection: "row-reverse",
         paddingEnd: 5,
         alignItems:"center"
     },

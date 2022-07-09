@@ -46,7 +46,7 @@ export const Asset = {
     /**
      * Sync statis with box
      */
-    syncStatus:  { type: "int", default: 0 },
+    syncStatus: { type: "int", default: 0 },
     /**
      * Sync date with box
      */
@@ -56,8 +56,12 @@ export const Asset = {
      */
     cid: "string?",
     /**
+     * When an asset stored in the box by encryption we generate jwe to able to decrypt asset in the future
+     */
+    jwe: "string?", // Embed a single object
+    /**
      * Deleted form storage
      */
-    isDeleted:{ type: "bool", default: false },
+    isDeleted: { type: "bool", default: false },
   },
 }
