@@ -7,11 +7,6 @@ export * from "./box/box-list-screen"
 export * from "./box/box-add-update-screen"
 export * from "./error/error-boundary"
 export * from "./photo"
-<<<<<<< HEAD
 export * from './HighlightScreen';
-=======
 export * from "./shared-viewer"
-
-
->>>>>>> develop
 // export other screens here

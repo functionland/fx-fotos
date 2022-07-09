@@ -6,43 +6,31 @@ import { createSharedElementStackNavigator } from "react-navigation-shared-eleme
 import Toast from "react-native-toast-message"
 
 import { navigationRef } from "./navigation-utilities"
-<<<<<<< HEAD
 import {
   PhotoScreen,
   LibraryAssetsScreen,
   BoxListScreen,
   BoxAddUpdateScreen,
   HighlightScreen,
+  AccountScreen,
+  ShareViewerScreen,
 } from "../screens"
-=======
-import { PhotoScreen, LibraryAssetsScreen, BoxListScreen, BoxAddUpdateScreen, AccountScreen, ShareViewerScreen } from "../screens"
->>>>>>> develop
 import { HomeNavigator } from "./home-navigator"
 import { ThemeContext } from "../theme"
 import { BoxEntity } from "../realmdb/entities"
-<<<<<<< HEAD
 import { AssetStory, RecyclerAssetListSection } from "../types"
-=======
->>>>>>> develop
 
 enableScreens()
 export type RootStackParamList = {
   Home: undefined
-<<<<<<< HEAD
-  Photo: { section: RecyclerAssetListSection }
-  Settings: undefined
-  BoxList: undefined
-  BoxAddUpdate: { box: BoxEntity },
   LibraryAssets: undefined,
   HighlightScreen: { highlights:  AssetStory }
-=======
   Photo: { section: RecyclerAssetListSection },
   Account: undefined,
   Settings: undefined,
   BoxList: undefined,
   BoxAddUpdate: { box: BoxEntity },
   SharedViewer: { assetURI: string }
->>>>>>> develop
 }
 export enum AppNavigationNames {
   HomeScreen = "Home",
@@ -51,11 +39,8 @@ export enum AppNavigationNames {
   LibraryAssets = "LibraryAssets",
   BoxList = "BoxList",
   BoxAddUpdate = "BoxAddUpdate",
-<<<<<<< HEAD
-  HighlightScreen = "HighlightScreen"
-=======
+  HighlightScreen = "HighlightScreen",
   SharedViewer = "SharedViewer"
->>>>>>> develop
 }
 
 const Stack = createSharedElementStackNavigator<RootStackParamList>()
@@ -179,17 +164,13 @@ const AppStack = () => {
 type NavigationProps = Partial<React.ComponentProps<typeof NavigationContainer>>
 
 export const AppNavigator = (props: NavigationProps) => {
-<<<<<<< HEAD
   const { theme } = useContext(ThemeContext)
-=======
-  const { theme } = useContext(ThemeContext);
   const [toastVisible, setToastVisible] = useState(false)
   useEffect(() => {
     setTimeout(() => {
       setToastVisible(true)
     }, 1000);
   }, [])
->>>>>>> develop
   return (
     <Animated.View style={{ flex: 1 }}>
       <NavigationContainer
@@ -209,11 +190,7 @@ export const AppNavigator = (props: NavigationProps) => {
       >
         <AppStack />
       </NavigationContainer>
-<<<<<<< HEAD
-      <Toast />
-=======
       {toastVisible && <Toast />}
->>>>>>> develop
     </Animated.View>
   )
 }
