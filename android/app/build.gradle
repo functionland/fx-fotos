@@ -150,12 +150,6 @@ android {
         }
     }
     signingConfigs {
-        release {
-            storeFile file('photos.keystore')
-            storePassword 'photos'
-            keyAlias 'photos_alias'
-            keyPassword 'photos'
-        }
         debug {
             storeFile file('debug.keystore')
             storePassword 'android'
