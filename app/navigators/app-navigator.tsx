@@ -1,145 +1,135 @@
-/**
- * The app navigator (formerly "AppNavigator" and "MainNavigator") is used for the primary
- * navigation flows of your app.
- * Generally speaking, it will contain an auth flow (registration, login, forgot password)
- * and a "main" flow which the user will use once logged in.
- */
-import React from "react"
-import { useColorScheme, View, Text } from "react-native"
-import { NavigationContainer, DefaultTheme, DarkTheme } from "@react-navigation/native"
-import { createNativeStackNavigator } from "@react-navigation/native-stack"
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { enableScreens } from "react-native-screens"
-
-import { HomeScreen } from "../screens"
-import { navigationRef } from "./navigation-utilities"
+import React, { useContext } from "react"
 import Animated from "react-native-reanimated"
-import { AnimatedHeader } from "../components/header/animated-header"
-import { TabHeader } from "../components/header/tab-header"
-import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import { enableScreens } from "react-native-screens"
+import { NavigationContainer } from "@react-navigation/native"
+import { createSharedElementStackNavigator } from "react-navigation-shared-element"
+import Toast from "react-native-toast-message"
 
-/**
- * This type allows TypeScript to know what routes are defined in this navigator
- * as well as what properties (if any) they might take when navigating to them.
- *
- * If no params are allowed, pass through `undefined`. Generally speaking, we
- * recommend using your MobX-State-Tree store(s) to keep application state
- * rather than passing state through navigation params.
- *
- * For more information, see this documentation:
- *   https://reactnavigation.org/docs/params/
- *   https://reactnavigation.org/docs/typescript#type-checking-the-navigator
- */
+import { navigationRef } from "./navigation-utilities"
+import {
+  PhotoScreen,
+  LibraryAssetsScreen,
+  BoxListScreen,
+  BoxAddUpdateScreen,
+  HighlightScreen,
+} from "../screens"
+import { HomeNavigator } from "./home-navigator"
+import { ThemeContext } from "../theme"
+import { BoxEntity } from "../realmdb/entities"
+import { AssetStory, RecyclerAssetListSection } from "../types"
 
-enableScreens();
-export type NavigatorParamList = {
-  home: undefined
+enableScreens()
+export type RootStackParamList = {
+  Home: undefined
+  Photo: { section: RecyclerAssetListSection }
+  Settings: undefined
+  BoxList: undefined
+  BoxAddUpdate: { box: BoxEntity },
+  LibraryAssets: undefined,
+  HighlightScreen: { highlights:  AssetStory }
+}
+export enum AppNavigationNames {
+  HomeScreen = "Home",
+  PhotoScreen = "Photo",
+  LibraryAssets = "LibraryAssets",
+  BoxList = "BoxList",
+  BoxAddUpdate = "BoxAddUpdate",
+  HighlightScreen = "HighlightScreen"
 }
 
-// Documentation: https://reactnavigation.org/docs/stack-navigator/
-const Stack = createNativeStackNavigator<NavigatorParamList>()
+const Stack = createSharedElementStackNavigator<RootStackParamList>()
 
 const AppStack = () => {
   return (
     <Stack.Navigator
+      initialRouteName={AppNavigationNames.HomeScreen}
       screenOptions={{
-        headerShown: true,
+        headerShown: false,
         headerTransparent: true,
-        headerHideShadow: true,
       }}
-      initialRouteName="homeTabs"
     >
+      <Stack.Screen name={AppNavigationNames.HomeScreen} component={HomeNavigator} />
+      <Stack.Screen name={AppNavigationNames.LibraryAssets} component={LibraryAssetsScreen} />
+      <Stack.Screen name={AppNavigationNames.BoxList} component={BoxListScreen} />
+      <Stack.Screen name={AppNavigationNames.BoxAddUpdate} component={BoxAddUpdateScreen} />
       <Stack.Screen
-        name="homeTabs"
+        name={AppNavigationNames.PhotoScreen}
         options={{
           headerShown: false,
           headerTransparent: true,
+          gestureEnabled: false,
+          headerShown: false,
+          cardOverlayEnabled: true,
+          cardStyle: { backgroundColor: "transparent" },
+          animationEnabled: true,
+          cardStyleInterpolator: ({ current: { progress } }) => ({
+            cardStyle: {
+              opacity: progress.interpolate({
+                inputRange: [0, 0.5, 0.9, 1],
+                outputRange: [0, 0.25, 0.7, 1],
+              }),
+            },
+            overlayStyle: {
+              opacity: progress.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, 0],
+                extrapolate: "clamp",
+              }),
+            },
+          }),
         }}
-        component={HomeTabsNavigator}
+        component={PhotoScreen}
+        sharedElements={(route) => {
+          const { section } = route.params
+          return [section.data.uri]
+        }}
       />
       <Stack.Screen
-        name="settings2"
+        name={AppNavigationNames.HighlightScreen}
         options={{
-          headerShown: true,
-          
+          headerShown: false,
+          headerTransparent: true,
+          gestureEnabled: false,
+          cardOverlayEnabled: true,
+          cardStyle: { backgroundColor: "transparent" },
+          animationEnabled: true,
+          cardStyleInterpolator: ({ current: { progress } }) => ({
+            cardStyle: {
+              opacity: progress.interpolate({
+                inputRange: [0, 0.5, 0.9, 1],
+                outputRange: [0, 0.25, 0.7, 1],
+              }),
+            },
+            overlayStyle: {
+              opacity: progress.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, 0],
+                extrapolate: "clamp",
+              }),
+            },
+          }),
         }}
-        component={SettingsScreen}
+        component={HighlightScreen}
       />
     </Stack.Navigator>
-
   )
 }
-function SettingsScreen() {
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Settings!</Text>
-    </View>
-  );
-}
 
-const HomeTabs = createBottomTabNavigator();
-
-function HomeTabsNavigator() {
-  return (
-    <HomeTabs.Navigator
-      screenOptions={{
-        headerTransparent: true,
-        headerShown: true,
-        header: (props) => <TabHeader {...props} />,
-        tabBarStyle: {
-          height: 70,
-          backgroundColor:"white"
-        },
-        tabBarLabelStyle: {
-          fontSize: 15,
-          color: "black",
-          fontWeight: "600",
-          padding: 5,
-        },
-        
-      }}
-    >
-      <HomeTabs.Screen
-        options={{
-          tabBarLabel: "Photos",
-          tabBarIcon: (props) => <FontAwesome5 name={'images'} size={25} color={props?.focused ? "blue" : "gray"} style={{}} />
-        }}
-
-        name="Home" component={HomeScreen} />
-      <HomeTabs.Screen
-        name="Search"
-        options={{
-          tabBarIcon: (props) => <FontAwesome5 name={'search'} color={props?.focused ? "blue" : "gray"} size={25} style={{}} />
-        }}
-        component={SettingsScreen} />
-      <HomeTabs.Screen
-        name="Sharing"
-        options={{
-          tabBarIcon: (props) => <FontAwesome5 name={'user-friends'} color={props?.focused ? "blue" : "gray"} size={25} style={{}} />
-        }}
-        component={SettingsScreen} />
-      <HomeTabs.Screen
-        name="Library"
-        options={{
-          tabBarIcon: (props) => <FontAwesome5 name={'swatchbook'} color={props?.focused ? "blue" : "gray"} size={25} style={{}} />
-        }}
-        component={SettingsScreen} />
-    </HomeTabs.Navigator>
-  );
-}
-interface NavigationProps extends Partial<React.ComponentProps<typeof NavigationContainer>> { }
+type NavigationProps = Partial<React.ComponentProps<typeof NavigationContainer>>
 
 export const AppNavigator = (props: NavigationProps) => {
-  const colorScheme = useColorScheme()
+  const { theme } = useContext(ThemeContext)
   return (
     <Animated.View style={{ flex: 1 }}>
       <NavigationContainer
+        theme={theme}
         ref={navigationRef}
-        theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+        //theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}
         {...props}
       >
         <AppStack />
       </NavigationContainer>
+      <Toast />
     </Animated.View>
   )
 }

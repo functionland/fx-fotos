@@ -9,6 +9,12 @@
 // It's easier just to leave it here.
 import App from "./app/app.tsx"
 import { AppRegistry } from "react-native"
+import BackgroundFetch from "react-native-background-fetch"
 
-AppRegistry.registerComponent("photos", () => App)
+import { SyncService } from "./app/services"
+AppRegistry.registerComponent("fotos", () => App)
+
+/// register the backgroyndFetch handler.
+BackgroundFetch.registerHeadlessTask(SyncService.backgroundFetchHeadlessTask)
+
 export default App

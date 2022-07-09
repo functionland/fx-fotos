@@ -1,4 +1,6 @@
 
+include ':react-native-shared-element'
+project(':react-native-shared-element').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-shared-element/android')
 // React Native Colo Loco autolinks native files colocated next to your JS files
 // More info here: https://github.com/jamonholmgren/react-native-colo-loco
 
@@ -6,12 +8,12 @@
 // linkColocatedNativeFiles([
 //   appName: "Photos",
 //   appPath: "../app",
-//   appPackageName: "com.photos",
-//   androidPath: "./android/app/src/main/java/com/photos"
+//   appPackageName: "land.fx.fotos",
+//   androidPath: "./android/app/src/main/java/land/fx/fotos"
 // ])
 
 
-rootProject.name = 'photos'
+rootProject.name = 'fotos'
 apply from: new File(["node", "--print", "require.resolve('expo/package.json')"].execute().text.trim(), "../scripts/autolinking.gradle");
 useExpoModules()
 
