@@ -30,7 +30,6 @@ export type RootStackParamList = {
   BoxList: undefined,
   BoxAddUpdate: { box: BoxEntity },
   SharedViewer: { assetURI: string }
-  HighlightScreen: { highlights:  AssetStory }
 }
 export enum AppNavigationNames {
   HomeScreen = "Home",
@@ -40,7 +39,7 @@ export enum AppNavigationNames {
   BoxList = "BoxList",
   BoxAddUpdate = "BoxAddUpdate",
   SharedViewer = "SharedViewer",
-  HighlightScreen = "HighlightScreen"
+  HighlightScreen = "HighlightScreen",
 }
 
 const Stack = createSharedElementStackNavigator<RootStackParamList>()
