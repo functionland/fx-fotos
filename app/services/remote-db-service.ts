@@ -1,5 +1,5 @@
 import { graph, file } from "react-native-fula"
-import { AssetMeta } from "../types"
+import { AssetMeta, ShareMeta } from "../types"
 
 const ASSET_META_QUERY = `
   query getAssetsMetas($filter:JSON){
@@ -25,6 +25,38 @@ const ADD_ASSET_META = `
       name
       jwe
       ownerId
+      date
+    }
+  }
+`
+const SAHRED_ASSET_QUERY = `
+  query getSharedAssets($filter:JSON){
+    read(input:{
+      collection:"sharedAssets",
+      filter: $filter
+    }){
+      id
+      fileName
+      ownerId
+      cid
+      shareWithId
+      jwe
+      date
+    }
+  } 
+`
+const ADD_ShARE_META = `
+  mutation addSahreMeta($values:JSON){
+    create(input:{
+      collection:"sharedAssets",
+      values: $values
+    }){
+      id
+      fileName
+      ownerId
+      cid
+      shareWithId
+      jwe
       date
     }
   }
@@ -55,4 +87,22 @@ export const getAssetMeta = async (ownerId: string, id: string): Promise<AssetMe
     },
   })
   return result?.data?.read?.[0]
+}
+
+export const AddShareMeta = async (sharedWith: ShareMeta) => {
+  const result = await graph.graphql(ADD_ShARE_META, {
+    values: [
+      {
+        ...sharedWith,
+      },
+    ],
+  })
+  return result?.data?.create?.[0]
+}
+
+export const getSharedAssets = async (): Promise<ShareMeta> => {
+  const result = await graph.graphql(SAHRED_ASSET_QUERY, {
+    filter: {},
+  })
+  return result?.data?.read
 }

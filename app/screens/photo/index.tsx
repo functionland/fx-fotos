@@ -27,15 +27,16 @@ import { Asset, SyncStatus } from "../../types"
 import { Constants, palette } from "../../theme"
 import { Header } from "../../components"
 import { HomeNavigationParamList } from "../../navigators"
-import { BottomSheet, Button, Card, Icon, Input } from "@rneui/themed"
+import { BottomSheet, Button, Card, Icon, Input, Text } from "@rneui/themed"
 import { HeaderArrowBack, HeaderRightContainer } from "../../components/header"
 import { singleAssetState } from "../../store"
 import { Assets } from "../../services/localdb"
 import { AddBoxs, downloadAndDecryptAsset, downloadAsset, uploadAssetsInBackground } from "../../services/sync-service"
 import { Buffer } from "buffer"
 import { TaggedEncryption } from "@functionland/fula-sec"
-import { getAssetMeta } from "../../services/remote-db-service"
+import { AddShareMeta, getAssetMeta } from "../../services/remote-db-service"
 import * as helper from "../../utils/helper"
+import { BSON } from "realm"
 
 const { height } = Dimensions.get("window")
 
@@ -53,6 +54,7 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation }) => {
   const isPinchGestureActive = useSharedValue(false)
   const animatedOpacity = useSharedValue(1)
   const [loading, setLoading] = useState(false)
+  const [sharing, setSharing] = useState(false)
   const [showShareBottomSheet, setShowShareBottomSheet] = useState(false);
   const [DID, setDID] = useState("")
   const netInfoState = useNetInfo()
@@ -287,7 +289,7 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation }) => {
   const shareWithDID = async () => {
     if (!DID)
       return
-    setShowShareBottomSheet(false)
+    setSharing(true);
     try {
       const shareAsset = (await Assets.getById(asset.id))?.[0];
       const myDID = await helper.getMyDID();
@@ -295,14 +297,39 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation }) => {
         const myTag = new TaggedEncryption(myDID.did);
         const symetricKey = (await helper.decryptJWE(myDID.did, JSON.parse(shareAsset?.jwe)))?.symetricKey;
         const jwe = await myTag.encrypt(symetricKey, symetricKey?.id, [DID])
-        await Share.share({
-          title: 'Fotos | Just shared an asset',
-          message: `https://fotos.fx.land/shared/${Buffer.from(JSON.stringify(jwe), 'utf-8').toString('base64')}`
-        });
+        await AddShareMeta({
+          id: new BSON.UUID().toHexString(),
+          ownerId: myDID.authDID,
+          fileName: asset.filename,
+          cid: asset.cid,
+          jwe: jwe,
+          shareWithId: DID,
+          date: new Date().getTime()
+        })
+        Alert.alert("Shared", "This asset is added to the shared collection on the Box, do you want to create a sharing link too?",
+          [
+            {
+              text: "No",
+              style: "cancel"
+            },
+            {
+              text: "Yes",
+              onPress: () => {
+                Share.share({
+                  title: 'Fotos | Just shared an asset',
+                  message: `https://fotos.fx.land/shared/${Buffer.from(JSON.stringify(jwe), 'utf-8').toString('base64')}`
+                });
+              }
+            }
+          ])
+
       }
     } catch (error) {
       Alert.alert("Error", error.toString())
       console.log(error)
+    } finally {
+      setSharing(false)
+      setShowShareBottomSheet(false)
     }
   }
   const imageContainerStyle = {
@@ -318,7 +345,10 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation }) => {
             (asset?.syncStatus === SyncStatus.SYNCED && !asset?.isDeleted ? <Icon type="material-community" name="cloud-check" />
               : (asset?.syncStatus === SyncStatus.NOTSYNCED && !asset?.isDeleted ? <Icon type="material-community" name="cloud-upload-outline" onPress={uploadToBox} />
                 : asset?.syncStatus === SyncStatus.SYNC ? <Icon type="material-community" name="refresh" onPress={uploadToBox} /> : null))}
-          {asset?.syncStatus === SyncStatus.SYNCED && <Icon type="material-community" style={styles.headerIcon} name="share-variant" onPress={()=>setShowShareBottomSheet(true)} />}
+          {asset?.syncStatus === SyncStatus.SYNCED && <Icon type="material-community" style={styles.headerIcon} name="share-variant" onPress={() => {
+            setDID("")
+            setShowShareBottomSheet(true)
+          }} />}
         </HeaderRightContainer>
       } />)
   }
@@ -351,13 +381,13 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation }) => {
               <BottomSheet isVisible={showShareBottomSheet}
                 onBackdropPress={() => setShowShareBottomSheet(false)}
                 modalProps={{ transparent: true, animationType: "fade" }}
-
+                containerStyle={styles.bottomSheetContainer}
               >
                 <Card containerStyle={{ borderWidth: 0, margin: 0 }}>
                   <Card.Title>Share with (enter DID)</Card.Title>
-                  <Input onChangeText={(txt) => setDID(txt)} />
+                  <Input onChangeText={(txt) => setDID(txt)} onEndEditing={shareWithDID} />
                 </Card>
-                <Button title="Share" onPress={shareWithDID} />
+                <Button title={sharing ? <ActivityIndicator style={styles.activityIndicatorStyle} size="small" /> : "Share"} onPress={shareWithDID} ></Button>
               </BottomSheet>
             </View>
           </TapGestureHandler>
@@ -373,5 +403,11 @@ const styles = StyleSheet.create({
   },
   headerIcon: {
     marginHorizontal: 10
+  },
+  bottomSheetContainer: {
+    backgroundColor: "rgba(189,189,189,.2)"
+  },
+  activityIndicatorStyle: {
+    padding: 5
   }
 })

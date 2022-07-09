@@ -44,7 +44,7 @@ const backgroundTask = async (taskParameters: TaskParams) => {
         const asset = assets[index]
         BackgroundJob.updateNotification({
           taskTitle: `Upload asset #${index + 1}`,
-          taskDesc: `Totla: ${assets.length}`,
+          taskDesc: `Total: ${assets.length}`,
           progressBar: {
             max: assets.length,
             value: index,
