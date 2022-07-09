@@ -15,10 +15,10 @@ if (Platform.OS === 'android') {
 }
 
 export const App = () => {
-  const [isDarkTheme] = React.useState<boolean>(false);
+  const [isDarkTheme] = React.useState<boolean>(true);
 
   return (
-    <ThemeProvider theme={isDarkTheme || true ? fxDarkTheme : fxLightTheme}>
+    <ThemeProvider theme={isDarkTheme ? fxDarkTheme : fxLightTheme}>
       <WalletConnectProvider
         redirectUrl={'yourappscheme://'}
         storageOptions={{
