@@ -6,10 +6,16 @@ import { WalletConnectProvider } from '@walletconnect/react-native-dapp/dist/pro
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavContainer } from '../navigation/NavContainer';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { StyleSheet } from 'react-native';
+import { Platform, StyleSheet, UIManager } from 'react-native';
+
+if (Platform.OS === 'android') {
+  if (UIManager.setLayoutAnimationEnabledExperimental) {
+    UIManager.setLayoutAnimationEnabledExperimental(true);
+  }
+}
 
 export const App = () => {
-  const [isDarkTheme] = React.useState<boolean>(false);
+  const [isDarkTheme] = React.useState<boolean>(true);
 
   return (
     <ThemeProvider theme={isDarkTheme ? fxDarkTheme : fxLightTheme}>
