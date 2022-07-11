@@ -15150,10 +15150,10 @@ react-native-flipper@^0.34.0:
   resolved "https://registry.npmjs.org/react-native-flipper/-/react-native-flipper-0.34.0.tgz"
   integrity sha512-48wgm29HJTOlZ0DibBsvXueEOY0EPIVL0wWKbwRfgrk86+luSEuLW3aZC50oJa95zSFb9qYShTV/6dWqh4Jamg==
 
-react-native-fula@^0.2.3:
-  version "0.2.3"
-  resolved "https://registry.yarnpkg.com/react-native-fula/-/react-native-fula-0.2.3.tgz#f314a3a4ecec35c17f8bf03fd8a021603d9b57da"
-  integrity sha512-oIfzSlR8EhmQq3vtZcgQ+YeKWNUxBQmRGawDiDF2zXYwt6I8zKMlVmJ21LKmzKhYsGSfv2r+dTqv0wEqEsI5zg==
+react-native-fula@^0.2.4:
+  version "0.2.4"
+  resolved "https://registry.yarnpkg.com/react-native-fula/-/react-native-fula-0.2.4.tgz#9e6cfa0e099ed08a85e5c88f204988467d67514f"
+  integrity sha512-Hh3khR9e573b4vu3DCIMnNNv6pTV2p0y2qD0DHrVmy4colq7VCimnvMt6JficrSA7T1n5LieX7dqiE+um8/CnA==
   dependencies:
     "@functionland/file-protocol" "^0.3.6"
     "@functionland/graph-protocol" "^0.2.2"

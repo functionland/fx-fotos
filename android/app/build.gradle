@@ -138,8 +138,8 @@ android {
         applicationId "land.fx.fotos"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 5
-        versionName "0.5.0"
+        versionCode 6
+        versionName "0.6.0"
     }
     splits {
         abi {
@@ -150,12 +150,12 @@ android {
         }
     }
     signingConfigs {
-        release {
-            storeFile file('photos.keystore')
-            storePassword 'photos'
-            keyAlias 'photos_alias'
-            keyPassword 'photos'
-        }
+        // release {
+        //     storeFile file('photos.keystore')
+        //     storePassword 'photos'
+        //     keyAlias 'photos_alias'
+        //     keyPassword 'photos'
+        // }
         debug {
             storeFile file('debug.keystore')
             storePassword 'android'
@@ -175,7 +175,7 @@ android {
         release {
             // Caution! In production, you need to generate your own keystore file.
             // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.release
+            //signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
