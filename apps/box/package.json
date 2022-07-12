@@ -27,6 +27,8 @@
     "react-native-reanimated": "*",
     "react-native-gesture-handler": "*",
     "react-native-redash": "*",
-    "react-native-device-info": "*"
+    "react-native-device-info": "*",
+    "@visx/scale": "*",
+    "@shopify/react-native-skia": "*"
   }
 }
