@@ -117,6 +117,7 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
     >
       <View style={{ backgroundColor: "#000" }}>
         <FlatList
+          showsHorizontalScrollIndicator={false}
           ref={highlightListRef}
           scrollEnabled={false}
           horizontal={true}
@@ -125,7 +126,7 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
           renderItem={({ item }) => {
             return (
               <FastImage
-                resizeMode={FastImage.resizeMode.cover}
+                resizeMode={FastImage.resizeMode.center}
                 source={{ uri: item.uri, priority: FastImage.priority.high }}
                 style={{ height: heightPercentageToDP(100), width: widthPercentageToDP(100) }}
               />
@@ -140,6 +141,7 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
         <Animated.View style={[styles.timeBarContainer, timeBarContainerAnimatedStyle]}>
           <FlatList
             horizontal
+            showsHorizontalScrollIndicator={false}
             keyExtractor={(item) => item.toString()}
             data={timeBarItems}
             renderItem={() => {
@@ -150,6 +152,7 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
         <Animated.View style={[styles.timeBarContainer, timeBarContainerAnimatedStyle]}>
           <FlatList
             horizontal
+            showsHorizontalScrollIndicator={false}
             keyExtractor={(item) => item.id}
             data={data}
             renderItem={() => {
