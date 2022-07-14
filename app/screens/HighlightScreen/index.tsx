@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     marginLeft: 2,
     zIndex: 900,
-    backgroundColor: "rgba(0,0,0, 0.1)",
+    backgroundColor: "rgba(255,255,255, 0.1)",
   },
   pressableContainer: {
     top: 0,
