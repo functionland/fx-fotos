@@ -24,9 +24,9 @@ export type RootStackParamList = {
   Photo: { section: RecyclerAssetListSection }
   Settings: undefined
   BoxList: undefined
-  BoxAddUpdate: { box: BoxEntity },
-  LibraryAssets: undefined,
-  HighlightScreen: { highlights:  AssetStory }
+  BoxAddUpdate: { box: BoxEntity }
+  LibraryAssets: undefined
+  HighlightScreen: { highlights: AssetStory }
 }
 export enum AppNavigationNames {
   HomeScreen = "Home",
@@ -34,7 +34,7 @@ export enum AppNavigationNames {
   LibraryAssets = "LibraryAssets",
   BoxList = "BoxList",
   BoxAddUpdate = "BoxAddUpdate",
-  HighlightScreen = "HighlightScreen"
+  HighlightScreen = "HighlightScreen",
 }
 
 const Stack = createSharedElementStackNavigator<RootStackParamList>()
@@ -92,6 +92,7 @@ const AppStack = () => {
           gestureEnabled: false,
           cardOverlayEnabled: true,
           animationEnabled: true,
+          cardStyle: { backgroundColor: "transparent" },
           cardStyleInterpolator: ({ current: { progress } }) => ({
             cardStyle: {
               opacity: progress.interpolate({
