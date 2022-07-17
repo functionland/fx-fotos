@@ -97,6 +97,7 @@ const AppStack = () => {
           gestureEnabled: false,
           cardOverlayEnabled: true,
           animationEnabled: true,
+          cardStyle: { backgroundColor: "transparent" },
           cardStyleInterpolator: ({ current: { progress } }) => ({
             cardStyle: {
               opacity: progress.interpolate({
