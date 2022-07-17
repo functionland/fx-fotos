@@ -1,8 +1,8 @@
 import * as React from "react"
 import shortid from "shortid"
-import { RouteProp } from "@react-navigation/native"
-import { View, StyleSheet, TouchableOpacity } from "react-native"
-import { FlatList, LongPressGestureHandler } from "react-native-gesture-handler"
+import { RouteProp, useNavigation } from "@react-navigation/native"
+import { View, StyleSheet, TouchableOpacity, Dimensions } from "react-native"
+import { FlatList, LongPressGestureHandler, PanGestureHandler } from "react-native-gesture-handler"
 import { heightPercentageToDP, widthPercentageToDP } from "react-native-responsive-screen"
 import Animated, {
   runOnJS,
@@ -11,8 +11,11 @@ import Animated, {
   useAnimatedStyle,
   useAnimatedReaction,
   SharedValue,
+  useAnimatedGestureHandler,
+  interpolate,
+  Extrapolate,
 } from "react-native-reanimated"
-import { withPause } from "react-native-redash"
+import { snapPoint, withPause } from "react-native-redash"
 import FastImage from "react-native-fast-image"
 
 import { AssetStory } from "../../types"
@@ -54,6 +57,7 @@ const TimeBar: React.FC<timeBarProps> = ({ width, pause }) => {
 export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
   const { data } = route.params.highlights
 
+  const navigation = useNavigation()
   const [imageIdx, setImageIdx] = React.useState(0)
   const pauseAnimation = useSharedValue(false)
   const timeBarContainerOpacity = useSharedValue(1)
@@ -109,89 +113,152 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
     [pauseAnimation],
   )
 
+  const { height } = Dimensions.get("window")
+
+  const translateX = useSharedValue(0)
+  const translateY = useSharedValue(0)
+  const imageScale = useSharedValue(1)
+  const animatedOpacity = useSharedValue(1)
+  const isPanGestureActive = useSharedValue(false)
+  const isPinchGestureActive = useSharedValue(false)
+
+  const animatedStyle = useAnimatedStyle(() => {
+    const scale = interpolate(translateY.value, [0, height], [1, 0.5], Extrapolate.CLAMP)
+    return {
+      alignItems: "center",
+      flex: 1,
+      justifyContent: "center",
+      transform: [{ translateX: translateX.value }, { translateY: translateY.value }, { scale }],
+    }
+  })
+
+  const goBack = () => navigation.goBack()
+
+  const onPanGesture = useAnimatedGestureHandler({
+    onActive: ({ translationX, translationY, velocityY }) => {
+      isPanGestureActive.value = true
+      translateX.value = translationX
+      translateY.value = translationY
+      if (!isPinchGestureActive.value) {
+        animatedOpacity.value = interpolate(translationY, [0, 400], [1, 0.5], Extrapolate.CLAMP)
+      }
+    },
+    onEnd: ({ velocityY }) => {
+      if (isPinchGestureActive.value) {
+        return
+      }
+      const shouldGoBack = snapPoint(translateY.value, velocityY, [0, 200])
+
+      if (shouldGoBack) {
+        runOnJS(goBack)()
+      } else {
+        translateX.value = withTiming(0, { duration: 100 })
+        translateY.value = withTiming(0, { duration: 100 })
+        animatedOpacity.value = interpolate(velocityY, [velocityY, 0], [1, 0.5], Extrapolate.CLAMP)
+      }
+      isPanGestureActive.value = false
+    },
+  })
+
+  useAnimatedReaction(
+    () => isPanGestureActive.value,
+    (isGestureActive) => {
+      if (isGestureActive) {
+        pauseAnimation.value = true
+        return
+      }
+      pauseAnimation.value = false
+    },
+    [isPanGestureActive.value],
+  )
+
   return (
-    <LongPressGestureHandler
-      minDurationMs={100}
-      onActivated={() => (pauseAnimation.value = true)}
-      onEnded={() => (pauseAnimation.value = false)}
-    >
-      <View style={{ backgroundColor: "#000" }}>
-        <FlatList
-          showsHorizontalScrollIndicator={false}
-          ref={highlightListRef}
-          scrollEnabled={false}
-          horizontal={true}
-          data={data}
-          keyExtractor={() => shortid.generate()}
-          renderItem={({ item }) => {
-            return (
-              <FastImage
-                resizeMode={FastImage.resizeMode.center}
-                source={{ uri: item.uri, priority: FastImage.priority.high }}
-                style={{ height: heightPercentageToDP(100), width: widthPercentageToDP(100) }}
+    <PanGestureHandler maxPointers={1} minPointers={1} onGestureEvent={onPanGesture}>
+      <Animated.View style={animatedStyle}>
+        <LongPressGestureHandler
+          minDurationMs={100}
+          onActivated={() => (pauseAnimation.value = true)}
+          onEnded={() => (pauseAnimation.value = false)}
+        >
+          <View style={{ backgroundColor: "#000" }}>
+            <FlatList
+              showsHorizontalScrollIndicator={false}
+              ref={highlightListRef}
+              scrollEnabled={false}
+              horizontal={true}
+              data={data}
+              keyExtractor={() => shortid.generate()}
+              renderItem={({ item }) => {
+                return (
+                  <FastImage
+                    resizeMode={FastImage.resizeMode.center}
+                    source={{ uri: item.uri, priority: FastImage.priority.high }}
+                    style={{ height: heightPercentageToDP(100), width: widthPercentageToDP(100) }}
+                  />
+                )
+              }}
+              getItemLayout={(data, index) => ({
+                length: data.length * widthPercentageToDP(100),
+                offset: widthPercentageToDP(100) * index,
+                index,
+              })}
+            />
+            <Animated.View style={[styles.timeBarContainer, timeBarContainerAnimatedStyle]}>
+              <FlatList
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                keyExtractor={(item) => item.toString()}
+                data={timeBarItems}
+                renderItem={() => {
+                  return <TimeBar width={BAR_WIDTH} pause={pauseAnimation} />
+                }}
               />
-            )
-          }}
-          getItemLayout={(data, index) => ({
-            length: data.length * widthPercentageToDP(100),
-            offset: widthPercentageToDP(100) * index,
-            index,
-          })}
-        />
-        <Animated.View style={[styles.timeBarContainer, timeBarContainerAnimatedStyle]}>
-          <FlatList
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            keyExtractor={(item) => item.toString()}
-            data={timeBarItems}
-            renderItem={() => {
-              return <TimeBar width={BAR_WIDTH} pause={pauseAnimation} />
-            }}
-          />
-        </Animated.View>
-        <Animated.View style={[styles.timeBarContainer, timeBarContainerAnimatedStyle]}>
-          <FlatList
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            keyExtractor={(item) => item.id}
-            data={data}
-            renderItem={() => {
-              return (
-                <View
-                  style={[
-                    styles.timeBarPlaceholder,
-                    {
-                      width: (widthPercentageToDP(95) - 2 * data.length) / data.length,
-                    },
-                  ]}
-                />
-              )
-            }}
-          />
-        </Animated.View>
-        <TouchableOpacity
-          onPress={() => {
-            if (imageIdx <= 0) {
-              return
-            }
-            setImageIdx((prev) => (prev -= 1))
-            setTimeBarItems((prev) => prev.slice(0, -1))
-            barWidth.value = BAR_WIDTH
-          }}
-          style={[styles.pressableContainer, { left: 0 }]}
-        />
-        <TouchableOpacity
-          onPress={() => {
-            if (imageIdx >= data.length - 1) {
-              return
-            }
-            setImageIdx((prev) => (prev += 1))
-            setTimeBarItems((prev) => [...prev, imageIdx + 1])
-          }}
-          style={[styles.pressableContainer, { right: 0 }]}
-        />
-      </View>
-    </LongPressGestureHandler>
+            </Animated.View>
+            <Animated.View style={[styles.timeBarContainer, timeBarContainerAnimatedStyle]}>
+              <FlatList
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                keyExtractor={(item) => item.id}
+                data={data}
+                renderItem={() => {
+                  return (
+                    <View
+                      style={[
+                        styles.timeBarPlaceholder,
+                        {
+                          width: (widthPercentageToDP(95) - 2 * data.length) / data.length,
+                        },
+                      ]}
+                    />
+                  )
+                }}
+              />
+            </Animated.View>
+            <TouchableOpacity
+              onPress={() => {
+                if (imageIdx <= 0) {
+                  return
+                }
+                setImageIdx((prev) => (prev -= 1))
+                setTimeBarItems((prev) => prev.slice(0, -1))
+                barWidth.value = BAR_WIDTH
+              }}
+              style={[styles.pressableContainer, { left: 0 }]}
+            />
+            <TouchableOpacity
+              onPress={() => {
+                if (imageIdx >= data.length - 1) {
+                  return
+                }
+                setImageIdx((prev) => (prev += 1))
+                setTimeBarItems((prev) => [...prev, imageIdx + 1])
+              }}
+              style={[styles.pressableContainer, { right: 0 }]}
+            />
+          </View>
+        </LongPressGestureHandler>
+      </Animated.View>
+    </PanGestureHandler>
   )
 }
 
