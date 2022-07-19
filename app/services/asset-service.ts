@@ -70,11 +70,11 @@ export const categorizeAssets = (assets: MediaLibrary.Asset[]) => {
   for (const asset of assets) {
     // Make story objects
     // Filter assets to get camera folder
-    // if (asset?.modificationTime && asset.uri?.toLowerCase().includes("/dcim/camera/")) {
-    const categoryName = getAssetStoryCategory(asset.modificationTime)
-    if (categoryName && !storiesObj[categoryName]) storiesObj[categoryName] = []
-    if (categoryName) storiesObj[categoryName].push(asset)
-    // }
+    if (__DEV__ || (asset?.modificationTime && asset.uri?.toLowerCase().includes("/dcim/camera/"))) {
+      const categoryName = getAssetStoryCategory(asset.modificationTime)
+      if (categoryName && !storiesObj[categoryName]) storiesObj[categoryName] = []
+      if (categoryName) storiesObj[categoryName].push(asset)
+    }
 
     const times = moment(asset.modificationTime).format("MMMM YYYY|dddd, MMM D, YYYY")
     const month = times.split("|")[0]
