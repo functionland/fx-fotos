@@ -176,16 +176,16 @@ export const getAssets = async (
     const medias = await MediaLibrary.getAssetsAsync(
       afterAssetId
         ? {
-            first: pageSize,
-            after: afterAssetId,
-            sortBy: sortBy,
-            mediaType: ["photo", "video"],
-          }
+          first: pageSize,
+          after: afterAssetId,
+          sortBy: sortBy,
+          mediaType: ["photo", "video"],
+        }
         : {
-            first: pageSize,
-            sortBy: sortBy,
-            mediaType: ["photo", "video"],
-          },
+          first: pageSize,
+          sortBy: sortBy,
+          mediaType: ["photo", "video"],
+        },
     )
     return medias
   } catch (error) {
