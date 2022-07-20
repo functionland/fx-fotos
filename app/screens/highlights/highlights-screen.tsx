@@ -23,8 +23,8 @@ interface HighlightScreenProps {
   route: RouteProp<{ params: { highlights: AssetStory } }, "params">
 }
 
-const DELAY_DURATION = 5
-const ANIMATION_DURATION = 1500
+const DELAY_DURATION = 0
+const ANIMATION_DURATION = 1000
 const OPACITY_FADE_DURATION = 111
 
 interface timeBarProps {
@@ -54,7 +54,7 @@ const TimeBar: React.FC<timeBarProps> = ({ width, pause }) => {
 }
 
 export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
-  const { data } = route.params.highlights
+  const { data: stories } = route.params.highlights
 
   const navigation = useNavigation()
   const [imageIdx, setImageIdx] = React.useState(0)
@@ -64,16 +64,20 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
   const [timeBarItems, setTimeBarItems] = React.useState<number[]>([0])
 
   const barWidth = useSharedValue(0)
-  const BAR_WIDTH = (widthPercentageToDP(95) - 2 * data.length) / data.length
+  const BAR_WIDTH = (widthPercentageToDP(95) - 2 * stories.length) / stories.length
 
   const updateImage = () => {
-    if (imageIdx >= data.length - 1) {
+    if (imageIdx >= stories.length - 1) {
       return
     }
 
     setImageIdx((prev) => (prev += 1))
     setTimeBarItems((prev) => [...prev, imageIdx + 1])
   }
+
+  React.useLayoutEffect(() => {
+    highlightListRef.current.scrollToIndex({ animated: true, index: imageIdx })
+  }, [imageIdx])
 
   React.useLayoutEffect(() => {
     barWidth.value = withPause(
@@ -92,10 +96,6 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
     )
   }, [imageIdx])
 
-  React.useEffect(() => {
-    highlightListRef.current.scrollToIndex({ animated: true, index: imageIdx })
-  }, [imageIdx])
-
   const timeBarContainerAnimatedStyle = useAnimatedStyle(() => {
     return {
       opacity: timeBarContainerOpacity.value,
@@ -112,11 +112,10 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
     [pauseAnimation],
   )
 
-  const { height } = Dimensions.get("window")
+  const { height, width: screenWidth } = Dimensions.get("window")
 
   const translateX = useSharedValue(0)
   const translateY = useSharedValue(0)
-  const imageScale = useSharedValue(1)
   const animatedOpacity = useSharedValue(1)
   const isPanGestureActive = useSharedValue(false)
   const isPinchGestureActive = useSharedValue(false)
@@ -134,7 +133,7 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
   const goBack = () => navigation.goBack()
 
   const onPanGesture = useAnimatedGestureHandler({
-    onActive: ({ translationX, translationY, velocityY }) => {
+    onActive: ({ translationX, translationY }) => {
       isPanGestureActive.value = true
       translateX.value = translationX
       translateY.value = translationY
@@ -185,22 +184,34 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
               ref={highlightListRef}
               scrollEnabled={false}
               horizontal={true}
+<<<<<<< Updated upstream:app/screens/HighlightScreen/index.tsx
               data={data}
+<<<<<<< Updated upstream:app/screens/highlights/highlights-screen.tsx
               keyExtractor={(_, index) => `image_${index}` }
+=======
+              keyExtractor={() => shortid.generate()}
+=======
+              data={stories}
+              keyExtractor={(item) => item.uri}
+>>>>>>> Stashed changes:app/screens/highlights/highlights-screen.tsx
+>>>>>>> Stashed changes:app/screens/HighlightScreen/index.tsx
               renderItem={({ item }) => {
                 return (
                   <FastImage
-                    resizeMode={FastImage.resizeMode.center}
+                    resizeMode={FastImage.resizeMode.contain}
                     source={{ uri: item.uri, priority: FastImage.priority.high }}
-                    style={{ height: heightPercentageToDP(100), width: widthPercentageToDP(100) }}
+                    style={{ height: height, width: screenWidth }}
                   />
                 )
               }}
-              getItemLayout={(data, index) => ({
-                length: data.length * widthPercentageToDP(100),
-                offset: widthPercentageToDP(100) * index,
-                index,
-              })}
+              getItemLayout={(data, index) => {
+                console.log({ len: data.length, idx: index })
+                return {
+                  length: widthPercentageToDP(100),
+                  offset: widthPercentageToDP(100) * index,
+                  index,
+                }
+              }}
             />
             <Animated.View style={[styles.timeBarContainer, timeBarContainerAnimatedStyle]}>
               <FlatList
@@ -218,14 +229,14 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 keyExtractor={(item) => item.id}
-                data={data}
+                data={stories}
                 renderItem={() => {
                   return (
                     <View
                       style={[
                         styles.timeBarPlaceholder,
                         {
-                          width: (widthPercentageToDP(95) - 2 * data.length) / data.length,
+                          width: (widthPercentageToDP(95) - 2 * stories.length) / stories.length,
                         },
                       ]}
                     />
@@ -246,7 +257,7 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
             />
             <TouchableOpacity
               onPress={() => {
-                if (imageIdx >= data.length - 1) {
+                if (imageIdx >= stories.length - 1) {
                   return
                 }
                 setImageIdx((prev) => (prev += 1))
