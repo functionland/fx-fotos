@@ -184,17 +184,8 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
               ref={highlightListRef}
               scrollEnabled={false}
               horizontal={true}
-<<<<<<< Updated upstream:app/screens/HighlightScreen/index.tsx
-              data={data}
-<<<<<<< Updated upstream:app/screens/highlights/highlights-screen.tsx
               keyExtractor={(_, index) => `image_${index}` }
-=======
-              keyExtractor={() => shortid.generate()}
-=======
               data={stories}
-              keyExtractor={(item) => item.uri}
->>>>>>> Stashed changes:app/screens/highlights/highlights-screen.tsx
->>>>>>> Stashed changes:app/screens/HighlightScreen/index.tsx
               renderItem={({ item }) => {
                 return (
                   <FastImage
