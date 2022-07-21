@@ -1,6 +1,6 @@
 {
   "name": "fotos",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "private": true,
   "scripts": {
     "start": "react-native start",
