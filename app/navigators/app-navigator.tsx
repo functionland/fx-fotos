@@ -19,6 +19,8 @@ import { HomeNavigator } from "./home-navigator"
 import { ThemeContext } from "../theme"
 import { BoxEntity } from "../realmdb/entities"
 import { AssetStory, RecyclerAssetListSection } from "../types"
+import { Asset } from "../types"
+import { ImageGalleryViewerScreen } from "../screens/image-gallery-viewer"
 
 enableScreens()
 export type RootStackParamList = {
@@ -30,6 +32,7 @@ export type RootStackParamList = {
   BoxList: undefined,
   BoxAddUpdate: { box: BoxEntity },
   SharedViewer: { assetURI: string }
+  ImageGalleryViewer: { assetId: Asset['id'], medias: Asset[]}
 }
 export enum AppNavigationNames {
   HomeScreen = "Home",
@@ -40,6 +43,7 @@ export enum AppNavigationNames {
   BoxAddUpdate = "BoxAddUpdate",
   SharedViewer = "SharedViewer",
   HighlightScreen = "HighlightScreen",
+  ImageGalleryViewer = "ImageGalleryViewer"
 }
 
 const Stack = createSharedElementStackNavigator<RootStackParamList>()
@@ -115,6 +119,38 @@ const AppStack = () => {
           }),
         }}
         component={HighlightScreen}
+      />
+      <Stack.Screen
+        name={AppNavigationNames.ImageGalleryViewer}
+        options={{
+          headerShown: false,
+          headerTransparent: true,
+          gestureEnabled: false,
+          cardOverlayEnabled: true,
+          cardStyle: { backgroundColor: "transparent" },
+          animationEnabled: true,
+          cardStyleInterpolator: ({ current: { progress } }) => ({
+            cardStyle: {
+              opacity: progress.interpolate({
+                inputRange: [0, 0.5, 0.9, 1],
+                outputRange: [0, 0.25, 0.7, 1],
+              }),
+            },
+            overlayStyle: {
+              opacity: progress.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, 0],
+                extrapolate: "clamp",
+              }),
+            },
+          }),
+        }}
+        component={ImageGalleryViewerScreen}
+        sharedElements={(route) => {
+          const { assetId = "" } = route.params
+          return [assetId]
+        }}
+
       />
       <Stack.Screen
         name={AppNavigationNames.AccountScrenn}
