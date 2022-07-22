@@ -2,10 +2,13 @@ import { Platform } from "react-native"
 import BackgroundJob, { BackgroundTaskOptions } from "react-native-background-actions"
 import BackgroundFetch, { HeadlessEvent } from "react-native-background-fetch"
 import { file, fula } from "react-native-fula"
-import { AssetEntity } from "../realmdb/entities"
 
+import { AssetEntity } from "../realmdb/entities"
 import { SyncStatus } from "../types"
 import { Assets, Boxs } from "./localdb/index"
+import { addAssetMeta } from "./remote-db-service"
+import { TaggedEncryption } from "@functionland/fula-sec"
+import * as helper from "../utils/helper"
 type TaskParams = {
   callback: (success: boolean) => void
   assets: AssetEntity[]
@@ -30,28 +33,55 @@ const backgroundTask = async (taskParameters: TaskParams) => {
     )
   }
   const { callback = null, assets = [] } = taskParameters
+  let taggedEncryption: TaggedEncryption = null
+  const myDID = await helper.getMyDID()
+  if (myDID) {
+    taggedEncryption = new TaggedEncryption(myDID?.did)
+  }
   await new Promise(async (resolve) => {
     try {
       for (let index = 0; index < assets.length; index++) {
         const asset = assets[index]
         BackgroundJob.updateNotification({
           taskTitle: `Upload asset #${index + 1}`,
-          taskDesc: `Totla: ${assets.length}`,
+          taskDesc: `Total: ${assets.length}`,
           progressBar: {
             max: assets.length,
             value: index,
             indeterminate: assets.length == 1,
           },
         })
-        const result = await uploadAsset(asset)
-        Assets.addOrUpdate([
-          {
-            id: asset.id,
-            cid: result,
-            syncDate: new Date(),
-            syncStatus: SyncStatus.SYNCED,
-          },
-        ])
+
+        if (myDID) {
+          const result = await encryptAndUploadAsset(asset)
+          const jwe = await taggedEncryption.encrypt(result, result?.id, [myDID?.authDID])
+          await addAssetMeta({
+            id: result.id,
+            name: asset.filename,
+            jwe,
+            date: asset.modificationTime,
+            ownerId: myDID?.authDID,
+          })
+          Assets.addOrUpdate([
+            {
+              id: asset.id,
+              cid: result.id,
+              jwe: JSON.stringify(jwe),
+              syncDate: new Date(),
+              syncStatus: SyncStatus.SYNCED,
+            },
+          ])
+        } else {
+          const result = await uploadAsset(asset)
+          Assets.addOrUpdate([
+            {
+              id: asset.id,
+              cid: result,
+              syncDate: new Date(),
+              syncStatus: SyncStatus.SYNCED,
+            },
+          ])
+        }
         try {
           callback?.(true)
         } catch {}
@@ -95,10 +125,17 @@ export const uploadAsset = async (asset: AssetEntity) => {
   return await file.send(decodeURI(_filePath))
 }
 
+export const encryptAndUploadAsset = async (asset: AssetEntity): Promise<file.FileRef> => {
+  const _filePath = asset.uri?.split("file:")[1]
+  return await file.encryptSend(decodeURI(_filePath))
+}
+
 export const downloadAsset = async (cid: string) => {
   return await file.receive(cid, false)
 }
-
+export const downloadAndDecryptAsset = async (fileRef: file.FileRef) => {
+  return await file.receiveDecrypt(fileRef, false)
+}
 export const AddBoxs = async () => {
   try {
     const boxs = await Boxs.getAll()

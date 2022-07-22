@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState, useContext } from "react"
 import { StyleSheet, Alert, View, Image, ActivityIndicator } from "react-native"
 import LottieView from "lottie-react-native"
-import { Icon, Text, useTheme, } from "@rneui/themed"
+import { Avatar, Icon, Text, useTheme, } from "@rneui/themed"
 import Toast from 'react-native-toast-message'
-
+import { useWalletConnect } from '@walletconnect/react-native-dapp';
+import { useSetRecoilState } from "recoil"
 import { Screen } from "../../components"
 import { AssetService } from "../../services"
 import AssetList, { AssetListHandle } from "../../components/asset-list"
@@ -12,10 +13,14 @@ import { palette } from "../../theme/palette"
 import { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { HomeNavigationParamList, HomeNavigationTypes } from "../../navigators/home-navigator"
 import { Assets } from "../../services/localdb"
-import { Header, HeaderLogo, HeaderLeftContainer, HeaderRightContainer, HeaderCenterContainer } from "../../components/header"
+import { Header, HeaderLogo, HeaderLeftContainer, HeaderRightContainer } from "../../components/header"
 import { ThemeContext } from "../../theme"
 import { AppNavigationNames } from "../../navigators"
 import { uploadAssetsInBackground } from "../../services/sync-service"
+import { SharedElement } from "react-navigation-shared-element"
+import * as helper from "../../utils/helper"
+import { Asset, RecyclerAssetListSection, ViewType } from "../../types"
+import { singleAssetState } from "../../store"
 interface Props {
   navigation: NativeStackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>;
   medias: Asset[];
@@ -32,7 +37,8 @@ export const AssetListScreen: React.FC<Props> = ({ navigation, medias, defaultHe
   const assetListRef = useRef<AssetListHandle>()
   const { toggleTheme } = useContext(ThemeContext);
   const { theme } = useTheme();
-
+  const walletConnector = useWalletConnect();
+  const  setSingleAsset = useSetRecoilState(singleAssetState)
   useEffect(() => {
     if (medias) {
       setRecyclerSections([...AssetService.categorizeAssets([...medias])]);
@@ -112,6 +118,14 @@ export const AssetListScreen: React.FC<Props> = ({ navigation, medias, defaultHe
     }
   }
 
+  const onItemPress = (section: RecyclerAssetListSection) => {
+    if (section.type === ViewType.ASSET) {
+      const asset: Asset = section.data
+      setSingleAsset(JSON.parse(JSON.stringify(asset)));
+      navigation.push(AppNavigationNames.PhotoScreen, { assetId: asset.id })
+    }
+  }
+
   const onSelectedItemsChange = (assetIds: string[], selectionMode: boolean) => {
     setSelectionMode(selectionMode);
     setSelectedItems(assetIds);
@@ -140,7 +154,30 @@ export const AssetListScreen: React.FC<Props> = ({ navigation, medias, defaultHe
           }} />
         </HeaderLeftContainer>}
         rightComponent={<HeaderRightContainer>
-          <Icon type="material-community" name="alpha-f-box-outline" onPress={() => navigation.navigate(AppNavigationNames.BoxList)} />
+          <SharedElement id="AccountAvatar">
+            {walletConnector.connected ? <Avatar
+              containerStyle={styles.avatar}
+
+              ImageComponent={() => <Image
+                source={walletConnector.peerMeta?.icons?.[0].endsWith(".svg")
+                  ? helper.getWalletImage(walletConnector.peerMeta?.name) :
+                  { uri: walletConnector.peerMeta?.icons?.[0] }
+                }
+                style={{
+                  height: 35,
+                  width: 35,
+                }}
+                resizeMode="contain"
+              />}
+              onPress={() => navigation.navigate(AppNavigationNames.AccountScrenn)}
+            /> : <Avatar
+              containerStyle={styles.disconnectedAvatar}
+              icon={{ name: "account-alert", type: "material-community", size: 34 }}
+              size="small" rounded={true}
+              onPress={() => navigation.navigate(AppNavigationNames.AccountScrenn)}
+            />}
+
+          </SharedElement>
         </HeaderRightContainer>}
       />)
     }
@@ -180,6 +217,7 @@ export const AssetListScreen: React.FC<Props> = ({ navigation, medias, defaultHe
           navigation={navigation}
           onAssetLoadError={onAssetLoadError}
           renderFooter={renderFooter}
+          onItemPress={onItemPress}
         />
       )}
     </Screen>
@@ -212,5 +250,22 @@ const styles = StyleSheet.create({
   },
   headerIcon: {
     marginStart: 10
+  },
+  avatar: {
+    backgroundColor: "gray",
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    marginHorizontal: 5
+  },
+  disconnectedAvatar: {
+    backgroundColor: "gray",
+    marginHorizontal: 5,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: "center",
   }
 })

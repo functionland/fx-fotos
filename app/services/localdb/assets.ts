@@ -19,6 +19,19 @@ export const getAll = (
       throw error
     })
 }
+export const getById = (id:string): Promise<Realm.Results<Entities.AssetEntity & Realm.Object>> => {
+  return RealmDB()
+    .then((realm) => {
+      const assets = realm
+        .objects<Entities.AssetEntity>(Schemas.Asset.name)
+        .filtered(`id = '${id}'`)
+      return assets
+    })
+    .catch((error) => {
+      console.error("RealmDB getById error!", error)
+      throw error
+    })
+}
 export const getAllNeedToSync = (): Promise<Realm.Results<Entities.AssetEntity & Realm.Object>> => {
   return RealmDB()
     .then((realm) => {
@@ -111,7 +124,7 @@ export const remove = (assetIds: string[]): Promise<void> => {
         const idsQuery = assetIds.map((id) => `id = '${id}'`).join(" OR ")
         const assets = realm.objects<Entities.AssetEntity>(Schemas.Asset.name).filtered(idsQuery)
         realm.write(() => {
-          realm.delete(assets)
+          for (const asset of assets) asset.isDeleted = true
         })
       } catch (error) {
         console.error("removeAssets error!", error)
@@ -131,9 +144,8 @@ export const removeByUri = (uri: string): Promise<void> => {
         const assets = realm
           .objects<Entities.AssetEntity>(Schemas.Asset.name)
           .filtered(`uri endsWith '${uri}'`)
-        console.log("removeByUri", assets.length)
         realm.write(() => {
-          realm.delete(assets)
+          for (const asset of assets) asset.isDeleted = true
         })
       } catch (error) {
         console.error("removeAssets error!", error)

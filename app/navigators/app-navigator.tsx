@@ -1,4 +1,4 @@
-import React, { useContext } from "react"
+import React, { useContext, useEffect, useState } from "react"
 import Animated from "react-native-reanimated"
 import { enableScreens } from "react-native-screens"
 import { NavigationContainer } from "@react-navigation/native"
@@ -6,24 +6,29 @@ import { createSharedElementStackNavigator } from "react-navigation-shared-eleme
 import Toast from 'react-native-toast-message'
 
 import { navigationRef } from "./navigation-utilities"
-import { PhotoScreen, LibraryAssetsScreen, BoxListScreen, BoxAddUpdateScreen } from "../screens"
+import { PhotoScreen, LibraryAssetsScreen, BoxListScreen, BoxAddUpdateScreen, AccountScreen, ShareViewerScreen } from "../screens"
 import { HomeNavigator } from "./home-navigator"
 import { ThemeContext } from '../theme';
 import { BoxEntity } from "../realmdb/entities"
+
 enableScreens()
 export type RootStackParamList = {
   Home: undefined
-  Photo: { section: RecyclerAssetListSection }
+  Photo: { section: RecyclerAssetListSection },
+  Account: undefined,
   Settings: undefined,
   BoxList: undefined,
-  BoxAddUpdate: { box: BoxEntity }
+  BoxAddUpdate: { box: BoxEntity },
+  SharedViewer: { assetURI: string }
 }
 export enum AppNavigationNames {
   HomeScreen = "Home",
+  AccountScrenn = "AccountScreen",
   PhotoScreen = "Photo",
   LibraryAssets = "LibraryAssets",
   BoxList = "BoxList",
-  BoxAddUpdate = "BoxAddUpdate"
+  BoxAddUpdate = "BoxAddUpdate",
+  SharedViewer = "SharedViewer"
 }
 const Stack = createSharedElementStackNavigator<RootStackParamList>()
 
@@ -80,10 +85,50 @@ const AppStack = () => {
         }}
         component={PhotoScreen}
         sharedElements={(route) => {
-          const { section } = route.params
-          return [section.data.uri]
+          const { assetId = "" } = route.params
+          return [assetId]
         }}
 
+      />
+      <Stack.Screen
+        name={AppNavigationNames.AccountScrenn}
+        options={{
+          headerShown: false,
+          headerTransparent: true,
+          gestureEnabled: false,
+          headerShown: false,
+          cardOverlayEnabled: true,
+          animationEnabled: true,
+          cardStyleInterpolator: ({ current: { progress } }) => ({
+            cardStyle: {
+              opacity: progress.interpolate({
+                inputRange: [0, 0.5, 0.9, 1],
+                outputRange: [0, 0.25, 0.7, 1],
+              }),
+            },
+            overlayStyle: {
+              opacity: progress.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, 0],
+                extrapolate: "clamp",
+              }),
+            },
+          }),
+        }}
+        component={AccountScreen}
+        sharedElements={(route) => {
+          return [
+            {
+              id: `AccountAvatar`,
+              animation: 'move',
+            },
+          ];
+        }}
+
+      />
+      <Stack.Screen
+        name={AppNavigationNames.SharedViewer}
+        component={ShareViewerScreen}
       />
     </Stack.Navigator>
   )
@@ -94,17 +139,32 @@ type NavigationProps = Partial<React.ComponentProps<typeof NavigationContainer>>
 
 export const AppNavigator = (props: NavigationProps) => {
   const { theme } = useContext(ThemeContext);
+  const [toastVisible, setToastVisible] = useState(false)
+  useEffect(() => {
+    setTimeout(() => {
+      setToastVisible(true)
+    }, 1000);
+  }, [])
   return (
     <Animated.View style={{ flex: 1 }}>
       <NavigationContainer
         theme={theme}
         ref={navigationRef}
+        linking={{
+          prefixes: ["https://fotos.fx.land", "http://fotos.fx.land", "fotos://fotos.fx.land"],
+          config: {
+            initialRouteName: AppNavigationNames.HomeScreen,
+            screens: {
+              [AppNavigationNames.SharedViewer]: "shared/:jwe"
+            }
+          }
+        }}
         //theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}
         {...props}
       >
         <AppStack />
       </NavigationContainer>
-      <Toast/>
+      {toastVisible && <Toast />}
     </Animated.View>
   )
 }

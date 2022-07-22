@@ -10,7 +10,7 @@ import Animated, {
 } from "react-native-reanimated"
 import Toast from 'react-native-toast-message'
 import { snapPoint } from "react-native-redash"
-import { ActivityIndicator, Alert, Dimensions, StyleSheet, View } from "react-native"
+import { ActivityIndicator, Alert, Dimensions, Share, StyleSheet, View } from "react-native"
 import { SharedElement } from "react-navigation-shared-element"
 import {
   TapGestureHandler,
@@ -21,17 +21,22 @@ import {
 import { widthPercentageToDP } from "react-native-responsive-screen"
 import { useNetInfo } from "@react-native-community/netinfo"
 import { RouteProp, NavigationProp } from "@react-navigation/native"
-import { file, fula } from "react-native-fula"
+import { useRecoilState } from "recoil"
+
 import { Asset, SyncStatus } from "../../types"
 import { Constants, palette } from "../../theme"
 import { Header } from "../../components"
 import { HomeNavigationParamList } from "../../navigators"
-import { Card, Icon } from "@rneui/themed"
-import { HeaderArrowBack } from "../../components/header"
-import { useRecoilState } from "recoil"
-import { boxsState } from "../../store"
+import { BottomSheet, Button, Card, Icon, Input, Text } from "@rneui/themed"
+import { HeaderArrowBack, HeaderRightContainer } from "../../components/header"
+import { singleAssetState } from "../../store"
 import { Assets } from "../../services/localdb"
-import { AddBoxs, downloadAsset, uploadAssetsInBackground } from "../../services/sync-service"
+import { AddBoxs, downloadAndDecryptAsset, downloadAsset, uploadAssetsInBackground } from "../../services/sync-service"
+import { Buffer } from "buffer"
+import { TaggedEncryption } from "@functionland/fula-sec"
+import { AddShareMeta, getAssetMeta } from "../../services/remote-db-service"
+import * as helper from "../../utils/helper"
+import { BSON } from "realm"
 
 const { height } = Dimensions.get("window")
 
@@ -40,22 +45,24 @@ interface PhotoScreenProps {
   route: RouteProp<{ params: { section: Asset } }>
 }
 
-export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) => {
-  const [asset, setAsset] = useState(JSON.parse(JSON.stringify(route.params.section?.data)) as Asset)
+export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation }) => {
+  const [asset, setAsset] = useRecoilState(singleAssetState)
   const translateX = useSharedValue(0)
   const translateY = useSharedValue(0)
   const imageScale = useSharedValue(1)
   const isPanGestureActive = useSharedValue(false)
   const isPinchGestureActive = useSharedValue(false)
   const animatedOpacity = useSharedValue(1)
-  const [, setBoxs] = useRecoilState(boxsState)
   const [loading, setLoading] = useState(false)
+  const [sharing, setSharing] = useState(false)
+  const [showShareBottomSheet, setShowShareBottomSheet] = useState(false);
+  const [DID, setDID] = useState("")
   const netInfoState = useNetInfo()
   useEffect(() => {
     return () => {
       Toast.hide();
     }
-  })
+  }, [])
   const wrapperAnimatedStyle = useAnimatedStyle(() => {
     return {
       paddingTop: Constants.HeaderHeight,
@@ -88,18 +95,30 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
             Alert.alert("Warning", error)
             return;
           }
-          const result = await downloadAsset(asset?.cid)
-          console.log("downloadFromBox:", result)
-          setAsset(prev => ({
-            ...prev,
-            uri: result.uri,
-            isDeleted: false
-          }))
-          Assets.addOrUpdate([{
-            id: asset.id,
-            uri: result.uri,
-            isDeleted: false
-          }]);
+          const myDID = await helper.getMyDID()
+          let fileRef = null;
+          if (myDID) {
+            const meta = await getAssetMeta(myDID.authDID, asset.cid);
+            fileRef = (await helper.decryptJWE(myDID.did, meta?.jwe))?.symetricKey;
+          }
+          let result = null;
+          if (fileRef) {
+            result = await downloadAndDecryptAsset(fileRef)
+          } else {
+            result = await downloadAsset(asset?.cid)
+          }
+          if (result) {
+            setAsset(prev => ({
+              ...prev,
+              uri: result.uri,
+              isDeleted: false
+            }))
+            Assets.addOrUpdate([{
+              id: asset.id,
+              uri: result.uri,
+              isDeleted: false
+            }]);
+          }
         } catch (error) {
           console.log("uploadOrDownload", error)
           Alert.alert("Error", "Unable to receive the file, make sure your box is available!")
@@ -265,18 +284,72 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
       imageScale.value = withTiming(1, { duration: 150 })
     }
   }
+  // This method is just for demo
 
+  const shareWithDID = async () => {
+    if (!DID)
+      return
+    setSharing(true);
+    try {
+      const shareAsset = (await Assets.getById(asset.id))?.[0];
+      const myDID = await helper.getMyDID();
+      if (myDID && shareAsset) {
+        const myTag = new TaggedEncryption(myDID.did);
+        const symetricKey = (await helper.decryptJWE(myDID.did, JSON.parse(shareAsset?.jwe)))?.symetricKey;
+        const jwe = await myTag.encrypt(symetricKey, symetricKey?.id, [DID])
+        await AddShareMeta({
+          id: new BSON.UUID().toHexString(),
+          ownerId: myDID.authDID,
+          fileName: asset.filename,
+          cid: asset.cid,
+          jwe: jwe,
+          shareWithId: DID,
+          date: new Date().getTime()
+        })
+        Alert.alert("Shared", "This asset is added to the shared collection on the Box, do you want to create a sharing link too?",
+          [
+            {
+              text: "No",
+              style: "cancel"
+            },
+            {
+              text: "Yes",
+              onPress: () => {
+                Share.share({
+                  title: 'Fotos | Just shared an asset',
+                  message: `https://fotos.fx.land/shared/${Buffer.from(JSON.stringify(jwe), 'utf-8').toString('base64')}`
+                });
+              }
+            }
+          ])
+
+      }
+    } catch (error) {
+      Alert.alert("Error", error.toString())
+      console.log(error)
+    } finally {
+      setSharing(false)
+      setShowShareBottomSheet(false)
+    }
+  }
   const imageContainerStyle = {
-    height: (widthPercentageToDP(100) * asset.height) / asset.width,
+    height: (widthPercentageToDP(100) * asset?.height) / asset?.width,
     width: widthPercentageToDP(100),
   }
   const renderHeader = () => {
     return (<Header
       leftComponent={<HeaderArrowBack navigation={navigation} />}
-      rightComponent={loading ? <ActivityIndicator size="small" /> :
-        (asset?.syncStatus === SyncStatus.SYNCED && !asset?.isDeleted ? <Icon type="material-community" name="cloud-check" />
-          : (asset?.syncStatus === SyncStatus.NOTSYNCED && !asset?.isDeleted ? <Icon type="material-community" name="cloud-upload-outline" onPress={uploadToBox} />
-            : asset?.syncStatus === SyncStatus.SYNC ? <Icon type="material-community" name="refresh" onPress={uploadToBox} /> : null))
+      rightComponent={
+        <HeaderRightContainer>
+          {loading ? <ActivityIndicator size="small" /> :
+            (asset?.syncStatus === SyncStatus.SYNCED && !asset?.isDeleted ? <Icon type="material-community" name="cloud-check" />
+              : (asset?.syncStatus === SyncStatus.NOTSYNCED && !asset?.isDeleted ? <Icon type="material-community" name="cloud-upload-outline" onPress={uploadToBox} />
+                : asset?.syncStatus === SyncStatus.SYNC ? <Icon type="material-community" name="refresh" onPress={uploadToBox} /> : null))}
+          {asset?.syncStatus === SyncStatus.SYNCED && <Icon type="material-community" style={styles.headerIcon} name="share-variant" onPress={() => {
+            setDID("")
+            setShowShareBottomSheet(true)
+          }} />}
+        </HeaderRightContainer>
       } />)
   }
   const renderDownloadSection = () => {
@@ -293,16 +366,29 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation, route }) =
           <TapGestureHandler onActivated={() => onDoubleTap()} numberOfTaps={2}>
             <View>
               {asset?.syncStatus === SyncStatus.SYNCED && asset?.isDeleted && renderDownloadSection()}
-              {!asset?.isDeleted && <SharedElement style={imageContainerStyle} id={asset.uri}>
-                <PinchGestureHandler onGestureEvent={onPinchHandler}>
-                  <Animated.Image
-                    source={{ uri: asset.uri }}
-                    fadeDuration={0}
-                    resizeMode="contain"
-                    style={[styles.image, animatedImage]}
-                  />
-                </PinchGestureHandler>
-              </SharedElement>}
+              {!asset?.isDeleted &&
+                <SharedElement style={imageContainerStyle} id={asset?.id}>
+                  <PinchGestureHandler onGestureEvent={onPinchHandler}>
+                    <Animated.Image
+                      source={{ uri: asset.uri }}
+                      fadeDuration={0}
+                      resizeMode="contain"
+                      style={[styles.image, animatedImage]}
+                    />
+                  </PinchGestureHandler>
+                </SharedElement>
+              }
+              <BottomSheet isVisible={showShareBottomSheet}
+                onBackdropPress={() => setShowShareBottomSheet(false)}
+                modalProps={{ transparent: true, animationType: "fade" }}
+                containerStyle={styles.bottomSheetContainer}
+              >
+                <Card containerStyle={{ borderWidth: 0, margin: 0 }}>
+                  <Card.Title>Share with (enter DID)</Card.Title>
+                  <Input onChangeText={(txt) => setDID(txt)} onEndEditing={shareWithDID} />
+                </Card>
+                <Button title={sharing ? <ActivityIndicator style={styles.activityIndicatorStyle} size="small" /> : "Share"} onPress={shareWithDID} ></Button>
+              </BottomSheet>
             </View>
           </TapGestureHandler>
         </Animated.View>
@@ -315,4 +401,13 @@ const styles = StyleSheet.create({
   image: {
     ...StyleSheet.absoluteFillObject,
   },
+  headerIcon: {
+    marginHorizontal: 10
+  },
+  bottomSheetContainer: {
+    backgroundColor: "rgba(189,189,189,.2)"
+  },
+  activityIndicatorStyle: {
+    padding: 5
+  }
 })

@@ -48,7 +48,7 @@ const AssetItem = (props: Props): JSX.Element => {
       borderColor: theme.colors.background
     }]}>
       <Animated.View style={[styles.imageContainer, imageContainerAnimatedStyle]}>
-        {props?.isDeleted && props?.isSynced ? <Icon type="material-community" name="alpha-f-box-outline" size={50} color="gray" /> : <SharedElement style={styles.sharedElementContainer} id={asset.uri}>
+        {props?.isDeleted && props?.isSynced ? <Icon type="material-community" name="alpha-f-box-outline" size={50} color="gray" /> : <SharedElement style={styles.sharedElementContainer} id={asset.id}>
           <Image
             style={styles.image}
             source={{

@@ -22,16 +22,12 @@ import RecyclerSectionItem from "./asset-items/recycler-section-item"
 import ExternalScrollView from "../external-scroll-view"
 import Cell from "../grid-provider/cell"
 import { useColumnsNumber, useScale, usePinching } from "../grid-provider/gridContext"
-import { NativeStackNavigationProp } from "@react-navigation/native-stack"
-import { HomeNavigationParamList, HomeNavigationTypes } from "../../../navigators/home-navigator"
-import { AppNavigationNames } from "../../../navigators/app-navigator"
 
 import GridLayoutProvider from "../grid-provider/gridLayoutProvider"
 import { LayoutTransitionRange, MIN_COLUMNS } from "../grid-provider/gridLayoutManager"
 import { ThumbScroll } from "../../index"
 
 export interface Props {
-  navigation: NativeStackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>
   sections: RecyclerAssetListSection[]
   numCols: 2 | 3 | 4 | 5
   scale?: SharedValue<number>
@@ -44,6 +40,7 @@ export interface Props {
   onSelectedItemsChange?: (assetIds: string[], selectionMode: boolean) => void
   onAssetLoadError?: (error: NativeSyntheticEvent<ImageErrorEventData>) => void
   renderFooter?: () => JSX.Element | JSX.Element[]
+  onItemPress?: (section: RecyclerAssetListSection) => void
 }
 
 export interface ExtendedState {
@@ -56,7 +53,6 @@ export interface RecyclerAssetListHandler {
 }
 // eslint-disable-next-line react/display-name
 const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(({
-  navigation,
   sections,
   scrollHandler,
   scrollRef,
@@ -64,6 +60,7 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(({
   onSelectedItemsChange,
   onAssetLoadError,
   renderFooter,
+  onItemPress,
   ...extras
 }, ref): JSX.Element => {
   const rclRef = useRef<RecyclerListView>()
@@ -145,8 +142,8 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(({
   }, [])
 
   const onPress = useCallback((section: RecyclerAssetListSection) => {
-    if (!extendedState.selectionMode && section.type === ViewType.ASSET) {
-      navigation.push(AppNavigationNames.PhotoScreen, { section: section })
+    if (!extendedState.selectionMode) {
+      onItemPress?.(section);
     } else toggleSelection(section)
   }, [extendedState.selectionMode])
 
