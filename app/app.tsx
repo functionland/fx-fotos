@@ -88,7 +88,6 @@ function App() {
   // otherwise, we're ready to render the app
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <ToggleStorybook>
         <RneThemeProvider theme={scheme === "dark" ? RneDarkTheme : RneLightTheme}>
           <ThemeProvider>
             <SafeAreaProvider initialMetrics={initialWindowMetrics}>
@@ -106,7 +105,6 @@ function App() {
             </SafeAreaProvider>
           </ThemeProvider>
         </RneThemeProvider>
-      </ToggleStorybook>
     </GestureHandlerRootView>
 
   )

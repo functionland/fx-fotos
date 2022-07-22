@@ -231,5 +231,12 @@
   },
   "resolutions": {
     "react-native-svg": "^12.3.0"
+  },
+  "expo": {
+    "autolinking": {
+      "ios": {
+        "exclude": ["expo-font"]
+      }
+    }
   }
 }
