@@ -49,7 +49,7 @@
     "i18n-js": "3.8.0",
     "lottie-ios": "3.2.3",
     "lottie-react-native": "^5.0.1",
-    "moment": "^2.29.1",
+    "moment": "^2.29.4",
     "react": "17.0.2",
     "react-native": "0.66.3",
     "react-native-background-actions": "^2.6.7",
