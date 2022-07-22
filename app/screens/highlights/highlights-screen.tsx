@@ -196,7 +196,6 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
                 )
               }}
               getItemLayout={(data, index) => {
-                console.log({ len: data.length, idx: index })
                 return {
                   length: widthPercentageToDP(100),
                   offset: widthPercentageToDP(100) * index,
