@@ -1,5 +1,5 @@
 import React from "react"
-import { View } from "react-native"
+import { View, Platform } from "react-native"
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import { useTheme } from "@react-navigation/native"
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5"
@@ -34,7 +34,7 @@ export function HomeNavigator() {
         headerShown: false,
         header: (props) => <TabHeader {...props} />,
         tabBarStyle: {
-          height: 70,
+          height: Platform.OS === 'ios' ? 90 : 70,
         },
         tabBarLabelStyle: {
           fontSize: 15,

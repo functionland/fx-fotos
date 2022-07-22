@@ -16,7 +16,7 @@ export type AssetEntity = {
   /**
    * __iOS Only.__ An array of media subtypes.
    */
-  mediaSubtypes: string | undefined
+  mediaSubtypes: string[] | undefined
   /**
    * Width of the image or video.
    */

@@ -18,7 +18,7 @@ export const Asset = {
     /**
      * __iOS Only.__ An array of media subtypes.
      */
-    mediaSubtypes: "string?",
+    mediaSubtypes: "string?[]",
     /**
      * Width of the image or video.
      */
