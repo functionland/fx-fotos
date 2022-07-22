@@ -130,6 +130,7 @@ export const AssetListScreen: React.FC<Props> = ({ navigation, medias, defaultHe
     setSelectionMode(selectionMode);
     setSelectedItems(assetIds);
   }
+  
   const renderHeader = () => {
     if (selectionMode) {
       return (<Header

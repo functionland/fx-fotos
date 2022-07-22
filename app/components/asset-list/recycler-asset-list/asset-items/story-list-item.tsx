@@ -1,45 +1,69 @@
-import React from "react"
-import { FlatList, View, StyleSheet, Text } from "react-native"
-import { AssetStory } from "../../../types"
+import * as React from "react"
+import { useNavigation } from "@react-navigation/native"
+import { widthPercentageToDP as wp } from "react-native-responsive-screen"
+import { Image, FlatList, StyleSheet, Pressable } from "react-native"
+import { Text, useTheme } from "@rneui/themed"
+
+import { AssetStory } from "../../../../types"
+import { AppNavigationNames } from "../../../../navigators"
 
 interface Props {
   stories: AssetStory[]
 }
 
-const StoryListItem = (props: Props): JSX.Element => {
-  const { stories } = props
+const StoryListItem = ({ stories }: Props): JSX.Element => {
+  const navigation = useNavigation()
+  const { theme } = useTheme();
+
   return (
-    <View style={styles.container}>
-      <FlatList
-        data={stories}
-        horizontal={true}
-        keyExtractor={(item, index) => "StoryItem_" + index}
-        // getItemLayout={(data, index) => {
-        //     return {
-        //         length: 15 + StoriesHeight / 1.618,
-        //         offset: index * (15 + StoriesHeight / 1.618),
-        //         index: index
-        //     }
-        // }}
-        showsHorizontalScrollIndicator={false}
-        renderItem={({ item, index }) => (
-          <View key={index} style={styles.itemCntainer}>
-            <Text>{item.title}</Text>
-          </View>
-        )}
-      />
-    </View>
+    <FlatList
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={styles.flatListContainer}
+      keyExtractor={(item) => item.id}
+      data={stories}
+      renderItem={({ item }) => {
+        if (item.data.length === 0) {
+          return null
+        }
+
+        return (
+          <Pressable
+            style={styles.container}
+            android_ripple={{ color: theme.colors.background, foreground: true }}
+            onPress={() =>
+              navigation.navigate(AppNavigationNames.HighlightScreen, { highlights: item })
+            }
+          >
+            <Image source={{ uri: item.data[0].uri }} fadeDuration={0} style={styles.image} />
+            <Text style={styles.label}>
+              {item.title}
+            </Text>
+          </Pressable>
+        )
+      }}
+    />
   )
 }
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  flatListContainer:{
+    paddingTop:3
   },
-  itemCntainer: {
-    alignItems: "center",
+  container: {
+    width: wp(30),
     height: "100%",
-    justifyContent: "center",
-    width: 150,
+    borderRadius: 10,
+    overflow: "hidden",
+    marginHorizontal: 4,
+  },
+  image: { height: "100%", width: "100%", opacity: 0.5 },
+  label: { position: "absolute", zIndex: 999, left: 10, bottom: 10 },
+  storyIndicatorBar: {
+    backgroundColor: "red",
+    height: 5,
+    marginLeft: 2,
+    borderRadius: 100,
   },
 })
 
