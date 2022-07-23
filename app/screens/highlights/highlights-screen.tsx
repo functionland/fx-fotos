@@ -1,6 +1,6 @@
 import * as React from "react"
 import { RouteProp, useNavigation } from "@react-navigation/native"
-import { View, StyleSheet, TouchableOpacity, Dimensions } from "react-native"
+import { Image, View, StyleSheet, TouchableOpacity, Dimensions, Platform } from "react-native"
 import { FlatList, LongPressGestureHandler, PanGestureHandler } from "react-native-gesture-handler"
 import { heightPercentageToDP, widthPercentageToDP } from "react-native-responsive-screen"
 import Animated, {
@@ -112,7 +112,7 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
     [pauseAnimation],
   )
 
-  const { height, width: screenWidth } = Dimensions.get("window")
+  const { height: screenHeight, width: screenWidth } = Dimensions.get("window")
 
   const translateX = useSharedValue(0)
   const translateY = useSharedValue(0)
@@ -121,7 +121,7 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
   const isPinchGestureActive = useSharedValue(false)
 
   const animatedStyle = useAnimatedStyle(() => {
-    const scale = interpolate(translateY.value, [0, height], [1, 0.5], Extrapolate.CLAMP)
+    const scale = interpolate(translateY.value, [0, screenHeight], [1, 0.5], Extrapolate.CLAMP)
     return {
       alignItems: "center",
       flex: 1,
@@ -184,21 +184,30 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
               ref={highlightListRef}
               scrollEnabled={false}
               horizontal={true}
-              keyExtractor={(_, index) => `image_${index}` }
+              keyExtractor={(_, index) => `image_${index}`}
               data={stories}
               renderItem={({ item }) => {
                 return (
-                  <FastImage
-                    resizeMode={FastImage.resizeMode.contain}
-                    source={{ uri: item.uri, priority: FastImage.priority.high }}
-                    style={{ height: height, width: screenWidth }}
-                  />
+                  <>
+                    {Platform.OS === "ios" ? (
+                      <Image
+                        source={{ uri: item.uri }}
+                        style={{ height: screenHeight, width: screenWidth, resizeMode: "contain" }}
+                      />
+                    ) : (
+                      <FastImage
+                        resizeMode={FastImage.resizeMode.cover}
+                        source={{ uri: item.uri, priority: FastImage.priority.high }}
+                        style={{ height: screenHeight, width: screenWidth }}
+                      />
+                    )}
+                  </>
                 )
               }}
               getItemLayout={(data, index) => {
                 return {
-                  length: widthPercentageToDP(100),
-                  offset: widthPercentageToDP(100) * index,
+                  length: screenHeight,
+                  offset: screenWidth * index,
                   index,
                 }
               }}
