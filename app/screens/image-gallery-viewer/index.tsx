@@ -17,7 +17,7 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
   route,
 }) => {
   const { medias, assetId } = route.params
-  const [currentIndex, setCurrentIndex] = useState(0)
+  const [currentIndex, setCurrentIndex] = useState(null)
   if (currentIndex === null) {
     medias.forEach((asset, idx) => {
       if (asset.id === assetId) {

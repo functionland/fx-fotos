@@ -1,5 +1,5 @@
-import React, { MutableRefObject, useRef, useState } from "react"
-import {useWindowDimensions } from "react-native"
+import React, { MutableRefObject, useEffect, useRef, useState } from "react"
+import { useWindowDimensions } from "react-native"
 import {
   FlatList,
   PanGestureHandler,
@@ -24,62 +24,57 @@ type GalleryImageProps = {
   listRef: MutableRefObject<FlatList>
 }
 
-const MAX_SCALE = 3
+const MAX_SCALE = 6
 export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef }) => {
   const dims = useWindowDimensions()
-  const imageScale = useSharedValue(1)
+  const accumulatedScale = useSharedValue(1)
   const curScale = useSharedValue(1)
   const translateX = useSharedValue(0)
   const translateY = useSharedValue(0)
-  const offsetX = useSharedValue(0)
-  const offsetY = useSharedValue(0)
+  const accumulatedX = useSharedValue(0)
+  const accumulatedY = useSharedValue(0)
   const panHandlerRef = useRef(null)
   const pinchHandlerRef = useRef(null)
-  const imageAspectRatio = useSharedValue(0);
 
-  const [zoom, setZoom] = useState(true)
+  const [isZoomed, setIsZoomed] = useState(false)
 
   const xLimit = useDerivedValue(() => {
-    const width = dims.width / 2
-    console.log("limit x ", width * imageScale.value - width)
-    const limit = width * imageScale.value - width
-    // if (offsetX.value > limit) {
-    //   offsetX.value = limit
-    //   translateX.value = limit
-    // }
-    // if (offsetX.value < -limit) {
-    //   offsetX.value = -limit
-    //   translateX.value = -limit
-    // }
+    const imageWidth = dims.width / 2
+    const limit = imageWidth * accumulatedScale.value - imageWidth
+    if (accumulatedX.value > limit) {
+      accumulatedX.value = limit
+      translateX.value = withTiming(limit)
+    }
+    if (accumulatedX.value < -limit) {
+      accumulatedX.value = -limit
+      translateX.value = withTiming(-limit)
+    }
     return limit
-  }, [imageScale.value])
+  }, [accumulatedScale.value])
 
   const yLimit = useDerivedValue(() => {
-    const imageHeight = dims.width * imageAspectRatio.value
-    const height = imageHeight / 2
-    const limit = height * imageScale.value - height
-    // if (offsetY.value > limit) {
-    //   offsetY.value = limit
-    //   translateY.value = limit
-    // }
-    // if (offsetY.value < -limit) {
-    //   offsetY.value = -limit
-    //   translateY.value = -limit
-    // }
+    const imageHeight = dims.height / 2
+    const limit = imageHeight * accumulatedScale.value - imageHeight
+    if (accumulatedY.value > limit) {
+      accumulatedY.value = limit
+      translateY.value = withTiming(limit)
+    }
+    if (accumulatedY.value < -limit) {
+      accumulatedY.value = -limit
+      translateY.value = withTiming(-limit)
+    }
     return limit
-  }, [imageScale.value])
-
-  
+  }, [accumulatedScale.value])
 
   const onDoubleTap = (event: TapGestureHandlerStateChangeEvent) => {
-    if (imageScale.value == 1) {
-      imageScale.value = withTiming(MAX_SCALE, { duration: 200 })
+    if (accumulatedScale.value == 1) {
+      accumulatedScale.value = withTiming(MAX_SCALE, { duration: 200 })
       curScale.value = MAX_SCALE
-      // setZoom(true)
+      setIsZoomed(true)
       disableParentListScroll()
     } else {
       resetValues(true)
-      // setZoom(false)
+      setIsZoomed(false)
       enableParentListScroll()
     }
   }
@@ -94,20 +89,18 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef }) =>
 
   const resetValues = (animated: boolean) => {
     curScale.value = 1
-    imageScale.value = animated ? withTiming(1, { duration: 150 }) : 1
-    // translateX.value = interpolate(imageScale.value, [1, imageScale.value], [0, translateX.value])
-    // translateY.value = interpolate(imageScale.value, [1, imageScale.value], [0, translateY.value])
-    offsetX.value = 0
-    offsetY.value = 0
-    translateX.value = animated ? withTiming(0, { duration: 300 }) : 0
-    translateY.value = animated ? withTiming(0, { duration: 300 }) : 0
+    accumulatedScale.value = animated ? withTiming(1, { duration: 150 }) : 1
+    accumulatedX.value = 0
+    accumulatedY.value = 0
+    translateX.value = animated ? withTiming(0, { duration: 150 }) : 0
+    translateY.value = animated ? withTiming(0, { duration: 150 }) : 0
   }
 
   const onPan = useAnimatedGestureHandler<PanGestureHandlerGestureEvent>({
     onActive(event) {
-      if (zoom) {
-        const newX = offsetX.value + event.translationX
-        const newY = offsetY.value + event.translationY
+      if (isZoomed) {
+        const newX = accumulatedX.value + event.translationX
+        const newY = accumulatedY.value + event.translationY
         if (newX < xLimit.value && newX > -xLimit.value) {
           translateX.value = newX
         }
@@ -118,31 +111,54 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef }) =>
     },
     onFinish(event, context, isCanceledOrFailed) {
       if (!isCanceledOrFailed) {
-        offsetX.value = translateX.value
-        offsetY.value = translateY.value
+        accumulatedX.value = translateX.value
+        accumulatedY.value = translateY.value
       }
     },
   })
 
   const onPinch = useAnimatedGestureHandler<PinchGestureHandlerGestureEvent>({
     onActive(event) {
-      imageScale.value = curScale.value * event.scale
-    },
-    onFinish(event) {
-      if (curScale.value * event.scale < 1) {
-        imageScale.value = withTiming(1)
-        curScale.value = 1
-      } else if (curScale.value * event.scale > MAX_SCALE) {
-        curScale.value = MAX_SCALE
-        imageScale.value = withTiming(MAX_SCALE)
-      } else {
-        curScale.value = imageScale.value
+      const newScale = curScale.value * event.scale
+      if (newScale > 1 && newScale < MAX_SCALE) {
+        accumulatedScale.value = newScale
+        if (translateX.value > xLimit.value) {
+          accumulatedX.value = xLimit.value
+          translateX.value = xLimit.value
+        }
+        if (translateX.value < -xLimit.value) {
+          accumulatedX.value = -xLimit.value
+          translateX.value = -xLimit.value
+        }
+        if (translateY.value > yLimit.value) {
+          accumulatedY.value = yLimit.value
+          translateY.value = yLimit.value
+        }
+        if (translateY.value < -yLimit.value) {
+          accumulatedY.value = -yLimit.value
+          translateY.value = -yLimit.value
+        }
       }
-      //handle scroll on scale
-      if (imageScale.value != 1) {
-        runOnJS(disableParentListScroll)()
-      } else {
-        runOnJS(enableParentListScroll)()
+    },
+    onFinish(event, context, isCanceledOrFailed) {
+      if (!isCanceledOrFailed) {
+        if (curScale.value * event.scale < 1) {
+          accumulatedScale.value = withTiming(1)
+          curScale.value = 1
+        } else if (curScale.value * event.scale > MAX_SCALE) {
+          curScale.value = MAX_SCALE
+          accumulatedScale.value = withTiming(MAX_SCALE)
+        } else {
+          curScale.value = accumulatedScale.value
+        }
+
+        if (curScale.value > 1) {
+          runOnJS(setIsZoomed)(true)
+          runOnJS(disableParentListScroll)()
+        } else {
+          runOnJS(setIsZoomed)(false)
+          runOnJS(enableParentListScroll)()
+        }
       }
     },
   })
@@ -151,55 +167,50 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef }) =>
     return {
       transform: [
         {
-          scale: imageScale.value,
+          scale: accumulatedScale.value,
         },
         {
-          translateX: translateX.value / imageScale.value,
+          translateX: translateX.value / accumulatedScale.value,
         },
         {
-          translateY: translateY.value / imageScale.value,
+          translateY: translateY.value / accumulatedScale.value,
         },
       ],
     }
   })
   return (
-      <TapGestureHandler
-        numberOfTaps={2}
-        maxDist={20}
-        onActivated={onDoubleTap}
-        waitFor={[panHandlerRef, pinchHandlerRef]}
-      >
-        <Animated.View>
-          <PinchGestureHandler
-            ref={pinchHandlerRef}
-            onGestureEvent={onPinch}
-            simultaneousHandlers={panHandlerRef}
-          >
-            <Animated.View>
-              <PanGestureHandler
-                ref={panHandlerRef}
-                onGestureEvent={onPan}
-                simultaneousHandlers={pinchHandlerRef}
-              >
-                <Animated.Image
-                  source={{ uri: asset.uri }}
-                  onLayout={(event) => {
-                    // console.log('==> ', event.nativeEvent.layout)
-                  }}
-                  onLoad={(event) => {
-                    imageAspectRatio.value = event.nativeEvent.source.width / event.nativeEvent.source.height;
-                  }}
-                  fadeDuration={0}
-                  resizeMode="contain"
-                  style={[
-                    { width: dims.width, aspectRatio: dims.width / dims.height },
-                    animatedImageStyle,
-                  ]}
-                />
-              </PanGestureHandler>
-            </Animated.View>
-           </PinchGestureHandler>
-         </Animated.View>
-       </TapGestureHandler>
+    <TapGestureHandler
+      numberOfTaps={2}
+      maxDist={10}
+      onActivated={onDoubleTap}
+      waitFor={[panHandlerRef, pinchHandlerRef]}
+    >
+      <Animated.View>
+        <PinchGestureHandler
+          ref={pinchHandlerRef}
+          onGestureEvent={onPinch}
+          simultaneousHandlers={panHandlerRef}
+        >
+          <Animated.View>
+            <PanGestureHandler
+              enabled={isZoomed}
+              ref={panHandlerRef}
+              onGestureEvent={onPan}
+              simultaneousHandlers={pinchHandlerRef}
+            >
+              <Animated.Image
+                source={{ uri: asset.uri }}
+                fadeDuration={0}
+                resizeMode="contain"
+                style={[
+                  { width: dims.width, aspectRatio: dims.width / dims.height },
+                  animatedImageStyle,
+                ]}
+              />
+            </PanGestureHandler>
+          </Animated.View>
+        </PinchGestureHandler>
+      </Animated.View>
+    </TapGestureHandler>
   )
 }
