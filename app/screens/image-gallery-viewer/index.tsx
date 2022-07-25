@@ -1,12 +1,12 @@
 import { NavigationProp, RouteProp } from "@react-navigation/native"
-import React from "react"
-import { Animated, Image, StyleSheet } from "react-native"
-import { widthPercentageToDP } from "react-native-responsive-screen"
-import { SharedElement } from "react-navigation-shared-element"
-import { useRecoilState } from "recoil"
+import React, { useState, useRef } from "react"
+import {StyleSheet} from "react-native"
+import {
+  FlatList,
+} from "react-native-gesture-handler"
 import { Screen } from "../../components"
 import { RootStackParamList } from "../../navigators"
-import { singleAssetState } from "../../store"
+import { GalleryImage } from "./gallery-image"
 
 interface ImageGalleryViewerScreenProps {
   navigation: NavigationProp<RootStackParamList>
@@ -14,26 +14,38 @@ interface ImageGalleryViewerScreenProps {
 }
 
 export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> = ({
-  navigation,
   route,
 }) => {
+  const { medias, assetId } = route.params
+  const [currentIndex, setCurrentIndex] = useState(0)
+  if (currentIndex === null) {
+    medias.forEach((asset, idx) => {
+      if (asset.id === assetId) {
+        setCurrentIndex(idx)
+      }
+    })
+  }
 
-  const [singleAsset, setSingleAsset] = useRecoilState(singleAssetState)
-  const imageContainerStyle = {
-    height: (widthPercentageToDP(100) * singleAsset?.height) / singleAsset?.width,
-    width: widthPercentageToDP(100),
+  const listRef = useRef();
+
+  const renderItem = ({ item }) => {
+    return <GalleryImage asset={item} listRef={listRef}  />
   }
 
   return (
-    <Screen style={styles.screen}>
-      <SharedElement style={imageContainerStyle} id={route.params.assetId}>
-        <Image
-          source={{ uri: singleAsset.uri }}
-          fadeDuration={0}
-          resizeMode="contain"
-          style={styles.image}
-        />
-      </SharedElement>
+    <Screen style={styles.screen} backgroundColor={"black"} statusBar={"dark-content"}>
+      <FlatList
+        ref={listRef}
+        style={{ flex: 1 }}
+        data={medias}
+        initialScrollIndex={currentIndex}
+        horizontal={true}
+        pagingEnabled
+        initialNumToRender={1}
+        maxToRenderPerBatch={1}
+        windowSize={2}
+        renderItem={renderItem}
+      />
     </Screen>
   )
 }
@@ -44,7 +56,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   image: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
 })
