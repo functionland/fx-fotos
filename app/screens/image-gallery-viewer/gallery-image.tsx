@@ -1,6 +1,7 @@
+import { useNavigation } from "@react-navigation/native"
 import moment from "moment"
-import React, { MutableRefObject, useRef } from "react"
-import { StyleSheet, View } from "react-native"
+import React, { MutableRefObject, useRef} from "react"
+import { View } from "react-native"
 import { useWindowDimensions } from "react-native"
 import {
   FlatList,
@@ -12,9 +13,9 @@ import {
   TapGestureHandler,
 } from "react-native-gesture-handler"
 import Animated, {
+  interpolate,
   runOnJS,
   useAnimatedGestureHandler,
-  useAnimatedReaction,
   useAnimatedStyle,
   useDerivedValue,
   useSharedValue,
@@ -31,6 +32,7 @@ type GalleryImageProps = {
 
 const MAX_SCALE = 6
 export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, listGestureRef }) => {
+  const navigation = useNavigation();
   const dims = useWindowDimensions()
   const accumulatedScale = useSharedValue(1)
   const curScale = useSharedValue(1)
@@ -38,10 +40,9 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, list
   const translateY = useSharedValue(0)
   const accumulatedX = useSharedValue(0)
   const accumulatedY = useSharedValue(0)
-  const xLimit = useSharedValue(0)
-  const yLimit = useSharedValue(0)
-  const bottomSheetOffset = useSharedValue(0)
-  const isSwipeUpStarted = useSharedValue(false)
+  const bottomSheetOpacity = useSharedValue(0)
+  const isImageInfoSheetOpened = useSharedValue(false)
+  const screenOpacity = useSharedValue(1)
   const panHandlerRef = useRef(null)
   const pinchHandlerRef = useRef(null)
 
@@ -53,40 +54,39 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, list
     }
   })
 
-  const bottomSheetOpacity = useDerivedValue(() => {
-    return Math.abs(bottomSheetOffset.value) > 20 ? 1 : 0
+  const xLimit = useDerivedValue(() => {
+    const imageWidth = dims.width / 2
+    const limit = imageWidth * accumulatedScale.value - imageWidth
+    if (accumulatedX.value > limit) {
+      accumulatedX.value = limit
+      translateX.value = withTiming(limit)
+    }
+    if (accumulatedX.value < -limit) {
+      accumulatedX.value = -limit
+      translateX.value = withTiming(-limit)
+    }
+    return limit
   })
 
-  useAnimatedReaction(
-    () => accumulatedScale.value,
-    () => {
-      const imageWidth = dims.width / 2
-      const xlimit = imageWidth * accumulatedScale.value - imageWidth
-      if (accumulatedX.value > xlimit) {
-        accumulatedX.value = xlimit
-        translateX.value = withTiming(xlimit)
-      }
-      if (accumulatedX.value < -xlimit) {
-        accumulatedX.value = -xlimit
-        translateX.value = withTiming(-xlimit)
-      }
-      xLimit.value = xlimit
-
-      const imageHeight = dims.height / 2
-      const ylimit = imageHeight * accumulatedScale.value - imageHeight
-      if (accumulatedY.value > ylimit) {
-        accumulatedY.value = ylimit
-        translateY.value = withTiming(ylimit)
-      }
-      if (accumulatedY.value < -ylimit) {
-        accumulatedY.value = -ylimit
-        translateY.value = withTiming(-ylimit)
-      }
-      yLimit.value = ylimit
-    },
-  )
+  const yLimit = useDerivedValue(() => {
+    const imageHeight = dims.height / 2
+    const limit = imageHeight * accumulatedScale.value - imageHeight
+    if (accumulatedY.value > limit) {
+      accumulatedY.value = limit
+      translateY.value = withTiming(limit)
+    }
+    if (accumulatedY.value < -limit) {
+      accumulatedY.value = -limit
+      translateY.value = withTiming(-limit)
+    }
+    return limit
+  })
 
   const onDoubleTap = () => {
+    if (isImageInfoSheetOpened.value) {
+      return
+    }
+
     if (accumulatedScale.value == 1) {
       accumulatedScale.value = withTiming(MAX_SCALE, { duration: 200 })
       curScale.value = MAX_SCALE
@@ -129,36 +129,37 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, list
         const { translationX, translationY } = event
 
         // Left / Right Swipe started.
-        if (Math.abs(translationX) > 5 && Math.abs(translationY) < 5) {
+        if (Math.abs(translationX) > 1) {
           return
         }
 
         // Up Swipe started.
-        if (translationY < -5 && Math.abs(translationX) < 10) {
-          isSwipeUpStarted.value = true
-        }
-
-        if (isSwipeUpStarted.value && translationY < 0) {
-          translateY.value = translationY
-          bottomSheetOffset.value = translationY
-          runOnJS(disableParentListScroll)()
+        if (!isImageInfoSheetOpened.value) {
+          // Start of Swipe up gesture
+          if (translationY < -5) {
+            bottomSheetOpacity.value = withTiming(1)
+            translateY.value = withTiming(-200)
+            runOnJS(disableParentListScroll)()
+            isImageInfoSheetOpened.value = true
+          }
         }
       }
     },
     onFinish(event, _, isCanceledOrFailed) {
       if (!isCanceledOrFailed) {
-        accumulatedX.value = translateX.value
-        accumulatedY.value = translateY.value
-
-        if (!isZoomed.value) {
-          if (isSwipeUpStarted.value) {
-            bottomSheetOffset.value = withTiming(0)
-            translateY.value = withTiming(accumulatedScale.value)
-            runOnJS(enableParentListScroll)()
-            isSwipeUpStarted.value = false
-          } else {
-            console.log("here onFinished ")
-            
+        if (isZoomed.value) {
+          accumulatedX.value = translateX.value
+          accumulatedY.value = translateY.value
+        } else {
+          if (isImageInfoSheetOpened.value) {
+            const { translationY } = event
+            if (translationY > 0) {
+              // End of swipe down gesture
+              bottomSheetOpacity.value = withTiming(0)
+              translateY.value = withTiming(0)
+              runOnJS(enableParentListScroll)()
+              isImageInfoSheetOpened.value = false
+            }
           }
         }
       }
@@ -167,9 +168,20 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, list
 
   const onPinch = useAnimatedGestureHandler<PinchGestureHandlerGestureEvent>({
     onActive(event) {
+      if (isImageInfoSheetOpened.value) {
+        return
+      }
+
       const newScale = curScale.value * event.scale
+      accumulatedScale.value = newScale
+      if(newScale < 0.6){
+        screenOpacity.value = interpolate(event.scale, [0, 0.6], [0, 1])
+      }
+      else{
+        screenOpacity.value = withTiming(1)
+      }
       if (newScale > 1 && newScale < MAX_SCALE) {
-        accumulatedScale.value = newScale
+        // accumulatedScale.value = newScale
         if (translateX.value > xLimit.value) {
           accumulatedX.value = xLimit.value
           translateX.value = xLimit.value
@@ -189,11 +201,18 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, list
       }
     },
     onFinish(event, context, isCanceledOrFailed) {
+      if(isImageInfoSheetOpened.value){
+        return
+      }
       if (!isCanceledOrFailed) {
-        if (curScale.value * event.scale < 1) {
+        const newScale = curScale.value * event.scale
+        if (newScale < 1) {
+          if(newScale < 0.6){
+            runOnJS(navigation.goBack)()
+          }
           accumulatedScale.value = withTiming(1)
           curScale.value = 1
-        } else if (curScale.value * event.scale > MAX_SCALE) {
+        } else if (newScale > MAX_SCALE) {
           curScale.value = MAX_SCALE
           accumulatedScale.value = withTiming(MAX_SCALE)
         } else {
@@ -228,16 +247,17 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, list
   const bottomSheetStyle = useAnimatedStyle(() => {
     return {
       opacity: bottomSheetOpacity.value,
-      transform: [
-        {
-          translateY: bottomSheetOffset.value,
-        },
-      ],
+    }
+  })
+
+  const screenStyle = useAnimatedStyle(() => {
+    return {
+      opacity: screenOpacity.value
     }
   })
 
   return (
-    <View>
+    <Animated.View style={screenStyle}>
       <TapGestureHandler
         numberOfTaps={2}
         maxDist={10}
@@ -256,46 +276,63 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, list
                 onGestureEvent={onPan}
                 simultaneousHandlers={[pinchHandlerRef, listGestureRef]}
               >
-                <Animated.Image
-                  source={{ uri: asset.uri }}
-                  fadeDuration={0}
-                  resizeMode="contain"
-                  style={[
-                    { width: dims.width, aspectRatio: dims.width / dims.height },
-                    animatedImageStyle,
-                  ]}
-                />
+                <Animated.View style={animatedImageStyle}>
+                  <Animated.Image
+                    source={{ uri: asset.uri }}
+                    fadeDuration={0}
+                    resizeMode="contain"
+                    style={[
+                      { width: dims.width, aspectRatio: dims.width / dims.height },
+                    ]}
+                  />
+                  <Animated.View
+                    style={[
+                      {
+                        position: "absolute",
+                        top: '75%',
+                        height: dims.height,
+                        left: 0,
+                        right: 0,
+                        backgroundColor: "white",
+                        borderTopStartRadius: 20,
+                        borderTopEndRadius: 20,
+                        padding: 20,
+                        elevation: 5
+                      },
+                      bottomSheetStyle,
+                    ]}
+                  >
+                    <View
+                      style={{
+                        width: 30,
+                        borderRadius: 2,
+                        height: 4,
+                        opacity: 0.25,
+                        backgroundColor: 'black',
+                        alignSelf: 'center',
+                        position: 'absolute',
+                        top: 10,
+                      }}
+                    />
+                    <Text style={{color: 'black', fontWeight: 'bold', fontSize: 18, marginVertical: 8}}>{moment(asset.modificationTime).format("ddd, Do MMM YYYY . h:mm")}</Text>
+                    <Text style={{color: 'black', fontWeight: 'bold', marginBottom: 8}}>Details</Text>
+                    <View style={{ flexDirection: "row", marginBottom: 8}}>
+                      <Text style={{color: 'black', fontWeight: 'bold'}}>Location:</Text>
+                      <Text style={{ marginLeft: 10, color: 'black', flex: 1 }}>{asset.uri}</Text>
+                    </View>
+                    <View style={{ flexDirection: "row" }}>
+                      <Text style={{color: 'black', fontWeight: 'bold'}}>Dimensions:</Text>
+                      <Text style={{ marginLeft: 10, color: 'black' }}>
+                        {asset.width} X {asset.height}
+                      </Text>
+                    </View>
+                  </Animated.View>
+                </Animated.View>
               </PanGestureHandler>
             </Animated.View>
           </PinchGestureHandler>
         </Animated.View>
       </TapGestureHandler>
-      <Animated.View
-        style={[{ position: "absolute", bottom: 0, left: 0, right: 0 }, bottomSheetStyle]}
-      >
-        <View
-          style={{
-            borderBottomColor: "white",
-            borderBottomWidth: StyleSheet.hairlineWidth,
-          }}
-        />
-        <Text>{moment(asset.modificationTime).format("ddd, Do MMM YYYY . h:mm")}</Text>
-        <Text>Details</Text>
-        <View style={{ flexDirection: "row" }}>
-          <Text>Location</Text>
-          <Text style={{ marginLeft: 10 }}>{asset.uri}</Text>
-        </View>
-        <View style={{ flexDirection: "row" }}>
-          <Text>Location</Text>
-          <Text style={{ marginLeft: 10 }}>{asset.uri}</Text>
-        </View>
-        <View style={{ flexDirection: "row" }}>
-          <Text>Dimensions</Text>
-          <Text style={{ marginLeft: 10 }}>
-            {asset.width} X {asset.height}
-          </Text>
-        </View>
-      </Animated.View>
-    </View>
+    </Animated.View>
   )
 }
