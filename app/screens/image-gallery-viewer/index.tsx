@@ -1,5 +1,6 @@
 import { NavigationProp, RouteProp } from "@react-navigation/native"
 import React, { useState, useRef } from "react"
+import { useWindowDimensions } from "react-native"
 import { StyleSheet } from "react-native"
 import { FlatList, NativeViewGestureHandler } from "react-native-gesture-handler"
 import { Screen } from "../../components"
@@ -13,6 +14,7 @@ interface ImageGalleryViewerScreenProps {
 
 export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> = ({ route }) => {
   const { medias, assetId } = route.params
+  const windowDims = useWindowDimensions();
   const [currentIndex, setCurrentIndex] = useState(null)
   if (currentIndex === null) {
     medias.forEach((asset, idx) => {
@@ -29,6 +31,10 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
     return <GalleryImage asset={item} listRef={listRef} listGestureRef={listGestureRef} />
   }
 
+  const getItemLayout = (data, index) => {
+    return {length: windowDims.width, offset: windowDims.width*index, index: index}
+  }
+
   return (
     <Screen style={styles.screen} backgroundColor={"black"} statusBar={"dark-content"}>
       <NativeViewGestureHandler ref={listGestureRef} >
@@ -36,6 +42,7 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
           ref={listRef}
           style={{ flex: 1 }}
           data={medias}
+          getItemLayout={getItemLayout}
           initialScrollIndex={currentIndex}
           horizontal={true}
           pagingEnabled

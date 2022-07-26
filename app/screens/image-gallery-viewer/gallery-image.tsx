@@ -1,6 +1,6 @@
 import { useNavigation } from "@react-navigation/native"
 import moment from "moment"
-import React, { MutableRefObject, useRef} from "react"
+import React, { MutableRefObject, useRef } from "react"
 import { View } from "react-native"
 import { useWindowDimensions } from "react-native"
 import {
@@ -11,6 +11,7 @@ import {
   PinchGestureHandler,
   PinchGestureHandlerGestureEvent,
   TapGestureHandler,
+  TapGestureHandlerGestureEvent,
 } from "react-native-gesture-handler"
 import Animated, {
   interpolate,
@@ -32,7 +33,7 @@ type GalleryImageProps = {
 
 const MAX_SCALE = 6
 export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, listGestureRef }) => {
-  const navigation = useNavigation();
+  const navigation = useNavigation()
   const dims = useWindowDimensions()
   const accumulatedScale = useSharedValue(1)
   const curScale = useSharedValue(1)
@@ -82,20 +83,18 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, list
     return limit
   })
 
-  const onDoubleTap = () => {
-    if (isImageInfoSheetOpened.value) {
-      return
-    }
-
-    if (accumulatedScale.value == 1) {
-      accumulatedScale.value = withTiming(MAX_SCALE, { duration: 200 })
-      curScale.value = MAX_SCALE
-      disableParentListScroll()
-    } else {
-      resetValues(true)
-      enableParentListScroll()
-    }
-  }
+  const onDoubleTap = useAnimatedGestureHandler<TapGestureHandlerGestureEvent>({
+    onActive() {
+      if (!isZoomed.value) {
+        accumulatedScale.value = withTiming(MAX_SCALE)
+      } else {
+        accumulatedScale.value = withTiming(1)
+      }
+    },
+    onFinish() {
+      curScale.value = accumulatedScale.value
+    },
+  })
 
   const disableParentListScroll = () => {
     listRef.current.setNativeProps({ scrollEnabled: false })
@@ -103,15 +102,6 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, list
 
   const enableParentListScroll = () => {
     listRef.current.setNativeProps({ scrollEnabled: true })
-  }
-
-  const resetValues = (animated: boolean) => {
-    curScale.value = 1
-    accumulatedScale.value = animated ? withTiming(1, { duration: 150 }) : 1
-    accumulatedX.value = 0
-    accumulatedY.value = 0
-    translateX.value = animated ? withTiming(0, { duration: 150 }) : 0
-    translateY.value = animated ? withTiming(0, { duration: 150 }) : 0
   }
 
   const onPan = useAnimatedGestureHandler<PanGestureHandlerGestureEvent>({
@@ -174,10 +164,9 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, list
 
       const newScale = curScale.value * event.scale
       accumulatedScale.value = newScale
-      if(newScale < 0.6){
+      if (newScale < 0.6) {
         screenOpacity.value = interpolate(event.scale, [0, 0.6], [0, 1])
-      }
-      else{
+      } else {
         screenOpacity.value = withTiming(1)
       }
       if (newScale > 1 && newScale < MAX_SCALE) {
@@ -201,13 +190,13 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, list
       }
     },
     onFinish(event, context, isCanceledOrFailed) {
-      if(isImageInfoSheetOpened.value){
+      if (isImageInfoSheetOpened.value) {
         return
       }
       if (!isCanceledOrFailed) {
         const newScale = curScale.value * event.scale
         if (newScale < 1) {
-          if(newScale < 0.6){
+          if (newScale < 0.6) {
             runOnJS(navigation.goBack)()
           }
           accumulatedScale.value = withTiming(1)
@@ -252,7 +241,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, list
 
   const screenStyle = useAnimatedStyle(() => {
     return {
-      opacity: screenOpacity.value
+      opacity: screenOpacity.value,
     }
   })
 
@@ -261,7 +250,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, list
       <TapGestureHandler
         numberOfTaps={2}
         maxDist={10}
-        onActivated={onDoubleTap}
+        onGestureEvent={onDoubleTap}
         waitFor={[panHandlerRef, pinchHandlerRef]}
       >
         <Animated.View>
@@ -281,15 +270,13 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, list
                     source={{ uri: asset.uri }}
                     fadeDuration={0}
                     resizeMode="contain"
-                    style={[
-                      { width: dims.width, aspectRatio: dims.width / dims.height },
-                    ]}
+                    style={[{ width: dims.width, aspectRatio: dims.width / dims.height }]}
                   />
                   <Animated.View
                     style={[
                       {
                         position: "absolute",
-                        top: '75%',
+                        top: "75%",
                         height: dims.height,
                         left: 0,
                         right: 0,
@@ -297,7 +284,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, list
                         borderTopStartRadius: 20,
                         borderTopEndRadius: 20,
                         padding: 20,
-                        elevation: 5
+                        elevation: 5,
                       },
                       bottomSheetStyle,
                     ]}
@@ -308,21 +295,32 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, list
                         borderRadius: 2,
                         height: 4,
                         opacity: 0.25,
-                        backgroundColor: 'black',
-                        alignSelf: 'center',
-                        position: 'absolute',
+                        backgroundColor: "black",
+                        alignSelf: "center",
+                        position: "absolute",
                         top: 10,
                       }}
                     />
-                    <Text style={{color: 'black', fontWeight: 'bold', fontSize: 18, marginVertical: 8}}>{moment(asset.modificationTime).format("ddd, Do MMM YYYY . h:mm")}</Text>
-                    <Text style={{color: 'black', fontWeight: 'bold', marginBottom: 8}}>Details</Text>
-                    <View style={{ flexDirection: "row", marginBottom: 8}}>
-                      <Text style={{color: 'black', fontWeight: 'bold'}}>Location:</Text>
-                      <Text style={{ marginLeft: 10, color: 'black', flex: 1 }}>{asset.uri}</Text>
+                    <Text
+                      style={{
+                        color: "black",
+                        fontWeight: "bold",
+                        fontSize: 18,
+                        marginVertical: 8,
+                      }}
+                    >
+                      {moment(asset.modificationTime).format("ddd, Do MMM YYYY . h:mm")}
+                    </Text>
+                    <Text style={{ color: "black", fontWeight: "bold", marginBottom: 8 }}>
+                      Details
+                    </Text>
+                    <View style={{ flexDirection: "row", marginBottom: 8 }}>
+                      <Text style={{ color: "black", fontWeight: "bold" }}>Location:</Text>
+                      <Text style={{ marginLeft: 10, color: "black", flex: 1 }}>{asset.uri}</Text>
                     </View>
                     <View style={{ flexDirection: "row" }}>
-                      <Text style={{color: 'black', fontWeight: 'bold'}}>Dimensions:</Text>
-                      <Text style={{ marginLeft: 10, color: 'black' }}>
+                      <Text style={{ color: "black", fontWeight: "bold" }}>Dimensions:</Text>
+                      <Text style={{ marginLeft: 10, color: "black" }}>
                         {asset.width} X {asset.height}
                       </Text>
                     </View>
