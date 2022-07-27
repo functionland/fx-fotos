@@ -75,6 +75,10 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, list
 
   const onDoubleTap = useAnimatedGestureHandler<TapGestureHandlerGestureEvent>({
     onActive({ absoluteX, absoluteY }) {
+      if (isImageInfoSheetOpened.value) {
+        return
+      }
+
       if (!isZoomed.value) {
         accumulatedScale.value = withTiming(MAX_SCALE)
         translateX.value = withTiming((dims.width / 2 - absoluteX) * MAX_SCALE)
