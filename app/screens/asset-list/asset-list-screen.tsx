@@ -39,8 +39,10 @@ export const AssetListScreen: React.FC<Props> = ({ navigation, medias, defaultHe
   const { theme } = useTheme();
   const walletConnector = useWalletConnect();
   const  setSingleAsset = useSetRecoilState(singleAssetState)
+  const mediasRef = useRef(medias);
   useEffect(() => {
     if (medias) {
+      mediasRef.current = medias
       setRecyclerSections([...AssetService.categorizeAssets([...medias])]);
     }
   }, [medias])
@@ -122,7 +124,7 @@ export const AssetListScreen: React.FC<Props> = ({ navigation, medias, defaultHe
     if (section.type === ViewType.ASSET) {
       const asset: Asset = section.data
       setSingleAsset(JSON.parse(JSON.stringify(asset)));
-      navigation.push(AppNavigationNames.ImageGalleryViewer, { assetId: asset.id, medias: medias })
+      navigation.push(AppNavigationNames.ImageGalleryViewer, { assetId: asset.id, medias: mediasRef.current })
     }
   }
 
