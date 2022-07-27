@@ -32,6 +32,8 @@ type GalleryImageProps = {
 }
 
 const MAX_SCALE = 6
+const SWIPE_UP_THRESHOLD = 10
+
 export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, listGestureRef }) => {
   const navigation = useNavigation()
   const dims = useWindowDimensions()
@@ -55,44 +57,36 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, list
     }
   })
 
-  const xLimit = useDerivedValue(() => {
+  const getXLimit = () => {
+    "worklet"
     const imageWidth = dims.width / 2
     const limit = imageWidth * accumulatedScale.value - imageWidth
-    if (accumulatedX.value > limit) {
-      accumulatedX.value = limit
-      translateX.value = withTiming(limit)
-    }
-    if (accumulatedX.value < -limit) {
-      accumulatedX.value = -limit
-      translateX.value = withTiming(-limit)
-    }
     return limit
-  })
+  }
 
-  const yLimit = useDerivedValue(() => {
+  const getYLimit = () => {
+    "worklet"
     const imageHeight = dims.height / 2
     const limit = imageHeight * accumulatedScale.value - imageHeight
-    if (accumulatedY.value > limit) {
-      accumulatedY.value = limit
-      translateY.value = withTiming(limit)
-    }
-    if (accumulatedY.value < -limit) {
-      accumulatedY.value = -limit
-      translateY.value = withTiming(-limit)
-    }
     return limit
-  })
+  }
 
   const onDoubleTap = useAnimatedGestureHandler<TapGestureHandlerGestureEvent>({
-    onActive() {
+    onActive({ absoluteX, absoluteY }) {
       if (!isZoomed.value) {
         accumulatedScale.value = withTiming(MAX_SCALE)
+        translateX.value = withTiming((dims.width  / 2 - absoluteX) * MAX_SCALE)
+        translateY.value = withTiming((dims.height / 2 - absoluteY) * MAX_SCALE)
       } else {
         accumulatedScale.value = withTiming(1)
+        translateX.value = withTiming(0)
+        translateY.value = withTiming(0)
       }
     },
     onFinish() {
       curScale.value = accumulatedScale.value
+      accumulatedX.value = translateX.value
+      accumulatedY.value = translateY.value
     },
   })
 
@@ -107,15 +101,19 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, list
   const onPan = useAnimatedGestureHandler<PanGestureHandlerGestureEvent>({
     onActive(event) {
       if (isZoomed.value) {
+        // Pan Zoomed Image.
         const newX = accumulatedX.value + event.translationX
         const newY = accumulatedY.value + event.translationY
-        if (newX < xLimit.value && newX > -xLimit.value) {
+        const xLimit = getXLimit()
+        const yLimit = getYLimit()
+        if (newX < xLimit && newX > -xLimit) {
           translateX.value = newX
         }
-        if (newY < yLimit.value && newY > -yLimit.value) {
+        if (newY < yLimit && newY > -yLimit) {
           translateY.value = newY
         }
       } else {
+        // Handle interaction when image is zoomed out.
         const { translationX, translationY } = event
 
         // Left / Right Swipe started.
@@ -126,7 +124,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, list
         // Up Swipe started.
         if (!isImageInfoSheetOpened.value) {
           // Start of Swipe up gesture
-          if (translationY < -5) {
+          if (translationY < -SWIPE_UP_THRESHOLD) {
             bottomSheetOpacity.value = withTiming(1)
             translateY.value = withTiming(-200)
             runOnJS(disableParentListScroll)()
@@ -136,20 +134,22 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, list
       }
     },
     onFinish(event, _, isCanceledOrFailed) {
-      if (!isCanceledOrFailed) {
-        if (isZoomed.value) {
-          accumulatedX.value = translateX.value
-          accumulatedY.value = translateY.value
-        } else {
-          if (isImageInfoSheetOpened.value) {
-            const { translationY } = event
-            if (translationY > 0) {
-              // End of swipe down gesture
-              bottomSheetOpacity.value = withTiming(0)
-              translateY.value = withTiming(0)
-              runOnJS(enableParentListScroll)()
-              isImageInfoSheetOpened.value = false
-            }
+      if (isCanceledOrFailed) {
+        return
+      }
+
+      if (isZoomed.value) {
+        accumulatedX.value = translateX.value
+        accumulatedY.value = translateY.value
+      } else {
+        if (isImageInfoSheetOpened.value) {
+          const { translationY } = event
+          if (translationY > 0) {
+            // End of swipe down gesture
+            bottomSheetOpacity.value = withTiming(0)
+            translateY.value = withTiming(0)
+            runOnJS(enableParentListScroll)()
+            isImageInfoSheetOpened.value = false
           }
         }
       }
@@ -163,30 +163,32 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, list
       }
 
       const newScale = curScale.value * event.scale
-      accumulatedScale.value = newScale
       if (newScale < 0.6) {
         screenOpacity.value = interpolate(event.scale, [0, 0.6], [0, 1])
       } else {
         screenOpacity.value = withTiming(1)
       }
       if (newScale > 1 && newScale < MAX_SCALE) {
-        // accumulatedScale.value = newScale
-        if (translateX.value > xLimit.value) {
-          accumulatedX.value = xLimit.value
-          translateX.value = xLimit.value
-        }
-        if (translateX.value < -xLimit.value) {
-          accumulatedX.value = -xLimit.value
-          translateX.value = -xLimit.value
-        }
-        if (translateY.value > yLimit.value) {
-          accumulatedY.value = yLimit.value
-          translateY.value = yLimit.value
-        }
-        if (translateY.value < -yLimit.value) {
-          accumulatedY.value = -yLimit.value
-          translateY.value = -yLimit.value
-        }
+        accumulatedScale.value = newScale
+      }
+      const xLimit = getXLimit()
+      const yLimit = getYLimit()
+      if (accumulatedX.value > xLimit) {
+        accumulatedX.value = xLimit
+        translateX.value = xLimit
+      }
+      if (accumulatedX.value < -xLimit) {
+        accumulatedX.value = -xLimit
+        translateX.value = -xLimit
+      }
+
+      if (accumulatedY.value > yLimit) {
+        accumulatedY.value = yLimit
+        translateY.value = yLimit
+      }
+      if (accumulatedY.value < -yLimit) {
+        accumulatedY.value = -yLimit
+        translateY.value = -yLimit
       }
     },
     onFinish(event, context, isCanceledOrFailed) {
@@ -199,8 +201,10 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, list
           if (newScale < 0.6) {
             runOnJS(navigation.goBack)()
           }
-          accumulatedScale.value = withTiming(1)
-          curScale.value = 1
+          else{
+            accumulatedScale.value = withTiming(1)
+            curScale.value = 1
+          }
         } else if (newScale > MAX_SCALE) {
           curScale.value = MAX_SCALE
           accumulatedScale.value = withTiming(MAX_SCALE)
@@ -270,7 +274,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, list
                     source={{ uri: asset.uri }}
                     fadeDuration={0}
                     resizeMode="contain"
-                    style={[{ width: dims.width, aspectRatio: dims.width / dims.height }]}
+                    style={[{ width: dims.width , aspectRatio: dims.width / dims.height }]}
                   />
                   <Animated.View
                     style={[
