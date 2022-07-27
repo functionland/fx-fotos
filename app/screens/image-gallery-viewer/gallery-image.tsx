@@ -1,8 +1,9 @@
 import { useNavigation } from "@react-navigation/native"
 import moment from "moment"
 import React, { MutableRefObject, useRef } from "react"
+import { useMemo } from "react"
 import { View } from "react-native"
-import { useWindowDimensions } from "react-native"
+import { useWindowDimensions, StyleSheet } from "react-native"
 import {
   FlatList,
   NativeViewGestureHandler,
@@ -23,6 +24,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated"
 import { Text } from "../../components"
+import { palette } from "../../theme"
 import { Asset } from "../../types"
 
 type GalleryImageProps = {
@@ -75,7 +77,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, list
     onActive({ absoluteX, absoluteY }) {
       if (!isZoomed.value) {
         accumulatedScale.value = withTiming(MAX_SCALE)
-        translateX.value = withTiming((dims.width  / 2 - absoluteX) * MAX_SCALE)
+        translateX.value = withTiming((dims.width / 2 - absoluteX) * MAX_SCALE)
         translateY.value = withTiming((dims.height / 2 - absoluteY) * MAX_SCALE)
       } else {
         accumulatedScale.value = withTiming(1)
@@ -200,8 +202,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, list
         if (newScale < 1) {
           if (newScale < 0.6) {
             runOnJS(navigation.goBack)()
-          }
-          else{
+          } else {
             accumulatedScale.value = withTiming(1)
             curScale.value = 1
           }
@@ -221,7 +222,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, list
     },
   })
 
-  const animatedImageStyle = useAnimatedStyle(() => {
+  const animatedImageContainerStyle = useAnimatedStyle(() => {
     return {
       transform: [
         {
@@ -237,8 +238,9 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, list
     }
   })
 
-  const bottomSheetStyle = useAnimatedStyle(() => {
+  const animatedBottomSheetStyle = useAnimatedStyle(() => {
     return {
+      height: dims.height,
       opacity: bottomSheetOpacity.value,
     }
   })
@@ -248,6 +250,10 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, list
       opacity: screenOpacity.value,
     }
   })
+
+  const imageStyle = useMemo(() => {
+    return { width: dims.width, aspectRatio: dims.width / dims.height }
+  }, [dims.width, dims.height])
 
   return (
     <Animated.View style={screenStyle}>
@@ -269,62 +275,26 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, list
                 onGestureEvent={onPan}
                 simultaneousHandlers={[pinchHandlerRef, listGestureRef]}
               >
-                <Animated.View style={animatedImageStyle}>
+                <Animated.View style={animatedImageContainerStyle}>
                   <Animated.Image
                     source={{ uri: asset.uri }}
                     fadeDuration={0}
                     resizeMode="contain"
-                    style={[{ width: dims.width , aspectRatio: dims.width / dims.height }]}
+                    style={imageStyle}
                   />
-                  <Animated.View
-                    style={[
-                      {
-                        position: "absolute",
-                        top: "75%",
-                        height: dims.height,
-                        left: 0,
-                        right: 0,
-                        backgroundColor: "white",
-                        borderTopStartRadius: 20,
-                        borderTopEndRadius: 20,
-                        padding: 20,
-                        elevation: 5,
-                      },
-                      bottomSheetStyle,
-                    ]}
-                  >
-                    <View
-                      style={{
-                        width: 30,
-                        borderRadius: 2,
-                        height: 4,
-                        opacity: 0.25,
-                        backgroundColor: "black",
-                        alignSelf: "center",
-                        position: "absolute",
-                        top: 10,
-                      }}
-                    />
-                    <Text
-                      style={{
-                        color: "black",
-                        fontWeight: "bold",
-                        fontSize: 18,
-                        marginVertical: 8,
-                      }}
-                    >
+                  <Animated.View style={[styles.bottomSheet, animatedBottomSheetStyle]}>
+                    <View style={styles.handle} />
+                    <Text style={styles.dateText}>
                       {moment(asset.modificationTime).format("ddd, Do MMM YYYY . h:mm")}
                     </Text>
-                    <Text style={{ color: "black", fontWeight: "bold", marginBottom: 8 }}>
-                      Details
-                    </Text>
-                    <View style={{ flexDirection: "row", marginBottom: 8 }}>
-                      <Text style={{ color: "black", fontWeight: "bold" }}>Location:</Text>
-                      <Text style={{ marginLeft: 10, color: "black", flex: 1 }}>{asset.uri}</Text>
+                    <Text style={styles.heading}>Details</Text>
+                    <View style={styles.detailsContainer}>
+                      <Text style={styles.locationHeading}>Location:</Text>
+                      <Text style={styles.uri}>{asset.uri}</Text>
                     </View>
-                    <View style={{ flexDirection: "row" }}>
-                      <Text style={{ color: "black", fontWeight: "bold" }}>Dimensions:</Text>
-                      <Text style={{ marginLeft: 10, color: "black" }}>
+                    <View style={styles.dimensionInfoContainer}>
+                      <Text style={styles.dimensionHeading}>Dimensions:</Text>
+                      <Text style={styles.dimensionText}>
                         {asset.width} X {asset.height}
                       </Text>
                     </View>
@@ -338,3 +308,40 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, list
     </Animated.View>
   )
 }
+
+const styles = StyleSheet.create({
+  bottomSheet: {
+    position: "absolute",
+    top: "75%",
+    left: 0,
+    right: 0,
+    backgroundColor: palette.white,
+    borderTopStartRadius: 20,
+    borderTopEndRadius: 20,
+    padding: 20,
+    elevation: 5,
+  },
+  handle: {
+    width: 30,
+    borderRadius: 2,
+    height: 4,
+    opacity: 0.25,
+    backgroundColor: palette.black,
+    alignSelf: "center",
+    position: "absolute",
+    top: 10,
+  },
+  dateText: {
+    color: palette.black,
+    fontWeight: "bold",
+    fontSize: 18,
+    marginVertical: 8,
+  },
+  heading: { color: palette.black, fontWeight: "bold", marginBottom: 8 },
+  detailsContainer: { flexDirection: "row", marginBottom: 8 },
+  locationHeading: { color: palette.black, fontWeight: "bold" },
+  uri: { marginLeft: 10, color: palette.black, flex: 1 },
+  dimensionInfoContainer: { flexDirection: "row" },
+  dimensionHeading: { color: palette.black, fontWeight: "bold" },
+  dimensionText: { marginLeft: 10, color: palette.black }
+})
