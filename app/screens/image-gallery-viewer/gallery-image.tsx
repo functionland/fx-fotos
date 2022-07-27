@@ -23,6 +23,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated"
+import { SharedElement } from "react-navigation-shared-element"
 import { Text } from "../../components"
 import { palette } from "../../theme"
 import { Asset } from "../../types"
@@ -280,12 +281,14 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, list
                 simultaneousHandlers={[pinchHandlerRef, listGestureRef]}
               >
                 <Animated.View style={animatedImageContainerStyle}>
+                <SharedElement id={asset?.id}>
                   <Animated.Image
                     source={{ uri: asset.uri }}
                     fadeDuration={0}
                     resizeMode="contain"
                     style={imageStyle}
                   />
+                  </SharedElement>
                   <Animated.View style={[styles.bottomSheet, animatedBottomSheetStyle]}>
                     <View style={styles.handle} />
                     <Text style={styles.dateText}>
