@@ -2,10 +2,10 @@ import { useNavigation } from "@react-navigation/native"
 import moment from "moment"
 import React, { MutableRefObject, useRef } from "react"
 import { useMemo } from "react"
-import { View } from "react-native"
+import { Image, Platform, View } from "react-native"
 import { useWindowDimensions, StyleSheet } from "react-native"
+import FastImage from "react-native-fast-image"
 import {
-  FlatList,
   NativeViewGestureHandler,
   PanGestureHandler,
   PanGestureHandlerGestureEvent,
@@ -30,14 +30,15 @@ import { Asset } from "../../types"
 
 type GalleryImageProps = {
   asset: Asset
-  listRef: MutableRefObject<FlatList>
+  enableParentScroll?: () => void,
+  disableParentScroll?: () => void,
   listGestureRef: MutableRefObject<NativeViewGestureHandler>
 }
 
 const MAX_SCALE = 6
 const SWIPE_UP_THRESHOLD = 10
 
-export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, listGestureRef }) => {
+export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, enableParentScroll, disableParentScroll, listGestureRef }) => {
   const navigation = useNavigation()
   const dims = useWindowDimensions()
   const accumulatedScale = useSharedValue(1)
@@ -98,11 +99,11 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, list
   })
 
   const disableParentListScroll = () => {
-    listRef.current.setNativeProps({ scrollEnabled: false })
+    disableParentScroll()
   }
 
   const enableParentListScroll = () => {
-    listRef.current.setNativeProps({ scrollEnabled: true })
+    enableParentScroll()
   }
 
   const onPan = useAnimatedGestureHandler<PanGestureHandlerGestureEvent>({
@@ -229,6 +230,9 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, list
 
   const animatedImageContainerStyle = useAnimatedStyle(() => {
     return {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
       transform: [
         {
           scale: accumulatedScale.value,
@@ -252,12 +256,13 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, list
 
   const screenStyle = useAnimatedStyle(() => {
     return {
+      flex: 1,
       opacity: screenOpacity.value,
     }
   })
 
   const imageStyle = useMemo(() => {
-    return { width: dims.width, aspectRatio: dims.width / dims.height }
+    return { flex: 1, width: dims.width}
   }, [dims.width, dims.height])
 
   return (
@@ -268,26 +273,29 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, listRef, list
         onGestureEvent={onDoubleTap}
         waitFor={[panHandlerRef, pinchHandlerRef]}
       >
-        <Animated.View>
+        <Animated.View style={styles.flex1}>
           <PinchGestureHandler
             ref={pinchHandlerRef}
             onGestureEvent={onPinch}
             simultaneousHandlers={panHandlerRef}
           >
-            <Animated.View>
+            <Animated.View style={styles.flex1}>
               <PanGestureHandler
                 ref={panHandlerRef}
                 onGestureEvent={onPan}
                 simultaneousHandlers={[pinchHandlerRef, listGestureRef]}
               >
                 <Animated.View style={animatedImageContainerStyle}>
-                <SharedElement id={asset?.id}>
-                  <Animated.Image
-                    source={{ uri: asset.uri }}
-                    fadeDuration={0}
-                    resizeMode="contain"
-                    style={imageStyle}
-                  />
+                  <SharedElement id={asset?.id}>
+                    {Platform.OS === "android" ? (
+                      <FastImage
+                        source={{ uri: asset.uri, priority: FastImage.priority.high }}
+                        resizeMode="contain"
+                        style={imageStyle}
+                      />
+                    ) : (
+                      <Image source={{ uri: asset.uri }} resizeMode="contain" style={imageStyle} />
+                    )}
                   </SharedElement>
                   <Animated.View style={[styles.bottomSheet, animatedBottomSheetStyle]}>
                     <View style={styles.handle} />
@@ -350,5 +358,6 @@ const styles = StyleSheet.create({
   uri: { marginLeft: 10, color: palette.black, flex: 1 },
   dimensionInfoContainer: { flexDirection: "row" },
   dimensionHeading: { color: palette.black, fontWeight: "bold" },
-  dimensionText: { marginLeft: 10, color: palette.black }
+  dimensionText: { marginLeft: 10, color: palette.black },
+  flex1: {flex: 1}
 })

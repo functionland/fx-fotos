@@ -1,10 +1,12 @@
 import { NavigationProp, RouteProp } from "@react-navigation/native"
-import React, { useState, useRef } from "react"
+import { DataProvider, GridLayoutProvider, RecyclerListView } from "fula-recyclerlistview"
+import React, { useState, useRef, useMemo } from "react"
 import { useWindowDimensions } from "react-native"
 import { StyleSheet } from "react-native"
-import { FlatList, NativeViewGestureHandler } from "react-native-gesture-handler"
+import { NativeViewGestureHandler } from "react-native-gesture-handler"
 import { Screen } from "../../components"
 import { RootStackParamList } from "../../navigators"
+import { Asset } from "../../types"
 import { GalleryImage } from "./gallery-image"
 
 interface ImageGalleryViewerScreenProps {
@@ -14,8 +16,9 @@ interface ImageGalleryViewerScreenProps {
 
 export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> = ({ route }) => {
   const { medias, assetId } = route.params
-  const windowDims = useWindowDimensions();
+  const windowDims = useWindowDimensions()
   const [currentIndex, setCurrentIndex] = useState(null)
+  const [scrollEnabled, setScrollEnabled] = useState(true)
   if (currentIndex === null) {
     medias.forEach((asset, idx) => {
       if (asset.id === assetId) {
@@ -24,34 +27,69 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
     })
   }
 
-  const listRef = useRef()
   const listGestureRef = useRef()
 
   const renderItem = ({ item }) => {
-    return <GalleryImage asset={item} listRef={listRef} listGestureRef={listGestureRef} />
+    return (
+      <GalleryImage
+        asset={item}
+        enableParentScroll={enableScroll}
+        disableParentScroll={disableScroll}
+        listGestureRef={listGestureRef}
+      />
+    )
   }
 
-  const getItemLayout = (data, index) => {
-    return {length: windowDims.width, offset: windowDims.width*index, index: index}
+  const rowRenderer = (type: string | number, data: Asset) => {
+    return renderItem({ item: data })
+  }
+
+  const layoutProvider = useMemo(() => {
+    return new GridLayoutProvider(
+      1,
+      () => "PHOTO",
+      () => 1,
+      () => windowDims.width,
+    )
+  }, [windowDims])
+
+  const dataProvider = useMemo(() => {
+    let provider = new DataProvider((r1: Asset, r2: Asset) => r1.id !== r2.id)
+    provider = provider.cloneWithRows(medias, 0)
+    return provider
+  }, [])
+
+  const enableScroll = () => {
+    setScrollEnabled(true)
+  }
+
+  const disableScroll = () => {
+    setScrollEnabled(false)
   }
 
   return (
-    <Screen style={styles.screen} backgroundColor={"black"} statusBar={"dark-content"}>
-      <NativeViewGestureHandler ref={listGestureRef} >
-        <FlatList
-          ref={listRef}
+    <Screen
+      style={styles.screen}
+      preset={"fixed"}
+      unsafe={true}
+      backgroundColor={"black"}
+      statusBar={"dark-content"}
+    >
+      <NativeViewGestureHandler ref={listGestureRef}>
+        <RecyclerListView
+          isHorizontal={true}
+          initialRenderIndex={currentIndex}
           style={{ flex: 1 }}
-          data={medias}
-          getItemLayout={getItemLayout}
-          initialScrollIndex={currentIndex}
-          horizontal={true}
-          pagingEnabled
-          initialNumToRender={1}
-          maxToRenderPerBatch={1}
-          windowSize={2}
-          showsHorizontalScrollIndicator={false}
-          showsVerticalScrollIndicator={false}
-          renderItem={renderItem}
+          layoutProvider={layoutProvider}
+          dataProvider={dataProvider}
+          rowRenderer={rowRenderer}
+          renderAheadOffset={5}
+          scrollViewProps={{
+            scrollEnabled: scrollEnabled,
+            pagingEnabled: true,
+            showsHorizontalScrollIndicator: false,
+            showsVerticalScrollIndicator: false,
+          }}
         />
       </NativeViewGestureHandler>
     </Screen>
