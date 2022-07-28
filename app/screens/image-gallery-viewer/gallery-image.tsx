@@ -30,15 +30,20 @@ import { Asset } from "../../types"
 
 type GalleryImageProps = {
   asset: Asset
-  enableParentScroll?: () => void,
-  disableParentScroll?: () => void,
+  enableParentScroll?: () => void
+  disableParentScroll?: () => void
   listGestureRef: MutableRefObject<NativeViewGestureHandler>
 }
 
 const MAX_SCALE = 6
 const SWIPE_UP_THRESHOLD = 10
 
-export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, enableParentScroll, disableParentScroll, listGestureRef }) => {
+export const GalleryImage: React.FC<GalleryImageProps> = ({
+  asset,
+  enableParentScroll,
+  disableParentScroll,
+  listGestureRef,
+}) => {
   const navigation = useNavigation()
   const dims = useWindowDimensions()
   const accumulatedScale = useSharedValue(1)
@@ -82,10 +87,12 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, enableParentS
       }
 
       if (!isZoomed.value) {
+        runOnJS(disableParentScroll)()
         accumulatedScale.value = withTiming(MAX_SCALE)
         translateX.value = withTiming((dims.width / 2 - absoluteX) * MAX_SCALE)
         translateY.value = withTiming((dims.height / 2 - absoluteY) * MAX_SCALE)
       } else {
+        runOnJS(enableParentScroll)()
         accumulatedScale.value = withTiming(1)
         translateX.value = withTiming(0)
         translateY.value = withTiming(0)
@@ -231,8 +238,8 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, enableParentS
   const animatedImageContainerStyle = useAnimatedStyle(() => {
     return {
       flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
+      justifyContent: "center",
+      alignItems: "center",
       transform: [
         {
           scale: accumulatedScale.value,
@@ -262,7 +269,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({ asset, enableParentS
   })
 
   const imageStyle = useMemo(() => {
-    return { flex: 1, width: dims.width}
+    return { flex: 1, width: dims.width }
   }, [dims.width, dims.height])
 
   return (
@@ -359,5 +366,5 @@ const styles = StyleSheet.create({
   dimensionInfoContainer: { flexDirection: "row" },
   dimensionHeading: { color: palette.black, fontWeight: "bold" },
   dimensionText: { marginLeft: 10, color: palette.black },
-  flex1: {flex: 1}
+  flex1: { flex: 1 },
 })
