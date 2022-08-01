@@ -141,10 +141,10 @@ const AppStack = () => {
           }),
         }}
         component={ImageGalleryViewerScreen}
-        sharedElements={(route) => {
-          const { assetId = "" } = route.params
-          return [assetId]
-        }}
+        // sharedElements={(route) => {
+        //   const { assetId = "" } = route.params
+        //   return [assetId]
+        // }}
       />
       <Stack.Screen
         name={AppNavigationNames.AccountScrenn}

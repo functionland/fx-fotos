@@ -310,7 +310,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
                 simultaneousHandlers={[pinchHandlerRef, listGestureRef]}
               >
                 <Animated.View style={animatedImageContainerStyle}>
-                  <SharedElement id={asset?.id}>
+                  {/* <SharedElement id={asset?.id}> */}
                     {Platform.OS === "android" ? (
                       <FastImage
                         source={{ uri: asset.uri, priority: FastImage.priority.high }}
@@ -320,7 +320,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
                     ) : (
                       <Image source={{ uri: asset.uri }} resizeMode="contain" style={imageStyle} />
                     )}
-                  </SharedElement>
+                  {/* </SharedElement> */}
                   <Animated.View style={[styles.bottomSheet, animatedBottomSheetStyle]}>
                     <View style={styles.handle} />
                     <Text style={styles.dateText}>
