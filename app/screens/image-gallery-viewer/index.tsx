@@ -1,20 +1,21 @@
 import { NavigationProp, RouteProp } from "@react-navigation/native"
 import { BottomSheet, Button, Card, Icon, Input } from "@rneui/themed"
 import { DataProvider, GridLayoutProvider, RecyclerListView } from "fula-recyclerlistview"
-import React, { useState, useRef, useMemo, useEffect } from "react"
+import React, { useState, useRef, useMemo, useEffect, useCallback } from "react"
 import {
   ActivityIndicator,
   Alert,
   NativeScrollEvent,
   NativeSyntheticEvent,
   Share,
+  TouchableOpacity,
   useWindowDimensions,
   View,
 } from "react-native"
 import { StyleSheet } from "react-native"
 import { NativeViewGestureHandler } from "react-native-gesture-handler"
 import { useRecoilState } from "recoil"
-import { Header, Screen } from "../../components"
+import { Header, Screen, Text } from "../../components"
 import { HeaderArrowBack, HeaderRightContainer } from "../../components/header"
 import { RootStackParamList } from "../../navigators"
 import { Assets } from "../../services/localdb"
@@ -33,6 +34,7 @@ import * as helper from "../../utils/helper"
 import { TaggedEncryption } from "@functionland/fula-sec"
 import { AddShareMeta, getAssetMeta } from "../../services/remote-db-service"
 import { BSON } from "realm"
+import { palette } from "../../theme"
 
 interface ImageGalleryViewerScreenProps {
   navigation: NavigationProp<RootStackParamList>
@@ -183,10 +185,10 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
             await uploadAssetsInBackground({
               callback: (success) => {
                 if (success)
-                setAsset((prev) => ({
-                  ...prev,
-                  syncStatus: SyncStatus.SYNC,
-                }))
+                  setAsset((prev) => ({
+                    ...prev,
+                    syncStatus: SyncStatus.SYNC,
+                  }))
                 else
                   Toast.show({
                     type: "error",
@@ -361,6 +363,76 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
     console.log("asset change ", asset)
   }, [asset])
 
+  const onActionPress = (action: string) => {
+    alert(`Action ${action} is being developed`)
+  }
+
+  const renderActionButtons = useCallback(() => {
+    return (
+      <View
+        style={{
+          backgroundColor: "transparent",
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignContent: "center",
+        }}
+      >
+        <TouchableOpacity
+          style={{ flex: 1, flexDirection: "column" }}
+          onPress={() => onActionPress("delete")}
+        >
+          <Icon name="delete" type="material-community" size={30} color={palette.white} />
+          <Text style={styles.actionText}>Delete</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{ flex: 1, flexDirection: "column" }}
+          onPress={() => onActionPress("print")}
+        >
+          <Icon name="printer" type="material-community" size={30} color={palette.white} />
+          <Text style={styles.actionText}>Print</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{ flex: 1, flexDirection: "column" }}
+          onPress={() => onActionPress("upload")}
+        >
+          <Icon
+            name="cloud-upload-outline"
+            type="material-community"
+            size={30}
+            color={palette.white}
+          />
+          <Text style={styles.actionText}>Upload</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{ flex: 1, flexDirection: "column" }}
+          onPress={() => onActionPress("AddToAlbum")}
+        >
+          <Icon name="playlist-plus" type="material-community" size={30} color={palette.white} />
+          <Text style={styles.actionText}>Add to Album</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{ flex: 1, flexDirection: "column" }}
+          onPress={() => onActionPress("openWith")}
+        >
+          <Icon name="open-in-app" type="material-community" size={30} color={palette.white} />
+          <Text style={styles.actionText}>Open With</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{ flex: 1, flexDirection: "column" }}
+          onPress={() => onActionPress("help")}
+        >
+          <Icon
+            name="help-circle-outline"
+            type="material-community"
+            size={30}
+            color={palette.white}
+          />
+          <Text style={styles.actionText}>Help</Text>
+        </TouchableOpacity>
+      </View>
+    )
+  }, [])
+
   return (
     <Screen
       style={styles.screen}
@@ -388,6 +460,7 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
           }}
         />
       </NativeViewGestureHandler>
+      {renderActionButtons()}
       <BottomSheet
         isVisible={showShareBottomSheet}
         onBackdropPress={() => setShowShareBottomSheet(false)}
@@ -427,4 +500,5 @@ const styles = StyleSheet.create({
   activityIndicatorStyle: {
     padding: 5,
   },
+  actionText: { textAlign: "center", color: palette.white },
 })

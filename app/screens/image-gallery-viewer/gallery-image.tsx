@@ -1,9 +1,8 @@
 import { useNavigation } from "@react-navigation/native"
-import { Icon } from "@rneui/base"
 import moment from "moment"
 import React, { MutableRefObject, useRef } from "react"
 import { useMemo } from "react"
-import { Image, Platform, TouchableOpacity, View } from "react-native"
+import { Image, Platform, View } from "react-native"
 import { useWindowDimensions, StyleSheet } from "react-native"
 import FastImage from "react-native-fast-image"
 import {
@@ -273,59 +272,6 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
     return { flex: 1, width: dims.width }
   }, [dims.width, dims.height])
 
-  const onActionPress = (action: string) => {
-    alert(`Action ${action} is being developed`)
-  }
-
-  const renderActionButtons = () => {
-    return (
-      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-        <TouchableOpacity
-          style={{ flex: 1, flexDirection: "column", alignSelf: "center" }}
-          onPress={() => onActionPress("delete")}
-        >
-          <Icon name="delete" type="material-community" size={30} />
-          <Text style={styles.actionText}>Delete</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={{ flex: 1, flexDirection: "column", alignSelf: "center" }}
-          onPress={() => onActionPress("print")}
-        >
-          <Icon name="printer" type="material-community" size={30} />
-          <Text style={styles.actionText}>Print</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={{ flex: 1, flexDirection: "column", alignSelf: "center" }}
-          onPress={() => onActionPress("upload")}
-        >
-          <Icon name="cloud-upload-outline" type="material-community" size={30} />
-          <Text style={styles.actionText}>Upload</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={{ flex: 1, flexDirection: "column", alignSelf: "center" }}
-          onPress={() => onActionPress("AddToAlbum")}
-        >
-          <Icon name="playlist-plus" type="material-community" size={30} />
-          <Text style={styles.actionText}>Add to Album</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={{ flex: 1, flexDirection: "column", alignSelf: "center" }}
-          onPress={() => onActionPress("openWith")}
-        >
-          <Icon name="open-in-app" type="material-community" size={30} />
-          <Text style={styles.actionText}>Open With</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={{ flex: 1, flexDirection: "column", alignSelf: "center" }}
-          onPress={() => onActionPress("help")}
-        >
-          <Icon name="help-circle-outline" type="material-community" size={30} />
-          <Text style={styles.actionText}>Help</Text>
-        </TouchableOpacity>
-      </View>
-    )
-  }
-
   return (
     <Animated.View style={screenStyle}>
       <TapGestureHandler
@@ -359,8 +305,6 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
                     )}
                   </SharedElement>
                   <Animated.View style={[styles.bottomSheet, animatedBottomSheetStyle]}>
-                    {renderActionButtons()}
-                    <View style={styles.horizontalBar} />
                     <View style={styles.handle} />
                     <Text style={styles.dateText}>
                       {moment(asset.modificationTime).format("ddd, Do MMM YYYY . h:mm")}
@@ -422,7 +366,6 @@ const styles = StyleSheet.create({
   dimensionInfoContainer: { flexDirection: "row" },
   dimensionHeading: { color: palette.black, fontWeight: "bold" },
   dimensionText: { marginLeft: 10, color: palette.black },
-  actionText: { textAlign: "center", color: palette.black },
   flex1: { flex: 1 },
   horizontalBar: {
     borderBottomColor: "black",
