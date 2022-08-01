@@ -367,10 +367,6 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
     setAsset(medias[index])
   }
 
-  useEffect(() => {
-    console.log("asset change ", asset)
-  }, [asset])
-
   const onActionPress = (action: string) => {
     alert(`Action ${action} is being developed`)
   }
