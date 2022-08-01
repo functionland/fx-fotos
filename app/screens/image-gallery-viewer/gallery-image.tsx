@@ -17,6 +17,7 @@ import {
 import Animated, {
   interpolate,
   runOnJS,
+  SharedValue,
   useAnimatedGestureHandler,
   useAnimatedStyle,
   useDerivedValue,
@@ -33,6 +34,7 @@ type GalleryImageProps = {
   enableParentScroll?: () => void
   disableParentScroll?: () => void
   listGestureRef: MutableRefObject<NativeViewGestureHandler>
+  screenOpacity: SharedValue<number>
 }
 
 const MAX_SCALE = 6
@@ -43,6 +45,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
   enableParentScroll,
   disableParentScroll,
   listGestureRef,
+  screenOpacity,
 }) => {
   const navigation = useNavigation()
   const dims = useWindowDimensions()
@@ -54,7 +57,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
   const accumulatedY = useSharedValue(0)
   const bottomSheetOpacity = useSharedValue(0)
   const isImageInfoSheetOpened = useSharedValue(false)
-  const screenOpacity = useSharedValue(1)
+  const shouldCloseOnZoomOut = useSharedValue(true)
   const panHandlerRef = useRef(null)
   const pinchHandlerRef = useRef(null)
 
@@ -88,11 +91,13 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
 
       if (!isZoomed.value) {
         runOnJS(disableParentScroll)()
+        shouldCloseOnZoomOut.value = false
         accumulatedScale.value = withTiming(MAX_SCALE)
         translateX.value = withTiming((dims.width / 2 - absoluteX) * MAX_SCALE)
         translateY.value = withTiming((dims.height / 2 - absoluteY) * MAX_SCALE)
       } else {
         runOnJS(enableParentScroll)()
+        shouldCloseOnZoomOut.value = true
         accumulatedScale.value = withTiming(1)
         translateX.value = withTiming(0)
         translateY.value = withTiming(0)
@@ -176,34 +181,40 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
       if (isImageInfoSheetOpened.value) {
         return
       }
-
       const newScale = curScale.value * event.scale
-      if (newScale < 0.6) {
-        screenOpacity.value = interpolate(event.scale, [0, 0.6], [0, 1])
-      } else {
-        screenOpacity.value = withTiming(1)
-      }
-      if (newScale > 1 && newScale < MAX_SCALE) {
+      if (shouldCloseOnZoomOut.value && newScale < 1) {
         accumulatedScale.value = newScale
-      }
-      const xLimit = getXLimit()
-      const yLimit = getYLimit()
-      if (accumulatedX.value > xLimit) {
-        accumulatedX.value = xLimit
-        translateX.value = xLimit
-      }
-      if (accumulatedX.value < -xLimit) {
-        accumulatedX.value = -xLimit
-        translateX.value = -xLimit
-      }
+        if (newScale < 0.6) {
+          screenOpacity.value = interpolate(event.scale, [0, 0.6], [0, 1])
+        } else {
+          screenOpacity.value = withTiming(1)
+        }
+      } else {
+        if (newScale >= 1 && newScale <= MAX_SCALE) {
+          accumulatedScale.value = newScale
+        }
+        if (newScale > 1) {
+          shouldCloseOnZoomOut.value = false
+          const xLimit = getXLimit()
+          const yLimit = getYLimit()
+          if (accumulatedX.value > xLimit) {
+            accumulatedX.value = xLimit
+            translateX.value = xLimit
+          }
+          if (accumulatedX.value < -xLimit) {
+            accumulatedX.value = -xLimit
+            translateX.value = -xLimit
+          }
 
-      if (accumulatedY.value > yLimit) {
-        accumulatedY.value = yLimit
-        translateY.value = yLimit
-      }
-      if (accumulatedY.value < -yLimit) {
-        accumulatedY.value = -yLimit
-        translateY.value = -yLimit
+          if (accumulatedY.value > yLimit) {
+            accumulatedY.value = yLimit
+            translateY.value = yLimit
+          }
+          if (accumulatedY.value < -yLimit) {
+            accumulatedY.value = -yLimit
+            translateY.value = -yLimit
+          }
+        }
       }
     },
     onFinish(event, context, isCanceledOrFailed) {
@@ -212,23 +223,29 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
       }
       if (!isCanceledOrFailed) {
         const newScale = curScale.value * event.scale
-        if (newScale < 1) {
+        curScale.value = accumulatedScale.value
+
+        if (shouldCloseOnZoomOut.value) {
           if (newScale < 0.6) {
             runOnJS(navigation.goBack)()
-          } else {
+          }
+          else{
             accumulatedScale.value = withTiming(1)
             curScale.value = 1
           }
-        } else if (newScale > MAX_SCALE) {
-          curScale.value = MAX_SCALE
-          accumulatedScale.value = withTiming(MAX_SCALE)
         } else {
-          curScale.value = accumulatedScale.value
+          if (newScale < 1){
+            accumulatedScale.value = withTiming(1)
+            curScale.value = 1
+            shouldCloseOnZoomOut.value = true
+          }
         }
-
+        
         if (curScale.value > 1) {
+          shouldCloseOnZoomOut.value = false
           runOnJS(disableParentListScroll)()
         } else {
+          shouldCloseOnZoomOut.value = true
           runOnJS(enableParentListScroll)()
         }
       }

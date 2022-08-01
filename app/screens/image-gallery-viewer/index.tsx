@@ -15,8 +15,8 @@ import {
 import { StyleSheet } from "react-native"
 import { NativeViewGestureHandler } from "react-native-gesture-handler"
 import { useRecoilState } from "recoil"
-import { Header, Screen, Text } from "../../components"
-import { HeaderArrowBack, HeaderRightContainer } from "../../components/header"
+import { Header, Text } from "../../components"
+import { HeaderArrowBack, HeaderLeftContainer, HeaderRightContainer } from "../../components/header"
 import { RootStackParamList } from "../../navigators"
 import { Assets } from "../../services/localdb"
 import { singleAssetState } from "../../store"
@@ -35,6 +35,7 @@ import { TaggedEncryption } from "@functionland/fula-sec"
 import { AddShareMeta, getAssetMeta } from "../../services/remote-db-service"
 import { BSON } from "realm"
 import { palette } from "../../theme"
+import Animated, { useAnimatedStyle, useSharedValue } from "react-native-reanimated"
 
 interface ImageGalleryViewerScreenProps {
   navigation: NavigationProp<RootStackParamList>
@@ -55,6 +56,7 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
   const [DID, setDID] = useState("")
   const [sharing, setSharing] = useState(false)
   const netInfoState = useNetInfo()
+  const screenOpacity = useSharedValue(1)
 
   if (initialIndexRef.current === null) {
     medias.forEach((asset, idx) => {
@@ -73,6 +75,7 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
         enableParentScroll={enableScroll}
         disableParentScroll={disableScroll}
         listGestureRef={listGestureRef}
+        screenOpacity={screenOpacity}
       />
     )
   }
@@ -113,7 +116,12 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
   const renderHeader = () => {
     return (
       <Header
-        leftComponent={<HeaderArrowBack navigation={navigation} />}
+        containerStyle={{ marginTop: 0, zIndex: 10, elevation: 3 }}
+        leftComponent={
+          <HeaderLeftContainer>
+            <HeaderArrowBack navigation={navigation} />
+          </HeaderLeftContainer>
+        }
         rightComponent={
           <HeaderRightContainer>
             {loading ? (
@@ -369,32 +377,16 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
 
   const renderActionButtons = useCallback(() => {
     return (
-      <View
-        style={{
-          backgroundColor: "transparent",
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignContent: "center",
-        }}
-      >
-        <TouchableOpacity
-          style={{ flex: 1, flexDirection: "column" }}
-          onPress={() => onActionPress("delete")}
-        >
+      <View style={styles.actionButtonContainer}>
+        <TouchableOpacity style={styles.iconContainer} onPress={() => onActionPress("delete")}>
           <Icon name="delete" type="material-community" size={30} color={palette.white} />
           <Text style={styles.actionText}>Delete</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={{ flex: 1, flexDirection: "column" }}
-          onPress={() => onActionPress("print")}
-        >
+        <TouchableOpacity style={styles.iconContainer} onPress={() => onActionPress("print")}>
           <Icon name="printer" type="material-community" size={30} color={palette.white} />
           <Text style={styles.actionText}>Print</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={{ flex: 1, flexDirection: "column" }}
-          onPress={() => onActionPress("upload")}
-        >
+        <TouchableOpacity style={styles.iconContainer} onPress={() => onActionPress("upload")}>
           <Icon
             name="cloud-upload-outline"
             type="material-community"
@@ -403,24 +395,15 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
           />
           <Text style={styles.actionText}>Upload</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={{ flex: 1, flexDirection: "column" }}
-          onPress={() => onActionPress("AddToAlbum")}
-        >
+        <TouchableOpacity style={styles.iconContainer} onPress={() => onActionPress("AddToAlbum")}>
           <Icon name="playlist-plus" type="material-community" size={30} color={palette.white} />
           <Text style={styles.actionText}>Add to Album</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={{ flex: 1, flexDirection: "column" }}
-          onPress={() => onActionPress("openWith")}
-        >
+        <TouchableOpacity style={styles.iconContainer} onPress={() => onActionPress("openWith")}>
           <Icon name="open-in-app" type="material-community" size={30} color={palette.white} />
           <Text style={styles.actionText}>Open With</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={{ flex: 1, flexDirection: "column" }}
-          onPress={() => onActionPress("help")}
-        >
+        <TouchableOpacity style={styles.iconContainer} onPress={() => onActionPress("help")}>
           <Icon
             name="help-circle-outline"
             type="material-community"
@@ -433,56 +416,61 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
     )
   }, [])
 
+  const wrapperAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      flex: 1,
+      justifyContent: "center",
+      backgroundColor: "black",
+      opacity: screenOpacity.value,
+    }
+  })
+
   return (
-    <Screen
-      style={styles.screen}
-      preset={"fixed"}
-      unsafe={true}
-      backgroundColor={"black"}
-      statusBar={"dark-content"}
-    >
-      {renderHeader()}
-      <NativeViewGestureHandler ref={listGestureRef}>
-        <RecyclerListView
-          isHorizontal={true}
-          initialRenderIndex={initialIndexRef.current}
-          style={{ flex: 1 }}
-          layoutProvider={layoutProvider}
-          dataProvider={dataProvider}
-          rowRenderer={rowRenderer}
-          renderAheadOffset={5}
-          scrollViewProps={{
-            scrollEnabled: scrollEnabled,
-            pagingEnabled: true,
-            onMomentumScrollEnd: onMomentumScrollEnd,
-            showsHorizontalScrollIndicator: false,
-            showsVerticalScrollIndicator: false,
-          }}
-        />
-      </NativeViewGestureHandler>
-      {renderActionButtons()}
-      <BottomSheet
-        isVisible={showShareBottomSheet}
-        onBackdropPress={() => setShowShareBottomSheet(false)}
-        modalProps={{ transparent: true, animationType: "fade" }}
-        containerStyle={styles.bottomSheetContainer}
-      >
-        <Card containerStyle={{ borderWidth: 0, margin: 0 }}>
-          <Card.Title>Share with (enter DID)</Card.Title>
-          <Input onChangeText={(txt) => setDID(txt)} onEndEditing={shareWithDID} />
-        </Card>
-        <Button
-          title={
-            sharing ? (
-              <ActivityIndicator style={styles.activityIndicatorStyle} size="small" />
-            ) : (
-              "Share"
-            )
-          }
-          onPress={shareWithDID}
-        ></Button>
-      </BottomSheet>
-    </Screen>
+    <Animated.View style={wrapperAnimatedStyle}>
+      <>
+        {renderHeader()}
+        <NativeViewGestureHandler ref={listGestureRef}>
+          <RecyclerListView
+            isHorizontal={true}
+            initialRenderIndex={initialIndexRef.current}
+            style={{ flex: 1 }}
+            layoutProvider={layoutProvider}
+            dataProvider={dataProvider}
+            rowRenderer={rowRenderer}
+            renderAheadOffset={5}
+            scrollViewProps={{
+              scrollEnabled: scrollEnabled,
+              pagingEnabled: true,
+              onMomentumScrollEnd: onMomentumScrollEnd,
+              showsHorizontalScrollIndicator: false,
+              showsVerticalScrollIndicator: false,
+            }}
+          />
+        </NativeViewGestureHandler>
+        {renderActionButtons()}
+        <BottomSheet
+          isVisible={showShareBottomSheet}
+          onBackdropPress={() => setShowShareBottomSheet(false)}
+          modalProps={{ transparent: true, animationType: "fade" }}
+          containerStyle={styles.bottomSheetContainer}
+        >
+          <Card containerStyle={{ borderWidth: 0, margin: 0 }}>
+            <Card.Title>Share with (enter DID)</Card.Title>
+            <Input onChangeText={(txt) => setDID(txt)} onEndEditing={shareWithDID} />
+          </Card>
+          <Button
+            title={
+              sharing ? (
+                <ActivityIndicator style={styles.activityIndicatorStyle} size="small" />
+              ) : (
+                "Share"
+              )
+            }
+            onPress={shareWithDID}
+          ></Button>
+        </BottomSheet>
+      </>
+    </Animated.View>
   )
 }
 
@@ -501,4 +489,11 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   actionText: { textAlign: "center", color: palette.white },
+  iconContainer: { flex: 1, flexDirection: "column" },
+  actionButtonContainer: {
+    position: "absolute",
+    bottom: 0,
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
 })

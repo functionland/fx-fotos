@@ -18,9 +18,10 @@ import {
 import { HomeNavigator } from "./home-navigator"
 import { ThemeContext } from "../theme"
 import { BoxEntity } from "../realmdb/entities"
-import { AssetStory, RecyclerAssetListSection } from "../types"
+import { RecyclerAssetListSection } from "../types"
 import { Asset } from "../types"
 import { ImageGalleryViewerScreen } from "../screens/image-gallery-viewer"
+import { Platform } from "react-native"
 
 enableScreens()
 export type RootStackParamList = {
@@ -129,18 +130,12 @@ const AppStack = () => {
           cardOverlayEnabled: true,
           cardStyle: { backgroundColor: "transparent" },
           animationEnabled: true,
+          presentation: Platform.OS === "ios" ? "transparentModal" : "card",
           cardStyleInterpolator: ({ current: { progress } }) => ({
-            cardStyle: {
+            containerStyle: {
               opacity: progress.interpolate({
                 inputRange: [0, 0.5, 0.9, 1],
                 outputRange: [0, 0.25, 0.7, 1],
-              }),
-            },
-            overlayStyle: {
-              opacity: progress.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0, 0],
-                extrapolate: "clamp",
               }),
             },
           }),
@@ -150,7 +145,6 @@ const AppStack = () => {
           const { assetId = "" } = route.params
           return [assetId]
         }}
-
       />
       <Stack.Screen
         name={AppNavigationNames.AccountScrenn}
