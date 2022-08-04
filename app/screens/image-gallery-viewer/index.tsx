@@ -1,7 +1,7 @@
 import { NavigationProp, RouteProp } from "@react-navigation/native"
 import { BottomSheet, Button, Card, Icon, Input } from "@rneui/themed"
 import { DataProvider, GridLayoutProvider, RecyclerListView } from "fula-recyclerlistview"
-import React, { useState, useRef, useMemo, useEffect, useCallback } from "react"
+import React, { useState, useRef, useMemo, useCallback } from "react"
 import {
   ActivityIndicator,
   Alert,
@@ -425,6 +425,7 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
     <Animated.View style={wrapperAnimatedStyle}>
       <>
         {renderHeader()}
+        {renderActionButtons()}
         <NativeViewGestureHandler ref={listGestureRef}>
           <RecyclerListView
             isHorizontal={true}
@@ -443,7 +444,6 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
             }}
           />
         </NativeViewGestureHandler>
-        {renderActionButtons()}
         <BottomSheet
           isVisible={showShareBottomSheet}
           onBackdropPress={() => setShowShareBottomSheet(false)}

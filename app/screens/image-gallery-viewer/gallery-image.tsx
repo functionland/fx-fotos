@@ -39,6 +39,7 @@ type GalleryImageProps = {
 
 const MAX_SCALE = 6
 const SWIPE_UP_THRESHOLD = 10
+const SWIPE_TO_CLOSE_THRESHOLD = 100
 
 export const GalleryImage: React.FC<GalleryImageProps> = ({
   asset,
@@ -57,6 +58,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
   const accumulatedY = useSharedValue(0)
   const bottomSheetOpacity = useSharedValue(0)
   const isImageInfoSheetOpened = useSharedValue(false)
+  const isSwipeDownGestureStarted = useSharedValue(false)
   const shouldCloseOnZoomOut = useSharedValue(true)
   const panHandlerRef = useRef(null)
   const pinchHandlerRef = useRef(null)
@@ -137,18 +139,34 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
         const { translationX, translationY } = event
 
         // Left / Right Swipe started.
-        if (Math.abs(translationX) > 1) {
+        if (
+          !isImageInfoSheetOpened.value &&
+          !isSwipeDownGestureStarted.value &&
+          Math.abs(translationX) > 1
+        ) {
           return
         }
 
-        // Up Swipe started.
-        if (!isImageInfoSheetOpened.value) {
-          // Start of Swipe up gesture
-          if (translationY < -SWIPE_UP_THRESHOLD) {
-            bottomSheetOpacity.value = withTiming(1)
-            translateY.value = withTiming(-200)
+        if (translationY > 0) {
+          // Swipe down gesture
+          // translate the image in y-axis
+          if (!isImageInfoSheetOpened.value) {
+            translateY.value = translationY
+            screenOpacity.value = interpolate(translationY, [0, SWIPE_TO_CLOSE_THRESHOLD], [1, 0.8])
+          }
+          if (!isSwipeDownGestureStarted.value) {
             runOnJS(disableParentListScroll)()
-            isImageInfoSheetOpened.value = true
+            isSwipeDownGestureStarted.value = true
+          }
+        } else {
+          // Start of Swipe up gesture
+          if (!isImageInfoSheetOpened.value) {
+            if (translationY < -SWIPE_UP_THRESHOLD) {
+              bottomSheetOpacity.value = withTiming(1)
+              translateY.value = withTiming(-200)
+              runOnJS(disableParentListScroll)()
+              isImageInfoSheetOpened.value = true
+            }
           }
         }
       }
@@ -157,19 +175,29 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
       if (isCanceledOrFailed) {
         return
       }
-
+      const { translationY } = event
       if (isZoomed.value) {
         accumulatedX.value = translateX.value
         accumulatedY.value = translateY.value
       } else {
-        if (isImageInfoSheetOpened.value) {
-          const { translationY } = event
-          if (translationY > 0) {
+        if (translationY > 0) {
+          if (isImageInfoSheetOpened.value) {
             // End of swipe down gesture
             bottomSheetOpacity.value = withTiming(0)
             translateY.value = withTiming(0)
             runOnJS(enableParentListScroll)()
             isImageInfoSheetOpened.value = false
+          } else if (isSwipeDownGestureStarted.value) {
+            if (translationY > SWIPE_TO_CLOSE_THRESHOLD) {
+              runOnJS(navigation.goBack)()
+            } else {
+              // Return to previous place.
+              translateX.value = withTiming(accumulatedX.value)
+              translateY.value = withTiming(accumulatedY.value)
+              screenOpacity.value = withTiming(1)
+              runOnJS(enableParentListScroll)()
+              isSwipeDownGestureStarted.value = false
+            }
           }
         }
       }
@@ -228,19 +256,18 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
         if (shouldCloseOnZoomOut.value) {
           if (newScale < 0.6) {
             runOnJS(navigation.goBack)()
-          }
-          else{
+          } else {
             accumulatedScale.value = withTiming(1)
             curScale.value = 1
           }
         } else {
-          if (newScale < 1){
+          if (newScale < 1) {
             accumulatedScale.value = withTiming(1)
             curScale.value = 1
             shouldCloseOnZoomOut.value = true
           }
         }
-        
+
         if (curScale.value > 1) {
           shouldCloseOnZoomOut.value = false
           runOnJS(disableParentListScroll)()
@@ -310,7 +337,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
                 simultaneousHandlers={[pinchHandlerRef, listGestureRef]}
               >
                 <Animated.View style={animatedImageContainerStyle}>
-                  {/* <SharedElement id={asset?.id}> */}
+                  {/* <SharedElement id={asset.id}> */}
                     {Platform.OS === "android" ? (
                       <FastImage
                         source={{ uri: asset.uri, priority: FastImage.priority.high }}
@@ -318,7 +345,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
                         style={imageStyle}
                       />
                     ) : (
-                      <Image source={{ uri: asset.uri }} resizeMode="contain" style={imageStyle} />
+                      <Image source={{ uri: asset.uri }} fadeDuration={0} resizeMode="contain" style={imageStyle} />
                     )}
                   {/* </SharedElement> */}
                   <Animated.View style={[styles.bottomSheet, animatedBottomSheetStyle]}>
