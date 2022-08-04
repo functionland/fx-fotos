@@ -1,6 +1,7 @@
 import { useNavigation } from "@react-navigation/native"
 import moment from "moment"
 import React, { MutableRefObject, useRef } from "react"
+import { useCallback } from "react"
 import { useMemo } from "react"
 import { Image, Platform, View } from "react-native"
 import { useWindowDimensions, StyleSheet } from "react-native"
@@ -71,19 +72,19 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
     }
   })
 
-  const getXLimit = () => {
+  const getXLimit = useCallback(() => {
     "worklet"
     const imageWidth = dims.width / 2
     const limit = imageWidth * accumulatedScale.value - imageWidth
     return limit
-  }
+  }, [dims.width])
 
-  const getYLimit = () => {
+  const getYLimit = useCallback(() => {
     "worklet"
     const imageHeight = dims.height / 2
     const limit = imageHeight * accumulatedScale.value - imageHeight
     return limit
-  }
+  }, [dims.height])
 
   const onDoubleTap = useAnimatedGestureHandler<TapGestureHandlerGestureEvent>({
     onActive({ absoluteX, absoluteY }) {
@@ -112,13 +113,13 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
     },
   })
 
-  const disableParentListScroll = () => {
+  const disableParentListScroll = useCallback(() => {
     disableParentScroll()
-  }
+  }, [])
 
-  const enableParentListScroll = () => {
+  const enableParentListScroll = useCallback(() => {
     enableParentScroll()
-  }
+  }, [])
 
   const onPan = useAnimatedGestureHandler<PanGestureHandlerGestureEvent>({
     onActive(event) {

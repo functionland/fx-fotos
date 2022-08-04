@@ -68,19 +68,30 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
 
   const listGestureRef = useRef()
 
-  const renderItem = ({ item }) => {
-    return (
-      <GalleryImage
-        asset={item}
-        enableParentScroll={enableScroll}
-        disableParentScroll={disableScroll}
-        listGestureRef={listGestureRef}
-        screenOpacity={screenOpacity}
-      />
-    )
-  }
+  const enableScroll = useCallback(() => {
+    setScrollEnabled(true)
+  }, [])
 
-  const rowRenderer = (type: string | number, data: Asset) => {
+  const disableScroll = useCallback(() => {
+    setScrollEnabled(false)
+  }, [])
+
+  const renderItem = useCallback(
+    ({ item }) => {
+      return (
+        <GalleryImage
+          asset={item}
+          enableParentScroll={enableScroll}
+          disableParentScroll={disableScroll}
+          listGestureRef={listGestureRef}
+          screenOpacity={screenOpacity}
+        />
+      )
+    },
+    [enableScroll, disableScroll, screenOpacity],
+  )
+
+  const rowRenderer = useCallback((type: string | number, data: Asset) => {
     if (data?.syncStatus === SyncStatus.SYNCED && data?.isDeleted) {
       return renderDownloadSection()
     }
@@ -88,7 +99,7 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
       return null
     }
     return renderItem({ item: data })
-  }
+  }, [])
 
   const layoutProvider = useMemo(() => {
     return new GridLayoutProvider(
@@ -103,54 +114,33 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
     let provider = new DataProvider((r1: Asset, r2: Asset) => r1.id !== r2.id)
     provider = provider.cloneWithRows(medias, 0)
     return provider
-  }, [])
+  }, [medias])
 
-  const enableScroll = () => {
-    setScrollEnabled(true)
-  }
+  const cancelUpdate = useCallback(() => {
+    Alert.alert("Waiting for connection", "Will upload when connected", [
+      {
+        text: "Cancel update",
+        onPress: async () => {
+          console.log("onPressed ", asset)
+          await Assets.addOrUpdate([
+            {
+              id: asset.id,
+              syncStatus: SyncStatus.NOTSYNCED,
+            },
+          ])
+          setAsset((prev) => ({
+            ...prev,
+            syncStatus: SyncStatus.NOTSYNCED,
+          }))
+        },
+      },
+      {
+        text: "OK",
+      },
+    ])
+  }, [asset])
 
-  const disableScroll = () => {
-    setScrollEnabled(false)
-  }
-
-  const renderHeader = () => {
-    return (
-      <Header
-        containerStyle={{ marginTop: 0, zIndex: 10, elevation: 3 }}
-        leftComponent={
-          <HeaderLeftContainer>
-            <HeaderArrowBack navigation={navigation} />
-          </HeaderLeftContainer>
-        }
-        rightComponent={
-          <HeaderRightContainer>
-            {loading ? (
-              <ActivityIndicator size="small" />
-            ) : asset?.syncStatus === SyncStatus.SYNCED && !asset?.isDeleted ? (
-              <Icon type="material-community" name="cloud-check" />
-            ) : asset?.syncStatus === SyncStatus.NOTSYNCED && !asset?.isDeleted ? (
-              <Icon type="material-community" name="cloud-upload-outline" onPress={uploadToBox} />
-            ) : asset?.syncStatus === SyncStatus.SYNC ? (
-              <Icon type="material-community" name="refresh" onPress={uploadToBox} />
-            ) : null}
-            {asset?.syncStatus === SyncStatus.SYNCED && (
-              <Icon
-                type="material-community"
-                style={styles.headerIcon}
-                name="share-variant"
-                onPress={() => {
-                  setDID("")
-                  setShowShareBottomSheet(true)
-                }}
-              />
-            )}
-          </HeaderRightContainer>
-        }
-      />
-    )
-  }
-
-  const uploadToBox = async () => {
+  const uploadToBox = useCallback(async () => {
     if (asset?.syncStatus === SyncStatus.NOTSYNCED && !asset?.isDeleted) {
       setLoading(true)
       setTimeout(async () => {
@@ -219,32 +209,46 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
     } else if (asset?.syncStatus === SyncStatus.SYNC) {
       cancelUpdate()
     }
-  }
-  const cancelUpdate = () => {
-    Alert.alert("Waiting for connection", "Will upload when connected", [
-      {
-        text: "Cancel update",
-        onPress: async () => {
-          console.log("onPressed ", asset)
-          await Assets.addOrUpdate([
-            {
-              id: asset.id,
-              syncStatus: SyncStatus.NOTSYNCED,
-            },
-          ])
-          setAsset((prev) => ({
-            ...prev,
-            syncStatus: SyncStatus.NOTSYNCED,
-          }))
-        },
-      },
-      {
-        text: "OK",
-      },
-    ])
-  }
+  }, [asset, netInfoState.isConnected, cancelUpdate])
 
-  const shareWithDID = async () => {
+  const renderHeader = useCallback(() => {
+    return (
+      <Header
+        containerStyle={{ marginTop: 0, zIndex: 10, elevation: 3 }}
+        leftComponent={
+          <HeaderLeftContainer>
+            <HeaderArrowBack navigation={navigation} />
+          </HeaderLeftContainer>
+        }
+        rightComponent={
+          <HeaderRightContainer>
+            {loading ? (
+              <ActivityIndicator size="small" />
+            ) : asset?.syncStatus === SyncStatus.SYNCED && !asset?.isDeleted ? (
+              <Icon type="material-community" name="cloud-check" />
+            ) : asset?.syncStatus === SyncStatus.NOTSYNCED && !asset?.isDeleted ? (
+              <Icon type="material-community" name="cloud-upload-outline" onPress={uploadToBox} />
+            ) : asset?.syncStatus === SyncStatus.SYNC ? (
+              <Icon type="material-community" name="refresh" onPress={uploadToBox} />
+            ) : null}
+            {asset?.syncStatus === SyncStatus.SYNCED && (
+              <Icon
+                type="material-community"
+                style={styles.headerIcon}
+                name="share-variant"
+                onPress={() => {
+                  setDID("")
+                  setShowShareBottomSheet(true)
+                }}
+              />
+            )}
+          </HeaderRightContainer>
+        }
+      />
+    )
+  }, [navigation, loading, uploadToBox, asset])
+
+  const shareWithDID = useCallback(async () => {
     if (!DID) return
     setSharing(true)
     try {
@@ -294,9 +298,9 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
       setSharing(false)
       setShowShareBottomSheet(false)
     }
-  }
+  }, [DID, asset])
 
-  const downloadFromBox = async () => {
+  const downloadFromBox = useCallback(async () => {
     if (asset?.syncStatus === SyncStatus.SYNCED && asset?.isDeleted) {
       setLoading(true)
       setTimeout(async () => {
@@ -341,9 +345,9 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
         }
       }, 0)
     }
-  }
+  }, [asset])
 
-  const renderDownloadSection = () => {
+  const renderDownloadSection = useCallback(() => {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <Card containerStyle={{ borderWidth: 0 }}>
@@ -357,19 +361,22 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
         </Card>
       </View>
     )
-  }
+  }, [downloadFromBox])
 
-  const onMomentumScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const { x: xOffset } = event.nativeEvent.contentOffset
-    const imageWidth = windowDims.width
+  const onMomentumScrollEnd = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const { x: xOffset } = event.nativeEvent.contentOffset
+      const imageWidth = windowDims.width
 
-    const index = Math.floor(xOffset / imageWidth)
-    setAsset(medias[index])
-  }
+      const index = Math.floor(xOffset / imageWidth)
+      setAsset(medias[index])
+    },
+    [windowDims.width, medias],
+  )
 
-  const onActionPress = (action: string) => {
+  const onActionPress = useCallback((action: string) => {
     alert(`Action ${action} is being developed`)
-  }
+  }, [])
 
   const renderActionButtons = useCallback(() => {
     return (
@@ -426,6 +433,7 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
       <>
         {renderHeader()}
         {renderActionButtons()}
+        {/* {rowRenderer('', asset)} */}
         <NativeViewGestureHandler ref={listGestureRef}>
           <RecyclerListView
             isHorizontal={true}
