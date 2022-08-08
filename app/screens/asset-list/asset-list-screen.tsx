@@ -124,7 +124,7 @@ export const AssetListScreen: React.FC<Props> = ({ navigation, medias, defaultHe
     if (section.type === ViewType.ASSET) {
       const asset: Asset = section.data
       setSingleAsset(JSON.parse(JSON.stringify(asset)));
-      navigation.push(AppNavigationNames.ImageGalleryViewer, { assetId: asset.id, medias: mediasRef.current })
+      navigation.push(AppNavigationNames.ImageGalleryViewer, { assetId: asset.id })
     }
   }
 

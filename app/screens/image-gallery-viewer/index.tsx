@@ -19,7 +19,7 @@ import { Header, Text } from "../../components"
 import { HeaderArrowBack, HeaderLeftContainer, HeaderRightContainer } from "../../components/header"
 import { RootStackParamList } from "../../navigators"
 import { Assets } from "../../services/localdb"
-import { singleAssetState } from "../../store"
+import { singleAssetState, mediasState } from "../../store"
 import { Asset, SyncStatus } from "../../types"
 import { GalleryImage } from "./gallery-image"
 import Toast from "react-native-toast-message"
@@ -47,7 +47,8 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
   navigation,
 }) => {
   const [asset, setAsset] = useRecoilState(singleAssetState)
-  const { medias, assetId } = route.params
+  const [medias, setMedias] = useRecoilState(mediasState)
+  const { assetId } = route.params
   const windowDims = useWindowDimensions()
   const initialIndexRef = useRef(null)
   const [scrollEnabled, setScrollEnabled] = useState(true)

@@ -33,7 +33,7 @@ export type RootStackParamList = {
   BoxList: undefined,
   BoxAddUpdate: { box: BoxEntity },
   SharedViewer: { assetURI: string }
-  ImageGalleryViewer: { assetId: Asset['id'], medias: Asset[]}
+  ImageGalleryViewer: { assetId: Asset['id']}
 }
 export enum AppNavigationNames {
   HomeScreen = "Home",
@@ -141,12 +141,10 @@ const AppStack = () => {
           }),
         }}
         component={ImageGalleryViewerScreen}
-        // sharedElements={(route) => {
-        //   const { assetId = "" } = route.params
-        //   return [{
-        //     id: assetId,
-        //   }]
-        // }}
+        sharedElements={(route) => {
+          const { assetId = "" } = route.params
+          return [assetId]
+        }}
       />
       <Stack.Screen
         name={AppNavigationNames.AccountScrenn}
