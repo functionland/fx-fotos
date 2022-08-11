@@ -49,7 +49,8 @@ export interface ExtendedState {
 }
 export interface RecyclerAssetListHandler {
   resetSelectedItems: () => void,
-  toggleSelectionMode: () => void
+  toggleSelectionMode: () => void,
+  scrollToItem: (item: RecyclerAssetListSection, animated?: boolean) => void
 }
 // eslint-disable-next-line react/display-name
 const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(({
@@ -87,6 +88,9 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(({
     },
     toggleSelectionMode: () => {
       toggleSelectionMode()
+    },
+    scrollToItem: (item: RecyclerAssetListSection, animated = false) => {
+      rclRef.current.scrollToItem(item, animated)
     }
   }));
   const toggleSelectionMode = () => {

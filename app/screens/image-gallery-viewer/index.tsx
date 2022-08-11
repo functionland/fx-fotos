@@ -19,7 +19,7 @@ import { Header, Text } from "../../components"
 import { HeaderArrowBack, HeaderLeftContainer, HeaderRightContainer } from "../../components/header"
 import { RootStackParamList } from "../../navigators"
 import { Assets } from "../../services/localdb"
-import { singleAssetState, mediasState } from "../../store"
+import { singleAssetState, mediasState, recyclerSectionsState } from "../../store"
 import { Asset, SyncStatus } from "../../types"
 import { GalleryImage } from "./gallery-image"
 import Toast from "react-native-toast-message"
@@ -36,6 +36,8 @@ import { AddShareMeta, getAssetMeta } from "../../services/remote-db-service"
 import { BSON } from "realm"
 import { palette } from "../../theme"
 import Animated, { useAnimatedStyle, useSharedValue } from "react-native-reanimated"
+import { useEffect } from "react"
+import { BackHandler } from "react-native"
 
 interface ImageGalleryViewerScreenProps {
   navigation: NavigationProp<RootStackParamList>
@@ -47,8 +49,9 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
   navigation,
 }) => {
   const [asset, setAsset] = useRecoilState(singleAssetState)
+  const [recyclerList, setRecyclerSections] = useRecoilState(recyclerSectionsState)
   const [medias, setMedias] = useRecoilState(mediasState)
-  const { assetId } = route.params
+  const { assetId, scrollToItem } = route.params
   const windowDims = useWindowDimensions()
   const initialIndexRef = useRef(null)
   const [scrollEnabled, setScrollEnabled] = useState(true)
@@ -69,6 +72,17 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
   }
 
   const listGestureRef = useRef()
+
+  useEffect(() => {
+    const onBack = () => {
+      goBack()
+      return true
+    }
+    BackHandler.addEventListener('hardwareBackPress', onBack)
+    return () => {
+      BackHandler.removeEventListener('hardwareBackPress', onBack)
+    }
+  }, [])
 
   const enableScroll = useCallback(() => {
     setScrollEnabled(true)
@@ -377,10 +391,19 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
       const { x: xOffset } = event.nativeEvent.contentOffset
       const imageWidth = windowDims.width
       const index = Math.round(xOffset / imageWidth)
-      currentAssetRef.current = dataProvider.getDataForIndex(index)
-      setAsset(medias[index])
+      const currentAsset = dataProvider.getDataForIndex(index);
+      currentAssetRef.current = currentAsset
+      setAsset(currentAsset)
+      setTimeout(() => {
+        for(let i=0;i<recyclerList.length;i++){
+          const section = recyclerList[i]
+          if(section.id === currentAsset.id){
+            scrollToItem(section, false)
+          }
+        }
+      })
     },
-    [windowDims.width, medias],
+    [windowDims.width],
   )
 
   const onActionPress = useCallback((action: string) => {

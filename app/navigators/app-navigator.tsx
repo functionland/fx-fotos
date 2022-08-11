@@ -33,7 +33,7 @@ export type RootStackParamList = {
   BoxList: undefined,
   BoxAddUpdate: { box: BoxEntity },
   SharedViewer: { assetURI: string }
-  ImageGalleryViewer: { assetId: Asset['id']}
+  ImageGalleryViewer: { assetId: Asset['id'], scrollToItem: (item: RecyclerAssetListSection, animated?: boolean) => void}
 }
 export enum AppNavigationNames {
   HomeScreen = "Home",

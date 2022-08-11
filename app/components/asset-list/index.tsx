@@ -24,7 +24,8 @@ interface Props {
 }
 export interface AssetListHandle {
   resetSelectedItems: () => void,
-  toggleSelectionMode: () => void
+  toggleSelectionMode: () => void,
+  scrollToItem: (item: RecyclerAssetListSection, animated?: boolean) => void
 }
 // eslint-disable-next-line react/display-name
 const AssetList = forwardRef<AssetListHandle, Props>(({ refreshData, sections, scrollY, onSelectedItemsChange, onAssetLoadError, renderFooter, onItemPress }, ref): JSX.Element => {
@@ -37,6 +38,9 @@ const AssetList = forwardRef<AssetListHandle, Props>(({ refreshData, sections, s
     },
     toggleSelectionMode: () => {
       recyclerAssetListRef.current?.toggleSelectionMode()
+    },
+    scrollToItem: (item: RecyclerAssetListSection, animated?: boolean) => {
+      recyclerAssetListRef.current.scrollToItem(item, animated)
     }
   }));
   const scrollHandler = useAnimatedScrollHandler({
