@@ -124,13 +124,17 @@ const AppStack = () => {
       <Stack.Screen
         name={AppNavigationNames.ImageGalleryViewer}
         options={{
+          detachPreviousScreen: false,
           headerShown: false,
           headerTransparent: true,
           gestureEnabled: false,
           cardOverlayEnabled: true,
           cardStyle: { backgroundColor: "transparent" },
           animationEnabled: true,
-          presentation: Platform.OS === "ios" ? "transparentModal" : "card",
+          transitionSpec: {
+            open: { animation: "timing", config: {duration: 200, delay: Platform.OS === 'android' ? 300 : 100}},
+            close: { animation: "timing", config: {duration: 200} },
+          },
           cardStyleInterpolator: ({ current: { progress } }) => ({
             containerStyle: {
               opacity: progress.interpolate({
@@ -143,7 +147,11 @@ const AppStack = () => {
         component={ImageGalleryViewerScreen}
         sharedElements={(route) => {
           const { assetId = "" } = route.params
-          return [assetId]
+          return [
+            {
+              id: assetId,
+            },
+          ]
         }}
       />
       <Stack.Screen
@@ -176,7 +184,7 @@ const AppStack = () => {
           return [
             {
               id: `AccountAvatar`,
-              animation: 'move',
+              animation: "move",
             },
           ];
         }}

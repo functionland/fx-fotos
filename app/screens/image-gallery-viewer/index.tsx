@@ -431,10 +431,8 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
 
   return (
     <Animated.View style={wrapperAnimatedStyle}>
-      <>
+      <View style={{ flex: 1 }}>
         {renderHeader()}
-        {renderActionButtons()}
-        {/* {rowRenderer('', asset)} */}
         <NativeViewGestureHandler ref={listGestureRef}>
           <RecyclerListView
             isHorizontal={true}
@@ -453,6 +451,7 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
             }}
           />
         </NativeViewGestureHandler>
+        {renderActionButtons()}
         <BottomSheet
           isVisible={showShareBottomSheet}
           onBackdropPress={() => setShowShareBottomSheet(false)}
@@ -474,7 +473,7 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
             onPress={shareWithDID}
           ></Button>
         </BottomSheet>
-      </>
+      </View>
     </Animated.View>
   )
 }
