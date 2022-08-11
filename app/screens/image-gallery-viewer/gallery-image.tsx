@@ -121,6 +121,13 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
     enableParentScroll()
   }, [])
 
+  const goBack = useCallback(() => {
+    navigation.setParams({assetId: asset.id})
+    setTimeout(() => {
+      navigation.goBack()
+    })
+  }, [asset.id])
+
   const onPan = useAnimatedGestureHandler<PanGestureHandlerGestureEvent>({
     onActive(event) {
       if (isZoomed.value) {
@@ -190,7 +197,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
             isImageInfoSheetOpened.value = false
           } else if (isSwipeDownGestureStarted.value) {
             if (translationY > SWIPE_TO_CLOSE_THRESHOLD) {
-              runOnJS(navigation.goBack)()
+              runOnJS(goBack)()
             } else {
               // Return to previous place.
               translateX.value = withTiming(accumulatedX.value)
@@ -256,7 +263,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
 
         if (shouldCloseOnZoomOut.value) {
           if (newScale < 0.6) {
-            runOnJS(navigation.goBack)()
+            runOnJS(goBack)()
           } else {
             accumulatedScale.value = withTiming(1)
             curScale.value = 1

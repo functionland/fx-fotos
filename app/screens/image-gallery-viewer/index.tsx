@@ -58,6 +58,7 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
   const [sharing, setSharing] = useState(false)
   const netInfoState = useNetInfo()
   const screenOpacity = useSharedValue(1)
+  const currentAssetRef = useRef(asset)
 
   if (initialIndexRef.current === null) {
     medias.forEach((asset, idx) => {
@@ -116,6 +117,13 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
     provider = provider.cloneWithRows(medias, 0)
     return provider
   }, [medias])
+
+  const goBack = useCallback(() => {
+    navigation.setParams({ assetId: currentAssetRef.current.id })
+    setTimeout(() => {
+      navigation.goBack()
+    })
+  }, [])
 
   const cancelUpdate = useCallback(() => {
     Alert.alert("Waiting for connection", "Will upload when connected", [
@@ -218,7 +226,7 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
         containerStyle={{ marginTop: 0, zIndex: 10, elevation: 3 }}
         leftComponent={
           <HeaderLeftContainer>
-            <HeaderArrowBack navigation={navigation} />
+            <HeaderArrowBack navigation={navigation} iconProps={{ onPress: goBack }} />
           </HeaderLeftContainer>
         }
         rightComponent={
@@ -247,7 +255,7 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
         }
       />
     )
-  }, [navigation, loading, uploadToBox, asset])
+  }, [navigation, loading, uploadToBox, asset, goBack])
 
   const shareWithDID = useCallback(async () => {
     if (!DID) return
@@ -368,8 +376,8 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
       const { x: xOffset } = event.nativeEvent.contentOffset
       const imageWidth = windowDims.width
-
-      const index = Math.floor(xOffset / imageWidth)
+      const index = Math.round(xOffset / imageWidth)
+      currentAssetRef.current = dataProvider.getDataForIndex(index)
       setAsset(medias[index])
     },
     [windowDims.width, medias],

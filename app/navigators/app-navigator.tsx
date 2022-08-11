@@ -132,7 +132,7 @@ const AppStack = () => {
           cardStyle: { backgroundColor: "transparent" },
           animationEnabled: true,
           transitionSpec: {
-            open: { animation: "timing", config: {duration: 200, delay: Platform.OS === 'android' ? 300 : 100}},
+            open: { animation: "timing", config: {duration: 200, delay: Platform.OS === 'android' ? 400 : 100}},
             close: { animation: "timing", config: {duration: 200} },
           },
           cardStyleInterpolator: ({ current: { progress } }) => ({
