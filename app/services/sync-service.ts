@@ -6,7 +6,6 @@ import { file, fula } from "react-native-fula"
 import { AssetEntity } from "../realmdb/entities"
 import { SyncStatus } from "../types"
 import { Assets, Boxs } from "./localdb/index"
-import { addAssetMeta } from "./remote-db-service"
 import { TaggedEncryption } from "@functionland/fula-sec"
 import * as helper from "../utils/helper"
 type TaskParams = {
@@ -55,13 +54,6 @@ const backgroundTask = async (taskParameters: TaskParams) => {
         if (myDID) {
           const result = await encryptAndUploadAsset(asset)
           const jwe = await taggedEncryption.encrypt(result, result?.id, [myDID?.authDID])
-          await addAssetMeta({
-            id: result.id,
-            name: asset.filename,
-            jwe,
-            date: asset.modificationTime,
-            ownerId: myDID?.authDID,
-          })
           Assets.addOrUpdate([
             {
               id: asset.id,
