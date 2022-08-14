@@ -1,7 +1,6 @@
 import { NavigationProp, RouteProp } from "@react-navigation/native"
 import { BottomSheet, Button, Card, Icon, Input } from "@rneui/themed"
-import { DataProvider, GridLayoutProvider, RecyclerListView } from "fula-recyclerlistview"
-import React, { useState, useRef, useMemo, useCallback } from "react"
+import React, { useEffect, useState, useRef, useCallback } from "react"
 import {
   ActivityIndicator,
   Alert,
@@ -12,7 +11,7 @@ import {
   useWindowDimensions,
   View,
 } from "react-native"
-import { StyleSheet } from "react-native"
+import { StyleSheet, FlatList, BackHandler, InteractionManager } from "react-native"
 import { NativeViewGestureHandler } from "react-native-gesture-handler"
 import { useRecoilState } from "recoil"
 import { Header, Text } from "../../components"
@@ -36,8 +35,6 @@ import { AddShareMeta, getAssetMeta } from "../../services/remote-db-service"
 import { BSON } from "realm"
 import { palette } from "../../theme"
 import Animated, { useAnimatedStyle, useSharedValue } from "react-native-reanimated"
-import { useEffect } from "react"
-import { BackHandler } from "react-native"
 
 interface ImageGalleryViewerScreenProps {
   navigation: NavigationProp<RootStackParamList>
@@ -54,7 +51,6 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
   const { assetId, scrollToItem } = route.params
   const windowDims = useWindowDimensions()
   const initialIndexRef = useRef(null)
-  const [scrollEnabled, setScrollEnabled] = useState(true)
   const [loading, setLoading] = useState(false)
   const [showShareBottomSheet, setShowShareBottomSheet] = useState(false)
   const [DID, setDID] = useState("")
@@ -62,13 +58,16 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
   const netInfoState = useNetInfo()
   const screenOpacity = useSharedValue(1)
   const currentAssetRef = useRef(asset)
+  const scrollRef = useRef(null)
 
   if (initialIndexRef.current === null) {
-    medias.forEach((asset, idx) => {
-      if (asset.id === assetId) {
-        initialIndexRef.current = idx
+    for(let i = 0;i<medias.length;i++){
+      const currentAsset = medias[i]
+      if (currentAsset.id === assetId) {
+        initialIndexRef.current = i
+        break;
       }
-    })
+    }
   }
 
   const listGestureRef = useRef()
@@ -78,18 +77,18 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
       goBack()
       return true
     }
-    BackHandler.addEventListener('hardwareBackPress', onBack)
+    BackHandler.addEventListener("hardwareBackPress", onBack)
     return () => {
-      BackHandler.removeEventListener('hardwareBackPress', onBack)
+      BackHandler.removeEventListener("hardwareBackPress", onBack)
     }
   }, [])
 
   const enableScroll = useCallback(() => {
-    setScrollEnabled(true)
+    scrollRef.current.setNativeProps({ scrollEnabled: true })
   }, [])
 
   const disableScroll = useCallback(() => {
-    setScrollEnabled(false)
+    scrollRef.current.setNativeProps({ scrollEnabled: false })
   }, [])
 
   const renderItem = useCallback(
@@ -106,31 +105,6 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
     },
     [enableScroll, disableScroll, screenOpacity],
   )
-
-  const rowRenderer = useCallback((type: string | number, data: Asset) => {
-    if (data?.syncStatus === SyncStatus.SYNCED && data?.isDeleted) {
-      return renderDownloadSection()
-    }
-    if (data.isDeleted) {
-      return null
-    }
-    return renderItem({ item: data })
-  }, [])
-
-  const layoutProvider = useMemo(() => {
-    return new GridLayoutProvider(
-      1,
-      () => "PHOTO",
-      () => 1,
-      () => windowDims.width,
-    )
-  }, [windowDims])
-
-  const dataProvider = useMemo(() => {
-    let provider = new DataProvider((r1: Asset, r2: Asset) => r1.id !== r2.id)
-    provider = provider.cloneWithRows(medias, 0)
-    return provider
-  }, [medias])
 
   const goBack = useCallback(() => {
     navigation.setParams({ assetId: currentAssetRef.current.id })
@@ -391,14 +365,15 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
       const { x: xOffset } = event.nativeEvent.contentOffset
       const imageWidth = windowDims.width
       const index = Math.round(xOffset / imageWidth)
-      const currentAsset = dataProvider.getDataForIndex(index);
+      const currentAsset = medias[index]
       currentAssetRef.current = currentAsset
       setAsset(currentAsset)
-      setTimeout(() => {
-        for(let i=0;i<recyclerList.length;i++){
+      InteractionManager.runAfterInteractions(() => {
+        for (let i = 0; i < recyclerList.length; i++) {
           const section = recyclerList[i]
-          if(section.id === currentAsset.id){
+          if (section.id === currentAsset.id) {
             scrollToItem(section, false)
+            break;
           }
         }
       })
@@ -460,26 +435,33 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
     }
   })
 
+  const getItemLayout = useCallback((data, index) => {
+    return { length: windowDims.width, offset: windowDims.width * index, index: index }
+  }, [])
+
+  const keyExtractor = useCallback((item: Asset) => item.id , [])
+
   return (
     <Animated.View style={wrapperAnimatedStyle}>
       <View style={{ flex: 1 }}>
         {renderHeader()}
         <NativeViewGestureHandler ref={listGestureRef}>
-          <RecyclerListView
-            isHorizontal={true}
-            initialRenderIndex={initialIndexRef.current}
+          <FlatList
+            ref={scrollRef}
+            horizontal={true}
+            initialScrollIndex={initialIndexRef.current}
             style={{ flex: 1 }}
-            layoutProvider={layoutProvider}
-            dataProvider={dataProvider}
-            rowRenderer={rowRenderer}
-            renderAheadOffset={5}
-            scrollViewProps={{
-              scrollEnabled: scrollEnabled,
-              pagingEnabled: true,
-              onMomentumScrollEnd: onMomentumScrollEnd,
-              showsHorizontalScrollIndicator: false,
-              showsVerticalScrollIndicator: false,
-            }}
+            getItemLayout={getItemLayout}
+            renderItem={renderItem}
+            keyExtractor={keyExtractor}
+            onMomentumScrollEnd={onMomentumScrollEnd}
+            showsHorizontalScrollIndicator={false}
+            showsVerticalScrollIndicator={false}
+            maxToRenderPerBatch={3}
+            windowSize={3}
+            initialNumToRender={3}
+            pagingEnabled={true}
+            data={medias}
           />
         </NativeViewGestureHandler>
         {renderActionButtons()}
