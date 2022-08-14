@@ -12,22 +12,17 @@
 import "./i18n"
 import "./utils/ignore-warnings"
 import React, { useRef } from "react"
-import { useColorScheme } from "react-native"
+import { useColorScheme, SafeAreaView } from "react-native"
 import { GestureHandlerRootView } from "react-native-gesture-handler"
-import {
-  SafeAreaProvider,
-  initialWindowMetrics,
-  SafeAreaView,
-} from "react-native-safe-area-context"
+import { SafeAreaProvider, initialWindowMetrics } from "react-native-safe-area-context"
 import { RecoilRoot } from "recoil"
-import { ThemeProvider as RneThemeProvider } from "@rneui/themed"
+import { ThemeProvider as RneThemeProvider, useTheme, useThemeMode } from "@rneui/themed"
 import WalletConnectProvider from "@walletconnect/react-native-dapp"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 
 import { initFonts } from "./theme/fonts" // expo
 import * as storage from "./utils/storage"
 import { useBackButtonHandler, AppNavigator, canExit, useNavigationPersistence } from "./navigators"
-import { ToggleStorybook } from "../storybook/toggle-storybook"
 import { ErrorBoundary } from "./screens/error/error-boundary"
 import * as MediaLibrary from "expo-media-library"
 import { ThemeProvider } from "./theme"
@@ -78,7 +73,6 @@ function App() {
     })
   }
 
-  // Before we show the app, we have to wait for our state to be ready.
   // In the meantime, don't render anything. This will be the background
   // color set in native by rootView's background color.
   // In iOS: application:didFinishLaunchingWithOptions:
@@ -100,7 +94,13 @@ function App() {
                     asyncStorage: AsyncStorage,
                   }}
                 >
-                  <SafeAreaView style={{ flex: 1 }}>
+                  <SafeAreaView
+                    style={{
+                      backgroundColor: RneDarkTheme.darkColors.platform.ios.primary,
+                      height: "100%",
+                      width: "100%",
+                    }}
+                  >
                     <AppNavigator onStateChange={onNavigationStateChange} />
                   </SafeAreaView>
                 </WalletConnectProvider>
