@@ -12,15 +12,11 @@
 import "./i18n"
 import "./utils/ignore-warnings"
 import React, { useRef } from "react"
-import { useColorScheme } from "react-native"
+import { useColorScheme, Platform, View, SafeAreaView, StatusBar } from "react-native"
 import { GestureHandlerRootView } from "react-native-gesture-handler"
-import {
-  SafeAreaProvider,
-  initialWindowMetrics,
-  SafeAreaView,
-} from "react-native-safe-area-context"
+import { SafeAreaProvider, initialWindowMetrics } from "react-native-safe-area-context"
 import { RecoilRoot } from "recoil"
-import { ThemeProvider as RneThemeProvider } from "@rneui/themed"
+import { darkColors, ThemeProvider as RneThemeProvider } from "@rneui/themed"
 import WalletConnectProvider from "@walletconnect/react-native-dapp"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 
@@ -86,6 +82,7 @@ function App() {
   // You can replace with your own loading component if you wish.
   if (!isNavigationStateRestored) return null
 
+  let WrapperContainer = Platform.OS === 'ios' ? SafeAreaView : View
   // otherwise, we're ready to render the app
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -100,9 +97,10 @@ function App() {
                     asyncStorage: AsyncStorage,
                   }}
                 >
-                  <SafeAreaView style={{ flex: 1 }}>
+                  <WrapperContainer style={{ height: "100%", width: "100%" }}>
+                    <StatusBar backgroundColor={scheme === 'dark' ? darkColors.platform.ios : ''} />
                     <AppNavigator onStateChange={onNavigationStateChange} />
-                  </SafeAreaView>
+                  </WrapperContainer>
                 </WalletConnectProvider>
               </RecoilRoot>
             </ErrorBoundary>
