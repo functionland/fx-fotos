@@ -7,6 +7,12 @@ import FontAwesome5 from "react-native-vector-icons/FontAwesome5"
 import { HomeScreen, LibraryScreen } from "../screens"
 import { TabHeader } from "../components/header/tab-header"
 import { UnderConstruction } from "../components"
+<<<<<<< Updated upstream
+=======
+import { heightPercentageToDP } from "react-native-responsive-screen"
+import { RneDarkTheme } from "../theme"
+import { useThemeMode } from "@rneui/themed"
+>>>>>>> Stashed changes
 export type HomeNavigationParamList = {
   HomeScreen: undefined
 }
@@ -26,7 +32,14 @@ function UnderConstructionScreen() {
 }
 const HomeTabs = createBottomTabNavigator()
 export function HomeNavigator() {
+<<<<<<< Updated upstream
   const { colors } = useTheme();
+=======
+  const { colors } = useTheme()
+
+  const [themeMode] = useThemeMode()
+
+>>>>>>> Stashed changes
   return (
     <HomeTabs.Navigator
       screenOptions={{
@@ -34,12 +47,18 @@ export function HomeNavigator() {
         headerShown: false,
         header: (props) => <TabHeader {...props} />,
         tabBarStyle: {
+<<<<<<< Updated upstream
           height: Platform.OS === 'ios' ? 90 : 70,
         },
         tabBarLabelStyle: {
           fontSize: 15,
           fontWeight: "600",
           padding: 5,
+=======
+          height: 70,
+          backgroundColor:
+            themeMode === "d" ? RneDarkTheme.darkColors.platform.ios.primary : "#fff",
+>>>>>>> Stashed changes
         },
       }}
     >
@@ -111,3 +130,16 @@ export function HomeNavigator() {
     </HomeTabs.Navigator>
   )
 }
+<<<<<<< Updated upstream
+=======
+
+const styles = StyleSheet.create({
+  tabIconWrapper: {
+    marginTop: Platform.OS === "ios" ? heightPercentageToDP(4) : 0,
+    height: "100%",
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+})
+>>>>>>> Stashed changes

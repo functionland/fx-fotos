@@ -100,9 +100,19 @@ function App() {
                     asyncStorage: AsyncStorage,
                   }}
                 >
+<<<<<<< Updated upstream
                   <SafeAreaView style={{ flex: 1 }}>
+=======
+                  {/* <SafeAreaView
+                    style={{
+                      backgroundColor: RneDarkTheme.darkColors.platform.ios.primary,
+                      height: "100%",
+                      width: "100%",
+                    }}
+                  > */}
+>>>>>>> Stashed changes
                     <AppNavigator onStateChange={onNavigationStateChange} />
-                  </SafeAreaView>
+                  {/* </SafeAreaView> */}
                 </WalletConnectProvider>
               </RecoilRoot>
             </ErrorBoundary>

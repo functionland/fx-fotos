@@ -4,6 +4,7 @@ import { enableScreens } from "react-native-screens"
 import { NavigationContainer } from "@react-navigation/native"
 import { createSharedElementStackNavigator } from "react-navigation-shared-element"
 import Toast from "react-native-toast-message"
+import { SafeAreaView } from "react-native"
 
 import { navigationRef } from "./navigation-utilities"
 import {
@@ -16,19 +17,20 @@ import {
   ShareViewerScreen,
 } from "../screens"
 import { HomeNavigator } from "./home-navigator"
-import { ThemeContext } from "../theme"
+import { RneDarkTheme, ThemeContext } from "../theme"
 import { BoxEntity } from "../realmdb/entities"
 import { AssetStory, RecyclerAssetListSection } from "../types"
+import { useThemeMode } from "@rneui/themed"
 
 enableScreens()
 export type RootStackParamList = {
   Home: undefined
-  LibraryAssets: undefined,
-  Photo: { section: RecyclerAssetListSection },
-  Account: undefined,
-  Settings: undefined,
-  BoxList: undefined,
-  BoxAddUpdate: { box: BoxEntity },
+  LibraryAssets: undefined
+  Photo: { section: RecyclerAssetListSection }
+  Account: undefined
+  Settings: undefined
+  BoxList: undefined
+  BoxAddUpdate: { box: BoxEntity }
   SharedViewer: { assetURI: string }
 }
 export enum AppNavigationNames {
@@ -146,16 +148,12 @@ const AppStack = () => {
           return [
             {
               id: `AccountAvatar`,
-              animation: 'move',
+              animation: "move",
             },
-          ];
+          ]
         }}
-
       />
-      <Stack.Screen
-        name={AppNavigationNames.SharedViewer}
-        component={ShareViewerScreen}
-      />
+      <Stack.Screen name={AppNavigationNames.SharedViewer} component={ShareViewerScreen} />
     </Stack.Navigator>
   )
 }
@@ -168,28 +166,41 @@ export const AppNavigator = (props: NavigationProps) => {
   useEffect(() => {
     setTimeout(() => {
       setToastVisible(true)
-    }, 1000);
+    }, 1000)
   }, [])
+
+  const [themeMode] = useThemeMode()
+
+  React.useEffect(() => console.log({ themeMode }), [themeMode])
+
   return (
     <Animated.View style={{ flex: 1 }}>
-      <NavigationContainer
-        theme={theme}
-        ref={navigationRef}
-        linking={{
-          prefixes: ["https://fotos.fx.land", "http://fotos.fx.land", "fotos://fotos.fx.land"],
-          config: {
-            initialRouteName: AppNavigationNames.HomeScreen,
-            screens: {
-              [AppNavigationNames.SharedViewer]: "shared/:jwe"
-            }
-          }
+      <SafeAreaView
+        style={{
+          height: "100%",
+          width: "100%",
+          backgroundColor:
+            themeMode === "d" ? RneDarkTheme.darkColors.platform.ios.primary : "#fff",
         }}
-        //theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-        {...props}
       >
-        <AppStack />
-      </NavigationContainer>
-      {toastVisible && <Toast />}
+        <NavigationContainer
+          theme={theme}
+          ref={navigationRef}
+          linking={{
+            prefixes: ["https://fotos.fx.land", "http://fotos.fx.land", "fotos://fotos.fx.land"],
+            config: {
+              initialRouteName: AppNavigationNames.HomeScreen,
+              screens: {
+                [AppNavigationNames.SharedViewer]: "shared/:jwe",
+              },
+            },
+          }}
+          {...props}
+        >
+          <AppStack />
+        </NavigationContainer>
+        {toastVisible && <Toast />}
+      </SafeAreaView>
     </Animated.View>
   )
 }
