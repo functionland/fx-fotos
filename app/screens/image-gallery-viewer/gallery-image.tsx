@@ -42,7 +42,7 @@ const MAX_SCALE = 6
 const SWIPE_UP_THRESHOLD = 10
 const SWIPE_TO_CLOSE_THRESHOLD = 100
 
-export const GalleryImage: React.FC<GalleryImageProps> = ({
+const GalleryImageComponent: React.FC<GalleryImageProps> = ({
   asset,
   enableParentScroll,
   disableParentScroll,
@@ -382,6 +382,8 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
     </Animated.View>
   )
 }
+
+export const GalleryImage = React.memo(GalleryImageComponent)
 
 const styles = StyleSheet.create({
   bottomSheet: {

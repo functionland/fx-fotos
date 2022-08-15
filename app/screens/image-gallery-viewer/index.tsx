@@ -443,16 +443,17 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
 
   return (
     <Animated.View style={wrapperAnimatedStyle}>
-      <View style={{ flex: 1 }}>
+      <View style={styles.list}>
         {renderHeader()}
         <NativeViewGestureHandler ref={listGestureRef}>
           <FlatList
             ref={scrollRef}
             horizontal={true}
             initialScrollIndex={initialIndexRef.current}
-            style={{ flex: 1 }}
+            style={styles.list}
             getItemLayout={getItemLayout}
             renderItem={renderItem}
+            removeClippedSubviews={true}
             keyExtractor={keyExtractor}
             onMomentumScrollEnd={onMomentumScrollEnd}
             showsHorizontalScrollIndicator={false}
@@ -499,6 +500,7 @@ const styles = StyleSheet.create({
   headerIcon: {
     marginHorizontal: 10,
   },
+  list: { flex: 1 },
   bottomSheetContainer: {
     backgroundColor: "rgba(189,189,189,.2)",
   },
