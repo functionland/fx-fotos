@@ -82,7 +82,6 @@ function App() {
   // You can replace with your own loading component if you wish.
   if (!isNavigationStateRestored) return null
 
-  let WrapperContainer = Platform.OS === 'ios' ? SafeAreaView : View
   // otherwise, we're ready to render the app
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -97,10 +96,7 @@ function App() {
                     asyncStorage: AsyncStorage,
                   }}
                 >
-                  <WrapperContainer style={{ height: "100%", width: "100%" }}>
-                    <StatusBar backgroundColor={scheme === 'dark' ? darkColors.platform.ios : ''} />
-                    <AppNavigator onStateChange={onNavigationStateChange} />
-                  </WrapperContainer>
+                  <AppNavigator onStateChange={onNavigationStateChange} />
                 </WalletConnectProvider>
               </RecoilRoot>
             </ErrorBoundary>
