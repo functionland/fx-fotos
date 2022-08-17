@@ -1,5 +1,5 @@
 import React from "react"
-import { View, Platform } from "react-native"
+import { View, Platform, StyleSheet, Text } from "react-native"
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import { useTheme } from "@react-navigation/native"
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5"
@@ -7,6 +7,9 @@ import FontAwesome5 from "react-native-vector-icons/FontAwesome5"
 import { HomeScreen, LibraryScreen } from "../screens"
 import { TabHeader } from "../components/header/tab-header"
 import { UnderConstruction } from "../components"
+import { heightPercentageToDP } from "react-native-responsive-screen"
+import { useThemeMode } from "@rneui/themed"
+import { RneDarkTheme } from "../theme"
 export type HomeNavigationParamList = {
   HomeScreen: undefined
 }
@@ -15,6 +18,7 @@ export enum HomeNavigationTypes {
   PhotosTab = "PhotosTab",
   LibraryTab = "LibraryTab",
 }
+
 function UnderConstructionScreen() {
   return (
     <View
@@ -24,22 +28,29 @@ function UnderConstructionScreen() {
     </View>
   )
 }
+
+const TabBarIconWrapper = ({ children }) => {
+  return <View style={styles.tabIconWrapper}>{children}</View>
+}
+
 const HomeTabs = createBottomTabNavigator()
+
 export function HomeNavigator() {
-  const { colors } = useTheme();
+  const { colors } = useTheme()
+
+  const [themeMode] = useThemeMode()
+
   return (
     <HomeTabs.Navigator
       screenOptions={{
+        tabBarShowLabel: false,
         headerTransparent: true,
         headerShown: false,
         header: (props) => <TabHeader {...props} />,
         tabBarStyle: {
-          height: Platform.OS === 'ios' ? 90 : 70,
-        },
-        tabBarLabelStyle: {
-          fontSize: 15,
-          fontWeight: "600",
-          padding: 5,
+          height: heightPercentageToDP(8.5),
+          backgroundColor:
+            themeMode === "d" ? RneDarkTheme.darkColors.platform.ios.primary : "#fff",
         },
       }}
     >
@@ -48,11 +59,16 @@ export function HomeNavigator() {
           tabBarLabel: "Photos",
           tabBarIcon: function tabIcon(props) {
             return (
-              <FontAwesome5
-                name={"images"}
-                size={25}
-                color={props?.focused ? colors.text : "gray"}
-              />
+              <TabBarIconWrapper>
+                <FontAwesome5
+                  name={"images"}
+                  size={25}
+                  color={props?.focused ? colors.text : "gray"}
+                />
+                <Text style={{ color: props?.focused ? colors.text : "gray", ...styles.label }}>
+                  Photos
+                </Text>
+              </TabBarIconWrapper>
             )
           },
         }}
@@ -64,12 +80,17 @@ export function HomeNavigator() {
         options={{
           tabBarIcon: function tabIcon(props) {
             return (
-              <FontAwesome5
-                name={"search"}
-                color={props?.focused ? colors.text : "gray"}
-                size={25}
-                style={{}}
-              />
+              <TabBarIconWrapper>
+                <FontAwesome5
+                  name={"search"}
+                  color={props?.focused ? colors.text : "gray"}
+                  size={25}
+                  style={{}}
+                />
+                <Text style={{ color: props?.focused ? colors.text : "gray", ...styles.label }}>
+                  Search
+                </Text>
+              </TabBarIconWrapper>
             )
           },
         }}
@@ -80,12 +101,17 @@ export function HomeNavigator() {
         options={{
           tabBarIcon: function tabIcon(props) {
             return (
-              <FontAwesome5
-                name={"user-friends"}
-                color={props?.focused ? colors.text : "gray"}
-                size={25}
-                style={{}}
-              />
+              <TabBarIconWrapper>
+                <FontAwesome5
+                  name={"user-friends"}
+                  color={props?.focused ? colors.text : "gray"}
+                  size={25}
+                  style={{}}
+                />
+                <Text style={{ color: props?.focused ? colors.text : "gray", ...styles.label }}>
+                  Share
+                </Text>
+              </TabBarIconWrapper>
             )
           },
         }}
@@ -97,12 +123,17 @@ export function HomeNavigator() {
           tabBarLabel: "Library",
           tabBarIcon: function tabIcon(props) {
             return (
-              <FontAwesome5
-                name={"swatchbook"}
-                color={props?.focused ? colors.text : "gray"}
-                size={25}
-                style={{}}
-              />
+              <TabBarIconWrapper>
+                <FontAwesome5
+                  name={"swatchbook"}
+                  color={props?.focused ? colors.text : "gray"}
+                  size={25}
+                  style={{}}
+                />
+                <Text style={{ color: props?.focused ? colors.text : "gray", ...styles.label }}>
+                  Library
+                </Text>
+              </TabBarIconWrapper>
             )
           },
         }}
@@ -111,3 +142,17 @@ export function HomeNavigator() {
     </HomeTabs.Navigator>
   )
 }
+
+const styles = StyleSheet.create({
+  tabIconWrapper: {
+    marginTop: Platform.OS === "ios" ? heightPercentageToDP(4) : 0,
+    height: "100%",
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  label: {
+    marginTop: 4,
+    fontWeight: "bold",
+  },
+})
