@@ -8,7 +8,6 @@ import { HomeScreen, LibraryScreen } from "../screens"
 import { TabHeader } from "../components/header/tab-header"
 import { UnderConstruction } from "../components"
 import { heightPercentageToDP } from "react-native-responsive-screen"
-import { useThemeMode } from "@rneui/themed"
 import { RneDarkTheme } from "../theme"
 export type HomeNavigationParamList = {
   HomeScreen: undefined
@@ -36,9 +35,7 @@ const TabBarIconWrapper = ({ children }) => {
 const HomeTabs = createBottomTabNavigator()
 
 export function HomeNavigator() {
-  const { colors } = useTheme()
-
-  const [themeMode] = useThemeMode()
+  const { colors, dark } = useTheme()
 
   return (
     <HomeTabs.Navigator
@@ -49,8 +46,7 @@ export function HomeNavigator() {
         header: (props) => <TabHeader {...props} />,
         tabBarStyle: {
           height: heightPercentageToDP(8.5),
-          backgroundColor:
-            themeMode === "d" ? RneDarkTheme.darkColors.platform.ios.primary : "#fff",
+          backgroundColor: dark ? RneDarkTheme.darkColors.platform.ios.primary : "#fff",
         },
       }}
     >
