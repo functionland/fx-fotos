@@ -1,5 +1,4 @@
 import React from "react"
-import { useThemeMode } from "@rneui/themed"
 import { useTheme } from "@react-navigation/native"
 import { View, Platform, SafeAreaView } from "react-native"
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
@@ -29,14 +28,12 @@ function UnderConstructionScreen() {
 }
 const HomeTabs = createBottomTabNavigator()
 export function HomeNavigator() {
-  const { colors } = useTheme()
-
-  const [themeMode] = useThemeMode()
+  const { colors, dark } = useTheme()
 
   return (
     <SafeAreaView
       style={{
-        backgroundColor: themeMode === "d" ? RneDarkTheme.darkColors.platform.ios.primary : "#fff",
+        backgroundColor: dark ? RneDarkTheme.darkColors.platform.ios.primary : "#fff",
         height: "100%",
         width: "100%",
       }}
