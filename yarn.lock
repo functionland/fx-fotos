@@ -15151,8 +15151,8 @@ react-native-flipper@^0.34.0:
   integrity sha512-48wgm29HJTOlZ0DibBsvXueEOY0EPIVL0wWKbwRfgrk86+luSEuLW3aZC50oJa95zSFb9qYShTV/6dWqh4Jamg==
 
 "react-native-fula@github:ghorbani-m/react-native-fula":
-  version "0.2.5"
-  resolved "https://codeload.github.com/ghorbani-m/react-native-fula/tar.gz/e8f211aab5c7e79431b694c4b98059bca2f39fae"
+  version "0.2.6"
+  resolved "https://codeload.github.com/ghorbani-m/react-native-fula/tar.gz/4319a24efaff3989aa0d6685c79fca700dcdd8c4"
   dependencies:
     "@functionland/file-protocol" "^0.3.6"
     "@functionland/graph-protocol" "^0.2.2"

@@ -83,7 +83,7 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
     const interactionPromise = InteractionManager.runAfterInteractions(()=>setTimeout(() => {
       setLocalMedias(medias)
       setScrollEnabled(true)
-    }, 300) )
+    }, 100) )
     //BackHandler.addEventListener('hardwareBackPress', onBack)
     return () => {
       interactionPromise.cancel();

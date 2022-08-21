@@ -1,8 +1,10 @@
 import React from "react"
 import { View, ViewStyle, StyleSheet, StyleProp } from "react-native"
+import { heightPercentageToDP } from "react-native-responsive-screen"
 
 type Props = {
-    style?: StyleProp<ViewStyle>
+    style?: StyleProp<ViewStyle>,
+    children: any
 }
 export const HeaderRightContainer: React.FC<Props> = ({ style, children }) => {
     return (
@@ -14,9 +16,9 @@ export const HeaderRightContainer: React.FC<Props> = ({ style, children }) => {
 
 const styles = StyleSheet.create({
     headerRightContainer: {
-        flex: 1,
         flexDirection: "row-reverse",
         paddingEnd: 5,
-        alignItems:"center"
+        alignItems:"center",
+        height: heightPercentageToDP(5.5)
     },
 })
