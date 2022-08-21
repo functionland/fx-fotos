@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   useWindowDimensions,
   View,
+  InteractionManager
 } from "react-native"
 import { StyleSheet } from "react-native"
 import { NativeViewGestureHandler } from "react-native-gesture-handler"
@@ -54,7 +55,7 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
   const { assetId, scrollToItem } = route.params
   const windowDims = useWindowDimensions()
   const initialIndexRef = useRef(null)
-  const [scrollEnabled, setScrollEnabled] = useState(true)
+  const [scrollEnabled, setScrollEnabled] = useState(false)
   const [loading, setLoading] = useState(false)
   const [showShareBottomSheet, setShowShareBottomSheet] = useState(false)
   const [DID, setDID] = useState("")
@@ -70,7 +71,8 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
       }
     })
   }
-
+  const [localMedias, setLocalMedias] = useState([...Array(initialIndexRef.current), asset])
+ 
   const listGestureRef = useRef()
 
   useEffect(() => {
@@ -78,9 +80,14 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
       goBack()
       return true
     }
-    BackHandler.addEventListener('hardwareBackPress', onBack)
+    const interactionPromise = InteractionManager.runAfterInteractions(()=>setTimeout(() => {
+      setLocalMedias(medias)
+      setScrollEnabled(true)
+    }, 300) )
+    //BackHandler.addEventListener('hardwareBackPress', onBack)
     return () => {
-      BackHandler.removeEventListener('hardwareBackPress', onBack)
+      interactionPromise.cancel();
+      //BackHandler.removeEventListener('hardwareBackPress', onBack)
     }
   }, [])
 
@@ -108,6 +115,8 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
   )
 
   const rowRenderer = useCallback((type: string | number, data: Asset) => {
+    if (!data)
+      return null
     if (data?.syncStatus === SyncStatus.SYNCED && data?.isDeleted) {
       return renderDownloadSection()
     }
@@ -127,10 +136,10 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
   }, [windowDims])
 
   const dataProvider = useMemo(() => {
-    let provider = new DataProvider((r1: Asset, r2: Asset) => r1.id !== r2.id)
-    provider = provider.cloneWithRows(medias, 0)
+    let provider = new DataProvider((r1: Asset, r2: Asset) => r1?.id !== r2?.id)
+    provider = provider.cloneWithRows(localMedias, 0)
     return provider
-  }, [medias])
+  }, [localMedias])
 
   const goBack = useCallback(() => {
     navigation.setParams({ assetId: currentAssetRef.current.id })
@@ -393,17 +402,16 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
       const index = Math.round(xOffset / imageWidth)
       const currentAsset = dataProvider.getDataForIndex(index);
       currentAssetRef.current = currentAsset
-      setAsset(currentAsset)
       setTimeout(() => {
-        for(let i=0;i<recyclerList.length;i++){
+        for (let i = 0; i < recyclerList.length; i++) {
           const section = recyclerList[i]
-          if(section.id === currentAsset.id){
+          if (section.id === currentAsset.id) {
             scrollToItem(section, false)
           }
         }
       })
     },
-    [windowDims.width],
+    [windowDims.width,localMedias],
   )
 
   const onActionPress = useCallback((action: string) => {
