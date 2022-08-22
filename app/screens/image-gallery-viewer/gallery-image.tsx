@@ -36,6 +36,7 @@ type GalleryImageProps = {
   disableParentScroll?: () => void
   listGestureRef: MutableRefObject<NativeViewGestureHandler>
   screenOpacity: SharedValue<number>
+  sharedElementId: string
 }
 
 const MAX_SCALE = 6
@@ -48,6 +49,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
   disableParentScroll,
   listGestureRef,
   screenOpacity,
+  sharedElementId
 }) => {
   const navigation = useNavigation()
   const dims = useWindowDimensions()
@@ -345,7 +347,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
                 simultaneousHandlers={[pinchHandlerRef, listGestureRef]}
               >
                 <Animated.View style={animatedImageContainerStyle}>
-                  <SharedElement id={asset.id}>
+                  <SharedElement id={sharedElementId}>
                     {Platform.OS === "android" ? (
                       <FastImage
                         source={{ uri: asset.uri, priority: FastImage.priority.high }}

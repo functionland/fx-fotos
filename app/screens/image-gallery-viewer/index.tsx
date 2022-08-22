@@ -21,7 +21,7 @@ import { HeaderArrowBack, HeaderLeftContainer, HeaderRightContainer } from "../.
 import { RootStackParamList } from "../../navigators"
 import { Assets } from "../../services/localdb"
 import { singleAssetState, mediasState, recyclerSectionsState } from "../../store"
-import { Asset, SyncStatus } from "../../types"
+import { Asset, SyncStatus, ViewType } from "../../types"
 import { GalleryImage } from "./gallery-image"
 import Toast from "react-native-toast-message"
 import { useNetInfo } from "@react-native-community/netinfo"
@@ -38,7 +38,6 @@ import { BSON } from "realm"
 import { palette } from "../../theme"
 import Animated, { useAnimatedStyle, useSharedValue } from "react-native-reanimated"
 import { useEffect } from "react"
-import { BackHandler } from "react-native"
 
 interface ImageGalleryViewerScreenProps {
   navigation: NavigationProp<RootStackParamList>
@@ -50,12 +49,12 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
   navigation,
 }) => {
   const [asset, setAsset] = useRecoilState(singleAssetState)
-  const [recyclerList, setRecyclerSections] = useRecoilState(recyclerSectionsState)
-  const [medias, setMedias] = useRecoilState(mediasState)
+  const [recyclerList] = useRecoilState(recyclerSectionsState)
+  const [medias] = useRecoilState(mediasState)
   const { assetId, scrollToItem } = route.params
   const windowDims = useWindowDimensions()
   const initialIndexRef = useRef(null)
-  const [scrollEnabled, setScrollEnabled] = useState(false)
+  const [scrollEnabled, setScrollEnabled] = useState(true)
   const [loading, setLoading] = useState(false)
   const [showShareBottomSheet, setShowShareBottomSheet] = useState(false)
   const [DID, setDID] = useState("")
@@ -63,6 +62,7 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
   const netInfoState = useNetInfo()
   const screenOpacity = useSharedValue(1)
   const currentAssetRef = useRef(asset)
+  const [transitionDone, setTransitionDone] = useState(false)
 
   if (initialIndexRef.current === null) {
     medias.forEach((asset, idx) => {
@@ -71,23 +71,21 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
       }
     })
   }
-  const [localMedias, setLocalMedias] = useState([...Array(initialIndexRef.current), asset])
- 
   const listGestureRef = useRef()
+  const rclRef = useRef()
 
   useEffect(() => {
     const onBack = () => {
       goBack()
       return true
     }
-    const interactionPromise = InteractionManager.runAfterInteractions(()=>setTimeout(() => {
-      setLocalMedias(medias)
-      setScrollEnabled(true)
-    }, 100) )
-    //BackHandler.addEventListener('hardwareBackPress', onBack)
+    const interactionPromise = InteractionManager.runAfterInteractions(() => setTimeout(() => {
+      setTransitionDone(true)
+      rclRef.current?.forceRerender()
+    }, 0))
+
     return () => {
       interactionPromise.cancel();
-      //BackHandler.removeEventListener('hardwareBackPress', onBack)
     }
   }, [])
 
@@ -104,6 +102,7 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
       return (
         <GalleryImage
           asset={item}
+          sharedElementId={transitionDone ? item.id : item.id + "_"}
           enableParentScroll={enableScroll}
           disableParentScroll={disableScroll}
           listGestureRef={listGestureRef}
@@ -111,7 +110,7 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
         />
       )
     },
-    [enableScroll, disableScroll, screenOpacity],
+    [enableScroll, disableScroll, screenOpacity, transitionDone],
   )
 
   const rowRenderer = useCallback((type: string | number, data: Asset) => {
@@ -124,7 +123,7 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
       return null
     }
     return renderItem({ item: data })
-  }, [])
+  }, [transitionDone])
 
   const layoutProvider = useMemo(() => {
     return new GridLayoutProvider(
@@ -137,9 +136,9 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
 
   const dataProvider = useMemo(() => {
     let provider = new DataProvider((r1: Asset, r2: Asset) => r1?.id !== r2?.id)
-    provider = provider.cloneWithRows(localMedias, 0)
+    provider = provider.cloneWithRows(medias, 0)
     return provider
-  }, [localMedias])
+  }, [medias])
 
   const goBack = useCallback(() => {
     navigation.setParams({ assetId: currentAssetRef.current.id })
@@ -246,7 +245,7 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
   const renderHeader = useCallback(() => {
     return (
       <Header
-        containerStyle={{ marginTop: 0, zIndex: 10, elevation: 3 }}
+        containerStyle={{ marginTop: 10, zIndex: 10, backgroundColor:"tranparent" }}
         leftComponent={
           <HeaderLeftContainer>
             <HeaderArrowBack navigation={navigation} iconProps={{ onPress: goBack }} />
@@ -400,18 +399,16 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
       const { x: xOffset } = event.nativeEvent.contentOffset
       const imageWidth = windowDims.width
       const index = Math.round(xOffset / imageWidth)
-      const currentAsset = dataProvider.getDataForIndex(index);
-      currentAssetRef.current = currentAsset
+      currentAssetRef.current = dataProvider.getDataForIndex(index);
       setTimeout(() => {
-        for (let i = 0; i < recyclerList.length; i++) {
-          const section = recyclerList[i]
-          if (section.id === currentAsset.id) {
+        recyclerList.forEach(section=>{
+          if (section.id === currentAssetRef.current.id) {
             scrollToItem(section, false)
           }
-        }
+        })
       })
     },
-    [windowDims.width,localMedias],
+    [windowDims.width],
   )
 
   const onActionPress = useCallback((action: string) => {
@@ -474,6 +471,7 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
         {renderHeader()}
         <NativeViewGestureHandler ref={listGestureRef}>
           <RecyclerListView
+            ref={rclRef}
             isHorizontal={true}
             initialRenderIndex={initialIndexRef.current}
             style={{ flex: 1 }}
@@ -490,6 +488,18 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
             }}
           />
         </NativeViewGestureHandler>
+        {transitionDone ||
+          <View style={styles.mockContainer}>
+            <GalleryImage
+              asset={asset}
+              sharedElementId={asset.id}
+              enableParentScroll={enableScroll}
+              disableParentScroll={disableScroll}
+              listGestureRef={listGestureRef}
+              screenOpacity={screenOpacity}
+            />
+          </View>
+        }
         {renderActionButtons()}
         <BottomSheet
           isVisible={showShareBottomSheet}
@@ -539,4 +549,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
+  mockContainer: {
+    flex: 1,
+    position: "absolute",
+    top: 0,
+    bottom: 0
+  }
 })
