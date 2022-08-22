@@ -4,7 +4,7 @@ import LottieView from "lottie-react-native"
 import { Avatar, Icon, Text, useTheme } from "@rneui/themed"
 import Toast from "react-native-toast-message"
 import { useWalletConnect } from "@walletconnect/react-native-dapp"
-import { useSetRecoilState } from "recoil"
+import { useRecoilState, useSetRecoilState } from "recoil"
 import { Screen } from "../../components"
 import { AssetService } from "../../services"
 import AssetList, { AssetListHandle } from "../../components/asset-list"
@@ -39,7 +39,7 @@ export const AssetListScreen: React.FC<Props> = ({
   defaultHeader,
   loading,
 }) => {
-  const [recyclerSections, setRecyclerSections] = useState<RecyclerAssetListSection[]>(null)
+  const [recyclerSections, setRecyclerSections] = useRecoilState(recyclerSectionsState)
   // Get a custom hook to animate the header
   const [scrollY, headerStyles] = useFloatHederAnimation(60)
   const [selectionMode, setSelectionMode] = useState(false)
