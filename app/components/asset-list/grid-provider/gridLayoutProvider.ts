@@ -1,5 +1,6 @@
 import { Dimension, Layout, LayoutManager, BaseLayoutProvider } from "fula-recyclerlistview"
 import Reanimated, { SharedValue } from "react-native-reanimated"
+import { widthPercentageToDP as wp } from "react-native-responsive-screen"
 import {
   getStoryHeight,
   MAIN_HEADER_HEIGHT,
@@ -62,7 +63,7 @@ export default class GridLayoutProvider extends BaseLayoutProvider {
       switch (type) {
         case ViewType.STORY:
           dim.width = this._renderWindowSize.width
-          dim.height = getStoryHeight(this._renderWindowSize.width) + 20 + 1 * MAIN_HEADER_HEIGHT
+          dim.height = getStoryHeight(wp(33)) + 20 + 1 * MAIN_HEADER_HEIGHT
           break
         case ViewType.ASSET:
           const side = this._renderWindowSize.width / columnNumber
