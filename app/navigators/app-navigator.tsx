@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react"
 import Animated from "react-native-reanimated"
 import { enableScreens } from "react-native-screens"
-import { NavigationContainer } from "@react-navigation/native"
+import { NavigationContainer, useTheme } from "@react-navigation/native"
 import { createSharedElementStackNavigator } from "react-navigation-shared-element"
 import Toast from "react-native-toast-message"
 
@@ -16,19 +16,20 @@ import {
   ShareViewerScreen,
 } from "../screens"
 import { HomeNavigator } from "./home-navigator"
-import { ThemeContext } from "../theme"
+import { palette, RneDarkTheme, ThemeContext } from "../theme"
 import { BoxEntity } from "../realmdb/entities"
-import { AssetStory, RecyclerAssetListSection } from "../types"
+import { RecyclerAssetListSection } from "../types"
+import { SafeAreaView } from "react-native"
 
 enableScreens()
 export type RootStackParamList = {
   Home: undefined
-  LibraryAssets: undefined,
-  Photo: { section: RecyclerAssetListSection },
-  Account: undefined,
-  Settings: undefined,
-  BoxList: undefined,
-  BoxAddUpdate: { box: BoxEntity },
+  LibraryAssets: undefined
+  Photo: { section: RecyclerAssetListSection }
+  Account: undefined
+  Settings: undefined
+  BoxList: undefined
+  BoxAddUpdate: { box: BoxEntity }
   SharedViewer: { assetURI: string }
 }
 export enum AppNavigationNames {
@@ -45,118 +46,121 @@ export enum AppNavigationNames {
 const Stack = createSharedElementStackNavigator<RootStackParamList>()
 
 const AppStack = () => {
+  const { dark } = useTheme()
   return (
-    <Stack.Navigator
-      initialRouteName={AppNavigationNames.HomeScreen}
-      screenOptions={{
-        headerShown: false,
-        headerTransparent: true,
+    <SafeAreaView
+      style={{
+        height: "100%",
+        width: "100%",
+        backgroundColor: dark ? RneDarkTheme.darkColors.platform.ios.primary : palette.white,
       }}
     >
-      <Stack.Screen name={AppNavigationNames.HomeScreen} component={HomeNavigator} />
-      <Stack.Screen name={AppNavigationNames.LibraryAssets} component={LibraryAssetsScreen} />
-      <Stack.Screen name={AppNavigationNames.BoxList} component={BoxListScreen} />
-      <Stack.Screen name={AppNavigationNames.BoxAddUpdate} component={BoxAddUpdateScreen} />
-      <Stack.Screen
-        name={AppNavigationNames.PhotoScreen}
-        options={{
+      <Stack.Navigator
+        initialRouteName={AppNavigationNames.HomeScreen}
+        screenOptions={{
           headerShown: false,
           headerTransparent: true,
-          gestureEnabled: false,
-          headerShown: false,
-          cardOverlayEnabled: true,
-          cardStyle: { backgroundColor: "transparent" },
-          animationEnabled: true,
-          cardStyleInterpolator: ({ current: { progress } }) => ({
-            cardStyle: {
-              opacity: progress.interpolate({
-                inputRange: [0, 0.5, 0.9, 1],
-                outputRange: [0, 0.25, 0.7, 1],
-              }),
-            },
-            overlayStyle: {
-              opacity: progress.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0, 0],
-                extrapolate: "clamp",
-              }),
-            },
-          }),
         }}
-        component={PhotoScreen}
-        sharedElements={(route) => {
-          const { assetId = "" } = route.params
-          return [assetId]
-        }}
-      />
-      <Stack.Screen
-        name={AppNavigationNames.HighlightScreen}
-        options={{
-          headerShown: false,
-          headerTransparent: true,
-          gestureEnabled: false,
-          cardOverlayEnabled: true,
-          animationEnabled: true,
-          cardStyle: { backgroundColor: "transparent" },
-          cardStyleInterpolator: ({ current: { progress } }) => ({
-            cardStyle: {
-              opacity: progress.interpolate({
-                inputRange: [0, 0.5, 0.9, 1],
-                outputRange: [0, 0.25, 0.7, 1],
-              }),
-            },
-            overlayStyle: {
-              opacity: progress.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0, 0],
-                extrapolate: "clamp",
-              }),
-            },
-          }),
-        }}
-        component={HighlightScreen}
-      />
-      <Stack.Screen
-        name={AppNavigationNames.AccountScrenn}
-        options={{
-          headerShown: false,
-          headerTransparent: true,
-          gestureEnabled: false,
-          headerShown: false,
-          cardOverlayEnabled: true,
-          animationEnabled: true,
-          cardStyleInterpolator: ({ current: { progress } }) => ({
-            cardStyle: {
-              opacity: progress.interpolate({
-                inputRange: [0, 0.5, 0.9, 1],
-                outputRange: [0, 0.25, 0.7, 1],
-              }),
-            },
-            overlayStyle: {
-              opacity: progress.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0, 0],
-                extrapolate: "clamp",
-              }),
-            },
-          }),
-        }}
-        component={AccountScreen}
-        sharedElements={(route) => {
-          return [
-            {
-              id: `AccountAvatar`,
-              animation: 'move',
-            },
-          ];
-        }}
-
-      />
-      <Stack.Screen
-        name={AppNavigationNames.SharedViewer}
-        component={ShareViewerScreen}
-      />
-    </Stack.Navigator>
+      >
+        <Stack.Screen name={AppNavigationNames.HomeScreen} component={HomeNavigator} />
+        <Stack.Screen name={AppNavigationNames.LibraryAssets} component={LibraryAssetsScreen} />
+        <Stack.Screen name={AppNavigationNames.BoxList} component={BoxListScreen} />
+        <Stack.Screen name={AppNavigationNames.BoxAddUpdate} component={BoxAddUpdateScreen} />
+        <Stack.Screen
+          name={AppNavigationNames.PhotoScreen}
+          options={{
+            headerShown: false,
+            headerTransparent: true,
+            gestureEnabled: false,
+            cardOverlayEnabled: true,
+            cardStyle: { backgroundColor: "transparent" },
+            animationEnabled: true,
+            cardStyleInterpolator: ({ current: { progress } }) => ({
+              cardStyle: {
+                opacity: progress.interpolate({
+                  inputRange: [0, 0.5, 0.9, 1],
+                  outputRange: [0, 0.25, 0.7, 1],
+                }),
+              },
+              overlayStyle: {
+                opacity: progress.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, 0],
+                  extrapolate: "clamp",
+                }),
+              },
+            }),
+          }}
+          component={PhotoScreen}
+          sharedElements={(route) => {
+            const { assetId = "" } = route.params
+            return [assetId]
+          }}
+        />
+        <Stack.Screen
+          name={AppNavigationNames.HighlightScreen}
+          options={{
+            headerShown: false,
+            headerTransparent: true,
+            gestureEnabled: false,
+            cardOverlayEnabled: true,
+            animationEnabled: true,
+            cardStyle: { backgroundColor: "transparent" },
+            cardStyleInterpolator: ({ current: { progress } }) => ({
+              cardStyle: {
+                opacity: progress.interpolate({
+                  inputRange: [0, 0.5, 0.9, 1],
+                  outputRange: [0, 0.25, 0.7, 1],
+                }),
+              },
+              overlayStyle: {
+                opacity: progress.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, 0],
+                  extrapolate: "clamp",
+                }),
+              },
+            }),
+          }}
+          component={HighlightScreen}
+        />
+        <Stack.Screen
+          name={AppNavigationNames.AccountScrenn}
+          options={{
+            headerShown: false,
+            headerTransparent: true,
+            gestureEnabled: false,
+            cardOverlayEnabled: true,
+            animationEnabled: true,
+            cardStyleInterpolator: ({ current: { progress } }) => ({
+              cardStyle: {
+                opacity: progress.interpolate({
+                  inputRange: [0, 0.5, 0.9, 1],
+                  outputRange: [0, 0.25, 0.7, 1],
+                }),
+              },
+              overlayStyle: {
+                opacity: progress.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, 0],
+                  extrapolate: "clamp",
+                }),
+              },
+            }),
+          }}
+          component={AccountScreen}
+          sharedElements={(route) => {
+            return [
+              {
+                id: `AccountAvatar`,
+                animation: "move",
+              },
+            ]
+          }}
+        />
+        <Stack.Screen name={AppNavigationNames.SharedViewer} component={ShareViewerScreen} />
+      </Stack.Navigator>
+    </SafeAreaView>
   )
 }
 
@@ -168,7 +172,7 @@ export const AppNavigator = (props: NavigationProps) => {
   useEffect(() => {
     setTimeout(() => {
       setToastVisible(true)
-    }, 1000);
+    }, 1000)
   }, [])
   return (
     <Animated.View style={{ flex: 1 }}>
@@ -180,9 +184,9 @@ export const AppNavigator = (props: NavigationProps) => {
           config: {
             initialRouteName: AppNavigationNames.HomeScreen,
             screens: {
-              [AppNavigationNames.SharedViewer]: "shared/:jwe"
-            }
-          }
+              [AppNavigationNames.SharedViewer]: "shared/:jwe",
+            },
+          },
         }}
         //theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}
         {...props}
