@@ -203,7 +203,7 @@ export const AssetListScreen: React.FC<Props> = ({
                           resizeMode="contain"
                         />
                       )}
-                      onPress={() => navigation.navigate(AppNavigationNames.AccountScrenn)}
+                      onPress={() => navigation.navigate(AppNavigationNames.AccountScreen)}
                     />
                   ) : (
                     <Avatar
@@ -211,7 +211,7 @@ export const AssetListScreen: React.FC<Props> = ({
                       icon={{ name: "account-alert", type: "material-community", size: 34 }}
                       size="small"
                       rounded={true}
-                      onPress={() => navigation.navigate(AppNavigationNames.AccountScrenn)}
+                      onPress={() => navigation.navigate(AppNavigationNames.AccountScreen)}
                     />
                   )}
                 </SharedElement>
