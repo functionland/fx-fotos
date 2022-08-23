@@ -13,7 +13,7 @@ export const useFloatHederAnimation = (maxHeight: number) => {
       return scrollY.value
     },
     (result, previous) => {
-      if (result !== previous) {
+      if (result>= 0 && result !== previous) {
         const diff = (previous || 0) - result
         diffY.value = interpolate(
           diffY.value + diff,
