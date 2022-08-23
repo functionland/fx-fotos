@@ -4,7 +4,7 @@ import LottieView from "lottie-react-native"
 import { Avatar, Icon, Text, useTheme } from "@rneui/themed"
 import Toast from "react-native-toast-message"
 import { useWalletConnect } from "@walletconnect/react-native-dapp"
-import { useSetRecoilState } from "recoil"
+import { useRecoilState, useSetRecoilState } from "recoil"
 import { Screen } from "../../components"
 import { AssetService } from "../../services"
 import AssetList, { AssetListHandle } from "../../components/asset-list"
@@ -25,7 +25,7 @@ import { uploadAssetsInBackground } from "../../services/sync-service"
 import { SharedElement } from "react-navigation-shared-element"
 import * as helper from "../../utils/helper"
 import { Asset, RecyclerAssetListSection, ViewType } from "../../types"
-import { singleAssetState } from "../../store"
+import { recyclerSectionsState, singleAssetState } from "../../store"
 interface Props {
   navigation: NativeStackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>
   medias: Asset[]
@@ -39,7 +39,7 @@ export const AssetListScreen: React.FC<Props> = ({
   defaultHeader,
   loading,
 }) => {
-  const [recyclerSections, setRecyclerSections] = useState<RecyclerAssetListSection[]>(null)
+  const [recyclerSections, setRecyclerSections] = useRecoilState(recyclerSectionsState)
   // Get a custom hook to animate the header
   const [scrollY, headerStyles] = useFloatHederAnimation(60)
   const [selectionMode, setSelectionMode] = useState(false)
@@ -127,8 +127,8 @@ export const AssetListScreen: React.FC<Props> = ({
   const onItemPress = (section: RecyclerAssetListSection) => {
     if (section.type === ViewType.ASSET) {
       const asset: Asset = section.data
-      setSingleAsset(JSON.parse(JSON.stringify(asset)))
-      navigation.push(AppNavigationNames.PhotoScreen, { assetId: asset.id })
+      setSingleAsset(JSON.parse(JSON.stringify(asset)));
+      navigation.push(AppNavigationNames.ImageGalleryViewer, { assetId: asset.id, scrollToItem: assetListRef.current.scrollToItem })
     }
   }
 
@@ -203,7 +203,7 @@ export const AssetListScreen: React.FC<Props> = ({
                           resizeMode="contain"
                         />
                       )}
-                      onPress={() => navigation.navigate(AppNavigationNames.AccountScrenn)}
+                      onPress={() => navigation.navigate(AppNavigationNames.AccountScreen)}
                     />
                   ) : (
                     <Avatar
@@ -211,7 +211,7 @@ export const AssetListScreen: React.FC<Props> = ({
                       icon={{ name: "account-alert", type: "material-community", size: 34 }}
                       size="small"
                       rounded={true}
-                      onPress={() => navigation.navigate(AppNavigationNames.AccountScrenn)}
+                      onPress={() => navigation.navigate(AppNavigationNames.AccountScreen)}
                     />
                   )}
                 </SharedElement>
