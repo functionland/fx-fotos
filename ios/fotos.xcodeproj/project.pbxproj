@@ -785,7 +785,7 @@
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = fotos/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 0.6.1;
+				MARKETING_VERSION = 0.7.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -813,7 +813,7 @@
 				DEVELOPMENT_TEAM = 656TD8GM9B;
 				INFOPLIST_FILE = fotos/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 0.6.1;
+				MARKETING_VERSION = 0.7.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",

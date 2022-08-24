@@ -316,7 +316,7 @@ PODS:
     - glog
   - react-native-background-actions (2.6.7):
     - React-Core
-  - react-native-fula (0.2.6):
+  - react-native-fula (0.3.1):
     - Mobile (~> 0.0.3)
     - React-Core
   - react-native-get-random-values (1.8.0):
@@ -740,7 +740,7 @@ SPEC CHECKSUMS:
   React-jsinspector: d9c8eb0b53f0da206fed56612b289fec84991157
   React-logger: e522e76fa3e9ec3e7d7115b49485cc065cf4ae06
   react-native-background-actions: 2c251c986f23347f9c1722f05fd296938f60edb1
-  react-native-fula: 773fc6c858170bef2e4d7707cd3c708c457bc766
+  react-native-fula: 93d9bc0cfbcf6cefb05832b40b53a24a8e63fb8a
   react-native-get-random-values: a6ea6a8a65dc93e96e24a11105b1a9c8cfe1d72a
   react-native-netinfo: 1a6035d3b9780221d407c277ebfb5722ace00658
   react-native-randombytes: 421f1c7d48c0af8dbcd471b0324393ebf8fe7846

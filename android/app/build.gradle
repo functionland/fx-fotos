@@ -138,8 +138,8 @@ android {
         applicationId "land.fx.fotos"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 7
-        versionName "0.6.1"
+        versionCode 8
+        versionName "0.7.0"
     }
     splits {
         abi {
