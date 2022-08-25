@@ -17,7 +17,9 @@ import Animated, {
 import { snapPoint, withPause } from "react-native-redash"
 import FastImage from "react-native-fast-image"
 
-import { AssetStory } from "../../types"
+import { Asset, AssetStory } from "../../types"
+import { DataProvider, LayoutProvider, RecyclerListView } from "fula-recyclerlistview"
+import { palette } from "../../theme"
 
 interface HighlightScreenProps {
   route: RouteProp<{ params: { highlights: AssetStory } }, "params">
@@ -52,15 +54,43 @@ const TimeBar: React.FC<timeBarProps> = ({ width, pause }) => {
 
   return <Animated.View style={[styles.timeBar, animatedStyle]} />
 }
-
+const { height: screenHeight, width: screenWidth } = Dimensions.get("window")
 export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
+  const navigation = useNavigation()
   const { data: stories } = route.params.highlights
 
-  const navigation = useNavigation()
+  const [_dataProvider, _setDataProvider] = React.useState(() => {
+    return new DataProvider((r1, r2) => r1 !== r2)
+  })
+
+  const _layoutProvider = new LayoutProvider(
+    () => 0,
+    (_, dim) => {
+      dim.width = screenWidth
+      dim.height = screenHeight
+    },
+  )
+
+  const _rowRenderer = (_: unknown, data: Asset) => {
+    return (
+      <FastImage
+        source={{ uri: data.uri, priority: "high" }}
+        resizeMode="center"
+        style={{ height: screenHeight, width: screenWidth }}
+      />
+    )
+  }
+
+  React.useLayoutEffect(() => {
+    _setDataProvider((prev) => {
+      return prev.cloneWithRows(stories)
+    })
+  }, [])
+
   const [imageIdx, setImageIdx] = React.useState(0)
   const pauseAnimation = useSharedValue(false)
   const timeBarContainerOpacity = useSharedValue(1)
-  const highlightListRef = React.useRef<FlatList>(null)
+  const highlightListRef = React.useRef<RecyclerListView<any, any>>(null)
   const [timeBarItems, setTimeBarItems] = React.useState<number[]>([0])
 
   const barWidth = useSharedValue(0)
@@ -76,7 +106,7 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
   }
 
   React.useLayoutEffect(() => {
-    highlightListRef.current.scrollToIndex({ animated: true, index: imageIdx })
+    highlightListRef.current.scrollToOffset(imageIdx * screenWidth, 0, true)
   }, [imageIdx])
 
   React.useLayoutEffect(() => {
@@ -112,8 +142,6 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
     [pauseAnimation],
   )
 
-  const { height: screenHeight, width: screenWidth } = Dimensions.get("window")
-
   const translateX = useSharedValue(0)
   const translateY = useSharedValue(0)
   const animatedOpacity = useSharedValue(1)
@@ -123,8 +151,8 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
   const animatedStyle = useAnimatedStyle(() => {
     const scale = interpolate(translateY.value, [0, screenHeight], [1, 0.5], Extrapolate.CLAMP)
     return {
-      alignItems: "center",
       flex: 1,
+      alignItems: "center",
       justifyContent: "center",
       transform: [{ translateX: translateX.value }, { translateY: translateY.value }, { scale }],
     }
@@ -178,40 +206,16 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
           onActivated={() => (pauseAnimation.value = true)}
           onEnded={() => (pauseAnimation.value = false)}
         >
-          <View style={{ backgroundColor: "#000" }}>
-            <FlatList
-              showsHorizontalScrollIndicator={false}
-              ref={highlightListRef}
-              scrollEnabled={false}
-              horizontal={true}
-              keyExtractor={(_, index) => `image_${index}`}
-              data={stories}
-              renderItem={({ item }) => {
-                return (
-                  <>
-                    {Platform.OS === "ios" ? (
-                      <Image
-                        source={{ uri: item.uri }}
-                        style={{ height: screenHeight, width: screenWidth, resizeMode: "contain" }}
-                      />
-                    ) : (
-                      <FastImage
-                        resizeMode={FastImage.resizeMode.cover}
-                        source={{ uri: item.uri, priority: FastImage.priority.high }}
-                        style={{ height: screenHeight, width: screenWidth }}
-                      />
-                    )}
-                  </>
-                )
-              }}
-              getItemLayout={(data, index) => {
-                return {
-                  length: screenHeight,
-                  offset: screenWidth * index,
-                  index,
-                }
-              }}
-            />
+          <View>
+            <View style={styles.rclWrapper}>
+              <RecyclerListView
+                isHorizontal
+                ref={highlightListRef}
+                layoutProvider={_layoutProvider}
+                dataProvider={_dataProvider}
+                rowRenderer={_rowRenderer}
+              />
+            </View>
             <Animated.View style={[styles.timeBarContainer, timeBarContainerAnimatedStyle]}>
               <FlatList
                 horizontal
@@ -305,5 +309,10 @@ const styles = StyleSheet.create({
     position: "absolute",
     height: heightPercentageToDP(100),
     width: widthPercentageToDP(20),
+  },
+  rclWrapper: {
+    height: screenHeight,
+    width: screenWidth,
+    backgroundColor: palette.black,
   },
 })
