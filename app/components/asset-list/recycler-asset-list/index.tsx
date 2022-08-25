@@ -335,9 +335,13 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(({
           const visibleIndexValue = all[Math.floor(all.length / 2)] || 0
           if (!pinching.value && all && all.length) {
             visibileIndices.value = [...all]
-            layoutTransitionRange.value = gridLayoutProvider
+            try {
+              layoutTransitionRange.value = gridLayoutProvider
               .getLayoutManager()
               ?.getLayoutTransitionRangeForIndex(visibleIndexValue, numColumns.value)
+            } catch (error) {
+              console.error(error)
+            }
           }
         }}
         stopRenderingOnAnimation={pinching}
