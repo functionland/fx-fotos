@@ -1,7 +1,12 @@
 import * as React from "react"
 import { RouteProp, useNavigation } from "@react-navigation/native"
-import { Image, View, StyleSheet, TouchableOpacity, Dimensions, Platform } from "react-native"
-import { FlatList, LongPressGestureHandler, PanGestureHandler } from "react-native-gesture-handler"
+import { View, StyleSheet, TouchableOpacity, Dimensions, Text } from "react-native"
+import {
+  FlatList,
+  LongPressGestureHandler,
+  PanGestureHandler,
+  TouchableWithoutFeedback,
+} from "react-native-gesture-handler"
 import { heightPercentageToDP, widthPercentageToDP } from "react-native-responsive-screen"
 import Animated, {
   runOnJS,
@@ -20,6 +25,8 @@ import FastImage from "react-native-fast-image"
 import { Asset, AssetStory } from "../../types"
 import { DataProvider, LayoutProvider, RecyclerListView } from "fula-recyclerlistview"
 import { palette } from "../../theme"
+import Icon from "react-native-vector-icons/EvilIcons"
+import { format } from "date-fns"
 
 interface HighlightScreenProps {
   route: RouteProp<{ params: { highlights: AssetStory } }, "params">
@@ -155,6 +162,7 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
       alignItems: "center",
       justifyContent: "center",
       transform: [{ translateX: translateX.value }, { translateY: translateY.value }, { scale }],
+      marginTop: 30,
     }
   })
 
@@ -197,6 +205,11 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
     },
     [isPanGestureActive.value],
   )
+
+  const generateCreateTimeString = () => {
+    const d = new Date(stories[imageIdx].creationTime)
+    return format(d, "PPPP")
+  }
 
   return (
     <PanGestureHandler maxPointers={1} minPointers={1} onGestureEvent={onPanGesture}>
@@ -246,6 +259,12 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
                   )
                 }}
               />
+              <View style={styles.imageInfoWrapper}>
+                <TouchableWithoutFeedback style={{ zIndex: 999 }} onPress={goBack}>
+                  <Icon name="close" size={24} />
+                </TouchableWithoutFeedback>
+                <Text style={styles.imageDateText}>{generateCreateTimeString()}</Text>
+              </View>
             </Animated.View>
             <TouchableOpacity
               onPress={() => {
@@ -288,16 +307,16 @@ const styles = StyleSheet.create({
     position: "absolute",
   },
   timeBar: {
-    height: 4,
-    marginTop: 40,
+    height: 2,
+    marginTop: 20,
     zIndex: 99999999,
     borderRadius: 100,
     backgroundColor: "grey",
     marginLeft: 2,
   },
   timeBarPlaceholder: {
-    height: 4,
-    marginTop: 40,
+    height: 2,
+    marginTop: 20,
     borderRadius: 100,
     marginLeft: 2,
     zIndex: 900,
@@ -315,4 +334,11 @@ const styles = StyleSheet.create({
     width: screenWidth,
     backgroundColor: palette.black,
   },
+  imageInfoWrapper: {
+    position: "absolute",
+    top: heightPercentageToDP(5),
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  imageDateText: { marginLeft: widthPercentageToDP(3), fontSize: 13 },
 })
