@@ -1,6 +1,6 @@
 import * as React from "react"
 import { RouteProp, useNavigation } from "@react-navigation/native"
-import { View, StyleSheet, TouchableOpacity, Dimensions, Text } from "react-native"
+import { View, StyleSheet, TouchableOpacity, Dimensions, Text, Platform, Image } from "react-native"
 import {
   FlatList,
   LongPressGestureHandler,
@@ -79,11 +79,13 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
   )
 
   const _rowRenderer = (_: unknown, data: Asset) => {
-    return (
+    return Platform.OS === "ios" ? (
+      <Image source={{ uri: data.uri }} style={styles.image} />
+    ) : (
       <FastImage
         source={{ uri: data.uri, priority: "high" }}
         resizeMode="center"
-        style={{ height: screenHeight, width: screenWidth }}
+        style={styles.image}
       />
     )
   }
@@ -341,4 +343,5 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   imageDateText: { marginLeft: widthPercentageToDP(3), fontSize: 13 },
+  image: { height: screenHeight, width: screenWidth },
 })
