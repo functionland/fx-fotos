@@ -33,7 +33,7 @@ interface HighlightScreenProps {
 }
 
 const DELAY_DURATION = 0
-const ANIMATION_DURATION = 1000
+const ANIMATION_DURATION = 3000
 const OPACITY_FADE_DURATION = 111
 
 interface timeBarProps {
