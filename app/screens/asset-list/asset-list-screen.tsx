@@ -30,7 +30,8 @@ interface Props {
   navigation: NativeStackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>
   medias: Asset[]
   defaultHeader?: (style: any) => JSX.Element | undefined
-  loading: boolean
+  loading: boolean,
+  showStoryHighlight: boolean
 }
 
 export const AssetListScreen: React.FC<Props> = ({
@@ -38,6 +39,7 @@ export const AssetListScreen: React.FC<Props> = ({
   medias,
   defaultHeader,
   loading,
+  showStoryHighlight
 }) => {
   const [recyclerSections, setRecyclerSections] = useRecoilState(recyclerSectionsState)
   // Get a custom hook to animate the header
@@ -51,7 +53,7 @@ export const AssetListScreen: React.FC<Props> = ({
   const setSingleAsset = useSetRecoilState(singleAssetState)
   useEffect(() => {
     if (medias) {
-      setRecyclerSections([...AssetService.categorizeAssets([...medias])])
+      setRecyclerSections([...AssetService.categorizeAssets([...medias],showStoryHighlight)])
     }
   }, [medias])
 
