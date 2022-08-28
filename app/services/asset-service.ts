@@ -59,7 +59,7 @@ const getAssetStoryCategory = (modificationTime: number) => {
   return null
 }
 
-export const categorizeAssets = (assets: MediaLibrary.Asset[]) => {
+export const categorizeAssets = (assets: MediaLibrary.Asset[], storyHighlight=false) => {
   const sections: RecyclerAssetListSection[] = []
   let lastMonth = moment().format("MMMM YYYY")
   let lastDay = null
@@ -128,22 +128,27 @@ export const categorizeAssets = (assets: MediaLibrary.Asset[]) => {
     }
   }
 
-  // Create story section
-  const storySection: RecyclerAssetListSection = {
-    id: "story_highlight",
-    type: ViewType.STORY,
-    data: Object.keys(storiesObj)
-      // Sort stories based on first asset
-      .sort((a, b) => storiesObj[a]?.[0].modificationTime < storiesObj[b]?.[0].modificationTime)
-      .map((key, index) => {
-        return {
-          id: `story_${index}_${storiesObj[key]?.length}`,
-          data: storiesObj[key],
-          title: key,
-        } as AssetStory
-      }),
+  if(storyHighlight){
+    // Create story section
+    const storySection: RecyclerAssetListSection = {
+      id: "story_highlight",
+      type: ViewType.STORY,
+      data: Object.keys(storiesObj)
+        // Sort stories based on first asset
+        .sort((a, b) => storiesObj[a]?.[0].modificationTime < storiesObj[b]?.[0].modificationTime)
+        .map((key, index) => {
+          return {
+            id: `story_${index}_${storiesObj[key]?.length}`,
+            data: storiesObj[key],
+            title: key,
+          } as AssetStory
+        }),
+    }
+    return [storySection, ...sections]
   }
-  return [storySection, ...sections]
+
+  return [...sections]
+  
 }
 export const getLibraries = (assets: MediaLibrary.Asset[]): Library[] => {
   const librariesObj: Record<string, MediaLibrary.Asset[]> = {}

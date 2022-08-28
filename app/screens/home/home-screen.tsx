@@ -104,6 +104,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   }
 
   return (
-    <AssetListScreen navigation={navigation} medias={isReady ? medias : null} loading={loading} />
+    <AssetListScreen navigation={navigation} medias={isReady ? medias : null} loading={loading} showStoryHighlight={true} />
   )
 }
