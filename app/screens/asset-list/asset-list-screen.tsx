@@ -10,8 +10,6 @@ import { AssetService } from "../../services"
 import AssetList, { AssetListHandle } from "../../components/asset-list"
 import { useFloatHederAnimation } from "../../utils/hooks"
 import { palette } from "../../theme/palette"
-import { NativeStackNavigationProp } from "@react-navigation/native-stack"
-import { HomeNavigationParamList, HomeNavigationTypes } from "../../navigators/home-navigator"
 import { Assets } from "../../services/localdb"
 import {
   Header,
@@ -20,14 +18,15 @@ import {
   HeaderRightContainer,
 } from "../../components/header"
 import { ThemeContext } from "../../theme"
-import { AppNavigationNames } from "../../navigators"
+import { AppNavigationNames, RootStackParamList } from "../../navigators"
 import { uploadAssetsInBackground } from "../../services/sync-service"
 import { SharedElement } from "react-navigation-shared-element"
 import * as helper from "../../utils/helper"
-import { Asset, RecyclerAssetListSection, ViewType } from "../../types"
+import { Asset, AssetStory, RecyclerAssetListSection, ViewType } from "../../types"
 import { recyclerSectionsState, singleAssetState } from "../../store"
+import { NavigationProp, useNavigation } from "@react-navigation/native"
+
 interface Props {
-  navigation: NativeStackNavigationProp<HomeNavigationParamList, HomeNavigationTypes>
   medias: Asset[]
   defaultHeader?: (style: any) => JSX.Element | undefined
   loading: boolean,
@@ -35,7 +34,6 @@ interface Props {
 }
 
 export const AssetListScreen: React.FC<Props> = ({
-  navigation,
   medias,
   defaultHeader,
   loading,
@@ -51,6 +49,8 @@ export const AssetListScreen: React.FC<Props> = ({
   const { theme } = useTheme()
   const walletConnector = useWalletConnect()
   const setSingleAsset = useSetRecoilState(singleAssetState)
+  const navigation=useNavigation<NavigationProp<RootStackParamList>>();
+  
   useEffect(() => {
     if (medias) {
       setRecyclerSections([...AssetService.categorizeAssets([...medias],showStoryHighlight)])
@@ -127,13 +127,16 @@ export const AssetListScreen: React.FC<Props> = ({
   }
 
   const onItemPress = (section: RecyclerAssetListSection) => {
+    console.log("onItemPress",section)
     if (section.type === ViewType.ASSET) {
       const asset: Asset = section.data
       setSingleAsset(JSON.parse(JSON.stringify(asset)));
-      navigation.push(AppNavigationNames.ImageGalleryViewer, { assetId: asset.id, scrollToItem: assetListRef.current.scrollToItem })
+      navigation.navigate(AppNavigationNames.ImageGalleryViewer, { assetId: asset.id, scrollToItem: assetListRef.current.scrollToItem })
     }
   }
-
+  const onStoryPress=(story:AssetStory)=>{
+    navigation.navigate(AppNavigationNames.HighlightScreen, { highlights: story })
+  }
   const onSelectedItemsChange = (assetIds: string[], selectionMode: boolean) => {
     setSelectionMode(selectionMode)
     setSelectedItems(assetIds)
@@ -254,10 +257,10 @@ export const AssetListScreen: React.FC<Props> = ({
           sections={recyclerSections}
           scrollY={scrollY}
           onSelectedItemsChange={onSelectedItemsChange}
-          navigation={navigation}
           onAssetLoadError={onAssetLoadError}
           renderFooter={renderFooter}
           onItemPress={onItemPress}
+          onStoryPress={onStoryPress}
         />
       )}
     </Screen>

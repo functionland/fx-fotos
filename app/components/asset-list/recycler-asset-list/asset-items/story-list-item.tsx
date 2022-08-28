@@ -1,20 +1,36 @@
 import * as React from "react"
-import { useNavigation } from "@react-navigation/native"
+import { useCallback } from "react"
 import { widthPercentageToDP as wp } from "react-native-responsive-screen"
 import { Image, FlatList, StyleSheet, Pressable } from "react-native"
 import { Text, useTheme } from "@rneui/themed"
-
 import { AssetStory } from "../../../../types"
-import { AppNavigationNames } from "../../../../navigators"
-
 interface Props {
-  stories: AssetStory[]
+  stories: AssetStory[],
+  onPress?: (story: AssetStory) => void
 }
 
-const StoryListItem = ({ stories }: Props): JSX.Element => {
-  const navigation = useNavigation()
+const StoryListItem = ({ stories, onPress }: Props): JSX.Element => {
   const { theme } = useTheme();
-
+  const renderItem=useCallback(({ item })=>{
+    if (item.data.length === 0) {
+      return null
+    }
+    const onItemPress=()=>{
+      onPress?.(item)
+    }
+    return (
+      <Pressable
+        style={styles.container}
+        android_ripple={{ color: theme.colors.background, foreground: true }}
+        onPress={onItemPress}
+      >
+        <Image source={{ uri: item.data[0].uri }} fadeDuration={0} style={styles.image} />
+        <Text style={styles.label}>
+          {item.title}
+        </Text>
+      </Pressable>
+    )
+  },[])
   return (
     <FlatList
       horizontal
@@ -22,26 +38,7 @@ const StoryListItem = ({ stories }: Props): JSX.Element => {
       contentContainerStyle={styles.flatListContainer}
       keyExtractor={(item) => item.id}
       data={stories}
-      renderItem={({ item }) => {
-        if (item.data.length === 0) {
-          return null
-        }
-
-        return (
-          <Pressable
-            style={styles.container}
-            android_ripple={{ color: theme.colors.background, foreground: true }}
-            onPress={() =>
-              navigation.navigate(AppNavigationNames.HighlightScreen, { highlights: item })
-            }
-          >
-            <Image source={{ uri: item.data[0].uri }} fadeDuration={0} style={styles.image} />
-            <Text style={styles.label}>
-              {item.title}
-            </Text>
-          </Pressable>
-        )
-      }}
+      renderItem={renderItem}
     />
   )
 }

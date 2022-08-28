@@ -19,14 +19,14 @@ import {
 import { HomeNavigator } from "./home-navigator"
 import { ThemeContext } from "../theme"
 import { BoxEntity } from "../realmdb/entities"
-import { RecyclerAssetListSection } from "../types"
+import { Asset, AssetStory, RecyclerAssetListSection } from "../types"
 
 enableScreens()
 export type RootStackParamList = {
   Home: undefined
   LibraryAssets: undefined
   Photo: { section: RecyclerAssetListSection }
-  HighlightScreen: undefined
+  HighlightScreen: {highlights:AssetStory|undefined}
   AccountScreen: undefined
   Account: undefined
   Settings: undefined
