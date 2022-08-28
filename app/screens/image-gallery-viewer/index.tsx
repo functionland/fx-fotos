@@ -21,7 +21,7 @@ import { HeaderArrowBack, HeaderLeftContainer, HeaderRightContainer } from "../.
 import { RootStackParamList } from "../../navigators"
 import { Assets } from "../../services/localdb"
 import { singleAssetState, mediasState, recyclerSectionsState } from "../../store"
-import { Asset, SyncStatus, ViewType } from "../../types"
+import { Asset, SyncStatus } from "../../types"
 import { GalleryImage } from "./gallery-image"
 import Toast from "react-native-toast-message"
 import { useNetInfo } from "@react-native-community/netinfo"
@@ -33,8 +33,6 @@ import {
 } from "../../services/sync-service"
 import * as helper from "../../utils/helper"
 import { TaggedEncryption } from "@functionland/fula-sec"
-import { AddShareMeta, getAssetMeta } from "../../services/remote-db-service"
-import { BSON } from "realm"
 import { palette } from "../../theme"
 import Animated, { useAnimatedStyle, useSharedValue } from "react-native-reanimated"
 import { useEffect } from "react"
@@ -75,10 +73,6 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
   const rclRef = useRef()
 
   useEffect(() => {
-    const onBack = () => {
-      goBack()
-      return true
-    }
     const interactionPromise = InteractionManager.runAfterInteractions(() => setTimeout(() => {
       setTransitionDone(true)
       rclRef.current?.forceRerender()
@@ -171,62 +165,62 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
     ])
   }, [asset])
 
-  const uploadToBox = useCallback(async () => {
+  const uploadToBox = async () => {
     if (asset?.syncStatus === SyncStatus.NOTSYNCED && !asset?.isDeleted) {
-      setLoading(true)
+      setLoading(true);
       setTimeout(async () => {
         try {
           // const _filePath = asset.uri?.split('file:')[1];
           // const result = await file.send(decodeURI(_filePath))
           // console.log("result:",result)
-          await Assets.addOrUpdate([
-            {
-              id: asset.id,
-              syncStatus: SyncStatus.SYNC,
-            },
-          ])
-          setAsset((prev) => ({
+          await Assets.addOrUpdate([{
+            id: asset.id,
+            syncStatus: SyncStatus.SYNC,
+          }]);
+          setAsset(prev => ({
             ...prev,
             syncStatus: SyncStatus.SYNC,
           }))
           if (!netInfoState.isConnected) {
             Toast.show({
-              type: "info",
-              text1: "Will upload when connected",
+              type: 'info',
+              text1: 'Will upload when connected',
               position: "bottom",
               bottomOffset: 0,
-            })
+            });
             return
           }
           try {
             await AddBoxs()
           } catch (error) {
             Alert.alert("Warning", error)
-            return
+            return;
           }
           try {
             Toast.show({
-              type: "info",
-              text1: "Upload...",
+              type: 'info',
+              text1: 'Upload...',
               position: "bottom",
               bottomOffset: 0,
-            })
+            });
             await uploadAssetsInBackground({
               callback: (success) => {
                 if (success)
-                  setAsset((prev) => ({
+                  setAsset(prev => ({
                     ...prev,
-                    syncStatus: SyncStatus.SYNC,
+                    syncStatus: SyncStatus.SYNCED,
                   }))
                 else
                   Toast.show({
-                    type: "error",
-                    text1: "Will upload when connected",
+                    type: 'error',
+                    text1: 'Will upload when connected',
                     position: "bottom",
                     bottomOffset: 0,
-                  })
-              },
-            })
+                  });
+
+              }
+            });
+
           } catch (error) {
             Alert.alert("Error", "Unable to send the file now, will upload when connected")
           }
@@ -236,16 +230,16 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
         } finally {
           setLoading(false)
         }
-      }, 0)
+      }, 0);
     } else if (asset?.syncStatus === SyncStatus.SYNC) {
-      cancelUpdate()
+      cancelUpdate();
     }
-  }, [asset, netInfoState.isConnected, cancelUpdate])
+  }
 
   const renderHeader = useCallback(() => {
     return (
       <Header
-        containerStyle={{ marginTop: 10, zIndex: 10, backgroundColor:"tranparent" }}
+        containerStyle={{ marginTop: 10, zIndex: 10, backgroundColor: "tranparent" }}
         leftComponent={
           <HeaderLeftContainer>
             <HeaderArrowBack navigation={navigation} iconProps={{ onPress: goBack }} />
@@ -279,48 +273,21 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
     )
   }, [navigation, loading, uploadToBox, asset, goBack])
 
-  const shareWithDID = useCallback(async () => {
-    if (!DID) return
-    setSharing(true)
+  const shareWithDID = async () => {
+    if (!DID)
+      return
+    setSharing(true);
     try {
-      const shareAsset = (await Assets.getById(asset.id))?.[0]
-      const myDID = await helper.getMyDID()
+      const shareAsset = (await Assets.getById(asset.id))?.[0];
+      const myDID = await helper.getMyDID();
       if (myDID && shareAsset) {
-        const myTag = new TaggedEncryption(myDID.did)
-        const symetricKey = (await helper.decryptJWE(myDID.did, JSON.parse(shareAsset?.jwe)))
-          ?.symetricKey
+        const myTag = new TaggedEncryption(myDID.did);
+        const symetricKey = (await helper.decryptJWE(myDID.did, JSON.parse(shareAsset?.jwe)))?.symetricKey;
         const jwe = await myTag.encrypt(symetricKey, symetricKey?.id, [DID])
-        await AddShareMeta({
-          id: new BSON.UUID().toHexString(),
-          ownerId: myDID.authDID,
-          fileName: asset.filename,
-          cid: asset.cid,
-          jwe: jwe,
-          shareWithId: DID,
-          date: new Date().getTime(),
-        })
-        Alert.alert(
-          "Shared",
-          "This asset is added to the shared collection on the Box, do you want to create a sharing link too?",
-          [
-            {
-              text: "No",
-              style: "cancel",
-            },
-            {
-              text: "Yes",
-              onPress: () => {
-                Share.share({
-                  title: "Fotos | Just shared an asset",
-                  message: `https://fotos.fx.land/shared/${Buffer.from(
-                    JSON.stringify(jwe),
-                    "utf-8",
-                  ).toString("base64")}`,
-                })
-              },
-            },
-          ],
-        )
+        Share.share({
+          title: 'Fotos | Just shared an asset',
+          message: `https://fotos.fx.land/shared/${Buffer.from(JSON.stringify(jwe), 'utf-8').toString('base64')}`
+        });
       }
     } catch (error) {
       Alert.alert("Error", error.toString())
@@ -329,44 +296,42 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
       setSharing(false)
       setShowShareBottomSheet(false)
     }
-  }, [DID, asset])
+  }
 
-  const downloadFromBox = useCallback(async () => {
+  const downloadFromBox = async () => {
     if (asset?.syncStatus === SyncStatus.SYNCED && asset?.isDeleted) {
-      setLoading(true)
+      setLoading(true);
       setTimeout(async () => {
         try {
           try {
             await AddBoxs()
           } catch (error) {
             Alert.alert("Warning", error)
-            return
+            return;
           }
           const myDID = await helper.getMyDID()
-          let fileRef = null
+          let fileRef = null;
           if (myDID) {
-            const meta = await getAssetMeta(myDID.authDID, asset.cid)
-            fileRef = (await helper.decryptJWE(myDID.did, meta?.jwe))?.symetricKey
+            const jwe = JSON.parse(asset?.jwe)
+            fileRef = (await helper.decryptJWE(myDID.did, jwe))?.symetricKey;
           }
-          let result = null
+          let result = null;
           if (fileRef) {
             result = await downloadAndDecryptAsset(fileRef)
           } else {
             result = await downloadAsset(asset?.cid)
           }
           if (result) {
-            setAsset((prev) => ({
+            setAsset(prev => ({
               ...prev,
               uri: result.uri,
-              isDeleted: false,
+              isDeleted: false
             }))
-            Assets.addOrUpdate([
-              {
-                id: asset.id,
-                uri: result.uri,
-                isDeleted: false,
-              },
-            ])
+            Assets.addOrUpdate([{
+              id: asset.id,
+              uri: result.uri,
+              isDeleted: false
+            }]);
           }
         } catch (error) {
           console.log("uploadOrDownload", error)
@@ -374,9 +339,9 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
         } finally {
           setLoading(false)
         }
-      }, 0)
+      }, 0);
     }
-  }, [asset])
+  }
 
   const renderDownloadSection = useCallback(() => {
     return (
@@ -401,7 +366,7 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
       const index = Math.round(xOffset / imageWidth)
       currentAssetRef.current = dataProvider.getDataForIndex(index);
       setTimeout(() => {
-        recyclerList.forEach(section=>{
+        recyclerList.forEach(section => {
           if (section.id === currentAssetRef.current.id) {
             scrollToItem(section, false)
           }

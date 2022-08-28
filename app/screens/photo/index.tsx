@@ -27,16 +27,14 @@ import { Asset, SyncStatus } from "../../types"
 import { Constants, palette } from "../../theme"
 import { Header } from "../../components"
 import { HomeNavigationParamList } from "../../navigators"
-import { BottomSheet, Button, Card, Icon, Input, Text } from "@rneui/themed"
+import { BottomSheet, Button, Card, Icon, Input } from "@rneui/themed"
 import { HeaderArrowBack, HeaderRightContainer } from "../../components/header"
 import { singleAssetState } from "../../store"
 import { Assets } from "../../services/localdb"
 import { AddBoxs, downloadAndDecryptAsset, downloadAsset, uploadAssetsInBackground } from "../../services/sync-service"
 import { Buffer } from "buffer"
 import { TaggedEncryption } from "@functionland/fula-sec"
-import { AddShareMeta, getAssetMeta } from "../../services/remote-db-service"
 import * as helper from "../../utils/helper"
-import { BSON } from "realm"
 
 const { height } = Dimensions.get("window")
 
@@ -98,8 +96,8 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation }) => {
           const myDID = await helper.getMyDID()
           let fileRef = null;
           if (myDID) {
-            const meta = await getAssetMeta(myDID.authDID, asset.cid);
-            fileRef = (await helper.decryptJWE(myDID.did, meta?.jwe))?.symetricKey;
+            const jwe= JSON.parse(asset?.jwe)
+            fileRef = (await helper.decryptJWE(myDID.did, jwe))?.symetricKey;
           }
           let result = null;
           if (fileRef) {
@@ -297,32 +295,10 @@ export const PhotoScreen: React.FC<PhotoScreenProps> = ({ navigation }) => {
         const myTag = new TaggedEncryption(myDID.did);
         const symetricKey = (await helper.decryptJWE(myDID.did, JSON.parse(shareAsset?.jwe)))?.symetricKey;
         const jwe = await myTag.encrypt(symetricKey, symetricKey?.id, [DID])
-        await AddShareMeta({
-          id: new BSON.UUID().toHexString(),
-          ownerId: myDID.authDID,
-          fileName: asset.filename,
-          cid: asset.cid,
-          jwe: jwe,
-          shareWithId: DID,
-          date: new Date().getTime()
-        })
-        Alert.alert("Shared", "This asset is added to the shared collection on the Box, do you want to create a sharing link too?",
-          [
-            {
-              text: "No",
-              style: "cancel"
-            },
-            {
-              text: "Yes",
-              onPress: () => {
-                Share.share({
-                  title: 'Fotos | Just shared an asset',
-                  message: `https://fotos.fx.land/shared/${Buffer.from(JSON.stringify(jwe), 'utf-8').toString('base64')}`
-                });
-              }
-            }
-          ])
-
+        Share.share({
+          title: 'Fotos | Just shared an asset',
+          message: `https://fotos.fx.land/shared/${Buffer.from(JSON.stringify(jwe), 'utf-8').toString('base64')}`
+        });
       }
     } catch (error) {
       Alert.alert("Error", error.toString())
