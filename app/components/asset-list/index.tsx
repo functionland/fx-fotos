@@ -10,9 +10,8 @@ import RecyclerAssetList, { RecyclerAssetListHandler } from "./recycler-asset-li
 import GridProvider from "./grid-provider/gridContext"
 import PinchZoom from "./grid-provider/pinchZoom"
 
-import { RecyclerAssetListSection } from "../../types"
-import { NativeStackNavigationProp } from "@react-navigation/native-stack"
-import { HomeNavigationParamList, HomeNavigationTypes } from "../../navigators/home-navigator"
+import { AssetStory, RecyclerAssetListSection } from "../../types"
+import { ImageErrorEventData, NativeSyntheticEvent } from "react-native"
 interface Props {
   refreshData: () => Promise<void>
   sections: RecyclerAssetListSection[]
@@ -21,6 +20,7 @@ interface Props {
   onAssetLoadError?: (error: NativeSyntheticEvent<ImageErrorEventData>) => void;
   renderFooter?: () => JSX.Element | JSX.Element[]
   onItemPress?: (section: RecyclerAssetListSection) => void
+  onStoryPress?: (story: AssetStory)=> void
 }
 export interface AssetListHandle {
   resetSelectedItems: () => void,
@@ -28,7 +28,7 @@ export interface AssetListHandle {
   scrollToItem: (item: RecyclerAssetListSection, animated?: boolean) => void
 }
 // eslint-disable-next-line react/display-name
-const AssetList = forwardRef<AssetListHandle, Props>(({ refreshData, sections, scrollY, onSelectedItemsChange, onAssetLoadError, renderFooter, onItemPress }, ref): JSX.Element => {
+const AssetList = forwardRef<AssetListHandle, Props>(({ refreshData, sections, scrollY, onSelectedItemsChange, onAssetLoadError, renderFooter, onItemPress, onStoryPress }, ref): JSX.Element => {
   const translationY = useSharedValue(0)
   const scrollRefExternal = useAnimatedRef<Animated.ScrollView>()
   const recyclerAssetListRef = useRef<RecyclerAssetListHandler>();
@@ -65,6 +65,7 @@ const AssetList = forwardRef<AssetListHandle, Props>(({ refreshData, sections, s
           onAssetLoadError={onAssetLoadError}
           renderFooter={renderFooter}
           onItemPress={onItemPress}
+          onStoryPress={onStoryPress}
         />
       </PinchZoom>
     </GridProvider>

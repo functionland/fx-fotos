@@ -66,10 +66,14 @@ const Cell = React.forwardRef<unknown, CellProps>(
     }, [])
     const updateDependencies = useCallback(
       (index, columnNumber, style) => {
-        sharedFinalRangeValues.value = layoutProvider
+        try {
+          sharedFinalRangeValues.value = layoutProvider
           .getLayoutManager()
           ?.getLayoutTransitionRangeForIndex(index, columnNumber)
-        externalStyle.value = style
+          externalStyle.value = style
+        } catch (error) {
+          console.error(error)
+        }
       },
       [layoutProvider],
     )

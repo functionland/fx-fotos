@@ -14,10 +14,11 @@ import Animated, {
   runOnJS,
   useAnimatedReaction,
   Extrapolate,
+  SharedValue,
 } from "react-native-reanimated"
 import { DataProvider, RecyclerListView } from "fula-recyclerlistview"
 import { Constants } from "../../../theme/constants"
-import { RecyclerAssetListSection, ViewType, GroupHeader } from "../../../types"
+import { RecyclerAssetListSection, ViewType, GroupHeader, AssetStory } from "../../../types"
 import RecyclerSectionItem from "./asset-items/recycler-section-item"
 import ExternalScrollView from "../external-scroll-view"
 import Cell from "../grid-provider/cell"
@@ -41,11 +42,13 @@ export interface Props {
   onAssetLoadError?: (error: NativeSyntheticEvent<ImageErrorEventData>) => void
   renderFooter?: () => JSX.Element | JSX.Element[]
   onItemPress?: (section: RecyclerAssetListSection) => void
+  onStoryPress?: (story: AssetStory)=> void
 }
 
 export interface ExtendedState {
   selectedGroups: { [key: string]: boolean }
   selectedAssets: { [key: string]: boolean }
+  selectionMode: boolean
 }
 export interface RecyclerAssetListHandler {
   resetSelectedItems: () => void,
@@ -62,6 +65,7 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(({
   onAssetLoadError,
   renderFooter,
   onItemPress,
+  onStoryPress,
   ...extras
 }, ref): JSX.Element => {
   const rclRef = useRef<RecyclerListView>()
@@ -169,6 +173,7 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(({
           selected={!!extendedState.selectedAssets[data.id]}
           onLongPress={onLongPress}
           onPress={onPress}
+          onStoryPress={onStoryPress}
           onAssetLoadError={onAssetLoadError}
         />
       )
