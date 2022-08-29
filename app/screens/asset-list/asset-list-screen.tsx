@@ -23,7 +23,7 @@ import { uploadAssetsInBackground } from "../../services/sync-service"
 import { SharedElement } from "react-navigation-shared-element"
 import * as helper from "../../utils/helper"
 import { Asset, AssetStory, RecyclerAssetListSection, ViewType } from "../../types"
-import { recyclerSectionsState, singleAssetState } from "../../store"
+import { recyclerSectionsState, singleAssetState,selectedStoryState } from "../../store"
 import { NavigationProp, useNavigation } from "@react-navigation/native"
 
 interface Props {
@@ -49,6 +49,7 @@ export const AssetListScreen: React.FC<Props> = ({
   const { theme } = useTheme()
   const walletConnector = useWalletConnect()
   const setSingleAsset = useSetRecoilState(singleAssetState)
+  const setSelectedStoryState = useSetRecoilState(selectedStoryState)
   const navigation=useNavigation<NavigationProp<RootStackParamList>>();
   
   useEffect(() => {
@@ -127,7 +128,6 @@ export const AssetListScreen: React.FC<Props> = ({
   }
 
   const onItemPress = (section: RecyclerAssetListSection) => {
-    console.log("onItemPress",section)
     if (section.type === ViewType.ASSET) {
       const asset: Asset = section.data
       setSingleAsset(JSON.parse(JSON.stringify(asset)));
@@ -135,7 +135,8 @@ export const AssetListScreen: React.FC<Props> = ({
     }
   }
   const onStoryPress=(story:AssetStory)=>{
-    navigation.navigate(AppNavigationNames.HighlightScreen, { highlights: story })
+    setSelectedStoryState(story)
+    navigation.navigate(AppNavigationNames.HighlightScreen)
   }
   const onSelectedItemsChange = (assetIds: string[], selectionMode: boolean) => {
     setSelectionMode(selectionMode)

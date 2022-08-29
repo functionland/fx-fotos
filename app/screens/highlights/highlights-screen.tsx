@@ -16,10 +16,11 @@ import Animated, {
 } from "react-native-reanimated"
 import { snapPoint, withPause } from "react-native-redash"
 import FastImage from "react-native-fast-image"
-
+import { useRecoilState } from "recoil"
 import { Asset, AssetStory } from "../../types"
 import { DataProvider, GridLayoutProvider, RecyclerListView } from "fula-recyclerlistview"
 import { palette } from "../../theme"
+import { selectedStoryState } from "../../store"
 
 interface HighlightScreenProps {
   route: RouteProp<{ params: { highlights: AssetStory } }, "params">
@@ -57,11 +58,10 @@ const TimeBar: React.FC<timeBarProps> = ({ width, pause }) => {
 const { height: screenHeight, width: screenWidth } = Dimensions.get("window")
 export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
   const navigation = useNavigation()
-  const { data: stories } = route.params.highlights
-
+  const [selectedStory] = useRecoilState(selectedStoryState)
   const dataProvider = React.useMemo(() => {
     let provider = new DataProvider((r1: Asset, r2: Asset) => r1?.id !== r2?.id)
-    provider = provider.cloneWithRows(stories, 0)
+    provider = provider.cloneWithRows(selectedStory?.data, 0)
     return provider
   }, [])
 
@@ -100,10 +100,10 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
   const [timeBarItems, setTimeBarItems] = React.useState<number[]>([0])
 
   const barWidth = useSharedValue(0)
-  const BAR_WIDTH = (widthPercentageToDP(95) - 2 * stories.length) / stories.length
+  const BAR_WIDTH = (widthPercentageToDP(95) - 2 * selectedStory?.data?.length) / selectedStory?.data?.length
 
   const updateImage = () => {
-    if (imageIdx >= stories.length - 1) {
+    if (imageIdx >= selectedStory?.data?.length - 1) {
       return
     }
 
@@ -112,7 +112,8 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
   }
 
   React.useLayoutEffect(() => {
-    highlightListRef.current.scrollToItem(stories[imageIdx], true)
+    const currentItem=dataProvider.getDataForIndex(imageIdx)
+    highlightListRef.current.scrollToItem(currentItem, true)
   }, [imageIdx])
 
   React.useLayoutEffect(() => {
@@ -242,14 +243,14 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
               horizontal
               showsHorizontalScrollIndicator={false}
               keyExtractor={(item) => item.id}
-              data={stories}
+              data={selectedStory?.data}
               renderItem={() => {
                 return (
                   <View
                     style={[
                       styles.timeBarPlaceholder,
                       {
-                        width: (widthPercentageToDP(95) - 2 * stories.length) / stories.length,
+                        width: (widthPercentageToDP(95) - 2 * selectedStory?.data?.length) / selectedStory?.data?.length,
                       },
                     ]}
                   />
@@ -270,7 +271,7 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
           />
           <TouchableOpacity
             onPress={() => {
-              if (imageIdx >= stories.length - 1) {
+              if (imageIdx >= selectedStory?.data?.length - 1) {
                 return
               }
               setImageIdx((prev) => (prev += 1))
@@ -279,8 +280,8 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
             style={[styles.pressableContainer, { right: 0 }]}
           />
         </View>
-    </Animated.View>
-   </PanGestureHandler >
+      </Animated.View>
+    </PanGestureHandler >
   )
 }
 
