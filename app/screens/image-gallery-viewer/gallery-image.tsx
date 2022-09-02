@@ -49,7 +49,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
   disableParentScroll,
   listGestureRef,
   screenOpacity,
-  sharedElementId
+  sharedElementId,
 }) => {
   const navigation = useNavigation()
   const dims = useWindowDimensions()
@@ -124,7 +124,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
   }, [])
 
   const goBack = useCallback(() => {
-    navigation.setParams({assetId: asset.id})
+    navigation.setParams({ assetId: asset.id })
     setTimeout(() => {
       navigation.goBack()
     })
@@ -162,7 +162,11 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
           // translate the image in y-axis
           if (!isImageInfoSheetOpened.value) {
             translateY.value = translationY
-            accumulatedScale.value = interpolate(translationY, [0, SWIPE_TO_CLOSE_THRESHOLD], [1, 0.8])
+            accumulatedScale.value = interpolate(
+              translationY,
+              [0, SWIPE_TO_CLOSE_THRESHOLD],
+              [1, 0.8],
+            )
             screenOpacity.value = interpolate(translationY, [0, SWIPE_TO_CLOSE_THRESHOLD], [1, 0.8])
           }
           if (!isSwipeDownGestureStarted.value) {
@@ -208,9 +212,9 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
               screenOpacity.value = withTiming(1)
               accumulatedScale.value = withTiming(1)
               runOnJS(enableParentListScroll)()
-              isSwipeDownGestureStarted.value = false
             }
           }
+          isSwipeDownGestureStarted.value = false
         }
       }
     },
@@ -357,7 +361,12 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
                         style={imageStyle}
                       />
                     ) : (
-                      <Image source={{ uri: asset.uri }} fadeDuration={0} resizeMode="contain" style={imageStyle} />
+                      <Image
+                        source={{ uri: asset.uri }}
+                        fadeDuration={0}
+                        resizeMode="contain"
+                        style={imageStyle}
+                      />
                     )}
                   </SharedElement>
                   <Animated.View style={[styles.bottomSheet, animatedBottomSheetStyle]}>
