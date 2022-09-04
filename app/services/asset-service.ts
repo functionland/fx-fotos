@@ -1,6 +1,7 @@
-import moment from "moment"
+import { Platform } from "react-native"
 import * as MediaLibrary from "expo-media-library"
 import { manipulateAsync, SaveFormat, ImageResult } from "expo-image-manipulator"
+import moment from "moment"
 
 import { RecyclerAssetListSection, ViewType, GroupHeader, Library, AssetStory } from "../types"
 export const generateThumbnail = async (assets: MediaLibrary.Asset[]) => {
@@ -18,33 +19,6 @@ export const generateThumbnail = async (assets: MediaLibrary.Asset[]) => {
   }
   return result
 }
-
-// const TODAY = new Date()
-// const startOfMonth = dateFns.startOfMonth(TODAY)
-// const storyTimeLine = (() => {
-//   const timeLineCount = 13
-//   const temp = []
-//   for (let i = 0; i < timeLineCount; i++) {
-//     if (i === 0) {
-//       temp.push(startOfMonth)
-//       continue
-//     }
-
-//     temp.push(dateFns.subMonths(temp[i - 1], 1))
-//   }
-
-//   return temp.map((item) => {
-//     return { id: item.toString(), title: item.toString(), data: [] }
-//   })
-// })()
-
-// const categorizeStoryies = (asset: MediaLibrary.Asset) => {
-//   for (let i = 0; i < storyTimeLine.length; i++) {
-//     if (dateFns.isSameMonth(new Date(storyTimeLine[i].id), asset.modificationTime)) {
-//       storyTimeLine[i].data.push(asset)
-//     }
-//   }
-// }
 
 const getAssetStoryCategory = (modificationTime: number) => {
   const diff = (new Date().getTime() - modificationTime) / (1000 * 60 * 60 * 24)
@@ -70,7 +44,7 @@ export const categorizeAssets = (assets: MediaLibrary.Asset[], storyHighlight=fa
   for (const asset of assets) {
     // Make story objects
     // Filter assets to get camera folder
-    if (__DEV__ || (asset?.modificationTime && asset.uri?.toLowerCase().includes("/dcim/camera/"))) {
+    if (__DEV__ || (storyHighlight && asset?.modificationTime && (Platform.OS==="ios" || asset.uri?.toLowerCase().includes("/dcim/camera/")))) {
       const categoryName = getAssetStoryCategory(asset.modificationTime)
       if (categoryName && !storiesObj[categoryName]) storiesObj[categoryName] = []
       if (categoryName) storiesObj[categoryName].push(asset)
@@ -135,7 +109,7 @@ export const categorizeAssets = (assets: MediaLibrary.Asset[], storyHighlight=fa
       type: ViewType.STORY,
       data: Object.keys(storiesObj)
         // Sort stories based on first asset
-        .sort((a, b) => storiesObj[a]?.[0].modificationTime < storiesObj[b]?.[0].modificationTime)
+        .sort((a, b) =>  storiesObj[b]?.[0].modificationTime - storiesObj[a]?.[0].modificationTime)
         .map((key, index) => {
           return {
             id: `story_${index}_${storiesObj[key]?.length}`,
