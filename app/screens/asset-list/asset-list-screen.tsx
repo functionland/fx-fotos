@@ -136,7 +136,7 @@ export const AssetListScreen: React.FC<Props> = ({
   }
   const onStoryPress=(story:AssetStory)=>{
     setSelectedStoryState(story)
-    navigation.navigate(AppNavigationNames.HighlightScreen)
+    navigation.navigate(AppNavigationNames.HighlightScreen,{ storyId: story.id})
   }
   const onSelectedItemsChange = (assetIds: string[], selectionMode: boolean) => {
     setSelectionMode(selectionMode)

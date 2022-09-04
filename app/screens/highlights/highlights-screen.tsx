@@ -21,6 +21,7 @@ import { DataProvider, LayoutProvider, RecyclerListView } from "fula-recyclerlis
 import { selectedStoryState } from "../../store"
 import { Screen, TimerProgress, TimerProgressHandler } from "../../components"
 import { Text } from "@rneui/themed"
+import { SharedElement } from "react-navigation-shared-element"
 
 
 interface HighlightScreenProps {
@@ -174,9 +175,11 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
       <NativeViewGestureHandler ref={gestureHanlderRef}>
         <Animated.View style={[containerAnimatedStyle]}>
           <PanGestureHandler ref={panGestureRef} waitFor={[longPressRef]} maxPointers={1}
-            minPointers={1} onGestureEvent={onPanGesture}
-          >
+            minPointers={1} onGestureEvent={onPanGesture}>
             <Animated.View style={{ flex: 1 }}>
+              <SharedElement id={selectedStory.id} style={{ position: "absolute" }}>
+                {_rowRenderer(null, selectedStory?.data[0], 0)}
+              </SharedElement>
               <Animated.View style={[styles.timeBarContainer, timeBarContainerAnimatedStyle]}>
                 <View>
                   <Text>{imageIdx + 1}/{selectedStory?.data?.length}</Text>
