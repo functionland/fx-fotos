@@ -1,5 +1,12 @@
 import * as React from "react"
-import { KeyboardAvoidingView, Platform, ScrollView, StatusBar, View } from "react-native"
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StatusBar,
+  View,
+  ViewStyle,
+} from "react-native"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { useTheme } from "@rneui/themed"
 import { ScreenProps } from "./screen.props"
@@ -9,10 +16,9 @@ const isIos = Platform.OS === "ios"
 
 function ScreenWithoutScrolling(props: ScreenProps) {
   const insets = useSafeAreaInsets()
+  const insetStyle: ViewStyle = { marginTop: props.unsafe ? 0 : insets.top }
   const preset = presets.fixed
-  const style = props.style || {}
   const backgroundStyle = props.backgroundColor ? { backgroundColor: props.backgroundColor } : {}
-  const insetStyle = { paddingTop: props.unsafe ? 0 : insets.top }
   const { theme } = useTheme()
   return (
     <KeyboardAvoidingView
@@ -21,7 +27,9 @@ function ScreenWithoutScrolling(props: ScreenProps) {
       keyboardVerticalOffset={offsets[props.keyboardOffset || "none"]}
     >
       <StatusBar barStyle={props.statusBar || "light-content"} />
-      <View style={[preset.inner, style, Platform.OS === 'ios' ? {} : insetStyle, props.style || {}]}>{props.children}</View>
+      <View style={[preset.inner, props.style, Platform.OS === "android" ? {} : insetStyle]}>
+        {props.children}
+      </View>
     </KeyboardAvoidingView>
   )
 }

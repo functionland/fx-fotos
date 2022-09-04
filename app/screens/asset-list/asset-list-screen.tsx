@@ -25,11 +25,12 @@ import * as helper from "../../utils/helper"
 import { Asset, AssetStory, RecyclerAssetListSection, ViewType } from "../../types"
 import { recyclerSectionsState, singleAssetState } from "../../store"
 import { NavigationProp, useNavigation } from "@react-navigation/native"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 interface Props {
   medias: Asset[]
   defaultHeader?: (style: any) => JSX.Element | undefined
-  loading: boolean,
+  loading: boolean
   showStoryHighlight: boolean
 }
 
@@ -37,7 +38,7 @@ export const AssetListScreen: React.FC<Props> = ({
   medias,
   defaultHeader,
   loading,
-  showStoryHighlight
+  showStoryHighlight,
 }) => {
   const [recyclerSections, setRecyclerSections] = useRecoilState(recyclerSectionsState)
   // Get a custom hook to animate the header
@@ -49,11 +50,11 @@ export const AssetListScreen: React.FC<Props> = ({
   const { theme } = useTheme()
   const walletConnector = useWalletConnect()
   const setSingleAsset = useSetRecoilState(singleAssetState)
-  const navigation=useNavigation<NavigationProp<RootStackParamList>>();
-  
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>()
+
   useEffect(() => {
     if (medias) {
-      setRecyclerSections([...AssetService.categorizeAssets([...medias],showStoryHighlight)])
+      setRecyclerSections([...AssetService.categorizeAssets([...medias], showStoryHighlight)])
     }
   }, [medias])
 
@@ -127,14 +128,17 @@ export const AssetListScreen: React.FC<Props> = ({
   }
 
   const onItemPress = (section: RecyclerAssetListSection) => {
-    console.log("onItemPress",section)
+    console.log("onItemPress", section)
     if (section.type === ViewType.ASSET) {
       const asset: Asset = section.data
-      setSingleAsset(JSON.parse(JSON.stringify(asset)));
-      navigation.navigate(AppNavigationNames.ImageGalleryViewer, { assetId: asset.id, scrollToItem: assetListRef.current.scrollToItem })
+      setSingleAsset(JSON.parse(JSON.stringify(asset)))
+      navigation.navigate(AppNavigationNames.ImageGalleryViewer, {
+        assetId: asset.id,
+        scrollToItem: assetListRef.current.scrollToItem,
+      })
     }
   }
-  const onStoryPress=(story:AssetStory)=>{
+  const onStoryPress = (story: AssetStory) => {
     navigation.navigate(AppNavigationNames.HighlightScreen, { highlights: story })
   }
   const onSelectedItemsChange = (assetIds: string[], selectionMode: boolean) => {
@@ -237,8 +241,9 @@ export const AssetListScreen: React.FC<Props> = ({
     }
     return null
   }
+
   return (
-    <Screen scrollEventThrottle={16} automaticallyAdjustContentInsets style={styles.screen}>
+    <Screen style={styles.screen}>
       {renderHeader()}
       {!recyclerSections ? (
         <View style={styles.loaderContainer}>

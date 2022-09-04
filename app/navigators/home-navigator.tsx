@@ -9,6 +9,7 @@ import { HomeScreen, LibraryScreen } from "../screens"
 import { TabHeader } from "../components/header/tab-header"
 import { UnderConstruction } from "../components"
 import { RneDarkTheme } from "../theme"
+import { SafeAreaProvider } from "react-native-safe-area-context"
 export type HomeNavigationParamList = {
   HomeScreen: undefined
 }
@@ -26,18 +27,14 @@ function UnderConstructionScreen() {
     </View>
   )
 }
+
+import { initialWindowMetrics } from "react-native-safe-area-context"
 const HomeTabs = createBottomTabNavigator()
 export function HomeNavigator() {
   const { colors, dark } = useTheme()
 
   return (
-    <SafeAreaView
-      style={{
-        backgroundColor: dark ? RneDarkTheme.darkColors.platform.ios.primary : "#fff",
-        height: "100%",
-        width: "100%",
-      }}
-    >
+    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
       <HomeTabs.Navigator
         screenOptions={{
           headerTransparent: true,
@@ -119,6 +116,6 @@ export function HomeNavigator() {
           component={LibraryScreen}
         />
       </HomeTabs.Navigator>
-    </SafeAreaView>
+    </SafeAreaProvider>
   )
 }
