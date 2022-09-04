@@ -8,7 +8,9 @@ import FontAwesome5 from "react-native-vector-icons/FontAwesome5"
 import { HomeScreen, LibraryScreen } from "../screens"
 import { TabHeader } from "../components/header/tab-header"
 import { UnderConstruction } from "../components"
-import { RneDarkTheme } from "../theme"
+import { palette, RneDarkTheme, RneLightTheme } from "../theme"
+import { Icon, Text } from "@rneui/themed"
+
 import { SafeAreaProvider } from "react-native-safe-area-context"
 export type HomeNavigationParamList = {
   HomeScreen: undefined
@@ -28,16 +30,37 @@ function UnderConstructionScreen() {
   )
 }
 
+interface TabBarLabelProps {
+  focused: boolean
+  children: any
+}
+
+const TabBarLabel: React.FC<TabBarLabelProps> = ({ focused, children }) => {
+  return (
+    <Text
+      style={{
+        color: focused ? palette.black : RneLightTheme.darkColors.grey4,
+        fontSize: 14,
+        paddingTop: 4,
+        fontWeight: "600",
+      }}
+    >
+      {children}
+    </Text>
+  )
+}
+
 import { initialWindowMetrics } from "react-native-safe-area-context"
 const HomeTabs = createBottomTabNavigator()
 export function HomeNavigator() {
-  const { colors, dark } = useTheme()
+  const { colors } = useTheme()
 
   return (
     <SafeAreaProvider initialMetrics={initialWindowMetrics}>
       <HomeTabs.Navigator
         screenOptions={{
           headerTransparent: true,
+          tabBarShowLabel: false,
           headerShown: false,
           header: (props) => <TabHeader {...props} />,
           tabBarStyle: {
@@ -52,14 +75,17 @@ export function HomeNavigator() {
       >
         <HomeTabs.Screen
           options={{
-            tabBarLabel: "Photos",
             tabBarIcon: function tabIcon(props) {
               return (
-                <FontAwesome5
-                  name={"images"}
-                  size={25}
-                  color={props?.focused ? colors.text : "gray"}
-                />
+                <View>
+                  <Icon
+                    type="font-awesome-5"
+                    name="images"
+                    size={25}
+                    color={props?.focused ? colors.text : "gray"}
+                  />
+                  <TabBarLabel focused={props.focused}>Photos</TabBarLabel>
+                </View>
               )
             },
           }}
@@ -71,12 +97,15 @@ export function HomeNavigator() {
           options={{
             tabBarIcon: function tabIcon(props) {
               return (
-                <FontAwesome5
-                  name={"search"}
-                  color={props?.focused ? colors.text : "gray"}
-                  size={25}
-                  style={{}}
-                />
+                <View>
+                  <Icon
+                    type="font-awesome-5"
+                    name="search"
+                    size={25}
+                    color={props?.focused ? colors.text : "gray"}
+                  />
+                  <TabBarLabel focused={props.focused}>Search</TabBarLabel>
+                </View>
               )
             },
           }}
@@ -87,12 +116,15 @@ export function HomeNavigator() {
           options={{
             tabBarIcon: function tabIcon(props) {
               return (
-                <FontAwesome5
-                  name={"user-friends"}
-                  color={props?.focused ? colors.text : "gray"}
-                  size={25}
-                  style={{}}
-                />
+                <View>
+                  <Icon
+                    type="font-awesome-5"
+                    name="user-friends"
+                    size={25}
+                    color={props?.focused ? colors.text : "gray"}
+                  />
+                  <TabBarLabel focused={props.focused}>Share</TabBarLabel>
+                </View>
               )
             },
           }}
@@ -104,12 +136,15 @@ export function HomeNavigator() {
             tabBarLabel: "Library",
             tabBarIcon: function tabIcon(props) {
               return (
-                <FontAwesome5
-                  name={"swatchbook"}
-                  color={props?.focused ? colors.text : "gray"}
-                  size={25}
-                  style={{}}
-                />
+                <View>
+                  <Icon
+                    type="font-awesome-5"
+                    name="swatchbook"
+                    size={25}
+                    color={props?.focused ? colors.text : "gray"}
+                  />
+                  <TabBarLabel focused={props.focused}>Library</TabBarLabel>
+                </View>
               )
             },
           }}
