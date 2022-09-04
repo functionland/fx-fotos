@@ -26,9 +26,13 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated"
 import { SharedElement } from "react-navigation-shared-element"
+import { Video } from "expo-av"
+
 import { Text } from "../../components"
 import { palette } from "../../theme"
 import { Asset } from "../../types"
+import { heightPercentageToDP, widthPercentageToDP } from "react-native-responsive-screen"
+import { ScreenHeight, ScreenWidth } from "@rneui/base"
 
 type GalleryImageProps = {
   asset: Asset
@@ -49,7 +53,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
   disableParentScroll,
   listGestureRef,
   screenOpacity,
-  sharedElementId
+  sharedElementId,
 }) => {
   const navigation = useNavigation()
   const dims = useWindowDimensions()
@@ -124,7 +128,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
   }, [])
 
   const goBack = useCallback(() => {
-    navigation.setParams({assetId: asset.id})
+    navigation.setParams({ assetId: asset.id })
     setTimeout(() => {
       navigation.goBack()
     })
@@ -326,6 +330,8 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
     return { flex: 1, width: dims.width }
   }, [dims.width, dims.height])
 
+  const video = React.useRef(null)
+
   return (
     <Animated.View style={screenStyle}>
       <TapGestureHandler
@@ -348,14 +354,35 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
               >
                 <Animated.View style={animatedImageContainerStyle}>
                   <SharedElement id={sharedElementId}>
-                    {Platform.OS === "android" ? (
+                    {asset.mediaType === "video" ? (
+                      <Video
+                        ref={video}
+                        style={{
+                          height: (ScreenHeight * 75) / 100,
+                          width: ScreenWidth,
+                          zIndex: 9999999
+                        }}
+                        source={{
+                          uri: asset.uri,
+                        }}
+                        resizeMode="contain"
+                        useNativeControls
+                        shouldPlay
+                        isLooping
+                      />
+                    ) : Platform.OS === "android" ? (
                       <FastImage
                         source={{ uri: asset.uri, priority: FastImage.priority.high }}
                         resizeMode="contain"
                         style={imageStyle}
                       />
                     ) : (
-                      <Image source={{ uri: asset.uri }} fadeDuration={0} resizeMode="contain" style={imageStyle} />
+                      <Image
+                        source={{ uri: asset.uri }}
+                        fadeDuration={0}
+                        resizeMode="contain"
+                        style={imageStyle}
+                      />
                     )}
                   </SharedElement>
                   <Animated.View style={[styles.bottomSheet, animatedBottomSheetStyle]}>
