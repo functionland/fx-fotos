@@ -34,6 +34,7 @@ type GalleryImageProps = {
   asset: Asset
   enableParentScroll?: () => void
   disableParentScroll?: () => void
+  toggleMenu?: () => void
   listGestureRef: MutableRefObject<NativeViewGestureHandler>
   screenOpacity: SharedValue<number>
   sharedElementId: string
@@ -45,6 +46,7 @@ const SWIPE_TO_CLOSE_THRESHOLD = 100
 
 export const GalleryImage: React.FC<GalleryImageProps> = ({
   asset,
+  toggleMenu,
   enableParentScroll,
   disableParentScroll,
   listGestureRef,
@@ -65,6 +67,8 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
   const shouldCloseOnZoomOut = useSharedValue(true)
   const panHandlerRef = useRef(null)
   const pinchHandlerRef = useRef(null)
+  const doubleTapHandlerRef = useRef(null)
+  const singleTapHandlerRef = useRef(null)
 
   const isZoomed = useDerivedValue(() => {
     if (accumulatedScale.value > 1) {
@@ -87,6 +91,10 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
     const limit = imageHeight * accumulatedScale.value - imageHeight
     return limit
   }, [dims.height])
+
+  const onTap = useCallback(() => {
+    toggleMenu()
+  }, [])
 
   const onDoubleTap = useAnimatedGestureHandler<TapGestureHandlerGestureEvent>({
     onActive({ absoluteX, absoluteY }) {
@@ -335,61 +343,70 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
   return (
     <Animated.View style={screenStyle}>
       <TapGestureHandler
-        numberOfTaps={2}
-        maxDist={10}
-        onGestureEvent={onDoubleTap}
-        waitFor={[panHandlerRef, pinchHandlerRef]}
+        ref={singleTapHandlerRef}
+        onActivated={onTap}
+        waitFor={doubleTapHandlerRef}
       >
         <Animated.View style={styles.flex1}>
-          <PinchGestureHandler
-            ref={pinchHandlerRef}
-            onGestureEvent={onPinch}
-            simultaneousHandlers={panHandlerRef}
+          <TapGestureHandler
+            numberOfTaps={2}
+            ref={doubleTapHandlerRef}
+            maxDist={10}
+            onGestureEvent={onDoubleTap}
+            waitFor={[panHandlerRef, pinchHandlerRef]}
           >
             <Animated.View style={styles.flex1}>
-              <PanGestureHandler
-                ref={panHandlerRef}
-                onGestureEvent={onPan}
-                simultaneousHandlers={[pinchHandlerRef, listGestureRef]}
+              <PinchGestureHandler
+                ref={pinchHandlerRef}
+                onGestureEvent={onPinch}
+                simultaneousHandlers={panHandlerRef}
               >
-                <Animated.View style={animatedImageContainerStyle}>
-                  <SharedElement id={sharedElementId}>
-                    {Platform.OS === "android" ? (
-                      <FastImage
-                        source={{ uri: asset.uri, priority: FastImage.priority.high }}
-                        resizeMode="contain"
-                        style={imageStyle}
-                      />
-                    ) : (
-                      <Image
-                        source={{ uri: asset.uri }}
-                        fadeDuration={0}
-                        resizeMode="contain"
-                        style={imageStyle}
-                      />
-                    )}
-                  </SharedElement>
-                  <Animated.View style={[styles.bottomSheet, animatedBottomSheetStyle]}>
-                    <View style={styles.handle} />
-                    <Text style={styles.dateText}>
-                      {moment(asset.modificationTime).format("ddd, Do MMM YYYY . h:mm")}
-                    </Text>
-                    <Text style={styles.heading}>Details</Text>
-                    <View style={styles.detailsContainer}>
-                      <Text style={styles.locationHeading}>Location:</Text>
-                      <Text style={styles.uri}>{asset.uri}</Text>
-                    </View>
-                    <View style={styles.dimensionInfoContainer}>
-                      <Text style={styles.dimensionHeading}>Dimensions:</Text>
-                      <Text style={styles.dimensionText}>
-                        {asset.width} X {asset.height}
-                      </Text>
-                    </View>
-                  </Animated.View>
+                <Animated.View style={styles.flex1}>
+                  <PanGestureHandler
+                    ref={panHandlerRef}
+                    onGestureEvent={onPan}
+                    simultaneousHandlers={[pinchHandlerRef, listGestureRef]}
+                  >
+                    <Animated.View style={animatedImageContainerStyle}>
+                      <SharedElement id={sharedElementId}>
+                        {Platform.OS === "android" ? (
+                          <FastImage
+                            source={{ uri: asset.uri, priority: FastImage.priority.high }}
+                            resizeMode="contain"
+                            style={imageStyle}
+                          />
+                        ) : (
+                          <Image
+                            source={{ uri: asset.uri }}
+                            fadeDuration={0}
+                            resizeMode="contain"
+                            style={imageStyle}
+                          />
+                        )}
+                      </SharedElement>
+                      <Animated.View style={[styles.bottomSheet, animatedBottomSheetStyle]}>
+                        <View style={styles.handle} />
+                        <Text style={styles.dateText}>
+                          {moment(asset.modificationTime).format("ddd, Do MMM YYYY . h:mm")}
+                        </Text>
+                        <Text style={styles.heading}>Details</Text>
+                        <View style={styles.detailsContainer}>
+                          <Text style={styles.locationHeading}>Location:</Text>
+                          <Text style={styles.uri}>{asset.uri}</Text>
+                        </View>
+                        <View style={styles.dimensionInfoContainer}>
+                          <Text style={styles.dimensionHeading}>Dimensions:</Text>
+                          <Text style={styles.dimensionText}>
+                            {asset.width} X {asset.height}
+                          </Text>
+                        </View>
+                      </Animated.View>
+                    </Animated.View>
+                  </PanGestureHandler>
                 </Animated.View>
-              </PanGestureHandler>
+              </PinchGestureHandler>
             </Animated.View>
-          </PinchGestureHandler>
+          </TapGestureHandler>
         </Animated.View>
       </TapGestureHandler>
     </Animated.View>
