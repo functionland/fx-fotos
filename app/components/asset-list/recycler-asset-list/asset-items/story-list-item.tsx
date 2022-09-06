@@ -4,6 +4,7 @@ import { widthPercentageToDP as wp } from "react-native-responsive-screen"
 import { Image, FlatList, StyleSheet, Pressable } from "react-native"
 import { Text, useTheme } from "@rneui/themed"
 import { AssetStory } from "../../../../types"
+import { SharedElement } from "react-navigation-shared-element"
 interface Props {
   stories: AssetStory[],
   onPress?: (story: AssetStory) => void
@@ -24,10 +25,12 @@ const StoryListItem = ({ stories, onPress }: Props): JSX.Element => {
         android_ripple={{ color: theme.colors.background, foreground: true }}
         onPress={onItemPress}
       >
-        <Image source={{ uri: item.data[0].uri }} fadeDuration={0} style={styles.image} />
-        <Text style={styles.label}>
-          {item.title}
-        </Text>
+        <SharedElement id={item.id}>
+          <Image source={{ uri: item.data[0].uri }} fadeDuration={0} style={styles.image} />
+          <Text style={styles.label}>
+            {item.title}
+          </Text>
+        </SharedElement>
       </Pressable>
     )
   },[])

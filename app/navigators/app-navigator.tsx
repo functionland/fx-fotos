@@ -26,7 +26,7 @@ export type RootStackParamList = {
   Home: undefined
   LibraryAssets: undefined
   Photo: { section: RecyclerAssetListSection }
-  HighlightScreen: {highlights:AssetStory|undefined}
+  HighlightScreen: { storyId: AssetStory['id']}
   AccountScreen: undefined
   Account: undefined
   Settings: undefined
@@ -119,6 +119,10 @@ const AppStack = () => {
           }),
         }}
         component={HighlightScreen}
+        sharedElements={(route) => {
+          const { storyId = "" } = route.params
+          return [storyId]
+        }}
       />
       <Stack.Screen
         name={AppNavigationNames.ImageGalleryViewer}
