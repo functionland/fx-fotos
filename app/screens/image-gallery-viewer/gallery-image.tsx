@@ -31,8 +31,8 @@ import { Video } from "expo-av"
 import { Text } from "../../components"
 import { palette } from "../../theme"
 import { Asset } from "../../types"
-import { heightPercentageToDP, widthPercentageToDP } from "react-native-responsive-screen"
 import { ScreenHeight, ScreenWidth } from "@rneui/base"
+import type { Video as VideoType } from "expo-av"
 
 type GalleryImageProps = {
   asset: Asset
@@ -46,6 +46,24 @@ type GalleryImageProps = {
 const MAX_SCALE = 6
 const SWIPE_UP_THRESHOLD = 10
 const SWIPE_TO_CLOSE_THRESHOLD = 100
+
+import * as MediaLibrary from "expo-media-library"
+import type { Asset as Media } from "expo-media-library"
+
+const getUserAssets = async (): Promise<Media[] | null> => {
+  const { assets } = await MediaLibrary.getAssetsAsync({
+    mediaType: ["photo", "video", "audio", "unknown"],
+  })
+  if (!assets) {
+    return null
+  }
+  return assets
+}
+
+const getMediaInfo = async (asset: Asset): Promise<MediaLibrary.AssetInfo> => {
+  const info = await MediaLibrary.getAssetInfoAsync(asset)
+  return info
+}
 
 export const GalleryImage: React.FC<GalleryImageProps> = ({
   asset,
@@ -331,6 +349,17 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
   }, [dims.width, dims.height])
 
   const video = React.useRef(null)
+  const [localUri, setLocalUri] = React.useState(null)
+  const [, setPlaybackStatus] = React.useState({})
+
+  const getAssetLocalInfo = React.useCallback(async () => {
+    const localInfo = await getMediaInfo(asset)
+    setLocalUri(localInfo.localUri)
+  }, [getMediaInfo, asset])
+
+  React.useLayoutEffect(() => {
+    getAssetLocalInfo()
+  }, [asset])
 
   return (
     <Animated.View style={screenStyle}>
@@ -357,16 +386,15 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
                     {asset.mediaType === "video" ? (
                       <Video
                         ref={video}
+                        source={{ uri: Platform.OS === "ios" ? localUri : asset.uri }}
                         style={{
-                          height: (ScreenHeight * 75) / 100,
+                          height: (asset.height * ScreenWidth) / asset.width,
                           width: ScreenWidth,
-                          zIndex: 9999999
+                          zIndex: 9999999,
                         }}
-                        source={{
-                          uri: asset.uri,
-                        }}
-                        resizeMode="contain"
+                        onPlaybackStatusUpdate={(status) => setPlaybackStatus(() => status)}
                         useNativeControls
+                        resizeMode="contain"
                         shouldPlay
                         isLooping
                       />
