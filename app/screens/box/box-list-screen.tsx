@@ -72,6 +72,7 @@ export const BoxListScreen: React.FC<Props> = ({ navigation }) => {
   }
   return (
     <Screen
+      preset="fixed"
       scrollEventThrottle={16}
       automaticallyAdjustContentInsets
       style={styles.screen}

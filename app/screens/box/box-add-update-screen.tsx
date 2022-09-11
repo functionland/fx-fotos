@@ -70,7 +70,6 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
   return (
     <Screen
       preset="scroll"
-      unsafe={true}
       scrollEventThrottle={16}
       automaticallyAdjustContentInsets
       style={styles.screen}

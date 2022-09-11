@@ -150,7 +150,6 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <Screen
       preset="scroll"
-      unsafe
       scrollEventThrottle={16}
       automaticallyAdjustContentInsets
       style={styles.screen}

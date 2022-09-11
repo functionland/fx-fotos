@@ -12,11 +12,11 @@ interface Props {
 
 const StoryListItem = ({ stories, onPress }: Props): JSX.Element => {
   const { theme } = useTheme();
-  const renderItem=useCallback(({ item })=>{
+  const renderItem = useCallback(({ item }) => {
     if (item.data.length === 0) {
       return null
     }
-    const onItemPress=()=>{
+    const onItemPress = () => {
       onPress?.(item)
     }
     return (
@@ -27,13 +27,13 @@ const StoryListItem = ({ stories, onPress }: Props): JSX.Element => {
       >
         <SharedElement id={item.id}>
           <Image source={{ uri: item.data[0].uri }} fadeDuration={0} style={styles.image} />
-          <Text style={styles.label}>
-            {item.title}
-          </Text>
         </SharedElement>
+        <Text style={styles.label}>
+          {item.title}
+        </Text>
       </Pressable>
     )
-  },[])
+  }, [])
   return (
     <FlatList
       horizontal
@@ -47,8 +47,8 @@ const StoryListItem = ({ stories, onPress }: Props): JSX.Element => {
 }
 
 const styles = StyleSheet.create({
-  flatListContainer:{
-    paddingTop:3
+  flatListContainer: {
+    paddingTop: 3
   },
   container: {
     width: wp(30),
