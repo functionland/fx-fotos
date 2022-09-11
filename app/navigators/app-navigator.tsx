@@ -178,13 +178,12 @@ const AppStack = () => {
           }),
         }}
         component={AccountScreen}
-        sharedElements={(route) => {
-          return [
-            {
-              id: `AccountAvatar`,
-              animation: "move",
-            },
-          ];
+        sharedElements={(route, otherRoute) => {
+          if (route?.name === AppNavigationNames.AccountScreen && otherRoute.name === AppNavigationNames.HomeScreen) {
+            return [
+              `AccountAvatar`
+            ];
+          }
         }}
 
       />

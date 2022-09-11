@@ -13,14 +13,14 @@ import { Header, HeaderArrowBack, HeaderRightContainer } from "../../components/
 import { AppNavigationNames, RootStackParamList } from "../../navigators"
 import { SharedElement } from "react-navigation-shared-element"
 import * as helper from "../../utils/helper"
-type Props = NativeStackScreenProps<RootStackParamList, AppNavigationNames.BoxList>;
+type Props = NativeStackScreenProps<RootStackParamList, AppNavigationNames.AccountScreen>;
 type ConnectToWalletStep = "None" | "Connecting" | "Signing"
 
 export const AccountScreen: React.FC<Props> = ({ navigation }) => {
   const walletConnector = useWalletConnect()
   const [userCredentials, setUserCredentials] = useState<Keychain.UserCredentials | undefined | null>(null);
   const [connectToWalletStep, setConnectToWalletStep] = useState<ConnectToWalletStep>("None");
-
+  
   useEffect(() => {
     getGenericPassword()
   }, [])
