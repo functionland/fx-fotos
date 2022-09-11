@@ -1,21 +1,20 @@
-import React, { useEffect, useRef, useState, } from "react"
-import { StyleSheet, View, ListRenderItemInfo, Pressable, Image } from "react-native"
+import React, { useEffect, useRef } from "react"
+import { StyleSheet } from "react-native"
 import { useRecoilState } from "recoil"
-import { Icon, ListItem, Text, useTheme } from "@rneui/themed"
+import { Icon, ListItem, Text } from "@rneui/themed"
 
 import { Screen } from "../../components"
 import { Boxs } from "../../services/localdb"
 import { boxsState } from "../../store"
-import { NativeStackNavigationProp, NativeStackScreenProps } from "@react-navigation/native-stack"
-import { HomeNavigationParamList, HomeNavigationTypes } from "../../navigators/home-navigator"
-import { Header, HeaderArrowBack, HeaderLogo, HeaderRightContainer } from "../../components/header"
+import { NativeStackScreenProps } from "@react-navigation/native-stack"
+import { Header, HeaderArrowBack, HeaderRightContainer } from "../../components/header"
 import { FlatList } from "react-native-gesture-handler"
 import { AppNavigationNames, RootStackParamList } from "../../navigators"
 import { BoxEntity } from "../../realmdb/entities"
 
 type Props = NativeStackScreenProps<RootStackParamList, AppNavigationNames.BoxList>;
 
-export const BoxListScreen: React.FC<Props> = ({ navigation }) => {
+export const BoxListScreen: React.FC<Props> = ({ route,navigation }) => {
   const pressed = useRef<boolean>(false);
   const [boxs, setBoxs] = useRecoilState(boxsState)
 
