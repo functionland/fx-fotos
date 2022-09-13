@@ -3,6 +3,8 @@ import * as MediaLibrary from "expo-media-library"
 import { manipulateAsync, SaveFormat, ImageResult } from "expo-image-manipulator"
 import moment from "moment"
 
+import type { Asset as AssetType } from "expo-media-library"
+
 import { RecyclerAssetListSection, ViewType, GroupHeader, Library, AssetStory } from "../types"
 export const generateThumbnail = async (assets: MediaLibrary.Asset[]) => {
   const result: ImageResult[] = []
@@ -33,7 +35,7 @@ const getAssetStoryCategory = (modificationTime: number) => {
   return null
 }
 
-export const categorizeAssets = (assets: MediaLibrary.Asset[], storyHighlight=false) => {
+export const categorizeAssets = (assets: MediaLibrary.Asset[], storyHighlight = false) => {
   const sections: RecyclerAssetListSection[] = []
   let lastMonth = moment().format("MMMM YYYY")
   let lastDay = null
@@ -102,7 +104,7 @@ export const categorizeAssets = (assets: MediaLibrary.Asset[], storyHighlight=fa
     }
   }
 
-  if(storyHighlight){
+  if (storyHighlight) {
     // Create story section
     const storySection: RecyclerAssetListSection = {
       id: "story_highlight",
@@ -122,7 +124,6 @@ export const categorizeAssets = (assets: MediaLibrary.Asset[], storyHighlight=fa
   }
 
   return [...sections]
-  
 }
 export const getLibraries = (assets: MediaLibrary.Asset[]): Library[] => {
   const librariesObj: Record<string, MediaLibrary.Asset[]> = {}
@@ -155,16 +156,16 @@ export const getAssets = async (
     const medias = await MediaLibrary.getAssetsAsync(
       afterAssetId
         ? {
-          first: pageSize,
-          after: afterAssetId,
-          sortBy: sortBy,
-          mediaType: ["photo", "video"],
-        }
+            first: pageSize,
+            after: afterAssetId,
+            sortBy: sortBy,
+            mediaType: ["photo", "video"],
+          }
         : {
-          first: pageSize,
-          sortBy: sortBy,
-          mediaType: ["photo", "video"],
-        },
+            first: pageSize,
+            sortBy: sortBy,
+            mediaType: ["photo", "video"],
+          },
     )
     return medias
   } catch (error) {
@@ -180,4 +181,9 @@ export const deleteAssets = async (assetIds: string[]): Promise<boolean> => {
     console.error("error", error)
     throw error
   }
+}
+
+export const getMediaInfo = async (asset: AssetType): Promise<MediaLibrary.AssetInfo> => {
+  const info = await MediaLibrary.getAssetInfoAsync(asset)
+  return info
 }
