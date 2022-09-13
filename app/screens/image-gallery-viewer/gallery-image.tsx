@@ -38,6 +38,7 @@ type GalleryImageProps = {
   asset: Asset
   enableParentScroll?: () => void
   disableParentScroll?: () => void
+  toggleMenu?: () => void
   listGestureRef: MutableRefObject<NativeViewGestureHandler>
   screenOpacity: SharedValue<number>
   sharedElementId: string
@@ -49,6 +50,7 @@ const SWIPE_TO_CLOSE_THRESHOLD = 100
 
 export const GalleryImage: React.FC<GalleryImageProps> = ({
   asset,
+  toggleMenu,
   enableParentScroll,
   disableParentScroll,
   listGestureRef,
@@ -69,6 +71,8 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
   const shouldCloseOnZoomOut = useSharedValue(true)
   const panHandlerRef = useRef(null)
   const pinchHandlerRef = useRef(null)
+  const doubleTapHandlerRef = useRef(null)
+  const singleTapHandlerRef = useRef(null)
 
   const isZoomed = useDerivedValue(() => {
     if (accumulatedScale.value > 1) {
@@ -91,6 +95,10 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
     const limit = imageHeight * accumulatedScale.value - imageHeight
     return limit
   }, [dims.height])
+
+  const onTap = useCallback(() => {
+    toggleMenu()
+  }, [])
 
   const onDoubleTap = useAnimatedGestureHandler<TapGestureHandlerGestureEvent>({
     onActive({ absoluteX, absoluteY }) {
@@ -166,6 +174,11 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
           // translate the image in y-axis
           if (!isImageInfoSheetOpened.value) {
             translateY.value = translationY
+            accumulatedScale.value = interpolate(
+              translationY,
+              [0, SWIPE_TO_CLOSE_THRESHOLD],
+              [1, 0.8],
+            )
             screenOpacity.value = interpolate(translationY, [0, SWIPE_TO_CLOSE_THRESHOLD], [1, 0.8])
           }
           if (!isSwipeDownGestureStarted.value) {
@@ -209,10 +222,11 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
               translateX.value = withTiming(accumulatedX.value)
               translateY.value = withTiming(accumulatedY.value)
               screenOpacity.value = withTiming(1)
+              accumulatedScale.value = withTiming(1)
               runOnJS(enableParentListScroll)()
-              isSwipeDownGestureStarted.value = false
             }
           }
+          isSwipeDownGestureStarted.value = false
         }
       }
     },

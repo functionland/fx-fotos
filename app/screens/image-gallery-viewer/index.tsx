@@ -34,7 +34,7 @@ import {
 import * as helper from "../../utils/helper"
 import { TaggedEncryption } from "@functionland/fula-sec"
 import { palette } from "../../theme"
-import Animated, { useAnimatedStyle, useSharedValue } from "react-native-reanimated"
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated"
 import { useEffect } from "react"
 
 interface ImageGalleryViewerScreenProps {
@@ -61,6 +61,12 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
   const screenOpacity = useSharedValue(1)
   const currentAssetRef = useRef(asset)
   const [transitionDone, setTransitionDone] = useState(false)
+  const optionsVisibleRef = useRef(true)
+  const headerOffset = useSharedValue(0)
+  const footerOffset = useSharedValue(0)
+
+  const headerHeightRef = useRef(0)
+  const footerHeightRef = useRef(0)
 
   if (initialIndexRef.current === null) {
     medias.forEach((asset, idx) => {
@@ -91,11 +97,23 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
     setScrollEnabled(false)
   }, [])
 
+  const toggleMenu = useCallback(() => {
+    if (optionsVisibleRef.current) {
+      headerOffset.value = withTiming(-headerHeightRef.current)
+      footerOffset.value = withTiming(-footerHeightRef.current)
+    } else {
+      headerOffset.value = withTiming(0)
+      footerOffset.value = withTiming(0)
+    }
+    optionsVisibleRef.current = !optionsVisibleRef.current
+  }, [])
+
   const renderItem = useCallback(
     ({ item }) => {
       return (
         <GalleryImage
           asset={item}
+          toggleMenu={toggleMenu}
           sharedElementId={transitionDone ? item.id : item.id + "_"}
           enableParentScroll={enableScroll}
           disableParentScroll={disableScroll}
@@ -104,7 +122,7 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
         />
       )
     },
-    [enableScroll, disableScroll, screenOpacity, transitionDone],
+    [enableScroll, disableScroll, screenOpacity, transitionDone, toggleMenu],
   )
 
   const rowRenderer = useCallback((type: string | number, data: Asset) => {
@@ -236,40 +254,53 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
     }
   }
 
+  const animatedHeaderStyle = useAnimatedStyle(() => {
+    return {
+      top: headerOffset.value,
+    }
+  })
+
   const renderHeader = useCallback(() => {
     return (
-      <Header
-        containerStyle={{ marginTop: 10, zIndex: 10, backgroundColor: "tranparent" }}
-        leftComponent={
-          <HeaderLeftContainer>
-            <HeaderArrowBack navigation={navigation} iconProps={{ onPress: goBack }} />
-          </HeaderLeftContainer>
-        }
-        rightComponent={
-          <HeaderRightContainer>
-            {loading ? (
-              <ActivityIndicator size="small" />
-            ) : asset?.syncStatus === SyncStatus.SYNCED && !asset?.isDeleted ? (
-              <Icon type="material-community" name="cloud-check" />
-            ) : asset?.syncStatus === SyncStatus.NOTSYNCED && !asset?.isDeleted ? (
-              <Icon type="material-community" name="cloud-upload-outline" onPress={uploadToBox} />
-            ) : asset?.syncStatus === SyncStatus.SYNC ? (
-              <Icon type="material-community" name="refresh" onPress={uploadToBox} />
-            ) : null}
-            {asset?.syncStatus === SyncStatus.SYNCED && (
-              <Icon
-                type="material-community"
-                style={styles.headerIcon}
-                name="share-variant"
-                onPress={() => {
-                  setDID("")
-                  setShowShareBottomSheet(true)
-                }}
-              />
-            )}
-          </HeaderRightContainer>
-        }
-      />
+      <Animated.View
+        style={[{zIndex: 10}, animatedHeaderStyle]}
+      >
+        <Header
+          onLayout={(event) => {
+            headerHeightRef.current = event.nativeEvent.layout.height
+          }}
+          containerStyle={{ marginTop: 10, zIndex: 10, backgroundColor: "transparent" }}
+          leftComponent={
+            <HeaderLeftContainer>
+              <HeaderArrowBack navigation={navigation} iconProps={{ onPress: goBack }} />
+            </HeaderLeftContainer>
+          }
+          rightComponent={
+            <HeaderRightContainer>
+              {loading ? (
+                <ActivityIndicator size="small" />
+              ) : asset?.syncStatus === SyncStatus.SYNCED && !asset?.isDeleted ? (
+                <Icon type="material-community" name="cloud-check" />
+              ) : asset?.syncStatus === SyncStatus.NOTSYNCED && !asset?.isDeleted ? (
+                <Icon type="material-community" name="cloud-upload-outline" onPress={uploadToBox} />
+              ) : asset?.syncStatus === SyncStatus.SYNC ? (
+                <Icon type="material-community" name="refresh" onPress={uploadToBox} />
+              ) : null}
+              {asset?.syncStatus === SyncStatus.SYNCED && (
+                <Icon
+                  type="material-community"
+                  style={styles.headerIcon}
+                  name="share-variant"
+                  onPress={() => {
+                    setDID("")
+                    setShowShareBottomSheet(true)
+                  }}
+                />
+              )}
+            </HeaderRightContainer>
+          }
+        />
+      </Animated.View>
     )
   }, [navigation, loading, uploadToBox, asset, goBack])
 
@@ -380,9 +411,20 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
     alert(`Action ${action} is being developed`)
   }, [])
 
+  const animatedFooterStyle = useAnimatedStyle(() => {
+    return {
+      bottom: footerOffset.value,
+    }
+  })
+
   const renderActionButtons = useCallback(() => {
     return (
-      <View style={styles.actionButtonContainer}>
+      <Animated.View
+        onLayout={(event) => {
+          footerHeightRef.current = event.nativeEvent.layout.height
+        }}
+        style={[styles.actionButtonContainer, animatedFooterStyle]}
+      >
         <TouchableOpacity style={styles.iconContainer} onPress={() => onActionPress("delete")}>
           <Icon name="delete" type="material-community" size={30} color={palette.white} />
           <Text style={styles.actionText}>Delete</Text>
@@ -417,7 +459,7 @@ export const ImageGalleryViewerScreen: React.FC<ImageGalleryViewerScreenProps> =
           />
           <Text style={styles.actionText}>Help</Text>
         </TouchableOpacity>
-      </View>
+      </Animated.View>
     )
   }, [])
 
