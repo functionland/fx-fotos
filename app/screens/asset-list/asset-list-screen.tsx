@@ -23,13 +23,13 @@ import { uploadAssetsInBackground } from "../../services/sync-service"
 import { SharedElement } from "react-navigation-shared-element"
 import * as helper from "../../utils/helper"
 import { Asset, AssetStory, RecyclerAssetListSection, ViewType } from "../../types"
-import { recyclerSectionsState, singleAssetState,selectedStoryState } from "../../store"
+import { recyclerSectionsState, singleAssetState, selectedStoryState } from "../../store"
 import { NavigationProp, useNavigation } from "@react-navigation/native"
 
 interface Props {
   medias: Asset[]
   defaultHeader?: (style: any) => JSX.Element | undefined
-  loading: boolean,
+  loading: boolean
   showStoryHighlight: boolean
 }
 
@@ -37,24 +37,24 @@ export const AssetListScreen: React.FC<Props> = ({
   medias,
   defaultHeader,
   loading,
-  showStoryHighlight
+  showStoryHighlight,
 }) => {
   const [recyclerSections, setRecyclerSections] = useRecoilState(recyclerSectionsState)
   // Get a custom hook to animate the header
   const [scrollY, headerStyles] = useFloatHederAnimation(60)
   const [selectionMode, setSelectionMode] = useState(false)
-  const [selectedItems, setSelectedItems] = useState<stringp[]>([])
+  const [selectedItems, setSelectedItems] = useState<string[]>([])
   const assetListRef = useRef<AssetListHandle>()
   const { toggleTheme } = useContext(ThemeContext)
   const { theme } = useTheme()
   const walletConnector = useWalletConnect()
   const setSingleAsset = useSetRecoilState(singleAssetState)
   const setSelectedStoryState = useSetRecoilState(selectedStoryState)
-  const navigation=useNavigation<NavigationProp<RootStackParamList>>();
-  
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>()
+
   useEffect(() => {
     if (medias) {
-      setRecyclerSections([...AssetService.categorizeAssets([...medias],showStoryHighlight)])
+      setRecyclerSections([...AssetService.categorizeAssets([...medias], showStoryHighlight)])
     }
   }, [medias])
 
@@ -130,18 +130,25 @@ export const AssetListScreen: React.FC<Props> = ({
   const onItemPress = (section: RecyclerAssetListSection) => {
     if (section.type === ViewType.ASSET) {
       const asset: Asset = section.data
-      setSingleAsset(JSON.parse(JSON.stringify(asset)));
-      navigation.navigate(AppNavigationNames.ImageGalleryViewer, { assetId: asset.id, scrollToItem: assetListRef.current.scrollToItem })
+      setSingleAsset(JSON.parse(JSON.stringify(asset)))
+      navigation.navigate(AppNavigationNames.ImageGalleryViewer, {
+        assetId: asset.id,
+        scrollToItem: assetListRef.current.scrollToItem,
+      })
     }
   }
-  const onStoryPress=(story:AssetStory)=>{
+  const onStoryPress = (story: AssetStory) => {
     setSelectedStoryState(story)
-    navigation.navigate(AppNavigationNames.HighlightScreen,{ storyId: story.id})
+    navigation.navigate(AppNavigationNames.HighlightScreen, { storyId: story.id })
   }
   const onSelectedItemsChange = (assetIds: string[], selectionMode: boolean) => {
     setSelectionMode(selectionMode)
     setSelectedItems(assetIds)
   }
+
+  React.useEffect(() => {
+    setSelectionMode(() => (selectedItems.length === 0 ? false : true))
+  }, [selectedItems])
 
   const renderHeader = () => {
     if (selectionMode) {
