@@ -39,7 +39,9 @@ export const AssetListScreen: React.FC<Props> = ({
   loading,
   showStoryHighlight,
 }) => {
-  const [recyclerSections, setRecyclerSections] = useRecoilState(recyclerSectionsState)
+  const setRecyclerSectionsStore = useSetRecoilState(recyclerSectionsState)
+  const [recyclerSections, setRecyclerSections] = useState(null)
+
   // Get a custom hook to animate the header
   const [scrollY, headerStyles] = useFloatHederAnimation(60)
   const [selectionMode, setSelectionMode] = useState(false)
@@ -131,6 +133,7 @@ export const AssetListScreen: React.FC<Props> = ({
     if (section.type === ViewType.ASSET) {
       const asset: Asset = section.data
       setSingleAsset(JSON.parse(JSON.stringify(asset)))
+      setRecyclerSectionsStore(recyclerSections);
       navigation.navigate(AppNavigationNames.ImageGalleryViewer, {
         assetId: asset.id,
         scrollToItem: assetListRef.current.scrollToItem,
