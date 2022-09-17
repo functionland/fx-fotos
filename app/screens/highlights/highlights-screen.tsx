@@ -69,12 +69,12 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
         <Image
           source={{ uri: data.uri }}
           resizeMode="contain"
-          style={{ height: screenHeight, width: screenWidth }}
+          style={[{ height: screenHeight, width: screenWidth }, styles.image]}
         />
         : <FastImage
           source={{ uri: data.uri, priority: "high" }}
           resizeMode="contain"
-          style={{ height: screenHeight, width: screenWidth }}
+          style={[{ height: screenHeight, width: screenWidth }, styles.image]}
         />
     )
   }, [])
@@ -257,5 +257,8 @@ const styles = StyleSheet.create({
     position: "absolute",
     height: heightPercentageToDP(100),
     width: widthPercentageToDP(20),
+  },
+  image: {
+    backgroundColor: "black"
   }
 })
