@@ -1,6 +1,7 @@
-import React from "react"
-import { BaseScrollView } from "fula-recyclerlistview"
-import Animated from "react-native-reanimated"
+import React from 'react'
+import { BaseScrollView } from 'fula-recyclerlistview'
+import Animated from 'react-native-reanimated'
+
 export default class ExternalScrollView extends BaseScrollView {
   constructor(props) {
     super(props)
@@ -17,8 +18,8 @@ export default class ExternalScrollView extends BaseScrollView {
         style={{ zIndex: 1 }}
         ref={(this.props as any).scrollRefExternal}
         scrollEventThrottle={16}
-        nestedScrollEnabled={true}
-        removeClippedSubviews={true}
+        nestedScrollEnabled
+        removeClippedSubviews
         showsVerticalScrollIndicator={false}
         contentInsetAdjustmentBehavior="automatic"
         showsHorizontalScrollIndicator={false}

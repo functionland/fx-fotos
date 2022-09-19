@@ -1,9 +1,9 @@
-import React from "react"
-import { AutoImage as Image } from "../auto-image/auto-image"
-import { presets } from "./wallpaper.presets"
-import { WallpaperProps } from "./wallpaper.props"
+import React from 'react'
+import { AutoImage as Image } from '../auto-image/auto-image'
+import { presets } from './wallpaper.presets'
+import { WallpaperProps } from './wallpaper.props'
 
-const defaultImage = require("./bg.png")
+import defaultImage from './bg.png'
 
 /**
  * For your text displaying needs.
@@ -12,7 +12,7 @@ const defaultImage = require("./bg.png")
  */
 export function Wallpaper(props: WallpaperProps) {
   // grab the props
-  const { preset = "stretch", style: styleOverride, backgroundImage } = props
+  const { preset = 'stretch', style: styleOverride, backgroundImage } = props
 
   // assemble the style
   const presetToUse = presets[preset] || presets.stretch

@@ -1,8 +1,24 @@
-import React, { useRef } from "react"
-import { RouteProp, useNavigation } from "@react-navigation/native"
-import { Image, View, StyleSheet, TouchableOpacity, Dimensions, Platform } from "react-native"
-import { LongPressGestureHandler, NativeViewGestureHandler, PanGestureHandler, PanGestureHandlerGestureEvent, State } from "react-native-gesture-handler"
-import { heightPercentageToDP, widthPercentageToDP } from "react-native-responsive-screen"
+import React, { useRef } from 'react'
+import { RouteProp, useNavigation } from '@react-navigation/native'
+import {
+  Image,
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Dimensions,
+  Platform,
+} from 'react-native'
+import {
+  LongPressGestureHandler,
+  NativeViewGestureHandler,
+  PanGestureHandler,
+  PanGestureHandlerGestureEvent,
+  State,
+} from 'react-native-gesture-handler'
+import {
+  heightPercentageToDP,
+  widthPercentageToDP,
+} from 'react-native-responsive-screen'
 import Animated, {
   runOnJS,
   withTiming,
@@ -12,25 +28,35 @@ import Animated, {
   useAnimatedGestureHandler,
   interpolate,
   Extrapolate,
-} from "react-native-reanimated"
-import { snapPoint } from "react-native-redash"
-import FastImage from "react-native-fast-image"
-import { useRecoilState } from "recoil"
-import { Asset, AssetStory } from "../../types"
-import { DataProvider, LayoutProvider, RecyclerListView } from "fula-recyclerlistview"
-import { selectedStoryState } from "../../store"
-import { Screen, TimerProgress, TimerProgressHandler } from "../../components"
-import { Text } from "@rneui/themed"
-import { SharedElement } from "react-navigation-shared-element"
-
+} from 'react-native-reanimated'
+import { snapPoint } from 'react-native-redash'
+import FastImage from 'react-native-fast-image'
+import { useRecoilState } from 'recoil'
+import {
+  DataProvider,
+  LayoutProvider,
+  RecyclerListView,
+} from 'fula-recyclerlistview'
+import { Text } from '@rneui/themed'
+import { SharedElement } from 'react-navigation-shared-element'
+import { Asset, AssetStory } from '../../types'
+import { selectedStoryState } from '../../store'
+import { Screen, TimerProgress, TimerProgressHandler } from '../../components'
 
 interface HighlightScreenProps {
-  route: RouteProp<{ params: { highlights: AssetStory } }, "params">
+  route: RouteProp<
+    {
+      params: {
+        highlights: AssetStory
+      }
+    },
+    'params'
+  >
 }
 
 const OPACITY_FADE_DURATION = 111
 
-const { height: screenHeight, width: screenWidth } = Dimensions.get("window")
+const { height: screenHeight, width: screenWidth } = Dimensions.get('window')
 export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
   const navigation = useNavigation()
   const gestureHanlderRef = useRef<NativeViewGestureHandler>()
@@ -43,7 +69,6 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
   const highlightListRef = React.useRef<RecyclerListView<any, any>>(null)
   const timerProgressRef = useRef<TimerProgressHandler>()
   const longPressRef = useRef<LongPressGestureHandler>()
-
 
   const translateX = useSharedValue(0)
   const translateY = useSharedValue(0)
@@ -58,38 +83,51 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
     return provider
   }, [])
 
-  const _layoutProvider = new LayoutProvider(() => "Asset", (_, dim) => {
-    dim.height = screenHeight
-    dim.width = screenWidth
-  })
+  const _layoutProvider = new LayoutProvider(
+    () => 'Asset',
+    (_, dim) => {
+      dim.height = screenHeight
+      dim.width = screenWidth
+    },
+  )
 
-  const _rowRenderer = React.useCallback((_: unknown, data: Asset, index) => {
-    return (
-      Platform.OS === "ios" ?
+  const _rowRenderer = React.useCallback(
+    (_: unknown, data: Asset, index) =>
+      Platform.OS === 'ios' ? (
         <Image
           source={{ uri: data.uri }}
           resizeMode="contain"
-          style={{ height: screenHeight, width: screenWidth }}
+          style={{
+            height: screenHeight,
+            width: screenWidth,
+          }}
         />
-        : <FastImage
-          source={{ uri: data.uri, priority: "high" }}
+      ) : (
+        <FastImage
+          source={{
+            uri: data.uri,
+            priority: 'high',
+          }}
           resizeMode="contain"
-          style={{ height: screenHeight, width: screenWidth }}
+          style={{
+            height: screenHeight,
+            width: screenWidth,
+          }}
         />
-    )
-  }, [])
+      ),
+    [],
+  )
 
   const updateImage = () => {
     if (imageIdx >= selectedStory?.data?.length - 1) {
       return
     }
-    setImageIdx((prev) => (prev += 1))
+    setImageIdx(prev => (prev += 1))
   }
   const nextImage = (value: number) => {
-    if (timerRef.current)
-      clearTimeout(timerRef.current)
-    setImageIdx((prev) => {
-      if (prev + value >= 0 && (prev + value) < selectedStory?.data?.length)
+    if (timerRef.current) clearTimeout(timerRef.current)
+    setImageIdx(prev => {
+      if (prev + value >= 0 && prev + value < selectedStory?.data?.length)
         prev += value
       return prev
     })
@@ -102,16 +140,16 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
   React.useEffect(() => {
     setTimeout(() => {
       highlightListRef.current?.scrollToIndex(imageIdx, true)
-      if (!timerRef.current)
-        timerProgressRef?.current?.start()
-    }, 0);
+      if (!timerRef.current) timerProgressRef?.current?.start()
+    }, 0)
   }, [imageIdx])
 
-  const timeBarContainerAnimatedStyle = useAnimatedStyle(() => {
-    return {
+  const timeBarContainerAnimatedStyle = useAnimatedStyle(
+    () => ({
       opacity: timeBarContainerOpacity.value,
-    }
-  }, [])
+    }),
+    [],
+  )
 
   useAnimatedReaction(
     () => pauseTimeProgress.value,
@@ -124,69 +162,122 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
   )
 
   const containerAnimatedStyle = useAnimatedStyle(() => {
-    const scale = interpolate(translateY.value, [0, screenHeight], [1, 0.5], Extrapolate.CLAMP)
+    const scale = interpolate(
+      translateY.value,
+      [0, screenHeight],
+      [1, 0.5],
+      Extrapolate.CLAMP,
+    )
     return {
       flex: 1,
-      transform: [{ translateX: translateX.value }, { translateY: translateY.value }, { scale }],
+      transform: [
+        {
+          translateX: translateX.value,
+        },
+        {
+          translateY: translateY.value,
+        },
+        { scale },
+      ],
     }
   }, [])
 
+  const onPanGesture = useAnimatedGestureHandler<PanGestureHandlerGestureEvent>(
+    {
+      onActive({ translationX, translationY }) {
+        isPanGestureActive.value = true
+        translateX.value = translationX
+        translateY.value = translationY
+        if (!isPinchGestureActive.value) {
+          animatedOpacity.value = interpolate(
+            translationY,
+            [0, 400],
+            [1, 0.5],
+            Extrapolate.CLAMP,
+          )
+        }
+        pauseTimeProgress.value = true
+      },
+      onEnd({ velocityY }) {
+        pauseTimeProgress.value = false
+        if (isPinchGestureActive.value) {
+          return
+        }
+        const shouldGoBack = snapPoint(translateY.value, velocityY, [0, 200])
 
-  const onPanGesture = useAnimatedGestureHandler<PanGestureHandlerGestureEvent>({
-    onActive({ translationX, translationY }) {
-      isPanGestureActive.value = true
-      translateX.value = translationX
-      translateY.value = translationY
-      if (!isPinchGestureActive.value) {
-        animatedOpacity.value = interpolate(translationY, [0, 400], [1, 0.5], Extrapolate.CLAMP)
-      }
-      pauseTimeProgress.value = true
+        if (shouldGoBack) {
+          runOnJS(goBack)()
+        } else {
+          translateX.value = withTiming(0, {
+            duration: 100,
+          })
+          translateY.value = withTiming(0, {
+            duration: 100,
+          })
+          animatedOpacity.value = interpolate(
+            velocityY,
+            [velocityY, 0],
+            [1, 0.5],
+            Extrapolate.CLAMP,
+          )
+        }
+        isPanGestureActive.value = false
+      },
     },
-    onEnd({ velocityY }) {
-      pauseTimeProgress.value = false
-      if (isPinchGestureActive.value) {
-        return
-      }
-      const shouldGoBack = snapPoint(translateY.value, velocityY, [0, 200])
-
-      if (shouldGoBack) {
-        runOnJS(goBack)()
-      } else {
-        translateX.value = withTiming(0, { duration: 100 })
-        translateY.value = withTiming(0, { duration: 100 })
-        animatedOpacity.value = interpolate(velocityY, [velocityY, 0], [1, 0.5], Extrapolate.CLAMP)
-      }
-      isPanGestureActive.value = false
-    }
-  })
+  )
 
   useAnimatedReaction(
     () => isPanGestureActive.value,
-    (isGestureActive) => {
+    isGestureActive => {
       if (isGestureActive) {
         pauseTimeProgress.value = true
         return
       }
       pauseTimeProgress.value = false
-    }, [])
+    },
+    [],
+  )
 
   return (
-    <Screen scrollEventThrottle={16} automaticallyAdjustContentInsets style={styles.screen}>
+    <Screen
+      scrollEventThrottle={16}
+      automaticallyAdjustContentInsets
+      style={styles.screen}
+    >
       <NativeViewGestureHandler ref={gestureHanlderRef}>
         <Animated.View style={[containerAnimatedStyle]}>
-          <PanGestureHandler ref={panGestureRef} waitFor={[longPressRef]} maxPointers={1}
-            minPointers={1} onGestureEvent={onPanGesture}>
+          <PanGestureHandler
+            ref={panGestureRef}
+            waitFor={[longPressRef]}
+            maxPointers={1}
+            minPointers={1}
+            onGestureEvent={onPanGesture}
+          >
             <Animated.View style={{ flex: 1 }}>
-              <SharedElement id={selectedStory.id} style={{ position: "absolute" }}>
+              <SharedElement
+                id={selectedStory.id}
+                style={{
+                  position: 'absolute',
+                }}
+              >
                 {_rowRenderer(null, selectedStory?.data[0], 0)}
               </SharedElement>
-              <Animated.View style={[styles.timeBarContainer, timeBarContainerAnimatedStyle]}>
+              <Animated.View
+                style={[styles.timeBarContainer, timeBarContainerAnimatedStyle]}
+              >
                 <View>
-                  <Text>{imageIdx + 1}/{selectedStory?.data?.length}</Text>
+                  <Text>
+                    {imageIdx + 1}/{selectedStory?.data?.length}
+                  </Text>
                 </View>
-                <TimerProgress ref={timerProgressRef} onLayout={() => {
-                  timerProgressRef?.current?.start()
-                }} onTimerEnd={updateImage} pause={pauseTimeProgress} />
+                <TimerProgress
+                  ref={timerProgressRef}
+                  onLayout={() => {
+                    timerProgressRef?.current?.start()
+                  }}
+                  onTimerEnd={updateImage}
+                  pause={pauseTimeProgress}
+                />
               </Animated.View>
               <LongPressGestureHandler
                 ref={longPressRef}
@@ -197,10 +288,11 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
                     pauseTimeProgress.value = false
                   }
                 }}
-                minDurationMs={150}>
+                minDurationMs={150}
+              >
                 <RecyclerListView
                   style={{ flex: 1 }}
-                  isHorizontal={true}
+                  isHorizontal
                   initialRenderIndex={0}
                   ref={highlightListRef}
                   layoutProvider={_layoutProvider}
@@ -225,7 +317,7 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
               />
             </Animated.View>
           </PanGestureHandler>
-        </Animated.View >
+        </Animated.View>
       </NativeViewGestureHandler>
     </Screen>
   )
@@ -233,15 +325,15 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
 
 const styles = StyleSheet.create({
   timeBarContainer: {
-    position: "absolute",
-    width: "100%",
+    position: 'absolute',
+    width: '100%',
     top: 0,
     left: 0,
     right: 0,
-    alignItems: "center",
+    alignItems: 'center',
     zIndex: 9,
     paddingHorizontal: 10,
-    paddingVertical: 5
+    paddingVertical: 5,
   },
   timeBarPlaceholder: {
     height: 4,
@@ -249,13 +341,13 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     marginLeft: 2,
     zIndex: 9,
-    backgroundColor: "blue"// "rgba(255,255,255, 0.1)",
+    backgroundColor: 'blue', // "rgba(255,255,255, 0.1)",
   },
   pressableContainer: {
     top: 0,
     bottom: 0,
-    position: "absolute",
+    position: 'absolute',
     height: heightPercentageToDP(100),
     width: widthPercentageToDP(20),
-  }
+  },
 })

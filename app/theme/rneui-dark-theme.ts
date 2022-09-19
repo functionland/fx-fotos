@@ -1,7 +1,8 @@
-import { StatusBar } from "react-native"
-import { createTheme, darkColors } from "@rneui/themed"
+import { StatusBar } from 'react-native'
+import { createTheme, darkColors } from '@rneui/themed'
 
-import { Constants } from "./"
+import { Constants } from '.'
+
 export const RneDarkTheme = createTheme({
   darkColors: {
     ...Platform.select({
@@ -21,7 +22,7 @@ export const RneDarkTheme = createTheme({
       height: Constants.HeaderHeight,
       top: 0,
       zIndex: 9999,
-      position: "absolute",
+      position: 'absolute',
       marginTop: StatusBar.currentHeight,
       borderBottomWidth: 0,
     },
@@ -29,5 +30,5 @@ export const RneDarkTheme = createTheme({
       height: Constants.HeaderHeight - StatusBar.currentHeight,
     },
   },
-  mode: "dark",
+  mode: 'dark',
 })

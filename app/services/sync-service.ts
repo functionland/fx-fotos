@@ -1,34 +1,37 @@
-import { Platform } from "react-native"
-import BackgroundJob, { BackgroundTaskOptions } from "react-native-background-actions"
-import BackgroundFetch, { HeadlessEvent } from "react-native-background-fetch"
-import { file, fula } from "react-native-fula"
+import { Platform } from 'react-native'
+import BackgroundJob, {
+  BackgroundTaskOptions,
+} from 'react-native-background-actions'
+import BackgroundFetch, { HeadlessEvent } from 'react-native-background-fetch'
+import { file, fula } from 'react-native-fula'
 
-import { AssetEntity } from "../realmdb/entities"
-import { SyncStatus } from "../types"
-import { Assets, Boxs } from "./localdb/index"
-import { TaggedEncryption } from "@functionland/fula-sec"
-import * as helper from "../utils/helper"
+import { TaggedEncryption } from '@functionland/fula-sec'
+import { AssetEntity } from '../realmdb/entities'
+import { SyncStatus } from '../types'
+import { Assets, Boxs } from './localdb/index'
+import * as helper from '../utils/helper'
+
 type TaskParams = {
   callback: (success: boolean) => void
   assets: AssetEntity[]
 }
 const defaultOptions = {
-  taskName: "BackgroundSyncTask",
-  taskTitle: "Preparing upload...",
-  taskDesc: "",
+  taskName: 'BackgroundSyncTask',
+  taskTitle: 'Preparing upload...',
+  taskDesc: '',
   taskIcon: {
-    name: "ic_launcher",
-    type: "mipmap",
+    name: 'ic_launcher',
+    type: 'mipmap',
   },
-  color: "#2196f3",
-  linkingURI: "exampleScheme://chat/jane",
+  color: '#2196f3',
+  linkingURI: 'exampleScheme://chat/jane',
 } as BackgroundTaskOptions
 
 const backgroundTask = async (taskParameters: TaskParams) => {
-  if (Platform.OS === "ios") {
+  if (Platform.OS === 'ios') {
     console.warn(
-      "This task will not keep your app alive in the background by itself, use other library like react-native-track-player that use audio,",
-      "geolocalization, etc. to keep your app alive in the background while you excute the JS from this library.",
+      'This task will not keep your app alive in the background by itself, use other library like react-native-track-player that use audio,',
+      'geolocalization, etc. to keep your app alive in the background while you excute the JS from this library.',
     )
   }
   const { callback = null, assets = [] } = taskParameters
@@ -37,7 +40,7 @@ const backgroundTask = async (taskParameters: TaskParams) => {
   if (myDID) {
     taggedEncryption = new TaggedEncryption(myDID?.did)
   }
-  await new Promise(async (resolve) => {
+  await new Promise(async resolve => {
     try {
       for (let index = 0; index < assets.length; index++) {
         const asset = assets[index]
@@ -53,7 +56,9 @@ const backgroundTask = async (taskParameters: TaskParams) => {
 
         if (myDID) {
           const result = await encryptAndUploadAsset(asset)
-          const jwe = await taggedEncryption.encrypt(result, result?.id, [myDID?.authDID])
+          const jwe = await taggedEncryption.encrypt(result, result?.id, [
+            myDID?.authDID,
+          ])
           Assets.addOrUpdate([
             {
               id: asset.id,
@@ -79,7 +84,7 @@ const backgroundTask = async (taskParameters: TaskParams) => {
         } catch {}
       }
     } catch (error) {
-      console.log("backgroundTask:", error)
+      console.log('backgroundTask:', error)
       try {
         callback?.(false)
       } catch {}
@@ -107,33 +112,33 @@ export const uploadAssetsInBackground = async (options: {
         })
     }
   } catch (e) {
-    console.log("Error", e)
+    console.log('Error', e)
     await BackgroundJob.stop()
   }
 }
 
 export const uploadAsset = async (asset: AssetEntity) => {
-  const _filePath = asset.uri?.split("file:")[1]
+  const _filePath = asset.uri?.split('file:')[1]
   return await file.send(decodeURI(_filePath))
 }
 
-export const encryptAndUploadAsset = async (asset: AssetEntity): Promise<file.FileRef> => {
-  const _filePath = asset.uri?.split("file:")[1]
+export const encryptAndUploadAsset = async (
+  asset: AssetEntity,
+): Promise<file.FileRef> => {
+  const _filePath = asset.uri?.split('file:')[1]
   return await file.encryptSend(decodeURI(_filePath))
 }
 
-export const downloadAsset = async (cid: string) => {
-  return await file.receive(cid, false)
-}
-export const downloadAndDecryptAsset = async (fileRef: file.FileRef) => {
-  return await file.receiveDecrypt(fileRef, false)
-}
+export const downloadAsset = async (cid: string) =>
+  await file.receive(cid, false)
+export const downloadAndDecryptAsset = async (fileRef: file.FileRef) =>
+  await file.receiveDecrypt(fileRef, false)
 export const AddBoxs = async () => {
   try {
     const boxs = await Boxs.getAll()
-    console.log("boxs:", boxs)
+    console.log('boxs:', boxs)
     if (boxs && boxs.length) {
-      boxs.map(async (item) => {
+      boxs.map(async item => {
         try {
           await fula.addBox(item.address)
         } catch (error) {
@@ -141,7 +146,7 @@ export const AddBoxs = async () => {
         }
       })
     } else {
-      throw "There is no box, please first add a box in the box list!"
+      throw 'There is no box, please first add a box in the box list!'
     }
   } catch (error) {
     console.log(error)
@@ -151,8 +156,8 @@ export const AddBoxs = async () => {
 
 /// Configure BackgroundFetch.
 ///
-export const initBackgroundFetch = async () => {
-  return await BackgroundFetch.configure(
+export const initBackgroundFetch = async () =>
+  await BackgroundFetch.configure(
     {
       minimumFetchInterval: 15, // <-- minutes (15 is minimum allowed)
       stopOnTerminate: false,
@@ -167,7 +172,7 @@ export const initBackgroundFetch = async () => {
       requiresStorageNotLow: false, // Default
     },
     async (taskId: string) => {
-      console.log("[BackgroundFetch (configure)] taskId", taskId)
+      console.log('[BackgroundFetch (configure)] taskId', taskId)
       await backgroundFetchHeadlessTask({ taskId, timeout: false })
 
       BackgroundFetch.finish(taskId)
@@ -175,23 +180,22 @@ export const initBackgroundFetch = async () => {
     (taskId: string) => {
       // Oh No!  Our task took too long to complete and the OS has signalled
       // that this task must be finished immediately.
-      console.log("[Fetch] TIMEOUT taskId:", taskId)
+      console.log('[Fetch] TIMEOUT taskId:', taskId)
       BackgroundFetch.finish(taskId)
     },
   )
-}
 
 /// BackgroundFetch Android Headless Event Receiver.
 /// Called when the Android app is terminated.
 ///
 export const backgroundFetchHeadlessTask = async (event: HeadlessEvent) => {
   if (event.timeout) {
-    console.log("[BackgroundFetch] 💀 HeadlessTask TIMEOUT: ", event.taskId)
+    console.log('[BackgroundFetch] 💀 HeadlessTask TIMEOUT: ', event.taskId)
     BackgroundFetch.finish(event.taskId)
     return
   }
 
-  console.log("[BackgroundFetch] 💀 HeadlessTask start: ", event.taskId)
+  console.log('[BackgroundFetch] 💀 HeadlessTask start: ', event.taskId)
   await uploadAssetsInBackground()
 
   // Required:  Signal to native code that your task is complete.

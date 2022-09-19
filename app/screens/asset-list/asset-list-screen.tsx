@@ -1,30 +1,39 @@
-import React, { useEffect, useRef, useState, useContext } from "react"
-import { StyleSheet, Alert, View, Image, ActivityIndicator } from "react-native"
-import LottieView from "lottie-react-native"
-import { Avatar, Icon, Text, useTheme } from "@rneui/themed"
-import Toast from "react-native-toast-message"
-import { useWalletConnect } from "@walletconnect/react-native-dapp"
-import { useRecoilState, useSetRecoilState } from "recoil"
-import { Screen } from "../../components"
-import { AssetService } from "../../services"
-import AssetList, { AssetListHandle } from "../../components/asset-list"
-import { useFloatHederAnimation } from "../../utils/hooks"
-import { palette } from "../../theme/palette"
-import { Assets } from "../../services/localdb"
+import React, { useEffect, useRef, useState, useContext } from 'react'
+import { StyleSheet, Alert, View, Image, ActivityIndicator } from 'react-native'
+import LottieView from 'lottie-react-native'
+import { Avatar, Icon, Text, useTheme } from '@rneui/themed'
+import Toast from 'react-native-toast-message'
+import { useWalletConnect } from '@walletconnect/react-native-dapp'
+import { useRecoilState, useSetRecoilState } from 'recoil'
+import { SharedElement } from 'react-navigation-shared-element'
+import { NavigationProp, useNavigation } from '@react-navigation/native'
+import { Screen } from '../../components'
+import { AssetService } from '../../services'
+import AssetList, { AssetListHandle } from '../../components/asset-list'
+import { useFloatHederAnimation } from '../../utils/hooks'
+import { palette } from '../../theme/palette'
+import { Assets } from '../../services/localdb'
 import {
   Header,
   HeaderLogo,
   HeaderLeftContainer,
   HeaderRightContainer,
-} from "../../components/header"
-import { ThemeContext } from "../../theme"
-import { AppNavigationNames, RootStackParamList } from "../../navigators"
-import { uploadAssetsInBackground } from "../../services/sync-service"
-import { SharedElement } from "react-navigation-shared-element"
-import * as helper from "../../utils/helper"
-import { Asset, AssetStory, RecyclerAssetListSection, ViewType } from "../../types"
-import { recyclerSectionsState, singleAssetState, selectedStoryState } from "../../store"
-import { NavigationProp, useNavigation } from "@react-navigation/native"
+} from '../../components/header'
+import { ThemeContext } from '../../theme'
+import { AppNavigationNames, RootStackParamList } from '../../navigators'
+import { uploadAssetsInBackground } from '../../services/sync-service'
+import * as helper from '../../utils/helper'
+import {
+  Asset,
+  AssetStory,
+  RecyclerAssetListSection,
+  ViewType,
+} from '../../types'
+import {
+  recyclerSectionsState,
+  singleAssetState,
+  selectedStoryState,
+} from '../../store'
 
 interface Props {
   medias: Asset[]
@@ -39,7 +48,9 @@ export const AssetListScreen: React.FC<Props> = ({
   loading,
   showStoryHighlight,
 }) => {
-  const [recyclerSections, setRecyclerSections] = useRecoilState(recyclerSectionsState)
+  const [recyclerSections, setRecyclerSections] = useRecoilState(
+    recyclerSectionsState,
+  )
   // Get a custom hook to animate the header
   const [scrollY, headerStyles] = useFloatHederAnimation(60)
   const [selectionMode, setSelectionMode] = useState(false)
@@ -54,7 +65,9 @@ export const AssetListScreen: React.FC<Props> = ({
 
   useEffect(() => {
     if (medias) {
-      setRecyclerSections([...AssetService.categorizeAssets([...medias], showStoryHighlight)])
+      setRecyclerSections([
+        ...AssetService.categorizeAssets([...medias], showStoryHighlight),
+      ])
     }
   }, [medias])
 
@@ -63,20 +76,20 @@ export const AssetListScreen: React.FC<Props> = ({
   }
 
   const deleteAssets = () => {
-    Alert.alert("Delete", "Are you sure want to delete these assets?", [
+    Alert.alert('Delete', 'Are you sure want to delete these assets?', [
       {
-        text: "No",
-        style: "cancel",
+        text: 'No',
+        style: 'cancel',
       },
       {
-        text: "Yes",
+        text: 'Yes',
         onPress: async () => {
           try {
             const deleted = await AssetService.deleteAssets(selectedItems)
             if (deleted) {
               assetListRef?.current?.resetSelectedItems()
               await Assets.addOrUpdate(
-                selectedItems.map((id) => ({
+                selectedItems.map(id => ({
                   id,
                   isDeleted: true,
                 })),
@@ -84,28 +97,28 @@ export const AssetListScreen: React.FC<Props> = ({
               cancelSelectionMode()
             }
           } catch (error) {
-            console.log("deleteAssets: ", error)
+            console.log('deleteAssets: ', error)
           }
         },
       },
     ])
   }
   const batchUpload = () => {
-    Alert.alert("Upload", "Are you sure want to upload these assets?", [
+    Alert.alert('Upload', 'Are you sure want to upload these assets?', [
       {
-        text: "No",
-        style: "cancel",
+        text: 'No',
+        style: 'cancel',
       },
       {
-        text: "Yes",
+        text: 'Yes',
         onPress: async () => {
           try {
             await Assets.markAsSYNC(selectedItems)
             cancelSelectionMode()
             Toast.show({
-              type: "success",
-              text1: "Marked to sync as soon as possible",
-              position: "bottom",
+              type: 'success',
+              text1: 'Marked to sync as soon as possible',
+              position: 'bottom',
               bottomOffset: 0,
             })
             uploadAssetsInBackground()
@@ -116,12 +129,14 @@ export const AssetListScreen: React.FC<Props> = ({
       },
     ])
   }
-  const onAssetLoadError = (error: NativeSyntheticEvent<ImageErrorEventData>) => {
+  const onAssetLoadError = (
+    error: NativeSyntheticEvent<ImageErrorEventData>,
+  ) => {
     if (error?.nativeEvent?.error) {
       // Error is something like "/storage/emulated/0/DCIM/Camera/20220501_200313.jpg: open failed: ENOENT (No such file or directory)"
-      const errorParts = (error.nativeEvent.error as string)?.split(":")
-      if (errorParts?.[1]?.includes("open failed")) {
-        console.log("onAssetLoadError:", errorParts?.[0])
+      const errorParts = (error.nativeEvent.error as string)?.split(':')
+      if (errorParts?.[1]?.includes('open failed')) {
+        console.log('onAssetLoadError:', errorParts?.[0])
         Assets.removeByUri(errorParts?.[0].trim())
       }
     }
@@ -139,15 +154,20 @@ export const AssetListScreen: React.FC<Props> = ({
   }
   const onStoryPress = (story: AssetStory) => {
     setSelectedStoryState(story)
-    navigation.navigate(AppNavigationNames.HighlightScreen, { storyId: story.id })
+    navigation.navigate(AppNavigationNames.HighlightScreen, {
+      storyId: story.id,
+    })
   }
-  const onSelectedItemsChange = (assetIds: string[], selectionMode: boolean) => {
+  const onSelectedItemsChange = (
+    assetIds: string[],
+    selectionMode: boolean,
+  ) => {
     setSelectionMode(selectionMode)
     setSelectedItems(assetIds)
   }
 
   React.useEffect(() => {
-    setSelectionMode(() => (selectedItems.length === 0 ? false : true))
+    setSelectionMode(() => selectedItems.length !== 0)
   }, [selectedItems])
 
   const renderHeader = () => {
@@ -157,8 +177,19 @@ export const AssetListScreen: React.FC<Props> = ({
           style={headerStyles}
           leftComponent={
             <HeaderLeftContainer>
-              <Icon type="material-community" name="close" onPress={cancelSelectionMode} />
-              <Text style={{ fontSize: 16, marginStart: 20 }}>{selectedItems?.length}</Text>
+              <Icon
+                type="material-community"
+                name="close"
+                onPress={cancelSelectionMode}
+              />
+              <Text
+                style={{
+                  fontSize: 16,
+                  marginStart: 20,
+                }}
+              >
+                {selectedItems?.length}
+              </Text>
             </HeaderLeftContainer>
           }
           rightComponent={
@@ -173,67 +204,78 @@ export const AssetListScreen: React.FC<Props> = ({
                 style={styles.headerIcon}
                 type="material-community"
                 name="delete"
-                onPress={() => deleteAssets("delete")}
+                onPress={() => deleteAssets('delete')}
               />
             </HeaderRightContainer>
           }
         />
       )
-    } else {
-      return (
-        defaultHeader?.(headerStyles) || (
-          <Header
-            style={headerStyles}
-            centerComponent={<HeaderLogo />}
-            leftComponent={
-              <HeaderLeftContainer>
-                <Icon
-                  type="material-community"
-                  name="white-balance-sunny"
-                  onPress={() => {
-                    toggleTheme()
-                  }}
-                />
-              </HeaderLeftContainer>
-            }
-            rightComponent={
-              <HeaderRightContainer>
-                <SharedElement id="AccountAvatar">
-                  {walletConnector.connected ? (
-                    <Avatar
-                      containerStyle={styles.avatar}
-                      ImageComponent={() => (
-                        <Image
-                          source={
-                            walletConnector.peerMeta?.icons?.[0].endsWith(".svg")
-                              ? helper.getWalletImage(walletConnector.peerMeta?.name)
-                              : { uri: walletConnector.peerMeta?.icons?.[0] }
-                          }
-                          style={{
-                            height: 35,
-                            width: 35,
-                          }}
-                          resizeMode="contain"
-                        />
-                      )}
-                      onPress={() => navigation.navigate(AppNavigationNames.AccountScreen)}
-                    />
-                  ) : (
-                    <Avatar
-                      containerStyle={styles.disconnectedAvatar}
-                      icon={{ name: "account-alert", type: "material-community", size: 34 }}
-                      size="small"
-                      rounded={true}
-                      onPress={() => navigation.navigate(AppNavigationNames.AccountScreen)}
-                    />
-                  )}
-                </SharedElement>
-              </HeaderRightContainer>
-            }
-          />
-        )
-      )
     }
+    return (
+      defaultHeader?.(headerStyles) || (
+        <Header
+          style={headerStyles}
+          centerComponent={<HeaderLogo />}
+          leftComponent={
+            <HeaderLeftContainer>
+              <Icon
+                type="material-community"
+                name="white-balance-sunny"
+                onPress={() => {
+                  toggleTheme()
+                }}
+              />
+            </HeaderLeftContainer>
+          }
+          rightComponent={
+            <HeaderRightContainer>
+              <SharedElement id="AccountAvatar">
+                {walletConnector.connected ? (
+                  <Avatar
+                    containerStyle={styles.avatar}
+                    ImageComponent={() => (
+                      <Image
+                        source={
+                          walletConnector.peerMeta?.icons?.[0].endsWith('.svg')
+                            ? helper.getWalletImage(
+                                walletConnector.peerMeta?.name,
+                              )
+                            : {
+                                uri: walletConnector.peerMeta?.icons?.[0],
+                              }
+                        }
+                        style={{
+                          height: 35,
+                          width: 35,
+                        }}
+                        resizeMode="contain"
+                      />
+                    )}
+                    onPress={() =>
+                      navigation.navigate(AppNavigationNames.AccountScreen)
+                    }
+                  />
+                ) : (
+                  <Avatar
+                    containerStyle={styles.disconnectedAvatar}
+                    icon={{
+                      name: 'account-alert',
+                      type: 'material-community',
+                      size: 34,
+                    }}
+                    size="small"
+                    rounded
+                    onPress={() =>
+                      navigation.navigate(AppNavigationNames.AccountScreen)
+                    }
+                  />
+                )}
+              </SharedElement>
+            </HeaderRightContainer>
+          }
+        />
+      )
+    )
   }
   const renderFooter = () => {
     if (loading) {
@@ -246,14 +288,18 @@ export const AssetListScreen: React.FC<Props> = ({
     return null
   }
   return (
-    <Screen scrollEventThrottle={16} automaticallyAdjustContentInsets style={styles.screen}>
+    <Screen
+      scrollEventThrottle={16}
+      automaticallyAdjustContentInsets
+      style={styles.screen}
+    >
       {renderHeader()}
       {!recyclerSections ? (
         <View style={styles.loaderContainer}>
           <LottieView
-            autoPlay={true}
-            loop={true}
-            source={require("../../../assets/lotties/photo-loading.json")}
+            autoPlay
+            loop
+            source={require('../../../assets/lotties/photo-loading.json')}
           />
           <Text style={styles.loadingText}>Gathering photos</Text>
         </View>
@@ -277,24 +323,24 @@ export const AssetListScreen: React.FC<Props> = ({
 
 const styles = StyleSheet.create({
   emptyText: {
-    alignSelf: "center",
+    alignSelf: 'center',
     fontSize: 24,
-    fontWeight: "800",
+    fontWeight: '800',
   },
   loadingText: {
-    alignSelf: "center",
+    alignSelf: 'center',
     color: palette.lightGrey,
     fontSize: 16,
     marginTop: 250,
   },
   screen: {
     flex: 1,
-    justifyContent: "center",
+    justifyContent: 'center',
   },
   loaderContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignContent: "center",
+    justifyContent: 'center',
+    alignContent: 'center',
   },
   footerContainer: {
     padding: 5,
@@ -303,20 +349,20 @@ const styles = StyleSheet.create({
     marginStart: 10,
   },
   avatar: {
-    backgroundColor: "gray",
+    backgroundColor: 'gray',
     width: 40,
     height: 40,
     borderRadius: 20,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     marginHorizontal: 5,
   },
   disconnectedAvatar: {
-    backgroundColor: "gray",
+    backgroundColor: 'gray',
     marginHorizontal: 5,
     width: 40,
     height: 40,
     borderRadius: 20,
-    justifyContent: "center",
+    justifyContent: 'center',
   },
 })

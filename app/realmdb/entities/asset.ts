@@ -1,4 +1,5 @@
-import { SyncStatus } from "../../types"
+import { SyncStatus } from '../../types'
+
 export type AssetEntity = {
   id: string
   /**
