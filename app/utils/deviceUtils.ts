@@ -1,6 +1,6 @@
-import { Dimensions, Platform } from "react-native"
+import { Dimensions, Platform } from 'react-native'
 
-const { height, width } = Dimensions.get("window")
+const { height, width } = Dimensions.get('window')
 
 const deviceUtils: {
   iPhoneXHeight: number
@@ -30,7 +30,8 @@ deviceUtils.isLargePhone = width >= deviceUtils.iPhoneXWidth
 
 deviceUtils.isTallPhone = height >= deviceUtils.iPhoneXHeight
 deviceUtils.isTinyPhone = height <= deviceUtils.iphoneSEHeight
-deviceUtils.isIOS14 = Platform.OS === "ios" && parseFloat(Platform.Version.toString()) >= 14
+deviceUtils.isIOS14 =
+  Platform.OS === 'ios' && parseFloat(Platform.Version.toString()) >= 14
 
 deviceUtils.dimensions = {
   height,

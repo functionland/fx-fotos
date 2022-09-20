@@ -1,36 +1,43 @@
-import React, { useCallback, useState } from 'react';
-import { useColorScheme } from "react-native"
-import { DefaultTheme, DarkTheme, Theme, } from '@react-navigation/native';
-import { useTheme } from '@rneui/themed';
-import { RneLightTheme, RneDarkTheme } from "./"
+import React from 'react'
+import { useColorScheme } from 'react-native'
+import { DefaultTheme, DarkTheme, Theme } from '@react-navigation/native'
+import { useTheme } from '@rneui/themed'
+import { RneLightTheme, RneDarkTheme } from '.'
+
 export interface ThemeContextType {
-    theme: Theme,
-    toggleTheme: () => void
+  theme: Theme
+  toggleTheme: () => void
 }
-export const ThemeContext: React.Context<ThemeContextType> = React.createContext<ThemeContextType>({
+
+export const ThemeContext: React.Context<ThemeContextType> =
+  React.createContext<ThemeContextType>({
     theme: DefaultTheme,
     toggleTheme: () => null,
-});
+  })
 
-export const ThemeProvider: React.FC = ({ children }) => {
-    const scheme = useColorScheme();
-    const [theme, setTheme] = useState(scheme === "dark" ? DarkTheme : DefaultTheme);
-    const rneTheme = useTheme()
+export function ThemeProvider({ children }) {
+  const rneTheme = useTheme()
+  const scheme = useColorScheme()
 
-    const toggleTheme = useCallback(() => {
-        const nextTheme = theme === DefaultTheme ? DarkTheme : DefaultTheme;
-        setTheme(nextTheme);
-        rneTheme.replaceTheme(rneTheme.theme.mode === "dark" ? RneLightTheme : RneDarkTheme)
-    }, [theme, rneTheme]);
+  const [theme, setTheme] = React.useState(() =>
+    scheme === 'dark' ? DarkTheme : DefaultTheme,
+  )
 
-    return (
-        <ThemeContext.Provider
-            value={{
-                theme,
-                toggleTheme,
-            }}
-        >
-            {children}
-        </ThemeContext.Provider>
-    );
-};
+  const toggleTheme = React.useCallback(() => {
+    const nextTheme = theme === DefaultTheme ? DarkTheme : DefaultTheme
+    setTheme(nextTheme)
+    rneTheme.replaceTheme(
+      rneTheme.theme.mode === 'dark' ? RneLightTheme : RneDarkTheme,
+    )
+  }, [theme, rneTheme])
+
+  const value = React.useMemo(
+    () => ({
+      theme,
+      toggleTheme,
+    }),
+    [theme, toggleTheme],
+  )
+
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+}

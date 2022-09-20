@@ -2,7 +2,7 @@ export type BoxEntity = {
   /**
    * Box peerId
    */
-  peerId: string 
+  peerId: string
   /**
    * box nickname.
    */

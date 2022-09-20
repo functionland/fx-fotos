@@ -1,15 +1,15 @@
-import React from "react"
-import { View, Image, StyleSheet } from "react-native"
-import { BottomTabHeaderProps } from "@react-navigation/bottom-tabs"
-import { getFocusedRouteNameFromRoute } from "@react-navigation/native"
-import Animated from "react-native-reanimated"
-import { Text } from "../text"
-import { palette, Constants } from "../../theme"
-import { HomeNavigationTypes } from "../../navigators/home-navigator"
+import React from 'react'
+import { View, Image, StyleSheet } from 'react-native'
+import { BottomTabHeaderProps } from '@react-navigation/bottom-tabs'
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native'
+import Animated from 'react-native-reanimated'
+import { Text } from '../text'
+import { palette, Constants } from '../../theme'
+import { HomeNavigationTypes } from '../../navigators/home-navigator'
 
 type Props = BottomTabHeaderProps
 
-export const TabHeader = ({ route, options, ...props }: Props) => {
+export function TabHeader({ route, options, ...props }: Props) {
   return (
     <Animated.View {...props} style={[styles.container, options?.headerStyle]}>
       <View style={styles.startSection}>
@@ -17,12 +17,14 @@ export const TabHeader = ({ route, options, ...props }: Props) => {
       </View>
       {options?.title ? (
         <Text>{options?.title}</Text>
-      ) : (options.headerTitle ? options.headerTitle() :
+      ) : options.headerTitle ? (
+        options.headerTitle()
+      ) : (
         <Image
           style={styles.logo}
           fadeDuration={0}
           resizeMode="contain"
-          source={require("../../../assets/images/logo.png")}
+          source={require('../../../assets/images/logo.png')}
         />
       )}
       <View style={styles.endSection}>
@@ -34,22 +36,21 @@ export const TabHeader = ({ route, options, ...props }: Props) => {
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: "center",
+    alignItems: 'center',
     backgroundColor: palette.white,
-    flexDirection: "row",
+    flexDirection: 'row',
     height: Constants.HeaderHeight,
-    justifyContent: "space-around",
+    justifyContent: 'space-around',
   },
   endSection: {
     end: 0,
     paddingEnd: 3,
-    position: "absolute",
-
+    position: 'absolute',
   },
   startSection: {
     start: 0,
     paddingStart: 3,
-    position: "absolute",
+    position: 'absolute',
   },
   logo: {
     height: 30,

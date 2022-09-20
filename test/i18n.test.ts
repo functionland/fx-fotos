@@ -1,5 +1,5 @@
-const en = require("../app/i18n/en.json")
-const { exec } = require("child_process")
+const { exec } = require('child_process')
+const en = require('../app/i18n/en.json')
 
 // Use this array for keys that for whatever reason aren't greppable so they
 // don't hold your test suite hostage by always failing.
@@ -10,7 +10,7 @@ const EXCEPTIONS = [
 function iterate(obj, stack, array) {
   for (const property in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, property)) {
-      if (typeof obj[property] === "object") {
+      if (typeof obj[property] === 'object') {
         iterate(obj[property], `${stack}.${property}`, array)
       } else {
         array.push(`${stack.slice(1)}.${property}`)
@@ -37,17 +37,16 @@ function iterate(obj, stack, array) {
  *
  * This approach isn't 100% perfect. If you are storing your key string in a variable because you
  * are setting it conditionally, then it won't be picked up.
- *
  */
 
-describe("i18n", () => {
-  test("There are no missing keys", (done) => {
+describe('i18n', () => {
+  test('There are no missing keys', done => {
     // Actual command output:
     // grep "Tx=\"\S*\"\|tx=\"\S*\"\|translate(\"\S*\"" -ohr './app' | grep -o "\".*\""
     const command = `grep "Tx=\\"\\S*\\"\\|tx=\\"\\S*\\"\\|translate(\\"\\S*\\"" -ohr './app' | grep -o "\\".*\\""`
     exec(command, (_, stdout) => {
-      const allTranslationsDefined = iterate(en, "", [])
-      const allTranslationsUsed = stdout.replace(/"/g, "").split("\n")
+      const allTranslationsDefined = iterate(en, '', [])
+      const allTranslationsUsed = stdout.replace(/"/g, '').split('\n')
       allTranslationsUsed.splice(-1, 1)
 
       for (let i = 0; i < allTranslationsUsed.length; i += 1) {
