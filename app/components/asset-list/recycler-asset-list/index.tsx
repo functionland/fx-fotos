@@ -6,14 +6,14 @@ import React, {
   useRef,
   useState,
   useImperativeHandle,
-} from "react"
+} from 'react'
 import {
   NativeSyntheticEvent,
   NativeScrollEvent,
   View,
   ImageErrorEventData,
   ActivityIndicator,
-} from "react-native"
+} from 'react-native'
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -23,18 +23,30 @@ import Animated, {
   useAnimatedReaction,
   Extrapolate,
   SharedValue,
-} from "react-native-reanimated"
-import { DataProvider, RecyclerListView } from "fula-recyclerlistview"
-import { Constants } from "../../../theme/constants"
-import { RecyclerAssetListSection, ViewType, GroupHeader, AssetStory } from "../../../types"
-import RecyclerSectionItem from "./asset-items/recycler-section-item"
-import ExternalScrollView from "../external-scroll-view"
-import Cell from "../grid-provider/cell"
-import { useColumnsNumber, useScale, usePinching } from "../grid-provider/gridContext"
+} from 'react-native-reanimated'
+import { DataProvider, RecyclerListView } from 'fula-recyclerlistview'
+import { Constants } from '../../../theme/constants'
+import {
+  RecyclerAssetListSection,
+  ViewType,
+  GroupHeader,
+  AssetStory,
+} from '../../../types'
+import RecyclerSectionItem from './asset-items/recycler-section-item'
+import ExternalScrollView from '../external-scroll-view'
+import Cell from '../grid-provider/cell'
+import {
+  useColumnsNumber,
+  useScale,
+  usePinching,
+} from '../grid-provider/gridContext'
 
-import GridLayoutProvider from "../grid-provider/gridLayoutProvider"
-import { LayoutTransitionRange, MIN_COLUMNS } from "../grid-provider/gridLayoutManager"
-import { ThumbScroll } from "../../index"
+import GridLayoutProvider from '../grid-provider/gridLayoutProvider'
+import {
+  LayoutTransitionRange,
+  MIN_COLUMNS,
+} from '../grid-provider/gridLayoutManager'
+import { ThumbScroll } from '../../index'
 
 export interface Props {
   sections: RecyclerAssetListSection[]
@@ -54,8 +66,12 @@ export interface Props {
 }
 
 export interface ExtendedState {
-  selectedGroups: { [key: string]: boolean }
-  selectedAssets: { [key: string]: boolean }
+  selectedGroups: {
+    [key: string]: boolean
+  }
+  selectedAssets: {
+    [key: string]: boolean
+  }
   selectionMode: boolean
 }
 export interface RecyclerAssetListHandler {
@@ -98,7 +114,7 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(
 
     useImperativeHandle(ref, () => ({
       resetSelectedItems: () => {
-        setExtendedState((prev) => ({
+        setExtendedState(prev => ({
           ...prev,
           selectedAssets: {},
         }))
@@ -111,13 +127,11 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(
       },
     }))
     const toggleSelectionMode = () => {
-      setExtendedState((prevState) => {
-        return {
-          ...prevState,
-          selectedAssets: {},
-          selectionMode: !prevState.selectionMode,
-        }
-      })
+      setExtendedState(prevState => ({
+        ...prevState,
+        selectedAssets: {},
+        selectionMode: !prevState.selectionMode,
+      }))
     }
 
     React.useEffect(() => {
@@ -126,42 +140,55 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(
         Object.keys(extendedState.selectedGroups).length === 0
       ) {
         return undefined
-      } else {
-        if (!Object.values(extendedState.selectedAssets).includes(true)) {
-          setExtendedState(() => {
-            return { selectedAssets: {}, selectedGroups: {}, selectionMode: false }
-          })
-        }
+      }
+      if (!Object.values(extendedState.selectedAssets).includes(true)) {
+        setExtendedState(() => ({
+          selectedAssets: {},
+          selectedGroups: {},
+          selectionMode: false,
+        }))
       }
     }, [extendedState.selectedAssets])
 
     const toggleSelection = (section: RecyclerAssetListSection) => {
-      setExtendedState((prevState) => {
+      setExtendedState(prevState => {
         if (!prevState.selectionMode) return prevState
 
         if (section.type === ViewType.MONTH) {
-          prevState.selectedAssets[section.id] = !prevState.selectedAssets[section.id]
+          prevState.selectedAssets[section.id] =
+            !prevState.selectedAssets[section.id]
           // TODO: toggle all subgroups
           return {
             ...prevState,
-            selectedAssets: { ...prevState.selectedAssets },
+            selectedAssets: {
+              ...prevState.selectedAssets,
+            },
           }
-        } else if (section.type === ViewType.DAY) {
-          const data: GroupHeader = section.data
-          prevState.selectedAssets[section.id] = !prevState.selectedAssets[section.id]
-          data.subGroupIds?.forEach((id) => {
+        }
+        if (section.type === ViewType.DAY) {
+          const { data } = section
+          prevState.selectedAssets[section.id] =
+            !prevState.selectedAssets[section.id]
+          data.subGroupIds?.forEach(id => {
             if (id !== section.id)
-              prevState.selectedAssets[id] = prevState.selectedAssets[section.id]
+              prevState.selectedAssets[id] =
+                prevState.selectedAssets[section.id]
           })
           return {
             ...prevState,
-            selectedAssets: { ...prevState.selectedAssets },
+            selectedAssets: {
+              ...prevState.selectedAssets,
+            },
           }
-        } else if (section.type === ViewType.ASSET) {
-          prevState.selectedAssets[section.id] = !prevState.selectedAssets[section.id]
+        }
+        if (section.type === ViewType.ASSET) {
+          prevState.selectedAssets[section.id] =
+            !prevState.selectedAssets[section.id]
           return {
             ...prevState,
-            selectedAssets: { ...prevState.selectedAssets },
+            selectedAssets: {
+              ...prevState.selectedAssets,
+            },
           }
         }
         return prevState
@@ -170,7 +197,7 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(
     useEffect(() => {
       if (onSelectedItemsChange) {
         const assetIds = Object.keys(extendedState.selectedAssets).filter(
-          (key) => extendedState.selectedAssets[key],
+          key => extendedState.selectedAssets[key],
         )
         onSelectedItemsChange(assetIds, extendedState.selectionMode)
       }
@@ -215,46 +242,40 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(
       [extendedState],
     )
 
-    const getLayoutType = useCallback(
-      (index) => {
-        return sections[index].type
-      },
-      [sections],
-    )
+    const getLayoutType = useCallback(index => sections[index].type, [sections])
 
     const gridLayoutProvider = useMemo(
       () => new GridLayoutProvider(numColumns, scale1, getLayoutType),
       [getLayoutType],
     )
     const renderItemContainer = useCallback(
-      (props: any, parentProps: any, children: React.ReactNode) => {
-        return (
-          <Cell
-            {...props}
-            pinching={pinching}
-            lastScrollY={lastScrollY}
-            scale={scale1}
-            columnNumber={numColumns.value}
-            layoutProvider={gridLayoutProvider}
-            index={parentProps.index}
-          >
-            {children}
-          </Cell>
-        )
-      },
+      (props: any, parentProps: any, children: React.ReactNode) => (
+        <Cell
+          {...props}
+          pinching={pinching}
+          lastScrollY={lastScrollY}
+          scale={scale1}
+          columnNumber={numColumns.value}
+          layoutProvider={gridLayoutProvider}
+          index={parentProps.index}
+        >
+          {children}
+        </Cell>
+      ),
       [gridLayoutProvider],
     )
 
     gridLayoutProvider.shouldRefreshWithAnchoring = false
 
     const dataProvider = useMemo(() => {
-      console.log("dataProvider", sections?.length)
+      console.log('dataProvider', sections?.length)
       let provider = new DataProvider(
-        (r1: RecyclerAssetListSection, r2: RecyclerAssetListSection) => r1.id !== r2.id,
+        (r1: RecyclerAssetListSection, r2: RecyclerAssetListSection) =>
+          r1.id !== r2.id,
       )
       provider = provider.cloneWithRows(sections, 0)
       // provider.getStableId = index => sections[index].id;
-      console.log("provider.getSize()", provider.getSize())
+      console.log('provider.getSize()', provider.getSize())
       return provider
     }, [sections])
 
@@ -263,9 +284,10 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(
     }
 
     useAnimatedReaction(
-      () => {
-        return { pinchingValue: pinching.value, numColumnsValue: numColumns.value }
-      },
+      () => ({
+        pinchingValue: pinching.value,
+        numColumnsValue: numColumns.value,
+      }),
       (next, prev) => {
         if (
           prev &&
@@ -278,12 +300,14 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(
     )
 
     useAnimatedReaction(
-      () => {
-        return { scaleValue: scale1.value, pinchingValue: pinching.value }
-      },
+      () => ({
+        scaleValue: scale1.value,
+        pinchingValue: pinching.value,
+      }),
       (next, prev) => {
         if (!next.pinchingValue && !prev?.pinchingValue) return
-        if (next.pinchingValue && !prev?.pinchingValue) lastScrollY.value = scrollY.value
+        if (next.pinchingValue && !prev?.pinchingValue)
+          lastScrollY.value = scrollY.value
 
         if (layoutTransitionRange.value) {
           const extrapolation = {
@@ -320,18 +344,19 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(
       return style
     }, [containerSize])
 
-    console.log("Render: Recycle-Asset-List", currentColumns, containerSize)
+    console.log('Render: Recycle-Asset-List', currentColumns, containerSize)
 
     const forcRenderRCL = () => {
-      console.log("forcRenderRCL", numColumns.value)
+      console.log('forcRenderRCL', numColumns.value)
       rclRef.current?.getVirtualRenderer()?._prepareViewabilityTracker()
-      //rclRef.current?._onScroll(0, dyanmicScrollY.value + lastScrollY.value)
+      // rclRef.current?._onScroll(0, dyanmicScrollY.value + lastScrollY.value)
       setCurrentColumns(numColumns.value)
     }
 
     const updateContainerSize = () => {
       const heights = Object.values(
-        gridLayoutProvider.getLayoutManager?.()?.getAllContentDimension()?.height || {},
+        gridLayoutProvider.getLayoutManager?.()?.getAllContentDimension()
+          ?.height || {},
       )
       if (heights.length) {
         setContainerSize(heights)
@@ -340,7 +365,7 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(
     return (
       <View
         style={{ flex: 1 }}
-        onLayout={(e) => {
+        onLayout={e => {
           setViewPortHeight(e.nativeEvent.layout.height)
         }}
       >
@@ -350,10 +375,12 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(
           headerHeight={Constants.HeaderHeight}
           footerHeight={Constants.TabBarHeight}
           viewPortHeight={viewPortHeight}
-          layoutHeight={containerSize?.[currentColumns - MIN_COLUMNS] || viewPortHeight}
+          layoutHeight={
+            containerSize?.[currentColumns - MIN_COLUMNS] || viewPortHeight
+          }
           shouldIndicatorHide={false}
           scrollRef={scrollRef}
-          showYearFilter={true}
+          showYearFilter
           sections={sections}
           layoutProvider={gridLayoutProvider}
         />
@@ -379,30 +406,33 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(
               try {
                 layoutTransitionRange.value = gridLayoutProvider
                   .getLayoutManager()
-                  ?.getLayoutTransitionRangeForIndex(visibleIndexValue, numColumns.value)
+                  ?.getLayoutTransitionRangeForIndex(
+                    visibleIndexValue,
+                    numColumns.value,
+                  )
               } catch (error) {
                 console.error(error)
               }
             }
           }}
           stopRenderingOnAnimation={pinching}
-          contentContainerStyle={{ paddingTop: 70 }}
-          renderItemContainer={renderItemContainer}
-          renderContentContainer={(props, children) => {
-            return (
-              <Animated.View
-                {...props}
-                style={[props.style, containerStyle]}
-                onLayout={() => {
-                  if (!pinching.value) {
-                    updateContainerSize()
-                  }
-                }}
-              >
-                {children}
-              </Animated.View>
-            )
+          contentContainerStyle={{
+            paddingTop: 70,
           }}
+          renderItemContainer={renderItemContainer}
+          renderContentContainer={(props, children) => (
+            <Animated.View
+              {...props}
+              style={[props.style, containerStyle]}
+              onLayout={() => {
+                if (!pinching.value) {
+                  updateContainerSize()
+                }
+              }}
+            >
+              {children}
+            </Animated.View>
+          )}
           renderFooter={renderFooter}
           {...extras}
         />

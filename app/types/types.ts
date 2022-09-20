@@ -1,5 +1,6 @@
-import { Asset as ExpoAsset } from "expo-media-library"
-import { AssetEntity } from "../realmdb/entities"
+import { Asset as ExpoAsset } from 'expo-media-library'
+import { AssetEntity } from '../realmdb/entities'
+
 export type Asset = ExpoAsset & AssetEntity
 export type AssetStory = {
   id: string
@@ -27,9 +28,9 @@ export type AssetMeta = {
 }
 
 export type ShareMeta = {
-  id: string //uid
+  id: string // uid
   fileName: string
-  ownerId: string //did
+  ownerId: string // did
   cid: string
   shareWithId: string // did
   jwe: unknown

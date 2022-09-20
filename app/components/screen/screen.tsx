@@ -1,4 +1,4 @@
-import * as React from "react"
+import * as React from 'react'
 import {
   KeyboardAvoidingView,
   Platform,
@@ -6,31 +6,60 @@ import {
   StatusBar,
   View,
   Dimensions,
-} from "react-native"
-import { useSafeAreaInsets } from "react-native-safe-area-context"
-import { useTheme } from "@rneui/themed"
-import { ScreenProps } from "./screen.props"
-import { isNonScrolling, offsets, presets } from "./screen.presets"
+} from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useTheme } from '@rneui/themed'
+import { ScreenProps } from './screen.props'
+import { isNonScrolling, offsets, presets } from './screen.presets'
 
-const isIos = Platform.OS === "ios"
+const isIos = Platform.OS === 'ios'
 
 function ScreenWithoutScrolling(props: ScreenProps) {
   const insets = useSafeAreaInsets()
   const preset = presets.fixed
   const style = props.style || {}
   const { theme } = useTheme()
-  const isDark = theme.mode === "dark"
+  const isDark = theme.mode === 'dark'
 
-  const backgroundStyle = props.backgroundColor ? { backgroundColor: props.backgroundColor } : {}
-  const insetStyle = isIos?{ marginTop: props.unsafe ? 0 : insets.top }:{ paddingTop: props.unsafe ? 0 : insets.top }
+  const backgroundStyle = props.backgroundColor
+    ? {
+        backgroundColor: props.backgroundColor,
+      }
+    : {}
+  const insetStyle = isIos
+    ? {
+        marginTop: props.unsafe ? 0 : insets.top,
+      }
+    : {
+        paddingTop: props.unsafe ? 0 : insets.top,
+      }
   return (
     <KeyboardAvoidingView
-      style={[preset.outer, { backgroundColor: isDark ? theme.colors.primary : theme.colors.background }, backgroundStyle]}
-      behavior={isIos ? "padding" : undefined}
-      keyboardVerticalOffset={offsets[props.keyboardOffset || "none"]}
+      style={[
+        preset.outer,
+        {
+          backgroundColor: isDark
+            ? theme.colors.primary
+            : theme.colors.background,
+        },
+        backgroundStyle,
+      ]}
+      behavior={isIos ? 'padding' : undefined}
+      keyboardVerticalOffset={offsets[props.keyboardOffset || 'none']}
     >
-      <StatusBar barStyle={props.statusBar || "light-content"} />
-      <View style={[preset.inner, { backgroundColor: theme.colors.background }, style, insetStyle]}>{props.children}</View>
+      <StatusBar barStyle={props.statusBar || 'light-content'} />
+      <View
+        style={[
+          preset.inner,
+          {
+            backgroundColor: theme.colors.background,
+          },
+          style,
+          insetStyle,
+        ]}
+      >
+        {props.children}
+      </View>
     </KeyboardAvoidingView>
   )
 }
@@ -40,21 +69,30 @@ function ScreenWithScrolling(props: ScreenProps) {
   const preset = presets.scroll
   const style = props.style || {}
   const { theme } = useTheme()
-  const isDark = theme.mode === "dark"
-  const backgroundStyle = props.backgroundColor ? { backgroundColor: props.backgroundColor } : {}
-  const insetStyle = isIos?{ paddingTop: props.unsafe ? 0 : insets.top }:{}
+  const isDark = theme.mode === 'dark'
+  const backgroundStyle = props.backgroundColor
+    ? {
+        backgroundColor: props.backgroundColor,
+      }
+    : {}
+  const insetStyle = isIos
+    ? {
+        paddingTop: props.unsafe ? 0 : insets.top,
+      }
+    : {}
   // The followings for <Screen preset='auto' />
   // This will automatically disables scrolling if content fits the screen.
-  const { height } = Dimensions.get("window")
+  const { height } = Dimensions.get('window')
   const scrollViewHeight = React.useRef(null)
   const [scrollEnabled, setScrollEnabled] = React.useState(true)
 
   const updateScrollState = () => {
-    if (props.preset === "auto") {
+    if (props.preset === 'auto') {
       // check whether if content fits the screen
       // then toggle scroll state according to it
       const contentFitsScreen =
-        scrollViewHeight.current < height * presets.auto.offset.percent - presets.auto.offset.point
+        scrollViewHeight.current <
+        height * presets.auto.offset.percent - presets.auto.offset.point
 
       // content is less than the size of the screen, so we can disable scrolling
       if (scrollEnabled && contentFitsScreen) setScrollEnabled(false)
@@ -82,16 +120,37 @@ function ScreenWithScrolling(props: ScreenProps) {
   return (
     <KeyboardAvoidingView
       style={[preset.outer, backgroundStyle]}
-      behavior={isIos ? "padding" : undefined}
-      keyboardVerticalOffset={offsets[props.keyboardOffset || "none"]}
+      behavior={isIos ? 'padding' : undefined}
+      keyboardVerticalOffset={offsets[props.keyboardOffset || 'none']}
     >
-      <StatusBar barStyle={props.statusBar || "light-content"} />
-      <View style={[preset.outer,{backgroundColor: isDark ? theme.colors.primary : theme.colors.background}, backgroundStyle, insetStyle]}>
+      <StatusBar barStyle={props.statusBar || 'light-content'} />
+      <View
+        style={[
+          preset.outer,
+          {
+            backgroundColor: isDark
+              ? theme.colors.primary
+              : theme.colors.background,
+          },
+          backgroundStyle,
+          insetStyle,
+        ]}
+      >
         <ScrollView
           bounces={false}
-          style={[preset.outer, { backgroundColor: isDark ? theme.colors.background : theme.colors.background },backgroundStyle]}
+          style={[
+            preset.outer,
+            {
+              backgroundColor: isDark
+                ? theme.colors.background
+                : theme.colors.background,
+            },
+            backgroundStyle,
+          ]}
           contentContainerStyle={[preset.inner, style]}
-          keyboardShouldPersistTaps={props.keyboardShouldPersistTaps || "handled"}
+          keyboardShouldPersistTaps={
+            props.keyboardShouldPersistTaps || 'handled'
+          }
         >
           {props.children}
         </ScrollView>
@@ -108,7 +167,6 @@ function ScreenWithScrolling(props: ScreenProps) {
 export function Screen(props: ScreenProps) {
   if (isNonScrolling(props.preset)) {
     return <ScreenWithoutScrolling {...props} />
-  } else {
-    return <ScreenWithScrolling {...props} />
   }
+  return <ScreenWithScrolling {...props} />
 }

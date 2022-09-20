@@ -1,25 +1,36 @@
-import { Dimension, Layout, LayoutManager, BaseLayoutProvider } from "fula-recyclerlistview"
-import Reanimated, { SharedValue } from "react-native-reanimated"
-import { widthPercentageToDP as wp } from "react-native-responsive-screen"
+import {
+  Dimension,
+  Layout,
+  LayoutManager,
+  BaseLayoutProvider,
+} from 'fula-recyclerlistview'
+import Reanimated, { SharedValue } from 'react-native-reanimated'
+import { widthPercentageToDP as wp } from 'react-native-responsive-screen'
 import {
   getStoryHeight,
   MAIN_HEADER_HEIGHT,
   DAY_HEADER_HEIGHT,
   MONTH_HEADER_HEIGHT,
-} from "./constants"
-import GridLayoutManager from "./gridLayoutManager"
-import { ViewType } from "../../../types"
+} from './constants'
+import GridLayoutManager from './gridLayoutManager'
+import { ViewType } from '../../../types'
 /*
  * This class determines the type of the current row and can estimate its current size
  */
 export default class GridLayoutProvider extends BaseLayoutProvider {
   private _getLayoutTypeForIndex: (index: number) => string | number
+
   private _renderWindowSize?: Dimension
+
   private _tempDim: Dimension
+
   private _lastLayoutManager: GridLayoutManager | undefined
+
   // animation stuff
   private _columnNumber: SharedValue<number>
+
   private _scale: Reanimated.SharedValue<number>
+
   constructor(
     columnNumber: SharedValue<number>,
     scale: Reanimated.SharedValue<number>,
@@ -37,7 +48,7 @@ export default class GridLayoutProvider extends BaseLayoutProvider {
     isHorizontal?: boolean,
     cachedLayouts?: Layout[],
   ): LayoutManager {
-    console.log("newLayoutManager")
+    console.log('newLayoutManager')
     this._renderWindowSize = renderWindowSize
     this._lastLayoutManager = new GridLayoutManager(
       this,
@@ -66,6 +77,7 @@ export default class GridLayoutProvider extends BaseLayoutProvider {
           dim.height = getStoryHeight(wp(33)) + 20 + 1 * MAIN_HEADER_HEIGHT
           break
         case ViewType.ASSET:
+          // eslint-disable-next-line no-case-declarations
           const side = this._renderWindowSize.width / columnNumber
           dim.width = side
           dim.height = side
@@ -99,6 +111,9 @@ export default class GridLayoutProvider extends BaseLayoutProvider {
     if (this._lastLayoutManager) {
       this._lastLayoutManager.setMaxBounds(dimension2)
     }
-    return dimension1.height !== dimension2.height || dimension1.width !== dimension2.width
+    return (
+      dimension1.height !== dimension2.height ||
+      dimension1.width !== dimension2.width
+    )
   }
 }

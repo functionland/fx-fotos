@@ -1,29 +1,29 @@
-import { atom } from "recoil"
-import { BoxEntity } from "../realmdb/entities"
-import { Asset, RecyclerAssetListSection, Library, AssetStory } from "../types"
+import { atom } from 'recoil'
+import { BoxEntity } from '../realmdb/entities'
+import { Asset, RecyclerAssetListSection, Library, AssetStory } from '../types'
 
 export const mediasState = atom<Asset[]>({
-  key: "mediasState",
+  key: 'mediasState',
   default: [],
 })
 export const singleAssetState = atom<Asset>({
-  key: "singleAssetState",
+  key: 'singleAssetState',
   default: null,
 })
 export const recyclerSectionsState = atom<RecyclerAssetListSection[]>({
-  key: "recyclerSectionsState",
+  key: 'recyclerSectionsState',
   default: null,
 })
 
 export const selectedLibraryState = atom<Library>({
-  key: "selectedLibraryState",
+  key: 'selectedLibraryState',
   default: null,
 })
 export const selectedStoryState = atom<AssetStory>({
-  key: "selectedStoryState",
+  key: 'selectedStoryState',
   default: null,
 })
 export const boxsState = atom<BoxEntity[]>({
-  key: "boxsState",
+  key: 'boxsState',
   default: null,
 })

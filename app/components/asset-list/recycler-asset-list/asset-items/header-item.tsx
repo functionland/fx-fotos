@@ -1,7 +1,7 @@
-import React from "react"
-import { View, StyleSheet, ViewStyle, TextStyle } from "react-native"
-import { Text } from "@rneui/themed"
-import { Checkbox } from "../../.."
+import React from 'react'
+import { View, StyleSheet, ViewStyle, TextStyle } from 'react-native'
+import { Text } from '@rneui/themed'
+import { Checkbox } from '../../..'
 
 interface Props {
   title: string | undefined
@@ -9,13 +9,23 @@ interface Props {
   selectionMode: boolean
   textStyle: TextStyle
   containerStyle: ViewStyle
+  children: any
 }
 
-const HeaderItem: React.FC<Props> = (props) => {
-  const { title, selectionMode, selected, children, containerStyle, textStyle } = props
+const HeaderItem: React.FC<Props> = props => {
+  const {
+    title,
+    selectionMode,
+    selected,
+    children,
+    containerStyle,
+    textStyle,
+  } = props
   return (
     <View style={[styles.container, containerStyle]}>
-      {selectionMode ? <Checkbox value={selected} style={styles.checkBox} /> : null}
+      {selectionMode ? (
+        <Checkbox value={selected} style={styles.checkBox} />
+      ) : null}
       {title ? <Text style={[styles.text, textStyle]}>{title}</Text> : null}
       {children}
     </View>
@@ -25,8 +35,8 @@ const HeaderItem: React.FC<Props> = (props) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingTop: 5,
   },
   text: {
@@ -35,7 +45,7 @@ const styles = StyleSheet.create({
   },
   checkBox: {
     marginStart: 5,
-    alignSelf: "center",
+    alignSelf: 'center',
   },
 })
 
