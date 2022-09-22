@@ -102,7 +102,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
 
   const onTap = useCallback(() => {
     toggleMenu()
-  }, [])
+  }, [toggleMenu])
 
   const onDoubleTap = useAnimatedGestureHandler<TapGestureHandlerGestureEvent>({
     onActive({ absoluteX, absoluteY }) {
@@ -364,89 +364,99 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
   return (
     <Animated.View style={screenStyle}>
       <TapGestureHandler
-        numberOfTaps={2}
-        maxDist={10}
-        onGestureEvent={onDoubleTap}
-        waitFor={[panHandlerRef, pinchHandlerRef]}
+        ref={singleTapHandlerRef}
+        onActivated={onTap}
+        waitFor={doubleTapHandlerRef}
+        numberOfTaps={1}
       >
         <Animated.View style={styles.flex1}>
-          <PinchGestureHandler
-            ref={pinchHandlerRef}
-            onGestureEvent={onPinch}
-            simultaneousHandlers={panHandlerRef}
+          <TapGestureHandler
+            ref={doubleTapHandlerRef}
+            numberOfTaps={2}
+            maxDist={10}
+            onGestureEvent={onDoubleTap}
+            waitFor={[panHandlerRef, pinchHandlerRef]}
           >
             <Animated.View style={styles.flex1}>
-              <PanGestureHandler
-                ref={panHandlerRef}
-                onGestureEvent={onPan}
-                simultaneousHandlers={[pinchHandlerRef, listGestureRef]}
+              <PinchGestureHandler
+                ref={pinchHandlerRef}
+                onGestureEvent={onPinch}
+                simultaneousHandlers={panHandlerRef}
               >
-                <Animated.View style={animatedImageContainerStyle}>
-                  <SharedElement id={sharedElementId}>
-                    {asset.mediaType === 'video' ? (
-                      <Video
-                        ref={video}
-                        source={{
-                          uri: Platform.OS === 'ios' ? localUri : asset.uri,
-                        }}
-                        style={{
-                          height: (asset.height * ScreenWidth) / asset.width,
-                          width: ScreenWidth,
-                          zIndex: 9999999,
-                        }}
-                        onPlaybackStatusUpdate={status =>
-                          setPlaybackStatus(() => status)
-                        }
-                        useNativeControls
-                        resizeMode="contain"
-                        shouldPlay
-                        isLooping
-                      />
-                    ) : Platform.OS === 'android' ? (
-                      <FastImage
-                        source={{
-                          uri: asset.uri,
-                          priority: FastImage.priority.high,
-                        }}
-                        resizeMode="contain"
-                        style={imageStyle}
-                      />
-                    ) : (
-                      <Image
-                        source={{
-                          uri: asset.uri,
-                        }}
-                        fadeDuration={0}
-                        resizeMode="contain"
-                        style={imageStyle}
-                      />
-                    )}
-                  </SharedElement>
-                  <Animated.View
-                    style={[styles.bottomSheet, animatedBottomSheetStyle]}
+                <Animated.View style={styles.flex1}>
+                  <PanGestureHandler
+                    ref={panHandlerRef}
+                    onGestureEvent={onPan}
+                    simultaneousHandlers={[pinchHandlerRef, listGestureRef]}
                   >
-                    <View style={styles.handle} />
-                    <Text style={styles.dateText}>
-                      {moment(asset.modificationTime).format(
-                        'ddd, Do MMM YYYY . h:mm',
-                      )}
-                    </Text>
-                    <Text style={styles.heading}>Details</Text>
-                    <View style={styles.detailsContainer}>
-                      <Text style={styles.locationHeading}>Location:</Text>
-                      <Text style={styles.uri}>{asset.uri}</Text>
-                    </View>
-                    <View style={styles.dimensionInfoContainer}>
-                      <Text style={styles.dimensionHeading}>Dimensions:</Text>
-                      <Text style={styles.dimensionText}>
-                        {asset.width} X {asset.height}
-                      </Text>
-                    </View>
-                  </Animated.View>
+                    <Animated.View style={animatedImageContainerStyle}>
+                      <SharedElement id={sharedElementId}>
+                        {asset.mediaType === 'video' ? (
+                          <Video
+                            ref={video}
+                            source={{
+                              uri: Platform.OS === 'ios' ? localUri : asset.uri,
+                            }}
+                            style={{
+                              height: (asset.height * ScreenWidth) / asset.width,
+                              width: ScreenWidth,
+                              zIndex: 9999999,
+                            }}
+                            onPlaybackStatusUpdate={status =>
+                              setPlaybackStatus(() => status)
+                            }
+                            useNativeControls
+                            resizeMode="contain"
+                            shouldPlay
+                            isLooping
+                          />
+                        ) : Platform.OS === 'android' ? (
+                          <FastImage
+                            source={{
+                              uri: asset.uri,
+                              priority: FastImage.priority.high,
+                            }}
+                            resizeMode="contain"
+                            style={imageStyle}
+                          />
+                        ) : (
+                          <Image
+                            source={{
+                              uri: asset.uri,
+                            }}
+                            fadeDuration={0}
+                            resizeMode="contain"
+                            style={imageStyle}
+                          />
+                        )}
+                      </SharedElement>
+                      <Animated.View
+                        style={[styles.bottomSheet, animatedBottomSheetStyle]}
+                      >
+                        <View style={styles.handle} />
+                        <Text style={styles.dateText}>
+                          {moment(asset.modificationTime).format(
+                            'ddd, Do MMM YYYY . h:mm',
+                          )}
+                        </Text>
+                        <Text style={styles.heading}>Details</Text>
+                        <View style={styles.detailsContainer}>
+                          <Text style={styles.locationHeading}>Location:</Text>
+                          <Text style={styles.uri}>{asset.uri}</Text>
+                        </View>
+                        <View style={styles.dimensionInfoContainer}>
+                          <Text style={styles.dimensionHeading}>Dimensions:</Text>
+                          <Text style={styles.dimensionText}>
+                            {asset.width} X {asset.height}
+                          </Text>
+                        </View>
+                      </Animated.View>
+                    </Animated.View>
+                  </PanGestureHandler>
                 </Animated.View>
-              </PanGestureHandler>
+              </PinchGestureHandler>
             </Animated.View>
-          </PinchGestureHandler>
+          </TapGestureHandler>
         </Animated.View>
       </TapGestureHandler>
     </Animated.View>
