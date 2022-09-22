@@ -16,7 +16,7 @@
     "format:md": "npx prettier --write \"**/*.md\"",
     "format:ts": "npx prettier --write \"app/**/*.ts{,x}\"",
     "format:test": "npx prettier --write \"test/**/*.ts\"",
-    "lint": "npx eslint index.js app storybook test --fix --ext .js,.ts,.tsx,.test.ts ",
+    "lint": "npx eslint index.js app --fix --ext .js,.tsx ",
     "patch": "patch-package",
     "storybook": "start-storybook -p 9001 -c ./storybook",
     "test": "jest",

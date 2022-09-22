@@ -40,13 +40,14 @@ export const generateThumbnail = async (assets: MediaLibrary.Asset[]) => {
 const getAssetStoryCategory = (modificationTime: number) => {
   const diff = (new Date().getTime() - modificationTime) / (1000 * 60 * 60 * 24)
   const span = 2
-  if (diff <= 14) return "Recently"
-  else if (diff >2*30-span && diff <= 2*30+span) return "2 months ago"
-  else if (diff >3*30-span  && diff <= 3*30+span) return "3 months ago"
-  else if (diff > 6*30-span && diff <= 6*30+span) return "6 months ago"
-  else if (diff > 12*30-span && diff <= 12*30+span) return "A year ago"
-  else if (diff > 24*30-span && diff< 24*30+span ) return "2 years ago"
-  else if (diff > 36*30-span && diff<36*30+span) return "More than 3 years"
+  if (diff <= 14) return 'Recently'
+  else if (diff > 2 * 30 - span && diff <= 2 * 30 + span) return '2 months ago'
+  else if (diff > 3 * 30 - span && diff <= 3 * 30 + span) return '3 months ago'
+  else if (diff > 6 * 30 - span && diff <= 6 * 30 + span) return '6 months ago'
+  else if (diff > 12 * 30 - span && diff <= 12 * 30 + span) return 'A year ago'
+  else if (diff > 24 * 30 - span && diff < 24 * 30 + span) return '2 years ago'
+  else if (diff > 36 * 30 - span && diff < 36 * 30 + span)
+    return 'More than 3 years'
   return null
 }
 

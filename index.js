@@ -12,7 +12,7 @@ import './shim.js'
 import 'react-native-get-random-values'
 import { AppRegistry } from 'react-native'
 import BackgroundFetch from 'react-native-background-fetch'
-import App from './app/app.tsx'
+import App from './app/app'
 
 import { SyncService } from './app/services'
 

@@ -39,7 +39,7 @@ import {
   canExit,
   useNavigationPersistence,
 } from './navigators'
-import { ToggleStorybook } from '../storybook/toggle-storybook'
+
 import { ErrorBoundary } from './screens/error/error-boundary'
 import { ThemeProvider, RneLightTheme, RneDarkTheme } from './theme'
 import { AddBoxs, uploadAssetsInBackground } from './services/sync-service'
