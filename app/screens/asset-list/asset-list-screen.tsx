@@ -1,5 +1,13 @@
 import React, { useEffect, useRef, useState, useContext } from 'react'
-import { StyleSheet, Alert, View, Image, ActivityIndicator } from 'react-native'
+import {
+  StyleSheet,
+  Alert,
+  View,
+  Image,
+  ActivityIndicator,
+  ImageErrorEventData,
+  NativeSyntheticEvent,
+} from 'react-native'
 import LottieView from 'lottie-react-native'
 import { Avatar, Icon, Text, useTheme } from '@rneui/themed'
 import Toast from 'react-native-toast-message'
@@ -146,7 +154,7 @@ export const AssetListScreen: React.FC<Props> = ({
     if (section.type === ViewType.ASSET) {
       const asset: Asset = section.data
       setSingleAsset(JSON.parse(JSON.stringify(asset)))
-      setRecyclerSectionsStore(recyclerSections);
+      setRecyclerSectionsStore(recyclerSections)
       navigation.navigate(AppNavigationNames.ImageGalleryViewer, {
         assetId: asset.id,
         scrollToItem: assetListRef.current.scrollToItem,

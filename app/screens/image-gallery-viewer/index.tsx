@@ -360,6 +360,7 @@ export const ImageGalleryViewerScreen: React.FC<
         const jwe = await myTag.encrypt(symetricKey, symetricKey?.id, [DID])
         Share.share({
           title: 'Fotos | Just shared an asset',
+          // eslint-disable-next-line no-undef
           message: `https://fotos.fx.land/shared/${Buffer.from(
             JSON.stringify(jwe),
             'utf-8',

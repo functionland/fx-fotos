@@ -345,6 +345,6 @@ const styles = StyleSheet.create({
     width: widthPercentageToDP(20),
   },
   image: {
-    backgroundColor: "black"
-  }
+    backgroundColor: 'black',
+  },
 })

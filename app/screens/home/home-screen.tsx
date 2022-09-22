@@ -9,6 +9,7 @@ import {
   HomeNavigationParamList,
   HomeNavigationTypes,
 } from '../../navigators/home-navigator'
+import Realm from 'realm'
 import { mediasState } from '../../store'
 import { Assets } from '../../services/localdb'
 import { Entities } from '../../realmdb'

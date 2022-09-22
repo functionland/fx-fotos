@@ -53,7 +53,7 @@ storiesOf('FormRow', module)
           </Text>
         </FormRow>
         <FormRow preset="soloRound">
-          <Text style={TEXT_STYLE_OVERRIDE}>I'm round</Text>
+          <Text style={TEXT_STYLE_OVERRIDE}>{`I'm round`}</Text>
         </FormRow>
         <FormRow
           preset="soloStraight"
@@ -63,7 +63,7 @@ storiesOf('FormRow', module)
           }}
         >
           <Text style={TEXT_STYLE_OVERRIDE}>
-            I'm square and have a custom style.
+            {`I'm square and have a custom style.`}
           </Text>
         </FormRow>
       </UseCase>

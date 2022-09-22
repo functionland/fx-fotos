@@ -33,7 +33,7 @@ storiesOf('Text', module)
       </UseCase>
       <UseCase text="bold" usage="Used for bolded body text.">
         <View style={VIEWSTYLE}>
-          <Text preset="bold">Osnap! I'm puffy.</Text>
+          <Text preset="bold">{`Osnap! I'm puffy.`}</Text>
         </View>
       </UseCase>
       <UseCase text="header" usage="Used for major section headers.">
