@@ -3106,6 +3106,11 @@
   dependencies:
     merge-options "^3.0.4"
 
+"@react-native-camera-roll/camera-roll@^5.0.3":
+  version "5.0.3"
+  resolved "https://registry.yarnpkg.com/@react-native-camera-roll/camera-roll/-/camera-roll-5.0.3.tgz#6fc2786c213f4aa1810273bf3763b216e9628e78"
+  integrity sha512-O0pl67kFuZjl6at9LvM4l+28IC53WndvOD8GqtshaGyySuvQDg37TaWyRF5lsMbann4rCCv+FznVDMmCWGDOcQ==
+
 "@react-native-community/cli-debugger-ui@^6.0.0-rc.0":
   version "6.0.0"
   resolved "https://registry.npmjs.org/@react-native-community/cli-debugger-ui/-/cli-debugger-ui-6.0.0.tgz"
