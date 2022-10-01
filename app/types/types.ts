@@ -2,6 +2,25 @@ import { Asset as ExpoAsset } from 'expo-media-library'
 import { AssetEntity } from '../realmdb/entities'
 
 export type Asset = ExpoAsset & AssetEntity
+export type PagedInfo<T> = {
+  /**
+   * A page of [`Asset`](#asset)s fetched by the query.
+   */
+  assets: T[]
+  /**
+   * ID of the last fetched asset. It should be passed as `after` option in order to get the
+   * next page.
+   */
+  endCursor: string
+  /**
+   * Whether there are more assets to fetch.
+   */
+  hasNextPage: boolean
+  /**
+   * Estimated total number of assets that match the query.
+   */
+  totalCount: number
+}
 export type AssetStory = {
   id: string
   data: Asset[]

@@ -1,20 +1,21 @@
 import { Platform } from 'react-native'
 import * as MediaLibrary from 'expo-media-library'
+import { CameraRoll } from '@react-native-camera-roll/camera-roll'
 import {
   manipulateAsync,
   SaveFormat,
   ImageResult,
 } from 'expo-image-manipulator'
+
 import moment from 'moment'
-
-import type { Asset as AssetType } from 'expo-media-library'
-
 import {
   RecyclerAssetListSection,
   ViewType,
   GroupHeader,
   Library,
   AssetStory,
+  Asset,
+  PagedInfo,
 } from '../types'
 
 export const generateThumbnail = async (assets: MediaLibrary.Asset[]) => {
@@ -37,8 +38,8 @@ export const generateThumbnail = async (assets: MediaLibrary.Asset[]) => {
   return result
 }
 
-const getAssetStoryCategory = (modificationTime: number) => {
-  const diff = (new Date().getTime() - modificationTime) / (1000 * 60 * 60 * 24)
+const getAssetStoryCategory = (startTime: number, modificationTime: number) => {
+  const diff = (startTime - modificationTime) / (1000 * 60 * 60 * 24)
   const span = 2
   if (diff <= 14) return 'Recently'
   else if (diff > 2 * 30 - span && diff <= 2 * 30 + span) return '2 months ago'
@@ -51,10 +52,7 @@ const getAssetStoryCategory = (modificationTime: number) => {
   return null
 }
 
-export const categorizeAssets = (
-  assets: MediaLibrary.Asset[],
-  storyHighlight = false,
-) => {
+export const categorizeAssets = (assets: Asset[], storyHighlight = false) => {
   const sections: RecyclerAssetListSection[] = []
   let lastMonth = moment().format('MMMM YYYY')
   let lastDay = null
@@ -72,7 +70,10 @@ export const categorizeAssets = (
         (Platform.OS === 'ios' ||
           asset.uri?.toLowerCase().includes('/dcim/camera/')))
     ) {
-      const categoryName = getAssetStoryCategory(asset.modificationTime)
+      const categoryName = getAssetStoryCategory(
+        assets?.[0].modificationTime,
+        asset.modificationTime,
+      )
       if (categoryName && !storiesObj[categoryName])
         storiesObj[categoryName] = []
       if (categoryName) storiesObj[categoryName].push(asset)
@@ -183,27 +184,32 @@ export const getLibraries = (assets: MediaLibrary.Asset[]): Library[] => {
 
 export const getAssets = async (
   pageSize = 100,
-  afterAssetId: string,
-  sortBy:
-    | MediaLibrary.SortByValue[]
-    | MediaLibrary.SortByValue = 'modificationTime',
-): Promise<MediaLibrary.PagedInfo<MediaLibrary.Asset>> => {
+  afterAssetId: string | null,
+): Promise<PagedInfo<Asset>> => {
   try {
-    const medias = await MediaLibrary.getAssetsAsync(
+    const medias = await CameraRoll.getPhotos(
       afterAssetId
         ? {
             first: pageSize,
             after: afterAssetId,
-            sortBy,
-            mediaType: ['photo', 'video'],
           }
         : {
             first: pageSize,
-            sortBy,
-            mediaType: ['photo', 'video'],
           },
     )
-    return medias
+    return {
+      assets: medias.edges.map<Asset>(photo => ({
+        filename: photo?.node?.image?.filename || '',
+        uri: photo?.node?.image?.uri,
+        height: photo?.node?.image?.height,
+        width: photo?.node?.image?.width,
+        creationTime: photo?.node?.timestamp * 1000,
+        modificationTime: photo?.node?.modified * 1000 || photo?.node?.timestamp * 1000,
+        duration: photo?.node?.image?.playableDuration || 0,
+      })),
+      hasNextPage: medias.page_info.has_next_page,
+      endCursor: medias.page_info.end_cursor,
+    }
   } catch (error) {
     console.error('error', error)
     throw error
@@ -220,7 +226,7 @@ export const deleteAssets = async (assetIds: string[]): Promise<boolean> => {
 }
 
 export const getMediaInfo = async (
-  asset: AssetType,
+  asset: Asset,
 ): Promise<MediaLibrary.AssetInfo> => {
   const info = await MediaLibrary.getAssetInfoAsync(asset)
   return info

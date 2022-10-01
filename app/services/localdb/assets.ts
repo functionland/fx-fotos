@@ -1,3 +1,4 @@
+import Realm from 'realm'
 import { Entities, RealmDB, Schemas } from '../../realmdb'
 import { SyncStatus } from '../../types'
 
@@ -76,6 +77,7 @@ export const addOrUpdate = (
                 Schemas.Asset.name,
                 {
                   ...asset,
+                  id: asset.uri,
                 },
                 Realm.UpdateMode.Modified,
               ),
