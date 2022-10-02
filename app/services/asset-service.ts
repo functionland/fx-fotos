@@ -1,6 +1,6 @@
 import { Platform } from 'react-native'
 import * as MediaLibrary from 'expo-media-library'
-import { CameraRoll } from '@react-native-camera-roll/camera-roll'
+import { CameraRoll, Include } from '@react-native-camera-roll/camera-roll'
 import {
   manipulateAsync,
   SaveFormat,
@@ -16,6 +16,7 @@ import {
   AssetStory,
   Asset,
   PagedInfo,
+  MediaTypeValue,
 } from '../types'
 
 export const generateThumbnail = async (assets: MediaLibrary.Asset[]) => {
@@ -185,6 +186,7 @@ export const getLibraries = (assets: MediaLibrary.Asset[]): Library[] => {
 export const getAssets = async (
   pageSize = 100,
   afterAssetId: string | null,
+  include: Include = ['filename', 'imageSize'],
 ): Promise<PagedInfo<Asset>> => {
   try {
     const medias = await CameraRoll.getPhotos(
@@ -192,21 +194,28 @@ export const getAssets = async (
         ? {
             first: pageSize,
             after: afterAssetId,
+            include,
           }
         : {
             first: pageSize,
+            include,
           },
     )
+    const assets = medias.edges.map<Asset>(photo => ({
+      id: photo?.node?.image?.uri,
+      filename: photo?.node?.image?.filename || '',
+      uri: photo?.node?.image?.uri,
+      height: photo?.node?.image?.height,
+      width: photo?.node?.image?.width,
+      creationTime: photo?.node?.timestamp * 1000,
+      modificationTime:
+        photo?.node?.modified * 1000 || photo?.node?.timestamp * 1000,
+      duration: photo?.node?.image?.playableDuration || 0,
+      mediaType: mimeToMediaType(photo?.node?.type),
+      albumId: photo?.node?.group_name,
+    }))
     return {
-      assets: medias.edges.map<Asset>(photo => ({
-        filename: photo?.node?.image?.filename || '',
-        uri: photo?.node?.image?.uri,
-        height: photo?.node?.image?.height,
-        width: photo?.node?.image?.width,
-        creationTime: photo?.node?.timestamp * 1000,
-        modificationTime: photo?.node?.modified * 1000 || photo?.node?.timestamp * 1000,
-        duration: photo?.node?.image?.playableDuration || 0,
-      })),
+      assets,
       hasNextPage: medias.page_info.has_next_page,
       endCursor: medias.page_info.end_cursor,
     }
@@ -230,4 +239,18 @@ export const getMediaInfo = async (
 ): Promise<MediaLibrary.AssetInfo> => {
   const info = await MediaLibrary.getAssetInfoAsync(asset)
   return info
+}
+
+export const mimeToMediaType = (mime: string): MediaTypeValue => {
+  const mimeType = mime?.split('/')?.[0]
+  switch (mimeType) {
+    case 'image':
+      return 'photo'
+    case 'video':
+      return 'video'
+    case 'audio':
+      return 'audio'
+    default:
+      return 'unknown'
+  }
 }

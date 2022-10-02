@@ -1,6 +1,7 @@
 import { Asset as ExpoAsset } from 'expo-media-library'
 import { AssetEntity } from '../realmdb/entities'
 
+export type MediaTypeValue = 'audio' | 'photo' | 'video' | 'unknown'
 export type Asset = ExpoAsset & AssetEntity
 export type PagedInfo<T> = {
   /**
