@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState, useContext } from 'react'
-import { Alert } from 'react-native'
-import * as MediaLibrary from 'expo-media-library'
+import React, { useEffect, useRef, useState } from 'react'
+import { Alert, Platform } from 'react-native'
 import { useRecoilState } from 'recoil'
+import { request, PERMISSIONS } from 'react-native-permissions'
 
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { AssetService } from '../../services'
@@ -14,6 +14,8 @@ import { mediasState } from '../../store'
 import { Assets } from '../../services/localdb'
 import { Entities } from '../../realmdb'
 import { AssetListScreen } from '../index'
+import { Asset, PagedInfo } from '../../types'
+import { useCallback } from 'react'
 
 interface HomeScreenProps {
   navigation: NativeStackNavigationProp<
@@ -27,18 +29,34 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const realmAssets =
     useRef<Realm.Results<Entities.AssetEntity & Realm.Object>>(null)
   const [medias, setMedias] = useRecoilState(mediasState)
-  const [loading, setLoading] = useState(true)
-  const requestAndroidPermission = async () => {
+  const [loading, setLoading] = useState(false)
+
+  const requestAndroidPermission = useCallback(async () => {
     try {
       console.log('requestAndroidPermission')
-      await MediaLibrary.requestPermissionsAsync(true)
+      const permissions = Platform.select({
+        android: PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE,
+        ios: PERMISSIONS.IOS.PHOTO_LIBRARY,
+      })
+
+      const result = await request(permissions, {
+        title: 'Permission',
+        message: 'Please grant acces to the media library on your phone!',
+        buttonPositive: 'Yes',
+      })
+      if (result === 'granted') {
+        setIsReady(true)
+      } else if (result === 'blocked') {
+        Alert.alert(
+          'Permission',
+          'Please grant access to the media library on your phone!',
+        )
+      }
     } catch (err) {
       Alert.alert('Request permission', JSON.stringify(err))
       console.warn(err)
-    } finally {
-      setIsReady(true)
     }
-  }
+  }, [])
 
   useEffect(() => {
     requestAndroidPermission()
@@ -46,7 +64,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
   useEffect(() => {
     if (isReady) {
-      ;(async () => {
+      ; (async () => {
         realmAssets.current = await Assets.getAll()
         realmAssets.current.addListener(onLocalDbAssetChange)
         const assets = []
@@ -101,17 +119,15 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   ) => {
     try {
       let first = 20
-      let allMedias: MediaLibrary.PagedInfo<MediaLibrary.Asset> = null
-      let lastAsset: MediaLibrary.Asset = null
-      let fitstAsset: MediaLibrary.Asset = null
+      let allMedias: PagedInfo<Asset> = null
+      let lastAsset: Asset = null
+      let fitstAsset: Asset = null
       do {
         allMedias = await AssetService.getAssets(first, allMedias?.endCursor)
         await Assets.addOrUpdate(allMedias.assets)
         if (first === 20) {
           // Get the first assets that is created
-          fitstAsset = (
-            await AssetService.getAssets(1, null, [['modificationTime', true]])
-          )?.assets?.[0]
+          fitstAsset = (await AssetService.getAssets(1, null))?.assets?.[0]
         }
         first *= 4
         lastAsset = allMedias.assets?.[allMedias.assets.length - 1]
