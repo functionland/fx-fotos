@@ -17,7 +17,9 @@ require 'json'
 podfile_properties = JSON.parse(File.read('./Podfile.properties.json')) rescue {}
 
 target 'fotos' do
+  permissions_path = '../node_modules/react-native-permissions/ios'
   use_expo_modules!
+  pod 'Permission-PhotoLibrary', :path => "#{permissions_path}/PhotoLibrary"
   post_integrate do |installer|
     begin
       expo_patch_react_imports!(installer)
