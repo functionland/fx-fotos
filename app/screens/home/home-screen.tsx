@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState, useCallback } from 'react'
 import { Alert, Platform } from 'react-native'
 import { useRecoilState } from 'recoil'
 import { request, PERMISSIONS } from 'react-native-permissions'
@@ -15,7 +15,6 @@ import { Assets } from '../../services/localdb'
 import { Entities } from '../../realmdb'
 import { AssetListScreen } from '../index'
 import { Asset, PagedInfo } from '../../types'
-import { useCallback } from 'react'
 
 interface HomeScreenProps {
   navigation: NativeStackNavigationProp<
@@ -33,23 +32,27 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
   const requestAndroidPermission = useCallback(async () => {
     try {
-      console.log('requestAndroidPermission')
       const permissions = Platform.select({
         android: PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE,
         ios: PERMISSIONS.IOS.PHOTO_LIBRARY,
       })
-
-      const result = await request(permissions, {
-        title: 'Permission',
-        message: 'Please grant acces to the media library on your phone!',
-        buttonPositive: 'Yes',
-      })
+      const result = await request(permissions)
       if (result === 'granted') {
         setIsReady(true)
-      } else if (result === 'blocked') {
+      } else {
         Alert.alert(
-          'Permission',
-          'Please grant access to the media library on your phone!',
+          'Need Permission!',
+          'Please allow to access photos and media on your phone',
+          [
+            {
+              text: 'Cancel',
+              style: 'cancel',
+            },
+            {
+              text: 'Ok',
+              onPress: () => requestAndroidPermission(),
+            },
+          ],
         )
       }
     } catch (err) {
@@ -64,7 +67,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
   useEffect(() => {
     if (isReady) {
-      ; (async () => {
+      ;(async () => {
         realmAssets.current = await Assets.getAll()
         realmAssets.current.addListener(onLocalDbAssetChange)
         const assets = []
