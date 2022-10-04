@@ -224,10 +224,9 @@ export const getAssets = async (
     throw error
   }
 }
-export const deleteAssets = async (assetIds: string[]): Promise<boolean> => {
+export const deleteAssets = async (photoUris: string[]): Promise<void> => {
   try {
-    const deleted = await MediaLibrary.deleteAssetsAsync(assetIds)
-    return deleted
+    await CameraRoll.deletePhotos(photoUris)
   } catch (error) {
     console.error('error', error)
     throw error

@@ -77,7 +77,6 @@ export const addOrUpdate = (
                 Schemas.Asset.name,
                 {
                   ...asset,
-                  id: asset.uri,
                 },
                 Realm.UpdateMode.Modified,
               ),
