@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react'
 import { Alert, Platform } from 'react-native'
 import { useRecoilState } from 'recoil'
-import { request, PERMISSIONS } from 'react-native-permissions'
+import { request, PERMISSIONS, openSettings } from 'react-native-permissions'
 
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { AssetService } from '../../services'
@@ -50,7 +50,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             },
             {
               text: 'Ok',
-              onPress: () => requestAndroidPermission(),
+              onPress: () => openSettings(),
             },
           ],
         )
