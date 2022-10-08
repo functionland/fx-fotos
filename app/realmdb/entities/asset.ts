@@ -7,6 +7,10 @@ export type AssetEntity = {
    */
   filename: string | undefined
   /**
+   * Asset file size
+   */
+  fileSize: number | undefined
+  /**
    * URI that points to the asset. `assets://*` (iOS), `file://*` (Android)
    */
   uri: string | undefined
@@ -62,4 +66,20 @@ export type AssetEntity = {
    * Deleted from storage
    */
   isDeleted: boolean
+  /**
+   * Asset location medatadat
+   */
+  location: AssetLocationEntity
+  /**
+   * whenever asset metadata sync is done it would be true
+   */
+  metadataIsSynced: boolean
+}
+
+export type AssetLocationEntity = {
+  latitude: number | undefined
+  longitude: number | undefined
+  altitude: number | undefined
+  heading: number | undefined
+  speed: number | undefined
 }

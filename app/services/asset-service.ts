@@ -1,6 +1,9 @@
 import { Platform } from 'react-native'
 import * as MediaLibrary from 'expo-media-library'
-import { CameraRoll, Include } from '@react-native-camera-roll/camera-roll'
+import {
+  CameraRoll,
+  GetPhotosParams,
+} from '@react-native-camera-roll/camera-roll'
 import {
   manipulateAsync,
   SaveFormat,
@@ -184,23 +187,10 @@ export const getLibraries = (assets: MediaLibrary.Asset[]): Library[] => {
 }
 
 export const getAssets = async (
-  pageSize = 100,
-  afterAssetId: string | null,
-  include: Include = ['filename', 'imageSize'],
+  params: GetPhotosParams,
 ): Promise<PagedInfo<Asset>> => {
   try {
-    const medias = await CameraRoll.getPhotos(
-      afterAssetId
-        ? {
-            first: pageSize,
-            after: afterAssetId,
-            include,
-          }
-        : {
-            first: pageSize,
-            include,
-          },
-    )
+    const medias = await CameraRoll.getPhotos(params)
     const assets = medias.edges.map<Asset>(photo => ({
       id: photo?.node?.image?.uri,
       filename: photo?.node?.image?.filename || '',
@@ -213,6 +203,8 @@ export const getAssets = async (
       duration: photo?.node?.image?.playableDuration || 0,
       mediaType: mimeToMediaType(photo?.node?.type),
       albumId: photo?.node?.group_name,
+      location: photo?.node?.location,
+      fileSize: photo?.node?.image.fileSize,
     }))
     return {
       assets,

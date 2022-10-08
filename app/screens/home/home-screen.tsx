@@ -63,29 +63,36 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
   useEffect(() => {
     requestAndroidPermission()
+    return () => {
+      realmAssets.current?.removeAllListeners()
+    }
   }, [])
 
   useEffect(() => {
     if (isReady) {
-      ;(async () => {
-        realmAssets.current = await Assets.getAll()
-        realmAssets.current.addListener(onLocalDbAssetChange)
-        const assets = []
-        for (const asset of realmAssets.current) {
-          assets.push(asset)
-        }
-        setMedias(assets)
-        syncAssets(
-          assets?.[0]?.modificationTime,
-          assets?.[assets.length - 1]?.modificationTime,
-        )
-        // remove listener after screen disposed
-        return () => {
-          realmAssets.current?.removeAllListeners()
-        }
-      })()
+      loadAssets()
     }
   }, [isReady])
+
+  const loadAssets = async () => {
+    try {
+      realmAssets.current?.removeAllListeners()
+      realmAssets.current = await Assets.getAll()
+      realmAssets.current.addListener(onLocalDbAssetChange)
+      const assets = []
+      for (const asset of realmAssets.current) {
+        assets.push(asset)
+      }
+      setMedias(assets)
+      await syncAssets(
+        assets?.[0]?.modificationTime,
+        assets?.[assets.length - 1]?.modificationTime,
+      )
+      syncAssetsMetadata(realmAssets.current)
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
   const onLocalDbAssetChange = (
     collection: Realm.Collection<Entities.AssetEntity>,
@@ -126,11 +133,14 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       let lastAsset: Asset = null
       let fitstAsset: Asset = null
       do {
-        allMedias = await AssetService.getAssets(first, allMedias?.endCursor)
+        allMedias = await AssetService.getAssets({
+          first,
+          after: allMedias?.endCursor,
+        })
         await Assets.addOrUpdate(allMedias.assets)
         if (first === 20) {
           // Get the first assets that is created
-          fitstAsset = (await AssetService.getAssets(1, null))?.assets?.[0]
+          fitstAsset = allMedias.assets?.[0]
         }
         first *= 4
         lastAsset = allMedias.assets?.[allMedias.assets.length - 1]
@@ -147,7 +157,55 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       setLoading(false)
     }
   }
+  const syncAssetsMetadata = async () => {
+    try {
+      const localAssets = await Assets.getAll('creationTime')
 
+      let allMedias: PagedInfo<Asset> = null
+      let startTime = null
+      const syncBundariesObj = localAssets.reduce((obj, asset) => {
+        if (asset.metadataIsSynced && startTime != null) {
+          obj[startTime] = asset.creationTime
+          startTime = null
+        } else if (!asset.metadataIsSynced && startTime === null) {
+          startTime = asset.creationTime
+          obj[startTime] = startTime
+        } else if (!asset.metadataIsSynced && startTime != null) {
+          obj[startTime] = asset.creationTime
+        }
+        return obj
+      }, {})
+
+      const syncBundaries = Object.keys(syncBundariesObj)
+      for (let index = 0; index < syncBundaries.length; index++) {
+        const toTime = Number.parseInt(syncBundaries[index])
+        const fromTime = Number.parseInt(syncBundariesObj[syncBundaries[index]])
+        let first = 100
+        do {
+          allMedias = await AssetService.getAssets({
+            first,
+            after: allMedias?.endCursor,
+            fromTime,
+            toTime,
+            include: ['fileSize', 'location', 'playableDuration'],
+          })
+
+          await Assets.addOrUpdate(
+            allMedias?.assets.map<Asset>(asset => ({
+              id: asset.id,
+              duration: asset.duration,
+              location: asset.location,
+              fileSize: asset.fileSize,
+              metadataIsSynced: true,
+            })),
+          )
+          first *= 2
+        } while (allMedias.hasNextPage)
+      }
+    } catch (error) {
+      console.log('syncAssetsMetadata:', error)
+    }
+  }
   return (
     <AssetListScreen
       navigation={navigation}
