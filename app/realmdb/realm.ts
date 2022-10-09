@@ -1,9 +1,9 @@
 import Realm from 'realm'
-import { Asset, Box } from './schemas'
+import { Asset, Box, AssetLocation } from './schemas'
 
 export const RealmDB = async () =>
   await Realm.open({
-    schema: [Asset, Box],
-    schemaVersion: 4,
+    schema: [Asset, Box, AssetLocation],
+    schemaVersion: 6,
     deleteRealmIfMigrationNeeded: true,
   })

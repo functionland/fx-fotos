@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState, useContext } from 'react'
-import { Alert } from 'react-native'
-import * as MediaLibrary from 'expo-media-library'
+import React, { useEffect, useRef, useState, useCallback } from 'react'
+import { Alert, Platform } from 'react-native'
 import { useRecoilState } from 'recoil'
+import { request, PERMISSIONS, openSettings } from 'react-native-permissions'
 
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { AssetService } from '../../services'
@@ -14,6 +14,7 @@ import { mediasState } from '../../store'
 import { Assets } from '../../services/localdb'
 import { Entities } from '../../realmdb'
 import { AssetListScreen } from '../index'
+import { Asset, PagedInfo } from '../../types'
 
 interface HomeScreenProps {
   navigation: NativeStackNavigationProp<
@@ -27,44 +28,71 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const realmAssets =
     useRef<Realm.Results<Entities.AssetEntity & Realm.Object>>(null)
   const [medias, setMedias] = useRecoilState(mediasState)
-  const [loading, setLoading] = useState(true)
-  const requestAndroidPermission = async () => {
+  const [loading, setLoading] = useState(false)
+
+  const requestAndroidPermission = useCallback(async () => {
     try {
-      console.log('requestAndroidPermission')
-      await MediaLibrary.requestPermissionsAsync(true)
+      const permissions = Platform.select({
+        android: PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE,
+        ios: PERMISSIONS.IOS.PHOTO_LIBRARY,
+      })
+      const result = await request(permissions)
+      if (result === 'granted') {
+        setIsReady(true)
+      } else {
+        Alert.alert(
+          'Need Permission!',
+          'Please allow to access photos and media on your phone',
+          [
+            {
+              text: 'Cancel',
+              style: 'cancel',
+            },
+            {
+              text: 'Ok',
+              onPress: () => openSettings(),
+            },
+          ],
+        )
+      }
     } catch (err) {
       Alert.alert('Request permission', JSON.stringify(err))
       console.warn(err)
-    } finally {
-      setIsReady(true)
     }
-  }
+  }, [])
 
   useEffect(() => {
     requestAndroidPermission()
+    return () => {
+      realmAssets.current?.removeAllListeners()
+    }
   }, [])
 
   useEffect(() => {
     if (isReady) {
-      ;(async () => {
-        realmAssets.current = await Assets.getAll()
-        realmAssets.current.addListener(onLocalDbAssetChange)
-        const assets = []
-        for (const asset of realmAssets.current) {
-          assets.push(asset)
-        }
-        setMedias(assets)
-        syncAssets(
-          assets?.[0]?.modificationTime,
-          assets?.[assets.length - 1]?.modificationTime,
-        )
-        // remove listener after screen disposed
-        return () => {
-          realmAssets.current?.removeAllListeners()
-        }
-      })()
+      loadAssets()
     }
   }, [isReady])
+
+  const loadAssets = async () => {
+    try {
+      realmAssets.current?.removeAllListeners()
+      realmAssets.current = await Assets.getAll()
+      realmAssets.current.addListener(onLocalDbAssetChange)
+      const assets = []
+      for (const asset of realmAssets.current) {
+        assets.push(asset)
+      }
+      setMedias(assets)
+      await syncAssets(
+        assets?.[0]?.modificationTime,
+        assets?.[assets.length - 1]?.modificationTime,
+      )
+      syncAssetsMetadata(realmAssets.current)
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
   const onLocalDbAssetChange = (
     collection: Realm.Collection<Entities.AssetEntity>,
@@ -101,17 +129,18 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   ) => {
     try {
       let first = 20
-      let allMedias: MediaLibrary.PagedInfo<MediaLibrary.Asset> = null
-      let lastAsset: MediaLibrary.Asset = null
-      let fitstAsset: MediaLibrary.Asset = null
+      let allMedias: PagedInfo<Asset> = null
+      let lastAsset: Asset = null
+      let fitstAsset: Asset = null
       do {
-        allMedias = await AssetService.getAssets(first, allMedias?.endCursor)
+        allMedias = await AssetService.getAssets({
+          first,
+          after: allMedias?.endCursor,
+        })
         await Assets.addOrUpdate(allMedias.assets)
         if (first === 20) {
           // Get the first assets that is created
-          fitstAsset = (
-            await AssetService.getAssets(1, null, [['modificationTime', true]])
-          )?.assets?.[0]
+          fitstAsset = allMedias.assets?.[0]
         }
         first *= 4
         lastAsset = allMedias.assets?.[allMedias.assets.length - 1]
@@ -128,7 +157,55 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       setLoading(false)
     }
   }
+  const syncAssetsMetadata = async () => {
+    try {
+      const localAssets = await Assets.getAll('creationTime')
 
+      let allMedias: PagedInfo<Asset> = null
+      let startTime = null
+      const syncBundariesObj = localAssets.reduce((obj, asset) => {
+        if (asset.metadataIsSynced && startTime != null) {
+          obj[startTime] = asset.creationTime
+          startTime = null
+        } else if (!asset.metadataIsSynced && startTime === null) {
+          startTime = asset.creationTime
+          obj[startTime] = startTime
+        } else if (!asset.metadataIsSynced && startTime != null) {
+          obj[startTime] = asset.creationTime
+        }
+        return obj
+      }, {})
+
+      const syncBundaries = Object.keys(syncBundariesObj)
+      for (let index = 0; index < syncBundaries.length; index++) {
+        const toTime = Number.parseInt(syncBundaries[index])
+        const fromTime = Number.parseInt(syncBundariesObj[syncBundaries[index]])
+        let first = 100
+        do {
+          allMedias = await AssetService.getAssets({
+            first,
+            after: allMedias?.endCursor,
+            fromTime,
+            toTime,
+            include: ['fileSize', 'location', 'playableDuration'],
+          })
+
+          await Assets.addOrUpdate(
+            allMedias?.assets.map<Asset>(asset => ({
+              id: asset.id,
+              duration: asset.duration,
+              location: asset.location,
+              fileSize: asset.fileSize,
+              metadataIsSynced: true,
+            })),
+          )
+          first *= 2
+        } while (allMedias.hasNextPage)
+      }
+    } catch (error) {
+      console.log('syncAssetsMetadata:', error)
+    }
+  }
   return (
     <AssetListScreen
       navigation={navigation}

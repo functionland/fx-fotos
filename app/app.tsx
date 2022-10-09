@@ -12,26 +12,19 @@
 import './i18n'
 import './utils/ignore-warnings'
 import React, { useRef } from 'react'
-import {
-  useColorScheme,
-  Platform,
-  View,
-  SafeAreaView,
-  StatusBar,
-} from 'react-native'
+import { useColorScheme } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import {
   SafeAreaProvider,
   initialWindowMetrics,
 } from 'react-native-safe-area-context'
 import { RecoilRoot } from 'recoil'
-import { darkColors, ThemeProvider as RneThemeProvider } from '@rneui/themed'
+import { ThemeProvider as RneThemeProvider } from '@rneui/themed'
 import WalletConnectProvider from '@walletconnect/react-native-dapp'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
-import * as MediaLibrary from 'expo-media-library'
 import NetInfo from '@react-native-community/netinfo'
-import { initFonts } from './theme/fonts' // expo
+
 import * as storage from './utils/storage'
 import {
   useBackButtonHandler,
@@ -62,12 +55,9 @@ function App() {
   const { onNavigationStateChange, isRestored: isNavigationStateRestored } =
     useNavigationPersistence(storage, NAVIGATION_PERSISTENCE_KEY)
 
-  const [, getPermissions] = MediaLibrary.usePermissions()
   // Kick off initial async loading actions, like loading fonts and RootStore
   React.useEffect(() => {
     ;(async () => {
-      await getPermissions()
-      await initFonts()
       await SyncService.initBackgroundFetch()
     })()
     // Subscribe

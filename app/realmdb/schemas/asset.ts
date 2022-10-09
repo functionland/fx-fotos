@@ -8,6 +8,10 @@ export const Asset = {
      */
     filename: 'string?',
     /**
+     * file size of asset
+     */
+    fileSize: 'float?',
+    /**
      * URI that points to the asset. `assets://*` (iOS), `file://*` (Android)
      */
     uri: 'string?',
@@ -63,5 +67,24 @@ export const Asset = {
      * Deleted form storage
      */
     isDeleted: { type: 'bool', default: false },
+    /**
+     * Asset location metadata
+     */
+    location: 'AssetLocation?',
+    /**
+     * whenever asset metadata sync is done it would be true
+     */
+    metadataIsSynced: { type: 'bool', default: false },
+  },
+}
+export const AssetLocation = {
+  name: 'AssetLocation',
+  embedded: true,
+  properties: {
+    latitude: 'float?',
+    longitude: 'float?',
+    altitude: 'float?',
+    heading: 'float?',
+    speed: 'float?',
   },
 }

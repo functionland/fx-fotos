@@ -93,17 +93,15 @@ export const AssetListScreen: React.FC<Props> = ({
         text: 'Yes',
         onPress: async () => {
           try {
-            const deleted = await AssetService.deleteAssets(selectedItems)
-            if (deleted) {
-              assetListRef?.current?.resetSelectedItems()
-              await Assets.addOrUpdate(
-                selectedItems.map(id => ({
-                  id,
-                  isDeleted: true,
-                })),
-              )
-              cancelSelectionMode()
-            }
+            await AssetService.deleteAssets(selectedItems)
+            assetListRef?.current?.resetSelectedItems()
+            await Assets.addOrUpdate(
+              selectedItems.map(id => ({
+                id,
+                isDeleted: true,
+              })),
+            )
+            cancelSelectionMode()
           } catch (error) {
             console.log('deleteAssets: ', error)
           }
@@ -247,11 +245,11 @@ export const AssetListScreen: React.FC<Props> = ({
                         source={
                           walletConnector.peerMeta?.icons?.[0].endsWith('.svg')
                             ? helper.getWalletImage(
-                                walletConnector.peerMeta?.name,
-                              )
+                              walletConnector.peerMeta?.name,
+                            )
                             : {
-                                uri: walletConnector.peerMeta?.icons?.[0],
-                              }
+                              uri: walletConnector.peerMeta?.icons?.[0],
+                            }
                         }
                         style={{
                           height: 35,

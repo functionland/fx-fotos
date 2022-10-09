@@ -1,44 +1,24 @@
 import { Platform } from 'react-native'
 import * as MediaLibrary from 'expo-media-library'
 import {
-  manipulateAsync,
-  SaveFormat,
-  ImageResult,
-} from 'expo-image-manipulator'
+  CameraRoll,
+  GetPhotosParams,
+} from '@react-native-camera-roll/camera-roll'
+
 import moment from 'moment'
-
-import type { Asset as AssetType } from 'expo-media-library'
-
 import {
   RecyclerAssetListSection,
   ViewType,
   GroupHeader,
   Library,
   AssetStory,
+  Asset,
+  PagedInfo,
+  MediaTypeValue,
 } from '../types'
 
-export const generateThumbnail = async (assets: MediaLibrary.Asset[]) => {
-  const result: ImageResult[] = []
-  for (let index = 0; index < assets.length; index++) {
-    const asset = assets[index]
-    if (asset.mediaType === 'photo' && asset.uri) {
-      const thumbnail = await manipulateAsync(
-        asset.uri,
-        [{ resize: { height: 200 } }],
-        {
-          compress: 1,
-          format: SaveFormat.PNG,
-          base64: false,
-        },
-      )
-      result.push(thumbnail)
-    }
-  }
-  return result
-}
-
-const getAssetStoryCategory = (modificationTime: number) => {
-  const diff = (new Date().getTime() - modificationTime) / (1000 * 60 * 60 * 24)
+const getAssetStoryCategory = (startTime: number, modificationTime: number) => {
+  const diff = (startTime - modificationTime) / (1000 * 60 * 60 * 24)
   const span = 2
   if (diff <= 14) return 'Recently'
   else if (diff > 2 * 30 - span && diff <= 2 * 30 + span) return '2 months ago'
@@ -51,16 +31,13 @@ const getAssetStoryCategory = (modificationTime: number) => {
   return null
 }
 
-export const categorizeAssets = (
-  assets: MediaLibrary.Asset[],
-  storyHighlight = false,
-) => {
+export const categorizeAssets = (assets: Asset[], storyHighlight = false) => {
   const sections: RecyclerAssetListSection[] = []
   let lastMonth = moment().format('MMMM YYYY')
   let lastDay = null
   let lastMonthHeader: GroupHeader = null
   let lastDayHeader: GroupHeader = null
-  const storiesObj: Record<string, MediaLibrary.Asset[]> = {}
+  const storiesObj: Record<string, Asset[]> = {}
 
   for (const asset of assets) {
     // Make story objects
@@ -72,7 +49,10 @@ export const categorizeAssets = (
         (Platform.OS === 'ios' ||
           asset.uri?.toLowerCase().includes('/dcim/camera/')))
     ) {
-      const categoryName = getAssetStoryCategory(asset.modificationTime)
+      const categoryName = getAssetStoryCategory(
+        assets?.[0].modificationTime,
+        asset.modificationTime,
+      )
       if (categoryName && !storiesObj[categoryName])
         storiesObj[categoryName] = []
       if (categoryName) storiesObj[categoryName].push(asset)
@@ -158,8 +138,8 @@ export const categorizeAssets = (
 
   return [...sections]
 }
-export const getLibraries = (assets: MediaLibrary.Asset[]): Library[] => {
-  const librariesObj: Record<string, MediaLibrary.Asset[]> = {}
+export const getLibraries = (assets: Asset[]): Library[] => {
+  const librariesObj: Record<string, Asset[]> = {}
 
   // Group assets based on last directory name
   for (const asset of assets) {
@@ -182,46 +162,61 @@ export const getLibraries = (assets: MediaLibrary.Asset[]): Library[] => {
 }
 
 export const getAssets = async (
-  pageSize = 100,
-  afterAssetId: string,
-  sortBy:
-    | MediaLibrary.SortByValue[]
-    | MediaLibrary.SortByValue = 'modificationTime',
-): Promise<MediaLibrary.PagedInfo<MediaLibrary.Asset>> => {
+  params: GetPhotosParams,
+): Promise<PagedInfo<Asset>> => {
   try {
-    const medias = await MediaLibrary.getAssetsAsync(
-      afterAssetId
-        ? {
-            first: pageSize,
-            after: afterAssetId,
-            sortBy,
-            mediaType: ['photo', 'video'],
-          }
-        : {
-            first: pageSize,
-            sortBy,
-            mediaType: ['photo', 'video'],
-          },
-    )
-    return medias
+    const medias = await CameraRoll.getPhotos(params)
+    const assets = medias.edges.map<Asset>(photo => ({
+      id: photo?.node?.image?.uri,
+      filename: photo?.node?.image?.filename || '',
+      uri: photo?.node?.image?.uri,
+      height: photo?.node?.image?.height,
+      width: photo?.node?.image?.width,
+      creationTime: photo?.node?.timestamp * 1000,
+      modificationTime:
+        photo?.node?.modified * 1000 || photo?.node?.timestamp * 1000,
+      duration: photo?.node?.image?.playableDuration || 0,
+      mediaType: mimeToMediaType(photo?.node?.type),
+      albumId: photo?.node?.group_name,
+      location: photo?.node?.location,
+      fileSize: photo?.node?.image.fileSize,
+    }))
+    return {
+      assets,
+      hasNextPage: medias.page_info.has_next_page,
+      endCursor: medias.page_info.end_cursor,
+    }
   } catch (error) {
     console.error('error', error)
     throw error
   }
 }
-export const deleteAssets = async (assetIds: string[]): Promise<boolean> => {
+export const deleteAssets = async (photoUris: string[]): Promise<void> => {
   try {
-    const deleted = await MediaLibrary.deleteAssetsAsync(assetIds)
-    return deleted
+    await CameraRoll.deletePhotos(photoUris)
   } catch (error) {
     console.error('error', error)
     throw error
   }
 }
 
-export const getMediaInfo = async (
-  asset: AssetType,
-): Promise<MediaLibrary.AssetInfo> => {
-  const info = await MediaLibrary.getAssetInfoAsync(asset)
-  return info
+export const getIOSMediaLocalUri = async (
+  asset: Asset,
+): Promise<string | undefined> => {
+  const info = await CameraRoll.iosGetImageDataById(asset.uri, false)
+  return info?.node?.image?.uri
+}
+
+export const mimeToMediaType = (mime: string): MediaTypeValue => {
+  const mimeType = mime?.split('/')?.[0]
+  switch (mimeType) {
+    case 'image':
+      return 'photo'
+    case 'video':
+      return 'video'
+    case 'audio':
+      return 'audio'
+    default:
+      return 'unknown'
+  }
 }

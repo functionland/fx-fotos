@@ -353,9 +353,9 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
   const [, setPlaybackStatus] = React.useState({})
 
   const getAssetLocalInfo = React.useCallback(async () => {
-    const localInfo = await AssetService.getMediaInfo(asset)
-    setLocalUri(localInfo.localUri)
-  }, [AssetService.getMediaInfo, asset])
+    const uri = await AssetService.getIOSMediaLocalUri(asset)
+    setLocalUri(uri)
+  }, [asset])
 
   React.useLayoutEffect(() => {
     getAssetLocalInfo()
