@@ -113,3 +113,21 @@ export type ShareMeta = {
   jwe: unknown
   date: string
 }
+
+export type SearchOptionType =
+  | 'AssetType'
+  | 'AssetSize'
+  | 'AssetDimension'
+  | 'AssetMime'
+  | 'AssetFileSize'
+  | 'AssetDateRange'
+  | 'AssetDuration'
+
+export type SearchOptionValueType = {
+  id: string
+  title: string
+  type: SearchOptionType
+  value: string | number | [number, number] | MediaTypeValue
+  icon: string | undefined
+  iconType: string | undefined
+}
