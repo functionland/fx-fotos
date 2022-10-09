@@ -1,8 +1,65 @@
-import { Asset as ExpoAsset } from 'expo-media-library'
 import { AssetEntity } from '../realmdb/entities'
 
 export type MediaTypeValue = 'audio' | 'photo' | 'video' | 'unknown'
-export type Asset = ExpoAsset & AssetEntity
+export declare type MediaSubtype =
+  | 'depthEffect'
+  | 'hdr'
+  | 'highFrameRate'
+  | 'livePhoto'
+  | 'panorama'
+  | 'screenshot'
+  | 'stream'
+  | 'timelapse'
+
+export type Asset = {
+  /**
+   * Internal ID that represents an asset.
+   */
+  id: string
+  /**
+   * Filename of the asset.
+   */
+  filename: string
+  /**
+   * URI that points to the asset. `assets://*` (iOS), `file://*` (Android)
+   */
+  uri: string
+  /**
+   * Media type.
+   */
+  mediaType: MediaTypeValue
+  /**
+   * An array of media subtypes.
+   * @platform ios
+   */
+  mediaSubtypes?: MediaSubtype[]
+  /**
+   * Width of the image or video.
+   */
+  width: number
+  /**
+   * Height of the image or video.
+   */
+  height: number
+  /**
+   * File creation timestamp.
+   */
+  creationTime: number
+  /**
+   * Last modification timestamp.
+   */
+  modificationTime: number
+  /**
+   * Duration of the video or audio asset in seconds.
+   */
+  duration: number
+  /**
+   * Album ID that the asset belongs to.
+   * @platform android
+   */
+  albumId?: string
+} & AssetEntity
+
 export type PagedInfo<T> = {
   /**
    * A page of [`Asset`](#asset)s fetched by the query.
