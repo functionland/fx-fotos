@@ -4,11 +4,6 @@ import {
   CameraRoll,
   GetPhotosParams,
 } from '@react-native-camera-roll/camera-roll'
-import {
-  manipulateAsync,
-  SaveFormat,
-  ImageResult,
-} from 'expo-image-manipulator'
 
 import moment from 'moment'
 import {
@@ -21,26 +16,6 @@ import {
   PagedInfo,
   MediaTypeValue,
 } from '../types'
-
-export const generateThumbnail = async (assets: MediaLibrary.Asset[]) => {
-  const result: ImageResult[] = []
-  for (let index = 0; index < assets.length; index++) {
-    const asset = assets[index]
-    if (asset.mediaType === 'photo' && asset.uri) {
-      const thumbnail = await manipulateAsync(
-        asset.uri,
-        [{ resize: { height: 200 } }],
-        {
-          compress: 1,
-          format: SaveFormat.PNG,
-          base64: false,
-        },
-      )
-      result.push(thumbnail)
-    }
-  }
-  return result
-}
 
 const getAssetStoryCategory = (startTime: number, modificationTime: number) => {
   const diff = (startTime - modificationTime) / (1000 * 60 * 60 * 24)
@@ -62,7 +37,7 @@ export const categorizeAssets = (assets: Asset[], storyHighlight = false) => {
   let lastDay = null
   let lastMonthHeader: GroupHeader = null
   let lastDayHeader: GroupHeader = null
-  const storiesObj: Record<string, MediaLibrary.Asset[]> = {}
+  const storiesObj: Record<string, Asset[]> = {}
 
   for (const asset of assets) {
     // Make story objects
@@ -163,8 +138,8 @@ export const categorizeAssets = (assets: Asset[], storyHighlight = false) => {
 
   return [...sections]
 }
-export const getLibraries = (assets: MediaLibrary.Asset[]): Library[] => {
-  const librariesObj: Record<string, MediaLibrary.Asset[]> = {}
+export const getLibraries = (assets: Asset[]): Library[] => {
+  const librariesObj: Record<string, Asset[]> = {}
 
   // Group assets based on last directory name
   for (const asset of assets) {
@@ -225,11 +200,11 @@ export const deleteAssets = async (photoUris: string[]): Promise<void> => {
   }
 }
 
-export const getMediaInfo = async (
+export const getIOSMediaLocalUri = async (
   asset: Asset,
-): Promise<MediaLibrary.AssetInfo> => {
-  const info = await MediaLibrary.getAssetInfoAsync(asset)
-  return info
+): Promise<string | undefined> => {
+  const info = await CameraRoll.iosGetImageDataById(asset.uri, false)
+  return info?.node?.image?.uri
 }
 
 export const mimeToMediaType = (mime: string): MediaTypeValue => {
