@@ -42,12 +42,14 @@ import {
   singleAssetState,
   selectedStoryState,
 } from '../../store'
+import { SharedValue } from 'react-native-reanimated'
 
 interface Props {
   medias: Asset[]
   defaultHeader?: (style: any) => JSX.Element | undefined
   loading: boolean
   showStoryHighlight: boolean
+  externalScrollY?: SharedValue<number>
 }
 
 export const AssetListScreen: React.FC<Props> = ({
@@ -55,6 +57,7 @@ export const AssetListScreen: React.FC<Props> = ({
   defaultHeader,
   loading,
   showStoryHighlight,
+  externalScrollY,
 }) => {
   const setRecyclerSectionsStore = useSetRecoilState(recyclerSectionsState)
   const [recyclerSections, setRecyclerSections] = useState(null)
@@ -245,11 +248,11 @@ export const AssetListScreen: React.FC<Props> = ({
                         source={
                           walletConnector.peerMeta?.icons?.[0].endsWith('.svg')
                             ? helper.getWalletImage(
-                              walletConnector.peerMeta?.name,
-                            )
+                                walletConnector.peerMeta?.name,
+                              )
                             : {
-                              uri: walletConnector.peerMeta?.icons?.[0],
-                            }
+                                uri: walletConnector.peerMeta?.icons?.[0],
+                              }
                         }
                         style={{
                           height: 35,
@@ -295,11 +298,7 @@ export const AssetListScreen: React.FC<Props> = ({
     return null
   }
   return (
-    <Screen
-      scrollEventThrottle={16}
-      automaticallyAdjustContentInsets
-      style={styles.screen}
-    >
+    <View style={{ flex: 1 }}>
       {renderHeader()}
       {!recyclerSections ? (
         <View style={styles.loaderContainer}>
@@ -316,7 +315,7 @@ export const AssetListScreen: React.FC<Props> = ({
         <AssetList
           ref={assetListRef}
           sections={recyclerSections}
-          scrollY={scrollY}
+          scrollY={externalScrollY || scrollY}
           onSelectedItemsChange={onSelectedItemsChange}
           onAssetLoadError={onAssetLoadError}
           renderFooter={renderFooter}
@@ -324,7 +323,7 @@ export const AssetListScreen: React.FC<Props> = ({
           onStoryPress={onStoryPress}
         />
       )}
-    </Screen>
+    </View>
   )
 }
 

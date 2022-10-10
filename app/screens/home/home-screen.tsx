@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react'
-import { Alert, Platform } from 'react-native'
+import { Alert, Platform, StyleSheet } from 'react-native'
 import { useRecoilState } from 'recoil'
 import { request, PERMISSIONS, openSettings } from 'react-native-permissions'
 
@@ -15,6 +15,7 @@ import { Assets } from '../../services/localdb'
 import { Entities } from '../../realmdb'
 import { AssetListScreen } from '../index'
 import { Asset, PagedInfo } from '../../types'
+import { Screen } from '../../components'
 
 interface HomeScreenProps {
   navigation: NativeStackNavigationProp<
@@ -207,11 +208,22 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     }
   }
   return (
-    <AssetListScreen
-      navigation={navigation}
-      medias={isReady ? medias : null}
-      loading={loading}
-      showStoryHighlight
-    />
+    <Screen
+      scrollEventThrottle={16}
+      automaticallyAdjustContentInsets
+      style={styles.screen}
+    >
+      <AssetListScreen
+        navigation={navigation}
+        medias={isReady ? medias : null}
+        loading={loading}
+        showStoryHighlight
+      />
+    </Screen>
   )
 }
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
+})

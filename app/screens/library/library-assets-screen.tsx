@@ -11,11 +11,8 @@ import {
 } from '../../navigators/home-navigator'
 import { selectedLibraryState } from '../../store'
 import { AssetListScreen } from '../index'
-import {
-  Header,
-  HeaderLeftContainer,
-  HeaderArrowBack,
-} from '../../components/header'
+import { Header, HeaderArrowBack } from '../../components/header'
+import { Screen } from '../../components'
 
 interface Props {
   navigation: NativeStackNavigationProp<
@@ -41,10 +38,21 @@ export const LibraryAssetsScreen: React.FC<Props> = ({ navigation }) => {
     />
   )
   return (
-    <AssetListScreen
-      navigation={navigation}
-      medias={selectedLibrary?.assets}
-      defaultHeader={renderHeader}
-    />
+    <Screen
+      scrollEventThrottle={16}
+      automaticallyAdjustContentInsets
+      style={styles.screen}
+    >
+      <AssetListScreen
+        navigation={navigation}
+        medias={selectedLibrary?.assets}
+        defaultHeader={renderHeader}
+      />
+    </Screen>
   )
 }
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
+})
