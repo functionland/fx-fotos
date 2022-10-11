@@ -12,7 +12,7 @@ import {
   NativeScrollEvent,
   View,
   ImageErrorEventData,
-  ActivityIndicator,
+  ViewStyle,
 } from 'react-native'
 import Animated, {
   useSharedValue,
@@ -26,12 +26,7 @@ import Animated, {
 } from 'react-native-reanimated'
 import { DataProvider, RecyclerListView } from 'fula-recyclerlistview'
 import { Constants } from '../../../theme/constants'
-import {
-  RecyclerAssetListSection,
-  ViewType,
-  GroupHeader,
-  AssetStory,
-} from '../../../types'
+import { RecyclerAssetListSection, ViewType, AssetStory } from '../../../types'
 import RecyclerSectionItem from './asset-items/recycler-section-item'
 import ExternalScrollView from '../external-scroll-view'
 import Cell from '../grid-provider/cell'
@@ -63,6 +58,7 @@ export interface Props {
   renderFooter?: () => JSX.Element | JSX.Element[]
   onItemPress?: (section: RecyclerAssetListSection) => void
   onStoryPress?: (story: AssetStory) => void
+  contentContainerStyle?: ViewStyle
 }
 
 export interface ExtendedState {
@@ -92,6 +88,7 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(
       renderFooter,
       onItemPress,
       onStoryPress,
+      contentContainerStyle,
       ...extras
     },
     ref,
@@ -416,9 +413,12 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(
             }
           }}
           stopRenderingOnAnimation={pinching}
-          contentContainerStyle={{
-            paddingTop: 70,
-          }}
+          contentContainerStyle={[
+            {
+              paddingTop: 70,
+            },
+            contentContainerStyle,
+          ]}
           renderItemContainer={renderItemContainer}
           renderContentContainer={(props, children) => (
             <Animated.View

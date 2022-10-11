@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   ImageErrorEventData,
   NativeSyntheticEvent,
+  ViewStyle,
 } from 'react-native'
 import LottieView from 'lottie-react-native'
 import { Avatar, Icon, Text, useTheme } from '@rneui/themed'
@@ -50,6 +51,7 @@ interface Props {
   loading: boolean
   showStoryHighlight: boolean
   externalScrollY?: SharedValue<number>
+  contentContainerStyle?: ViewStyle
 }
 
 export const AssetListScreen: React.FC<Props> = ({
@@ -58,6 +60,7 @@ export const AssetListScreen: React.FC<Props> = ({
   loading,
   showStoryHighlight,
   externalScrollY,
+  contentContainerStyle,
 }) => {
   const setRecyclerSectionsStore = useSetRecoilState(recyclerSectionsState)
   const [recyclerSections, setRecyclerSections] = useState(null)
@@ -321,6 +324,7 @@ export const AssetListScreen: React.FC<Props> = ({
           renderFooter={renderFooter}
           onItemPress={onItemPress}
           onStoryPress={onStoryPress}
+          contentContainerStyle={contentContainerStyle}
         />
       )}
     </View>
