@@ -18,7 +18,12 @@ import {
 } from '../../navigators/home-navigator'
 import { mediasState } from '../../store'
 import { NavigationProp, RouteProp } from '@react-navigation/native'
-import { Header, Screen, SearchOptionsList } from '../../components'
+import {
+  Header,
+  Screen,
+  SearchOptionClip,
+  SearchOptionsList,
+} from '../../components'
 import AssetList from '../../components/asset-list'
 import Animated, {
   FadeIn,
@@ -28,15 +33,45 @@ import Animated, {
 } from 'react-native-reanimated'
 import { AssetListScreen } from '../asset-list/asset-list-screen'
 import { useFloatHederAnimation } from '../../utils/hooks'
+import { Asset, SearchOptionValueType } from '../../types'
+import { ScrollView } from 'react-native-gesture-handler'
+import { Assets } from '../../services/localdb'
 
 interface SearchScreenProps {
   navigation: NavigationProp<HomeNavigationParamList>
   route: RouteProp<HomeNavigationParamList, HomeNavigationTypes.SearchScreen>
 }
 export const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
-  const [medias] = useRecoilState(mediasState)
+  const [medias, setMedias] = useState<Asset[]>([])
   const [showSearchOptions, setShowSearchOptions] = useState(false)
-  const [scrollY, headerStyles] = useFloatHederAnimation(60)
+  const [searchText, setSearchText] = useState('')
+  const [selectedOptions, setSelectedOptions] = useState<
+    SearchOptionValueType[]
+  >([])
+  const [scrollY, headerStyles] = useFloatHederAnimation(43)
+
+  const loadAssets = async () => {
+    try {
+      console.log('loadAssets', selectedOptions)
+      if (selectedOptions?.length || searchText) {
+        const assets = await Assets.getAll({
+          filenameFilter: searchText,
+          searchOptions: selectedOptions,
+        })
+        console.log('loadAssets assets', assets?.[0])
+
+        setMedias(assets)
+      } else {
+        setMedias([])
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+  useEffect(() => {
+    loadAssets()
+  }, [selectedOptions, searchText])
+
   const renderHeader = (
     style?: StyleProp<Animated.AnimateStyle<StyleProp<ViewStyle>>>,
   ) => (
@@ -57,11 +92,52 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
           placeholder="Search assets ..."
           containerStyle={{ backgroundColor: 'black', borderWidth: 0 }}
           inputContainerStyle={{ borderRadius: 50 }}
-          //   onChangeText={updateSearch}
-          //   value={search}
+          onChangeText={updateSearch => {
+            setSearchText(updateSearch)
+            setShowSearchOptions(false)
+          }}
+          value={searchText}
           onFocus={() => setShowSearchOptions(true)}
+          onClear={() => {
+            setSearchText('')
+            loadAssets()
+          }}
         />
       </View>
+
+      {/* Display selected search option clips */}
+      {showSearchOptions || !selectedOptions?.length || (
+        <Animated.ScrollView
+          showsVerticalScrollIndicator={false}
+          showsHorizontalScrollIndicator={false}
+          horizontal={true}
+          style={{
+            width: '100%',
+            //height: ,
+            padding: 0,
+            paddingHorizontal:10
+          }}
+          exiting={FadeOut}
+        >
+          {selectedOptions.map(option => (
+            <SearchOptionClip
+              key={option.id}
+              option={option}
+              containerStyle={{ marginVertical: 5 }}
+              buttonStyle={{
+                backgroundColor: 'gray',
+              }}
+              onOptionsPress={removedOption =>
+                setSelectedOptions(
+                  selectedOptions.filter(item => item.id != removedOption.id),
+                )
+              }
+            />
+          ))}
+        </Animated.ScrollView>
+      )}
+
+      {/* Display search options list */}
       {showSearchOptions && (
         <Animated.View
           entering={FadeIn.duration(100)}
@@ -70,7 +146,10 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
         >
           <SearchOptionsList
             style={{ paddingHorizontal: 10 }}
-            onOptionsPress={() => setShowSearchOptions(false)}
+            onOptionsPress={option => {
+              setShowSearchOptions(false)
+              setSelectedOptions([...selectedOptions, option])
+            }}
           />
         </Animated.View>
       )}
@@ -89,6 +168,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
           medias={medias}
           defaultHeader={() => <View></View>}
           externalScrollY={scrollY}
+          contentContainerStyle={{ paddingTop: 80 }}
         />
       </View>
     </Screen>
