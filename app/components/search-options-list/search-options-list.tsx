@@ -31,107 +31,6 @@ export const SearchOptionsList = ({
       return obj
     }, {})
 
-  const renderClip = useCallback(
-    (option: SearchOptionValueType) => {
-      switch (option.type) {
-        case 'AssetDateRange':
-          return (
-            <Chip
-              key={option.id}
-              title={option.title}
-              titleStyle={{ color: theme.colors.greyOutline }}
-              type="outline"
-              containerStyle={styles.clipContainerStyle}
-              buttonStyle={[
-                styles.clipButtonStyle,
-                {
-                  borderColor: theme.colors.greyOutline,
-                },
-              ]}
-              icon={{
-                name: 'calendar',
-                type: 'font-awesome',
-                size: 18,
-                color: '#42a5f5',
-              }}
-              onPress={() => onOptionsPress?.(option)}
-            />
-          )
-        case 'AssetType':
-          return (
-            <Chip
-              key={option.id}
-              title={option.title}
-              titleStyle={{ color: theme.colors.greyOutline }}
-              type="outline"
-              containerStyle={styles.clipContainerStyle}
-              buttonStyle={[
-                styles.clipButtonStyle,
-                {
-                  borderColor: theme.colors.greyOutline,
-                },
-              ]}
-              icon={{
-                name: option.icon,
-                type: 'font-awesome',
-                size: 18,
-                color: '#fdd835',
-              }}
-              onPress={() => onOptionsPress?.(option)}
-            />
-          )
-        case 'AssetMime':
-          return (
-            <Chip
-              key={option.id}
-              title={option.title}
-              titleStyle={{ color: theme.colors.greyOutline }}
-              type="outline"
-              containerStyle={styles.clipContainerStyle}
-              buttonStyle={[
-                styles.clipButtonStyle,
-                {
-                  borderColor: theme.colors.greyOutline,
-                },
-              ]}
-              icon={{
-                name: option.icon,
-                type: 'font-awesome',
-                size: 18,
-                color: '#757575',
-              }}
-              onPress={() => onOptionsPress?.(option)}
-            />
-          )
-        case 'AssetDuration':
-          return (
-            <Chip
-              key={option.id}
-              title={option.title}
-              titleStyle={{ color: theme.colors.greyOutline }}
-              type="outline"
-              containerStyle={styles.clipContainerStyle}
-              buttonStyle={[
-                styles.clipButtonStyle,
-                {
-                  borderColor: theme.colors.greyOutline,
-                },
-              ]}
-              icon={{
-                name: option.icon,
-                type: 'material-community',
-                size: 18,
-                color: '#4caf50',
-              }}
-              onPress={() => onOptionsPress?.(option)}
-            />
-          )
-        default:
-          break
-      }
-    },
-    [onOptionsPress],
-  )
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
@@ -146,7 +45,16 @@ export const SearchOptionsList = ({
           showsVerticalScrollIndicator={false}
           showsHorizontalScrollIndicator={false}
         >
-          {optionList.searchOptions?.map(option => renderClip(option))}
+          {optionList.searchOptions?.map(option =>
+            SearchOptionClip({
+              option,
+              titleStyle: { color: theme.colors.greyOutline },
+              buttonStyle: {
+                borderColor: theme.colors.greyOutline,
+              },
+              onOptionsPress,
+            }),
+          )}
         </AnimatedScrollView>
       ))}
     </ScrollView>
@@ -163,7 +71,97 @@ const styles = StyleSheet.create({
     padding: 5,
   },
 })
-
+export interface SearchOptionClipProps {
+  option: SearchOptionValueType
+  onOptionsPress?: (option: SearchOptionValueType) => void
+  titleStyle?: ViewStyle
+  buttonStyle?: ViewStyle
+  containerStyle?: ViewStyle
+}
+export const SearchOptionClip = ({
+  option,
+  onOptionsPress,
+  titleStyle,
+  buttonStyle,
+  containerStyle,
+}: SearchOptionClipProps) => {
+  switch (option.type) {
+    case 'AssetDateRange':
+      return (
+        <Chip
+          key={option.id}
+          title={option.title}
+          titleStyle={[titleStyle]}
+          type="outline"
+          containerStyle={[styles.clipContainerStyle, containerStyle]}
+          buttonStyle={[styles.clipButtonStyle, buttonStyle]}
+          icon={{
+            name: 'calendar',
+            type: 'font-awesome',
+            size: 18,
+            color: '#42a5f5',
+          }}
+          onPress={() => onOptionsPress?.(option)}
+        />
+      )
+    case 'AssetType':
+      return (
+        <Chip
+          key={option.id}
+          title={option.title}
+          titleStyle={[titleStyle]}
+          type="outline"
+          containerStyle={[styles.clipContainerStyle, containerStyle]}
+          buttonStyle={[styles.clipButtonStyle, buttonStyle]}
+          icon={{
+            name: option.icon,
+            type: 'font-awesome',
+            size: 18,
+            color: '#fdd835',
+          }}
+          onPress={() => onOptionsPress?.(option)}
+        />
+      )
+    case 'AssetMime':
+      return (
+        <Chip
+          key={option.id}
+          title={option.title}
+          titleStyle={[titleStyle]}
+          type="outline"
+          containerStyle={[styles.clipContainerStyle, containerStyle]}
+          buttonStyle={[styles.clipButtonStyle, buttonStyle]}
+          icon={{
+            name: option.icon,
+            type: 'font-awesome',
+            size: 18,
+            color: '#757575',
+          }}
+          onPress={() => onOptionsPress?.(option)}
+        />
+      )
+    case 'AssetDuration':
+      return (
+        <Chip
+          key={option.id}
+          title={option.title}
+          titleStyle={[titleStyle]}
+          type="outline"
+          containerStyle={[styles.clipContainerStyle, containerStyle]}
+          buttonStyle={[styles.clipButtonStyle, buttonStyle]}
+          icon={{
+            name: option.icon,
+            type: 'material-community',
+            size: 18,
+            color: '#4caf50',
+          }}
+          onPress={() => onOptionsPress?.(option)}
+        />
+      )
+    default:
+      break
+  }
+}
 type OptionsList = {
   order: number
   type: SearchOptionType
