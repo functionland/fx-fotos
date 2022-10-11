@@ -160,7 +160,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   }
   const syncAssetsMetadata = async () => {
     try {
-      const localAssets = await Assets.getAll('creationTime')
+      const localAssets = await Assets.getAll({ descriptor: 'creationTime' })
 
       let allMedias: PagedInfo<Asset> = null
       let startTime = null
@@ -188,12 +188,20 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             after: allMedias?.endCursor,
             fromTime,
             toTime,
-            include: ['fileSize', 'location', 'playableDuration'],
+            include: [
+              'filename',
+              'fileSize',
+              'location',
+              'imageSize',
+              'playableDuration',
+            ],
           })
 
           await Assets.addOrUpdate(
             allMedias?.assets.map<Asset>(asset => ({
               id: asset.id,
+              filename: asset.filename,
+              filenameNormalized: asset.filenameNormalized,
               duration: asset.duration,
               location: asset.location,
               fileSize: asset.fileSize,
