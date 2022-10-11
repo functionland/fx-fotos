@@ -1,24 +1,54 @@
 import Realm from 'realm'
 import { Entities, RealmDB, Schemas } from '../../realmdb'
-import { SyncStatus } from '../../types'
+import { SearchOptionValueType, SyncStatus } from '../../types'
 
 export const getAll = (
-  descriptor = 'modificationTime',
-  orderby: 'asc' | 'desc' = 'desc',
-  filter = 'isDeleted=false or syncStatus=2',
+  params: {
+    descriptor: string
+    orderby: 'asc' | 'desc'
+    filter: string
+    filenameFilter: string | undefined
+    searchOptions?: SearchOptionValueType[]
+  } = {},
 ): Promise<Realm.Results<Entities.AssetEntity & Realm.Object>> =>
   RealmDB()
     .then(realm => {
+      const {
+        descriptor = 'modificationTime',
+        orderby = 'desc',
+        filter = 'isDeleted=false or syncStatus=2',
+        filenameFilter,
+        searchOptions,
+      } = params
       let assets = realm
         .objects<Entities.AssetEntity>(Schemas.Asset.name)
         .sorted(descriptor, orderby === 'desc')
       if (filter) assets = assets.filtered(filter)
+      if (filenameFilter)
+        assets = assets.filtered(
+          `filenameNormalized CONTAINS '${filenameFilter.toLowerCase()}'`,
+        )
+
+      // filter the query based on search options
+      searchOptions?.forEach(option => {
+        switch (option.type) {
+          case 'AssetType':
+            assets = assets.filtered(`mediaType == '${option.value}'`)
+            break
+          case 'AssetMime':
+            assets = assets.filtered(`mimeType == '${option.value}'`)
+            break
+          default:
+            break
+        }
+      })
       return assets
     })
     .catch(error => {
       console.error('RealmDB getAllAssets error!', error)
       throw error
     })
+
 export const getById = (
   id: string,
 ): Promise<Realm.Results<Entities.AssetEntity & Realm.Object>> =>
@@ -33,6 +63,7 @@ export const getById = (
       console.error('RealmDB getById error!', error)
       throw error
     })
+
 export const getAllNeedToSync = (): Promise<
   Realm.Results<Entities.AssetEntity & Realm.Object>
 > =>
