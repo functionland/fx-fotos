@@ -49,9 +49,15 @@ export const SearchOptionsList = ({
             SearchOptionClip({
               option,
               titleStyle: { color: theme.colors.greyOutline },
-              buttonStyle: {
-                borderColor: theme.colors.greyOutline,
-              },
+              buttonStyle: [
+                {
+                  borderColor: theme.colors.greyOutline,
+                },
+                selectedOptionsObj?.[option.id]
+                  ? { backgroundColor: theme.colors.grey0 }
+                  : {},
+              ],
+              disabled: !!selectedOptionsObj?.[option.id],
               onOptionsPress,
             }),
           )}
@@ -77,6 +83,7 @@ export interface SearchOptionClipProps {
   titleStyle?: ViewStyle
   buttonStyle?: ViewStyle
   containerStyle?: ViewStyle
+  disabled?: boolean
 }
 export const SearchOptionClip = ({
   option,
@@ -84,6 +91,7 @@ export const SearchOptionClip = ({
   titleStyle,
   buttonStyle,
   containerStyle,
+  disabled,
 }: SearchOptionClipProps) => {
   switch (option.type) {
     case 'AssetDateRange':
@@ -91,6 +99,7 @@ export const SearchOptionClip = ({
         <Chip
           key={option.id}
           title={option.title}
+          disabled={disabled}
           titleStyle={[titleStyle]}
           type="outline"
           containerStyle={[styles.clipContainerStyle, containerStyle]}
@@ -117,7 +126,7 @@ export const SearchOptionClip = ({
             name: option.icon,
             type: 'font-awesome',
             size: 18,
-            color: '#fdd835',
+            color: '#f9a825',
           }}
           onPress={() => onOptionsPress?.(option)}
         />
@@ -135,7 +144,7 @@ export const SearchOptionClip = ({
             name: option.icon,
             type: 'font-awesome',
             size: 18,
-            color: '#757575',
+            color: '#f4511e',
           }}
           onPress={() => onOptionsPress?.(option)}
         />

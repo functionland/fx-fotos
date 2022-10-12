@@ -152,6 +152,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
               setShowSearchOptions(false)
               setSelectedOptions([...selectedOptions, option])
             }}
+            selectedOptions={selectedOptions}
           />
         </Animated.View>
       )}
