@@ -8,7 +8,7 @@ import {
   View,
   ViewStyle,
 } from 'react-native'
-import { SearchBar, useTheme } from '@rneui/themed'
+import { Icon, SearchBar, Text, useTheme } from '@rneui/themed'
 import {
   HomeNavigationParamList,
   HomeNavigationTypes,
@@ -52,6 +52,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
       console.error(error)
     } finally {
       setLoading(false)
+      scrollY.value = 0
     }
   }
   useEffect(() => {
@@ -69,6 +70,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
     <Animated.View
       style={[
         {
+          top: 0,
           position: 'absolute',
           width: '100%',
           zIndex: 99,
@@ -155,21 +157,48 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
       )}
     </Animated.View>
   )
+  const renderSearchPlaceHolder = () =>
+    !medias.length &&
+    !searchText &&
+    !selectedOptions.length &&
+    !loading && (
+      <View style={styles.placeholderContainer}>
+        <Icon name="image-search" size={80} />
+        <Text h4 style={styles.placeholderText}>
+          Find your assets
+        </Text>
+      </View>
+    )
+  const renderNotfoundPlaceHolder = () =>
+    (!!searchText || selectedOptions.length > 0) &&
+    !medias?.length &&
+    !loading && (
+      <View style={styles.placeholderContainer}>
+        <Icon type="material-community" name="emoticon-sad-outline" size={60} />
+        <Text h4 style={styles.placeholderText}>
+          Nothing found!
+        </Text>
+      </View>
+    )
   return (
     <Screen
       scrollEventThrottle={16}
       automaticallyAdjustContentInsets
       style={styles.screen}
     >
-      <View style={styles.assetListScreenContainer}>
+      <View style={styles.container}>
         {renderHeader()}
-        <AssetListScreen
-          navigation={navigation}
-          medias={medias}
-          defaultHeader={() => <View></View>}
-          externalScrollY={scrollY}
-          contentContainerStyle={{ paddingTop: 80 }}
-        />
+        {renderSearchPlaceHolder()}
+        {renderNotfoundPlaceHolder()}
+        {medias?.length > 0 && (
+          <AssetListScreen
+            navigation={navigation}
+            medias={medias}
+            defaultHeader={() => true}
+            externalScrollY={scrollY}
+            contentContainerStyle={styles.assetListScreenContainer}
+          />
+        )}
       </View>
     </Screen>
   )
@@ -178,8 +207,11 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
   },
-  assetListScreenContainer: {
+  container: {
     flex: 1,
+  },
+  assetListScreenContainer: {
+    paddingTop: 80,
   },
   selectedOptionsContainer: {
     width: '100%',
@@ -193,5 +225,13 @@ const styles = StyleSheet.create({
   },
   SearchOptionsList: {
     paddingHorizontal: 10,
+  },
+  placeholderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  placeholderText: {
+    padding: 10,
   },
 })
