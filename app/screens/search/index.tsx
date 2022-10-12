@@ -1,40 +1,25 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react'
 import {
   Alert,
+  Keyboard,
   Platform,
   StyleProp,
   StyleSheet,
   View,
   ViewStyle,
 } from 'react-native'
-import { useRecoilState } from 'recoil'
-import { request, PERMISSIONS, openSettings } from 'react-native-permissions'
-import { Input, SearchBar } from '@rneui/themed'
-import { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import { AssetService } from '../../services'
+import { SearchBar, useTheme } from '@rneui/themed'
 import {
   HomeNavigationParamList,
   HomeNavigationTypes,
 } from '../../navigators/home-navigator'
-import { mediasState } from '../../store'
 import { NavigationProp, RouteProp } from '@react-navigation/native'
-import {
-  Header,
-  Screen,
-  SearchOptionClip,
-  SearchOptionsList,
-} from '../../components'
-import AssetList from '../../components/asset-list'
-import Animated, {
-  FadeIn,
-  FadeOut,
-  SlideOutDown,
-  SlideOutUp,
-} from 'react-native-reanimated'
+import { Screen, SearchOptionClip, SearchOptionsList } from '../../components'
+
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated'
 import { AssetListScreen } from '../asset-list/asset-list-screen'
 import { useFloatHederAnimation } from '../../utils/hooks'
 import { Asset, SearchOptionValueType } from '../../types'
-import { ScrollView } from 'react-native-gesture-handler'
 import { Assets } from '../../services/localdb'
 
 interface SearchScreenProps {
@@ -42,34 +27,40 @@ interface SearchScreenProps {
   route: RouteProp<HomeNavigationParamList, HomeNavigationTypes.SearchScreen>
 }
 export const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
+  const keyboardTimer = useRef(0)
   const [medias, setMedias] = useState<Asset[]>([])
   const [showSearchOptions, setShowSearchOptions] = useState(false)
+  const [loading, setLoading] = useState(false)
   const [searchText, setSearchText] = useState('')
   const [selectedOptions, setSelectedOptions] = useState<
     SearchOptionValueType[]
   >([])
-  const [scrollY, headerStyles] = useFloatHederAnimation(43)
-
+  const [scrollY, headerStyles] = useFloatHederAnimation(33)
+  const { theme } = useTheme()
   const loadAssets = async () => {
     try {
-      console.log('loadAssets', selectedOptions)
       if (selectedOptions?.length || searchText) {
         const assets = await Assets.getAll({
           filenameFilter: searchText,
           searchOptions: selectedOptions,
         })
-        console.log('loadAssets assets', assets?.[0])
-
         setMedias(assets)
       } else {
         setMedias([])
       }
     } catch (error) {
       console.error(error)
+    } finally {
+      setLoading(false)
     }
   }
   useEffect(() => {
-    loadAssets()
+    setLoading(true)
+    clearTimeout(keyboardTimer.current)
+    keyboardTimer.current = setTimeout(() => {
+      keyboardTimer.current = 0
+      loadAssets()
+    }, 300)
   }, [selectedOptions, searchText])
 
   const renderHeader = (
@@ -88,20 +79,34 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
     >
       <View style={{ flex: 1 }}>
         <SearchBar
-          style={{ borderWidth: 0 }}
-          placeholder="Search assets ..."
-          containerStyle={{ backgroundColor: 'black', borderWidth: 0 }}
+          placeholder="Search asset's name"
+          containerStyle={{
+            backgroundColor: showSearchOptions
+              ? theme.colors.background
+              : 'transparent',
+            borderTopWidth: 0,
+            borderBottomWidth: 0,
+          }}
           inputContainerStyle={{ borderRadius: 50 }}
           onChangeText={updateSearch => {
             setSearchText(updateSearch)
             setShowSearchOptions(false)
           }}
           value={searchText}
-          onFocus={() => setShowSearchOptions(true)}
-          onClear={() => {
-            setSearchText('')
-            loadAssets()
+          showLoading={loading}
+          onPressIn={() => setShowSearchOptions(true)}
+          searchIcon={{
+            iconProps: showSearchOptions
+              ? {
+                  name: 'arrow-back',
+                }
+              : {},
+            onPress: () => {
+              Keyboard.dismiss()
+              setShowSearchOptions(!showSearchOptions)
+            },
           }}
+          theme={theme}
         />
       </View>
 
@@ -111,12 +116,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
           showsVerticalScrollIndicator={false}
           showsHorizontalScrollIndicator={false}
           horizontal={true}
-          style={{
-            width: '100%',
-            //height: ,
-            padding: 0,
-            paddingHorizontal:10
-          }}
+          style={styles.selectedOptionsContainer}
           exiting={FadeOut}
         >
           {selectedOptions.map(option => (
@@ -125,7 +125,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
               option={option}
               containerStyle={{ marginVertical: 5 }}
               buttonStyle={{
-                backgroundColor: 'gray',
+                backgroundColor: theme.colors.grey0,
               }}
               onOptionsPress={removedOption =>
                 setSelectedOptions(
@@ -142,10 +142,10 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
         <Animated.View
           entering={FadeIn.duration(100)}
           exiting={FadeOut.duration(300)}
-          style={{ flex: 1, height: 800, zIndex: 99 }}
+          style={styles.searchOptionsContainer}
         >
           <SearchOptionsList
-            style={{ paddingHorizontal: 10 }}
+            style={styles.SearchOptionsList}
             onOptionsPress={option => {
               setShowSearchOptions(false)
               setSelectedOptions([...selectedOptions, option])
@@ -161,7 +161,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
       automaticallyAdjustContentInsets
       style={styles.screen}
     >
-      <View style={{ flex: 1 }}>
+      <View style={styles.assetListScreenContainer}>
         {renderHeader()}
         <AssetListScreen
           navigation={navigation}
@@ -177,5 +177,21 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
+  },
+  assetListScreenContainer: {
+    flex: 1,
+  },
+  selectedOptionsContainer: {
+    width: '100%',
+    padding: 0,
+    paddingHorizontal: 10,
+  },
+  searchOptionsContainer: {
+    flex: 1,
+    height: 8000,
+    zIndex: 99,
+  },
+  SearchOptionsList: {
+    paddingHorizontal: 10,
   },
 })
