@@ -1,5 +1,11 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react'
-import { Alert, Platform, StyleSheet } from 'react-native'
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+  useContext,
+} from 'react'
+import { Alert, Platform, StyleSheet, ViewStyle } from 'react-native'
 import { useRecoilState } from 'recoil'
 import { request, PERMISSIONS, openSettings } from 'react-native-permissions'
 
@@ -15,7 +21,18 @@ import { Assets } from '../../services/localdb'
 import { Entities } from '../../realmdb'
 import { AssetListScreen } from '../index'
 import { Asset, PagedInfo } from '../../types'
-import { Screen } from '../../components'
+import { Header, Screen } from '../../components'
+import {
+  HeaderLeftContainer,
+  HeaderLogo,
+  HeaderRightContainer,
+} from '../../components/header'
+import { Avatar, Icon, Image } from '@rneui/themed'
+import { SharedElement } from 'react-navigation-shared-element'
+import { AppNavigationNames } from '../../navigators'
+import { useWalletConnect } from '@walletconnect/react-native-dapp'
+import { ThemeContext } from '../../theme'
+import * as helper from '../../utils/helper'
 
 interface HomeScreenProps {
   navigation: NativeStackNavigationProp<
@@ -26,6 +43,9 @@ interface HomeScreenProps {
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [isReady, setIsReady] = useState(false)
+  const walletConnector = useWalletConnect()
+  const { toggleTheme } = useContext(ThemeContext)
+
   const realmAssets =
     useRef<Realm.Results<Entities.AssetEntity & Realm.Object>>(null)
   const [medias, setMedias] = useRecoilState(mediasState)
@@ -215,12 +235,78 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       console.log('syncAssetsMetadata:', error)
     }
   }
+  const renderHeader = (headerStyles: ViewStyle) => {
+    return (
+      <Header
+        style={headerStyles}
+        centerComponent={<HeaderLogo />}
+        leftComponent={
+          <HeaderLeftContainer>
+            <Icon
+              type="material-community"
+              name="white-balance-sunny"
+              onPress={() => {
+                toggleTheme()
+              }}
+            />
+          </HeaderLeftContainer>
+        }
+        rightComponent={
+          <HeaderRightContainer>
+            <SharedElement id="AccountAvatar">
+              {walletConnector.connected ? (
+                <Avatar
+                  containerStyle={styles.avatar}
+                  ImageComponent={() => (
+                    <Image
+                      source={
+                        walletConnector.peerMeta?.icons?.[0].endsWith('.svg')
+                          ? helper.getWalletImage(
+                              walletConnector.peerMeta?.name,
+                            )
+                          : {
+                              uri: walletConnector.peerMeta?.icons?.[0],
+                            }
+                      }
+                      style={{
+                        height: 35,
+                        width: 35,
+                      }}
+                      resizeMode="contain"
+                    />
+                  )}
+                  onPress={() =>
+                    navigation.navigate(AppNavigationNames.AccountScreen)
+                  }
+                />
+              ) : (
+                <Avatar
+                  containerStyle={styles.disconnectedAvatar}
+                  icon={{
+                    name: 'account-alert',
+                    type: 'material-community',
+                    size: 34,
+                  }}
+                  size="small"
+                  rounded
+                  onPress={() =>
+                    navigation.navigate(AppNavigationNames.AccountScreen)
+                  }
+                />
+              )}
+            </SharedElement>
+          </HeaderRightContainer>
+        }
+      />
+    )
+  }
   return (
     <Screen
       scrollEventThrottle={16}
       automaticallyAdjustContentInsets
       style={styles.screen}
     >
+      {renderHeader()}
       <AssetListScreen
         navigation={navigation}
         medias={isReady ? medias : null}
@@ -233,5 +319,22 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
+  },
+  avatar: {
+    backgroundColor: 'gray',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: 5,
+  },
+  disconnectedAvatar: {
+    backgroundColor: 'gray',
+    marginHorizontal: 5,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
   },
 })
