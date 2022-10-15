@@ -1,9 +1,10 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React from 'react'
 
-import { StyleSheet, View, ViewStyle } from 'react-native'
+import { StyleSheet, ViewStyle } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
 import Animated, { SlideInUp } from 'react-native-reanimated'
 import { Chip, useTheme } from '@rneui/themed'
+import moment from 'moment'
 import { SearchOptionType, SearchOptionValueType } from '../../types'
 
 interface Props {
@@ -30,7 +31,7 @@ export const SearchOptionsList = ({
       obj[option.id] = option
       return obj
     }, {})
-
+  console.log('SearchOptions', SearchOptions)
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
@@ -186,24 +187,28 @@ const SearchOptions: OptionsList[] = [
         title: '7 days ago',
         type: 'AssetDateRange',
         icon: 'calendar',
+        value: moment().add(-7, 'days').toDate().getTime(),
       },
       {
         id: '1 month ago',
         title: '1 month ago',
         type: 'AssetDateRange',
         icon: 'calendar',
+        value: moment().add(-1, 'months').toDate().getTime(),
       },
       {
         id: '3 month ago',
         title: '3 month ago',
         type: 'AssetDateRange',
         icon: 'calendar',
+        value: moment().add(-3, 'months').toDate().getTime(),
       },
       {
         id: '6 month ago',
         title: '6 month ago',
         type: 'AssetDateRange',
         icon: 'calendar',
+        value: moment().add(-6, 'months').toDate().getTime(),
       },
     ],
   },
@@ -268,35 +273,35 @@ const SearchOptions: OptionsList[] = [
       {
         id: 'More than 30s',
         title: 'More than 30s',
-        value: 30 * 100,
+        value: 30,
         type: 'AssetDuration',
         icon: 'clock-time-ten-outline',
       },
       {
         id: 'More than 60s',
         title: 'More than 60s',
-        value: 60 * 1000,
+        value: 60,
         type: 'AssetDuration',
         icon: 'clock-time-ten-outline',
       },
       {
         id: 'More than 5min',
         title: 'More than 5min',
-        value: 5 * 60 * 1000,
+        value: 5 * 60,
         type: 'AssetDuration',
         icon: 'clock-time-ten-outline',
       },
       {
         id: 'More than 30 mins',
         title: 'More than 30 mins',
-        value: 30 * 60 * 1000,
+        value: 30 * 60,
         type: 'AssetDuration',
         icon: 'clock-time-ten-outline',
       },
       {
         id: 'More than 60 mins',
         title: 'More than 60 mins',
-        value: 60 * 60 * 1000,
+        value: 60 * 60,
         type: 'AssetDuration',
         icon: 'clock-time-ten-outline',
       },
