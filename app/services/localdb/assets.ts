@@ -2,6 +2,43 @@ import Realm from 'realm'
 import { Entities, RealmDB, Schemas } from '../../realmdb'
 import { SearchOptionValueType, SyncStatus } from '../../types'
 
+const dynamicFilterGenerator = (
+  searchOptions: SearchOptionValueType[],
+): string[] => {
+  const searchOptionsObj = searchOptions?.reduce<
+    Record<string, SearchOptionValueType[]>
+  >((obj, option) => {
+    if (!obj[option.type]) obj[option.type] = []
+    obj[option.type].push(option)
+    return obj
+  }, {})
+  let filterString = []
+  Object.keys(searchOptionsObj || {}).map(optionType => {
+    let orFilterString = '('
+    searchOptionsObj[optionType]?.forEach((option, index) => {
+      if (index) orFilterString += ' OR '
+      switch (option.type) {
+        case 'AssetDateRange':
+          orFilterString += ` creationTime <= ${option.value} `
+          break
+        case 'AssetType':
+          orFilterString += ` mediaType == '${option.value}' `
+          break
+        case 'AssetMime':
+          orFilterString += ` mimeType == '${option.value}' `
+          break
+        case 'AssetDuration':
+          orFilterString += ` duration >= ${option.value} `
+          break
+        default:
+          break
+      }
+    })
+    orFilterString += ')'
+    filterString.push(orFilterString)
+  })
+  return filterString
+}
 export const getAll = (
   params: {
     descriptor: string
@@ -30,17 +67,10 @@ export const getAll = (
         )
 
       // filter the query based on search options
-      searchOptions?.forEach(option => {
-        switch (option.type) {
-          case 'AssetType':
-            assets = assets.filtered(`mediaType == '${option.value}'`)
-            break
-          case 'AssetMime':
-            assets = assets.filtered(`mimeType == '${option.value}'`)
-            break
-          default:
-            break
-        }
+      const dynamicFilter = dynamicFilterGenerator(searchOptions)
+      console.log('dynamicFilter', dynamicFilter)
+      dynamicFilter.forEach(filterStr => {
+        assets = assets.filtered(filterStr)
       })
       return assets
     })
