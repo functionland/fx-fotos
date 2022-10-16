@@ -47,7 +47,13 @@ function ScreenWithoutScrolling(props: ScreenProps) {
       behavior={isIos ? 'padding' : undefined}
       keyboardVerticalOffset={offsets[props.keyboardOffset || 'none']}
     >
-      <StatusBar barStyle={props.statusBar || 'light-content'} />
+      <StatusBar
+        barStyle={
+          props.statusBar || theme.mode == 'dark'
+            ? 'light-content'
+            : 'dark-content'
+        }
+      />
       <View
         style={[
           preset.inner,
