@@ -6,17 +6,20 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { HomeScreen, LibraryScreen } from '../screens'
+import { HomeScreen, LibraryScreen, SearchScreen } from '../screens'
 import { TabHeader } from '../components/header/tab-header'
 import { UnderConstruction } from '../components'
 
 export type HomeNavigationParamList = {
-  HomeScreen: undefined
+  HomeTab: undefined
+  LibraryTab: undefined
+  SearchTab: undefined
 }
 
 export enum HomeNavigationTypes {
-  PhotosTab = 'PhotosTab',
-  LibraryTab = 'LibraryTab',
+  HomeScreen = 'HomeTab',
+  LibraryScreen = 'LibraryTab',
+  SearchScreen = 'SearchTab',
 }
 function UnderConstructionScreen() {
   return (
@@ -67,12 +70,12 @@ export function HomeNavigator() {
             )
           },
         }}
-        name={HomeNavigationTypes.PhotosTab}
+        name={HomeNavigationTypes.HomeScreen}
         component={HomeScreen}
       />
       <HomeTabs.Screen
-        name="Search"
         options={{
+          tabBarLabel: 'Search',
           tabBarIcon: function tabIcon(props) {
             return (
               <FontAwesome5
@@ -84,11 +87,13 @@ export function HomeNavigator() {
             )
           },
         }}
-        component={UnderConstructionScreen}
+        name={HomeNavigationTypes.SearchScreen}
+        component={SearchScreen}
       />
       <HomeTabs.Screen
         name="Sharing"
         options={{
+          tabBarLabel: 'Sharing',
           tabBarIcon: function tabIcon(props) {
             return (
               <FontAwesome5
@@ -103,7 +108,7 @@ export function HomeNavigator() {
         component={UnderConstructionScreen}
       />
       <HomeTabs.Screen
-        name={HomeNavigationTypes.LibraryTab}
+        name={HomeNavigationTypes.LibraryScreen}
         options={{
           tabBarLabel: 'Library',
           tabBarIcon: function tabIcon(props) {

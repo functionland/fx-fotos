@@ -1,21 +1,18 @@
-import React, { useEffect, useRef, useState, useContext } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import {
   StyleSheet,
   Alert,
   View,
-  Image,
   ActivityIndicator,
   ImageErrorEventData,
   NativeSyntheticEvent,
+  ViewStyle,
 } from 'react-native'
 import LottieView from 'lottie-react-native'
-import { Avatar, Icon, Text, useTheme } from '@rneui/themed'
+import { Icon, Text, useTheme } from '@rneui/themed'
 import Toast from 'react-native-toast-message'
-import { useWalletConnect } from '@walletconnect/react-native-dapp'
-import { useRecoilState, useSetRecoilState } from 'recoil'
-import { SharedElement } from 'react-navigation-shared-element'
+import { useSetRecoilState } from 'recoil'
 import { NavigationProp, useNavigation } from '@react-navigation/native'
-import { Screen } from '../../components'
 import { AssetService } from '../../services'
 import AssetList, { AssetListHandle } from '../../components/asset-list'
 import { useFloatHederAnimation } from '../../utils/hooks'
@@ -23,14 +20,11 @@ import { palette } from '../../theme/palette'
 import { Assets } from '../../services/localdb'
 import {
   Header,
-  HeaderLogo,
   HeaderLeftContainer,
   HeaderRightContainer,
 } from '../../components/header'
-import { ThemeContext } from '../../theme'
 import { AppNavigationNames, RootStackParamList } from '../../navigators'
 import { uploadAssetsInBackground } from '../../services/sync-service'
-import * as helper from '../../utils/helper'
 import {
   Asset,
   AssetStory,
@@ -42,12 +36,15 @@ import {
   singleAssetState,
   selectedStoryState,
 } from '../../store'
+import { SharedValue } from 'react-native-reanimated'
 
 interface Props {
   medias: Asset[]
-  defaultHeader?: (style: any) => JSX.Element | undefined
+  defaultHeader?: (style: ViewStyle) => JSX.Element | undefined
   loading: boolean
   showStoryHighlight: boolean
+  externalScrollY?: SharedValue<number>
+  contentContainerStyle?: ViewStyle
 }
 
 export const AssetListScreen: React.FC<Props> = ({
@@ -55,6 +52,8 @@ export const AssetListScreen: React.FC<Props> = ({
   defaultHeader,
   loading,
   showStoryHighlight,
+  externalScrollY,
+  contentContainerStyle,
 }) => {
   const setRecyclerSectionsStore = useSetRecoilState(recyclerSectionsState)
   const [recyclerSections, setRecyclerSections] = useState(null)
@@ -64,9 +63,7 @@ export const AssetListScreen: React.FC<Props> = ({
   const [selectionMode, setSelectionMode] = useState(false)
   const [selectedItems, setSelectedItems] = useState<string[]>([])
   const assetListRef = useRef<AssetListHandle>()
-  const { toggleTheme } = useContext(ThemeContext)
   const { theme } = useTheme()
-  const walletConnector = useWalletConnect()
   const setSingleAsset = useSetRecoilState(singleAssetState)
   const setSelectedStoryState = useSetRecoilState(selectedStoryState)
   const navigation = useNavigation<NavigationProp<RootStackParamList>>()
@@ -218,71 +215,7 @@ export const AssetListScreen: React.FC<Props> = ({
         />
       )
     }
-    return (
-      defaultHeader?.(headerStyles) || (
-        <Header
-          style={headerStyles}
-          centerComponent={<HeaderLogo />}
-          leftComponent={
-            <HeaderLeftContainer>
-              <Icon
-                type="material-community"
-                name="white-balance-sunny"
-                onPress={() => {
-                  toggleTheme()
-                }}
-              />
-            </HeaderLeftContainer>
-          }
-          rightComponent={
-            <HeaderRightContainer>
-              <SharedElement id="AccountAvatar">
-                {walletConnector.connected ? (
-                  <Avatar
-                    containerStyle={styles.avatar}
-                    ImageComponent={() => (
-                      <Image
-                        source={
-                          walletConnector.peerMeta?.icons?.[0].endsWith('.svg')
-                            ? helper.getWalletImage(
-                              walletConnector.peerMeta?.name,
-                            )
-                            : {
-                              uri: walletConnector.peerMeta?.icons?.[0],
-                            }
-                        }
-                        style={{
-                          height: 35,
-                          width: 35,
-                        }}
-                        resizeMode="contain"
-                      />
-                    )}
-                    onPress={() =>
-                      navigation.navigate(AppNavigationNames.AccountScreen)
-                    }
-                  />
-                ) : (
-                  <Avatar
-                    containerStyle={styles.disconnectedAvatar}
-                    icon={{
-                      name: 'account-alert',
-                      type: 'material-community',
-                      size: 34,
-                    }}
-                    size="small"
-                    rounded
-                    onPress={() =>
-                      navigation.navigate(AppNavigationNames.AccountScreen)
-                    }
-                  />
-                )}
-              </SharedElement>
-            </HeaderRightContainer>
-          }
-        />
-      )
-    )
+    return defaultHeader?.(headerStyles)
   }
   const renderFooter = () => {
     if (loading) {
@@ -295,11 +228,7 @@ export const AssetListScreen: React.FC<Props> = ({
     return null
   }
   return (
-    <Screen
-      scrollEventThrottle={16}
-      automaticallyAdjustContentInsets
-      style={styles.screen}
-    >
+    <>
       {renderHeader()}
       {!recyclerSections ? (
         <View style={styles.loaderContainer}>
@@ -316,15 +245,16 @@ export const AssetListScreen: React.FC<Props> = ({
         <AssetList
           ref={assetListRef}
           sections={recyclerSections}
-          scrollY={scrollY}
+          scrollY={externalScrollY || scrollY}
           onSelectedItemsChange={onSelectedItemsChange}
           onAssetLoadError={onAssetLoadError}
           renderFooter={renderFooter}
           onItemPress={onItemPress}
           onStoryPress={onStoryPress}
+          contentContainerStyle={contentContainerStyle}
         />
       )}
-    </Screen>
+    </>
   )
 }
 

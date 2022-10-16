@@ -166,21 +166,26 @@ export const getAssets = async (
 ): Promise<PagedInfo<Asset>> => {
   try {
     const medias = await CameraRoll.getPhotos(params)
-    const assets = medias.edges.map<Asset>(photo => ({
-      id: photo?.node?.image?.uri,
-      filename: photo?.node?.image?.filename || '',
-      uri: photo?.node?.image?.uri,
-      height: photo?.node?.image?.height,
-      width: photo?.node?.image?.width,
-      creationTime: photo?.node?.timestamp * 1000,
-      modificationTime:
-        photo?.node?.modified * 1000 || photo?.node?.timestamp * 1000,
-      duration: photo?.node?.image?.playableDuration || 0,
-      mediaType: mimeToMediaType(photo?.node?.type),
-      albumId: photo?.node?.group_name,
-      location: photo?.node?.location,
-      fileSize: photo?.node?.image.fileSize,
-    }))
+    const assets = medias.edges.map(
+      photo =>
+        ({
+          id: photo?.node?.image?.uri,
+          filename: photo?.node?.image?.filename || '',
+          filenameNormalized: photo?.node?.image?.filename?.toLowerCase(),
+          uri: photo?.node?.image?.uri,
+          height: photo?.node?.image?.height,
+          width: photo?.node?.image?.width,
+          creationTime: photo?.node?.timestamp * 1000,
+          modificationTime:
+            photo?.node?.modified * 1000 || photo?.node?.timestamp * 1000,
+          duration: photo?.node?.image?.playableDuration || 0,
+          mimeType: photo?.node?.type,
+          mediaType: mimeToMediaType(photo?.node?.type),
+          albumId: photo?.node?.group_name,
+          location: photo?.node?.location,
+          fileSize: photo?.node?.image.fileSize,
+        } as Asset),
+    )
     return {
       assets,
       hasNextPage: medias.page_info.has_next_page,

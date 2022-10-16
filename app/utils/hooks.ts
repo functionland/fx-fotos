@@ -1,12 +1,15 @@
+import { ViewStyle } from 'react-native'
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   interpolate,
   useAnimatedReaction,
-  withSpring,
+  SharedValue,
 } from 'react-native-reanimated'
 
-export const useFloatHederAnimation = (maxHeight: number) => {
+export const useFloatHederAnimation = (
+  maxHeight: number,
+): [SharedValue<number>, ViewStyle] => {
   const scrollY = useSharedValue(0)
   const diffY = useSharedValue(0)
   useAnimatedReaction(

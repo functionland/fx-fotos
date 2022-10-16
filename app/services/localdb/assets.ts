@@ -1,24 +1,84 @@
 import Realm from 'realm'
 import { Entities, RealmDB, Schemas } from '../../realmdb'
-import { SyncStatus } from '../../types'
+import { SearchOptionValueType, SyncStatus } from '../../types'
 
+const dynamicFilterGenerator = (
+  searchOptions: SearchOptionValueType[],
+): string[] => {
+  const searchOptionsObj = searchOptions?.reduce<
+    Record<string, SearchOptionValueType[]>
+  >((obj, option) => {
+    if (!obj[option.type]) obj[option.type] = []
+    obj[option.type].push(option)
+    return obj
+  }, {})
+  let filterString = []
+  Object.keys(searchOptionsObj || {}).map(optionType => {
+    let orFilterString = '('
+    searchOptionsObj[optionType]?.forEach((option, index) => {
+      if (index) orFilterString += ' OR '
+      switch (option.type) {
+        case 'AssetDateRange':
+          orFilterString += ` creationTime <= ${option.value} `
+          break
+        case 'AssetType':
+          orFilterString += ` mediaType == '${option.value}' `
+          break
+        case 'AssetMime':
+          orFilterString += ` mimeType == '${option.value}' `
+          break
+        case 'AssetDuration':
+          orFilterString += ` duration >= ${option.value} `
+          break
+        default:
+          break
+      }
+    })
+    orFilterString += ')'
+    filterString.push(orFilterString)
+  })
+  return filterString
+}
 export const getAll = (
-  descriptor = 'modificationTime',
-  orderby: 'asc' | 'desc' = 'desc',
-  filter = 'isDeleted=false or syncStatus=2',
+  params: {
+    descriptor: string
+    orderby: 'asc' | 'desc'
+    filter: string
+    filenameFilter: string | undefined
+    searchOptions?: SearchOptionValueType[]
+  } = {},
 ): Promise<Realm.Results<Entities.AssetEntity & Realm.Object>> =>
   RealmDB()
     .then(realm => {
+      const {
+        descriptor = 'modificationTime',
+        orderby = 'desc',
+        filter = 'isDeleted=false or syncStatus=2',
+        filenameFilter,
+        searchOptions,
+      } = params
       let assets = realm
         .objects<Entities.AssetEntity>(Schemas.Asset.name)
         .sorted(descriptor, orderby === 'desc')
       if (filter) assets = assets.filtered(filter)
+      if (filenameFilter)
+        assets = assets.filtered(
+          `filenameNormalized CONTAINS '${filenameFilter.toLowerCase()}'`,
+        )
+
+      // filter the query based on search options
+      const dynamicFilter = dynamicFilterGenerator(searchOptions)
+      console.log('dynamicFilter', dynamicFilter)
+      dynamicFilter.forEach(filterStr => {
+        assets = assets.filtered(filterStr)
+      })
       return assets
     })
     .catch(error => {
       console.error('RealmDB getAllAssets error!', error)
       throw error
     })
+
 export const getById = (
   id: string,
 ): Promise<Realm.Results<Entities.AssetEntity & Realm.Object>> =>
@@ -33,6 +93,7 @@ export const getById = (
       console.error('RealmDB getById error!', error)
       throw error
     })
+
 export const getAllNeedToSync = (): Promise<
   Realm.Results<Entities.AssetEntity & Realm.Object>
 > =>

@@ -7,6 +7,10 @@ export type AssetEntity = {
    */
   filename: string | undefined
   /**
+   * Lowercase of file name for search
+   */
+  filenameNormalized: string | undefined
+  /**
    * Asset file size
    */
   fileSize: number | undefined
@@ -74,6 +78,10 @@ export type AssetEntity = {
    * whenever asset metadata sync is done it would be true
    */
   metadataIsSynced: boolean
+  /**
+   * Asset mime type string
+   */
+  mimeType: string | undefined
 }
 
 export type AssetLocationEntity = {

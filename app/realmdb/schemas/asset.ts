@@ -8,6 +8,10 @@ export const Asset = {
      */
     filename: 'string?',
     /**
+     * Lowercase of filename for search
+     */
+    filenameNormalized: 'string?',
+    /**
      * file size of asset
      */
     fileSize: 'float?',
@@ -75,6 +79,10 @@ export const Asset = {
      * whenever asset metadata sync is done it would be true
      */
     metadataIsSynced: { type: 'bool', default: false },
+    /**
+     * asset MIME type
+     */
+    mimeType: 'string?',
   },
 }
 export const AssetLocation = {

@@ -6,7 +6,11 @@ import Animated, {
   SharedValue,
 } from 'react-native-reanimated'
 
-import { ImageErrorEventData, NativeSyntheticEvent } from 'react-native'
+import {
+  ImageErrorEventData,
+  NativeSyntheticEvent,
+  ViewStyle,
+} from 'react-native'
 import RecyclerAssetList, {
   RecyclerAssetListHandler,
 } from './recycler-asset-list'
@@ -24,6 +28,7 @@ interface Props {
   renderFooter?: () => JSX.Element | JSX.Element[]
   onItemPress?: (section: RecyclerAssetListSection) => void
   onStoryPress?: (story: AssetStory) => void
+  contentContainerStyle?: ViewStyle
 }
 export interface AssetListHandle {
   resetSelectedItems: () => void
@@ -42,6 +47,7 @@ const AssetList = forwardRef<AssetListHandle, Props>(
       renderFooter,
       onItemPress,
       onStoryPress,
+      contentContainerStyle,
     },
     ref,
   ): JSX.Element => {
@@ -82,6 +88,7 @@ const AssetList = forwardRef<AssetListHandle, Props>(
             renderFooter={renderFooter}
             onItemPress={onItemPress}
             onStoryPress={onStoryPress}
+            contentContainerStyle={contentContainerStyle}
           />
         </PinchZoom>
       </GridProvider>
