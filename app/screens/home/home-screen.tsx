@@ -306,12 +306,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       automaticallyAdjustContentInsets
       style={styles.screen}
     >
-      {renderHeader()}
       <AssetListScreen
         navigation={navigation}
         medias={isReady ? medias : null}
         loading={loading}
         showStoryHighlight
+        defaultHeader={renderHeader}
       />
     </Screen>
   )

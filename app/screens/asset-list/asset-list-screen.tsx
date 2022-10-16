@@ -228,7 +228,7 @@ export const AssetListScreen: React.FC<Props> = ({
     return null
   }
   return (
-    <View style={{ flex: 1 }}>
+    <>
       {renderHeader()}
       {!recyclerSections ? (
         <View style={styles.loaderContainer}>
@@ -254,7 +254,7 @@ export const AssetListScreen: React.FC<Props> = ({
           contentContainerStyle={contentContainerStyle}
         />
       )}
-    </View>
+    </>
   )
 }
 
