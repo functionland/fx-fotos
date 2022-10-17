@@ -2,7 +2,6 @@ import React, { useRef } from 'react'
 import { RouteProp, useNavigation } from '@react-navigation/native'
 import {
   Image,
-  View,
   StyleSheet,
   TouchableOpacity,
   Dimensions,
@@ -37,7 +36,6 @@ import {
   LayoutProvider,
   RecyclerListView,
 } from 'fula-recyclerlistview'
-import { Text } from '@rneui/themed'
 import { SharedElement } from 'react-navigation-shared-element'
 import { Asset, AssetStory } from '../../types'
 import { selectedStoryState } from '../../store'
@@ -77,9 +75,10 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
   const isPinchGestureActive = useSharedValue(false)
   const goBack = () => navigation.goBack()
 
+  const selectedStoryData = selectedStory?.data.slice(0, 40)
   const dataProvider = React.useMemo(() => {
     let provider = new DataProvider((r1: Asset, r2: Asset) => r1?.id !== r2?.id)
-    provider = provider.cloneWithRows(selectedStory?.data, 0)
+    provider = provider.cloneWithRows(selectedStoryData, 0)
     return provider
   }, [])
 
@@ -113,29 +112,29 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
   )
 
   const updateImage = () => {
-    if (imageIdx >= selectedStory?.data?.length - 1) {
+    if (imageIdx >= selectedStoryData?.length - 1) {
       return
     }
     setImageIdx(prev => (prev += 1))
   }
   const nextImage = (value: number) => {
-    if (timerRef.current) clearTimeout(timerRef.current)
     setImageIdx(prev => {
-      if (prev + value >= 0 && prev + value < selectedStory?.data?.length)
+      if (prev + value >= 0 && prev + value < selectedStoryData?.length)
         prev += value
       return prev
     })
-    timerRef.current = setTimeout(() => {
-      timerRef.current = null
-    }, 500)
-    timerProgressRef?.current?.start()
+    //timerProgressRef?.current?.start()
   }
 
   React.useEffect(() => {
+    clearTimeout(timerRef.current)
     setTimeout(() => {
       highlightListRef.current?.scrollToIndex(imageIdx, true)
-      if (!timerRef.current) timerProgressRef?.current?.start()
     }, 0)
+    timerRef.current = setTimeout(() => {
+      timerRef.current = null
+      timerProgressRef?.current?.start(imageIdx)
+    }, 100)
   }, [imageIdx])
 
   const timeBarContainerAnimatedStyle = useAnimatedStyle(
@@ -254,16 +253,16 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
                   position: 'absolute',
                 }}
               >
-                {_rowRenderer(null, selectedStory?.data[0], 0)}
+                {_rowRenderer(null, selectedStoryData?.[0], 0)}
               </SharedElement>
               <Animated.View
                 style={[styles.timeBarContainer, timeBarContainerAnimatedStyle]}
               >
-                <View>
+                {/* <View>
                   <Text>
-                    {imageIdx + 1}/{selectedStory?.data?.length}
+                    {imageIdx + 1}/{selectedStoryData?.length}
                   </Text>
-                </View>
+                </View> */}
                 <TimerProgress
                   ref={timerProgressRef}
                   onLayout={() => {
@@ -271,6 +270,7 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
                   }}
                   onTimerEnd={updateImage}
                   pause={pauseTimeProgress}
+                  barCount={dataProvider.getSize()}
                 />
               </Animated.View>
               <LongPressGestureHandler
@@ -326,8 +326,8 @@ const styles = StyleSheet.create({
     right: 0,
     alignItems: 'center',
     zIndex: 9,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingHorizontal: 7,
+    paddingVertical: 10,
   },
   timeBarPlaceholder: {
     height: 4,
