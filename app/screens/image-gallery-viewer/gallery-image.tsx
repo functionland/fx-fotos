@@ -30,7 +30,10 @@ import Animated, {
 } from 'react-native-reanimated'
 import { SharedElement } from 'react-navigation-shared-element'
 import { ScreenWidth } from '@rneui/base'
-import { Video } from 'expo-av'
+import VideoPlayer from 'react-native-video-player';
+import { Button } from 'react-native';
+
+
 
 import { Text } from '../../components'
 import { palette } from '../../theme'
@@ -357,6 +360,8 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
     setLocalUri(uri)
   }, [asset])
 
+
+  console.log(asset)
   React.useLayoutEffect(() => {
     getAssetLocalInfo()
   }, [asset])
@@ -392,25 +397,12 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
                     <Animated.View style={animatedImageContainerStyle}>
                       <SharedElement id={sharedElementId}>
                         {asset.mediaType === 'video' ? (
-                          <Video
-                            ref={video}
-                            source={{
-                              uri: Platform.OS === 'ios' ? localUri : asset.uri,
-                            }}
-                            style={{
-                              height: (asset.height * ScreenWidth) / asset.width,
-                              width: ScreenWidth,
-                              zIndex: 9999999,
-                            }}
-                            onPlaybackStatusUpdate={status =>
-                              setPlaybackStatus(() => status)
-                            }
-                            useNativeControls
-                            resizeMode="contain"
-                            shouldPlay
-                            isLooping
+                          <VideoPlayer
+                            video={{ uri:  Platform.OS === 'ios' ? localUri : asset.uri }}
+                            videoWidth={dims.width}
+                            videoHeight={dims.height}
                           />
-                        ) : Platform.OS === 'android' ? (
+                          ) : Platform.OS === 'android' ? (
                           <FastImage
                             source={{
                               uri: asset.uri,
