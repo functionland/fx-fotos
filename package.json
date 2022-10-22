@@ -71,6 +71,7 @@
     "react-native-permissions": "^3.6.1",
     "react-native-randombytes": "^3.6.1",
     "react-native-reanimated": "^2.8.0",
+    "react-native-reanimated-carousel": "^3.1.0",
     "react-native-redash": "^16.3.0",
     "react-native-responsive-screen": "^1.4.2",
     "react-native-safe-area-context": "^4.1.2",
