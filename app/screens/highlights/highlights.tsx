@@ -150,14 +150,16 @@ export const Highlights: React.FC<HighlightScreenProps> = ({
     },
     [pauseTimeProgress],
   )
-
   useEffect(() => {
     pauseTimeProgress.value = paused
   }, [paused, pauseTimeProgress])
   return (
     <Animated.View style={[{ flex: 1, backgroundColor: 'black' }]}>
       <Animated.View
-        style={[styles.timeBarContainer, timeBarContainerAnimatedStyle]}
+        style={[
+          styles.timeBarContainer,
+          paused ? {} : timeBarContainerAnimatedStyle,
+        ]}
       >
         <LinearGradient
           colors={[

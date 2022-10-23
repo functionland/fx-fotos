@@ -186,22 +186,33 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
     },
     [],
   )
+  // const PESPECTIVE = Platform.OS === 'ios' ? 2.38 : 1.7
+  // const TR_POSITION = Platform.OS === 'ios' ? 2 : 1.5
 
   const animationStyle: TAnimationStyle = React.useCallback((value: number) => {
     'worklet'
-    //const translateY = interpolate(value, [-1, 0, 1], [-PAGE_HEIGHT, 0, 0])
 
-    const translateX = interpolate(value, [-1, 0, 1], [-PAGE_WIDTH, 0, 0])
-
+    const translateX = interpolate(
+      value,
+      [-1, 0, 1],
+      [-PAGE_WIDTH, 0, PAGE_WIDTH],
+    )
+    const rotateY = interpolate(value, [-1, 0, 1], [-45, 0, 45])
     const zIndex = interpolate(value, [-1, 0, 1], [300, 0, -300])
 
-    const scale = interpolate(value, [-1, 0, 1], [1, 1, 0.75])
+    const scale = interpolate(value, [-1, 0, 1], [0.65, 1, 0.65])
 
     return {
-      transform: [{ translateX }, { scale }],
+      transform: [
+        { perspective: PAGE_WIDTH },
+        { translateX },
+        { rotateY: `${rotateY}deg` },
+        { scale },
+      ],
       zIndex,
     }
   }, [])
+
   useEffect(() => {
     const interactionPromise = InteractionManager.runAfterInteractions(() => {
       sharedElementOpacity.value = 0
@@ -245,6 +256,9 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
               <Animated.View>
                 <Carousel
                   ref={carouselRef}
+                  style={{
+                    backgroundColor: '#212121',
+                  }}
                   defaultIndex={currentIndex}
                   loop={false}
                   width={deviceUtils.dimensions.width}
@@ -252,9 +266,12 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
                   autoPlay={false}
                   data={stories.map((_, i) => i)}
                   scrollAnimationDuration={600}
-                  onSnapToItem={index => setCurrentIndex(index)}
+                  onSnapToItem={index => {
+                    setCurrentIndex(index)
+                  }}
                   renderItem={({ index, animationValue }) => (
                     <Highlights
+                      key={index}
                       animationValue={animationValue}
                       assets={stories[index]?.data}
                       active={
@@ -275,6 +292,7 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
                         if (direction === 'next') carouselRef.current?.next()
                         else carouselRef.current?.prev()
                       }}
+                      index={index}
                     />
                   )}
                   panGestureHandlerProps={{
