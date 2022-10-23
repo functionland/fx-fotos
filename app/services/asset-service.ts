@@ -133,7 +133,11 @@ export const categorizeAssets = (assets: Asset[], storyHighlight = false) => {
             } as AssetStory),
         ),
     }
-    return [storySection, ...sections]
+    if ((storySection?.data as AssetStory[])?.length > 0) {
+      return [storySection, ...sections]
+    } else {
+      return [...sections]
+    }
   }
 
   return [...sections]

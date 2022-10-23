@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import {
   StyleSheet,
   Alert,
@@ -70,9 +70,10 @@ export const AssetListScreen: React.FC<Props> = ({
 
   useEffect(() => {
     if (medias) {
-      setRecyclerSections([
+      const sections = [
         ...AssetService.categorizeAssets([...medias], showStoryHighlight),
-      ])
+      ]
+      setRecyclerSections(sections)
     }
   }, [medias])
 
@@ -145,23 +146,30 @@ export const AssetListScreen: React.FC<Props> = ({
     }
   }
 
-  const onItemPress = (section: RecyclerAssetListSection) => {
-    if (section.type === ViewType.ASSET) {
-      const asset: Asset = section.data
-      setSingleAsset(JSON.parse(JSON.stringify(asset)))
+  const onItemPress = useCallback(
+    (section: RecyclerAssetListSection) => {
+      if (section.type === ViewType.ASSET) {
+        const asset: Asset = section.data
+        setSingleAsset(JSON.parse(JSON.stringify(asset)))
+        setRecyclerSectionsStore(recyclerSections)
+        navigation.navigate(AppNavigationNames.ImageGalleryViewer, {
+          assetId: asset.id,
+          scrollToItem: assetListRef.current.scrollToItem,
+        })
+      }
+    },
+    [recyclerSections],
+  )
+  const onStoryPress = useCallback(
+    (story: AssetStory) => {
+      setSelectedStoryState(story)
       setRecyclerSectionsStore(recyclerSections)
-      navigation.navigate(AppNavigationNames.ImageGalleryViewer, {
-        assetId: asset.id,
-        scrollToItem: assetListRef.current.scrollToItem,
+      navigation.navigate(AppNavigationNames.HighlightScreen, {
+        storyId: story.id,
       })
-    }
-  }
-  const onStoryPress = (story: AssetStory) => {
-    setSelectedStoryState(story)
-    navigation.navigate(AppNavigationNames.HighlightScreen, {
-      storyId: story.id,
-    })
-  }
+    },
+    [recyclerSections],
+  )
   const onSelectedItemsChange = (
     assetIds: string[],
     selectionMode: boolean,

@@ -236,7 +236,7 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(
           />
         )
       },
-      [extendedState],
+      [extendedState, onStoryPress, onPress, onLongPress, onAssetLoadError],
     )
 
     const getLayoutType = useCallback(index => sections[index].type, [sections])
