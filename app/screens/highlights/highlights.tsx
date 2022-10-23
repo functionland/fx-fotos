@@ -30,6 +30,8 @@ import {
 } from 'fula-recyclerlistview'
 import { Asset, AssetStory } from '../../types'
 import { TimerProgress, TimerProgressHandler } from '../../components'
+import { Text } from '@rneui/themed'
+import { LinearGradient } from 'expo-linear-gradient'
 
 interface HighlightScreenProps {
   route: RouteProp<
@@ -40,10 +42,12 @@ interface HighlightScreenProps {
     },
     'params'
   >
+  title: string
   animationValue?: Animated.SharedValue<number>
   active: boolean
   paused: boolean
   assets: Asset[]
+  onNextStory?: (direction: 'next' | 'previous') => void
 }
 
 const OPACITY_FADE_DURATION = 111
@@ -51,10 +55,12 @@ const OPACITY_FADE_DURATION = 111
 const { height: screenHeight, width: screenWidth } = Dimensions.get('window')
 export const Highlights: React.FC<HighlightScreenProps> = ({
   route,
+  title,
   animationValue,
   active = true,
   assets = [],
   paused = false,
+  onNextStory,
 }) => {
   const timerRef = useRef(null)
   const [imageIdx, setImageIdx] = React.useState(0)
@@ -101,16 +107,19 @@ export const Highlights: React.FC<HighlightScreenProps> = ({
   )
 
   const updateImage = () => {
-    if (imageIdx >= selectedStoryData?.length - 1) {
-      return
-    }
-    setImageIdx(prev => (prev += 1))
+    nextImage(1)
   }
   const nextImage = (value: number) => {
     setImageIdx(prev => {
+      let next = prev
       if (prev + value >= 0 && prev + value < selectedStoryData?.length)
-        prev += value
-      return prev
+        next += value
+
+      if (next == prev) {
+        value > 0 ? onNextStory?.('next') : onNextStory?.('previous')
+      }
+
+      return next
     })
   }
 
@@ -142,7 +151,6 @@ export const Highlights: React.FC<HighlightScreenProps> = ({
     [pauseTimeProgress],
   )
 
-
   useEffect(() => {
     pauseTimeProgress.value = paused
   }, [paused, pauseTimeProgress])
@@ -151,15 +159,25 @@ export const Highlights: React.FC<HighlightScreenProps> = ({
       <Animated.View
         style={[styles.timeBarContainer, timeBarContainerAnimatedStyle]}
       >
-        <TimerProgress
-          ref={timerProgressRef}
-          onLayout={() => {
-            timerProgressRef?.current?.start()
-          }}
-          onTimerEnd={updateImage}
-          pause={pauseTimeProgress}
-          barCount={dataProvider.getSize()}
-        />
+        <LinearGradient
+          colors={[
+            'rgba(33,33,33,0.3)',
+            'rgba(33,33,33,0.2)',
+            'rgba(33,33,33,0)',
+          ]}
+          style={styles.gradientContainer}
+        >
+          <TimerProgress
+            ref={timerProgressRef}
+            onLayout={() => {
+              timerProgressRef?.current?.start()
+            }}
+            onTimerEnd={updateImage}
+            pause={pauseTimeProgress}
+            barCount={dataProvider.getSize()}
+          />
+          <Text style={styles.title}>{title}</Text>
+        </LinearGradient>
       </Animated.View>
       {active && (
         <LongPressGestureHandler
@@ -210,8 +228,9 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    alignItems: 'center',
     zIndex: 9,
+  },
+  gradientContainer: {
     paddingHorizontal: 7,
     paddingVertical: 10,
   },
@@ -232,5 +251,9 @@ const styles = StyleSheet.create({
   },
   image: {
     backgroundColor: 'black',
+  },
+  title: {
+    padding: 5,
+    color: 'white',
   },
 })

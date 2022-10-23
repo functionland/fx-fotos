@@ -31,7 +31,7 @@ import Animated, {
 import { snapPoint } from 'react-native-redash'
 import FastImage from 'react-native-fast-image'
 import { useRecoilState } from 'recoil'
-import Carousel from 'react-native-reanimated-carousel'
+import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
 import { SharedElement } from 'react-navigation-shared-element'
 import { Asset, AssetStory, ViewType } from '../../types'
 import { recyclerSectionsState, selectedStoryState } from '../../store'
@@ -55,6 +55,7 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
   const navigation = useNavigation()
   const gestureHanlderRef = useRef<NativeViewGestureHandler>()
   const panGestureRef = useRef<PanGestureHandler>()
+  const carouselRef = useRef<ICarouselInstance>()
   const [selectedStory] = useRecoilState(selectedStoryState)
   const pauseTimeProgress = useSharedValue(false)
   const sharedElementOpacity = useSharedValue(1)
@@ -243,13 +244,14 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
 
               <Animated.View>
                 <Carousel
+                  ref={carouselRef}
                   defaultIndex={currentIndex}
                   loop={false}
                   width={deviceUtils.dimensions.width}
                   height={deviceUtils.dimensions.height}
                   autoPlay={false}
                   data={stories.map((_, i) => i)}
-                  scrollAnimationDuration={300}
+                  scrollAnimationDuration={600}
                   onSnapToItem={index => setCurrentIndex(index)}
                   renderItem={({ index, animationValue }) => (
                     <Highlights
@@ -260,7 +262,19 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
                         index === currentIndex - 1 ||
                         index === currentIndex + 1
                       }
+                      title={stories[index]?.title}
                       paused={index != currentIndex}
+                      onNextStory={direction => {
+                        if (
+                          carouselRef.current?.getCurrentIndex() >=
+                            stories?.length - 1 &&
+                          direction === 'next'
+                        ) {
+                          goBack()
+                        }
+                        if (direction === 'next') carouselRef.current?.next()
+                        else carouselRef.current?.prev()
+                      }}
                     />
                   )}
                   panGestureHandlerProps={{
