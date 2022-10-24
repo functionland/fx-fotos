@@ -102,14 +102,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       realmAssets.current?.removeAllListeners()
       realmAssets.current = await Assets.getAll()
       realmAssets.current.addListener(onLocalDbAssetChange)
-      const assets = []
-      for (const asset of realmAssets.current) {
-        assets.push(asset)
-      }
-      setMedias(assets)
+      setMedias(realmAssets.current.slice(0, realmAssets.current.length - 1))
       await syncAssets(
-        assets?.[0]?.modificationTime,
-        assets?.[assets.length - 1]?.modificationTime,
+        realmAssets.current?.[0]?.modificationTime,
+        realmAssets.current?.[realmAssets.current.length - 1]?.modificationTime,
       )
       syncAssetsMetadata()
     } catch (error) {
@@ -160,7 +156,19 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           first,
           after: allMedias?.endCursor,
         })
-        await Assets.addOrUpdate(allMedias.assets)
+        await Assets.addOrUpdate(
+          allMedias.assets.map(asset => ({
+            id: asset.id,
+            uri: asset.uri,
+            height: asset.height,
+            width: asset.width,
+            creationTime: asset.creationTime,
+            modificationTime: asset.modificationTime,
+            albumId: asset.albumId,
+            mediaType: asset.mediaType,
+            mimeType: asset.mimeType,
+          })),
+        )
         if (first === 20) {
           // Get the first assets that is created
           fitstAsset = allMedias.assets?.[0]
@@ -200,7 +208,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       }, {})
 
       const syncBundaries = Object.keys(syncBundariesObj)
-      if (syncBundaries?.length === 0) {
+      if (
+        !syncBundaries.some(
+          startDate => syncBundariesObj[startDate] != startDate,
+        )
+      ) {
         return
       }
 
@@ -235,7 +247,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
               metadataIsSynced: true,
             }),
           )
-          first *= 2
         } while (allMedias.hasNextPage)
         await Assets.addOrUpdate(assetsMetadatas)
       }
