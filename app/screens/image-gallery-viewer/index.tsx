@@ -36,12 +36,8 @@ import {
 } from '../../components/header'
 import { RootStackParamList } from '../../navigators'
 import { Assets } from '../../services/localdb'
-import {
-  singleAssetState,
-  mediasState,
-  recyclerSectionsState,
-} from '../../store'
-import { Asset, SyncStatus } from '../../types'
+import { singleAssetState, recyclerSectionsState } from '../../store'
+import { Asset, SyncStatus, ViewType } from '../../types'
 import { GalleryImage } from './gallery-image'
 import {
   AddBoxs,
@@ -62,7 +58,6 @@ export const ImageGalleryViewerScreen: React.FC<
 > = ({ route, navigation }) => {
   const [asset, setAsset] = useRecoilState(singleAssetState)
   const [recyclerList] = useRecoilState(recyclerSectionsState)
-  const [medias] = useRecoilState(mediasState)
   const { assetId, scrollToItem } = route.params
   const windowDims = useWindowDimensions()
   const initialIndexRef = useRef(null)
@@ -83,11 +78,13 @@ export const ImageGalleryViewerScreen: React.FC<
   const footerHeightRef = useRef(0)
 
   if (initialIndexRef.current === null) {
-    medias.forEach((asset, idx) => {
-      if (asset.id === assetId) {
-        initialIndexRef.current = idx
-      }
-    })
+    recyclerList
+      .filter(section => section.type === ViewType.ASSET)
+      .forEach((section, idx) => {
+        if (section.data.id === assetId) {
+          initialIndexRef.current = idx
+        }
+      })
   }
   const listGestureRef = useRef()
   const rclRef = useRef()
@@ -166,9 +163,14 @@ export const ImageGalleryViewerScreen: React.FC<
 
   const dataProvider = useMemo(() => {
     let provider = new DataProvider((r1: Asset, r2: Asset) => r1?.id !== r2?.id)
-    provider = provider.cloneWithRows(medias, 0)
+    provider = provider.cloneWithRows(
+      recyclerList
+        .filter(section => section.type === ViewType.ASSET)
+        .map(section => section.data),
+      0,
+    )
     return provider
-  }, [medias])
+  }, [recyclerList])
 
   const goBack = useCallback(() => {
     navigation.setParams({
