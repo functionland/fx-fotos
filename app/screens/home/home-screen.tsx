@@ -5,7 +5,7 @@ import React, {
   useCallback,
   useContext,
 } from 'react'
-import { Alert, Platform, StyleSheet, ViewStyle } from 'react-native'
+import { Alert, Platform, StyleSheet, View, ViewStyle } from 'react-native'
 import { useRecoilState } from 'recoil'
 import { request, PERMISSIONS, openSettings } from 'react-native-permissions'
 
@@ -27,12 +27,13 @@ import {
   HeaderLogo,
   HeaderRightContainer,
 } from '../../components/header'
-import { Avatar, Icon, Image } from '@rneui/themed'
+import { Avatar, Icon, Image, LinearProgress } from '@rneui/themed'
 import { SharedElement } from 'react-navigation-shared-element'
 import { AppNavigationNames } from '../../navigators'
 import { useWalletConnect } from '@walletconnect/react-native-dapp'
 import { ThemeContext } from '../../theme'
 import * as helper from '../../utils/helper'
+import Animated from 'react-native-reanimated'
 
 interface HomeScreenProps {
   navigation: NativeStackNavigationProp<
@@ -43,6 +44,7 @@ interface HomeScreenProps {
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [isReady, setIsReady] = useState(false)
+  const [syncing, setSyncing] = useState(false)
   const walletConnector = useWalletConnect()
   const { toggleTheme } = useContext(ThemeContext)
 
@@ -109,7 +111,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         assets?.[0]?.modificationTime,
         assets?.[assets.length - 1]?.modificationTime,
       )
-      syncAssetsMetadata(realmAssets.current)
+      syncAssetsMetadata()
     } catch (error) {
       console.error(error)
     }
@@ -198,6 +200,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       }, {})
 
       const syncBundaries = Object.keys(syncBundariesObj)
+      if (syncBundaries?.length === 0) {
+        return
+      }
+
+      setSyncing(true)
+      const assetsMetadatas = []
       for (let index = 0; index < syncBundaries.length; index++) {
         const toTime = Number.parseInt(syncBundaries[index])
         const fromTime = Number.parseInt(syncBundariesObj[syncBundaries[index]])
@@ -211,93 +219,103 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             include: [
               'filename',
               'fileSize',
-              'location',
+              //'location', //For now we don't need location
               'imageSize',
               'playableDuration',
             ],
           })
-
-          await Assets.addOrUpdate(
-            allMedias?.assets.map<Asset>(asset => ({
+          allMedias?.assets.map<Asset>(asset =>
+            assetsMetadatas.push({
               id: asset.id,
               filename: asset.filename,
               filenameNormalized: asset.filenameNormalized,
-              duration: asset.duration,
-              location: asset.location,
-              fileSize: asset.fileSize,
+              duration: asset?.duration,
+              //location: asset?.location,
+              fileSize: asset?.fileSize,
               metadataIsSynced: true,
-            })),
+            }),
           )
           first *= 2
         } while (allMedias.hasNextPage)
+        await Assets.addOrUpdate(assetsMetadatas)
       }
     } catch (error) {
       console.log('syncAssetsMetadata:', error)
+    } finally {
+      setSyncing(false)
     }
   }
   const renderHeader = (headerStyles: ViewStyle) => {
     return (
-      <Header
-        style={headerStyles}
-        centerComponent={<HeaderLogo />}
-        leftComponent={
-          <HeaderLeftContainer>
-            <Icon
-              type="material-community"
-              name="white-balance-sunny"
-              onPress={() => {
-                toggleTheme()
-              }}
-            />
-          </HeaderLeftContainer>
-        }
-        rightComponent={
-          <HeaderRightContainer>
-            <SharedElement id="AccountAvatar">
-              {walletConnector.connected ? (
-                <Avatar
-                  containerStyle={styles.avatar}
-                  ImageComponent={() => (
-                    <Image
-                      source={
-                        walletConnector.peerMeta?.icons?.[0].endsWith('.svg')
-                          ? helper.getWalletImage(
-                              walletConnector.peerMeta?.name,
-                            )
-                          : {
-                              uri: walletConnector.peerMeta?.icons?.[0],
-                            }
-                      }
-                      style={{
-                        height: 35,
-                        width: 35,
-                      }}
-                      resizeMode="contain"
-                    />
-                  )}
-                  onPress={() =>
-                    navigation.navigate(AppNavigationNames.AccountScreen)
-                  }
-                />
-              ) : (
-                <Avatar
-                  containerStyle={styles.disconnectedAvatar}
-                  icon={{
-                    name: 'account-alert',
-                    type: 'material-community',
-                    size: 34,
-                  }}
-                  size="small"
-                  rounded
-                  onPress={() =>
-                    navigation.navigate(AppNavigationNames.AccountScreen)
-                  }
-                />
-              )}
-            </SharedElement>
-          </HeaderRightContainer>
-        }
-      />
+      <Animated.View
+        style={[
+          { position: 'absolute', top: 0, zIndex: 99, width: '100%' },
+          headerStyles,
+        ]}
+      >
+        <Header
+          containerStyle={{ position: 'relative' }}
+          centerComponent={<HeaderLogo />}
+          leftComponent={
+            <HeaderLeftContainer>
+              <Icon
+                type="material-community"
+                name="white-balance-sunny"
+                onPress={() => {
+                  toggleTheme()
+                }}
+              />
+            </HeaderLeftContainer>
+          }
+          rightComponent={
+            <HeaderRightContainer>
+              <SharedElement id="AccountAvatar">
+                {walletConnector.connected ? (
+                  <Avatar
+                    containerStyle={styles.avatar}
+                    ImageComponent={() => (
+                      <Image
+                        source={
+                          walletConnector.peerMeta?.icons?.[0].endsWith('.svg')
+                            ? helper.getWalletImage(
+                                walletConnector.peerMeta?.name,
+                              )
+                            : {
+                                uri: walletConnector.peerMeta?.icons?.[0],
+                              }
+                        }
+                        style={{
+                          height: 35,
+                          width: 35,
+                        }}
+                        resizeMode="contain"
+                      />
+                    )}
+                    onPress={() =>
+                      navigation.navigate(AppNavigationNames.AccountScreen)
+                    }
+                  />
+                ) : (
+                  <Avatar
+                    containerStyle={styles.disconnectedAvatar}
+                    icon={{
+                      name: 'account-alert',
+                      type: 'material-community',
+                      size: 34,
+                    }}
+                    size="small"
+                    rounded
+                    onPress={() =>
+                      navigation.navigate(AppNavigationNames.AccountScreen)
+                    }
+                  />
+                )}
+              </SharedElement>
+            </HeaderRightContainer>
+          }
+        />
+        {syncing && <LinearProgress />}
+      </Animated.View>
     )
   }
   return (
