@@ -206,12 +206,12 @@ export const AssetListScreen: React.FC<Props> = ({
           }
           rightComponent={
             <HeaderRightContainer>
-              <Icon
+              {/* <Icon
                 style={styles.headerIcon}
                 type="material-community"
                 name="upload-multiple"
                 onPress={batchUpload}
-              />
+              /> */}
               <Icon
                 style={styles.headerIcon}
                 type="material-community"
