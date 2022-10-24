@@ -36,12 +36,13 @@ import {
 } from '../../components/header'
 import { RootStackParamList } from '../../navigators'
 import { Assets } from '../../services/localdb'
+import { singleAssetState, recyclerSectionsState } from '../../store'
 import {
-  singleAssetState,
-  mediasState,
-  recyclerSectionsState,
-} from '../../store'
-import { Asset, SyncStatus } from '../../types'
+  Asset,
+  RecyclerAssetListSection,
+  SyncStatus,
+  ViewType,
+} from '../../types'
 import { GalleryImage } from './gallery-image'
 import {
   AddBoxs,
@@ -51,6 +52,8 @@ import {
 } from '../../services/sync-service'
 import * as helper from '../../utils/helper'
 import { palette } from '../../theme'
+import { AssetService } from '../../services'
+import { LinearGradient } from 'expo-linear-gradient'
 
 interface ImageGalleryViewerScreenProps {
   navigation: NavigationProp<RootStackParamList>
@@ -61,8 +64,7 @@ export const ImageGalleryViewerScreen: React.FC<
   ImageGalleryViewerScreenProps
 > = ({ route, navigation }) => {
   const [asset, setAsset] = useRecoilState(singleAssetState)
-  const [recyclerList] = useRecoilState(recyclerSectionsState)
-  const [medias] = useRecoilState(mediasState)
+  const [recyclerList, setRecyclerList] = useRecoilState(recyclerSectionsState)
   const { assetId, scrollToItem } = route.params
   const windowDims = useWindowDimensions()
   const initialIndexRef = useRef(null)
@@ -81,10 +83,18 @@ export const ImageGalleryViewerScreen: React.FC<
 
   const headerHeightRef = useRef(0)
   const footerHeightRef = useRef(0)
+  const [assetSections, setAssetSections] = useState<RecyclerAssetListSection>(
+    recyclerList.filter(section => section.type === ViewType.ASSET),
+  )
+  useEffect(() => {
+    setAssetSections(
+      recyclerList.filter(section => section.type === ViewType.ASSET),
+    )
+  }, [recyclerList])
 
   if (initialIndexRef.current === null) {
-    medias.forEach((asset, idx) => {
-      if (asset.id === assetId) {
+    assetSections.forEach((section, idx) => {
+      if (section.data.id === assetId) {
         initialIndexRef.current = idx
       }
     })
@@ -141,13 +151,13 @@ export const ImageGalleryViewerScreen: React.FC<
 
   const rowRenderer = useCallback(
     (type: string | number, data: Asset) => {
-      if (!data) return null
-      if (data?.syncStatus === SyncStatus.SYNCED && data?.isDeleted) {
-        return renderDownloadSection()
-      }
-      if (data.isDeleted) {
-        return null
-      }
+      // if (!data) return null
+      // if (data?.syncStatus === SyncStatus.SYNCED && data?.isDeleted) {
+      //   return renderDownloadSection()
+      // }
+      // if (data.isDeleted) {
+      //   return null
+      // }
       return renderItem({ item: data })
     },
     [transitionDone],
@@ -166,9 +176,12 @@ export const ImageGalleryViewerScreen: React.FC<
 
   const dataProvider = useMemo(() => {
     let provider = new DataProvider((r1: Asset, r2: Asset) => r1?.id !== r2?.id)
-    provider = provider.cloneWithRows(medias, 0)
+    provider = provider.cloneWithRows(
+      assetSections.map(section => section.data),
+      0,
+    )
     return provider
-  }, [medias])
+  }, [assetSections])
 
   const goBack = useCallback(() => {
     navigation.setParams({
@@ -179,6 +192,51 @@ export const ImageGalleryViewerScreen: React.FC<
     })
   }, [])
 
+  const deleteAsset = () => {
+    Alert.alert('Delete', 'Are you sure want to delete these assets?', [
+      {
+        text: 'No',
+        style: 'cancel',
+      },
+      {
+        text: 'Yes',
+        onPress: async () => {
+          try {
+            console.log(
+              'currentAssetRef.current?.id',
+              currentAssetRef.current?.id,
+            )
+
+            const nextIndex = assetSections.findIndex(
+              section => section?.data?.id == currentAssetRef.current?.id,
+            )
+            rclRef.current.scrollToIndex(nextIndex, true)
+            setAssetSections(
+              assetSections.filter(
+                section => section?.data?.id != currentAssetRef.current?.id,
+              ),
+            )
+            setRecyclerList(
+              recyclerList.filter(
+                section => section?.data?.id != currentAssetRef.current?.id,
+              ),
+            )
+            currentAssetRef.current = assetSections[nextIndex + 1]?.data
+            await AssetService.deleteAssets([currentAssetRef.current?.id])
+            await Assets.addOrUpdate([
+              {
+                id: currentAssetRef.current?.id,
+                isDeleted: true,
+              },
+            ])
+            return
+          } catch (error) {
+            console.log('deleteAssets: ', error)
+          }
+        },
+      },
+    ])
+  }
   const cancelUpdate = useCallback(() => {
     Alert.alert('Waiting for connection', 'Will upload when connected', [
       {
@@ -306,40 +364,40 @@ export const ImageGalleryViewerScreen: React.FC<
               />
             </HeaderLeftContainer>
           }
-          rightComponent={
-            <HeaderRightContainer>
-              {loading ? (
-                <ActivityIndicator size="small" />
-              ) : asset?.syncStatus === SyncStatus.SYNCED &&
-                !asset?.isDeleted ? (
-                <Icon type="material-community" name="cloud-check" />
-              ) : asset?.syncStatus === SyncStatus.NOTSYNCED &&
-                !asset?.isDeleted ? (
-                <Icon
-                  type="material-community"
-                  name="cloud-upload-outline"
-                  onPress={uploadToBox}
-                />
-              ) : asset?.syncStatus === SyncStatus.SYNC ? (
-                <Icon
-                  type="material-community"
-                  name="refresh"
-                  onPress={uploadToBox}
-                />
-              ) : null}
-              {asset?.syncStatus === SyncStatus.SYNCED && (
-                <Icon
-                  type="material-community"
-                  style={styles.headerIcon}
-                  name="share-variant"
-                  onPress={() => {
-                    setDID('')
-                    setShowShareBottomSheet(true)
-                  }}
-                />
-              )}
-            </HeaderRightContainer>
-          }
+          // rightComponent={
+          //   <HeaderRightContainer>
+          //     {loading ? (
+          //       <ActivityIndicator size="small" />
+          //     ) : asset?.syncStatus === SyncStatus.SYNCED &&
+          //       !asset?.isDeleted ? (
+          //       <Icon type="material-community" name="cloud-check" />
+          //     ) : asset?.syncStatus === SyncStatus.NOTSYNCED &&
+          //       !asset?.isDeleted ? (
+          //       <Icon
+          //         type="material-community"
+          //         name="cloud-upload-outline"
+          //         onPress={uploadToBox}
+          //       />
+          //     ) : asset?.syncStatus === SyncStatus.SYNC ? (
+          //       <Icon
+          //         type="material-community"
+          //         name="refresh"
+          //         onPress={uploadToBox}
+          //       />
+          //     ) : null}
+          //     {asset?.syncStatus === SyncStatus.SYNCED && (
+          //       <Icon
+          //         type="material-community"
+          //         style={styles.headerIcon}
+          //         name="share-variant"
+          //         onPress={() => {
+          //           setDID('')
+          //           setShowShareBottomSheet(true)
+          //         }}
+          //       />
+          //     )}
+          //   </HeaderRightContainer>
+          // }
         />
       </Animated.View>
     ),
@@ -376,93 +434,95 @@ export const ImageGalleryViewerScreen: React.FC<
     }
   }
 
-  const downloadFromBox = async () => {
-    if (asset?.syncStatus === SyncStatus.SYNCED && asset?.isDeleted) {
-      setLoading(true)
-      setTimeout(async () => {
-        try {
-          try {
-            await AddBoxs()
-          } catch (error) {
-            Alert.alert('Warning', error)
-            return
-          }
-          const myDID = await helper.getMyDID()
-          let fileRef = null
-          if (myDID) {
-            const jwe = JSON.parse(asset?.jwe)
-            fileRef = (await helper.decryptJWE(myDID.did, jwe))?.symetricKey
-          }
-          let result = null
-          if (fileRef) {
-            result = await downloadAndDecryptAsset(fileRef)
-          } else {
-            result = await downloadAsset(asset?.cid)
-          }
-          if (result) {
-            setAsset(prev => ({
-              ...prev,
-              uri: result.uri,
-              isDeleted: false,
-            }))
-            Assets.addOrUpdate([
-              {
-                id: asset.id,
-                uri: result.uri,
-                isDeleted: false,
-              },
-            ])
-          }
-        } catch (error) {
-          console.log('uploadOrDownload', error)
-          Alert.alert(
-            'Error',
-            'Unable to receive the file, make sure your box is available!',
-          )
-        } finally {
-          setLoading(false)
-        }
-      }, 0)
-    }
-  }
+  // const downloadFromBox = async () => {
+  //   if (asset?.syncStatus === SyncStatus.SYNCED && asset?.isDeleted) {
+  //     setLoading(true)
+  //     setTimeout(async () => {
+  //       try {
+  //         try {
+  //           await AddBoxs()
+  //         } catch (error) {
+  //           Alert.alert('Warning', error)
+  //           return
+  //         }
+  //         const myDID = await helper.getMyDID()
+  //         let fileRef = null
+  //         if (myDID) {
+  //           const jwe = JSON.parse(asset?.jwe)
+  //           fileRef = (await helper.decryptJWE(myDID.did, jwe))?.symetricKey
+  //         }
+  //         let result = null
+  //         if (fileRef) {
+  //           result = await downloadAndDecryptAsset(fileRef)
+  //         } else {
+  //           result = await downloadAsset(asset?.cid)
+  //         }
+  //         if (result) {
+  //           setAsset(prev => ({
+  //             ...prev,
+  //             uri: result.uri,
+  //             isDeleted: false,
+  //           }))
+  //           Assets.addOrUpdate([
+  //             {
+  //               id: asset.id,
+  //               uri: result.uri,
+  //               isDeleted: false,
+  //             },
+  //           ])
+  //         }
+  //       } catch (error) {
+  //         console.log('uploadOrDownload', error)
+  //         Alert.alert(
+  //           'Error',
+  //           'Unable to receive the file, make sure your box is available!',
+  //         )
+  //       } finally {
+  //         setLoading(false)
+  //       }
+  //     }, 0)
+  //   }
+  // }
 
-  const renderDownloadSection = useCallback(
-    () => (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        <Card
-          containerStyle={{
-            borderWidth: 0,
-          }}
-        >
-          <Icon
-            type="material-community"
-            name="cloud-download-outline"
-            size={78}
-            onPress={downloadFromBox}
-          />
-          <Card.Title>Tap to download</Card.Title>
-        </Card>
-      </View>
-    ),
-    [downloadFromBox],
-  )
+  // const renderDownloadSection = useCallback(
+  //   () => (
+  //     <View
+  //       style={{
+  //         flex: 1,
+  //         justifyContent: 'center',
+  //         alignItems: 'center',
+  //       }}
+  //     >
+  //       <Card
+  //         containerStyle={{
+  //           borderWidth: 0,
+  //         }}
+  //       >
+  //         <Icon
+  //           type="material-community"
+  //           name="cloud-download-outline"
+  //           size={78}
+  //           onPress={downloadFromBox}
+  //         />
+  //         <Card.Title>Tap to download</Card.Title>
+  //       </Card>
+  //     </View>
+  //   ),
+  //   [downloadFromBox],
+  // )
 
   const onMomentumScrollEnd = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
       const { x: xOffset } = event.nativeEvent.contentOffset
       const imageWidth = windowDims.width
       const index = Math.round(xOffset / imageWidth)
-      currentAssetRef.current = dataProvider.getDataForIndex(index)
+      const newAsset = dataProvider.getDataForIndex(index)
+      if (currentAssetRef.current.id == newAsset.id) return
+      currentAssetRef.current = newAsset
       setTimeout(() => {
-        recyclerList.forEach(section => {
+        assetSections.forEach(section => {
           if (section.id === currentAssetRef.current.id) {
-            scrollToItem(section, false)
+            scrollToItem?.(section, false)
           }
         })
       })
@@ -486,78 +546,24 @@ export const ImageGalleryViewerScreen: React.FC<
         }}
         style={[styles.actionButtonContainer, animatedFooterStyle]}
       >
-        <TouchableOpacity
-          style={styles.iconContainer}
-          onPress={() => onActionPress('delete')}
+        <LinearGradient
+          colors={[
+            'rgba(33,33,33,0)',
+            'rgba(33,33,33,0.2)',
+            'rgba(33,33,33,0.3)',
+          ]}
+          style={styles.gradientContainer}
         >
-          <Icon
-            name="delete"
-            type="material-community"
-            size={30}
-            color={palette.white}
-          />
-          <Text style={styles.actionText}>Delete</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.iconContainer}
-          onPress={() => onActionPress('print')}
-        >
-          <Icon
-            name="printer"
-            type="material-community"
-            size={30}
-            color={palette.white}
-          />
-          <Text style={styles.actionText}>Print</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.iconContainer}
-          onPress={() => onActionPress('upload')}
-        >
-          <Icon
-            name="cloud-upload-outline"
-            type="material-community"
-            size={30}
-            color={palette.white}
-          />
-          <Text style={styles.actionText}>Upload</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.iconContainer}
-          onPress={() => onActionPress('AddToAlbum')}
-        >
-          <Icon
-            name="playlist-plus"
-            type="material-community"
-            size={30}
-            color={palette.white}
-          />
-          <Text style={styles.actionText}>Add to Album</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.iconContainer}
-          onPress={() => onActionPress('openWith')}
-        >
-          <Icon
-            name="open-in-app"
-            type="material-community"
-            size={30}
-            color={palette.white}
-          />
-          <Text style={styles.actionText}>Open With</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.iconContainer}
-          onPress={() => onActionPress('help')}
-        >
-          <Icon
-            name="help-circle-outline"
-            type="material-community"
-            size={30}
-            color={palette.white}
-          />
-          <Text style={styles.actionText}>Help</Text>
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.iconContainer} onPress={deleteAsset}>
+            <Icon
+              name="delete"
+              type="material-community"
+              size={30}
+              color={palette.white}
+            />
+            <Text style={styles.actionText}>Delete</Text>
+          </TouchableOpacity>
+        </LinearGradient>
       </Animated.View>
     ),
     [],
@@ -679,5 +685,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     bottom: 0,
+  },
+  gradientContainer: {
+    paddingHorizontal: 7,
+    paddingVertical: 10,
+    flex: 1,
+    justifyContent: 'center',
   },
 })

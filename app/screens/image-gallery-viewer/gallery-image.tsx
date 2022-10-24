@@ -29,7 +29,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated'
 import { SharedElement } from 'react-navigation-shared-element'
-import { ScreenWidth } from '@rneui/base'
+import { ScreenHeight, ScreenWidth } from '@rneui/base'
 import { Video } from 'expo-av'
 
 import { Text } from '../../components'
@@ -78,7 +78,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
   const singleTapHandlerRef = useRef(null)
 
   const isZoomed = useDerivedValue(() => {
-    if (accumulatedScale.value > 1) {
+    if (accumulatedScale?.value > 1) {
       return true
     }
     return false
@@ -353,8 +353,10 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
   const [, setPlaybackStatus] = React.useState({})
 
   const getAssetLocalInfo = React.useCallback(async () => {
-    const uri = await AssetService.getIOSMediaLocalUri(asset)
-    setLocalUri(uri)
+    if (Platform.OS === 'ios') {
+      const uri = await AssetService.getIOSMediaLocalUri(asset)
+      setLocalUri(uri)
+    }
   }, [asset])
 
   React.useLayoutEffect(() => {
@@ -398,7 +400,9 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
                               uri: Platform.OS === 'ios' ? localUri : asset.uri,
                             }}
                             style={{
-                              height: (asset.height * ScreenWidth) / asset.width,
+                              height:
+                                (asset.height * ScreenWidth) / asset.width ||
+                                ScreenHeight,
                               width: ScreenWidth,
                               zIndex: 9999999,
                             }}
@@ -444,12 +448,16 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
                           <Text style={styles.locationHeading}>Location:</Text>
                           <Text style={styles.uri}>{asset.uri}</Text>
                         </View>
-                        <View style={styles.dimensionInfoContainer}>
-                          <Text style={styles.dimensionHeading}>Dimensions:</Text>
-                          <Text style={styles.dimensionText}>
-                            {asset.width} X {asset.height}
-                          </Text>
-                        </View>
+                        {asset?.width && (
+                          <View style={styles.dimensionInfoContainer}>
+                            <Text style={styles.dimensionHeading}>
+                              Dimensions:
+                            </Text>
+                            <Text style={styles.dimensionText}>
+                              {asset?.width} X {asset?.height}
+                            </Text>
+                          </View>
+                        )}
                       </Animated.View>
                     </Animated.View>
                   </PanGestureHandler>

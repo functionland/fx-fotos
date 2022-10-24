@@ -169,7 +169,10 @@ export const getAssets = async (
   params: GetPhotosParams,
 ): Promise<PagedInfo<Asset>> => {
   try {
-    const medias = await CameraRoll.getPhotos(params)
+    const medias = await CameraRoll.getPhotos({
+      include: ['imageSize'],
+      ...params,
+    })
     const assets = medias.edges.map(
       photo =>
         ({

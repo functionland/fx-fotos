@@ -216,7 +216,6 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
   useEffect(() => {
     const interactionPromise = InteractionManager.runAfterInteractions(() => {
       sharedElementOpacity.value = 0
-      console.log('sharedElementOpacity.value', sharedElementOpacity.value)
     })
 
     return () => {
@@ -259,7 +258,9 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
                   style={{
                     backgroundColor: '#212121',
                   }}
-                  defaultIndex={currentIndex}
+                  defaultIndex={
+                    currentIndex > stories?.length - 1 ? 0 : currentIndex
+                  }
                   loop={false}
                   width={deviceUtils.dimensions.width}
                   height={deviceUtils.dimensions.height}

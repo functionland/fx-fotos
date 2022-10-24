@@ -14,35 +14,38 @@ interface Props {
 // eslint-disable-next-line no-undef
 function StoryListItem({ stories, onPress }: Props): JSX.Element {
   const { theme } = useTheme()
-  const renderItem = useCallback(({ item }) => {
-    if (item.data.length === 0) {
-      return null
-    }
-    const onItemPress = () => {
-      onPress?.(item)
-    }
-    return (
-      <Pressable
-        style={styles.container}
-        android_ripple={{
-          color: theme.colors.background,
-          foreground: true,
-        }}
-        onPress={onItemPress}
-      >
-        <SharedElement id={item.id}>
-          <Image
-            source={{
-              uri: item.data[0].uri,
-            }}
-            fadeDuration={0}
-            style={styles.image}
-          />
-        </SharedElement>
-        <Text style={styles.label}>{item.title}</Text>
-      </Pressable>
-    )
-  }, [])
+  const renderItem = useCallback(
+    ({ item }) => {
+      if (item.data.length === 0) {
+        return null
+      }
+      const onItemPress = () => {
+        onPress?.(item)
+      }
+      return (
+        <Pressable
+          style={styles.container}
+          android_ripple={{
+            color: theme.colors.background,
+            foreground: true,
+          }}
+          onPress={onItemPress}
+        >
+          <SharedElement id={item.id}>
+            <Image
+              source={{
+                uri: item.data[0].uri,
+              }}
+              fadeDuration={0}
+              style={styles.image}
+            />
+          </SharedElement>
+          <Text style={styles.label}>{item.title}</Text>
+        </Pressable>
+      )
+    },
+    [onPress, theme],
+  )
   return (
     <FlatList
       horizontal

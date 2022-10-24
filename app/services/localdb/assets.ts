@@ -68,7 +68,6 @@ export const getAll = (
 
       // filter the query based on search options
       const dynamicFilter = dynamicFilterGenerator(searchOptions)
-      console.log('dynamicFilter', dynamicFilter)
       dynamicFilter.forEach(filterStr => {
         assets = assets.filtered(filterStr)
       })

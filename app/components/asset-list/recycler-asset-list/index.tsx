@@ -131,38 +131,21 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(
       }))
     }
 
-    React.useEffect(() => {
-      if (
-        Object.keys(extendedState.selectedAssets).length === 0 &&
-        Object.keys(extendedState.selectedGroups).length === 0
-      ) {
-        return undefined
-      }
-      if (!Object.values(extendedState.selectedAssets).includes(true)) {
-        setExtendedState(() => ({
-          selectedAssets: {},
-          selectedGroups: {},
-          selectionMode: false,
-        }))
-      }
-    }, [extendedState.selectedAssets])
-
     const toggleSelection = (section: RecyclerAssetListSection) => {
       setExtendedState(prevState => {
         if (!prevState.selectionMode) return prevState
-
+        let newState = { ...prevState }
         if (section.type === ViewType.MONTH) {
           prevState.selectedAssets[section.id] =
             !prevState.selectedAssets[section.id]
           // TODO: toggle all subgroups
-          return {
+          newState = {
             ...prevState,
             selectedAssets: {
               ...prevState.selectedAssets,
             },
           }
-        }
-        if (section.type === ViewType.DAY) {
+        } else if (section.type === ViewType.DAY) {
           const { data } = section
           prevState.selectedAssets[section.id] =
             !prevState.selectedAssets[section.id]
@@ -171,26 +154,34 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(
               prevState.selectedAssets[id] =
                 prevState.selectedAssets[section.id]
           })
-          return {
+          newState = {
             ...prevState,
             selectedAssets: {
               ...prevState.selectedAssets,
             },
           }
-        }
-        if (section.type === ViewType.ASSET) {
+        } else if (section.type === ViewType.ASSET) {
           prevState.selectedAssets[section.id] =
             !prevState.selectedAssets[section.id]
-          return {
+          newState = {
             ...prevState,
             selectedAssets: {
               ...prevState.selectedAssets,
             },
           }
         }
-        return prevState
+
+        if (!Object.values(newState.selectedAssets).includes(true)) {
+          return {
+            selectedAssets: {},
+            selectedGroups: {},
+            selectionMode: false,
+          }
+        }
+        return newState
       })
     }
+
     useEffect(() => {
       if (onSelectedItemsChange) {
         const assetIds = Object.keys(extendedState.selectedAssets).filter(
@@ -199,6 +190,7 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(
         onSelectedItemsChange(assetIds, extendedState.selectionMode)
       }
     }, [extendedState])
+
     const onLongPress = useCallback((section: RecyclerAssetListSection) => {
       toggleSelectionMode()
       toggleSelection(section)
@@ -210,7 +202,7 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(
           onItemPress?.(section)
         } else toggleSelection(section)
       },
-      [extendedState.selectionMode],
+      [extendedState.selectionMode, onItemPress],
     )
 
     const rowRenderer = useCallback(

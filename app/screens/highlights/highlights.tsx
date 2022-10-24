@@ -122,7 +122,12 @@ export const Highlights: React.FC<HighlightScreenProps> = ({
       return next
     })
   }
-
+  useEffect(() => {
+    const timerProgressRef_current = timerProgressRef?.current
+    return () => {
+      timerProgressRef_current?.stop()
+    }
+  }, [])
   React.useEffect(() => {
     clearTimeout(timerRef.current)
     setTimeout(() => {

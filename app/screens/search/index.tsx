@@ -124,7 +124,10 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ navigation }) => {
           {selectedOptions.map(option => (
             <SearchOptionClip
               key={option.id}
-              option={option}
+              option={{
+                ...option,
+                title: `${option.title} X`,
+              }}
               containerStyle={{ marginVertical: 5 }}
               buttonStyle={{
                 backgroundColor: theme.colors.grey0,
