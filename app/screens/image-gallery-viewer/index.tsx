@@ -138,13 +138,13 @@ export const ImageGalleryViewerScreen: React.FC<
 
   const rowRenderer = useCallback(
     (type: string | number, data: Asset) => {
-      if (!data) return null
-      if (data?.syncStatus === SyncStatus.SYNCED && data?.isDeleted) {
-        return renderDownloadSection()
-      }
-      if (data.isDeleted) {
-        return null
-      }
+      // if (!data) return null
+      // if (data?.syncStatus === SyncStatus.SYNCED && data?.isDeleted) {
+      //   return renderDownloadSection()
+      // }
+      // if (data.isDeleted) {
+      //   return null
+      // }
       return renderItem({ item: data })
     },
     [transitionDone],
@@ -308,40 +308,40 @@ export const ImageGalleryViewerScreen: React.FC<
               />
             </HeaderLeftContainer>
           }
-          rightComponent={
-            <HeaderRightContainer>
-              {loading ? (
-                <ActivityIndicator size="small" />
-              ) : asset?.syncStatus === SyncStatus.SYNCED &&
-                !asset?.isDeleted ? (
-                <Icon type="material-community" name="cloud-check" />
-              ) : asset?.syncStatus === SyncStatus.NOTSYNCED &&
-                !asset?.isDeleted ? (
-                <Icon
-                  type="material-community"
-                  name="cloud-upload-outline"
-                  onPress={uploadToBox}
-                />
-              ) : asset?.syncStatus === SyncStatus.SYNC ? (
-                <Icon
-                  type="material-community"
-                  name="refresh"
-                  onPress={uploadToBox}
-                />
-              ) : null}
-              {asset?.syncStatus === SyncStatus.SYNCED && (
-                <Icon
-                  type="material-community"
-                  style={styles.headerIcon}
-                  name="share-variant"
-                  onPress={() => {
-                    setDID('')
-                    setShowShareBottomSheet(true)
-                  }}
-                />
-              )}
-            </HeaderRightContainer>
-          }
+          // rightComponent={
+          //   <HeaderRightContainer>
+          //     {loading ? (
+          //       <ActivityIndicator size="small" />
+          //     ) : asset?.syncStatus === SyncStatus.SYNCED &&
+          //       !asset?.isDeleted ? (
+          //       <Icon type="material-community" name="cloud-check" />
+          //     ) : asset?.syncStatus === SyncStatus.NOTSYNCED &&
+          //       !asset?.isDeleted ? (
+          //       <Icon
+          //         type="material-community"
+          //         name="cloud-upload-outline"
+          //         onPress={uploadToBox}
+          //       />
+          //     ) : asset?.syncStatus === SyncStatus.SYNC ? (
+          //       <Icon
+          //         type="material-community"
+          //         name="refresh"
+          //         onPress={uploadToBox}
+          //       />
+          //     ) : null}
+          //     {asset?.syncStatus === SyncStatus.SYNCED && (
+          //       <Icon
+          //         type="material-community"
+          //         style={styles.headerIcon}
+          //         name="share-variant"
+          //         onPress={() => {
+          //           setDID('')
+          //           setShowShareBottomSheet(true)
+          //         }}
+          //       />
+          //     )}
+          //   </HeaderRightContainer>
+          // }
         />
       </Animated.View>
     ),
@@ -378,93 +378,95 @@ export const ImageGalleryViewerScreen: React.FC<
     }
   }
 
-  const downloadFromBox = async () => {
-    if (asset?.syncStatus === SyncStatus.SYNCED && asset?.isDeleted) {
-      setLoading(true)
-      setTimeout(async () => {
-        try {
-          try {
-            await AddBoxs()
-          } catch (error) {
-            Alert.alert('Warning', error)
-            return
-          }
-          const myDID = await helper.getMyDID()
-          let fileRef = null
-          if (myDID) {
-            const jwe = JSON.parse(asset?.jwe)
-            fileRef = (await helper.decryptJWE(myDID.did, jwe))?.symetricKey
-          }
-          let result = null
-          if (fileRef) {
-            result = await downloadAndDecryptAsset(fileRef)
-          } else {
-            result = await downloadAsset(asset?.cid)
-          }
-          if (result) {
-            setAsset(prev => ({
-              ...prev,
-              uri: result.uri,
-              isDeleted: false,
-            }))
-            Assets.addOrUpdate([
-              {
-                id: asset.id,
-                uri: result.uri,
-                isDeleted: false,
-              },
-            ])
-          }
-        } catch (error) {
-          console.log('uploadOrDownload', error)
-          Alert.alert(
-            'Error',
-            'Unable to receive the file, make sure your box is available!',
-          )
-        } finally {
-          setLoading(false)
-        }
-      }, 0)
-    }
-  }
+  // const downloadFromBox = async () => {
+  //   if (asset?.syncStatus === SyncStatus.SYNCED && asset?.isDeleted) {
+  //     setLoading(true)
+  //     setTimeout(async () => {
+  //       try {
+  //         try {
+  //           await AddBoxs()
+  //         } catch (error) {
+  //           Alert.alert('Warning', error)
+  //           return
+  //         }
+  //         const myDID = await helper.getMyDID()
+  //         let fileRef = null
+  //         if (myDID) {
+  //           const jwe = JSON.parse(asset?.jwe)
+  //           fileRef = (await helper.decryptJWE(myDID.did, jwe))?.symetricKey
+  //         }
+  //         let result = null
+  //         if (fileRef) {
+  //           result = await downloadAndDecryptAsset(fileRef)
+  //         } else {
+  //           result = await downloadAsset(asset?.cid)
+  //         }
+  //         if (result) {
+  //           setAsset(prev => ({
+  //             ...prev,
+  //             uri: result.uri,
+  //             isDeleted: false,
+  //           }))
+  //           Assets.addOrUpdate([
+  //             {
+  //               id: asset.id,
+  //               uri: result.uri,
+  //               isDeleted: false,
+  //             },
+  //           ])
+  //         }
+  //       } catch (error) {
+  //         console.log('uploadOrDownload', error)
+  //         Alert.alert(
+  //           'Error',
+  //           'Unable to receive the file, make sure your box is available!',
+  //         )
+  //       } finally {
+  //         setLoading(false)
+  //       }
+  //     }, 0)
+  //   }
+  // }
 
-  const renderDownloadSection = useCallback(
-    () => (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        <Card
-          containerStyle={{
-            borderWidth: 0,
-          }}
-        >
-          <Icon
-            type="material-community"
-            name="cloud-download-outline"
-            size={78}
-            onPress={downloadFromBox}
-          />
-          <Card.Title>Tap to download</Card.Title>
-        </Card>
-      </View>
-    ),
-    [downloadFromBox],
-  )
+  // const renderDownloadSection = useCallback(
+  //   () => (
+  //     <View
+  //       style={{
+  //         flex: 1,
+  //         justifyContent: 'center',
+  //         alignItems: 'center',
+  //       }}
+  //     >
+  //       <Card
+  //         containerStyle={{
+  //           borderWidth: 0,
+  //         }}
+  //       >
+  //         <Icon
+  //           type="material-community"
+  //           name="cloud-download-outline"
+  //           size={78}
+  //           onPress={downloadFromBox}
+  //         />
+  //         <Card.Title>Tap to download</Card.Title>
+  //       </Card>
+  //     </View>
+  //   ),
+  //   [downloadFromBox],
+  // )
 
   const onMomentumScrollEnd = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
       const { x: xOffset } = event.nativeEvent.contentOffset
       const imageWidth = windowDims.width
       const index = Math.round(xOffset / imageWidth)
-      currentAssetRef.current = dataProvider.getDataForIndex(index)
+      const newAsset = dataProvider.getDataForIndex(index)
+      if (currentAssetRef.current.id == newAsset.id) return
+      currentAssetRef.current = newAsset
       setTimeout(() => {
         recyclerList.forEach(section => {
           if (section.id === currentAssetRef.current.id) {
-            scrollToItem(section, false)
+            scrollToItem?.(section, false)
           }
         })
       })
