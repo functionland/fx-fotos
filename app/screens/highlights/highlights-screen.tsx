@@ -216,7 +216,6 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
   useEffect(() => {
     const interactionPromise = InteractionManager.runAfterInteractions(() => {
       sharedElementOpacity.value = 0
-      console.log('sharedElementOpacity.value', sharedElementOpacity.value)
     })
 
     return () => {
