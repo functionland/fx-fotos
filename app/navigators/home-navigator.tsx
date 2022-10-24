@@ -90,7 +90,7 @@ export function HomeNavigator() {
         name={HomeNavigationTypes.SearchScreen}
         component={SearchScreen}
       />
-      <HomeTabs.Screen
+      {/* <HomeTabs.Screen
         name="Sharing"
         options={{
           tabBarLabel: 'Sharing',
@@ -106,7 +106,7 @@ export function HomeNavigator() {
           },
         }}
         component={UnderConstructionScreen}
-      />
+      /> */}
       <HomeTabs.Screen
         name={HomeNavigationTypes.LibraryScreen}
         options={{
