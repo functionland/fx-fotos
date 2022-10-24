@@ -59,7 +59,7 @@ export const AssetListScreen: React.FC<Props> = ({
   const [recyclerSections, setRecyclerSections] = useState(null)
 
   // Get a custom hook to animate the header
-  const [scrollY, headerStyles] = useFloatHederAnimation(60)
+  const [scrollY, headerStyles] = useFloatHederAnimation(35)
   const [selectionMode, setSelectionMode] = useState(false)
   const [selectedItems, setSelectedItems] = useState<string[]>([])
   const assetListRef = useRef<AssetListHandle>()
