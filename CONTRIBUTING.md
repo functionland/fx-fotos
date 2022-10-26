@@ -14,7 +14,7 @@ and run the project.
 
 ### Node.js
 
-Contributing to the `Fotos` app, requires Node.js and Yarn installed on your
+Contributing to the `FxFotos` app, requires Node.js and Yarn installed on your
 machine. We suggest
 [installing Node.js with nvm](https://github.com/nvm-sh/nvm), and Yarn can later
 be installed with `npm install -g yarn`.
@@ -31,7 +31,7 @@ yarn android
 
 ### Open development
 
-All development on Fotos happens directly on GitHub. Both core team members and
+All development on FxFotos happens directly on GitHub. Both core team members and
 external contributors send pull requests which go through the same review
 process.
 

@@ -7,7 +7,6 @@ import Toast from 'react-native-toast-message'
 
 import { navigationRef } from './navigation-utilities'
 import {
-  PhotoScreen,
   LibraryAssetsScreen,
   BoxListScreen,
   BoxAddUpdateScreen,
@@ -25,9 +24,6 @@ enableScreens()
 export type RootStackParamList = {
   Home: undefined
   LibraryAssets: undefined
-  Photo: {
-    section: RecyclerAssetListSection
-  }
   HighlightScreen: {
     storyId: AssetStory['id']
   }
@@ -45,7 +41,6 @@ export type RootStackParamList = {
 export enum AppNavigationNames {
   HomeScreen = 'Home',
   AccountScreen = 'AccountScreen',
-  PhotoScreen = 'Photo',
   LibraryAssets = 'LibraryAssets',
   BoxList = 'BoxList',
   BoxAddUpdate = 'BoxAddUpdate',
@@ -80,39 +75,6 @@ function AppStack() {
       <Stack.Screen
         name={AppNavigationNames.BoxAddUpdate}
         component={BoxAddUpdateScreen}
-      />
-      <Stack.Screen
-        name={AppNavigationNames.PhotoScreen}
-        options={{
-          headerShown: false,
-          headerTransparent: true,
-          gestureEnabled: false,
-          cardOverlayEnabled: true,
-          cardStyle: {
-            backgroundColor: 'transparent',
-          },
-          animationEnabled: true,
-          cardStyleInterpolator: ({ current: { progress } }) => ({
-            cardStyle: {
-              opacity: progress.interpolate({
-                inputRange: [0, 0.5, 0.9, 1],
-                outputRange: [0, 0.25, 0.7, 1],
-              }),
-            },
-            overlayStyle: {
-              opacity: progress.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0, 0],
-                extrapolate: 'clamp',
-              }),
-            },
-          }),
-        }}
-        component={PhotoScreen}
-        sharedElements={route => {
-          const { assetId = '' } = route.params
-          return [assetId]
-        }}
       />
       <Stack.Screen
         name={AppNavigationNames.HighlightScreen}

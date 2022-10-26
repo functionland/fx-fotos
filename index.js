@@ -10,15 +10,10 @@
 import 'node-libs-react-native/globals.js'
 import './shim.js'
 import 'react-native-get-random-values'
+import 'text-encoding-polyfill'
 import { AppRegistry } from 'react-native'
-import BackgroundFetch from 'react-native-background-fetch'
 import App from './app/app'
 
-import { SyncService } from './app/services'
-
 AppRegistry.registerComponent('fotos', () => App)
-
-/// register the backgroyndFetch handler.
-BackgroundFetch.registerHeadlessTask(SyncService.backgroundFetchHeadlessTask)
 
 export default App

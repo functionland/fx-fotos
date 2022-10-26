@@ -34,7 +34,7 @@ import {
   HeaderLeftContainer,
   HeaderRightContainer,
 } from '../../components/header'
-import { RootStackParamList } from '../../navigators'
+import { RootStackParamList } from '../../navigators/app-navigator'
 import { Assets } from '../../services/localdb'
 import { singleAssetState, recyclerSectionsState } from '../../store'
 import {
@@ -44,12 +44,6 @@ import {
   ViewType,
 } from '../../types'
 import { GalleryImage } from './gallery-image'
-import {
-  AddBoxs,
-  downloadAndDecryptAsset,
-  downloadAsset,
-  uploadAssetsInBackground,
-} from '../../services/sync-service'
 import * as helper from '../../utils/helper'
 import { palette } from '../../theme'
 import { AssetService } from '../../services'
@@ -202,33 +196,27 @@ export const ImageGalleryViewerScreen: React.FC<
         text: 'Yes',
         onPress: async () => {
           try {
-            console.log(
-              'currentAssetRef.current?.id',
-              currentAssetRef.current?.id,
-            )
-
-            const nextIndex = assetSections.findIndex(
+            const currentIndex = assetSections.findIndex(
               section => section?.data?.id == currentAssetRef.current?.id,
             )
-            rclRef.current.scrollToIndex(nextIndex, true)
-            setAssetSections(
-              assetSections.filter(
-                section => section?.data?.id != currentAssetRef.current?.id,
-              ),
-            )
-            setRecyclerList(
-              recyclerList.filter(
-                section => section?.data?.id != currentAssetRef.current?.id,
-              ),
-            )
-            currentAssetRef.current = assetSections[nextIndex + 1]?.data
-            await AssetService.deleteAssets([currentAssetRef.current?.id])
+            const nextAssetIndex =
+              currentIndex === assetSections.length - 1
+                ? currentIndex - 1 //Go to the next asset
+                : currentIndex // Go to the previouse asset
+            rclRef.current.scrollToIndex(nextAssetIndex, true)
+            currentAssetRef.current = assetSections[nextAssetIndex]?.data
+            await AssetService.deleteAssets([assetSections[currentIndex]?.id])
             await Assets.addOrUpdate([
               {
-                id: currentAssetRef.current?.id,
+                id: assetSections[currentIndex]?.id,
                 isDeleted: true,
               },
             ])
+            setRecyclerList(
+              recyclerList.filter(
+                section => section?.data?.id != assetSections[currentIndex]?.id,
+              ),
+            )
             return
           } catch (error) {
             console.log('deleteAssets: ', error)
@@ -289,7 +277,7 @@ export const ImageGalleryViewerScreen: React.FC<
             return
           }
           try {
-            await AddBoxs()
+            //await AddBoxs()
           } catch (error) {
             Alert.alert('Warning', error)
             return
@@ -301,22 +289,22 @@ export const ImageGalleryViewerScreen: React.FC<
               position: 'bottom',
               bottomOffset: 0,
             })
-            await uploadAssetsInBackground({
-              callback: success => {
-                if (success)
-                  setAsset(prev => ({
-                    ...prev,
-                    syncStatus: SyncStatus.SYNCED,
-                  }))
-                else
-                  Toast.show({
-                    type: 'error',
-                    text1: 'Will upload when connected',
-                    position: 'bottom',
-                    bottomOffset: 0,
-                  })
-              },
-            })
+            // await uploadAssetsInBackground({
+            //   callback: success => {
+            //     if (success)
+            //       setAsset(prev => ({
+            //         ...prev,
+            //         syncStatus: SyncStatus.SYNCED,
+            //       }))
+            //     else
+            //       Toast.show({
+            //         type: 'error',
+            //         text1: 'Will upload when connected',
+            //         position: 'bottom',
+            //         bottomOffset: 0,
+            //       })
+            //   },
+            // })
           } catch (error) {
             Alert.alert(
               'Error',
@@ -417,7 +405,7 @@ export const ImageGalleryViewerScreen: React.FC<
         )?.symetricKey
         const jwe = await myTag.encrypt(symetricKey, symetricKey?.id, [DID])
         Share.share({
-          title: 'Fotos | Just shared an asset',
+          title: 'FxFotos | Just shared an asset',
           // eslint-disable-next-line no-undef
           message: `https://fotos.fx.land/shared/${Buffer.from(
             JSON.stringify(jwe),

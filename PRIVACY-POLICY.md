@@ -1,6 +1,6 @@
 **Privacy Policy**
 
-Functionland built the Fotos app as an Open Source app. This SERVICE is provided
+Functionland built the FxFotos app as an Open Source app. This SERVICE is provided
 by Functionland at no cost and is intended for use as is.
 
 This page is used to inform visitors regarding our policies with the collection,
@@ -13,7 +13,7 @@ is used for providing and improving the Service. We will not use or share your
 information with anyone except as described in this Privacy Policy.
 
 The terms used in this Privacy Policy have the same meanings as in our Terms and
-Conditions, which are accessible at Fotos unless otherwise defined in this
+Conditions, which are accessible at FxFotos unless otherwise defined in this
 Privacy Policy.
 
 **Information Collection and Use**

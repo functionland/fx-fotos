@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Alert, StyleProp, StyleSheet, View, ViewStyle } from 'react-native'
 import { Icon, Input, Text } from '@rneui/themed'
-import { fula } from 'react-native-fula'
 
 import {
   NativeStackNavigationProp,
@@ -69,7 +68,7 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
         Alert.alert('Warning', 'Please fill all the fields!')
         return
       }
-      await fula.addBox(form.address)
+      //await fula.addBox(form.address)
       const box = {
         name: form.name,
         address: form.address,

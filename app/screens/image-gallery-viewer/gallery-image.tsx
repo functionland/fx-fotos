@@ -82,7 +82,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
       return true
     }
     return false
-  })
+  }, [])
 
   const getXLimit = useCallback(() => {
     'worklet'
