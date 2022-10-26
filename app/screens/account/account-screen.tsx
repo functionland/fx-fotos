@@ -154,7 +154,7 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
     try {
       if (userCredentials?.username) {
         await Share.share({
-          title: 'Fotos | Did identity',
+          title: 'FxFotos | Did identity',
           message: userCredentials.username,
         })
       }

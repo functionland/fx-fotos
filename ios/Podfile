@@ -2,8 +2,6 @@
 # React Native Colo Loco autolinks native files colocated next to your JS files
 # More info here: https://github.com/jamonholmgren/react-native-colo-loco
 
-# require_relative '../node_modules/react-native-colo-loco/scripts/ios.rb'
-# link_colocated_native_files(app_name: 'Fotos', app_path: "../app")
 
 
 require File.join(File.dirname(`node --print "require.resolve('expo/package.json')"`), "scripts/autolinking")
