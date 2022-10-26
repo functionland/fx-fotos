@@ -33,7 +33,6 @@ import { Constants, palette } from '../../theme'
 import { Header } from '../../components'
 import { HomeNavigationParamList } from '../../navigators'
 import { HeaderArrowBack } from '../../components/header'
-import { AddBoxs, downloadAndDecryptAsset } from '../../services/sync-service'
 import * as helper from '../../utils/helper'
 
 const { height, width } = Dimensions.get('window')
@@ -81,7 +80,7 @@ export const ShareViewerScreen: React.FC<Props> = ({ navigation, route }) => {
     setLoading(true)
     try {
       try {
-        await AddBoxs()
+        //await AddBoxs()
       } catch (error) {
         Alert.alert('Warning', error)
         return
@@ -90,8 +89,8 @@ export const ShareViewerScreen: React.FC<Props> = ({ navigation, route }) => {
       const myDID = await helper.getMyDID()
       const fileRef = (await helper.decryptJWE(myDID?.did, jwe))?.symetricKey
       if (fileRef) {
-        result = await downloadAndDecryptAsset(fileRef)
-        setAssetURI(result.uri)
+        // result = await downloadAndDecryptAsset(fileRef)
+        // setAssetURI(result.uri)
       }
     } catch (error) {
       console.log('uploadOrDownload', error)

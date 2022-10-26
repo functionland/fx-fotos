@@ -1534,7 +1534,7 @@
     core-js-pure "^3.25.1"
     regenerator-runtime "^0.13.4"
 
-"@babel/runtime@^7.0.0", "@babel/runtime@^7.1.2", "@babel/runtime@^7.10.2", "@babel/runtime@^7.12.13", "@babel/runtime@^7.12.5", "@babel/runtime@^7.14.0", "@babel/runtime@^7.14.8", "@babel/runtime@^7.3.1", "@babel/runtime@^7.5.0", "@babel/runtime@^7.5.5", "@babel/runtime@^7.7.2", "@babel/runtime@^7.8.4", "@babel/runtime@^7.9.2", "@babel/runtime@~7.17.2":
+"@babel/runtime@^7.0.0", "@babel/runtime@^7.1.2", "@babel/runtime@^7.10.2", "@babel/runtime@^7.12.13", "@babel/runtime@^7.12.5", "@babel/runtime@^7.14.0", "@babel/runtime@^7.14.8", "@babel/runtime@^7.3.1", "@babel/runtime@^7.5.0", "@babel/runtime@^7.5.5", "@babel/runtime@^7.7.2", "@babel/runtime@^7.8.4", "@babel/runtime@^7.9.2":
   version "7.17.9"
   resolved "https://registry.npmjs.org/@babel/runtime/-/runtime-7.17.9.tgz"
   integrity sha512-lSiBBvodq29uShpWGNbgFdKYNiFDo5/HIYsaCEY9ff4sb10x9jizo2+pRrSyF4jKZCXqgzuqBOQKbUm90gQwJg==
@@ -2348,15 +2348,6 @@
     lodash.pick "^4.4.0"
     lodash.template "^4.5.0"
 
-"@functionland/file-protocol@^0.3.6":
-  version "0.3.6"
-  resolved "https://registry.npmjs.org/@functionland/file-protocol/-/file-protocol-0.3.6.tgz"
-  integrity sha512-dt36pB4igjX0wD8VAYPvOhGB7kj8mVQAPfPNxNr6CDB4URRXLbrvzja0UpbOG5+gdzhFrDuG25S9tH3F7GhoWA==
-  dependencies:
-    "@babel/runtime" "~7.17.2"
-    "@protobuf-ts/runtime" "~2.2.2"
-    aes-js "^3.1.2"
-
 "@functionland/fula-sec@0.6.6":
   version "0.6.6"
   resolved "https://registry.npmjs.org/@functionland/fula-sec/-/fula-sec-0.6.6.tgz"
@@ -2370,14 +2361,6 @@
     js-sha3 "^0.8.0"
     key-did-provider-ed25519 "~1.1.0"
     key-did-resolver "~1.4.4"
-
-"@functionland/graph-protocol@^0.2.2":
-  version "0.2.2"
-  resolved "https://registry.npmjs.org/@functionland/graph-protocol/-/graph-protocol-0.2.2.tgz"
-  integrity sha512-ege7ou9RoU6YfEfrDe304eCjHCD5dVoItJEdkKMTqbyqA4kYPwt6rVZCpUNWLCnPnlIhJjPRzhRPjwxwPnortA==
-  dependencies:
-    "@babel/runtime" "~7.17.2"
-    "@protobuf-ts/runtime" "~2.2.2"
 
 "@gar/promisify@^1.0.1":
   version "1.1.3"
@@ -3083,11 +3066,6 @@
   version "2.11.5"
   resolved "https://registry.npmjs.org/@popperjs/core/-/core-2.11.5.tgz"
   integrity sha512-9X2obfABZuDVLCgPK9aX0a/x4jaOEweTTWE2+9sr0Qqqevj2Uv5XorvusThmc9XGYpS9yI+fhh8RTafBtGposw==
-
-"@protobuf-ts/runtime@~2.2.2":
-  version "2.2.4"
-  resolved "https://registry.npmjs.org/@protobuf-ts/runtime/-/runtime-2.2.4.tgz"
-  integrity sha512-v6A67t27p56qG2j3Dtag7Lkj6F8VotXtlwCUs9YiL/Sv+Vxp0uGOwSNuBI798YnEozt5NTbmkWszp84j5cSNdQ==
 
 "@reach/router@^1.2.1", "@reach/router@^1.3.3":
   version "1.3.4"
@@ -9349,11 +9327,6 @@ fast-levenshtein@^2.0.6, fast-levenshtein@~2.0.6:
   resolved "https://registry.npmjs.org/fast-levenshtein/-/fast-levenshtein-2.0.6.tgz"
   integrity sha1-PYpcZog6FqMMqGQ+hR8Zuqd5eRc=
 
-fastestsmallesttextencoderdecoder@^1.0.22:
-  version "1.0.22"
-  resolved "https://registry.npmjs.org/fastestsmallesttextencoderdecoder/-/fastestsmallesttextencoderdecoder-1.0.22.tgz"
-  integrity sha512-Pb8d48e+oIuY4MaM64Cd7OW1gt4nxCHs7/ddPPZ/Ic3sg8yVGM7O9wDvZ7us6ScaUupzM+pfBolwtYhN1IxBIw==
-
 fastq@^1.6.0:
   version "1.13.0"
   resolved "https://registry.npmjs.org/fastq/-/fastq-1.13.0.tgz"
@@ -15525,11 +15498,6 @@ react-native-background-actions@^2.6.7:
   dependencies:
     eventemitter3 "^4.0.7"
 
-react-native-background-fetch@^4.1.0:
-  version "4.1.0"
-  resolved "https://registry.npmjs.org/react-native-background-fetch/-/react-native-background-fetch-4.1.0.tgz"
-  integrity sha512-LWl1xuLNfHbD9MQXV31RvpCia9hMxOW+gwjp5yzW7BbiZWTWV2TQ9szuHaPn4NBWHDdh+MtI5pb6JV9P/LCaOQ==
-
 react-native-clean-project@^3.6.3:
   version "3.6.7"
   resolved "https://registry.npmjs.org/react-native-clean-project/-/react-native-clean-project-3.6.7.tgz"
@@ -15569,16 +15537,6 @@ react-native-flipper@^0.34.0:
   version "0.34.0"
   resolved "https://registry.npmjs.org/react-native-flipper/-/react-native-flipper-0.34.0.tgz"
   integrity sha512-48wgm29HJTOlZ0DibBsvXueEOY0EPIVL0wWKbwRfgrk86+luSEuLW3aZC50oJa95zSFb9qYShTV/6dWqh4Jamg==
-
-react-native-fula@^0.3.1:
-  version "0.3.1"
-  resolved "https://registry.npmjs.org/react-native-fula/-/react-native-fula-0.3.1.tgz"
-  integrity sha512-la6l7yehXadkSVdSxujlL1wa5sy/bHiOLv/GpbEzM+LF4C/cRJUqzeu1Wfw1Sm639/KrVuzNZXjly2f599dWGw==
-  dependencies:
-    "@functionland/file-protocol" "^0.3.6"
-    "@functionland/graph-protocol" "^0.2.2"
-    buffer "^6.0.3"
-    fastestsmallesttextencoderdecoder "^1.0.22"
 
 react-native-gesture-handler@^2.4.1:
   version "2.4.1"
@@ -17849,6 +17807,11 @@ test-exclude@^6.0.0:
     "@istanbuljs/schema" "^0.1.2"
     glob "^7.1.4"
     minimatch "^3.0.4"
+
+text-encoding-polyfill@^0.6.7:
+  version "0.6.7"
+  resolved "https://registry.yarnpkg.com/text-encoding-polyfill/-/text-encoding-polyfill-0.6.7.tgz#4d27de0153e4c86eb2631ffd74c2f3f57969a9ec"
+  integrity sha512-/DZ1XJqhbqRkCop6s9ZFu8JrFRwmVuHg4quIRm+ziFkR3N3ec6ck6yBvJ1GYeEQZhLVwRW0rZE+C3SSJpy0RTg==
 
 text-table@0.2.0, text-table@^0.2.0:
   version "0.2.0"

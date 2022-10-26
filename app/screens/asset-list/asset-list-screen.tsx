@@ -24,7 +24,6 @@ import {
   HeaderRightContainer,
 } from '../../components/header'
 import { AppNavigationNames, RootStackParamList } from '../../navigators'
-import { uploadAssetsInBackground } from '../../services/sync-service'
 import {
   Asset,
   AssetStory,
@@ -125,7 +124,7 @@ export const AssetListScreen: React.FC<Props> = ({
               position: 'bottom',
               bottomOffset: 0,
             })
-            uploadAssetsInBackground()
+            //uploadAssetsInBackground()
           } catch (error) {
             console.log(error)
           }

@@ -189,7 +189,7 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
   // const PESPECTIVE = Platform.OS === 'ios' ? 2.38 : 1.7
   // const TR_POSITION = Platform.OS === 'ios' ? 2 : 1.5
 
-  const animationStyle: TAnimationStyle = React.useCallback((value: number) => {
+  const animationStyle = React.useCallback((value: number) => {
     'worklet'
 
     const translateX = interpolate(

@@ -23,13 +23,13 @@ buildscript {
 
 allprojects {
     repositories {
+        jcenter()
         google()
         mavenCentral()
-        jcenter()
-        maven {
-            // react-native-background-fetch
-            url("${project(':react-native-background-fetch').projectDir}/libs")
-        }
+        // maven {
+        //     // react-native-background-fetch
+        //      url("${project(':react-native-background-fetch').projectDir}/libs")
+        // }
         mavenLocal()
         maven {
             // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm

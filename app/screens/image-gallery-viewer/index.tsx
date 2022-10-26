@@ -22,7 +22,7 @@ import { NativeViewGestureHandler } from 'react-native-gesture-handler'
 import { useRecoilState } from 'recoil'
 import Toast from 'react-native-toast-message'
 import { useNetInfo } from '@react-native-community/netinfo'
-import { TaggedEncryption } from '@functionland/fula-sec'
+//import { TaggedEncryption } from '@functionland/fula-sec'
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -34,7 +34,7 @@ import {
   HeaderLeftContainer,
   HeaderRightContainer,
 } from '../../components/header'
-import { RootStackParamList } from '../../navigators'
+import { RootStackParamList } from '../../navigators/app-navigator'
 import { Assets } from '../../services/localdb'
 import { singleAssetState, recyclerSectionsState } from '../../store'
 import {
@@ -44,12 +44,6 @@ import {
   ViewType,
 } from '../../types'
 import { GalleryImage } from './gallery-image'
-import {
-  AddBoxs,
-  downloadAndDecryptAsset,
-  downloadAsset,
-  uploadAssetsInBackground,
-} from '../../services/sync-service'
 import * as helper from '../../utils/helper'
 import { palette } from '../../theme'
 import { AssetService } from '../../services'
@@ -289,7 +283,7 @@ export const ImageGalleryViewerScreen: React.FC<
             return
           }
           try {
-            await AddBoxs()
+            //await AddBoxs()
           } catch (error) {
             Alert.alert('Warning', error)
             return
@@ -301,22 +295,22 @@ export const ImageGalleryViewerScreen: React.FC<
               position: 'bottom',
               bottomOffset: 0,
             })
-            await uploadAssetsInBackground({
-              callback: success => {
-                if (success)
-                  setAsset(prev => ({
-                    ...prev,
-                    syncStatus: SyncStatus.SYNCED,
-                  }))
-                else
-                  Toast.show({
-                    type: 'error',
-                    text1: 'Will upload when connected',
-                    position: 'bottom',
-                    bottomOffset: 0,
-                  })
-              },
-            })
+            // await uploadAssetsInBackground({
+            //   callback: success => {
+            //     if (success)
+            //       setAsset(prev => ({
+            //         ...prev,
+            //         syncStatus: SyncStatus.SYNCED,
+            //       }))
+            //     else
+            //       Toast.show({
+            //         type: 'error',
+            //         text1: 'Will upload when connected',
+            //         position: 'bottom',
+            //         bottomOffset: 0,
+            //       })
+            //   },
+            // })
           } catch (error) {
             Alert.alert(
               'Error',

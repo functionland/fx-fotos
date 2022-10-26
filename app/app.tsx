@@ -35,8 +35,6 @@ import {
 
 import { ErrorBoundary } from './screens/error/error-boundary'
 import { ThemeProvider, RneLightTheme, RneDarkTheme } from './theme'
-import { AddBoxs, uploadAssetsInBackground } from './services/sync-service'
-import { SyncService } from './services'
 
 // This puts screens in a native ViewController or Activity. If you want fully native
 // stack navigation, use `createNativeStackNavigator` in place of `createStackNavigator`:
@@ -56,25 +54,25 @@ function App() {
     useNavigationPersistence(storage, NAVIGATION_PERSISTENCE_KEY)
 
   // Kick off initial async loading actions, like loading fonts and RootStore
-  React.useEffect(() => {
-    ;(async () => {
-      await SyncService.initBackgroundFetch()
-    })()
-    // Subscribe
-    const unsubscribeNetInfo = subscribeNetInfo()
-    return () => {
-      // Unsubscribe
-      unsubscribeNetInfo()
-    }
-  }, [])
-  const subscribeNetInfo = () =>
-    NetInfo.addEventListener(state => {
-      if (netInfoTimer.current) clearTimeout(netInfoTimer.current)
-      netInfoTimer.current = setTimeout(async () => {
-        if (state.isConnected) await AddBoxs()
-        uploadAssetsInBackground()
-      }, 1000)
-    })
+  // React.useEffect(() => {
+  //   ;(async () => {
+  //     await SyncService.initBackgroundFetch()
+  //   })()
+  //   // Subscribe
+  //   const unsubscribeNetInfo = subscribeNetInfo()
+  //   return () => {
+  //     // Unsubscribe
+  //     unsubscribeNetInfo()
+  //   }
+  // }, [])
+  // const subscribeNetInfo = () =>
+  //   NetInfo.addEventListener(state => {
+  //     if (netInfoTimer.current) clearTimeout(netInfoTimer.current)
+  //     netInfoTimer.current = setTimeout(async () => {
+  //       if (state.isConnected) await AddBoxs()
+  //       uploadAssetsInBackground()
+  //     }, 1000)
+  //   })
 
   // Before we show the app, we have to wait for our state to be ready.
   // In the meantime, don't render anything. This will be the background
