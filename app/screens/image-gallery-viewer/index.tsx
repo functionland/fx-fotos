@@ -196,33 +196,27 @@ export const ImageGalleryViewerScreen: React.FC<
         text: 'Yes',
         onPress: async () => {
           try {
-            console.log(
-              'currentAssetRef.current?.id',
-              currentAssetRef.current?.id,
-            )
-
-            const nextIndex = assetSections.findIndex(
+            const currentIndex = assetSections.findIndex(
               section => section?.data?.id == currentAssetRef.current?.id,
             )
-            rclRef.current.scrollToIndex(nextIndex, true)
-            setAssetSections(
-              assetSections.filter(
-                section => section?.data?.id != currentAssetRef.current?.id,
-              ),
-            )
-            setRecyclerList(
-              recyclerList.filter(
-                section => section?.data?.id != currentAssetRef.current?.id,
-              ),
-            )
-            currentAssetRef.current = assetSections[nextIndex + 1]?.data
-            await AssetService.deleteAssets([currentAssetRef.current?.id])
+            const nextAssetIndex =
+              currentIndex === assetSections.length - 1
+                ? currentIndex - 1 //Go to the next asset
+                : currentIndex // Go to the previouse asset
+            rclRef.current.scrollToIndex(nextAssetIndex, true)
+            currentAssetRef.current = assetSections[nextAssetIndex]?.data
+            await AssetService.deleteAssets([assetSections[currentIndex]?.id])
             await Assets.addOrUpdate([
               {
-                id: currentAssetRef.current?.id,
+                id: assetSections[currentIndex]?.id,
                 isDeleted: true,
               },
             ])
+            setRecyclerList(
+              recyclerList.filter(
+                section => section?.data?.id != assetSections[currentIndex]?.id,
+              ),
+            )
             return
           } catch (error) {
             console.log('deleteAssets: ', error)
