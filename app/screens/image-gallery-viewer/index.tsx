@@ -22,7 +22,7 @@ import { NativeViewGestureHandler } from 'react-native-gesture-handler'
 import { useRecoilState } from 'recoil'
 import Toast from 'react-native-toast-message'
 import { useNetInfo } from '@react-native-community/netinfo'
-//import { TaggedEncryption } from '@functionland/fula-sec'
+import { TaggedEncryption } from '@functionland/fula-sec'
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -411,7 +411,7 @@ export const ImageGalleryViewerScreen: React.FC<
         )?.symetricKey
         const jwe = await myTag.encrypt(symetricKey, symetricKey?.id, [DID])
         Share.share({
-          title: 'Fotos | Just shared an asset',
+          title: 'FxFotos | Just shared an asset',
           // eslint-disable-next-line no-undef
           message: `https://fotos.fx.land/shared/${Buffer.from(
             JSON.stringify(jwe),
