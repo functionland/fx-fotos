@@ -28,7 +28,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated'
-import { Header, Text } from '../../components'
+import { Header, Text, Screen } from '../../components'
 import {
   HeaderArrowBack,
   HeaderLeftContainer,
@@ -338,7 +338,7 @@ export const ImageGalleryViewerScreen: React.FC<
             headerHeightRef.current = event.nativeEvent.layout.height
           }}
           containerStyle={{
-            marginTop: 10,
+            //marginTop: 10,
             zIndex: 10,
             backgroundColor: 'transparent',
           }}
@@ -565,6 +565,11 @@ export const ImageGalleryViewerScreen: React.FC<
   }))
 
   return (
+    <Screen
+      scrollEventThrottle={16}
+      automaticallyAdjustContentInsets
+      style={styles.screen}
+    >
     <Animated.View style={wrapperAnimatedStyle}>
       <View style={{ flex: 1 }}>
         {renderHeader()}
@@ -637,6 +642,7 @@ export const ImageGalleryViewerScreen: React.FC<
         </BottomSheet>
       </View>
     </Animated.View>
+    </Screen>
   )
 }
 

@@ -62,6 +62,7 @@ function ScreenWithoutScrolling(props: ScreenProps) {
           },
           style,
           insetStyle,
+          isIos? {overflow:'hidden'}:{}
         ]}
       >
         {props.children}
