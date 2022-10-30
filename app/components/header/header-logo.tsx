@@ -26,6 +26,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   wrapper: {
+    flex:1,
     alignItems: 'center',
     justifyContent: 'center',
     height: heightPercentageToDP(5),

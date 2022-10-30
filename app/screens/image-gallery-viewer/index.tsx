@@ -405,7 +405,7 @@ export const ImageGalleryViewerScreen: React.FC<
         )?.symetricKey
         const jwe = await myTag.encrypt(symetricKey, symetricKey?.id, [DID])
         Share.share({
-          title: 'FxFotos | Just shared an asset',
+          title: 'Fx Fotos | Just shared an asset',
           // eslint-disable-next-line no-undef
           message: `https://fotos.fx.land/shared/${Buffer.from(
             JSON.stringify(jwe),

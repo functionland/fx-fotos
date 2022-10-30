@@ -267,11 +267,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         <Header
           containerStyle={{ position: 'relative' }}
           centerComponent={<HeaderLogo />}
+          leftContainerStyle={{zIndex:99}}
           leftComponent={
-            <HeaderLeftContainer>
+            <HeaderLeftContainer style={{flex:1}}>
               <Icon
                 type="material-community"
                 name="white-balance-sunny"
+                size={28}
                 onPress={() => {
                   toggleTheme()
                 }}
@@ -279,7 +281,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             </HeaderLeftContainer>
           }
           rightComponent={
-            <HeaderRightContainer>
+            <HeaderRightContainer style={{flex:1}}>
               <SharedElement id="AccountAvatar">
                 {walletConnector.connected ? (
                   <Avatar
@@ -289,11 +291,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                         source={
                           walletConnector.peerMeta?.icons?.[0].endsWith('.svg')
                             ? helper.getWalletImage(
-                                walletConnector.peerMeta?.name,
-                              )
+                              walletConnector.peerMeta?.name,
+                            )
                             : {
-                                uri: walletConnector.peerMeta?.icons?.[0],
-                              }
+                              uri: walletConnector.peerMeta?.icons?.[0],
+                            }
                         }
                         style={{
                           height: 35,
