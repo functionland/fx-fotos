@@ -332,7 +332,7 @@ export const ImageGalleryViewerScreen: React.FC<
 
   const renderHeader = useCallback(
     () => (
-      <Animated.View style={[{ zIndex: 10 }, animatedHeaderStyle]}>
+      <Animated.View style={[{ zIndex: 10, position: 'absolute' }, animatedHeaderStyle]}>
         <Header
           onLayout={event => {
             headerHeightRef.current = event.nativeEvent.layout.height
@@ -352,40 +352,40 @@ export const ImageGalleryViewerScreen: React.FC<
               />
             </HeaderLeftContainer>
           }
-          // rightComponent={
-          //   <HeaderRightContainer>
-          //     {loading ? (
-          //       <ActivityIndicator size="small" />
-          //     ) : asset?.syncStatus === SyncStatus.SYNCED &&
-          //       !asset?.isDeleted ? (
-          //       <Icon type="material-community" name="cloud-check" />
-          //     ) : asset?.syncStatus === SyncStatus.NOTSYNCED &&
-          //       !asset?.isDeleted ? (
-          //       <Icon
-          //         type="material-community"
-          //         name="cloud-upload-outline"
-          //         onPress={uploadToBox}
-          //       />
-          //     ) : asset?.syncStatus === SyncStatus.SYNC ? (
-          //       <Icon
-          //         type="material-community"
-          //         name="refresh"
-          //         onPress={uploadToBox}
-          //       />
-          //     ) : null}
-          //     {asset?.syncStatus === SyncStatus.SYNCED && (
-          //       <Icon
-          //         type="material-community"
-          //         style={styles.headerIcon}
-          //         name="share-variant"
-          //         onPress={() => {
-          //           setDID('')
-          //           setShowShareBottomSheet(true)
-          //         }}
-          //       />
-          //     )}
-          //   </HeaderRightContainer>
-          // }
+        // rightComponent={
+        //   <HeaderRightContainer>
+        //     {loading ? (
+        //       <ActivityIndicator size="small" />
+        //     ) : asset?.syncStatus === SyncStatus.SYNCED &&
+        //       !asset?.isDeleted ? (
+        //       <Icon type="material-community" name="cloud-check" />
+        //     ) : asset?.syncStatus === SyncStatus.NOTSYNCED &&
+        //       !asset?.isDeleted ? (
+        //       <Icon
+        //         type="material-community"
+        //         name="cloud-upload-outline"
+        //         onPress={uploadToBox}
+        //       />
+        //     ) : asset?.syncStatus === SyncStatus.SYNC ? (
+        //       <Icon
+        //         type="material-community"
+        //         name="refresh"
+        //         onPress={uploadToBox}
+        //       />
+        //     ) : null}
+        //     {asset?.syncStatus === SyncStatus.SYNCED && (
+        //       <Icon
+        //         type="material-community"
+        //         style={styles.headerIcon}
+        //         name="share-variant"
+        //         onPress={() => {
+        //           setDID('')
+        //           setShowShareBottomSheet(true)
+        //         }}
+        //       />
+        //     )}
+        //   </HeaderRightContainer>
+        // }
         />
       </Animated.View>
     ),
@@ -570,78 +570,78 @@ export const ImageGalleryViewerScreen: React.FC<
       automaticallyAdjustContentInsets
       style={styles.screen}
     >
-    <Animated.View style={wrapperAnimatedStyle}>
-      <View style={{ flex: 1 }}>
-        {renderHeader()}
-        <NativeViewGestureHandler ref={listGestureRef}>
-          <RecyclerListView
-            ref={rclRef}
-            isHorizontal
-            initialRenderIndex={initialIndexRef.current}
-            style={{ flex: 1 }}
-            layoutProvider={layoutProvider}
-            dataProvider={dataProvider}
-            rowRenderer={rowRenderer}
-            renderAheadOffset={5}
-            scrollViewProps={{
-              scrollEnabled,
-              pagingEnabled: true,
-              onMomentumScrollEnd,
-              showsHorizontalScrollIndicator: false,
-              showsVerticalScrollIndicator: false,
-            }}
-          />
-        </NativeViewGestureHandler>
-        {transitionDone || (
-          <View style={styles.mockContainer}>
-            <GalleryImage
-              asset={asset}
-              sharedElementId={asset.id}
-              enableParentScroll={enableScroll}
-              disableParentScroll={disableScroll}
-              listGestureRef={listGestureRef}
-              screenOpacity={screenOpacity}
+      <Animated.View style={wrapperAnimatedStyle}>
+        <View style={{ flex: 1 }}>
+          {renderHeader()}
+          <NativeViewGestureHandler ref={listGestureRef}>
+            <RecyclerListView
+              ref={rclRef}
+              isHorizontal
+              initialRenderIndex={initialIndexRef.current}
+              style={{ flex: 1 }}
+              layoutProvider={layoutProvider}
+              dataProvider={dataProvider}
+              rowRenderer={rowRenderer}
+              renderAheadOffset={5}
+              scrollViewProps={{
+                scrollEnabled,
+                pagingEnabled: true,
+                onMomentumScrollEnd,
+                showsHorizontalScrollIndicator: false,
+                showsVerticalScrollIndicator: false,
+              }}
             />
-          </View>
-        )}
-        {renderActionButtons()}
-        <BottomSheet
-          isVisible={showShareBottomSheet}
-          onBackdropPress={() => setShowShareBottomSheet(false)}
-          modalProps={{
-            transparent: true,
-            animationType: 'fade',
-          }}
-          containerStyle={styles.bottomSheetContainer}
-        >
-          <Card
-            containerStyle={{
-              borderWidth: 0,
-              margin: 0,
+          </NativeViewGestureHandler>
+          {transitionDone || (
+            <View style={styles.mockContainer}>
+              <GalleryImage
+                asset={asset}
+                sharedElementId={asset.id}
+                enableParentScroll={enableScroll}
+                disableParentScroll={disableScroll}
+                listGestureRef={listGestureRef}
+                screenOpacity={screenOpacity}
+              />
+            </View>
+          )}
+          {renderActionButtons()}
+          <BottomSheet
+            isVisible={showShareBottomSheet}
+            onBackdropPress={() => setShowShareBottomSheet(false)}
+            modalProps={{
+              transparent: true,
+              animationType: 'fade',
             }}
+            containerStyle={styles.bottomSheetContainer}
           >
-            <Card.Title>Share with (enter DID)</Card.Title>
-            <Input
-              onChangeText={txt => setDID(txt)}
-              onEndEditing={shareWithDID}
+            <Card
+              containerStyle={{
+                borderWidth: 0,
+                margin: 0,
+              }}
+            >
+              <Card.Title>Share with (enter DID)</Card.Title>
+              <Input
+                onChangeText={txt => setDID(txt)}
+                onEndEditing={shareWithDID}
+              />
+            </Card>
+            <Button
+              title={
+                sharing ? (
+                  <ActivityIndicator
+                    style={styles.activityIndicatorStyle}
+                    size="small"
+                  />
+                ) : (
+                  'Share'
+                )
+              }
+              onPress={shareWithDID}
             />
-          </Card>
-          <Button
-            title={
-              sharing ? (
-                <ActivityIndicator
-                  style={styles.activityIndicatorStyle}
-                  size="small"
-                />
-              ) : (
-                'Share'
-              )
-            }
-            onPress={shareWithDID}
-          />
-        </BottomSheet>
-      </View>
-    </Animated.View>
+          </BottomSheet>
+        </View>
+      </Animated.View>
     </Screen>
   )
 }
