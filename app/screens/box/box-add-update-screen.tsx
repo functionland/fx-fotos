@@ -135,6 +135,5 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   screen: {
     justifyContent: 'center',
-    paddingTop: 100,
   },
 })

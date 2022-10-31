@@ -115,7 +115,6 @@ export const BoxListScreen: React.FC<Props> = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   screen: {
     justifyContent: 'center',
-    paddingTop: 100,
   },
   listContainer: {
     flex: 1,

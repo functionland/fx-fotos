@@ -311,8 +311,7 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   screen: {
-    // alignItems: "center",
-    paddingTop: 100,
+    flex:1
   },
   container: {
     flex: 1,

@@ -26,16 +26,24 @@ export const LibraryAssetsScreen: React.FC<Props> = ({ navigation }) => {
   const renderHeader = (
     style?: StyleProp<Animated.AnimateStyle<StyleProp<ViewStyle>>>,
   ) => (
-    <Header
-      placement="left"
-      style={[style]}
-      centerComponent={
-        <Text lineBreakMode="tail" h4>
-          {selectedLibrary?.title}
-        </Text>
-      }
-      leftComponent={<HeaderArrowBack navigation={navigation} />}
-    />
+    <Animated.View
+      style={[
+        { position: 'absolute', top: 0, zIndex: 99, width: '100%' },
+        style,
+      ]}
+    >
+      <Header
+        containerStyle={{ position: 'relative' }}
+        placement="left"
+        centerComponent={
+          <Text lineBreakMode="tail" h4>
+            {selectedLibrary?.title}
+          </Text>
+        }
+        leftComponent={<HeaderArrowBack navigation={navigation} />}
+      />
+    </Animated.View>
+
   )
   return (
     <Screen

@@ -54,7 +54,14 @@ export const LibraryScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     },
   })
   const renderHeader = () => (
-    <Header style={headerStyles} centerComponent={<HeaderLogo />} />
+    <Animated.View
+      style={[
+        { position: 'absolute', top: 0, zIndex: 99, width: '100%' },
+        headerStyles,
+      ]}
+    >
+      <Header containerStyle={{ position: 'relative' }} centerComponent={<HeaderLogo />} />
+    </Animated.View>
   )
 
   const onLibraryPress = (item: Library) => {
