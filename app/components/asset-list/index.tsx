@@ -18,6 +18,7 @@ import GridProvider from './grid-provider/gridContext'
 import PinchZoom from './grid-provider/pinchZoom'
 
 import { AssetStory, RecyclerAssetListSection } from '../../types'
+import { PinchGestureHandler } from 'react-native-gesture-handler'
 
 interface Props {
   refreshData: () => Promise<void>
@@ -54,6 +55,7 @@ const AssetList = forwardRef<AssetListHandle, Props>(
     const translationY = useSharedValue(0)
     const scrollRefExternal = useAnimatedRef<Animated.ScrollView>()
     const recyclerAssetListRef = useRef<RecyclerAssetListHandler>()
+    const pinchZoomRef = useRef<PinchGestureHandler>()
     useImperativeHandle<AssetListHandle>(ref, () => ({
       resetSelectedItems: () => {
         recyclerAssetListRef.current?.resetSelectedItems()
@@ -75,9 +77,10 @@ const AssetList = forwardRef<AssetListHandle, Props>(
 
     return (
       <GridProvider>
-        <PinchZoom>
+        <PinchZoom ref={pinchZoomRef}>
           <RecyclerAssetList
             ref={recyclerAssetListRef}
+            waitFor={[pinchZoomRef]}
             refreshData={refreshData}
             sections={sections}
             scrollHandler={scrollHandler}

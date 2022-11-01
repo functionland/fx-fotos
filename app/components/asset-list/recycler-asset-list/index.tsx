@@ -74,6 +74,7 @@ export interface RecyclerAssetListHandler {
   resetSelectedItems: () => void
   toggleSelectionMode: () => void
   scrollToItem: (item: RecyclerAssetListSection, animated?: boolean) => void
+  waitFor?: React.Ref<unknown> | React.Ref<unknown>[] | undefined
 }
 // eslint-disable-next-line react/display-name
 const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(
@@ -89,6 +90,7 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(
       onItemPress,
       onStoryPress,
       contentContainerStyle,
+      waitFor,
       ...extras
     },
     ref,
@@ -387,6 +389,7 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(
             onLayout: () => {
               updateContainerSize()
             },
+            waitFor: waitFor,
           }}
           onVisibleIndicesChanged={(all = [], now, notNow) => {
             const visibleIndexValue = all[Math.floor(all.length / 2)] || 0

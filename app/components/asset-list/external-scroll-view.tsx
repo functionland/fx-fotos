@@ -1,7 +1,8 @@
 import React from 'react'
 import { BaseScrollView } from 'fula-recyclerlistview'
 import Animated from 'react-native-reanimated'
-
+import { ScrollView } from 'react-native-gesture-handler'
+const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView)
 export default class ExternalScrollView extends BaseScrollView {
   constructor(props) {
     super(props)
@@ -13,7 +14,7 @@ export default class ExternalScrollView extends BaseScrollView {
 
   render() {
     return (
-      <Animated.ScrollView
+      <AnimatedScrollView
         {...this.props}
         style={{ zIndex: 1 }}
         ref={(this.props as any).scrollRefExternal}
@@ -26,7 +27,7 @@ export default class ExternalScrollView extends BaseScrollView {
         alwaysBounceVertical={false}
       >
         {this.props.children}
-      </Animated.ScrollView>
+      </AnimatedScrollView>
     )
   }
 }
