@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { forwardRef } from 'react'
 import { StyleSheet } from 'react-native'
 import {
   PinchGestureHandler,
@@ -13,7 +13,8 @@ import { MIN_COLUMNS, MAX_COLUMNS } from './gridLayoutManager'
 
 interface Props {}
 
-const PinchZoom: React.FC<Props> = props => {
+// eslint-disable-next-line react/display-name
+const PinchZoom = forwardRef<unknown, React.FC<Props>>((props, ref) => {
   const scale = useScale()
   const pinching = usePinching()
   const [numColumns] = useColumnsNumber()
@@ -76,13 +77,13 @@ const PinchZoom: React.FC<Props> = props => {
   )
 
   return (
-    <PinchGestureHandler onGestureEvent={_onPinchGestureEvent}>
+    <PinchGestureHandler ref={ref} onGestureEvent={_onPinchGestureEvent}>
       <Reanimated.View style={styles.container}>
         {props.children}
       </Reanimated.View>
     </PinchGestureHandler>
   )
-}
+})
 const styles = StyleSheet.create({
   container: {
     flex: 1,
