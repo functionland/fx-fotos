@@ -277,7 +277,7 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
           </View>
         )}
       </View>
-      <View>
+      {/* <View>
         <Card
           containerStyle={{
             borderWidth: 0,
@@ -304,7 +304,7 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
             </ListItem.Content>
           </ListItem>
         </Card>
-      </View>
+      </View> */}
     </Screen>
   )
 }
