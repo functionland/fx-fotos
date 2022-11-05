@@ -281,7 +281,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             </HeaderLeftContainer>
           }
           rightComponent={
-            <HeaderRightContainer style={{flex:1}}>
+            Platform.OS === 'android'? <HeaderRightContainer style={{flex:1}}>
               <SharedElement id="AccountAvatar">
                 {walletConnector.connected ? (
                   <Avatar
@@ -324,7 +324,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                   />
                 )}
               </SharedElement>
-            </HeaderRightContainer>
+            </HeaderRightContainer>:null
           }
         />
         {syncing && <LinearProgress />}

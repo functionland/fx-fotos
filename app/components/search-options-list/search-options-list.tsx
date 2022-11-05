@@ -31,7 +31,6 @@ export const SearchOptionsList = ({
       obj[option.id] = option
       return obj
     }, {})
-  console.log('SearchOptions', SearchOptions)
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
