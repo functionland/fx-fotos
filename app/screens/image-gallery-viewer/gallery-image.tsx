@@ -101,7 +101,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
   }, [dims.height])
 
   const onTap = useCallback(() => {
-    toggleMenu()
+    toggleMenu?.()
   }, [toggleMenu])
 
   const onDoubleTap = useAnimatedGestureHandler<TapGestureHandlerGestureEvent>({
