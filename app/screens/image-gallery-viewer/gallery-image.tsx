@@ -30,9 +30,9 @@ import Animated, {
 } from 'react-native-reanimated'
 import { SharedElement } from 'react-navigation-shared-element'
 import { ScreenHeight, ScreenWidth } from '@rneui/base'
-import { Video } from 'expo-av'
+import Video from 'react-native-video'
 
-import { Text } from '../../components'
+import { Text } from '@rneui/themed'
 import { palette } from '../../theme'
 import { Asset } from '../../types'
 import { AssetService } from '../../services'

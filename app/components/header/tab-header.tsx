@@ -3,7 +3,7 @@ import { View, Image, StyleSheet } from 'react-native'
 import { BottomTabHeaderProps } from '@react-navigation/bottom-tabs'
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native'
 import Animated from 'react-native-reanimated'
-import { Text } from '../text'
+import { Text } from '@rneui/themed'
 import { palette, Constants } from '../../theme'
 import { HomeNavigationTypes } from '../../navigators/home-navigator'
 

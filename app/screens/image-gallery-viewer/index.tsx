@@ -1,5 +1,5 @@
 import { NavigationProp, RouteProp } from '@react-navigation/native'
-import { BottomSheet, Button, Card, Icon, Input } from '@rneui/themed'
+import { BottomSheet, Button, Card, Icon, Input, Text } from '@rneui/themed'
 import {
   DataProvider,
   GridLayoutProvider,
@@ -28,7 +28,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated'
-import { Header, Text, Screen } from '../../components'
+import { Header, Screen } from '../../components'
 import {
   HeaderArrowBack,
   HeaderLeftContainer,
@@ -47,7 +47,7 @@ import { GalleryImage } from './gallery-image'
 import * as helper from '../../utils/helper'
 import { palette } from '../../theme'
 import { AssetService } from '../../services'
-import { LinearGradient } from 'expo-linear-gradient'
+import LinearGradient from 'react-native-linear-gradient'
 
 interface ImageGalleryViewerScreenProps {
   navigation: NavigationProp<RootStackParamList>
