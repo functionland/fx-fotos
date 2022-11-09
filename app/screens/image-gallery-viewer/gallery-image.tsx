@@ -34,7 +34,7 @@ import Video from 'react-native-video'
 
 import { Text } from '@rneui/themed'
 import { palette } from '../../theme'
-import { Asset } from '../../types'
+import { Asset, VideoPlayerMetadata } from '../../types'
 import { AssetService } from '../../services'
 
 type GalleryImageProps = {
@@ -45,6 +45,11 @@ type GalleryImageProps = {
   listGestureRef: MutableRefObject<NativeViewGestureHandler>
   screenOpacity: SharedValue<number>
   sharedElementId: string
+  onVideoLoad: (videoRef: any, metadata: VideoPlayerMetadata) => void
+  onVideoProgress: (metadata: VideoPlayerMetadata) => void
+  isCurrentView: boolean
+  videoPaused: boolean
+  videoMuted: boolean
 }
 
 const MAX_SCALE = 6
@@ -59,6 +64,11 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
   listGestureRef,
   screenOpacity,
   sharedElementId,
+  onVideoLoad,
+  onVideoProgress,
+  isCurrentView,
+  videoPaused,
+  videoMuted,
 }) => {
   const navigation = useNavigation()
   const dims = useWindowDimensions()
@@ -76,6 +86,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
   const pinchHandlerRef = useRef(null)
   const doubleTapHandlerRef = useRef(null)
   const singleTapHandlerRef = useRef(null)
+  const videoPlayerRef = useRef(null)
 
   const isZoomed = useDerivedValue(() => {
     if (accumulatedScale?.value > 1) {
@@ -348,7 +359,6 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
     [dims.width, dims.height],
   )
 
-  const video = React.useRef(null)
   const [localUri, setLocalUri] = React.useState(null)
   const [, setPlaybackStatus] = React.useState({})
 
@@ -362,6 +372,19 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
   React.useLayoutEffect(() => {
     getAssetLocalInfo()
   }, [asset])
+
+  const _onVideoLoad = useCallback(
+    event => {
+      onVideoLoad?.(videoPlayerRef, event)
+    },
+    [onVideoLoad],
+  )
+  const _onVideoProgress = useCallback(
+    event => {
+      onVideoProgress?.(event)
+    },
+    [onVideoProgress],
+  )
 
   return (
     <Animated.View style={screenStyle}>
@@ -393,19 +416,17 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
                   >
                     <Animated.View style={animatedImageContainerStyle}>
                       <SharedElement id={sharedElementId}>
-                        {asset.mediaType === 'video' ? (
+                        {isCurrentView && asset.mediaType === 'video' ? (
                           <Video
-                            ref={video}
+                            ref={videoPlayerRef}
                             source={{
                               uri: Platform.OS === 'ios' ? localUri : asset.uri,
                             }}
                             style={{
-                              height:
-                                (asset.height * ScreenWidth) / asset.width ||
-                                ScreenHeight,
+                              height: ScreenHeight,
                               width: ScreenWidth,
-                              zIndex: 9999999,
                             }}
+                            fullscreenAutorotate={true}
                             onPlaybackStatusUpdate={status =>
                               setPlaybackStatus(() => status)
                             }
@@ -413,6 +434,10 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
                             resizeMode="contain"
                             shouldPlay
                             isLooping
+                            paused={videoPaused}
+                            muted={videoMuted}
+                            onLoad={_onVideoLoad}
+                            onProgress={_onVideoProgress}
                           />
                         ) : Platform.OS === 'android' ? (
                           <FastImage

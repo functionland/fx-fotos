@@ -41,6 +41,8 @@ import {
   Asset,
   RecyclerAssetListSection,
   SyncStatus,
+  VideoPlayerMetadata,
+  VideoPlayerProgress,
   ViewType,
 } from '../../types'
 import { GalleryImage } from './gallery-image'
@@ -52,6 +54,11 @@ import LinearGradient from 'react-native-linear-gradient'
 interface ImageGalleryViewerScreenProps {
   navigation: NavigationProp<RootStackParamList>
   route: RouteProp<RootStackParamList, 'ImageGalleryViewer'>
+}
+interface ExtendedState {
+  currentVideoMuted: boolean
+  currentVideoPaused: boolean
+  currentAssetId: string
 }
 
 export const ImageGalleryViewerScreen: React.FC<
@@ -74,7 +81,17 @@ export const ImageGalleryViewerScreen: React.FC<
   const optionsVisibleRef = useRef(true)
   const headerOffset = useSharedValue(0)
   const footerOffset = useSharedValue(0)
+  const currentVideoPlayerRef = useRef(null)
+  const [currentVideoMetadata, setCurrentVideoMetadata] =
+    useState<VideoPlayerMetadata>(null)
+  const [currnetVideoProgress, setCurrnetVideoProgress] =
+    useState<VideoPlayerProgress>(null)
 
+  const [extendedState, setExtendedState] = useState<ExtendedState>({
+    currentVideoMuted: true,
+    currentVideoPaused: false,
+    currentAssetId: assetId,
+  })
   const headerHeightRef = useRef(0)
   const footerHeightRef = useRef(0)
   const [assetSections, setAssetSections] = useState<RecyclerAssetListSection>(
@@ -128,20 +145,18 @@ export const ImageGalleryViewerScreen: React.FC<
     optionsVisibleRef.current = !optionsVisibleRef.current
   }, [])
 
-  const renderItem = useCallback(
-    ({ item }) => (
-      <GalleryImage
-        asset={item}
-        toggleMenu={toggleMenu}
-        sharedElementId={transitionDone ? item.id : `${item.id}_`}
-        enableParentScroll={enableScroll}
-        disableParentScroll={disableScroll}
-        listGestureRef={listGestureRef}
-        screenOpacity={screenOpacity}
-      />
-    ),
-    [enableScroll, disableScroll, screenOpacity, transitionDone, toggleMenu],
+  const _onVideoLoad = useCallback(
+    (videoRef: any, metadata: VideoPlayerMetadata) => {
+      currentVideoPlayerRef.current = videoRef
+      setCurrentVideoMetadata(metadata)
+      console.log('_onVideoLoad', metadata)
+    },
+    [],
   )
+  const _onVideoProgress = useCallback((metadata: VideoPlayerProgress) => {
+    setCurrentVideoMetadata(metadata)
+    console.log('_onVideoProgress', metadata)
+  }, [])
 
   const rowRenderer = useCallback(
     (type: string | number, data: Asset) => {
@@ -152,9 +167,32 @@ export const ImageGalleryViewerScreen: React.FC<
       // if (data.isDeleted) {
       //   return null
       // }
-      return renderItem({ item: data })
+      return (
+        <GalleryImage
+          asset={data}
+          toggleMenu={toggleMenu}
+          sharedElementId={transitionDone ? data.id : `${data.id}_`}
+          enableParentScroll={enableScroll}
+          disableParentScroll={disableScroll}
+          listGestureRef={listGestureRef}
+          screenOpacity={screenOpacity}
+          onVideoLoad={_onVideoLoad}
+          onVideoProgress={_onVideoProgress}
+          isCurrentView={extendedState?.currentAssetId === data.id}
+          videoPaused={extendedState?.currentVideoPaused}
+          videoMuted={extendedState?.currentVideoMuted}
+        />
+      )
     },
-    [transitionDone],
+    [
+      transitionDone,
+      _onVideoLoad,
+      enableScroll,
+      disableScroll,
+      toggleMenu,
+      screenOpacity,
+      extendedState,
+    ],
   )
 
   const layoutProvider = useMemo(
@@ -332,7 +370,9 @@ export const ImageGalleryViewerScreen: React.FC<
 
   const renderHeader = useCallback(
     () => (
-      <Animated.View style={[{ zIndex: 10, position: 'absolute' }, animatedHeaderStyle]}>
+      <Animated.View
+        style={[{ zIndex: 10, position: 'absolute' }, animatedHeaderStyle]}
+      >
         <Header
           onLayout={event => {
             headerHeightRef.current = event.nativeEvent.layout.height
@@ -352,40 +392,40 @@ export const ImageGalleryViewerScreen: React.FC<
               />
             </HeaderLeftContainer>
           }
-        // rightComponent={
-        //   <HeaderRightContainer>
-        //     {loading ? (
-        //       <ActivityIndicator size="small" />
-        //     ) : asset?.syncStatus === SyncStatus.SYNCED &&
-        //       !asset?.isDeleted ? (
-        //       <Icon type="material-community" name="cloud-check" />
-        //     ) : asset?.syncStatus === SyncStatus.NOTSYNCED &&
-        //       !asset?.isDeleted ? (
-        //       <Icon
-        //         type="material-community"
-        //         name="cloud-upload-outline"
-        //         onPress={uploadToBox}
-        //       />
-        //     ) : asset?.syncStatus === SyncStatus.SYNC ? (
-        //       <Icon
-        //         type="material-community"
-        //         name="refresh"
-        //         onPress={uploadToBox}
-        //       />
-        //     ) : null}
-        //     {asset?.syncStatus === SyncStatus.SYNCED && (
-        //       <Icon
-        //         type="material-community"
-        //         style={styles.headerIcon}
-        //         name="share-variant"
-        //         onPress={() => {
-        //           setDID('')
-        //           setShowShareBottomSheet(true)
-        //         }}
-        //       />
-        //     )}
-        //   </HeaderRightContainer>
-        // }
+          // rightComponent={
+          //   <HeaderRightContainer>
+          //     {loading ? (
+          //       <ActivityIndicator size="small" />
+          //     ) : asset?.syncStatus === SyncStatus.SYNCED &&
+          //       !asset?.isDeleted ? (
+          //       <Icon type="material-community" name="cloud-check" />
+          //     ) : asset?.syncStatus === SyncStatus.NOTSYNCED &&
+          //       !asset?.isDeleted ? (
+          //       <Icon
+          //         type="material-community"
+          //         name="cloud-upload-outline"
+          //         onPress={uploadToBox}
+          //       />
+          //     ) : asset?.syncStatus === SyncStatus.SYNC ? (
+          //       <Icon
+          //         type="material-community"
+          //         name="refresh"
+          //         onPress={uploadToBox}
+          //       />
+          //     ) : null}
+          //     {asset?.syncStatus === SyncStatus.SYNCED && (
+          //       <Icon
+          //         type="material-community"
+          //         style={styles.headerIcon}
+          //         name="share-variant"
+          //         onPress={() => {
+          //           setDID('')
+          //           setShowShareBottomSheet(true)
+          //         }}
+          //       />
+          //     )}
+          //   </HeaderRightContainer>
+          // }
         />
       </Animated.View>
     ),
@@ -507,6 +547,10 @@ export const ImageGalleryViewerScreen: React.FC<
       const newAsset = dataProvider.getDataForIndex(index)
       if (currentAssetRef.current.id == newAsset.id) return
       currentAssetRef.current = newAsset
+      setExtendedState(prev => ({
+        ...prev,
+        currentAssetId: newAsset.id,
+      }))
       setTimeout(() => {
         assetSections.forEach(section => {
           if (section.id === currentAssetRef.current.id) {
@@ -563,16 +607,25 @@ export const ImageGalleryViewerScreen: React.FC<
     backgroundColor: 'black',
     opacity: screenOpacity.value,
   }))
-
   return (
     <Screen
       scrollEventThrottle={16}
       automaticallyAdjustContentInsets
       style={styles.screen}
     >
+      <Icon
+        name="home"
+        onPress={() => {
+          setExtendedState({
+            ...extendedState,
+            currentVideoPaused: !extendedState.currentVideoPaused,
+          })
+        }}
+      />
       <Animated.View style={wrapperAnimatedStyle}>
         <View style={{ flex: 1 }}>
           {renderHeader()}
+
           <NativeViewGestureHandler ref={listGestureRef}>
             <RecyclerListView
               ref={rclRef}
@@ -590,6 +643,7 @@ export const ImageGalleryViewerScreen: React.FC<
                 showsHorizontalScrollIndicator: false,
                 showsVerticalScrollIndicator: false,
               }}
+              extendedState={extendedState}
             />
           </NativeViewGestureHandler>
           {transitionDone || (
