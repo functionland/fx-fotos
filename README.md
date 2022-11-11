@@ -1,7 +1,8 @@
 ![](https://github.com/functionland/photos/blob/main/assets/images/logo.png)
 
-Google Play: https://play.google.com/store/apps/details?id=land.fx.fotos
-App Store: https://apps.apple.com/ca/app/fx-fotos/id1640008383
+**Google Play:** https://play.google.com/store/apps/details?id=land.fx.fotos
+
+**App Store:** https://apps.apple.com/ca/app/fx-fotos/id1640008383
 
 # Latest 2 Updates
 
