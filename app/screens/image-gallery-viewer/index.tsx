@@ -82,10 +82,6 @@ export const ImageGalleryViewerScreen: React.FC<
   const headerOffset = useSharedValue(0)
   const footerOffset = useSharedValue(0)
   const currentVideoPlayerRef = useRef(null)
-  const [currentVideoMetadata, setCurrentVideoMetadata] =
-    useState<VideoPlayerMetadata>(null)
-  const [currnetVideoProgress, setCurrnetVideoProgress] =
-    useState<VideoPlayerProgress>(null)
 
   const [extendedState, setExtendedState] = useState<ExtendedState>({
     currentVideoMuted: true,
@@ -145,21 +141,8 @@ export const ImageGalleryViewerScreen: React.FC<
     optionsVisibleRef.current = !optionsVisibleRef.current
   }, [])
 
-  const _onVideoLoad = useCallback(
-    (videoRef: any, metadata: VideoPlayerMetadata) => {
-      currentVideoPlayerRef.current = videoRef
-      setCurrentVideoMetadata(metadata)
-      console.log('_onVideoLoad', metadata)
-    },
-    [],
-  )
-  const _onVideoProgress = useCallback((metadata: VideoPlayerProgress) => {
-    setCurrentVideoMetadata(metadata)
-    console.log('_onVideoProgress', metadata)
-  }, [])
-
   const rowRenderer = useCallback(
-    (type: string | number, data: Asset) => {
+    (type: string | number, data: Asset, index, extState: ExtendedState) => {
       // if (!data) return null
       // if (data?.syncStatus === SyncStatus.SYNCED && data?.isDeleted) {
       //   return renderDownloadSection()
@@ -176,23 +159,13 @@ export const ImageGalleryViewerScreen: React.FC<
           disableParentScroll={disableScroll}
           listGestureRef={listGestureRef}
           screenOpacity={screenOpacity}
-          onVideoLoad={_onVideoLoad}
-          onVideoProgress={_onVideoProgress}
-          isCurrentView={extendedState?.currentAssetId === data.id}
-          videoPaused={extendedState?.currentVideoPaused}
-          videoMuted={extendedState?.currentVideoMuted}
+          isCurrentView={extState?.currentAssetId === data.id}
+          videoPaused={extState?.currentVideoPaused}
+          videoMuted={extState?.currentVideoMuted}
         />
       )
     },
-    [
-      transitionDone,
-      _onVideoLoad,
-      enableScroll,
-      disableScroll,
-      toggleMenu,
-      screenOpacity,
-      extendedState,
-    ],
+    [transitionDone, enableScroll, disableScroll, toggleMenu, screenOpacity],
   )
 
   const layoutProvider = useMemo(

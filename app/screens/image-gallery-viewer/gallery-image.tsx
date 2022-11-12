@@ -1,6 +1,12 @@
 import { useNavigation } from '@react-navigation/native'
 import moment from 'moment'
-import React, { MutableRefObject, useRef, useCallback, useMemo } from 'react'
+import React, {
+  MutableRefObject,
+  useRef,
+  useCallback,
+  useMemo,
+  useState,
+} from 'react'
 import {
   Image,
   Platform,
@@ -34,8 +40,9 @@ import Video from 'react-native-video'
 
 import { Text } from '@rneui/themed'
 import { palette } from '../../theme'
-import { Asset, VideoPlayerMetadata } from '../../types'
+import { Asset, VideoPlayerMetadata, VideoPlayerProgress } from '../../types'
 import { AssetService } from '../../services'
+import { VideoPlayerControl } from '../../components'
 
 type GalleryImageProps = {
   asset: Asset
@@ -45,11 +52,7 @@ type GalleryImageProps = {
   listGestureRef: MutableRefObject<NativeViewGestureHandler>
   screenOpacity: SharedValue<number>
   sharedElementId: string
-  onVideoLoad: (videoRef: any, metadata: VideoPlayerMetadata) => void
-  onVideoProgress: (metadata: VideoPlayerMetadata) => void
   isCurrentView: boolean
-  videoPaused: boolean
-  videoMuted: boolean
 }
 
 const MAX_SCALE = 6
@@ -64,11 +67,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
   listGestureRef,
   screenOpacity,
   sharedElementId,
-  onVideoLoad,
-  onVideoProgress,
   isCurrentView,
-  videoPaused,
-  videoMuted,
 }) => {
   const navigation = useNavigation()
   const dims = useWindowDimensions()
@@ -87,6 +86,13 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
   const doubleTapHandlerRef = useRef(null)
   const singleTapHandlerRef = useRef(null)
   const videoPlayerRef = useRef(null)
+  const [videoMuted, setVideoMuted] = useState(true)
+  const [videoPaused, setVideoPaused] = useState(false)
+
+  const [currentVideoMetadata, setCurrentVideoMetadata] =
+    useState<VideoPlayerMetadata>(null)
+  const [currnetVideoProgress, setCurrnetVideoProgress] =
+    useState<VideoPlayerProgress>(null)
 
   const isZoomed = useDerivedValue(() => {
     if (accumulatedScale?.value > 1) {
@@ -373,18 +379,12 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
     getAssetLocalInfo()
   }, [asset])
 
-  const _onVideoLoad = useCallback(
-    event => {
-      onVideoLoad?.(videoPlayerRef, event)
-    },
-    [onVideoLoad],
-  )
-  const _onVideoProgress = useCallback(
-    event => {
-      onVideoProgress?.(event)
-    },
-    [onVideoProgress],
-  )
+  const _onVideoLoad = useCallback(event => {
+    setCurrentVideoMetadata(event)
+  }, [])
+  const _onVideoProgress = useCallback(event => {
+    setCurrnetVideoProgress(event)
+  }, [])
 
   return (
     <Animated.View style={screenStyle}>
@@ -486,6 +486,20 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
                       </Animated.View>
                     </Animated.View>
                   </PanGestureHandler>
+                  {asset.mediaType === 'video' && (
+                    <VideoPlayerControl
+                      containerStyle={{ position: 'absolute', bottom: 60 }}
+                      muted={videoMuted}
+                      currentTime={currnetVideoProgress?.currentTime}
+                      seekableDuration={currnetVideoProgress?.seekableDuration}
+                      onVolumePresss={() => {
+                        setVideoMuted(!videoMuted)
+                      }}
+                      onValueChange={value => {
+                        videoPlayerRef?.current?.seek(value)
+                      }}
+                    />
+                  )}
                 </Animated.View>
               </PinchGestureHandler>
             </Animated.View>
@@ -553,7 +567,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     color: palette.black,
   },
-  flex1: { flex: 1 },
+  flex1: { flex: 1, alignItems: 'center' },
   horizontalBar: {
     borderBottomColor: 'black',
     borderBottomWidth: StyleSheet.hairlineWidth,
