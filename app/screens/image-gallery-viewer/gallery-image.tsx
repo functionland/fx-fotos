@@ -6,6 +6,7 @@ import React, {
   useCallback,
   useMemo,
   useState,
+  useEffect,
 } from 'react'
 import {
   Image,
@@ -13,6 +14,7 @@ import {
   View,
   useWindowDimensions,
   StyleSheet,
+  ActivityIndicator,
 } from 'react-native'
 import FastImage from 'react-native-fast-image'
 import {
@@ -38,7 +40,7 @@ import { SharedElement } from 'react-navigation-shared-element'
 import { ScreenHeight, ScreenWidth } from '@rneui/base'
 import Video from 'react-native-video'
 
-import { Text } from '@rneui/themed'
+import { Icon, Text } from '@rneui/themed'
 import { palette } from '../../theme'
 import { Asset, VideoPlayerMetadata, VideoPlayerProgress } from '../../types'
 import { AssetService } from '../../services'
@@ -48,7 +50,7 @@ type GalleryImageProps = {
   asset: Asset
   enableParentScroll?: () => void
   disableParentScroll?: () => void
-  toggleMenu?: () => void
+  toggleMenu?: (forceValue?: boolean) => void
   listGestureRef: MutableRefObject<NativeViewGestureHandler>
   screenOpacity: SharedValue<number>
   sharedElementId: string
@@ -88,11 +90,22 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
   const videoPlayerRef = useRef(null)
   const [videoMuted, setVideoMuted] = useState(true)
   const [videoPaused, setVideoPaused] = useState(false)
+  const videoControlVisibilty = useSharedValue(false)
 
   const [currentVideoMetadata, setCurrentVideoMetadata] =
     useState<VideoPlayerMetadata>(null)
   const [currnetVideoProgress, setCurrnetVideoProgress] =
     useState<VideoPlayerProgress>(null)
+  useEffect(() => {
+    if (isCurrentView && asset?.mediaType !== 'video') {
+      toggleMenu?.()
+    }
+  }, [])
+  useEffect(() => {
+    if (!isCurrentView) {
+      setCurrentVideoMetadata(null)
+    }
+  }, [isCurrentView])
 
   const isZoomed = useDerivedValue(() => {
     if (accumulatedScale?.value > 1) {
@@ -118,6 +131,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
   }, [dims.height])
 
   const onTap = useCallback(() => {
+    videoControlVisibilty.value = !videoControlVisibilty.value
     toggleMenu?.()
   }, [toggleMenu])
 
@@ -329,7 +343,9 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
       }
     },
   })
-
+  const animatedVideoControlVisibility = useAnimatedStyle(() => ({
+    opacity: withTiming(videoControlVisibilty.value ? 1 : 0, { duration: 200 }),
+  }))
   const animatedImageContainerStyle = useAnimatedStyle(() => ({
     flex: 1,
     justifyContent: 'center',
@@ -366,7 +382,6 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
   )
 
   const [localUri, setLocalUri] = React.useState(null)
-  const [, setPlaybackStatus] = React.useState({})
 
   const getAssetLocalInfo = React.useCallback(async () => {
     if (Platform.OS === 'ios') {
@@ -426,14 +441,10 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
                               height: ScreenHeight,
                               width: ScreenWidth,
                             }}
+                            repeat={true}
                             fullscreenAutorotate={true}
-                            onPlaybackStatusUpdate={status =>
-                              setPlaybackStatus(() => status)
-                            }
-                            useNativeControls
                             resizeMode="contain"
                             shouldPlay
-                            isLooping
                             paused={videoPaused}
                             muted={videoMuted}
                             onLoad={_onVideoLoad}
@@ -486,26 +497,61 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
                       </Animated.View>
                     </Animated.View>
                   </PanGestureHandler>
-                  {asset.mediaType === 'video' && (
-                    <VideoPlayerControl
-                      containerStyle={{ position: 'absolute', bottom: 60 }}
-                      muted={videoMuted}
-                      currentTime={currnetVideoProgress?.currentTime}
-                      seekableDuration={currnetVideoProgress?.seekableDuration}
-                      onVolumePresss={() => {
-                        setVideoMuted(!videoMuted)
-                      }}
-                      onValueChange={value => {
-                        videoPlayerRef?.current?.seek(value)
-                      }}
-                    />
-                  )}
                 </Animated.View>
               </PinchGestureHandler>
             </Animated.View>
           </TapGestureHandler>
         </Animated.View>
       </TapGestureHandler>
+      {asset.mediaType === 'video' && (
+        <VideoPlayerControl
+          containerStyle={[
+            { position: 'absolute', bottom: 60 },
+            animatedVideoControlVisibility,
+          ]}
+          muted={videoMuted}
+          currentTime={currnetVideoProgress?.currentTime}
+          seekableDuration={currnetVideoProgress?.seekableDuration}
+          onVolumePresss={() => {
+            setVideoMuted(!videoMuted)
+          }}
+          onValueChange={value => {
+            videoPlayerRef?.current?.seek(value)
+          }}
+        />
+      )}
+      {asset.mediaType === 'video' && (
+        <Animated.View
+          style={[styles.overlayBox, animatedVideoControlVisibility]}
+          pointerEvents="box-none"
+        >
+          <Icon
+            type="materialIcons"
+            name={videoPaused ? 'play-circle-fill' : 'pause-circle-filled'}
+            size={52}
+            onPress={() => {
+              if (videoPaused) {
+                setTimeout(() => {
+                  toggleMenu?.(false)
+                  videoControlVisibilty.value = false
+                }, 1000)
+              }
+              setVideoPaused(!videoPaused)
+            }}
+            containerStyle={{
+              borderRadius: 26,
+            }}
+            color="rgba(255,255,255,0.6)"
+            useForeground={true}
+            background="black"
+          />
+        </Animated.View>
+      )}
+      {!currentVideoMetadata && asset.mediaType === 'video' && (
+        <Animated.View style={[styles.overlayBox]} pointerEvents="box-none">
+          <ActivityIndicator size="large" />
+        </Animated.View>
+      )}
     </Animated.View>
   )
 }
@@ -572,5 +618,14 @@ const styles = StyleSheet.create({
     borderBottomColor: 'black',
     borderBottomWidth: StyleSheet.hairlineWidth,
     marginVertical: 20,
+  },
+  overlayBox: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
   },
 })

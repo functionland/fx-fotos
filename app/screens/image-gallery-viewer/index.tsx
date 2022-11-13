@@ -17,6 +17,7 @@ import {
   View,
   InteractionManager,
   StyleSheet,
+  StatusBar,
 } from 'react-native'
 import { NativeViewGestureHandler } from 'react-native-gesture-handler'
 import { useRecoilState } from 'recoil'
@@ -78,10 +79,8 @@ export const ImageGalleryViewerScreen: React.FC<
   const screenOpacity = useSharedValue(1)
   const currentAssetRef = useRef(asset)
   const [transitionDone, setTransitionDone] = useState(false)
-  const optionsVisibleRef = useRef(true)
-  const headerOffset = useSharedValue(0)
-  const footerOffset = useSharedValue(0)
-  const currentVideoPlayerRef = useRef(null)
+  const optionsVisibleRef = useRef(false)
+  const headerOpacity = useSharedValue(0)
 
   const [extendedState, setExtendedState] = useState<ExtendedState>({
     currentVideoMuted: true,
@@ -130,15 +129,15 @@ export const ImageGalleryViewerScreen: React.FC<
     setScrollEnabled(false)
   }, [])
 
-  const toggleMenu = useCallback(() => {
-    if (optionsVisibleRef.current) {
-      headerOffset.value = withTiming(-headerHeightRef.current)
-      footerOffset.value = withTiming(-footerHeightRef.current)
+  const toggleMenu = useCallback(forceValue => {
+    if (forceValue != null) {
+      optionsVisibleRef.current = forceValue
     } else {
-      headerOffset.value = withTiming(0)
-      footerOffset.value = withTiming(0)
+      optionsVisibleRef.current = !optionsVisibleRef.current
     }
-    optionsVisibleRef.current = !optionsVisibleRef.current
+    headerOpacity.value = withTiming(optionsVisibleRef.current ? 1 : 0, {
+      duration: 200,
+    })
   }, [])
 
   const rowRenderer = useCallback(
@@ -337,69 +336,41 @@ export const ImageGalleryViewerScreen: React.FC<
     }
   }
 
-  const animatedHeaderStyle = useAnimatedStyle(() => ({
-    top: headerOffset.value,
+  const animatedOptionsStyle = useAnimatedStyle(() => ({
+    opacity: headerOpacity.value,
   }))
 
   const renderHeader = useCallback(
     () => (
       <Animated.View
-        style={[{ zIndex: 10, position: 'absolute' }, animatedHeaderStyle]}
-      >
-        <Header
-          onLayout={event => {
-            headerHeightRef.current = event.nativeEvent.layout.height
-          }}
-          containerStyle={{
-            //marginTop: 10,
+        style={[
+          {
             zIndex: 10,
-            backgroundColor: 'transparent',
-          }}
-          leftComponent={
-            <HeaderLeftContainer>
-              <HeaderArrowBack
-                navigation={navigation}
-                iconProps={{
-                  onPress: goBack,
-                }}
-              />
-            </HeaderLeftContainer>
-          }
-          // rightComponent={
-          //   <HeaderRightContainer>
-          //     {loading ? (
-          //       <ActivityIndicator size="small" />
-          //     ) : asset?.syncStatus === SyncStatus.SYNCED &&
-          //       !asset?.isDeleted ? (
-          //       <Icon type="material-community" name="cloud-check" />
-          //     ) : asset?.syncStatus === SyncStatus.NOTSYNCED &&
-          //       !asset?.isDeleted ? (
-          //       <Icon
-          //         type="material-community"
-          //         name="cloud-upload-outline"
-          //         onPress={uploadToBox}
-          //       />
-          //     ) : asset?.syncStatus === SyncStatus.SYNC ? (
-          //       <Icon
-          //         type="material-community"
-          //         name="refresh"
-          //         onPress={uploadToBox}
-          //       />
-          //     ) : null}
-          //     {asset?.syncStatus === SyncStatus.SYNCED && (
-          //       <Icon
-          //         type="material-community"
-          //         style={styles.headerIcon}
-          //         name="share-variant"
-          //         onPress={() => {
-          //           setDID('')
-          //           setShowShareBottomSheet(true)
-          //         }}
-          //       />
-          //     )}
-          //   </HeaderRightContainer>
-          // }
-        />
+            position: 'absolute',
+            width: '100%',
+          },
+          animatedOptionsStyle,
+        ]}
+      >
+        <StatusBar backgroundColor="transparent" />
+        <LinearGradient
+          colors={[
+            'rgba(33,33,33,0.3)',
+            'rgba(33,33,33,0.2)',
+            'rgba(33,33,33,0)',
+          ]}
+          style={[
+            styles.gradientContainer,
+            { alignItems: 'flex-start', paddingHorizontal: 20, paddingTop: 20 },
+          ]}
+        >
+          <HeaderArrowBack
+            navigation={navigation}
+            iconProps={{
+              onPress: goBack,
+            }}
+          />
+        </LinearGradient>
       </Animated.View>
     ),
     [navigation, loading, uploadToBox, asset, goBack],
@@ -535,21 +506,13 @@ export const ImageGalleryViewerScreen: React.FC<
     [windowDims.width],
   )
 
-  const onActionPress = useCallback((action: string) => {
-    alert(`Action ${action} is being developed`)
-  }, [])
-
-  const animatedFooterStyle = useAnimatedStyle(() => ({
-    bottom: footerOffset.value,
-  }))
-
   const renderActionButtons = useCallback(
     () => (
       <Animated.View
         onLayout={event => {
           footerHeightRef.current = event.nativeEvent.layout.height
         }}
-        style={[styles.actionButtonContainer, animatedFooterStyle]}
+        style={[styles.actionButtonContainer, animatedOptionsStyle]}
       >
         <LinearGradient
           colors={[
@@ -586,15 +549,6 @@ export const ImageGalleryViewerScreen: React.FC<
       automaticallyAdjustContentInsets
       style={styles.screen}
     >
-      <Icon
-        name="home"
-        onPress={() => {
-          setExtendedState({
-            ...extendedState,
-            currentVideoPaused: !extendedState.currentVideoPaused,
-          })
-        }}
-      />
       <Animated.View style={wrapperAnimatedStyle}>
         <View style={{ flex: 1 }}>
           {renderHeader()}
@@ -690,6 +644,7 @@ const styles = StyleSheet.create({
   actionText: {
     textAlign: 'center',
     color: palette.white,
+    fontSize: 13,
   },
   iconContainer: {
     flex: 1,

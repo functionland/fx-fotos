@@ -1,6 +1,7 @@
 import { Icon, Slider, Text } from '@rneui/themed'
 import React from 'react'
-import { View, StyleSheet, ViewStyle } from 'react-native'
+import { StyleSheet, ViewStyle } from 'react-native'
+import Animated from 'react-native-reanimated'
 import { secondToTimeString } from '../../utils/helper'
 type Props = {
   containerStyle?: ViewStyle
@@ -20,13 +21,15 @@ export const VideoPlayerControl = ({
   onValueChange,
 }: Props) => {
   return (
-    <View style={[styles.container, containerStyle]}>
+    <Animated.View style={[styles.container, containerStyle]}>
       <Text style={styles.timeText}>{secondToTimeString(currentTime)}</Text>
       <Slider
-        style={{ width: '60%', marginHorizontal: 10 }}
-        thumbStyle={{ backgroundColor: 'white', width: 12, height: 12 }}
-        trackStyle={{ backgroundColor: 'white', height: 2 }}
-        thumbTouchSize={{ height: 20, width: 20 }}
+        style={styles.slider}
+        thumbStyle={styles.thumbStyle}
+        trackStyle={{ height: 2 }}
+        minimumTrackTintColor="white"
+        maximumTrackTintColor="gray"
+        thumbTouchSize={{ height: 30, width: 30 }}
         minimumValue={0}
         maximumValue={seekableDuration}
         step={1}
@@ -41,19 +44,28 @@ export const VideoPlayerControl = ({
         name={muted ? 'volume-off' : 'volume-high'}
         onPress={onVolumePresss}
       />
-    </View>
+    </Animated.View>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
+    width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    paddingHorizontal: 10,
+    paddingHorizontal: 15,
   },
   timeText: {
-    color: 'back',
     fontSize: 12,
+  },
+  slider: {
+    width: '60%',
+    marginHorizontal: 10,
+  },
+  thumbStyle: {
+    backgroundColor: 'white',
+    width: 12,
+    height: 12,
   },
 })
