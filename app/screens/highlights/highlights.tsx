@@ -31,7 +31,7 @@ import {
 import { Asset, AssetStory } from '../../types'
 import { TimerProgress, TimerProgressHandler } from '../../components'
 import { Text } from '@rneui/themed'
-import { LinearGradient } from 'expo-linear-gradient'
+import LinearGradient from 'react-native-linear-gradient'
 
 interface HighlightScreenProps {
   route: RouteProp<

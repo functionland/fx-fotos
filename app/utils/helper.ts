@@ -44,3 +44,10 @@ export const decryptJWE = async (
   }
   return null
 }
+
+export const secondToTimeString = (second: number) => {
+  const date = new Date(0)
+  date.setSeconds(Math.floor(second))
+  if (Math.floor(second) > 60 * 60) return date.toISOString().substring(11, 19)
+  else return date.toISOString().substring(14, 19)
+}

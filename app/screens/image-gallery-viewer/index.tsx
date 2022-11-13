@@ -1,5 +1,5 @@
 import { NavigationProp, RouteProp } from '@react-navigation/native'
-import { BottomSheet, Button, Card, Icon, Input } from '@rneui/themed'
+import { BottomSheet, Button, Card, Icon, Input, Text } from '@rneui/themed'
 import {
   DataProvider,
   GridLayoutProvider,
@@ -17,6 +17,7 @@ import {
   View,
   InteractionManager,
   StyleSheet,
+  StatusBar,
 } from 'react-native'
 import { NativeViewGestureHandler } from 'react-native-gesture-handler'
 import { useRecoilState } from 'recoil'
@@ -28,7 +29,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated'
-import { Header, Text, Screen } from '../../components'
+import { Header, Screen } from '../../components'
 import {
   HeaderArrowBack,
   HeaderLeftContainer,
@@ -41,17 +42,24 @@ import {
   Asset,
   RecyclerAssetListSection,
   SyncStatus,
+  VideoPlayerMetadata,
+  VideoPlayerProgress,
   ViewType,
 } from '../../types'
 import { GalleryImage } from './gallery-image'
 import * as helper from '../../utils/helper'
 import { palette } from '../../theme'
 import { AssetService } from '../../services'
-import { LinearGradient } from 'expo-linear-gradient'
+import LinearGradient from 'react-native-linear-gradient'
 
 interface ImageGalleryViewerScreenProps {
   navigation: NavigationProp<RootStackParamList>
   route: RouteProp<RootStackParamList, 'ImageGalleryViewer'>
+}
+interface ExtendedState {
+  currentVideoMuted: boolean
+  currentVideoPaused: boolean
+  currentAssetId: string
 }
 
 export const ImageGalleryViewerScreen: React.FC<
@@ -71,10 +79,14 @@ export const ImageGalleryViewerScreen: React.FC<
   const screenOpacity = useSharedValue(1)
   const currentAssetRef = useRef(asset)
   const [transitionDone, setTransitionDone] = useState(false)
-  const optionsVisibleRef = useRef(true)
-  const headerOffset = useSharedValue(0)
-  const footerOffset = useSharedValue(0)
+  const optionsVisibleRef = useRef(false)
+  const headerOpacity = useSharedValue(0)
 
+  const [extendedState, setExtendedState] = useState<ExtendedState>({
+    currentVideoMuted: true,
+    currentVideoPaused: false,
+    currentAssetId: assetId,
+  })
   const headerHeightRef = useRef(0)
   const footerHeightRef = useRef(0)
   const [assetSections, setAssetSections] = useState<RecyclerAssetListSection>(
@@ -117,34 +129,19 @@ export const ImageGalleryViewerScreen: React.FC<
     setScrollEnabled(false)
   }, [])
 
-  const toggleMenu = useCallback(() => {
-    if (optionsVisibleRef.current) {
-      headerOffset.value = withTiming(-headerHeightRef.current)
-      footerOffset.value = withTiming(-footerHeightRef.current)
+  const toggleMenu = useCallback(forceValue => {
+    if (forceValue != null) {
+      optionsVisibleRef.current = forceValue
     } else {
-      headerOffset.value = withTiming(0)
-      footerOffset.value = withTiming(0)
+      optionsVisibleRef.current = !optionsVisibleRef.current
     }
-    optionsVisibleRef.current = !optionsVisibleRef.current
+    headerOpacity.value = withTiming(optionsVisibleRef.current ? 1 : 0, {
+      duration: 200,
+    })
   }, [])
 
-  const renderItem = useCallback(
-    ({ item }) => (
-      <GalleryImage
-        asset={item}
-        toggleMenu={toggleMenu}
-        sharedElementId={transitionDone ? item.id : `${item.id}_`}
-        enableParentScroll={enableScroll}
-        disableParentScroll={disableScroll}
-        listGestureRef={listGestureRef}
-        screenOpacity={screenOpacity}
-      />
-    ),
-    [enableScroll, disableScroll, screenOpacity, transitionDone, toggleMenu],
-  )
-
   const rowRenderer = useCallback(
-    (type: string | number, data: Asset) => {
+    (type: string | number, data: Asset, index, extState: ExtendedState) => {
       // if (!data) return null
       // if (data?.syncStatus === SyncStatus.SYNCED && data?.isDeleted) {
       //   return renderDownloadSection()
@@ -152,9 +149,22 @@ export const ImageGalleryViewerScreen: React.FC<
       // if (data.isDeleted) {
       //   return null
       // }
-      return renderItem({ item: data })
+      return (
+        <GalleryImage
+          asset={data}
+          toggleMenu={toggleMenu}
+          sharedElementId={transitionDone ? data.id : `${data.id}_`}
+          enableParentScroll={enableScroll}
+          disableParentScroll={disableScroll}
+          listGestureRef={listGestureRef}
+          screenOpacity={screenOpacity}
+          isCurrentView={extState?.currentAssetId === data.id}
+          videoPaused={extState?.currentVideoPaused}
+          videoMuted={extState?.currentVideoMuted}
+        />
+      )
     },
-    [transitionDone],
+    [transitionDone, enableScroll, disableScroll, toggleMenu, screenOpacity],
   )
 
   const layoutProvider = useMemo(
@@ -326,67 +336,41 @@ export const ImageGalleryViewerScreen: React.FC<
     }
   }
 
-  const animatedHeaderStyle = useAnimatedStyle(() => ({
-    top: headerOffset.value,
+  const animatedOptionsStyle = useAnimatedStyle(() => ({
+    opacity: headerOpacity.value,
   }))
 
   const renderHeader = useCallback(
     () => (
-      <Animated.View style={[{ zIndex: 10, position: 'absolute' }, animatedHeaderStyle]}>
-        <Header
-          onLayout={event => {
-            headerHeightRef.current = event.nativeEvent.layout.height
-          }}
-          containerStyle={{
-            //marginTop: 10,
+      <Animated.View
+        style={[
+          {
             zIndex: 10,
-            backgroundColor: 'transparent',
-          }}
-          leftComponent={
-            <HeaderLeftContainer>
-              <HeaderArrowBack
-                navigation={navigation}
-                iconProps={{
-                  onPress: goBack,
-                }}
-              />
-            </HeaderLeftContainer>
-          }
-        // rightComponent={
-        //   <HeaderRightContainer>
-        //     {loading ? (
-        //       <ActivityIndicator size="small" />
-        //     ) : asset?.syncStatus === SyncStatus.SYNCED &&
-        //       !asset?.isDeleted ? (
-        //       <Icon type="material-community" name="cloud-check" />
-        //     ) : asset?.syncStatus === SyncStatus.NOTSYNCED &&
-        //       !asset?.isDeleted ? (
-        //       <Icon
-        //         type="material-community"
-        //         name="cloud-upload-outline"
-        //         onPress={uploadToBox}
-        //       />
-        //     ) : asset?.syncStatus === SyncStatus.SYNC ? (
-        //       <Icon
-        //         type="material-community"
-        //         name="refresh"
-        //         onPress={uploadToBox}
-        //       />
-        //     ) : null}
-        //     {asset?.syncStatus === SyncStatus.SYNCED && (
-        //       <Icon
-        //         type="material-community"
-        //         style={styles.headerIcon}
-        //         name="share-variant"
-        //         onPress={() => {
-        //           setDID('')
-        //           setShowShareBottomSheet(true)
-        //         }}
-        //       />
-        //     )}
-        //   </HeaderRightContainer>
-        // }
-        />
+            position: 'absolute',
+            width: '100%',
+          },
+          animatedOptionsStyle,
+        ]}
+      >
+        <StatusBar backgroundColor="transparent" />
+        <LinearGradient
+          colors={[
+            'rgba(33,33,33,0.3)',
+            'rgba(33,33,33,0.2)',
+            'rgba(33,33,33,0)',
+          ]}
+          style={[
+            styles.gradientContainer,
+            { alignItems: 'flex-start', paddingHorizontal: 20, paddingTop: 20 },
+          ]}
+        >
+          <HeaderArrowBack
+            navigation={navigation}
+            iconProps={{
+              onPress: goBack,
+            }}
+          />
+        </LinearGradient>
       </Animated.View>
     ),
     [navigation, loading, uploadToBox, asset, goBack],
@@ -507,6 +491,10 @@ export const ImageGalleryViewerScreen: React.FC<
       const newAsset = dataProvider.getDataForIndex(index)
       if (currentAssetRef.current.id == newAsset.id) return
       currentAssetRef.current = newAsset
+      setExtendedState(prev => ({
+        ...prev,
+        currentAssetId: newAsset.id,
+      }))
       setTimeout(() => {
         assetSections.forEach(section => {
           if (section.id === currentAssetRef.current.id) {
@@ -518,21 +506,13 @@ export const ImageGalleryViewerScreen: React.FC<
     [windowDims.width],
   )
 
-  const onActionPress = useCallback((action: string) => {
-    alert(`Action ${action} is being developed`)
-  }, [])
-
-  const animatedFooterStyle = useAnimatedStyle(() => ({
-    bottom: footerOffset.value,
-  }))
-
   const renderActionButtons = useCallback(
     () => (
       <Animated.View
         onLayout={event => {
           footerHeightRef.current = event.nativeEvent.layout.height
         }}
-        style={[styles.actionButtonContainer, animatedFooterStyle]}
+        style={[styles.actionButtonContainer, animatedOptionsStyle]}
       >
         <LinearGradient
           colors={[
@@ -563,7 +543,6 @@ export const ImageGalleryViewerScreen: React.FC<
     backgroundColor: 'black',
     opacity: screenOpacity.value,
   }))
-
   return (
     <Screen
       scrollEventThrottle={16}
@@ -573,6 +552,7 @@ export const ImageGalleryViewerScreen: React.FC<
       <Animated.View style={wrapperAnimatedStyle}>
         <View style={{ flex: 1 }}>
           {renderHeader()}
+
           <NativeViewGestureHandler ref={listGestureRef}>
             <RecyclerListView
               ref={rclRef}
@@ -590,6 +570,7 @@ export const ImageGalleryViewerScreen: React.FC<
                 showsHorizontalScrollIndicator: false,
                 showsVerticalScrollIndicator: false,
               }}
+              extendedState={extendedState}
             />
           </NativeViewGestureHandler>
           {transitionDone || (
@@ -663,6 +644,7 @@ const styles = StyleSheet.create({
   actionText: {
     textAlign: 'center',
     color: palette.white,
+    fontSize: 13,
   },
   iconContainer: {
     flex: 1,

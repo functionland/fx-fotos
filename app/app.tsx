@@ -9,7 +9,6 @@
  * The app navigation resides in ./app/navigators, so head over there
  * if you're interested in adding screens and navigators.
  */
-import './i18n'
 import './utils/ignore-warnings'
 import React, { useRef } from 'react'
 import { useColorScheme } from 'react-native'
