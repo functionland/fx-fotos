@@ -1,13 +1,14 @@
-import React, { useEffect, useCallback } from "react"
-import { ViewStyle } from "react-native"
+import React, { useEffect, useCallback } from 'react'
+import { ViewStyle } from 'react-native'
 import Reanimated, {
   Extrapolate,
   interpolate,
   SharedValue,
   useAnimatedStyle,
   useSharedValue,
-} from "react-native-reanimated"
-import GridLayoutProvider from "./gridLayoutProvider"
+} from 'react-native-reanimated'
+import GridLayoutProvider from './gridLayoutProvider'
+
 interface CellProps {
   layoutProvider: GridLayoutProvider
   style: ViewStyle
@@ -28,13 +29,23 @@ const Cell = React.forwardRef<unknown, CellProps>(
         extrapolateLeft: Extrapolate.CLAMP,
         extrapolateRight: Extrapolate.CLAMP,
       }
-      if (!sharedFinalRangeValues.value) return { ...externalStyle.value }
+      if (!sharedFinalRangeValues.value)
+        return {
+          ...externalStyle.value,
+        }
       const finalRangeValues = sharedFinalRangeValues.value
-      const colsRange = finalRangeValues.colsRange
+      const { colsRange } = finalRangeValues
       if (colsRange.length) {
-        if (colsRange.length === 1) return { ...externalStyle.value }
+        if (colsRange.length === 1)
+          return {
+            ...externalStyle.value,
+          }
 
-        const finalScale = interpolate(scale.value, colsRange, finalRangeValues.scale)
+        const finalScale = interpolate(
+          scale.value,
+          colsRange,
+          finalRangeValues.scale,
+        )
         const finalTranslateY = interpolate(
           scale.value,
           colsRange,
@@ -62,21 +73,27 @@ const Cell = React.forwardRef<unknown, CellProps>(
           ],
         }
       }
-      return { ...externalStyle.value }
+      return {
+        ...externalStyle.value,
+      }
     }, [])
     const updateDependencies = useCallback(
       (index, columnNumber, style) => {
-        sharedFinalRangeValues.value = layoutProvider
-          .getLayoutManager()
-          ?.getLayoutTransitionRangeForIndex(index, columnNumber)
-        externalStyle.value = style
+        try {
+          sharedFinalRangeValues.value = layoutProvider
+            .getLayoutManager()
+            ?.getLayoutTransitionRangeForIndex(index, columnNumber)
+          externalStyle.value = style
+        } catch (error) {
+          console.error(error)
+        }
       },
       [layoutProvider],
     )
 
     useEffect(() => {
       updateDependencies(index, columnNumber, style)
-    }, [index,layoutProvider])
+    }, [index, layoutProvider])
     return (
       <Reanimated.View ref={ref} {...props} style={animationStyle}>
         {props.children}

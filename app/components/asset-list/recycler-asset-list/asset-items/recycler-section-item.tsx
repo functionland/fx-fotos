@@ -1,37 +1,60 @@
-import React from "react"
-import { TouchableHighlight, StyleSheet, NativeSyntheticEvent, ImageErrorEventData } from "react-native"
-import { Asset, GroupHeader, RecyclerAssetListSection, SyncStatus, ViewType } from "../../../../types"
-import StoryListItem from "./story-list-item"
-import AssetItem from "./asset-item"
-import HeaderItem from "./header-item"
+import React from 'react'
+import {
+  TouchableHighlight,
+  StyleSheet,
+  NativeSyntheticEvent,
+  ImageErrorEventData,
+} from 'react-native'
+import {
+  Asset,
+  AssetStory,
+  GroupHeader,
+  RecyclerAssetListSection,
+  SyncStatus,
+  ViewType,
+} from '../../../../types'
+import StoryListItem from './story-list-item'
+import AssetItem from './asset-item'
+import HeaderItem from './header-item'
 
 interface Props {
   section: RecyclerAssetListSection
   selectionMode: boolean
-  selected: boolean,
+  selected: boolean
   onLongPress: (section: RecyclerAssetListSection) => void
   onPress: (section: RecyclerAssetListSection) => void
+  onStoryPress?: (story: AssetStory) => void
   onAssetLoadError?: (error: NativeSyntheticEvent<ImageErrorEventData>) => void
 }
 const getSectionByType = (
   section: RecyclerAssetListSection,
   selectionMode: boolean,
   selected: boolean,
-  onAssetLoadError?: (error: NativeSyntheticEvent<ImageErrorEventData>) => void
+  onAssetLoadError?: (error: NativeSyntheticEvent<ImageErrorEventData>) => void,
+  onStoryPress?: (story: AssetStory) => void,
 ) => {
   switch (section.type) {
     case ViewType.STORY: {
-      return <StoryListItem stories={section.data} selectionMode={selectionMode} />
+      return (
+        <StoryListItem
+          stories={section.data}
+          selectionMode={selectionMode}
+          onPress={onStoryPress}
+        />
+      )
     }
     case ViewType.ASSET: {
       const data = section?.data as Asset
-      return <AssetItem
-        onError={onAssetLoadError}
-        asset={section.data}
-        selectionMode={selectionMode}
-        selected={selected}
-        isSynced={data.syncStatus === SyncStatus.SYNCED}
-        isDeleted={section?.data?.isDeleted} />
+      return (
+        <AssetItem
+          onError={onAssetLoadError}
+          asset={section.data}
+          selectionMode={selectionMode}
+          selected={selected}
+          isSynced={data.syncStatus === SyncStatus.SYNCED}
+          isDeleted={section?.data?.isDeleted}
+        />
+      )
     }
     case ViewType.MONTH: {
       const groupHeader: GroupHeader = section.data
@@ -66,7 +89,8 @@ const RecyclerSectionItem: React.FC<Props> = ({
   selected,
   onLongPress,
   onPress,
-  onAssetLoadError
+  onStoryPress,
+  onAssetLoadError,
 }) => {
   const onPressItem = () => {
     if (onPress) {
@@ -87,7 +111,13 @@ const RecyclerSectionItem: React.FC<Props> = ({
       onLongPress={onLongPressItem}
       onPress={onPressItem}
     >
-      {getSectionByType(section, selectionMode, selected, onAssetLoadError)}
+      {getSectionByType(
+        section,
+        selectionMode,
+        selected,
+        onAssetLoadError,
+        onStoryPress,
+      )}
     </TouchableHighlight>
   )
 }
@@ -97,12 +127,12 @@ const styles = StyleSheet.create({
   },
   dayText: {
     fontSize: 16,
-    fontWeight: "400",
+    fontWeight: '400',
     padding: 5,
   },
   monthText: {
     fontSize: 28,
-    fontWeight: "300",
+    fontWeight: '300',
     padding: 10,
   },
 })

@@ -1,41 +1,39 @@
-import { Entities, RealmDB, Schemas } from "../../realmdb"
-const { UUID } = Realm.BSON;
-export const getAll = (): Promise<Realm.Results<Entities.BoxEntity & Realm.Object>> => {
-  return RealmDB()
-    .then((realm) => {
-      const boxs = realm
-        .objects<Entities.BoxEntity>(Schemas.Box.name)
+import { Entities, RealmDB, Schemas } from '../../realmdb'
+
+const { UUID } = Realm.BSON
+export const getAll = (): Promise<
+  Realm.Results<Entities.BoxEntity & Realm.Object>
+> =>
+  RealmDB()
+    .then(realm => {
+      const boxs = realm.objects<Entities.BoxEntity>(Schemas.Box.name)
       return boxs
     })
-    .catch((error) => {
-      console.error("RealmDB getAll Boxs error!", error)
+    .catch(error => {
+      console.error('RealmDB getAll Boxs error!', error)
       throw error
     })
-}
 
-export const removeAll = (): Promise<void> => {
-  return RealmDB()
-    .then((realm) => {
-      return realm.write(() => {
-       
-        const boxs = realm
-        .objects<Entities.BoxEntity>(Schemas.Box.name);
-        
+export const removeAll = (): Promise<void> =>
+  RealmDB()
+    .then(realm =>
+      realm.write(() => {
+        const boxs = realm.objects<Entities.BoxEntity>(Schemas.Box.name)
+
         // Delete all instances of Assets from the realm.
-        return realm.delete(boxs);
-      });
-      
-    })
-    .catch((error) => {
-      console.error("RealmDB removeAll Boxs error!", error)
+        return realm.delete(boxs)
+      }),
+    )
+    .catch(error => {
+      console.error('RealmDB removeAll Boxs error!', error)
       throw error
     })
-}
 
-export const addOrUpdate = (boxs: Entities.BoxEntity[]): Promise<Entities.BoxEntity[]> => {
- 
-  return RealmDB()
-    .then((realm) => {
+export const addOrUpdate = (
+  boxs: Entities.BoxEntity[],
+): Promise<Entities.BoxEntity[]> =>
+  RealmDB()
+    .then(realm => {
       try {
         const result = []
         realm.write(() => {
@@ -45,7 +43,7 @@ export const addOrUpdate = (boxs: Entities.BoxEntity[]): Promise<Entities.BoxEnt
                 Schemas.Box.name,
                 {
                   ...box,
-                  peerId:box.peerId?box.peerId:new UUID().toHexString(),
+                  peerId: box.peerId ? box.peerId : new UUID().toHexString(),
                 },
                 Realm.UpdateMode.Modified,
               ),
@@ -54,55 +52,52 @@ export const addOrUpdate = (boxs: Entities.BoxEntity[]): Promise<Entities.BoxEnt
           return result
         })
       } catch (error) {
-        console.error("addOrUpdate Box error!", error)
+        console.error('addOrUpdate Box error!', error)
         throw error
-      } 
+      }
     })
-    .catch((error) => {
-      console.error("RealmDB addOrUpdateAssets error!", error)
+    .catch(error => {
+      console.error('RealmDB addOrUpdateAssets error!', error)
       throw error
     })
-}
 
-export const remove = (peerIds: string[]): Promise<void> => {
-  return RealmDB()
-    .then((realm) => {
+export const remove = (peerIds: string[]): Promise<void> =>
+  RealmDB()
+    .then(realm => {
       try {
-        const idsQuery = peerIds.map(id => `peerId = '${id}'`).join(' OR ');
+        const idsQuery = peerIds.map(id => `peerId = '${id}'`).join(' OR ')
         const boxs = realm
-        .objects<Entities.BoxEntity>(Schemas.Box.name)
-        .filtered(idsQuery)
+          .objects<Entities.BoxEntity>(Schemas.Box.name)
+          .filtered(idsQuery)
         realm.write(() => {
           realm.delete(boxs)
-        });
+        })
       } catch (error) {
-        console.error("remove Boxs error!", error)
+        console.error('remove Boxs error!', error)
         throw error
-      } 
+      }
     })
-    .catch((error) => {
-      console.error("RealmDB remove Boxs error!", error)
+    .catch(error => {
+      console.error('RealmDB remove Boxs error!', error)
       throw error
     })
-}
 
-export const removeByAddress = (address:string): Promise<void> => {
-  return RealmDB()
-    .then((realm) => {
+export const removeByAddress = (address: string): Promise<void> =>
+  RealmDB()
+    .then(realm => {
       try {
         const boxs = realm
-        .objects<Entities.BoxEntity>(Schemas.Box.name)
-        .filtered(`address endsWith '${address}'`)
+          .objects<Entities.BoxEntity>(Schemas.Box.name)
+          .filtered(`address endsWith '${address}'`)
         realm.write(() => {
           realm.delete(boxs)
-        });
+        })
       } catch (error) {
-        console.error("removeByAddress box error!", error)
+        console.error('removeByAddress box error!', error)
         throw error
-      } 
+      }
     })
-    .catch((error) => {
-      console.error("RealmDB removeByAddress box error!", error)
+    .catch(error => {
+      console.error('RealmDB removeByAddress box error!', error)
       throw error
     })
-}

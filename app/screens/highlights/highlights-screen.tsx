@@ -1,146 +1,66 @@
-import * as React from "react"
-import { RouteProp, useNavigation } from "@react-navigation/native"
-import { Image, View, StyleSheet, TouchableOpacity, Dimensions, Platform } from "react-native"
-import { FlatList, LongPressGestureHandler, PanGestureHandler } from "react-native-gesture-handler"
-import { heightPercentageToDP, widthPercentageToDP } from "react-native-responsive-screen"
+import React, { useEffect, useRef, useState } from 'react'
+import { RouteProp, useNavigation } from '@react-navigation/native'
+import {
+  Image,
+  StyleSheet,
+  Dimensions,
+  Platform,
+  InteractionManager,
+} from 'react-native'
+import {
+  LongPressGestureHandler,
+  NativeViewGestureHandler,
+  PanGestureHandler,
+  PanGestureHandlerGestureEvent,
+} from 'react-native-gesture-handler'
+import {
+  heightPercentageToDP,
+  widthPercentageToDP,
+} from 'react-native-responsive-screen'
 import Animated, {
   runOnJS,
   withTiming,
   useSharedValue,
   useAnimatedStyle,
   useAnimatedReaction,
-  SharedValue,
   useAnimatedGestureHandler,
   interpolate,
   Extrapolate,
-} from "react-native-reanimated"
-import { snapPoint, withPause } from "react-native-redash"
-import FastImage from "react-native-fast-image"
-
-import { Asset, AssetStory } from "../../types"
-import { DataProvider, LayoutProvider, RecyclerListView } from "fula-recyclerlistview"
-import { palette } from "../../theme"
+  withDelay,
+} from 'react-native-reanimated'
+import { snapPoint } from 'react-native-redash'
+import FastImage from 'react-native-fast-image'
+import { useRecoilState } from 'recoil'
+import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
+import { SharedElement } from 'react-navigation-shared-element'
+import { Asset, AssetStory, ViewType } from '../../types'
+import { recyclerSectionsState, selectedStoryState } from '../../store'
+import { Screen } from '../../components'
+import { Highlights } from './highlights'
+import deviceUtils from '../../utils/deviceUtils'
 
 interface HighlightScreenProps {
-  route: RouteProp<{ params: { highlights: AssetStory } }, "params">
+  route: RouteProp<
+    {
+      params: {
+        highlights: AssetStory
+      }
+    },
+    'params'
+  >
 }
 
-const DELAY_DURATION = 0
-const ANIMATION_DURATION = 1000
-const OPACITY_FADE_DURATION = 111
-
-interface timeBarProps {
-  width: number
-  pause: SharedValue<boolean>
-}
-
-const TimeBar: React.FC<timeBarProps> = ({ width, pause }) => {
-  const barWidth = useSharedValue(0)
-
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      width: barWidth.value,
-    }
-  })
-
-  React.useLayoutEffect(() => {
-    barWidth.value = withPause(
-      withTiming(width, {
-        duration: ANIMATION_DURATION - DELAY_DURATION,
-      }),
-      pause,
-    )
-  }, [])
-
-  return <Animated.View style={[styles.timeBar, animatedStyle]} />
-}
-const { height: screenHeight, width: screenWidth } = Dimensions.get("window")
+const { height: screenHeight, width: screenWidth } = Dimensions.get('window')
 export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
   const navigation = useNavigation()
-  const { data: stories } = route.params.highlights
+  const gestureHanlderRef = useRef<NativeViewGestureHandler>()
+  const panGestureRef = useRef<PanGestureHandler>()
+  const carouselRef = useRef<ICarouselInstance>()
+  const [selectedStory] = useRecoilState(selectedStoryState)
+  const pauseTimeProgress = useSharedValue(false)
+  const sharedElementOpacity = useSharedValue(1)
 
-  const [_dataProvider, _setDataProvider] = React.useState(() => {
-    return new DataProvider((r1, r2) => r1 !== r2)
-  })
-
-  const _layoutProvider = new LayoutProvider(
-    () => 0,
-    (_, dim) => {
-      dim.width = screenWidth
-      dim.height = screenHeight
-    },
-  )
-
-  const _rowRenderer = (_: unknown, data: Asset) => {
-    return (
-      <FastImage
-        source={{ uri: data.uri, priority: "high" }}
-        resizeMode="center"
-        style={{ height: screenHeight, width: screenWidth }}
-      />
-    )
-  }
-
-  React.useLayoutEffect(() => {
-    _setDataProvider((prev) => {
-      return prev.cloneWithRows(stories)
-    })
-  }, [])
-
-  const [imageIdx, setImageIdx] = React.useState(0)
-  const pauseAnimation = useSharedValue(false)
-  const timeBarContainerOpacity = useSharedValue(1)
-  const highlightListRef = React.useRef<RecyclerListView<any, any>>(null)
-  const [timeBarItems, setTimeBarItems] = React.useState<number[]>([0])
-
-  const barWidth = useSharedValue(0)
-  const BAR_WIDTH = (widthPercentageToDP(95) - 2 * stories.length) / stories.length
-
-  const updateImage = () => {
-    if (imageIdx >= stories.length - 1) {
-      return
-    }
-
-    setImageIdx((prev) => (prev += 1))
-    setTimeBarItems((prev) => [...prev, imageIdx + 1])
-  }
-
-  React.useLayoutEffect(() => {
-    highlightListRef.current.scrollToOffset(imageIdx * screenWidth, 0, true)
-  }, [imageIdx])
-
-  React.useLayoutEffect(() => {
-    barWidth.value = withPause(
-      withTiming(
-        BAR_WIDTH,
-        {
-          duration: ANIMATION_DURATION - DELAY_DURATION,
-        },
-        function (isFinished) {
-          if (isFinished) {
-            runOnJS(updateImage)()
-          }
-        },
-      ),
-      pauseAnimation,
-    )
-  }, [imageIdx])
-
-  const timeBarContainerAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      opacity: timeBarContainerOpacity.value,
-    }
-  })
-
-  useAnimatedReaction(
-    () => pauseAnimation.value,
-    (paused, _) => {
-      timeBarContainerOpacity.value = withTiming(paused ? 0 : 1, {
-        duration: OPACITY_FADE_DURATION,
-      })
-    },
-    [pauseAnimation],
-  )
+  const longPressRef = useRef<LongPressGestureHandler>()
 
   const translateX = useSharedValue(0)
   const translateY = useSharedValue(0)
@@ -148,171 +68,250 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
   const isPanGestureActive = useSharedValue(false)
   const isPinchGestureActive = useSharedValue(false)
 
-  const animatedStyle = useAnimatedStyle(() => {
-    const scale = interpolate(translateY.value, [0, screenHeight], [1, 0.5], Extrapolate.CLAMP)
+  const goBack = () => {
+    sharedElementOpacity.value = 1
+    navigation.goBack()
+  }
+
+  const PAGE_WIDTH = deviceUtils.dimensions.width
+  const PAGE_HEIGHT = deviceUtils.dimensions.height
+
+  const selectedStoryData = selectedStory?.data.slice(0, 40)
+  const [recyclerSections] = useRecoilState(recyclerSectionsState)
+  const [stories] = useState<AssetStory[]>(
+    recyclerSections?.[0].type === ViewType.STORY
+      ? recyclerSections?.[0].data
+      : [],
+  )
+  const [currentIndex, setCurrentIndex] = useState(
+    stories.findIndex(story => story.id === selectedStory.id),
+  )
+
+  const _rowRenderer = React.useCallback(
+    (_: unknown, data: Asset, index) =>
+      Platform.OS === 'ios' ? (
+        <Image
+          source={{ uri: data.uri }}
+          resizeMode="contain"
+          style={[{ height: screenHeight, width: screenWidth }, styles.image]}
+        />
+      ) : (
+        <FastImage
+          source={{
+            uri: data.uri,
+            priority: 'high',
+          }}
+          resizeMode="contain"
+          style={[{ height: screenHeight, width: screenWidth }, styles.image]}
+        />
+      ),
+    [],
+  )
+
+  const containerAnimatedStyle = useAnimatedStyle(() => {
+    const scale = interpolate(
+      translateY.value,
+      [0, screenHeight],
+      [1, 0.9],
+      Extrapolate.CLAMP,
+    )
     return {
       flex: 1,
-      alignItems: "center",
-      justifyContent: "center",
-      transform: [{ translateX: translateX.value }, { translateY: translateY.value }, { scale }],
+      transform: [
+        {
+          translateY: translateY.value,
+        },
+        { scale },
+      ],
     }
-  })
+  }, [])
 
-  const goBack = () => navigation.goBack()
+  const sharedElementConatinerStyle = useAnimatedStyle(() => {
+    return {
+      opacity: sharedElementOpacity.value,
+    }
+  }, [])
+  const onPanGesture = useAnimatedGestureHandler<PanGestureHandlerGestureEvent>(
+    {
+      onActive({ translationX, translationY }) {
+        isPanGestureActive.value = true
+        translateX.value = translationX
+        translateY.value = translationY
+        if (!isPinchGestureActive.value) {
+          animatedOpacity.value = interpolate(
+            translationY,
+            [0, 400],
+            [1, 0.5],
+            Extrapolate.CLAMP,
+          )
+        }
+        pauseTimeProgress.value = true
+      },
+      onEnd({ velocityY }) {
+        pauseTimeProgress.value = false
+        if (isPinchGestureActive.value) {
+          return
+        }
+        const shouldGoBack = snapPoint(translateY.value, velocityY, [0, 200])
 
-  const onPanGesture = useAnimatedGestureHandler({
-    onActive: ({ translationX, translationY }) => {
-      isPanGestureActive.value = true
-      translateX.value = translationX
-      translateY.value = translationY
-      if (!isPinchGestureActive.value) {
-        animatedOpacity.value = interpolate(translationY, [0, 400], [1, 0.5], Extrapolate.CLAMP)
-      }
+        if (shouldGoBack) {
+          runOnJS(goBack)()
+        } else {
+          translateX.value = withTiming(0, {
+            duration: 100,
+          })
+          translateY.value = withTiming(0, {
+            duration: 100,
+          })
+          animatedOpacity.value = interpolate(
+            velocityY,
+            [velocityY, 0],
+            [1, 0.5],
+            Extrapolate.CLAMP,
+          )
+        }
+        isPanGestureActive.value = false
+      },
     },
-    onEnd: ({ velocityY }) => {
-      if (isPinchGestureActive.value) {
-        return
-      }
-      const shouldGoBack = snapPoint(translateY.value, velocityY, [0, 200])
-
-      if (shouldGoBack) {
-        runOnJS(goBack)()
-      } else {
-        translateX.value = withTiming(0, { duration: 100 })
-        translateY.value = withTiming(0, { duration: 100 })
-        animatedOpacity.value = interpolate(velocityY, [velocityY, 0], [1, 0.5], Extrapolate.CLAMP)
-      }
-      isPanGestureActive.value = false
-    },
-  })
+  )
 
   useAnimatedReaction(
     () => isPanGestureActive.value,
-    (isGestureActive) => {
+    isGestureActive => {
       if (isGestureActive) {
-        pauseAnimation.value = true
+        pauseTimeProgress.value = true
         return
       }
-      pauseAnimation.value = false
+      pauseTimeProgress.value = false
     },
-    [isPanGestureActive.value],
+    [],
   )
+  // const PESPECTIVE = Platform.OS === 'ios' ? 2.38 : 1.7
+  // const TR_POSITION = Platform.OS === 'ios' ? 2 : 1.5
 
+  const animationStyle = React.useCallback((value: number) => {
+    'worklet'
+
+    const translateX = interpolate(
+      value,
+      [-1, 0, 1],
+      [-PAGE_WIDTH, 0, PAGE_WIDTH],
+    )
+    const rotateY = interpolate(value, [-1, 0, 1], [-45, 0, 45])
+    const zIndex = interpolate(value, [-1, 0, 1], [300, 0, -300])
+
+    const scale = interpolate(value, [-1, 0, 1], [0.65, 1, 0.65])
+
+    return {
+      transform: [
+        { perspective: PAGE_WIDTH },
+        { translateX },
+        { rotateY: `${rotateY}deg` },
+        { scale },
+      ],
+      zIndex,
+    }
+  }, [])
+
+  useEffect(() => {
+    const interactionPromise = InteractionManager.runAfterInteractions(() => {
+      sharedElementOpacity.value = 0
+    })
+
+    return () => {
+      interactionPromise.cancel()
+    }
+  }, [])
   return (
-    <PanGestureHandler maxPointers={1} minPointers={1} onGestureEvent={onPanGesture}>
-      <Animated.View style={animatedStyle}>
-        <LongPressGestureHandler
-          minDurationMs={100}
-          onActivated={() => (pauseAnimation.value = true)}
-          onEnded={() => (pauseAnimation.value = false)}
-        >
-          <View>
-            <View style={styles.rclWrapper}>
-              <RecyclerListView
-                isHorizontal
-                ref={highlightListRef}
-                layoutProvider={_layoutProvider}
-                dataProvider={_dataProvider}
-                rowRenderer={_rowRenderer}
-              />
-            </View>
-            <Animated.View style={[styles.timeBarContainer, timeBarContainerAnimatedStyle]}>
-              <FlatList
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                keyExtractor={(item) => item.toString()}
-                data={timeBarItems}
-                renderItem={() => {
-                  return <TimeBar width={BAR_WIDTH} pause={pauseAnimation} />
-                }}
-              />
-            </Animated.View>
-            <Animated.View style={[styles.timeBarContainer, timeBarContainerAnimatedStyle]}>
-              <FlatList
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                keyExtractor={(item) => item.id}
-                data={stories}
-                renderItem={() => {
-                  return (
-                    <View
-                      style={[
-                        styles.timeBarPlaceholder,
-                        {
-                          width: (widthPercentageToDP(95) - 2 * stories.length) / stories.length,
-                        },
-                      ]}
+    <Screen
+      scrollEventThrottle={16}
+      automaticallyAdjustContentInsets
+      style={styles.screen}
+    >
+      <NativeViewGestureHandler ref={gestureHanlderRef}>
+        <Animated.View style={[containerAnimatedStyle]}>
+          <PanGestureHandler
+            ref={panGestureRef}
+            waitFor={[longPressRef]}
+            maxPointers={1}
+            minPointers={1}
+            onGestureEvent={onPanGesture}
+            failOffsetX={300}
+            activeOffsetX={[-100, 100]}
+            activeOffsetY={[-100, 100]}
+          >
+            <Animated.View>
+              <Animated.View style={sharedElementConatinerStyle}>
+                <SharedElement
+                  id={selectedStory.id}
+                  style={{
+                    position: 'absolute',
+                  }}
+                >
+                  {_rowRenderer(null, selectedStoryData?.[0], 0)}
+                </SharedElement>
+              </Animated.View>
+
+              <Animated.View>
+                <Carousel
+                  ref={carouselRef}
+                  style={{
+                    backgroundColor: '#212121',
+                  }}
+                  defaultIndex={
+                    currentIndex > stories?.length - 1 ? 0 : currentIndex
+                  }
+                  loop={false}
+                  width={deviceUtils.dimensions.width}
+                  height={deviceUtils.dimensions.height}
+                  autoPlay={false}
+                  data={stories.map((_, i) => i)}
+                  scrollAnimationDuration={600}
+                  onSnapToItem={index => {
+                    setCurrentIndex(index)
+                  }}
+                  renderItem={({ index, animationValue }) => (
+                    <Highlights
+                      key={index}
+                      animationValue={animationValue}
+                      assets={stories[index]?.data}
+                      active={
+                        index === currentIndex ||
+                        index === currentIndex - 1 ||
+                        index === currentIndex + 1
+                      }
+                      title={stories[index]?.title}
+                      paused={index != currentIndex}
+                      onNextStory={direction => {
+                        if (
+                          carouselRef.current?.getCurrentIndex() >=
+                            stories?.length - 1 &&
+                          direction === 'next'
+                        ) {
+                          goBack()
+                        }
+                        if (direction === 'next') carouselRef.current?.next()
+                        else carouselRef.current?.prev()
+                      }}
+                      index={index}
                     />
-                  )
-                }}
-              />
+                  )}
+                  panGestureHandlerProps={{
+                    activeOffsetX: [-50, 50],
+                  }}
+                  customAnimation={animationStyle}
+                />
+              </Animated.View>
             </Animated.View>
-            <TouchableOpacity
-              onPress={() => {
-                if (imageIdx <= 0) {
-                  return
-                }
-                setImageIdx((prev) => (prev -= 1))
-                setTimeBarItems((prev) => prev.slice(0, -1))
-                barWidth.value = BAR_WIDTH
-              }}
-              style={[styles.pressableContainer, { left: 0 }]}
-            />
-            <TouchableOpacity
-              onPress={() => {
-                if (imageIdx >= stories.length - 1) {
-                  return
-                }
-                setImageIdx((prev) => (prev += 1))
-                setTimeBarItems((prev) => [...prev, imageIdx + 1])
-              }}
-              style={[styles.pressableContainer, { right: 0 }]}
-            />
-          </View>
-        </LongPressGestureHandler>
-      </Animated.View>
-    </PanGestureHandler>
+          </PanGestureHandler>
+        </Animated.View>
+      </NativeViewGestureHandler>
+    </Screen>
   )
 }
 
 const styles = StyleSheet.create({
-  timeBarContainer: {
-    width: "95%",
-    flexDirection: "row",
-    top: 0,
-    left: 0,
-    right: 0,
-    alignItems: "center",
-    marginLeft: widthPercentageToDP(2.5),
-    marginRight: "auto",
-    position: "absolute",
-  },
-  timeBar: {
-    height: 4,
-    marginTop: 40,
-    zIndex: 99999999,
-    borderRadius: 100,
-    backgroundColor: "grey",
-    marginLeft: 2,
-  },
-  timeBarPlaceholder: {
-    height: 4,
-    marginTop: 40,
-    borderRadius: 100,
-    marginLeft: 2,
-    zIndex: 900,
-    backgroundColor: "rgba(255,255,255, 0.1)",
-  },
-  pressableContainer: {
-    top: 0,
-    bottom: 0,
-    position: "absolute",
-    height: heightPercentageToDP(100),
-    width: widthPercentageToDP(20),
-  },
-  rclWrapper: {
-    height: screenHeight,
-    width: screenWidth,
-    backgroundColor: palette.black,
+  image: {
+    backgroundColor: 'black',
   },
 })

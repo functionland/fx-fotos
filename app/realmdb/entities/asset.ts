@@ -1,10 +1,19 @@
-import { SyncStatus } from "../../types"
+import { SyncStatus } from '../../types'
+
 export type AssetEntity = {
   id: string
   /**
    * Filename of the asset.
    */
   filename: string | undefined
+  /**
+   * Lowercase of file name for search
+   */
+  filenameNormalized: string | undefined
+  /**
+   * Asset file size
+   */
+  fileSize: number | undefined
   /**
    * URI that points to the asset. `assets://*` (iOS), `file://*` (Android)
    */
@@ -61,4 +70,24 @@ export type AssetEntity = {
    * Deleted from storage
    */
   isDeleted: boolean
+  /**
+   * Asset location medatadat
+   */
+  location: AssetLocationEntity
+  /**
+   * whenever asset metadata sync is done it would be true
+   */
+  metadataIsSynced: boolean
+  /**
+   * Asset mime type string
+   */
+  mimeType: string | undefined
+}
+
+export type AssetLocationEntity = {
+  latitude: number | undefined
+  longitude: number | undefined
+  altitude: number | undefined
+  heading: number | undefined
+  speed: number | undefined
 }

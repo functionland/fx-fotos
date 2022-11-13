@@ -1,13 +1,13 @@
-import * as ReactNative from "react-native"
-import mockFile from "./mock-file"
+import * as ReactNative from 'react-native'
+import mockFile from './mock-file'
 
-jest.doMock("react-native", () => {
+jest.doMock('react-native', () =>
   // Extend ReactNative
-  return Object.setPrototypeOf(
+  Object.setPrototypeOf(
     {
       Image: {
         ...ReactNative.Image,
-        resolveAssetSource: jest.fn((source) => mockFile), // eslint-disable-line @typescript-eslint/no-unused-vars
+        resolveAssetSource: jest.fn(source => mockFile), // eslint-disable-line @typescript-eslint/no-unused-vars
         getSize: jest.fn(
           (
             uri: string, // eslint-disable-line @typescript-eslint/no-unused-vars
@@ -18,5 +18,5 @@ jest.doMock("react-native", () => {
       },
     },
     ReactNative,
-  )
-})
+  ),
+)

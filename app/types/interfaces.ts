@@ -1,4 +1,4 @@
-import { ViewType, RecyclerAssetListSectionData } from "./index"
+import { ViewType, RecyclerAssetListSectionData } from './index'
 
 export interface RecyclerAssetListSection {
   id: string

@@ -1,6 +1,6 @@
-import { StatusBar } from "react-native"
-import { createTheme, lightColors } from "@rneui/themed"
-import { palette, Constants } from "./index"
+import { StatusBar } from 'react-native'
+import { createTheme, lightColors } from '@rneui/themed'
+import { palette, Constants } from './index'
 
 export const RneLightTheme = createTheme({
   lightColors: {
@@ -18,18 +18,18 @@ export const RneLightTheme = createTheme({
       paddingTop: 0,
       height: Constants.HeaderHeight,
       top: 0,
-      zIndex:9999,
-      position:"absolute",
+      zIndex: 9999,
+      position: 'absolute',
       marginTop: StatusBar.currentHeight,
-      borderBottomWidth:0,
+      borderBottomWidth: 0,
     },
     centerContainerStyle: {
       height: Constants.HeaderHeight - StatusBar.currentHeight,
     },
     statusBarProps: {
       backgroundColor: palette.white,
-      barStyle: "dark-content",
+      barStyle: 'dark-content',
     },
   },
-  mode: "light",
+  mode: 'light',
 })

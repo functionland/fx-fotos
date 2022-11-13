@@ -1,8 +1,8 @@
 export enum ViewType {
-  STORY = "STORY",
-  ASSET = "ASSET",
-  MONTH = "MONTH",
-  DAY = "DAY",
+  STORY = 'STORY',
+  ASSET = 'ASSET',
+  MONTH = 'MONTH',
+  DAY = 'DAY',
 }
 
 export enum SyncStatus {

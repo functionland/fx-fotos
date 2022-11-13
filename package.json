@@ -1,6 +1,6 @@
 {
   "name": "fotos",
-  "version": "0.7.0",
+  "version": "0.8.2",
   "private": true,
   "scripts": {
     "start": "react-native start",
@@ -12,11 +12,11 @@
     "ci:build:e2e": "detox build -c ios.sim.release",
     "compile": "tsc --noEmit -p . --pretty",
     "format": "npm-run-all format:*",
-    "format:js": "prettier --write \"app/**/*.js\"",
-    "format:json": "prettier --write \"app/**/*.json\"",
-    "format:md": "prettier --write \"**/*.md\"",
-    "format:ts": "prettier --write \"app/**/*.ts{,x}\"",
-    "lint": "eslint index.js app storybook test --fix --ext .js,.ts,.tsx && yarn format",
+    "format:json": "npx prettier --write \"app/**/*.json\"",
+    "format:md": "npx prettier --write \"**/*.md\"",
+    "format:ts": "npx prettier --write \"app/**/*.ts{,x}\"",
+    "format:test": "npx prettier --write \"test/**/*.ts\"",
+    "lint": "npx eslint index.js app --fix --ext .js,.tsx ",
     "patch": "patch-package",
     "storybook": "start-storybook -p 9001 -c ./storybook",
     "test": "jest",
@@ -25,11 +25,13 @@
     "build-ios": "react-native bundle --entry-file index.js --platform ios --dev false --bundle-output ios/main.jsbundle --assets-dest ios",
     "build-android": "react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res",
     "clean": "react-native-clean-project",
-    "clean-all": "npx react-native clean-project-auto"
+    "clean-all": "npx react-native clean-project-auto",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@functionland/fula-sec": "0.6.6",
     "@react-native-async-storage/async-storage": "^1.17.6",
+    "@react-native-camera-roll/camera-roll": "github:ghorbani-m/react-native-cameraroll.git",
     "@react-native-community/masked-view": "0.1.10",
     "@react-native-community/netinfo": "^8.3.1",
     "@react-navigation/bottom-tabs": "^6.3.1",
@@ -43,10 +45,12 @@
     "@types/uuid": "^8.3.4",
     "@walletconnect/react-native-dapp": "^1.7.8",
     "big-integer": "^1.6.51",
+    "eslint-import-resolver-typescript": "^3.5.1",
     "expo": "^44.0.6",
+    "expo-av": "~10.2.0",
     "expo-image-manipulator": "^10.1.2",
-    "expo-linear-gradient": "^10.0.3",
-    "expo-localization": "11.0.0",
+    "expo-linear-gradient": "~11.0.3",
+    "expo-localization": "~12.0.0",
     "expo-media-library": "^14.0.1",
     "fula-recyclerlistview": "^3.1.0-beta.7",
     "i18n-js": "3.8.0",
@@ -57,15 +61,15 @@
     "react": "17.0.2",
     "react-native": "0.66.3",
     "react-native-background-actions": "^2.6.7",
-    "react-native-background-fetch": "^4.1.0",
     "react-native-crypto": "^2.1.0",
     "react-native-fast-image": "^8.5.11",
-    "react-native-fula": "^0.3.1",
     "react-native-gesture-handler": "^2.4.1",
     "react-native-get-random-values": "^1.8.0",
     "react-native-keychain": "^8.0.0",
+    "react-native-permissions": "^3.6.1",
     "react-native-randombytes": "^3.6.1",
     "react-native-reanimated": "^2.8.0",
+    "react-native-reanimated-carousel": "^3.1.0",
     "react-native-redash": "^16.3.0",
     "react-native-responsive-screen": "^1.4.2",
     "react-native-safe-area-context": "^4.1.2",
@@ -82,6 +86,7 @@
     "realm": "10.20.0-alpha.2",
     "recoil": "^0.6.1",
     "shortid": "^2.2.16",
+    "text-encoding-polyfill": "^0.6.7",
     "uuid": "^8.3.2",
     "validate.js": "0.13.1"
   },
@@ -96,39 +101,54 @@
     "@storybook/react-native-server": "5.3.23",
     "@types/i18n-js": "3.0.3",
     "@types/jest": "26.0.19",
-    "@types/react": "^18.0.14",
-    "@types/react-native": "^0.67.9",
+    "@types/react": "^18.0.20",
+    "@types/react-native": "^0.70.0",
     "@types/react-test-renderer": "17.0.1",
-    "@typescript-eslint/eslint-plugin": "^5.18.0",
-    "@typescript-eslint/parser": "^5.18.0",
+    "@typescript-eslint/eslint-plugin": "^5.37.0",
+    "@typescript-eslint/parser": "^5.37.0",
     "babel-jest": "26.6.3",
     "babel-loader": "8.2.2",
+    "babel-plugin-transform-remove-console": "^6.9.4",
     "detox": "17.14.5",
-    "eslint": "^8.12.0",
+    "eslint": "^8.23.1",
+    "eslint-config-airbnb": "^19.0.4",
     "eslint-config-prettier": "^8.5.0",
     "eslint-config-standard": "16.0.2",
-    "eslint-plugin-import": "2.22.1",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-jsx-a11y": "^6.6.1",
     "eslint-plugin-node": "11.1.0",
+    "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-promise": "4.2.1",
-    "eslint-plugin-react": "^7.29.4",
-    "eslint-plugin-react-native": "3.10.0",
+    "eslint-plugin-react": "^7.31.8",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-native": "^4.0.0",
     "fbjs-scripts": "3.0.0",
+    "husky": "^8.0.0",
     "jest": "^25.5.4",
     "jest-circus": "25.5.4",
     "jest-expo": "^40.0.1",
     "jetifier": "1.6.6",
+    "lint-staged": "^13.0.3",
     "node-libs-react-native": "^1.2.1",
     "npm-run-all": "4.1.5",
     "patch-package": "6.2.2",
     "postinstall-prepare": "1.0.1",
-    "prettier": "^2.6.2",
+    "prettier": "^2.7.1",
     "react-devtools-core": "4.10.1",
     "react-dom": "^17.0.2",
     "react-native-clean-project": "^3.6.3",
     "react-native-web": "^0.16.3",
     "react-powerplug": "1.0.0",
     "solidarity": "^3.0.4",
-    "typescript": "4.2.3"
+    "typescript": "^4.8.3"
+  },
+  "lint-staged": {
+    "*.{js,ts,tsx}": [
+      "eslint --quiet --cache --fix"
+    ],
+    "*.{json,js,ts,jsx,tsx,html}": [
+      "prettier --write"
+    ]
   },
   "jest": {
     "preset": "jest-expo",
@@ -142,12 +162,6 @@
     "transformIgnorePatterns": [
       "node_modules/(?!(jest-)?react-native|expo|expo-linear-gradient|@react-native|@react-native-async-storage|@react-navigation|@storybook|@react-native-community|expo-localization)"
     ]
-  },
-  "prettier": {
-    "printWidth": 100,
-    "semi": false,
-    "singleQuote": false,
-    "trailingComma": "all"
   },
   "detox": {
     "test-runner": "jest",
@@ -170,70 +184,6 @@
           "os": "iOS 13.2"
         }
       }
-    }
-  },
-  "eslintConfig": {
-    "root": true,
-    "parser": "@typescript-eslint/parser",
-    "extends": [
-      "plugin:@typescript-eslint/recommended",
-      "plugin:react/recommended",
-      "plugin:react-native/all",
-      "standard",
-      "prettier",
-      "prettier/@typescript-eslint"
-    ],
-    "plugins": [
-      "@typescript-eslint",
-      "react",
-      "react-native"
-    ],
-    "parserOptions": {
-      "ecmaFeatures": {
-        "jsx": true
-      },
-      "project": "./tsconfig.json"
-    },
-    "settings": {
-      "react": {
-        "pragma": "React",
-        "version": "detect"
-      }
-    },
-    "globals": {
-      "__DEV__": false,
-      "jasmine": false,
-      "beforeAll": false,
-      "afterAll": false,
-      "beforeEach": false,
-      "afterEach": false,
-      "test": false,
-      "expect": false,
-      "describe": false,
-      "jest": false,
-      "it": false
-    },
-    "rules": {
-      "@typescript-eslint/ban-ts-ignore": 0,
-      "@typescript-eslint/explicit-function-return-type": 0,
-      "@typescript-eslint/explicit-member-accessibility": 0,
-      "@typescript-eslint/explicit-module-boundary-types": 0,
-      "@typescript-eslint/indent": 0,
-      "@typescript-eslint/member-delimiter-style": 0,
-      "@typescript-eslint/no-empty-interface": 0,
-      "@typescript-eslint/no-explicit-any": 0,
-      "@typescript-eslint/no-object-literal-type-assertion": 0,
-      "@typescript-eslint/no-var-requires": 0,
-      "comma-dangle": 0,
-      "multiline-ternary": 0,
-      "no-undef": 0,
-      "no-unused-vars": 0,
-      "no-use-before-define": "off",
-      "quotes": 0,
-      "react-native/no-raw-text": 0,
-      "react/no-unescaped-entities": 0,
-      "react/prop-types": "off",
-      "space-before-function-paren": 0
     }
   },
   "resolutions": {

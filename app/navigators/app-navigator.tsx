@@ -1,55 +1,57 @@
-import React, { useContext, useEffect, useState } from "react"
-import Animated from "react-native-reanimated"
-import { enableScreens } from "react-native-screens"
-import { NavigationContainer } from "@react-navigation/native"
-import { createSharedElementStackNavigator } from "react-navigation-shared-element"
-import Toast from "react-native-toast-message"
+import React, { useContext, useEffect, useState } from 'react'
+import Animated from 'react-native-reanimated'
+import { enableScreens } from 'react-native-screens'
+import { NavigationContainer } from '@react-navigation/native'
+import { createSharedElementStackNavigator } from 'react-navigation-shared-element'
+import Toast from 'react-native-toast-message'
 
-import { navigationRef } from "./navigation-utilities"
+import { navigationRef } from './navigation-utilities'
 import {
-  PhotoScreen,
   LibraryAssetsScreen,
   BoxListScreen,
   BoxAddUpdateScreen,
   HighlightScreen,
   AccountScreen,
   ShareViewerScreen,
-  ImageGalleryViewerScreen
-} from "../screens"
-import { HomeNavigator } from "./home-navigator"
-import { ThemeContext } from "../theme"
-import { BoxEntity } from "../realmdb/entities"
-import { RecyclerAssetListSection } from "../types"
+  ImageGalleryViewerScreen,
+} from '../screens'
+import { HomeNavigator } from './home-navigator'
+import { ThemeContext } from '../theme'
+import { BoxEntity } from '../realmdb/entities'
+import { Asset, AssetStory, RecyclerAssetListSection } from '../types'
 
 enableScreens()
 export type RootStackParamList = {
   Home: undefined
   LibraryAssets: undefined
-  Photo: { section: RecyclerAssetListSection }
-  HighlightScreen: undefined
+  HighlightScreen: {
+    storyId: AssetStory['id']
+  }
   AccountScreen: undefined
   Account: undefined
   Settings: undefined
   BoxList: undefined
   BoxAddUpdate: { box: BoxEntity }
   SharedViewer: { assetURI: string }
-  ImageGalleryViewer: { assetId: Asset['id'], scrollToItem: (item: RecyclerAssetListSection, animated?: boolean) => void}
+  ImageGalleryViewer: {
+    assetId: Asset['id']
+    scrollToItem: (item: RecyclerAssetListSection, animated?: boolean) => void
+  }
 }
 export enum AppNavigationNames {
-  HomeScreen = "Home",
-  AccountScreen = "AccountScreen",
-  PhotoScreen = "Photo",
-  LibraryAssets = "LibraryAssets",
-  BoxList = "BoxList",
-  BoxAddUpdate = "BoxAddUpdate",
-  SharedViewer = "SharedViewer",
-  HighlightScreen = "HighlightScreen",
-  ImageGalleryViewer = "ImageGalleryViewer"
+  HomeScreen = 'Home',
+  AccountScreen = 'AccountScreen',
+  LibraryAssets = 'LibraryAssets',
+  BoxList = 'BoxList',
+  BoxAddUpdate = 'BoxAddUpdate',
+  SharedViewer = 'SharedViewer',
+  HighlightScreen = 'HighlightScreen',
+  ImageGalleryViewer = 'ImageGalleryViewer',
 }
 
 const Stack = createSharedElementStackNavigator<RootStackParamList>()
 
-const AppStack = () => {
+function AppStack() {
   return (
     <Stack.Navigator
       initialRouteName={AppNavigationNames.HomeScreen}
@@ -58,40 +60,21 @@ const AppStack = () => {
         headerTransparent: true,
       }}
     >
-      <Stack.Screen name={AppNavigationNames.HomeScreen} component={HomeNavigator} />
-      <Stack.Screen name={AppNavigationNames.LibraryAssets} component={LibraryAssetsScreen} />
-      <Stack.Screen name={AppNavigationNames.BoxList} component={BoxListScreen} />
-      <Stack.Screen name={AppNavigationNames.BoxAddUpdate} component={BoxAddUpdateScreen} />
       <Stack.Screen
-        name={AppNavigationNames.PhotoScreen}
-        options={{
-          headerShown: false,
-          headerTransparent: true,
-          gestureEnabled: false,
-          cardOverlayEnabled: true,
-          cardStyle: { backgroundColor: "transparent" },
-          animationEnabled: true,
-          cardStyleInterpolator: ({ current: { progress } }) => ({
-            cardStyle: {
-              opacity: progress.interpolate({
-                inputRange: [0, 0.5, 0.9, 1],
-                outputRange: [0, 0.25, 0.7, 1],
-              }),
-            },
-            overlayStyle: {
-              opacity: progress.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0, 0],
-                extrapolate: "clamp",
-              }),
-            },
-          }),
-        }}
-        component={PhotoScreen}
-        sharedElements={(route) => {
-          const { assetId = "" } = route.params
-          return [assetId]
-        }}
+        name={AppNavigationNames.HomeScreen}
+        component={HomeNavigator}
+      />
+      <Stack.Screen
+        name={AppNavigationNames.LibraryAssets}
+        component={LibraryAssetsScreen}
+      />
+      <Stack.Screen
+        name={AppNavigationNames.BoxList}
+        component={BoxListScreen}
+      />
+      <Stack.Screen
+        name={AppNavigationNames.BoxAddUpdate}
+        component={BoxAddUpdateScreen}
       />
       <Stack.Screen
         name={AppNavigationNames.HighlightScreen}
@@ -101,7 +84,9 @@ const AppStack = () => {
           gestureEnabled: false,
           cardOverlayEnabled: true,
           animationEnabled: true,
-          cardStyle: { backgroundColor: "transparent" },
+          cardStyle: {
+            backgroundColor: 'transparent',
+          },
           cardStyleInterpolator: ({ current: { progress } }) => ({
             cardStyle: {
               opacity: progress.interpolate({
@@ -113,12 +98,16 @@ const AppStack = () => {
               opacity: progress.interpolate({
                 inputRange: [0, 1],
                 outputRange: [0, 0],
-                extrapolate: "clamp",
+                extrapolate: 'clamp',
               }),
             },
           }),
         }}
         component={HighlightScreen}
+        sharedElements={route => {
+          const { storyId = '' } = route.params
+          return [storyId]
+        }}
       />
       <Stack.Screen
         name={AppNavigationNames.ImageGalleryViewer}
@@ -128,7 +117,9 @@ const AppStack = () => {
           headerTransparent: true,
           gestureEnabled: false,
           cardOverlayEnabled: true,
-          cardStyle: { backgroundColor: "transparent" },
+          cardStyle: {
+            backgroundColor: 'transparent',
+          },
           animationEnabled: true,
           cardStyleInterpolator: ({ current: { progress } }) => ({
             containerStyle: {
@@ -140,8 +131,8 @@ const AppStack = () => {
           }),
         }}
         component={ImageGalleryViewerScreen}
-        sharedElements={(route) => {
-          const { assetId = "" } = route.params
+        sharedElements={route => {
+          const { assetId = '' } = route.params
           return [
             {
               id: assetId,
@@ -168,21 +159,20 @@ const AppStack = () => {
               opacity: progress.interpolate({
                 inputRange: [0, 1],
                 outputRange: [0, 0],
-                extrapolate: "clamp",
+                extrapolate: 'clamp',
               }),
             },
           }),
         }}
         component={AccountScreen}
-        sharedElements={(route) => {
-          return [
-            {
-              id: `AccountAvatar`,
-              animation: "move",
-            },
-          ];
+        sharedElements={(route, otherRoute) => {
+          if (
+            route?.name === AppNavigationNames.AccountScreen &&
+            otherRoute.name === AppNavigationNames.HomeScreen
+          ) {
+            return [`AccountAvatar`]
+          }
         }}
-
       />
       <Stack.Screen
         name={AppNavigationNames.SharedViewer}
@@ -194,7 +184,7 @@ const AppStack = () => {
 
 type NavigationProps = Partial<React.ComponentProps<typeof NavigationContainer>>
 
-export const AppNavigator = (props: NavigationProps) => {
+export function AppNavigator(props: NavigationProps) {
   const { theme } = useContext(ThemeContext)
   const [toastVisible, setToastVisible] = useState(false)
   useEffect(() => {
@@ -208,15 +198,19 @@ export const AppNavigator = (props: NavigationProps) => {
         theme={theme}
         ref={navigationRef}
         linking={{
-          prefixes: ["https://fotos.fx.land", "http://fotos.fx.land", "fotos://fotos.fx.land"],
+          prefixes: [
+            'https://fotos.fx.land',
+            'http://fotos.fx.land',
+            'fotos://fotos.fx.land',
+          ],
           config: {
             initialRouteName: AppNavigationNames.HomeScreen,
             screens: {
-              [AppNavigationNames.SharedViewer]: "shared/:jwe",
+              [AppNavigationNames.SharedViewer]: 'shared/:jwe',
             },
           },
         }}
-        //theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+        // theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}
         {...props}
       >
         <AppStack />
@@ -226,7 +220,7 @@ export const AppNavigator = (props: NavigationProps) => {
   )
 }
 
-AppNavigator.displayName = "AppNavigator"
+AppNavigator.displayName = 'AppNavigator'
 
 /**
  * A list of routes from which we're allowed to leave the app when
@@ -237,5 +231,5 @@ AppNavigator.displayName = "AppNavigator"
  *
  * `canExit` is used in ./app/app.tsx in the `useBackButtonHandler` hook.
  */
-const exitRoutes = ["welcome"]
+const exitRoutes = ['welcome']
 export const canExit = (routeName: string) => exitRoutes.includes(routeName)

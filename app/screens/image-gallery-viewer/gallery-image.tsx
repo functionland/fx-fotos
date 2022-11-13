@@ -1,11 +1,14 @@
-import { useNavigation } from "@react-navigation/native"
-import moment from "moment"
-import React, { MutableRefObject, useRef } from "react"
-import { useCallback } from "react"
-import { useMemo } from "react"
-import { Image, Platform, View } from "react-native"
-import { useWindowDimensions, StyleSheet } from "react-native"
-import FastImage from "react-native-fast-image"
+import { useNavigation } from '@react-navigation/native'
+import moment from 'moment'
+import React, { MutableRefObject, useRef, useCallback, useMemo } from 'react'
+import {
+  Image,
+  Platform,
+  View,
+  useWindowDimensions,
+  StyleSheet,
+} from 'react-native'
+import FastImage from 'react-native-fast-image'
 import {
   NativeViewGestureHandler,
   PanGestureHandler,
@@ -14,7 +17,7 @@ import {
   PinchGestureHandlerGestureEvent,
   TapGestureHandler,
   TapGestureHandlerGestureEvent,
-} from "react-native-gesture-handler"
+} from 'react-native-gesture-handler'
 import Animated, {
   interpolate,
   runOnJS,
@@ -24,16 +27,21 @@ import Animated, {
   useDerivedValue,
   useSharedValue,
   withTiming,
-} from "react-native-reanimated"
-import { SharedElement } from "react-navigation-shared-element"
-import { Text } from "../../components"
-import { palette } from "../../theme"
-import { Asset } from "../../types"
+} from 'react-native-reanimated'
+import { SharedElement } from 'react-navigation-shared-element'
+import { ScreenHeight, ScreenWidth } from '@rneui/base'
+import { Video } from 'expo-av'
+
+import { Text } from '../../components'
+import { palette } from '../../theme'
+import { Asset } from '../../types'
+import { AssetService } from '../../services'
 
 type GalleryImageProps = {
   asset: Asset
   enableParentScroll?: () => void
   disableParentScroll?: () => void
+  toggleMenu?: () => void
   listGestureRef: MutableRefObject<NativeViewGestureHandler>
   screenOpacity: SharedValue<number>
   sharedElementId: string
@@ -45,11 +53,12 @@ const SWIPE_TO_CLOSE_THRESHOLD = 100
 
 export const GalleryImage: React.FC<GalleryImageProps> = ({
   asset,
+  toggleMenu,
   enableParentScroll,
   disableParentScroll,
   listGestureRef,
   screenOpacity,
-  sharedElementId
+  sharedElementId,
 }) => {
   const navigation = useNavigation()
   const dims = useWindowDimensions()
@@ -65,28 +74,35 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
   const shouldCloseOnZoomOut = useSharedValue(true)
   const panHandlerRef = useRef(null)
   const pinchHandlerRef = useRef(null)
+  const doubleTapHandlerRef = useRef(null)
+  const singleTapHandlerRef = useRef(null)
 
   const isZoomed = useDerivedValue(() => {
-    if (accumulatedScale.value > 1) {
+    if (accumulatedScale?.value > 1) {
       return true
-    } else {
-      return false
     }
-  })
+    return false
+  }, [])
 
   const getXLimit = useCallback(() => {
-    "worklet"
+    'worklet'
+
     const imageWidth = dims.width / 2
     const limit = imageWidth * accumulatedScale.value - imageWidth
     return limit
   }, [dims.width])
 
   const getYLimit = useCallback(() => {
-    "worklet"
+    'worklet'
+
     const imageHeight = dims.height / 2
     const limit = imageHeight * accumulatedScale.value - imageHeight
     return limit
   }, [dims.height])
+
+  const onTap = useCallback(() => {
+    toggleMenu?.()
+  }, [toggleMenu])
 
   const onDoubleTap = useAnimatedGestureHandler<TapGestureHandlerGestureEvent>({
     onActive({ absoluteX, absoluteY }) {
@@ -124,7 +140,9 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
   }, [])
 
   const goBack = useCallback(() => {
-    navigation.setParams({assetId: asset.id})
+    navigation.setParams({
+      assetId: asset.id,
+    })
     setTimeout(() => {
       navigation.goBack()
     })
@@ -162,7 +180,16 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
           // translate the image in y-axis
           if (!isImageInfoSheetOpened.value) {
             translateY.value = translationY
-            screenOpacity.value = interpolate(translationY, [0, SWIPE_TO_CLOSE_THRESHOLD], [1, 0.8])
+            accumulatedScale.value = interpolate(
+              translationY,
+              [0, SWIPE_TO_CLOSE_THRESHOLD],
+              [1, 0.8],
+            )
+            screenOpacity.value = interpolate(
+              translationY,
+              [0, SWIPE_TO_CLOSE_THRESHOLD],
+              [1, 0.8],
+            )
           }
           if (!isSwipeDownGestureStarted.value) {
             runOnJS(disableParentListScroll)()
@@ -189,27 +216,26 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
       if (isZoomed.value) {
         accumulatedX.value = translateX.value
         accumulatedY.value = translateY.value
-      } else {
-        if (translationY > 0) {
-          if (isImageInfoSheetOpened.value) {
-            // End of swipe down gesture
-            bottomSheetOpacity.value = withTiming(0)
-            translateY.value = withTiming(0)
+      } else if (translationY > 0) {
+        if (isImageInfoSheetOpened.value) {
+          // End of swipe down gesture
+          bottomSheetOpacity.value = withTiming(0)
+          translateY.value = withTiming(0)
+          runOnJS(enableParentListScroll)()
+          isImageInfoSheetOpened.value = false
+        } else if (isSwipeDownGestureStarted.value) {
+          if (translationY > SWIPE_TO_CLOSE_THRESHOLD) {
+            runOnJS(goBack)()
+          } else {
+            // Return to previous place.
+            translateX.value = withTiming(accumulatedX.value)
+            translateY.value = withTiming(accumulatedY.value)
+            screenOpacity.value = withTiming(1)
+            accumulatedScale.value = withTiming(1)
             runOnJS(enableParentListScroll)()
-            isImageInfoSheetOpened.value = false
-          } else if (isSwipeDownGestureStarted.value) {
-            if (translationY > SWIPE_TO_CLOSE_THRESHOLD) {
-              runOnJS(goBack)()
-            } else {
-              // Return to previous place.
-              translateX.value = withTiming(accumulatedX.value)
-              translateY.value = withTiming(accumulatedY.value)
-              screenOpacity.value = withTiming(1)
-              runOnJS(enableParentListScroll)()
-              isSwipeDownGestureStarted.value = false
-            }
           }
         }
+        isSwipeDownGestureStarted.value = false
       }
     },
   })
@@ -270,12 +296,10 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
             accumulatedScale.value = withTiming(1)
             curScale.value = 1
           }
-        } else {
-          if (newScale < 1) {
-            accumulatedScale.value = withTiming(1)
-            curScale.value = 1
-            shouldCloseOnZoomOut.value = true
-          }
+        } else if (newScale < 1) {
+          accumulatedScale.value = withTiming(1)
+          curScale.value = 1
+          shouldCloseOnZoomOut.value = true
         }
 
         if (curScale.value > 1) {
@@ -289,96 +313,158 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
     },
   })
 
-  const animatedImageContainerStyle = useAnimatedStyle(() => {
-    return {
+  const animatedImageContainerStyle = useAnimatedStyle(() => ({
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    transform: [
+      {
+        scale: accumulatedScale.value,
+      },
+      {
+        translateX: translateX.value / accumulatedScale.value,
+      },
+      {
+        translateY: translateY.value / accumulatedScale.value,
+      },
+    ],
+  }))
+
+  const animatedBottomSheetStyle = useAnimatedStyle(() => ({
+    height: dims.height,
+    opacity: bottomSheetOpacity.value,
+  }))
+
+  const screenStyle = useAnimatedStyle(() => ({
+    flex: 1,
+    opacity: screenOpacity.value,
+  }))
+
+  const imageStyle = useMemo(
+    () => ({
       flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
-      transform: [
-        {
-          scale: accumulatedScale.value,
-        },
-        {
-          translateX: translateX.value / accumulatedScale.value,
-        },
-        {
-          translateY: translateY.value / accumulatedScale.value,
-        },
-      ],
-    }
-  })
+      width: dims.width,
+    }),
+    [dims.width, dims.height],
+  )
 
-  const animatedBottomSheetStyle = useAnimatedStyle(() => {
-    return {
-      height: dims.height,
-      opacity: bottomSheetOpacity.value,
-    }
-  })
+  const video = React.useRef(null)
+  const [localUri, setLocalUri] = React.useState(null)
+  const [, setPlaybackStatus] = React.useState({})
 
-  const screenStyle = useAnimatedStyle(() => {
-    return {
-      flex: 1,
-      opacity: screenOpacity.value,
+  const getAssetLocalInfo = React.useCallback(async () => {
+    if (Platform.OS === 'ios') {
+      const uri = await AssetService.getIOSMediaLocalUri(asset)
+      setLocalUri(uri)
     }
-  })
+  }, [asset])
 
-  const imageStyle = useMemo(() => {
-    return { flex: 1, width: dims.width }
-  }, [dims.width, dims.height])
+  React.useLayoutEffect(() => {
+    getAssetLocalInfo()
+  }, [asset])
 
   return (
     <Animated.View style={screenStyle}>
       <TapGestureHandler
-        numberOfTaps={2}
-        maxDist={10}
-        onGestureEvent={onDoubleTap}
-        waitFor={[panHandlerRef, pinchHandlerRef]}
+        ref={singleTapHandlerRef}
+        onActivated={onTap}
+        waitFor={doubleTapHandlerRef}
+        numberOfTaps={1}
       >
         <Animated.View style={styles.flex1}>
-          <PinchGestureHandler
-            ref={pinchHandlerRef}
-            onGestureEvent={onPinch}
-            simultaneousHandlers={panHandlerRef}
+          <TapGestureHandler
+            ref={doubleTapHandlerRef}
+            numberOfTaps={2}
+            maxDist={10}
+            onGestureEvent={onDoubleTap}
+            waitFor={[panHandlerRef, pinchHandlerRef]}
           >
             <Animated.View style={styles.flex1}>
-              <PanGestureHandler
-                ref={panHandlerRef}
-                onGestureEvent={onPan}
-                simultaneousHandlers={[pinchHandlerRef, listGestureRef]}
+              <PinchGestureHandler
+                ref={pinchHandlerRef}
+                onGestureEvent={onPinch}
+                simultaneousHandlers={panHandlerRef}
               >
-                <Animated.View style={animatedImageContainerStyle}>
-                  <SharedElement id={sharedElementId}>
-                    {Platform.OS === "android" ? (
-                      <FastImage
-                        source={{ uri: asset.uri, priority: FastImage.priority.high }}
-                        resizeMode="contain"
-                        style={imageStyle}
-                      />
-                    ) : (
-                      <Image source={{ uri: asset.uri }} fadeDuration={0} resizeMode="contain" style={imageStyle} />
-                    )}
-                  </SharedElement>
-                  <Animated.View style={[styles.bottomSheet, animatedBottomSheetStyle]}>
-                    <View style={styles.handle} />
-                    <Text style={styles.dateText}>
-                      {moment(asset.modificationTime).format("ddd, Do MMM YYYY . h:mm")}
-                    </Text>
-                    <Text style={styles.heading}>Details</Text>
-                    <View style={styles.detailsContainer}>
-                      <Text style={styles.locationHeading}>Location:</Text>
-                      <Text style={styles.uri}>{asset.uri}</Text>
-                    </View>
-                    <View style={styles.dimensionInfoContainer}>
-                      <Text style={styles.dimensionHeading}>Dimensions:</Text>
-                      <Text style={styles.dimensionText}>
-                        {asset.width} X {asset.height}
-                      </Text>
-                    </View>
-                  </Animated.View>
+                <Animated.View style={styles.flex1}>
+                  <PanGestureHandler
+                    ref={panHandlerRef}
+                    onGestureEvent={onPan}
+                    simultaneousHandlers={[pinchHandlerRef, listGestureRef]}
+                  >
+                    <Animated.View style={animatedImageContainerStyle}>
+                      <SharedElement id={sharedElementId}>
+                        {asset.mediaType === 'video' ? (
+                          <Video
+                            ref={video}
+                            source={{
+                              uri: Platform.OS === 'ios' ? localUri : asset.uri,
+                            }}
+                            style={{
+                              height:
+                                (asset.height * ScreenWidth) / asset.width ||
+                                ScreenHeight,
+                              width: ScreenWidth,
+                              zIndex: 9999999,
+                            }}
+                            onPlaybackStatusUpdate={status =>
+                              setPlaybackStatus(() => status)
+                            }
+                            useNativeControls
+                            resizeMode="contain"
+                            shouldPlay
+                            isLooping
+                          />
+                        ) : Platform.OS === 'android' ? (
+                          <FastImage
+                            source={{
+                              uri: asset.uri,
+                              priority: FastImage.priority.high,
+                            }}
+                            resizeMode="contain"
+                            style={imageStyle}
+                          />
+                        ) : (
+                          <Image
+                            source={{
+                              uri: asset.uri,
+                            }}
+                            fadeDuration={0}
+                            resizeMode="contain"
+                            style={imageStyle}
+                          />
+                        )}
+                      </SharedElement>
+                      <Animated.View
+                        style={[styles.bottomSheet, animatedBottomSheetStyle]}
+                      >
+                        <View style={styles.handle} />
+                        <Text style={styles.dateText}>
+                          {moment(asset.modificationTime).format(
+                            'ddd, Do MMM YYYY . h:mm',
+                          )}
+                        </Text>
+                        <Text style={styles.heading}>Details</Text>
+                        <View style={styles.detailsContainer}>
+                          <Text style={styles.locationHeading}>Location:</Text>
+                          <Text style={styles.uri}>{asset.uri}</Text>
+                        </View>
+                        {asset?.width && (
+                          <View style={styles.dimensionInfoContainer}>
+                            <Text style={styles.dimensionHeading}>
+                              Dimensions:
+                            </Text>
+                            <Text style={styles.dimensionText}>
+                              {asset?.width} X {asset?.height}
+                            </Text>
+                          </View>
+                        )}
+                      </Animated.View>
+                    </Animated.View>
+                  </PanGestureHandler>
                 </Animated.View>
-              </PanGestureHandler>
+              </PinchGestureHandler>
             </Animated.View>
-          </PinchGestureHandler>
+          </TapGestureHandler>
         </Animated.View>
       </TapGestureHandler>
     </Animated.View>
@@ -387,8 +473,8 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
 
 const styles = StyleSheet.create({
   bottomSheet: {
-    position: "absolute",
-    top: "75%",
+    position: 'absolute',
+    top: '75%',
     left: 0,
     right: 0,
     backgroundColor: palette.white,
@@ -403,26 +489,48 @@ const styles = StyleSheet.create({
     height: 4,
     opacity: 0.25,
     backgroundColor: palette.black,
-    alignSelf: "center",
-    position: "absolute",
+    alignSelf: 'center',
+    position: 'absolute',
     top: 10,
   },
   dateText: {
     color: palette.black,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     fontSize: 18,
     marginVertical: 8,
   },
-  heading: { color: palette.black, fontWeight: "bold", marginBottom: 8 },
-  detailsContainer: { flexDirection: "row", marginBottom: 8 },
-  locationHeading: { color: palette.black, fontWeight: "bold" },
-  uri: { marginLeft: 10, color: palette.black, flex: 1 },
-  dimensionInfoContainer: { flexDirection: "row" },
-  dimensionHeading: { color: palette.black, fontWeight: "bold" },
-  dimensionText: { marginLeft: 10, color: palette.black },
+  heading: {
+    color: palette.black,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  detailsContainer: {
+    flexDirection: 'row',
+    marginBottom: 8,
+  },
+  locationHeading: {
+    color: palette.black,
+    fontWeight: 'bold',
+  },
+  uri: {
+    marginLeft: 10,
+    color: palette.black,
+    flex: 1,
+  },
+  dimensionInfoContainer: {
+    flexDirection: 'row',
+  },
+  dimensionHeading: {
+    color: palette.black,
+    fontWeight: 'bold',
+  },
+  dimensionText: {
+    marginLeft: 10,
+    color: palette.black,
+  },
   flex1: { flex: 1 },
   horizontalBar: {
-    borderBottomColor: "black",
+    borderBottomColor: 'black',
     borderBottomWidth: StyleSheet.hairlineWidth,
     marginVertical: 20,
   },

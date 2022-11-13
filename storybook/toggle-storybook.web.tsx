@@ -1,18 +1,18 @@
-import React, { useState, useEffect } from "react"
-import * as QueryString from "query-string"
+import React, { useState, useEffect } from 'react'
+import * as QueryString from 'query-string'
 
 interface StorybookQueryParams {
   storybook?: boolean
 }
 
-export const ToggleStorybook = (props) => {
+export function ToggleStorybook(props) {
   const [StorybookUIRoot, setStorybookUIRoot] = useState<any>(null)
   const [queryParams, setQueryParams] = useState<StorybookQueryParams>({})
 
   useEffect(() => {
     if (__DEV__) {
       // Load the storybook UI once
-      setStorybookUIRoot(() => require("./storybook").StorybookUIRoot)
+      setStorybookUIRoot(() => require('./storybook').StorybookUIRoot)
     }
   }, [])
 
@@ -24,7 +24,6 @@ export const ToggleStorybook = (props) => {
 
   if (queryParams?.storybook) {
     return StorybookUIRoot ? <StorybookUIRoot /> : null
-  } else {
-    return props.children
   }
+  return props.children
 }

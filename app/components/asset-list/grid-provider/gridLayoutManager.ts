@@ -1,7 +1,8 @@
-import { Dimension, Layout, LayoutManager } from "fula-recyclerlistview"
-import Reanimated, { SharedValue } from "react-native-reanimated"
-import GridLayoutProvider from "./gridLayoutProvider"
-import { translateOrigin } from "../../../utils/helper"
+import { Dimension, Layout, LayoutManager } from 'fula-recyclerlistview'
+import Reanimated, { SharedValue } from 'react-native-reanimated'
+import GridLayoutProvider from './gridLayoutProvider'
+import { translateOrigin } from '../../../utils/helper'
+
 export const MAX_COLUMNS = 4
 export const MIN_COLUMNS = 1
 export interface LayoutTransitionRange {
@@ -14,10 +15,15 @@ export interface LayoutTransitionRange {
 export default class GridLayoutManager extends LayoutManager {
   // k is the number of columns
   private _allLayouts: Layout[][] // hold MAX_COLUMNS - MIN_COLUMNS + 1 sets of layouts
+
   private _columnNumber: SharedValue<number>
+
   private _layoutProvider: GridLayoutProvider
+
   private _window: Dimension
+
   private _totalHeight: Record<number, number>
+
   private _totalWidth: Record<number, number>
 
   constructor(
@@ -34,7 +40,8 @@ export default class GridLayoutManager extends LayoutManager {
     this._totalWidth = { [columnsNumber.value]: 0 }
     this._columnNumber = columnsNumber
     this._allLayouts = [[], [], [], []]
-    this._allLayouts[this._columnNumber.value - MIN_COLUMNS] = cachedLayouts ? cachedLayouts : []
+    this._allLayouts[this._columnNumber.value - MIN_COLUMNS] =
+      cachedLayouts || []
   }
 
   public getStyleOverridesForIndex(index: number): object | undefined {
@@ -44,7 +51,8 @@ export default class GridLayoutManager extends LayoutManager {
 
   public getContentDimension(): Dimension {
     return {
-      height: this._totalHeight[this._columnNumber.value] || this._window.height,
+      height:
+        this._totalHeight[this._columnNumber.value] || this._window.height,
       width: this._totalWidth[this._columnNumber.value] || this._window.width,
     }
   }
@@ -65,15 +73,14 @@ export default class GridLayoutManager extends LayoutManager {
   }
 
   public getLayoutsForIndex(index: number): Layout[] {
-    if (this._allLayouts.every((layout) => index < layout.length)) {
-      return this._allLayouts.map((layouts) => layouts[index])
+    if (this._allLayouts.every(layout => index < layout.length)) {
+      return this._allLayouts.map(layouts => layouts[index])
       // .map((layouts, idx) => ({
       //   layout: layouts[index],
       //   colNum: idx + MIN_COLUMNS,
       // }))
-    } else {
-      throw new Error("Layouts unavalaible")
     }
+    throw new Error('Layouts unavalaible')
   }
 
   public getGirdColumnsRange(): number[] {
@@ -90,10 +97,16 @@ export default class GridLayoutManager extends LayoutManager {
     return layouts.reduce(
       (obj, layout) => {
         obj.translateX.push(
-          translateOrigin(layout.x - currentLayout.x, currentLayout.width - layout.width),
+          translateOrigin(
+            layout.x - currentLayout.x,
+            currentLayout.width - layout.width,
+          ),
         )
         obj.translateY.push(
-          translateOrigin(layout.y - currentLayout.y, currentLayout.width - layout.width),
+          translateOrigin(
+            layout.y - currentLayout.y,
+            currentLayout.width - layout.width,
+          ),
         )
         if (layout.width && currentLayout.width) {
           obj.scale.push(layout.width / currentLayout.width)
@@ -166,24 +179,36 @@ export default class GridLayoutManager extends LayoutManager {
         let oldLayout = null
 
         if (!this._totalWidth[columnNumber]) this._totalWidth[columnNumber] = 0
-        if (!this._totalHeight[columnNumber]) this._totalHeight[columnNumber] = 0
+        if (!this._totalHeight[columnNumber])
+          this._totalHeight[columnNumber] = 0
 
         for (let i = startIndex; i < itemCount; i++) {
           oldLayout = layouts[i]
           const layoutType = this._layoutProvider.getLayoutTypeForIndex(i)
 
-          if (oldLayout && oldLayout.isOverridden && oldLayout.type === layoutType) {
+          if (
+            oldLayout &&
+            oldLayout.isOverridden &&
+            oldLayout.type === layoutType
+          ) {
             // We're sure the old value are still valid
             itemDim.height = oldLayout.height
             itemDim.width = oldLayout.width
           } else {
             // recompute
-            this._layoutProvider.setComputedLayout(layoutType, itemDim, i, columnNumber)
+            this._layoutProvider.setComputedLayout(
+              layoutType,
+              itemDim,
+              i,
+              columnNumber,
+            )
           }
           // make sure the item is not wider than the screen
           this.setMaxBounds(itemDim)
           // wrap the item if needed
-          while (!this._checkBounds(startX, startY, itemDim, this._isHorizontal)) {
+          while (
+            !this._checkBounds(startX, startY, itemDim, this._isHorizontal)
+          ) {
             if (this._isHorizontal) {
               startX += maxBound
               startY = 0
@@ -233,7 +258,10 @@ export default class GridLayoutManager extends LayoutManager {
       })
   }
 
-  private _locateFirstNeighbourIndex(startIndex: number, layouts = this.getLayouts()): number {
+  private _locateFirstNeighbourIndex(
+    startIndex: number,
+    layouts = this.getLayouts(),
+  ): number {
     if (startIndex === 0) {
       return 0
     }
