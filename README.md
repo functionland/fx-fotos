@@ -1,13 +1,15 @@
 ![](https://github.com/functionland/photos/blob/main/assets/images/logo.png)
 
+**Google Play:** https://play.google.com/store/apps/details?id=land.fx.fotos
+
+**App Store:** https://apps.apple.com/ca/app/fx-fotos/id1640008383
+
 # Latest 2 Updates
 
-**December-06-2021:** Speed improvement is being done in rn-borg branch and
-merged here after completion
+**November-10-2022:** Application was approved by App store.
 
-**November-15-2021:** A lot of updates! Many performance optimizations.
-Connected to backend of Box. Auto-upload photos to backend. Presented in Dfinity
-community!
+**October-26-2022:** Application was approved by Google Play.
+
 
 # Discussions
 
