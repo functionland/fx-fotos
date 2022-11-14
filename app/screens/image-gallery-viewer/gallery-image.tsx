@@ -1,12 +1,20 @@
 import { useNavigation } from '@react-navigation/native'
 import moment from 'moment'
-import React, { MutableRefObject, useRef, useCallback, useMemo } from 'react'
+import React, {
+  MutableRefObject,
+  useRef,
+  useCallback,
+  useMemo,
+  useState,
+  useEffect,
+} from 'react'
 import {
   Image,
   Platform,
   View,
   useWindowDimensions,
   StyleSheet,
+  ActivityIndicator,
 } from 'react-native'
 import FastImage from 'react-native-fast-image'
 import {
@@ -30,21 +38,23 @@ import Animated, {
 } from 'react-native-reanimated'
 import { SharedElement } from 'react-navigation-shared-element'
 import { ScreenHeight, ScreenWidth } from '@rneui/base'
-import { Video } from 'expo-av'
+import Video from 'react-native-video'
 
-import { Text } from '../../components'
+import { Icon, Text } from '@rneui/themed'
 import { palette } from '../../theme'
-import { Asset } from '../../types'
+import { Asset, VideoPlayerMetadata, VideoPlayerProgress } from '../../types'
 import { AssetService } from '../../services'
+import { VideoPlayerControl } from '../../components'
 
 type GalleryImageProps = {
   asset: Asset
   enableParentScroll?: () => void
   disableParentScroll?: () => void
-  toggleMenu?: () => void
+  toggleMenu?: (forceValue?: boolean) => void
   listGestureRef: MutableRefObject<NativeViewGestureHandler>
   screenOpacity: SharedValue<number>
   sharedElementId: string
+  isCurrentView: boolean
 }
 
 const MAX_SCALE = 6
@@ -59,6 +69,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
   listGestureRef,
   screenOpacity,
   sharedElementId,
+  isCurrentView,
 }) => {
   const navigation = useNavigation()
   const dims = useWindowDimensions()
@@ -76,6 +87,25 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
   const pinchHandlerRef = useRef(null)
   const doubleTapHandlerRef = useRef(null)
   const singleTapHandlerRef = useRef(null)
+  const videoPlayerRef = useRef(null)
+  const [videoMuted, setVideoMuted] = useState(true)
+  const [videoPaused, setVideoPaused] = useState(false)
+  const videoControlVisibilty = useSharedValue(false)
+
+  const [currentVideoMetadata, setCurrentVideoMetadata] =
+    useState<VideoPlayerMetadata>(null)
+  const [currnetVideoProgress, setCurrnetVideoProgress] =
+    useState<VideoPlayerProgress>(null)
+  useEffect(() => {
+    if (isCurrentView && asset?.mediaType !== 'video') {
+      toggleMenu?.()
+    }
+  }, [])
+  useEffect(() => {
+    if (!isCurrentView) {
+      setCurrentVideoMetadata(null)
+    }
+  }, [isCurrentView])
 
   const isZoomed = useDerivedValue(() => {
     if (accumulatedScale?.value > 1) {
@@ -101,6 +131,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
   }, [dims.height])
 
   const onTap = useCallback(() => {
+    videoControlVisibilty.value = !videoControlVisibilty.value
     toggleMenu?.()
   }, [toggleMenu])
 
@@ -312,7 +343,9 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
       }
     },
   })
-
+  const animatedVideoControlVisibility = useAnimatedStyle(() => ({
+    opacity: withTiming(videoControlVisibilty.value ? 1 : 0, { duration: 200 }),
+  }))
   const animatedImageContainerStyle = useAnimatedStyle(() => ({
     flex: 1,
     justifyContent: 'center',
@@ -348,9 +381,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
     [dims.width, dims.height],
   )
 
-  const video = React.useRef(null)
   const [localUri, setLocalUri] = React.useState(null)
-  const [, setPlaybackStatus] = React.useState({})
 
   const getAssetLocalInfo = React.useCallback(async () => {
     if (Platform.OS === 'ios') {
@@ -362,6 +393,13 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
   React.useLayoutEffect(() => {
     getAssetLocalInfo()
   }, [asset])
+
+  const _onVideoLoad = useCallback(event => {
+    setCurrentVideoMetadata(event)
+  }, [])
+  const _onVideoProgress = useCallback(event => {
+    setCurrnetVideoProgress(event)
+  }, [])
 
   return (
     <Animated.View style={screenStyle}>
@@ -393,26 +431,24 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
                   >
                     <Animated.View style={animatedImageContainerStyle}>
                       <SharedElement id={sharedElementId}>
-                        {asset.mediaType === 'video' ? (
+                        {isCurrentView && asset.mediaType === 'video' ? (
                           <Video
-                            ref={video}
+                            ref={videoPlayerRef}
                             source={{
                               uri: Platform.OS === 'ios' ? localUri : asset.uri,
                             }}
                             style={{
-                              height:
-                                (asset.height * ScreenWidth) / asset.width ||
-                                ScreenHeight,
+                              height: ScreenHeight,
                               width: ScreenWidth,
-                              zIndex: 9999999,
                             }}
-                            onPlaybackStatusUpdate={status =>
-                              setPlaybackStatus(() => status)
-                            }
-                            useNativeControls
+                            repeat={true}
+                            fullscreenAutorotate={true}
                             resizeMode="contain"
                             shouldPlay
-                            isLooping
+                            paused={videoPaused}
+                            muted={videoMuted}
+                            onLoad={_onVideoLoad}
+                            onProgress={_onVideoProgress}
                           />
                         ) : Platform.OS === 'android' ? (
                           <FastImage
@@ -467,6 +503,55 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
           </TapGestureHandler>
         </Animated.View>
       </TapGestureHandler>
+      {asset.mediaType === 'video' && (
+        <VideoPlayerControl
+          containerStyle={[
+            { position: 'absolute', bottom: 60 },
+            animatedVideoControlVisibility,
+          ]}
+          muted={videoMuted}
+          currentTime={currnetVideoProgress?.currentTime}
+          seekableDuration={currnetVideoProgress?.seekableDuration}
+          onVolumePresss={() => {
+            setVideoMuted(!videoMuted)
+          }}
+          onValueChange={value => {
+            videoPlayerRef?.current?.seek(value)
+          }}
+        />
+      )}
+      {asset.mediaType === 'video' && (
+        <Animated.View
+          style={[styles.overlayBox, animatedVideoControlVisibility]}
+          pointerEvents="box-none"
+        >
+          <Icon
+            type="materialIcons"
+            name={videoPaused ? 'play-circle-fill' : 'pause-circle-filled'}
+            size={52}
+            onPress={() => {
+              if (videoPaused) {
+                setTimeout(() => {
+                  toggleMenu?.(false)
+                  videoControlVisibilty.value = false
+                }, 1000)
+              }
+              setVideoPaused(!videoPaused)
+            }}
+            containerStyle={{
+              borderRadius: 26,
+            }}
+            color="rgba(255,255,255,0.6)"
+            useForeground={true}
+            background="black"
+          />
+        </Animated.View>
+      )}
+      {!currentVideoMetadata && asset.mediaType === 'video' && (
+        <Animated.View style={[styles.overlayBox]} pointerEvents="box-none">
+          <ActivityIndicator size="large" />
+        </Animated.View>
+      )}
     </Animated.View>
   )
 }
@@ -528,10 +613,19 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     color: palette.black,
   },
-  flex1: { flex: 1 },
+  flex1: { flex: 1, alignItems: 'center' },
   horizontalBar: {
     borderBottomColor: 'black',
     borderBottomWidth: StyleSheet.hairlineWidth,
     marginVertical: 20,
+  },
+  overlayBox: {
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
   },
 })
