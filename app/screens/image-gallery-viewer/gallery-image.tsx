@@ -201,7 +201,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
         if (
           !isImageInfoSheetOpened.value &&
           !isSwipeDownGestureStarted.value &&
-          Math.abs(translationX) > 1
+          Math.abs(translationX) > 5
         ) {
           return
         }
