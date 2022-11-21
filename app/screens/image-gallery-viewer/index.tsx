@@ -585,7 +585,7 @@ export const ImageGalleryViewerScreen: React.FC<
               />
             </View>
           )}
-          {renderActionButtons()}
+          {/* {renderActionButtons()} */}
           <BottomSheet
             isVisible={showShareBottomSheet}
             onBackdropPress={() => setShowShareBottomSheet(false)}
