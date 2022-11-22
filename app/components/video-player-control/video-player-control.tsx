@@ -43,6 +43,7 @@ export const VideoPlayerControl = ({
         type="material-community"
         name={muted ? 'volume-off' : 'volume-high'}
         onPress={onVolumePresss}
+        color={'white'}
       />
     </Animated.View>
   )
@@ -58,6 +59,7 @@ const styles = StyleSheet.create({
   },
   timeText: {
     fontSize: 12,
+    color:'white'
   },
   slider: {
     width: '60%',
