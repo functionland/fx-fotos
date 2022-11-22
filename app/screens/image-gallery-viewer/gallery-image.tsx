@@ -381,18 +381,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
     [dims.width, dims.height],
   )
 
-  const [localUri, setLocalUri] = React.useState(null)
-
-  const getAssetLocalInfo = React.useCallback(async () => {
-    if (Platform.OS === 'ios') {
-      const uri = await AssetService.getIOSMediaLocalUri(asset)
-      setLocalUri(uri)
-    }
-  }, [asset])
-
-  React.useLayoutEffect(() => {
-    getAssetLocalInfo()
-  }, [asset])
+  
 
   const _onVideoLoad = useCallback(event => {
     setCurrentVideoMetadata(event)
@@ -435,7 +424,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
                           <Video
                             ref={videoPlayerRef}
                             source={{
-                              uri: Platform.OS === 'ios' ? localUri : asset.uri,
+                              uri: Platform.OS === 'ios' ? AssetService.getIOSVideoUri(asset.uri,asset.filename) : asset.uri,
                             }}
                             style={{
                               height: ScreenHeight,
