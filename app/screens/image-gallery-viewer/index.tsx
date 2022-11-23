@@ -522,15 +522,16 @@ export const ImageGalleryViewerScreen: React.FC<
           ]}
           style={styles.gradientContainer}
         >
-          <TouchableOpacity style={styles.iconContainer} onPress={deleteAsset}>
+          <View style={styles.iconContainer}>
             <Icon
               name="delete"
               type="material-community"
               size={30}
               color={palette.white}
+              onPress={deleteAsset}
             />
             <Text style={styles.actionText}>Delete</Text>
-          </TouchableOpacity>
+          </View>
         </LinearGradient>
       </Animated.View>
     ),
@@ -584,7 +585,7 @@ export const ImageGalleryViewerScreen: React.FC<
               />
             </View>
           )}
-          {renderActionButtons()}
+          {/* {renderActionButtons()} */}
           <BottomSheet
             isVisible={showShareBottomSheet}
             onBackdropPress={() => setShowShareBottomSheet(false)}
@@ -641,13 +642,13 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   actionText: {
-    textAlign: 'center',
+    alignItems: 'center',
     color: palette.white,
     fontSize: 13,
   },
   iconContainer: {
-    flex: 1,
     flexDirection: 'column',
+    alignSelf: 'center',
   },
   actionButtonContainer: {
     position: 'absolute',

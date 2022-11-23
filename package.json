@@ -1,6 +1,6 @@
 {
   "name": "fotos",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "private": true,
   "scripts": {
     "start": "react-native start",
@@ -31,7 +31,7 @@
   "dependencies": {
     "@functionland/fula-sec": "0.6.6",
     "@react-native-async-storage/async-storage": "^1.17.6",
-    "@react-native-camera-roll/camera-roll": "github:ghorbani-m/react-native-cameraroll.git",
+    "@react-native-camera-roll/camera-roll": "^5.1.0",
     "@react-native-community/masked-view": "0.1.10",
     "@react-native-community/netinfo": "^8.3.1",
     "@react-navigation/bottom-tabs": "^6.3.1",

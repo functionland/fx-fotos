@@ -126,11 +126,11 @@ export const categorizeAssets = (assets: Asset[], storyHighlight = false) => {
         )
         .map(
           (key, index) =>
-            ({
-              id: `story_${index}_${storiesObj[key]?.length}`,
-              data: storiesObj[key],
-              title: key,
-            } as AssetStory),
+          ({
+            id: `story_${index}_${storiesObj[key]?.length}`,
+            data: storiesObj[key],
+            title: key,
+          } as AssetStory),
         ),
     }
     if ((storySection?.data as AssetStory[])?.length > 0) {
@@ -156,10 +156,10 @@ export const getLibraries = (assets: Asset[]): Library[] => {
 
   const libraries = Object.keys(librariesObj).map(
     title =>
-      ({
-        title,
-        assets: librariesObj[title],
-      } as Library),
+    ({
+      title,
+      assets: librariesObj[title],
+    } as Library),
   )
 
   return libraries
@@ -175,23 +175,23 @@ export const getAssets = async (
     })
     const assets = medias.edges.map(
       photo =>
-        ({
-          id: photo?.node?.image?.uri,
-          filename: photo?.node?.image?.filename || '',
-          filenameNormalized: photo?.node?.image?.filename?.toLowerCase(),
-          uri: photo?.node?.image?.uri,
-          height: photo?.node?.image?.height,
-          width: photo?.node?.image?.width,
-          creationTime: photo?.node?.timestamp * 1000,
-          modificationTime:
-            photo?.node?.modified * 1000 || photo?.node?.timestamp * 1000,
-          duration: photo?.node?.image?.playableDuration || 0,
-          mimeType: photo?.node?.type,
-          mediaType: mimeToMediaType(photo?.node?.type),
-          albumId: photo?.node?.group_name,
-          location: photo?.node?.location,
-          fileSize: photo?.node?.image.fileSize,
-        } as Asset),
+      ({
+        id: photo?.node?.image?.uri,
+        filename: photo?.node?.image?.filename || '',
+        filenameNormalized: photo?.node?.image?.filename?.toLowerCase(),
+        uri: photo?.node?.image?.uri,
+        height: photo?.node?.image?.height,
+        width: photo?.node?.image?.width,
+        creationTime: photo?.node?.timestamp * 1000,
+        modificationTime:
+          photo?.node?.modified * 1000 || photo?.node?.timestamp * 1000,
+        duration: photo?.node?.image?.playableDuration || 0,
+        mimeType: photo?.node?.type,
+        mediaType: mimeToMediaType(photo?.node?.type),
+        albumId: photo?.node?.group_name,
+        location: photo?.node?.location,
+        fileSize: photo?.node?.image.fileSize,
+      } as Asset),
     )
     return {
       assets,
@@ -215,10 +215,17 @@ export const deleteAssets = async (photoUris: string[]): Promise<void> => {
 export const getIOSMediaLocalUri = async (
   asset: Asset,
 ): Promise<string | undefined> => {
-  const info = await CameraRoll.iosGetImageDataById(asset.uri, false)
-  return info?.node?.image?.uri
+  const info = await CameraRoll.iosGetImageDataById(asset.uri,false)
+  return info?.node?.image?.filepath
 }
 
+export const getIOSVideoUri = (phUri: string, filename: string) => {
+  const appleId = phUri.substring(5, 41);
+  const fileNameLength = filename?.length;
+  const ext = filename?.substring(fileNameLength - 3);
+  const uri = `assets-library://asset/asset.${ext}?id=${appleId}&ext=${ext}`
+  return uri
+}
 export const mimeToMediaType = (mime: string): MediaTypeValue => {
   const mimeType = mime?.split('/')?.[0]
   switch (mimeType) {
