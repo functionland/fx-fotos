@@ -43,7 +43,11 @@ export const HeaderRNE = ({
       <StatusBar
         barStyle={barStyle}
         translucent={true}
-        backgroundColor={backgroundColor || theme?.colors?.primary}
+        backgroundColor={
+          backgroundColor || theme?.mode === 'dark'
+            ? theme?.colors?.primary
+            : theme?.colors?.background
+        }
         {...statusBarProps}
       />
       <ViewComponent
