@@ -1,5 +1,13 @@
 import { NavigationProp, RouteProp } from '@react-navigation/native'
-import { BottomSheet, Button, Card, Icon, Input, Text } from '@rneui/themed'
+import {
+  BottomSheet,
+  Button,
+  Card,
+  Icon,
+  Input,
+  Text,
+  useTheme,
+} from '@rneui/themed'
 import {
   DataProvider,
   GridLayoutProvider,
@@ -25,6 +33,9 @@ import Toast from 'react-native-toast-message'
 import { useNetInfo } from '@react-native-community/netinfo'
 import { TaggedEncryption } from '@functionland/fula-sec'
 import Animated, {
+  interpolate,
+  processColor,
+  useAnimatedReaction,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -81,13 +92,11 @@ export const ImageGalleryViewerScreen: React.FC<
   const [transitionDone, setTransitionDone] = useState(false)
   const optionsVisibleRef = useRef(false)
   const headerOpacity = useSharedValue(0)
-
   const [extendedState, setExtendedState] = useState<ExtendedState>({
     currentVideoMuted: true,
     currentVideoPaused: false,
     currentAssetId: assetId,
   })
-  const headerHeightRef = useRef(0)
   const footerHeightRef = useRef(0)
   const [assetSections, setAssetSections] = useState<RecyclerAssetListSection>(
     recyclerList.filter(section => section.type === ViewType.ASSET),
@@ -339,7 +348,12 @@ export const ImageGalleryViewerScreen: React.FC<
   const animatedOptionsStyle = useAnimatedStyle(() => ({
     opacity: headerOpacity.value,
   }))
-
+  useAnimatedReaction(
+    () => screenOpacity.value,
+    opacity => {
+      headerOpacity.value = interpolate(opacity, [0.95, 1], [0, 1])
+    },
+  )
   const renderHeader = useCallback(
     () => (
       <Animated.View
@@ -352,7 +366,7 @@ export const ImageGalleryViewerScreen: React.FC<
           animatedOptionsStyle,
         ]}
       >
-        <StatusBar backgroundColor="transparent" />
+        <StatusBar backgroundColor="black" barStyle="light-content" />
         <LinearGradient
           colors={[
             'rgba(33,33,33,0.3)',
@@ -541,14 +555,18 @@ export const ImageGalleryViewerScreen: React.FC<
   const wrapperAnimatedStyle = useAnimatedStyle(() => ({
     flex: 1,
     justifyContent: 'center',
-    backgroundColor: 'black',
-    opacity: screenOpacity.value,
+    backgroundColor: `rgba(0,0,0,${interpolate(
+      screenOpacity.value,
+      [0.9, 1],
+      [0, 1],
+    )})`,
   }))
   return (
     <Screen
       scrollEventThrottle={16}
       automaticallyAdjustContentInsets
       style={styles.screen}
+      backgroundColor="transparent"
     >
       <Animated.View style={wrapperAnimatedStyle}>
         <View style={{ flex: 1 }}>
@@ -631,6 +649,7 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     justifyContent: 'center',
+    backgroundColor: 'transparent',
   },
   headerIcon: {
     marginHorizontal: 10,
