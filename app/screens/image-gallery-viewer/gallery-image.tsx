@@ -35,6 +35,7 @@ import Animated, {
   useDerivedValue,
   useSharedValue,
   withTiming,
+  Extrapolation,
 } from 'react-native-reanimated'
 import { SharedElement } from 'react-navigation-shared-element'
 import { ScreenHeight, ScreenWidth } from '@rneui/base'
@@ -215,6 +216,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
               translationY,
               [0, SWIPE_TO_CLOSE_THRESHOLD],
               [1, 0.8],
+              Extrapolation.CLAMP,
             )
             screenOpacity.value = interpolate(
               translationY,
@@ -368,11 +370,6 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
     opacity: bottomSheetOpacity.value,
   }))
 
-  const screenStyle = useAnimatedStyle(() => ({
-    flex: 1,
-    opacity: screenOpacity.value,
-  }))
-
   const imageStyle = useMemo(
     () => ({
       flex: 1,
@@ -380,8 +377,6 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
     }),
     [dims.width, dims.height],
   )
-
-  
 
   const _onVideoLoad = useCallback(event => {
     setCurrentVideoMetadata(event)
@@ -391,7 +386,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
   }, [])
 
   return (
-    <Animated.View style={screenStyle}>
+    <Animated.View style={styles.screenStyle}>
       <TapGestureHandler
         ref={singleTapHandlerRef}
         onActivated={onTap}
@@ -424,7 +419,13 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
                           <Video
                             ref={videoPlayerRef}
                             source={{
-                              uri: Platform.OS === 'ios' ? AssetService.getIOSVideoUri(asset.uri,asset.filename) : asset.uri,
+                              uri:
+                                Platform.OS === 'ios'
+                                  ? AssetService.getIOSVideoUri(
+                                      asset.uri,
+                                      asset.filename,
+                                    )
+                                  : asset.uri,
                             }}
                             style={{
                               height: ScreenHeight,
@@ -546,6 +547,10 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
 }
 
 const styles = StyleSheet.create({
+  screenStyle: {
+    flex: 1,
+    backgroundColor: 'transparent',
+  },
   bottomSheet: {
     position: 'absolute',
     top: '75%',
