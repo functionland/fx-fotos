@@ -12,7 +12,8 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
-
+    <uses-permission android:name="android.permission.CAMERA" />
+    
     <!-- Walletconnect integration -->
     <queries>
         <intent>

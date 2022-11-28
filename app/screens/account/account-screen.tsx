@@ -54,27 +54,11 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
   }
 
   const connectToWallet = async () => {
-    try {
-      if (connectToWalletStep !== 'None') {
-        setConnectToWalletStep('None')
-        return
-      }
-      setConnectToWalletStep('Connecting')
-      await walletConnector.connect()
-      setConnectToWalletStep('Signing')
-    } catch (error) {
-      console.log(error)
-      setConnectToWalletStep('None')
-      Toast.show({
-        type: 'error',
-        text1: 'Unable to connect to wallet',
-        text2: `${error}`,
-        position: 'bottom',
-        bottomOffset: 0,
-      })
-    }
+    navigation.navigate(AppNavigationNames.ConnectWalletScreen)
   }
   const signWalletAddress = async () => {
+    navigation.navigate(AppNavigationNames.CreateDIDScreen)
+    return
     try {
       const messageBytes = new TextEncoder().encode(
         walletConnector?.accounts[0],
@@ -311,7 +295,7 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   screen: {
-    flex:1
+    flex: 1,
   },
   container: {
     flex: 1,
