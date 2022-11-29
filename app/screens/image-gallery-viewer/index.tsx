@@ -31,7 +31,6 @@ import { NativeViewGestureHandler } from 'react-native-gesture-handler'
 import { useRecoilState } from 'recoil'
 import Toast from 'react-native-toast-message'
 import { useNetInfo } from '@react-native-community/netinfo'
-import { TaggedEncryption } from '@functionland/fula-sec'
 import Animated, {
   interpolate,
   processColor,
@@ -394,23 +393,23 @@ export const ImageGalleryViewerScreen: React.FC<
     if (!DID) return
     setSharing(true)
     try {
-      const shareAsset = (await Assets.getById(asset.id))?.[0]
-      const myDID = await helper.getMyDID()
-      if (myDID && shareAsset) {
-        const myTag = new TaggedEncryption(myDID.did)
-        const symetricKey = (
-          await helper.decryptJWE(myDID.did, JSON.parse(shareAsset?.jwe))
-        )?.symetricKey
-        const jwe = await myTag.encrypt(symetricKey, symetricKey?.id, [DID])
-        Share.share({
-          title: 'Fx Fotos | Just shared an asset',
-          // eslint-disable-next-line no-undef
-          message: `https://fotos.fx.land/shared/${Buffer.from(
-            JSON.stringify(jwe),
-            'utf-8',
-          ).toString('base64')}`,
-        })
-      }
+      // const shareAsset = (await Assets.getById(asset.id))?.[0]
+      // const myDID = await helper.getMyDID()
+      // if (myDID && shareAsset) {
+      //   const myTag = new TaggedEncryption(myDID.did)
+      //   const symetricKey = (
+      //     await helper.decryptJWE(myDID.did, JSON.parse(shareAsset?.jwe))
+      //   )?.symetricKey
+      //   const jwe = await myTag.encrypt(symetricKey, symetricKey?.id, [DID])
+      //   Share.share({
+      //     title: 'Fx Fotos | Just shared an asset',
+      //     // eslint-disable-next-line no-undef
+      //     message: `https://fotos.fx.land/shared/${Buffer.from(
+      //       JSON.stringify(jwe),
+      //       'utf-8',
+      //     ).toString('base64')}`,
+      //   })
+      //}
     } catch (error) {
       Alert.alert('Error', error.toString())
       console.log(error)
