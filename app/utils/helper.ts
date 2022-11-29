@@ -1,6 +1,4 @@
-import * as Keychain from 'react-native-keychain'
-import { FulaDID, TaggedEncryption } from '@functionland/fula-sec'
-
+import { HDKEY, DID, EncryptJWT, DecryptJWT } from '@functionland/fula-sec'
 export const translateOrigin = (center: number, d: number) => center - d / 2
 export const convertDurationToTime = (duration: number): string => {
   const h = Math.floor(duration / 3600)
@@ -20,14 +18,11 @@ export const getWalletImage = (walletName: string) => {
   }
 }
 
-export const getMyDID = async () => {
-  const gPassword = await Keychain.getGenericPassword()
-  const myDID = new FulaDID()
-  if (gPassword) {
-    await myDID.create(gPassword.password, gPassword.password)
-    return myDID
-  }
-  return null
+export const getMyDID = (password: string, signiture: string): string => {
+  const ed = new HDKEY(password)
+  const keyPair = ed.createEDKeyPair(signiture)
+  const did = new DID(keyPair.secretKey)
+  return did.did()
 }
 
 export const decryptJWE = async (
@@ -37,11 +32,11 @@ export const decryptJWE = async (
   CID: string
   symetricKey: { id: string; iv: SVGFESpecularLightingElement; key: string }
 } => {
-  if (DID && jwe) {
-    const myTag = new TaggedEncryption(DID)
-    const dec_jwe = await myTag.decrypt(jwe)
-    return dec_jwe
-  }
+  // if (DID && jwe) {
+  //   const myTag = new TaggedEncryption(DID)
+  //   const dec_jwe = await myTag.decrypt(jwe)
+  //   return dec_jwe
+  // }
   return null
 }
 
