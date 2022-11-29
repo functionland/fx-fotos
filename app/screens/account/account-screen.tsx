@@ -1,17 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import {
-  StyleSheet,
-  View,
-  Image,
-  Alert,
-  ActivityIndicator,
-  Share,
-} from 'react-native'
-import { Avatar, Button, Card, Icon, ListItem, Text } from '@rneui/themed'
+import { StyleSheet, View, Image, Alert, Share } from 'react-native'
+import { Avatar, Button, Icon, Text } from '@rneui/themed'
 import { useWalletConnect } from '@walletconnect/react-native-dapp'
-import * as Keychain from 'react-native-keychain'
+import * as Keychain from '../../utils/keychain'
 import Toast from 'react-native-toast-message'
-import { FulaDID } from '@functionland/fula-sec'
 
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { SharedElement } from 'react-navigation-shared-element'
@@ -23,100 +15,34 @@ import {
 } from '../../components/header'
 import { AppNavigationNames, RootStackParamList } from '../../navigators'
 import * as helper from '../../utils/helper'
+import { useRecoilState } from 'recoil'
+import { dIDCredentials } from '../../store'
+import Clipboard from '@react-native-clipboard/clipboard'
 
 type Props = NativeStackScreenProps<
   RootStackParamList,
   AppNavigationNames.AccountScreen
 >
-type ConnectToWalletStep = 'None' | 'Connecting' | 'Signing'
 
 export const AccountScreen: React.FC<Props> = ({ navigation }) => {
   const walletConnector = useWalletConnect()
-  const [userCredentials, setUserCredentials] = useState<
-    Keychain.UserCredentials | undefined | null
-  >(null)
-  const [connectToWalletStep, setConnectToWalletStep] =
-    useState<ConnectToWalletStep>('None')
-
+  const [dIDCredentialsState, setDIDCredentialsState] =
+    useRecoilState(dIDCredentials)
+  const [did, setDID] = useState(null)
   useEffect(() => {
-    getGenericPassword()
-  }, [])
-  useEffect(() => {
-    if (walletConnector.session.connected && userCredentials === undefined) {
-      signWalletAddress()
+    if (dIDCredentialsState) {
+      const myDID = helper.getMyDID(
+        dIDCredentialsState.username,
+        dIDCredentialsState.password,
+      )
+      setDID(myDID)
     }
-  }, [walletConnector])
-  const getGenericPassword = async () => {
-    const gPassword = await Keychain.getGenericPassword()
-    if (gPassword) {
-      setUserCredentials(gPassword as Keychain.UserCredentials)
-    } else setUserCredentials(undefined)
-  }
-
+  }, [dIDCredentialsState])
   const connectToWallet = async () => {
-    try {
-      if (connectToWalletStep !== 'None') {
-        setConnectToWalletStep('None')
-        return
-      }
-      setConnectToWalletStep('Connecting')
-      await walletConnector.connect()
-      setConnectToWalletStep('Signing')
-    } catch (error) {
-      console.log(error)
-      setConnectToWalletStep('None')
-      Toast.show({
-        type: 'error',
-        text1: 'Unable to connect to wallet',
-        text2: `${error}`,
-        position: 'bottom',
-        bottomOffset: 0,
-      })
-    }
+    navigation.navigate(AppNavigationNames.ConnectWalletScreen)
   }
   const signWalletAddress = async () => {
-    try {
-      const messageBytes = new TextEncoder().encode(
-        walletConnector?.accounts[0],
-      )
-      if (!walletConnector.session?.connected)
-        await walletConnector.createSession()
-      const walletSignature = await walletConnector.signPersonalMessage([
-        messageBytes,
-        walletConnector?.accounts[0],
-      ])
-
-      const fulaDID = new FulaDID()
-      await fulaDID.create(walletSignature, walletSignature)
-
-      const credentials = Keychain.setGenericPassword(
-        fulaDID?.authDID,
-        walletSignature,
-      )
-      if (credentials) {
-        setUserCredentials({
-          username: fulaDID?.authDID,
-          password: walletSignature,
-        })
-        Toast.show({
-          type: 'success',
-          text1: 'Your DID created successfully!',
-          position: 'bottom',
-          bottomOffset: 0,
-        })
-      }
-    } catch (error) {
-      console.log(error)
-      Toast.show({
-        type: 'error',
-        text1: 'Unable to sign the wallet address!',
-        text2: `${error}`,
-        position: 'bottom',
-        bottomOffset: 0,
-      })
-    } finally {
-      setConnectToWalletStep('None')
-    }
+    navigation.navigate(AppNavigationNames.CreateDIDScreen)
   }
   const disconnectWallet = async () => {
     Alert.alert(
@@ -132,7 +58,7 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
           onPress: async () => {
             try {
               await walletConnector.killSession()
-              await Keychain.resetGenericPassword()
+              await Keychain.reset(Keychain.Service.DIDCredentials)
             } catch (error) {
               console.log(error)
               Toast.show({
@@ -142,8 +68,8 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
                 bottomOffset: 0,
               })
             } finally {
-              setUserCredentials(undefined)
-              setConnectToWalletStep('None')
+              setDIDCredentialsState(null)
+              setDID(null)
             }
           },
         },
@@ -152,10 +78,10 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
   }
   const shareDID = async () => {
     try {
-      if (userCredentials?.username) {
+      if (did) {
         await Share.share({
           title: 'FxFotos | Did identity',
-          message: userCredentials.username,
+          message: did,
         })
       }
     } catch (error) {
@@ -181,7 +107,7 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
               onPress={disconnectWallet}
             />
           )}
-          {userCredentials?.username && (
+          {did && (
             <Icon
               type="material-community"
               size={26}
@@ -245,35 +171,44 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
           )}
         </SharedElement>
 
-        {connectToWalletStep != 'None' && (
-          <View style={styles.section}>
-            <ActivityIndicator size="large" />
-            <Text>
-              {connectToWalletStep === 'Connecting'
-                ? 'Connecting to wallet'
-                : 'Please sign your wallet address'}
-            </Text>
-          </View>
-        )}
-
         {walletConnector.connected ? (
-          <View style={styles.section}>
-            <Text>{walletConnector.peerMeta?.name}</Text>
-            <Text ellipsizeMode="tail">{walletConnector.accounts?.[0]}</Text>
+          <>
             <View style={styles.section}>
-              {!userCredentials ? (
-                <Button title="Sign your address" onPress={signWalletAddress} />
-              ) : null}
+              <Text h4>{walletConnector.peerMeta?.name}</Text>
+              <Text ellipsizeMode="tail" style={styles.textCenter}>
+                {walletConnector.accounts?.[0]}
+              </Text>
+              <View style={styles.section}>
+                {!dIDCredentialsState ? (
+                  <Button title="Link DID" onPress={signWalletAddress} />
+                ) : null}
+              </View>
             </View>
-          </View>
+            {did && (
+              <View style={styles.section}>
+                <Text h4>Your DID</Text>
+                <Text ellipsizeMode="tail" style={styles.textCenter}>
+                  {did}
+                </Text>
+                <Icon
+                  name="content-copy"
+                  type="material-community"
+                  onPress={() => {
+                    Clipboard.setString(did)
+                    Toast.show({
+                      type: 'success',
+                      text1: 'Your DID copied to the clipboard!',
+                      position: 'bottom',
+                      bottomOffset: 0,
+                    })
+                  }}
+                />
+              </View>
+            )}
+          </>
         ) : (
           <View style={styles.section}>
-            <Button
-              onPress={connectToWallet}
-              title={
-                connectToWalletStep == 'None' ? 'Connect your wallet' : 'Cancel'
-              }
-            />
+            <Button onPress={connectToWallet} title="Create DID" />
           </View>
         )}
       </View>
@@ -311,7 +246,7 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   screen: {
-    flex:1
+    flex: 1,
   },
   container: {
     flex: 1,
@@ -319,8 +254,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   section: {
+    paddingHorizontal: 20,
     paddingTop: 20,
     alignItems: 'center',
+  },
+  textCenter: {
+    paddingVertical: 20,
+    textAlign: 'center',
   },
   card: {
     flex: 1,

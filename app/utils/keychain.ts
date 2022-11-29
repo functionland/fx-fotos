@@ -1,63 +1,49 @@
 import * as ReactNativeKeychain from 'react-native-keychain'
-
+export { UserCredentials, Result } from 'react-native-keychain'
+export enum Service {
+  DIDCredentials = 'DIDCredentials',
+}
 /**
  * Saves some credentials securely.
  *
  * @param username The username
  * @param password The password
- * @param server The server these creds are for.
+ * @param service The service these creds are for.
  */
 export async function save(
   username: string,
   password: string,
-  server?: string,
-) {
-  if (server) {
-    await ReactNativeKeychain.setInternetCredentials(server, username, password)
-    return true
-  }
-  return ReactNativeKeychain.setGenericPassword(username, password)
+  service?: Service | undefined,
+): Promise<false | ReactNativeKeychain.UserCredentials> {
+  if (
+    await ReactNativeKeychain.setGenericPassword(username, password, {
+      service,
+    })
+  ) {
+    return {
+      username,
+      password,
+      service,
+    }
+  } else return false
 }
 
 /**
  * Loads credentials that were already saved.
  *
- * @param server The server that these creds are for
+ * @param service The service that these creds are for
  */
-export async function load(server?: string) {
-  if (server) {
-    const creds = await ReactNativeKeychain.getInternetCredentials(server)
-    return {
-      username: creds ? creds.username : null,
-      password: creds ? creds.password : null,
-      server,
-    }
-  }
-  const creds = await ReactNativeKeychain.getGenericPassword()
-  if (typeof creds === 'object') {
-    return {
-      username: creds.username,
-      password: creds.password,
-      server: null,
-    }
-  }
-  return {
-    username: null,
-    password: null,
-    server: null,
-  }
+export async function load(
+  service?: Service | undefined,
+): Promise<false | ReactNativeKeychain.UserCredentials> {
+  return await ReactNativeKeychain.getGenericPassword({ service })
 }
 
 /**
  * Resets any existing credentials for the given server.
  *
- * @param server The server which has these creds
+ * @param service The service which has these creds
  */
-export async function reset(server?: string) {
-  if (server) {
-    await ReactNativeKeychain.resetInternetCredentials(server)
-    return true
-  }
-  const result = await ReactNativeKeychain.resetGenericPassword()
-  return result
+export async function reset(service?: Service | undefined): Promise<boolean> {
+  return await ReactNativeKeychain.resetGenericPassword({ service })
 }

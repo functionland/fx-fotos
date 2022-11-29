@@ -14,6 +14,8 @@ import {
   AccountScreen,
   ShareViewerScreen,
   ImageGalleryViewerScreen,
+  ConnectWalletScreen,
+  CreateDIDScreen,
 } from '../screens'
 import { HomeNavigator } from './home-navigator'
 import { ThemeContext } from '../theme'
@@ -37,6 +39,8 @@ export type RootStackParamList = {
     assetId: Asset['id']
     scrollToItem: (item: RecyclerAssetListSection, animated?: boolean) => void
   }
+  ConnectWalletScreen: undefined
+  CreateDIDScreen: undefined
 }
 export enum AppNavigationNames {
   HomeScreen = 'Home',
@@ -47,6 +51,8 @@ export enum AppNavigationNames {
   SharedViewer = 'SharedViewer',
   HighlightScreen = 'HighlightScreen',
   ImageGalleryViewer = 'ImageGalleryViewer',
+  ConnectWalletScreen = 'ConnectWalletScreen',
+  CreateDIDScreen = 'CreateDIDScreen',
 }
 
 const Stack = createSharedElementStackNavigator<RootStackParamList>()
@@ -177,6 +183,14 @@ function AppStack() {
       <Stack.Screen
         name={AppNavigationNames.SharedViewer}
         component={ShareViewerScreen}
+      />
+      <Stack.Screen
+        name={AppNavigationNames.ConnectWalletScreen}
+        component={ConnectWalletScreen}
+      />
+      <Stack.Screen
+        name={AppNavigationNames.CreateDIDScreen}
+        component={CreateDIDScreen}
       />
     </Stack.Navigator>
   )

@@ -10,4 +10,6 @@ export * from './error/error-boundary'
 export * from './highlights/highlights-screen'
 export * from './shared-viewer'
 export * from './image-gallery-viewer'
+export * from './connect-wallet/connect-wallet-screen'
+export * from './connect-wallet/create-did-screen'
 // export other screens here

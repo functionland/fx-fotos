@@ -6,7 +6,7 @@ import React, {
   useContext,
 } from 'react'
 import { Alert, Platform, StyleSheet, View, ViewStyle } from 'react-native'
-import { useRecoilState } from 'recoil'
+import { useRecoilState, useSetRecoilState } from 'recoil'
 import { request, PERMISSIONS, openSettings } from 'react-native-permissions'
 
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
@@ -16,7 +16,7 @@ import {
   HomeNavigationTypes,
 } from '../../navigators/home-navigator'
 import Realm from 'realm'
-import { mediasState } from '../../store'
+import { dIDCredentials, mediasState } from '../../store'
 import { Assets } from '../../services/localdb'
 import { Entities } from '../../realmdb'
 import { AssetListScreen } from '../index'
@@ -27,6 +27,8 @@ import {
   HeaderLogo,
   HeaderRightContainer,
 } from '../../components/header'
+import * as KeyChain from '../../utils/keychain'
+
 import { Avatar, Icon, Image, LinearProgress } from '@rneui/themed'
 import { SharedElement } from 'react-navigation-shared-element'
 import { AppNavigationNames } from '../../navigators'
@@ -46,6 +48,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [isReady, setIsReady] = useState(false)
   const [syncing, setSyncing] = useState(false)
   const walletConnector = useWalletConnect()
+  const setDIDCredentialsState = useSetRecoilState(dIDCredentials)
+
   const { toggleTheme } = useContext(ThemeContext)
 
   const realmAssets =
@@ -85,6 +89,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   }, [])
 
   useEffect(() => {
+    initDID()
+  }, [])
+
+  useEffect(() => {
     requestAndroidPermission()
     return () => {
       realmAssets.current?.removeAllListeners()
@@ -96,6 +104,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       loadAssets()
     }
   }, [isReady])
+
+  const initDID = async () => {
+    const didCredentials = await KeyChain.load(KeyChain.Service.DIDCredentials)
+    if (didCredentials) {
+      setDIDCredentialsState(didCredentials)
+    }
+  }
 
   const loadAssets = async () => {
     try {
@@ -267,9 +282,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         <Header
           containerStyle={{ position: 'relative' }}
           centerComponent={<HeaderLogo />}
-          leftContainerStyle={{zIndex:99}}
+          leftContainerStyle={{ zIndex: 99 }}
           leftComponent={
-            <HeaderLeftContainer style={{flex:1}}>
+            <HeaderLeftContainer style={{ flex: 1 }}>
               <Icon
                 type="material-community"
                 name="white-balance-sunny"
@@ -281,50 +296,54 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             </HeaderLeftContainer>
           }
           rightComponent={
-            Platform.OS === 'android'? <HeaderRightContainer style={{flex:1}}>
-              <SharedElement id="AccountAvatar">
-                {walletConnector.connected ? (
-                  <Avatar
-                    containerStyle={styles.avatar}
-                    ImageComponent={() => (
-                      <Image
-                        source={
-                          walletConnector.peerMeta?.icons?.[0].endsWith('.svg')
-                            ? helper.getWalletImage(
-                              walletConnector.peerMeta?.name,
+            Platform.OS === 'android' ? (
+              <HeaderRightContainer style={{ flex: 1 }}>
+                <SharedElement id="AccountAvatar">
+                  {walletConnector.connected ? (
+                    <Avatar
+                      containerStyle={styles.avatar}
+                      ImageComponent={() => (
+                        <Image
+                          source={
+                            walletConnector.peerMeta?.icons?.[0].endsWith(
+                              '.svg',
                             )
-                            : {
-                              uri: walletConnector.peerMeta?.icons?.[0],
-                            }
-                        }
-                        style={{
-                          height: 35,
-                          width: 35,
-                        }}
-                        resizeMode="contain"
-                      />
-                    )}
-                    onPress={() =>
-                      navigation.navigate(AppNavigationNames.AccountScreen)
-                    }
-                  />
-                ) : (
-                  <Avatar
-                    containerStyle={styles.disconnectedAvatar}
-                    icon={{
-                      name: 'account-alert',
-                      type: 'material-community',
-                      size: 34,
-                    }}
-                    size="small"
-                    rounded
-                    onPress={() =>
-                      navigation.navigate(AppNavigationNames.AccountScreen)
-                    }
-                  />
-                )}
-              </SharedElement>
-            </HeaderRightContainer>:null
+                              ? helper.getWalletImage(
+                                  walletConnector.peerMeta?.name,
+                                )
+                              : {
+                                  uri: walletConnector.peerMeta?.icons?.[0],
+                                }
+                          }
+                          style={{
+                            height: 35,
+                            width: 35,
+                          }}
+                          resizeMode="contain"
+                        />
+                      )}
+                      onPress={() =>
+                        navigation.navigate(AppNavigationNames.AccountScreen)
+                      }
+                    />
+                  ) : (
+                    <Avatar
+                      containerStyle={styles.disconnectedAvatar}
+                      icon={{
+                        name: 'account-alert',
+                        type: 'material-community',
+                        size: 34,
+                      }}
+                      size="small"
+                      rounded
+                      onPress={() =>
+                        navigation.navigate(AppNavigationNames.AccountScreen)
+                      }
+                    />
+                  )}
+                </SharedElement>
+              </HeaderRightContainer>
+            ) : null
           }
         />
         {syncing && <LinearProgress />}
