@@ -29,9 +29,10 @@
     "prepare": "husky install"
   },
   "dependencies": {
-    "@functionland/fula-sec": "^1.0.3",
+    "@functionland/fula-sec": "^2.0.0",
     "@react-native-async-storage/async-storage": "^1.17.6",
     "@react-native-camera-roll/camera-roll": "^5.1.0",
+    "@react-native-clipboard/clipboard": "^1.11.1",
     "@react-native-community/masked-view": "0.1.10",
     "@react-native-community/netinfo": "^8.3.1",
     "@react-navigation/bottom-tabs": "^6.3.1",
