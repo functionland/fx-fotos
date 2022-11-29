@@ -1,6 +1,7 @@
 import { atom } from 'recoil'
 import { BoxEntity } from '../realmdb/entities'
 import { Asset, RecyclerAssetListSection, Library, AssetStory } from '../types'
+import * as KeyChain from '../utils/keychain'
 
 export const mediasState = atom<Asset[]>({
   key: 'mediasState',
@@ -25,5 +26,9 @@ export const selectedStoryState = atom<AssetStory>({
 })
 export const boxsState = atom<BoxEntity[]>({
   key: 'boxsState',
+  default: null,
+})
+export const dIDCredentials = atom<KeyChain.UserCredentials>({
+  key: 'dIDCredentials',
   default: null,
 })
