@@ -184,42 +184,45 @@ export const AssetListScreen: React.FC<Props> = ({
   const renderHeader = () => {
     if (selectionMode) {
       return (
-        <Header
-          style={headerStyles}
-          leftComponent={
-            <HeaderLeftContainer>
-              <Icon
-                type="material-community"
-                name="close"
-                onPress={cancelSelectionMode}
-              />
-              <Text
-                style={{
-                  fontSize: 16,
-                  marginStart: 20,
-                }}
-              >
-                {selectedItems?.length}
-              </Text>
-            </HeaderLeftContainer>
-          }
-          rightComponent={
-            <HeaderRightContainer>
-              {/* <Icon
+        <View
+          style={[{ position: 'absolute', top: 0, zIndex: 99, width: '100%' }]}
+        >
+          <Header
+            leftComponent={
+              <HeaderLeftContainer>
+                <Icon
+                  type="material-community"
+                  name="close"
+                  onPress={cancelSelectionMode}
+                />
+                <Text
+                  style={{
+                    fontSize: 16,
+                    marginStart: 20,
+                  }}
+                >
+                  {selectedItems?.length}
+                </Text>
+              </HeaderLeftContainer>
+            }
+            rightComponent={
+              <HeaderRightContainer>
+                {/* <Icon
                 style={styles.headerIcon}
                 type="material-community"
                 name="upload-multiple"
                 onPress={batchUpload}
               /> */}
-              <Icon
-                style={styles.headerIcon}
-                type="material-community"
-                name="delete"
-                onPress={() => deleteAssets('delete')}
-              />
-            </HeaderRightContainer>
-          }
-        />
+                <Icon
+                  style={styles.headerIcon}
+                  type="material-community"
+                  name="delete"
+                  onPress={() => deleteAssets('delete')}
+                />
+              </HeaderRightContainer>
+            }
+          />
+        </View>
       )
     }
     return defaultHeader?.(headerStyles)

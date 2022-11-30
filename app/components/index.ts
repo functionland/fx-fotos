@@ -1,6 +1,7 @@
 export * from './header/header'
 export * from './gradient-background/gradient-background'
 export * from './icon/icon'
+export * from './checkbox/checkbox'
 export * from './screen/screen'
 export * from './switch/switch'
 export * from './wallpaper/wallpaper'
