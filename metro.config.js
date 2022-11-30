@@ -9,6 +9,5 @@ module.exports = {
       // eslint-disable-next-line no-undef
       crypto: require.resolve('react-native-crypto'),
     },
-    sourceExts: ['jsx', 'js', 'ts', 'tsx', 'cjs', 'json'],
   },
 }
