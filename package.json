@@ -44,7 +44,7 @@
     "@types/lodash": "^4.14.182",
     "@types/shortid": "^0.0.29",
     "@types/uuid": "^8.3.4",
-    "@walletconnect/react-native-dapp": "^1.8.0",
+    "@walletconnect/react-native-dapp": "1.7.8",
     "big-integer": "^1.6.51",
     "eslint-import-resolver-typescript": "^3.5.1",
     "fula-recyclerlistview": "^3.1.0-beta.7",
