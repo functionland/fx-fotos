@@ -2570,10 +2570,10 @@
   dependencies:
     merge-options "^3.0.4"
 
-"@react-native-camera-roll/camera-roll@^5.1.0":
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/@react-native-camera-roll/camera-roll/-/camera-roll-5.1.0.tgz#5cfb3cf02d72ab03b3d6a0bdda392e2896c8d55f"
-  integrity sha512-74pavpt2T2U3V0r5d+pn4NChJbRNcydqakp3NVmosod35Lzxrt9My7kCLDdHXW2S6J6DhgXb/n36/heZQB4AUA==
+"@react-native-camera-roll/camera-roll@^5.1.1":
+  version "5.1.1"
+  resolved "https://registry.yarnpkg.com/@react-native-camera-roll/camera-roll/-/camera-roll-5.1.1.tgz#5e6b98906f624c8535df93807d21ee19006ee662"
+  integrity sha512-o1rhZ3zAZma6UeI9/ouUI5M9gOzWdxkTqijnG/XUi5geNSLNkoIpm6xHgy7ansYABOz3R3LpDDNs7itrlEnVpg==
 
 "@react-native-clipboard/clipboard@^1.11.1":
   version "1.11.1"
