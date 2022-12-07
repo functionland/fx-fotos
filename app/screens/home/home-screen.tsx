@@ -101,7 +101,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
   useEffect(() => {
     if (isReady) {
-      loadAssets()
+      loadAssets(true)
     }
   }, [isReady])
 
@@ -112,49 +112,39 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     }
   }
 
-  const loadAssets = async () => {
+  const loadAssets = async (syncMetadata: boolean = true) => {
     try {
       realmAssets.current?.removeAllListeners()
       realmAssets.current = await Assets.getAll()
       realmAssets.current.addListener(onLocalDbAssetChange)
       setMedias(realmAssets.current.slice(0, realmAssets.current.length - 1))
-      await syncAssets(
-        realmAssets.current?.[0]?.modificationTime,
-        realmAssets.current?.[realmAssets.current.length - 1]?.modificationTime,
-      )
-      syncAssetsMetadata()
+      if (syncMetadata) {
+        await syncAssets(
+          realmAssets.current?.[0]?.modificationTime,
+          realmAssets.current?.[realmAssets.current.length - 1]
+            ?.modificationTime,
+        )
+        syncAssetsMetadata()
+      }
     } catch (error) {
       console.error(error)
     }
   }
-
   const onLocalDbAssetChange = (
     collection: Realm.Collection<Entities.AssetEntity>,
     changes: Realm.CollectionChangeSet,
   ) => {
-    setMedias(prev => {
-      let assets = [...prev]
-      if (changes.deletions?.length) {
+    if (changes.insertions?.length || changes.newModifications?.length) {
+      loadAssets(false)
+    } else if (changes.deletions?.length) {
+      setMedias(prev => {
+        let assets = [...prev]
         assets = assets.filter(
           (_, index) => !changes.deletions.some(i => i === index),
         )
         return [...assets]
-      }
-      if (changes.insertions?.length) {
-        changes.insertions.map(index => {
-          assets.push(collection[index])
-        })
-        return assets
-      }
-      if (changes.newModifications?.length) {
-        assets = []
-        for (const asset of collection) {
-          assets.push(asset)
-        }
-        return assets
-      }
-      return prev
-    })
+      })
+    }
   }
 
   const syncAssets = async (

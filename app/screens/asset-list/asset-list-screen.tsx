@@ -74,7 +74,7 @@ export const AssetListScreen: React.FC<Props> = ({
       ]
       setRecyclerSections(sections)
     }
-  }, [medias])
+  }, [medias, showStoryHighlight])
 
   const cancelSelectionMode = () => {
     assetListRef?.current?.toggleSelectionMode()
