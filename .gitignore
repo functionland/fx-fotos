@@ -83,3 +83,5 @@ web-build/
 # Configurations
 app/config/env.*.js
 !env.js
+*.lock
+yarn.lock
