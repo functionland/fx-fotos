@@ -8,6 +8,7 @@ import React, {
 import { Alert, Platform, StyleSheet, View, ViewStyle } from 'react-native'
 import { useRecoilState, useSetRecoilState } from 'recoil'
 import { request, PERMISSIONS, openSettings } from 'react-native-permissions'
+import { fula } from '@functionland/react-native-fula'
 
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { AssetService } from '../../services'
@@ -48,7 +49,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [isReady, setIsReady] = useState(false)
   const [syncing, setSyncing] = useState(false)
   const walletConnector = useWalletConnect()
-  const setDIDCredentialsState = useSetRecoilState(dIDCredentials)
+  const [dIDCredentialsState, setDIDCredentialsState] =
+    useRecoilState(dIDCredentials)
 
   const { toggleTheme } = useContext(ThemeContext)
 
@@ -93,6 +95,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   }, [])
 
   useEffect(() => {
+    if (dIDCredentialsState?.username && dIDCredentialsState?.password) {
+      initFula(dIDCredentialsState.username, dIDCredentialsState.password)
+    }
+  }, [dIDCredentialsState])
+
+  useEffect(() => {
     requestAndroidPermission()
     return () => {
       realmAssets.current?.removeAllListeners()
@@ -111,7 +119,21 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       setDIDCredentialsState(didCredentials)
     }
   }
-
+  const initFula = async (password: string, signiture: string) => {
+    try {
+      const keyPair = helper.getMyDIDKeyPair(password, signiture)
+      console.log('keyPair', keyPair)
+      const fulaInit = await fula.init(
+        keyPair.secretKey.toString(), //bytes of the privateKey of did identity in string format
+        '', // leave empty to use the default temp one
+        '',
+        'noop', //leave empty for testing without a backend node
+      )
+      console.log('fulaInit', fulaInit)
+    } catch (error) {
+      console.log('fulaInit Error', error)
+    }
+  }
   const loadAssets = async (syncMetadata: boolean = true) => {
     try {
       realmAssets.current?.removeAllListeners()
