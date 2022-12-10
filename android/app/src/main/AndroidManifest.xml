@@ -34,8 +34,7 @@
       android:roundIcon="@mipmap/ic_launcher_round"
       android:allowBackup="true"
       android:theme="@style/AppTheme"
-      android:requestLegacyExternalStorage="true"
-      tools:replace="android:allowBackup">
+      android:requestLegacyExternalStorage="true">
       <activity
         android:name="land.fx.fotos.MainActivity"
         android:label="@string/app_name"

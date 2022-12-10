@@ -121,10 +121,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   }
   const initFula = async (password: string, signiture: string) => {
     try {
-      const keyPair = helper.getMyDIDKeyPair(password, signiture)
-      console.log('keyPair', keyPair)
+      //const keyPair = helper.getMyDIDKeyPair(password, signiture)
+      //console.log('keyPair', keyPair)
       const fulaInit = await fula.init(
-        keyPair.secretKey.toString(), //bytes of the privateKey of did identity in string format
+        '', //bytes of the privateKey of did identity in string format
         '', // leave empty to use the default temp one
         '',
         'noop', //leave empty for testing without a backend node
