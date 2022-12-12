@@ -286,7 +286,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             </HeaderLeftContainer>
           }
           rightComponent={
-            Platform.OS === 'android' ? (
+            Platform.OS === 'android' || Platform.OS === "ios"? (
               <HeaderRightContainer style={{ flex: 1 }}>
                 <SharedElement id="AccountAvatar">
                   {walletConnector.connected ? (
