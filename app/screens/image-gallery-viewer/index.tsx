@@ -48,7 +48,11 @@ import {
 } from '../../components/header'
 import { RootStackParamList } from '../../navigators/app-navigator'
 import { Assets } from '../../services/localdb'
-import { singleAssetState, recyclerSectionsState } from '../../store'
+import {
+  singleAssetState,
+  recyclerSectionsState,
+  dIDCredentials,
+} from '../../store'
 import {
   Asset,
   RecyclerAssetListSection,
@@ -79,6 +83,7 @@ export const ImageGalleryViewerScreen: React.FC<
 > = ({ route, navigation }) => {
   const [asset, setAsset] = useRecoilState(singleAssetState)
   const [recyclerList, setRecyclerList] = useRecoilState(recyclerSectionsState)
+  const [dIDCredentialsState] = useRecoilState(dIDCredentials)
   const { assetId, scrollToItem } = route.params
   const windowDims = useWindowDimensions()
   const initialIndexRef = useRef(null)
@@ -330,8 +335,25 @@ export const ImageGalleryViewerScreen: React.FC<
       cancelUpdate()
     }
   }
-  const downloadFormBox = () => {
+  const downloadFormBox = async () => {
     if (asset?.syncStatus === SyncStatus.SYNCED && asset?.isDeleted) {
+      const path = await SyncService.downloadAsset({ filename: asset.filename })
+      console.log('path', path)
+      setAsset({
+        ...asset,
+        uri: path,
+        isDeleted: false,
+      })
+      await Assets.addOrUpdate([
+        {
+          id: asset.id,
+          uri: path,
+          isDeleted: false,
+        },
+      ])
+      setExtendedState(prev => ({
+        ...prev,
+      }))
     }
   }
   const animatedOptionsStyle = useAnimatedStyle(() => ({
@@ -629,7 +651,9 @@ export const ImageGalleryViewerScreen: React.FC<
               />
             </View>
           )}
-          {renderActionButtons()}
+          {dIDCredentialsState?.username &&
+            dIDCredentialsState?.password &&
+            renderActionButtons()}
           <BottomSheet
             isVisible={showShareBottomSheet}
             onBackdropPress={() => setShowShareBottomSheet(false)}

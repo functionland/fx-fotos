@@ -121,14 +121,24 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   }
   const initFula = async (password: string, signiture: string) => {
     try {
-      //const keyPair = helper.getMyDIDKeyPair(password, signiture)
-      //console.log('keyPair', keyPair)
+      const keyPair = helper.getMyDIDKeyPair(password, signiture)
+      const fulaRootObject = await KeyChain.load(
+        KeyChain.Service.FULARootObject,
+      )
       const fulaInit = await fula.init(
-        '', //bytes of the privateKey of did identity in string format
+        keyPair.secretKey.toString(), //bytes of the privateKey of did identity in string format
         '', // leave empty to use the default temp one
         '',
         'noop', //leave empty for testing without a backend node
+        fulaRootObject ? fulaRootObject.password : null,
       )
+      if (!fulaRootObject && fulaInit) {
+        await KeyChain.save(
+          'rootCid',
+          fulaInit.rootCid,
+          KeyChain.Service.FULARootObject,
+        )
+      }
       console.log('fulaInit', fulaInit)
     } catch (error) {
       console.log('fulaInit Error', error)

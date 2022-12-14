@@ -10,6 +10,7 @@ import { SyncStatus } from '../types'
 import { Assets, Boxs } from './localdb/index'
 import * as Constances from './../utils/constance'
 import { reject } from 'lodash'
+import deviceUtils from '../utils/deviceUtils'
 // import * as helper from '../utils/helper'
 
 type TaskParams = {
@@ -114,6 +115,32 @@ export const uploadAssetsInBackground = async (options: {
   }
 }
 
+export const downloadAsset = async ({
+  filename,
+  localStorePath = null,
+}: {
+  filename: string
+  localStorePath: string | null
+}) => {
+  try {
+    if (!localStorePath) {
+      localStorePath = `${deviceUtils.DocumentDirectoryPath}/fula/${filename}`
+    }
+    console.log(
+      'downloadAsset',
+      `${Constances.FOTOS_WNFS_ROOT}/${filename}`,
+      localStorePath,
+    )
+    const filePath = await fula.readFile(
+      `${Constances.FOTOS_WNFS_ROOT}/${filename}`,
+      localStorePath,
+    )
+    return `file://${filePath}`
+  } catch (e) {
+    console.log('Error', e)
+    throw e
+  }
+}
 // /// Configure BackgroundFetch.
 // ///
 // export const initBackgroundFetch = async () =>
