@@ -1,5 +1,5 @@
 import { Dimensions, Platform } from 'react-native'
-
+var RNFS = require('react-native-fs')
 const { height, width } = Dimensions.get('window')
 
 const deviceUtils: {
@@ -37,5 +37,5 @@ deviceUtils.dimensions = {
   height,
   width,
 }
-
+deviceUtils.DocumentDirectoryPath = RNFS.DocumentDirectoryPath
 export default deviceUtils

@@ -101,7 +101,7 @@ export const getAllNeedToSync = (): Promise<
       const assets = realm
         .objects<Entities.AssetEntity>(Schemas.Asset.name)
         .filtered('syncStatus=1')
-      return assets
+      return assets.slice()
     })
     .catch(error => {
       console.error('RealmDB getAllAssets error!', error)

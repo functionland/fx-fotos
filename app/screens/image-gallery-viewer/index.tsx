@@ -31,6 +31,7 @@ import { NativeViewGestureHandler } from 'react-native-gesture-handler'
 import { useRecoilState } from 'recoil'
 import Toast from 'react-native-toast-message'
 import { useNetInfo } from '@react-native-community/netinfo'
+import { fula } from '@functionland/react-native-fula'
 import Animated, {
   interpolate,
   processColor,
@@ -47,7 +48,11 @@ import {
 } from '../../components/header'
 import { RootStackParamList } from '../../navigators/app-navigator'
 import { Assets } from '../../services/localdb'
-import { singleAssetState, recyclerSectionsState } from '../../store'
+import {
+  singleAssetState,
+  recyclerSectionsState,
+  dIDCredentials,
+} from '../../store'
 import {
   Asset,
   RecyclerAssetListSection,
@@ -61,6 +66,7 @@ import * as helper from '../../utils/helper'
 import { palette } from '../../theme'
 import { AssetService } from '../../services'
 import LinearGradient from 'react-native-linear-gradient'
+import { SyncService } from '../../services'
 
 interface ImageGalleryViewerScreenProps {
   navigation: NavigationProp<RootStackParamList>
@@ -77,6 +83,7 @@ export const ImageGalleryViewerScreen: React.FC<
 > = ({ route, navigation }) => {
   const [asset, setAsset] = useRecoilState(singleAssetState)
   const [recyclerList, setRecyclerList] = useRecoilState(recyclerSectionsState)
+  const [dIDCredentialsState] = useRecoilState(dIDCredentials)
   const { assetId, scrollToItem } = route.params
   const windowDims = useWindowDimensions()
   const initialIndexRef = useRef(null)
@@ -90,7 +97,7 @@ export const ImageGalleryViewerScreen: React.FC<
   const currentAssetRef = useRef(asset)
   const [transitionDone, setTransitionDone] = useState(false)
   const optionsVisibleRef = useRef(false)
-  const headerOpacity = useSharedValue(0)
+  const headerOpacity = useSharedValue(asset.mediaType === 'photo' ? 1 : 0)
   const [extendedState, setExtendedState] = useState<ExtendedState>({
     currentVideoMuted: true,
     currentVideoPaused: false,
@@ -223,7 +230,7 @@ export const ImageGalleryViewerScreen: React.FC<
                 : currentIndex // Go to the previouse asset
             rclRef.current.scrollToIndex(nextAssetIndex, true)
             currentAssetRef.current = assetSections[nextAssetIndex]?.data
-            await AssetService.deleteAssets([assetSections[currentIndex]?.id])
+            //await AssetService.deleteAssets([assetSections[currentIndex]?.id])
             await Assets.addOrUpdate([
               {
                 id: assetSections[currentIndex]?.id,
@@ -272,9 +279,6 @@ export const ImageGalleryViewerScreen: React.FC<
       setLoading(true)
       setTimeout(async () => {
         try {
-          // const _filePath = asset.uri?.split('file:')[1];
-          // const result = await file.send(decodeURI(_filePath))
-          // console.log("result:",result)
           await Assets.addOrUpdate([
             {
               id: asset.id,
@@ -285,44 +289,32 @@ export const ImageGalleryViewerScreen: React.FC<
             ...prev,
             syncStatus: SyncStatus.SYNC,
           }))
-          if (!netInfoState.isConnected) {
-            Toast.show({
-              type: 'info',
-              text1: 'Will upload when connected',
-              position: 'bottom',
-              bottomOffset: 0,
-            })
-            return
-          }
-          try {
-            //await AddBoxs()
-          } catch (error) {
-            Alert.alert('Warning', error)
-            return
-          }
+
           try {
             Toast.show({
               type: 'info',
-              text1: 'Upload...',
+              text1: 'Adding file to wnfds ...',
               position: 'bottom',
               bottomOffset: 0,
             })
-            // await uploadAssetsInBackground({
-            //   callback: success => {
-            //     if (success)
-            //       setAsset(prev => ({
-            //         ...prev,
-            //         syncStatus: SyncStatus.SYNCED,
-            //       }))
-            //     else
-            //       Toast.show({
-            //         type: 'error',
-            //         text1: 'Will upload when connected',
-            //         position: 'bottom',
-            //         bottomOffset: 0,
-            //       })
-            //   },
-            // })
+
+            //Run the background task to upload all assets where SyncStatus are SYNC
+            await SyncService.uploadAssetsInBackground({
+              callback: success => {
+                if (success)
+                  setAsset(prev => ({
+                    ...prev,
+                    syncStatus: SyncStatus.SYNCED,
+                  }))
+                else
+                  Toast.show({
+                    type: 'error',
+                    text1: 'Will upload when connected',
+                    position: 'bottom',
+                    bottomOffset: 0,
+                  })
+              },
+            })
           } catch (error) {
             Alert.alert(
               'Error',
@@ -343,7 +335,27 @@ export const ImageGalleryViewerScreen: React.FC<
       cancelUpdate()
     }
   }
-
+  const downloadFormBox = async () => {
+    if (asset?.syncStatus === SyncStatus.SYNCED && asset?.isDeleted) {
+      const path = await SyncService.downloadAsset({ filename: asset.filename })
+      console.log('path', path)
+      setAsset({
+        ...asset,
+        uri: path,
+        isDeleted: false,
+      })
+      await Assets.addOrUpdate([
+        {
+          id: asset.id,
+          uri: path,
+          isDeleted: false,
+        },
+      ])
+      setExtendedState(prev => ({
+        ...prev,
+      }))
+    }
+  }
   const animatedOptionsStyle = useAnimatedStyle(() => ({
     opacity: headerOpacity.value,
   }))
@@ -386,7 +398,7 @@ export const ImageGalleryViewerScreen: React.FC<
         </LinearGradient>
       </Animated.View>
     ),
-    [navigation, loading, uploadToBox, asset, goBack],
+    [navigation, loading, asset, goBack],
   )
 
   const shareWithDID = async () => {
@@ -504,6 +516,7 @@ export const ImageGalleryViewerScreen: React.FC<
       const newAsset = dataProvider.getDataForIndex(index)
       if (currentAssetRef.current.id == newAsset.id) return
       currentAssetRef.current = newAsset
+      setAsset(newAsset)
       setExtendedState(prev => ({
         ...prev,
         currentAssetId: newAsset.id,
@@ -533,22 +546,58 @@ export const ImageGalleryViewerScreen: React.FC<
             'rgba(33,33,33,0.2)',
             'rgba(33,33,33,0.3)',
           ]}
-          style={styles.gradientContainer}
+          style={[styles.gradientContainer, { justifyContent: 'space-around' }]}
         >
+          {!asset.isDeleted && (
+            <View style={styles.iconContainer}>
+              <Icon
+                name="delete"
+                type="material-community"
+                size={30}
+                color={palette.white}
+                onPress={deleteAsset}
+              />
+              <Text style={styles.actionText}>Delete</Text>
+            </View>
+          )}
+          {asset.isDeleted && asset.syncStatus === SyncStatus.SYNCED && (
+            <View style={styles.iconContainer}>
+              <Icon
+                name="cloud-download"
+                type="material-community"
+                size={30}
+                color={palette.white}
+                onPress={downloadFormBox}
+              />
+              <Text style={styles.actionText}>Download</Text>
+            </View>
+          )}
           <View style={styles.iconContainer}>
             <Icon
-              name="delete"
+              name={
+                asset.syncStatus === SyncStatus.NOTSYNCED
+                  ? 'cloud-upload'
+                  : asset.syncStatus === SyncStatus.SYNC
+                  ? 'cloud-sync'
+                  : 'cloud-check'
+              }
               type="material-community"
               size={30}
               color={palette.white}
-              onPress={deleteAsset}
+              onPress={uploadToBox}
             />
-            <Text style={styles.actionText}>Delete</Text>
+            <Text style={styles.actionText}>
+              {asset.syncStatus === SyncStatus.NOTSYNCED
+                ? 'upload'
+                : asset.syncStatus === SyncStatus.SYNC
+                ? 'Waiting'
+                : 'Synced'}
+            </Text>
           </View>
         </LinearGradient>
       </Animated.View>
     ),
-    [],
+    [animatedOptionsStyle, asset.syncStatus],
   )
 
   const wrapperAnimatedStyle = useAnimatedStyle(() => ({
@@ -602,7 +651,9 @@ export const ImageGalleryViewerScreen: React.FC<
               />
             </View>
           )}
-          {/* {renderActionButtons()} */}
+          {dIDCredentialsState?.username &&
+            dIDCredentialsState?.password &&
+            renderActionButtons()}
           <BottomSheet
             isVisible={showShareBottomSheet}
             onBackdropPress={() => setShowShareBottomSheet(false)}
@@ -681,9 +732,9 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   gradientContainer: {
+    flexDirection: 'row',
     paddingHorizontal: 7,
     paddingVertical: 10,
     flex: 1,
-    justifyContent: 'center',
   },
 })
