@@ -1869,9 +1869,9 @@
     tslib "^2.4.0"
     uint8arrays "^3.0.0"
 
-"@functionland/react-native-fula@https://github.com/functionland/react-native-fula.git":
+"@functionland/react-native-fula@github:https://github.com/functionland/react-native-fula.git":
   version "0.4.5"
-  resolved "https://github.com/functionland/react-native-fula.git#72bd55f23150e1880ca984fa13a6807475676e8c"
+  resolved "https://codeload.github.com/functionland/react-native-fula/tar.gz/dc470ae2ee017e51ca504da449e9c7447e3b5c7b"
 
 "@gar/promisify@^1.0.1":
   version "1.1.3"
