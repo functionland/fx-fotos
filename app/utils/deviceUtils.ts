@@ -17,6 +17,7 @@ const deviceUtils: {
     height: number
     width: number
   }
+  DocumentDirectoryPath: string
 } = {}
 
 deviceUtils.iPhoneXHeight = 812

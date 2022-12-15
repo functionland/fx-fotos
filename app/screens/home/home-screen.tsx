@@ -37,6 +37,7 @@ import { useWalletConnect } from '@walletconnect/react-native-dapp'
 import { ThemeContext } from '../../theme'
 import * as helper from '../../utils/helper'
 import Animated from 'react-native-reanimated'
+import deviceUtils from '../../utils/deviceUtils'
 
 interface HomeScreenProps {
   navigation: NativeStackNavigationProp<
@@ -127,7 +128,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       )
       const fulaInit = await fula.init(
         keyPair.secretKey.toString(), //bytes of the privateKey of did identity in string format
-        '', // leave empty to use the default temp one
+        `${deviceUtils.DocumentDirectoryPath}/wnfs`, // leave empty to use the default temp one
         '',
         'noop', //leave empty for testing without a backend node
         fulaRootObject ? fulaRootObject.password : null,
@@ -318,7 +319,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             </HeaderLeftContainer>
           }
           rightComponent={
-            Platform.OS === 'android' || Platform.OS === "ios"? (
+            Platform.OS === 'android' || Platform.OS === 'ios' ? (
               <HeaderRightContainer style={{ flex: 1 }}>
                 <SharedElement id="AccountAvatar">
                   {walletConnector.connected ? (
