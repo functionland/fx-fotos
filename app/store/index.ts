@@ -1,5 +1,5 @@
 import { atom } from 'recoil'
-import { BoxEntity } from '../realmdb/entities'
+import { BoxEntity, FolderSettingsEntity } from '../realmdb/entities'
 import { Asset, RecyclerAssetListSection, Library, AssetStory } from '../types'
 import * as KeyChain from '../utils/keychain'
 
@@ -27,6 +27,10 @@ export const selectedStoryState = atom<AssetStory>({
 export const boxsState = atom<BoxEntity[]>({
   key: 'boxsState',
   default: null,
+})
+export const foldersSettingsState = atom<Record<string, FolderSettingsEntity>>({
+  key: 'foldersSettings',
+  default: {},
 })
 export const dIDCredentials = atom<KeyChain.UserCredentials>({
   key: 'dIDCredentials',
