@@ -13,17 +13,22 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { FlatList } from 'react-native-gesture-handler'
 import Animated, { useAnimatedScrollHandler } from 'react-native-reanimated'
 import { Screen } from '../../components'
-import { AssetService } from '../../services'
+import { AssetService, LocalDbService } from '../../services'
 import { Library } from '../../types'
 import {
   HomeNavigationParamList,
   HomeNavigationTypes,
 } from '../../navigators/home-navigator'
-import { mediasState, selectedLibraryState } from '../../store'
+import {
+  foldersSettingsState,
+  mediasState,
+  selectedLibraryState,
+} from '../../store'
 import { Header, HeaderLogo } from '../../components/header'
 import { Constants } from '../../theme'
 import { useFloatHederAnimation } from '../../utils/hooks'
 import { AppNavigationNames } from '../../navigators'
+import { FolderSettingsEntity } from '../../realmdb/entities'
 
 interface HomeScreenProps {
   navigation: NativeStackNavigationProp<
@@ -38,8 +43,10 @@ export const LibraryScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     useRecoilState(selectedLibraryState)
   const { theme } = useTheme()
   const [libraies, setLibraries] = useState<Library[]>(null)
+  const [foldersSettingsObj] = useRecoilState(foldersSettingsState)
   // Get a custom hook to animate the header
   const [scrollY, headerStyles] = useFloatHederAnimation(60)
+
   useEffect(() => {
     const libs = AssetService.getLibraries(medias)
     setLibraries(libs)
@@ -48,6 +55,7 @@ export const LibraryScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       if (lib) setSelectedLibrary(lib)
     }
   }, [medias])
+
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: event => {
       if (scrollY) scrollY.value = event.contentOffset.y
@@ -60,10 +68,12 @@ export const LibraryScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         headerStyles,
       ]}
     >
-      <Header containerStyle={{ position: 'relative' }} centerComponent={<HeaderLogo />} />
+      <Header
+        containerStyle={{ position: 'relative' }}
+        centerComponent={<HeaderLogo />}
+      />
     </Animated.View>
   )
-
   const onLibraryPress = (item: Library) => {
     setSelectedLibrary(item)
     navigation.push(AppNavigationNames.LibraryAssets)
@@ -71,6 +81,13 @@ export const LibraryScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
   const renderItem = (info: ListRenderItemInfo<Library>) => (
     <View style={styles.card}>
+      {foldersSettingsObj[info?.item?.title]?.autoBackup && (
+        <Icon
+          name="cloud-check"
+          type="material-community"
+          containerStyle={styles.iconContainer}
+        />
+      )}
       <Pressable
         android_ripple={{
           color: theme.colors.background,
@@ -130,5 +147,11 @@ const styles = StyleSheet.create({
     flex: 1,
     marginBottom: 8,
     borderRadius: 15,
+  },
+  iconContainer: {
+    position: 'absolute',
+    top: 15,
+    right: 15,
+    zIndex: 9,
   },
 })
