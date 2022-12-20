@@ -1870,8 +1870,8 @@
     uint8arrays "^3.0.0"
 
 "@functionland/react-native-fula@github:https://github.com/functionland/react-native-fula.git":
-  version "0.4.6"
-  resolved "https://codeload.github.com/functionland/react-native-fula/tar.gz/928e045eb488e2188572aef24b843845d9d3d4d7"
+  version "0.4.9"
+  resolved "https://codeload.github.com/functionland/react-native-fula/tar.gz/d087839c3656420b55b15ed29fd92e863da7ad26"
 
 "@gar/promisify@^1.0.1":
   version "1.1.3"
@@ -14568,10 +14568,10 @@ react-lifecycles-compat@^3.0.4:
   resolved "https://registry.npmjs.org/react-lifecycles-compat/-/react-lifecycles-compat-3.0.4.tgz"
   integrity sha512-fBASbA6LnOU9dOU2eW7aQ8xmYBSXUIWr+UmF9b1efZBazGNO+rcXT/icdKnYm2pTwcRylVUYwW7H1PHfLekVzA==
 
-react-native-background-actions@^2.6.7:
-  version "2.6.7"
-  resolved "https://registry.npmjs.org/react-native-background-actions/-/react-native-background-actions-2.6.7.tgz"
-  integrity sha512-qjHeks9EbLIXeb2xn3AR0eLVlUh/sAboKt0tI3ZN8leEEL1xmZUvpbk0fN6RKRpxpv7ATVHgWjGMK1FNoYh+Ug==
+react-native-background-actions@^2.6.8:
+  version "2.6.8"
+  resolved "https://registry.yarnpkg.com/react-native-background-actions/-/react-native-background-actions-2.6.8.tgz#f9eeff5d30d2b8710ff63eb1e06c20226c5acfa2"
+  integrity sha512-ImJI+pKTag+W7Y8fubUhtwS7ALU3ePhaZ6tCaTdgBdJcXQ2baILigxKm7XL7+O6N0hHfVpkHC2ZbCJcGpV2vPQ==
   dependencies:
     eventemitter3 "^4.0.7"
 

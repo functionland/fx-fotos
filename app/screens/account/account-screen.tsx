@@ -16,7 +16,7 @@ import {
 import { AppNavigationNames, RootStackParamList } from '../../navigators'
 import * as helper from '../../utils/helper'
 import { useRecoilState } from 'recoil'
-import { dIDCredentials } from '../../store'
+import { dIDCredentialsState } from '../../store'
 import Clipboard from '@react-native-clipboard/clipboard'
 
 type Props = NativeStackScreenProps<
@@ -26,18 +26,18 @@ type Props = NativeStackScreenProps<
 
 export const AccountScreen: React.FC<Props> = ({ navigation }) => {
   const walletConnector = useWalletConnect()
-  const [dIDCredentialsState, setDIDCredentialsState] =
-    useRecoilState(dIDCredentials)
+  const [dIDCredentials, setDIDCredentialsState] =
+    useRecoilState(dIDCredentialsState)
   const [did, setDID] = useState(null)
   useEffect(() => {
     if (dIDCredentialsState) {
       const myDID = helper.getMyDID(
-        dIDCredentialsState.username,
-        dIDCredentialsState.password,
+        dIDCredentials.username,
+        dIDCredentials.password,
       )
       setDID(myDID)
     }
-  }, [dIDCredentialsState])
+  }, [dIDCredentials])
   const connectToWallet = async () => {
     navigation.navigate(AppNavigationNames.ConnectWalletScreen)
   }
@@ -179,7 +179,7 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
                 {walletConnector.accounts?.[0]}
               </Text>
               <View style={styles.section}>
-                {!dIDCredentialsState ? (
+                {!dIDCredentials ? (
                   <Button title="Link DID" onPress={signWalletAddress} />
                 ) : null}
               </View>

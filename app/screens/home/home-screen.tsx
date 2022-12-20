@@ -11,14 +11,18 @@ import { request, PERMISSIONS, openSettings } from 'react-native-permissions'
 import { fula } from '@functionland/react-native-fula'
 
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import { AssetService } from '../../services'
+import { AssetService, SyncService } from '../../services'
 import {
   HomeNavigationParamList,
   HomeNavigationTypes,
 } from '../../navigators/home-navigator'
 import Realm from 'realm'
-import { dIDCredentials, mediasState } from '../../store'
-import { Assets } from '../../services/localdb'
+import {
+  dIDCredentialsState,
+  foldersSettingsState,
+  mediasState,
+} from '../../store'
+import { Assets, FolderSettings } from '../../services/localdb'
 import { Entities } from '../../realmdb'
 import { AssetListScreen } from '../index'
 import { Asset, PagedInfo } from '../../types'
@@ -38,6 +42,7 @@ import { ThemeContext } from '../../theme'
 import * as helper from '../../utils/helper'
 import Animated from 'react-native-reanimated'
 import deviceUtils from '../../utils/deviceUtils'
+import { FolderSettingsEntity } from '../../realmdb/entities'
 
 interface HomeScreenProps {
   navigation: NativeStackNavigationProp<
@@ -50,8 +55,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [isReady, setIsReady] = useState(false)
   const [syncing, setSyncing] = useState(false)
   const walletConnector = useWalletConnect()
-  const [dIDCredentialsState, setDIDCredentialsState] =
-    useRecoilState(dIDCredentials)
+  const [dIDCredentials, setDIDCredentialsState] =
+    useRecoilState(dIDCredentialsState)
+  const setFoldersSettings = useSetRecoilState(foldersSettingsState)
 
   const { toggleTheme } = useContext(ThemeContext)
 
@@ -92,14 +98,15 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   }, [])
 
   useEffect(() => {
+    loadFoldersSettings()
     initDID()
   }, [])
 
   useEffect(() => {
-    if (dIDCredentialsState?.username && dIDCredentialsState?.password) {
-      initFula(dIDCredentialsState.username, dIDCredentialsState.password)
+    if (dIDCredentials?.username && dIDCredentials?.password) {
+      initFula(dIDCredentials.username, dIDCredentials.password)
     }
-  }, [dIDCredentialsState])
+  }, [dIDCredentials])
 
   useEffect(() => {
     requestAndroidPermission()
@@ -113,6 +120,19 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       loadAssets(true)
     }
   }, [isReady])
+
+  const loadFoldersSettings = async () => {
+    try {
+      const folders = await FolderSettings.getAll()
+      const foldersObj = folders.reduce((obj, folder) => {
+        obj[folder?.name] = folder
+        return obj
+      }, {} as Record<string, FolderSettingsEntity>)
+      setFoldersSettings(foldersObj)
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   const initDID = async () => {
     const didCredentials = await KeyChain.load(KeyChain.Service.DIDCredentials)
@@ -158,6 +178,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             ?.modificationTime,
         )
         syncAssetsMetadata()
+        await SyncService.setAutoBackupAssets()
+        SyncService.uploadAssetsInBackground()
       }
     } catch (error) {
       console.error(error)

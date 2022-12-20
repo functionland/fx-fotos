@@ -5,14 +5,14 @@ import { Button, CheckBox, Icon, Input, Text } from '@rneui/themed'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import Toast from 'react-native-toast-message'
 import { HDKEY } from '@functionland/fula-sec'
-import { useRecoilState } from 'recoil'
+import { useSetRecoilState } from 'recoil'
 
 import * as Keychain from '../../utils/keychain'
 import { Header, HeaderArrowBack } from '../../components/header'
 import { Screen } from '../../components'
 import { RootStackParamList, AppNavigationNames } from '../../navigators'
 import { useWalletConnect } from '@walletconnect/react-native-dapp'
-import { dIDCredentials } from '../../store'
+import { dIDCredentialsState } from '../../store'
 type Props = NativeStackScreenProps<
   RootStackParamList,
   AppNavigationNames.BoxAddUpdate
@@ -20,8 +20,7 @@ type Props = NativeStackScreenProps<
 
 export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
   const walletConnector = useWalletConnect()
-  const [dIDCredentialsState, setDIDCredentialsState] =
-    useRecoilState(dIDCredentials)
+  const setDIDCredentialsState = useSetRecoilState(dIDCredentialsState)
   const [iKnow, setIKnow] = useState(false)
   const [passwod, setPassword] = useState('')
   useEffect(() => {}, [])
