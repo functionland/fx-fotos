@@ -32,7 +32,7 @@ export const foldersSettingsState = atom<Record<string, FolderSettingsEntity>>({
   key: 'foldersSettings',
   default: {},
 })
-export const dIDCredentials = atom<KeyChain.UserCredentials>({
+export const dIDCredentialsState = atom<KeyChain.UserCredentials>({
   key: 'dIDCredentials',
   default: null,
 })

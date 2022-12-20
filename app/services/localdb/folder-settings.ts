@@ -13,6 +13,20 @@ export const getAll = (): Promise<Entities.FolderSettingsEntity[]> =>
       console.error('RealmDB getAll FolderSettings error!', error)
       throw error
     })
+
+export const getAllAutoBackups = (): Promise<Entities.FolderSettingsEntity[]> =>
+  RealmDB()
+    .then(realm => {
+      const foldersSettings = realm.objects<Entities.FolderSettingsEntity>(
+        Schemas.FolderSettings.name,
+      )
+      return foldersSettings.filtered('autoBackup=true').slice()
+    })
+    .catch(error => {
+      console.error('RealmDB getAll FolderSettings error!', error)
+      throw error
+    })
+
 export const get = (
   name: string,
 ): Promise<Entities.FolderSettingsEntity | undefined> =>

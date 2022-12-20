@@ -1,13 +1,5 @@
 import { NavigationProp, RouteProp } from '@react-navigation/native'
-import {
-  BottomSheet,
-  Button,
-  Card,
-  Icon,
-  Input,
-  Text,
-  useTheme,
-} from '@rneui/themed'
+import { BottomSheet, Button, Card, Icon, Input, Text } from '@rneui/themed'
 import {
   DataProvider,
   GridLayoutProvider,
@@ -19,8 +11,6 @@ import {
   Alert,
   NativeScrollEvent,
   NativeSyntheticEvent,
-  Share,
-  TouchableOpacity,
   useWindowDimensions,
   View,
   InteractionManager,
@@ -30,41 +20,30 @@ import {
 import { NativeViewGestureHandler } from 'react-native-gesture-handler'
 import { useRecoilState } from 'recoil'
 import Toast from 'react-native-toast-message'
-import { useNetInfo } from '@react-native-community/netinfo'
-import { fula } from '@functionland/react-native-fula'
 import Animated, {
   interpolate,
-  processColor,
   useAnimatedReaction,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated'
-import { Header, Screen } from '../../components'
-import {
-  HeaderArrowBack,
-  HeaderLeftContainer,
-  HeaderRightContainer,
-} from '../../components/header'
+import { Screen } from '../../components'
+import { HeaderArrowBack } from '../../components/header'
 import { RootStackParamList } from '../../navigators/app-navigator'
 import { Assets } from '../../services/localdb'
 import {
   singleAssetState,
   recyclerSectionsState,
-  dIDCredentials,
+  dIDCredentialsState,
 } from '../../store'
 import {
   Asset,
   RecyclerAssetListSection,
   SyncStatus,
-  VideoPlayerMetadata,
-  VideoPlayerProgress,
   ViewType,
 } from '../../types'
 import { GalleryImage } from './gallery-image'
-import * as helper from '../../utils/helper'
 import { palette } from '../../theme'
-import { AssetService } from '../../services'
 import LinearGradient from 'react-native-linear-gradient'
 import { SyncService } from '../../services'
 
@@ -83,7 +62,7 @@ export const ImageGalleryViewerScreen: React.FC<
 > = ({ route, navigation }) => {
   const [asset, setAsset] = useRecoilState(singleAssetState)
   const [recyclerList, setRecyclerList] = useRecoilState(recyclerSectionsState)
-  const [dIDCredentialsState] = useRecoilState(dIDCredentials)
+  const [dIDCredentials] = useRecoilState(dIDCredentialsState)
   const { assetId, scrollToItem } = route.params
   const windowDims = useWindowDimensions()
   const initialIndexRef = useRef(null)
@@ -92,7 +71,6 @@ export const ImageGalleryViewerScreen: React.FC<
   const [showShareBottomSheet, setShowShareBottomSheet] = useState(false)
   const [DID, setDID] = useState('')
   const [sharing, setSharing] = useState(false)
-  const netInfoState = useNetInfo()
   const screenOpacity = useSharedValue(1)
   const currentAssetRef = useRef(asset)
   const [transitionDone, setTransitionDone] = useState(false)
@@ -651,8 +629,8 @@ export const ImageGalleryViewerScreen: React.FC<
               />
             </View>
           )}
-          {dIDCredentialsState?.username &&
-            dIDCredentialsState?.password &&
+          {dIDCredentials?.username &&
+            dIDCredentials?.password &&
             renderActionButtons()}
           <BottomSheet
             isVisible={showShareBottomSheet}

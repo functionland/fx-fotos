@@ -5,15 +5,17 @@ import {
   ListRenderItemInfo,
   Pressable,
   Image,
+  InteractionManager,
 } from 'react-native'
 import { useRecoilState } from 'recoil'
 import { Icon, Text, useTheme } from '@rneui/themed'
+import { useFocusEffect } from '@react-navigation/native'
 
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { FlatList } from 'react-native-gesture-handler'
 import Animated, { useAnimatedScrollHandler } from 'react-native-reanimated'
 import { Screen } from '../../components'
-import { AssetService, LocalDbService } from '../../services'
+import { AssetService, SyncService } from '../../services'
 import { Library } from '../../types'
 import {
   HomeNavigationParamList,
@@ -46,6 +48,12 @@ export const LibraryScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [foldersSettingsObj] = useRecoilState(foldersSettingsState)
   // Get a custom hook to animate the header
   const [scrollY, headerStyles] = useFloatHederAnimation(60)
+
+  useFocusEffect(() => {
+    InteractionManager.runAfterInteractions(() => {
+      SyncService.uploadAssetsInBackground()
+    })
+  })
 
   useEffect(() => {
     const libs = AssetService.getLibraries(medias)

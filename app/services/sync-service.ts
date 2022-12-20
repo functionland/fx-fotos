@@ -7,7 +7,7 @@ import { fula } from '@functionland/react-native-fula'
 // import { TaggedEncryption } from '@functionland/fula-sec'
 import { AssetEntity } from '../realmdb/entities'
 import { SyncStatus } from '../types'
-import { Assets, Boxs } from './localdb/index'
+import { Assets, Boxs, FolderSettings } from './localdb/index'
 import * as Constances from './../utils/constance'
 import { reject } from 'lodash'
 import deviceUtils from '../utils/deviceUtils'
@@ -26,7 +26,7 @@ const defaultOptions = {
     type: 'mipmap',
   },
   color: '#2196f3',
-  linkingURI: 'exampleScheme://chat/jane',
+  linkingURI: 'fotos://',
 } as BackgroundTaskOptions
 
 const backgroundTask = async (taskParameters: TaskParams) => {
@@ -42,9 +42,9 @@ const backgroundTask = async (taskParameters: TaskParams) => {
       const asset = assets[index]
 
       // Prepare task notification message
-      BackgroundJob.updateNotification({
-        taskTitle: `Upload asset #${index + 1}`,
-        taskDesc: `Total: ${assets.length}`,
+      await BackgroundJob.updateNotification({
+        taskTitle: `Uploading asset #${index + 1}/${assets.length}`,
+        taskDesc: `Syncing your assets ...`,
         progressBar: {
           max: assets.length,
           value: index,
@@ -97,10 +97,9 @@ export const uploadAssetsInBackground = async (options: {
   callback?: (success: boolean) => void
 }) => {
   try {
-    const assets = await Assets.getAllNeedToSync()
-    if (assets.length) {
-      await BackgroundJob.stop()
-      if (!BackgroundJob.isRunning())
+    if (!BackgroundJob.isRunning()) {
+      const assets = await Assets.getAllNeedToSync()
+      if (assets.length) {
         await BackgroundJob.start<TaskParams>(backgroundTask, {
           ...defaultOptions,
           parameters: {
@@ -108,6 +107,7 @@ export const uploadAssetsInBackground = async (options: {
             assets,
           },
         })
+      }
     }
   } catch (e) {
     console.log('Error', e)
@@ -141,6 +141,54 @@ export const downloadAsset = async ({
     throw e
   }
 }
+
+/**
+ *
+ * @param folders List of folders you want to set their assets as SYNC, If leave it empty all autoBackup folders will be included
+ */
+export const setAutoBackupAssets = async (folders: string[] | undefined) => {
+  let uris = []
+  if (!folders?.length) {
+    uris = (await FolderSettings.getAllAutoBackups())?.map(
+      folder => `/${folder.name}/`,
+    )
+  } else {
+    uris = folders.map(folder => `/${folder}/`)
+  }
+
+  if (uris?.length) {
+    const assets = await Assets.getAll({
+      filter: `isDeleted=false AND syncStatus=${SyncStatus.NOTSYNCED}`,
+      uris,
+    })
+
+    await Assets.addOrUpdate(
+      assets.map(asset => ({
+        id: asset.id,
+        syncStatus: SyncStatus.SYNC,
+      })),
+    )
+  }
+}
+
+export const unSetAutoBackupAssets = async (folders: string[]) => {
+  let uris = folders?.map(folder => `/${folder}/`)
+
+  if (uris?.length) {
+    const assets = await Assets.getAll({
+      filter: `isDeleted=false AND syncStatus=${SyncStatus.SYNC}`,
+      uris,
+    })
+
+    await Assets.addOrUpdate(
+      assets.map(asset => ({
+        id: asset.id,
+        syncStatus: SyncStatus.NOTSYNCED,
+      })),
+    )
+  }
+}
+
 // /// Configure BackgroundFetch.
 // ///
 // export const initBackgroundFetch = async () =>

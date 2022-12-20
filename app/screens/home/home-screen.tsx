@@ -11,13 +11,17 @@ import { request, PERMISSIONS, openSettings } from 'react-native-permissions'
 import { fula } from '@functionland/react-native-fula'
 
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import { AssetService } from '../../services'
+import { AssetService, SyncService } from '../../services'
 import {
   HomeNavigationParamList,
   HomeNavigationTypes,
 } from '../../navigators/home-navigator'
 import Realm from 'realm'
-import { dIDCredentials, foldersSettingsState, mediasState } from '../../store'
+import {
+  dIDCredentialsState,
+  foldersSettingsState,
+  mediasState,
+} from '../../store'
 import { Assets, FolderSettings } from '../../services/localdb'
 import { Entities } from '../../realmdb'
 import { AssetListScreen } from '../index'
@@ -51,8 +55,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [isReady, setIsReady] = useState(false)
   const [syncing, setSyncing] = useState(false)
   const walletConnector = useWalletConnect()
-  const [dIDCredentialsState, setDIDCredentialsState] =
-    useRecoilState(dIDCredentials)
+  const [dIDCredentials, setDIDCredentialsState] =
+    useRecoilState(dIDCredentialsState)
   const setFoldersSettings = useSetRecoilState(foldersSettingsState)
 
   const { toggleTheme } = useContext(ThemeContext)
@@ -99,10 +103,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   }, [])
 
   useEffect(() => {
-    if (dIDCredentialsState?.username && dIDCredentialsState?.password) {
-      initFula(dIDCredentialsState.username, dIDCredentialsState.password)
+    if (dIDCredentials?.username && dIDCredentials?.password) {
+      initFula(dIDCredentials.username, dIDCredentials.password)
     }
-  }, [dIDCredentialsState])
+  }, [dIDCredentials])
 
   useEffect(() => {
     requestAndroidPermission()
@@ -174,6 +178,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             ?.modificationTime,
         )
         syncAssetsMetadata()
+        await SyncService.setAutoBackupAssets()
+        SyncService.uploadAssetsInBackground()
       }
     } catch (error) {
       console.error(error)
