@@ -30,7 +30,7 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
     useRecoilState(dIDCredentialsState)
   const [did, setDID] = useState(null)
   useEffect(() => {
-    if (dIDCredentialsState) {
+    if (dIDCredentials?.username) {
       const myDID = helper.getMyDID(
         dIDCredentials.username,
         dIDCredentials.password,
