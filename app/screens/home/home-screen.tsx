@@ -5,7 +5,13 @@ import React, {
   useCallback,
   useContext,
 } from 'react'
-import { Alert, Platform, StyleSheet, View, ViewStyle } from 'react-native'
+import {
+  Alert,
+  Platform,
+  RefreshControl,
+  StyleSheet,
+  ViewStyle,
+} from 'react-native'
 import { useRecoilState, useSetRecoilState } from 'recoil'
 import { request, PERMISSIONS, openSettings } from 'react-native-permissions'
 import { fula } from '@functionland/react-native-fula'
@@ -54,6 +60,7 @@ interface HomeScreenProps {
 export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [isReady, setIsReady] = useState(false)
   const [syncing, setSyncing] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
   const walletConnector = useWalletConnect()
   const [dIDCredentials, setDIDCredentialsState] =
     useRecoilState(dIDCredentialsState)
@@ -185,6 +192,17 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       console.error(error)
     }
   }
+
+  const onRefresh = async () => {
+    try {
+      setRefreshing(true)
+      await loadAssets(true)
+    } catch (error) {
+      console.log(error)
+    }
+    setRefreshing(false)
+  }
+
   const onLocalDbAssetChange = (
     collection: Realm.Collection<Entities.AssetEntity>,
     changes: Realm.CollectionChangeSet,
@@ -407,6 +425,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         loading={loading}
         showStoryHighlight
         defaultHeader={renderHeader}
+        refreshControl={
+          <RefreshControl
+            progressViewOffset={60}
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+          />
+        }
       />
     </Screen>
   )

@@ -9,6 +9,7 @@ import Animated, {
 import {
   ImageErrorEventData,
   NativeSyntheticEvent,
+  RefreshControlProps,
   ViewStyle,
 } from 'react-native'
 import RecyclerAssetList, {
@@ -30,6 +31,7 @@ interface Props {
   onItemPress?: (section: RecyclerAssetListSection) => void
   onStoryPress?: (story: AssetStory) => void
   contentContainerStyle?: ViewStyle
+  refreshControl?: React.ReactElement<RefreshControlProps> | undefined
 }
 export interface AssetListHandle {
   resetSelectedItems: () => void
@@ -49,6 +51,7 @@ const AssetList = forwardRef<AssetListHandle, Props>(
       onItemPress,
       onStoryPress,
       contentContainerStyle,
+      refreshControl,
     },
     ref,
   ): JSX.Element => {
@@ -92,6 +95,7 @@ const AssetList = forwardRef<AssetListHandle, Props>(
             onItemPress={onItemPress}
             onStoryPress={onStoryPress}
             contentContainerStyle={contentContainerStyle}
+            refreshControl={refreshControl}
           />
         </PinchZoom>
       </GridProvider>
