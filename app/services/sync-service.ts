@@ -37,6 +37,8 @@ const backgroundTask = async (taskParameters: TaskParams) => {
     )
   }
   const { callback = null, assets = [] } = taskParameters
+  const updateAssets: AssetEntity[] = []
+
   try {
     for (let index = 0; index < assets.length; index++) {
       const asset = assets[index]
@@ -66,14 +68,12 @@ const backgroundTask = async (taskParameters: TaskParams) => {
       )
 
       //Update asset record in database
-      Assets.addOrUpdate([
-        {
-          id: asset.id,
-          cid: cid,
-          syncDate: new Date(),
-          syncStatus: SyncStatus.SYNCED,
-        },
-      ])
+      updateAssets.push({
+        id: asset.id,
+        cid: cid,
+        syncDate: new Date(),
+        syncStatus: SyncStatus.SYNCED,
+      })
 
       //return the callback function
       try {
@@ -86,6 +86,7 @@ const backgroundTask = async (taskParameters: TaskParams) => {
       callback?.(false)
     } catch {}
   } finally {
+    Assets.addOrUpdate(updateAssets)
     await BackgroundJob.stop()
   }
 }
