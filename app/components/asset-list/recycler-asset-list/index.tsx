@@ -13,6 +13,7 @@ import {
   View,
   ImageErrorEventData,
   ViewStyle,
+  RefreshControlProps,
 } from 'react-native'
 import Animated, {
   useSharedValue,
@@ -59,6 +60,7 @@ export interface Props {
   onItemPress?: (section: RecyclerAssetListSection) => void
   onStoryPress?: (story: AssetStory) => void
   contentContainerStyle?: ViewStyle
+  refreshControl?: React.ReactElement<RefreshControlProps> | undefined
 }
 
 export interface ExtendedState {
@@ -91,6 +93,7 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(
       onStoryPress,
       contentContainerStyle,
       waitFor,
+      refreshControl,
       ...extras
     },
     ref,
@@ -390,6 +393,7 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(
               updateContainerSize()
             },
             waitFor: waitFor,
+            refreshControl: refreshControl,
           }}
           onVisibleIndicesChanged={(all = [], now, notNow) => {
             const visibleIndexValue = all[Math.floor(all.length / 2)] || 0
