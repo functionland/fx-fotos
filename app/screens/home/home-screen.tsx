@@ -28,7 +28,7 @@ import {
   foldersSettingsState,
   mediasState,
 } from '../../store'
-import { Assets, FolderSettings } from '../../services/localdb'
+import { Assets, Boxs, FolderSettings } from '../../services/localdb'
 import { Entities } from '../../realmdb'
 import { AssetListScreen } from '../index'
 import { Asset, PagedInfo } from '../../types'
@@ -153,11 +153,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       const fulaRootObject = await KeyChain.load(
         KeyChain.Service.FULARootObject,
       )
+      const box = (await Boxs.getAll())?.[0]
       const fulaInit = await fula.init(
         keyPair.secretKey.toString(), //bytes of the privateKey of did identity in string format
         `${deviceUtils.DocumentDirectoryPath}/wnfs`, // leave empty to use the default temp one
-        '',
-        'noop', //leave empty for testing without a backend node
+        box ? box.address : '',
+        box ? '' : 'noop', //leave empty for testing without a backend node
         fulaRootObject ? fulaRootObject.password : null,
       )
       if (!fulaRootObject && fulaInit) {

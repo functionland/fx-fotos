@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { StyleSheet, View, Image, Alert, Share } from 'react-native'
-import { Avatar, Button, Icon, Text } from '@rneui/themed'
+import { StyleSheet, View, Image, Alert, Share, ScrollView } from 'react-native'
+import { Avatar, Button, Card, Icon, ListItem, Text } from '@rneui/themed'
 import { useWalletConnect } from '@walletconnect/react-native-dapp'
 import * as Keychain from '../../utils/keychain'
 import Toast from 'react-native-toast-message'
@@ -128,118 +128,123 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
       style={styles.screen}
     >
       {renderHeader()}
-
-      <View style={styles.container}>
-        <SharedElement id="AccountAvatar">
-          {walletConnector.connected ? (
-            <Avatar
-              containerStyle={{
-                backgroundColor: 'gray',
-                width: 100,
-                height: 100,
-                borderRadius: 50,
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-              ImageComponent={() => (
-                <Image
-                  source={
-                    walletConnector.peerMeta?.icons?.[0].endsWith('.svg')
-                      ? helper.getWalletImage(walletConnector.peerMeta?.name)
-                      : {
-                          uri: walletConnector.peerMeta?.icons?.[0],
-                        }
-                  }
-                  style={{
-                    height: 90,
-                    width: 90,
-                  }}
-                  resizeMode="contain"
-                />
-              )}
-            />
-          ) : (
-            <Avatar
-              containerStyle={styles.avatarLarge}
-              icon={{
-                name: 'account-alert',
-                type: 'material-community',
-                size: 84,
-              }}
-              rounded
-            />
-          )}
-        </SharedElement>
-
-        {walletConnector.connected ? (
-          <>
-            <View style={styles.section}>
-              <Text h4>{walletConnector.peerMeta?.name}</Text>
-              <Text ellipsizeMode="tail" style={styles.textCenter}>
-                {walletConnector.accounts?.[0]}
-              </Text>
-              <View style={styles.section}>
-                {!dIDCredentials ? (
-                  <Button title="Link DID" onPress={signWalletAddress} />
-                ) : null}
-              </View>
-            </View>
-            {did && (
-              <View style={styles.section}>
-                <Text h4>Your DID</Text>
-                <Text ellipsizeMode="tail" style={styles.textCenter}>
-                  {did}
-                </Text>
-                <Icon
-                  name="content-copy"
-                  type="material-community"
-                  onPress={() => {
-                    Clipboard.setString(did)
-                    Toast.show({
-                      type: 'success',
-                      text1: 'Your DID copied to the clipboard!',
-                      position: 'bottom',
-                      bottomOffset: 0,
-                    })
-                  }}
-                />
-              </View>
+      <ScrollView>
+        <View style={styles.container}>
+          <SharedElement id="AccountAvatar">
+            {walletConnector.connected ? (
+              <Avatar
+                containerStyle={{
+                  backgroundColor: 'gray',
+                  width: 100,
+                  height: 100,
+                  borderRadius: 50,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+                ImageComponent={() => (
+                  <Image
+                    source={
+                      walletConnector.peerMeta?.icons?.[0].endsWith('.svg')
+                        ? helper.getWalletImage(walletConnector.peerMeta?.name)
+                        : {
+                            uri: walletConnector.peerMeta?.icons?.[0],
+                          }
+                    }
+                    style={{
+                      height: 90,
+                      width: 90,
+                    }}
+                    resizeMode="contain"
+                  />
+                )}
+              />
+            ) : (
+              <Avatar
+                containerStyle={styles.avatarLarge}
+                icon={{
+                  name: 'account-alert',
+                  type: 'material-community',
+                  size: 84,
+                }}
+                rounded
+              />
             )}
-          </>
-        ) : (
-          <View style={styles.section}>
-            <Button onPress={connectToWallet} title="Create DID" />
-          </View>
-        )}
-      </View>
-      {/* <View>
-        <Card
-          containerStyle={{
-            borderWidth: 0,
-          }}
-        >
-          <Card.Title
-            style={{
-              textAlign: 'left',
-            }}
-          >
-            SETTINGS
-          </Card.Title>
-          <ListItem
-            key="Boxes"
-            bottomDivider
-            onPress={() => navigation.navigate(AppNavigationNames.BoxList)}
-          >
-            <Icon type="material-community" name="alpha-f-box-outline" />
-            <ListItem.Content>
-              <ListItem.Title lineBreakMode="tail">Boxes</ListItem.Title>
-              <ListItem.Subtitle lineBreakMode="tail">
-                Add your box address
-              </ListItem.Subtitle>
-            </ListItem.Content>
-          </ListItem>
-        </Card>
-      </View> */}
+          </SharedElement>
+
+          {walletConnector.connected ? (
+            <>
+              <View style={styles.section}>
+                <Text h4>{walletConnector.peerMeta?.name}</Text>
+                <Text ellipsizeMode="tail" style={styles.textCenter}>
+                  {walletConnector.accounts?.[0]}
+                </Text>
+                <View style={styles.section}>
+                  {!dIDCredentials ? (
+                    <Button title="Link DID" onPress={signWalletAddress} />
+                  ) : null}
+                </View>
+              </View>
+              {did && (
+                <View style={styles.section}>
+                  <Text h4>Your DID</Text>
+                  <Text ellipsizeMode="tail" style={styles.textCenter}>
+                    {did}
+                  </Text>
+                  <Icon
+                    name="content-copy"
+                    type="material-community"
+                    onPress={() => {
+                      Clipboard.setString(did)
+                      Toast.show({
+                        type: 'success',
+                        text1: 'Your DID copied to the clipboard!',
+                        position: 'bottom',
+                        bottomOffset: 0,
+                      })
+                    }}
+                  />
+                </View>
+              )}
+            </>
+          ) : (
+            <View style={styles.section}>
+              <Button onPress={connectToWallet} title="Create DID" />
+            </View>
+          )}
+          {did && (
+            <View style={[{ width: '100%' }]}>
+              <Card
+                containerStyle={{
+                  borderWidth: 0,
+                }}
+              >
+                <Card.Title
+                  style={{
+                    textAlign: 'left',
+                  }}
+                >
+                  SETTINGS
+                </Card.Title>
+                <ListItem
+                  key="Boxes"
+                  bottomDivider
+                  onPress={() =>
+                    navigation.navigate(AppNavigationNames.BoxList)
+                  }
+                >
+                  <Icon type="material-community" name="alpha-f-box-outline" />
+                  <ListItem.Content>
+                    <ListItem.Title lineBreakMode="tail">Boxes</ListItem.Title>
+                    <ListItem.Subtitle lineBreakMode="tail">
+                      Add your box address
+                    </ListItem.Subtitle>
+                  </ListItem.Content>
+                </ListItem>
+              </Card>
+            </View>
+          )}
+        </View>
+      </ScrollView>
     </Screen>
   )
 }
