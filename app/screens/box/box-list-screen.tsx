@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react'
-import { StyleSheet } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import { useRecoilState } from 'recoil'
 import { Icon, ListItem, Text } from '@rneui/themed'
 
@@ -49,24 +49,28 @@ export const BoxListScreen: React.FC<Props> = ({ route, navigation }) => {
     }
   }
   const renderHeader = () => (
-    <Header
-      centerComponent={
-        <Text lineBreakMode="tail" h4>
-          Boxs
-        </Text>
-      }
-      leftComponent={<HeaderArrowBack navigation={navigation} />}
-      rightComponent={
-        <HeaderRightContainer>
-          <Icon
-            type="material-community"
-            name="plus"
-            size={28}
-            onPress={() => navigation.navigate(AppNavigationNames.BoxAddUpdate)}
-          />
-        </HeaderRightContainer>
-      }
-    />
+    <View style={{ position: 'absolute', top: 0, zIndex: 99, width: '100%' }}>
+      <Header
+        centerComponent={
+          <Text lineBreakMode="tail" h4>
+            Boxs
+          </Text>
+        }
+        leftComponent={<HeaderArrowBack navigation={navigation} />}
+        rightComponent={
+          <HeaderRightContainer>
+            <Icon
+              type="material-community"
+              name="plus"
+              size={28}
+              onPress={() =>
+                navigation.navigate(AppNavigationNames.BoxAddUpdate)
+              }
+            />
+          </HeaderRightContainer>
+        }
+      />
+    </View>
   )
 
   const onItemPress = (box: BoxEntity) => {
@@ -96,7 +100,6 @@ export const BoxListScreen: React.FC<Props> = ({ route, navigation }) => {
   )
   return (
     <Screen
-      preset="fixed"
       scrollEventThrottle={16}
       automaticallyAdjustContentInsets
       style={styles.screen}
@@ -118,6 +121,7 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     flex: 1,
+    paddingTop: 60,
   },
   card: {
     flex: 1,

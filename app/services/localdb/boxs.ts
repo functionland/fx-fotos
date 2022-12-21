@@ -1,3 +1,4 @@
+import Realm from 'realm'
 import { Entities, RealmDB, Schemas } from '../../realmdb'
 
 const { UUID } = Realm.BSON
