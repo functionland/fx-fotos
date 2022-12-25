@@ -169,6 +169,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         )
       }
       console.log('fulaInit', fulaInit)
+      const checkFailedActions = await fula.checkFailedActions(true)
+      console.log('checkFailedActions',checkFailedActions)
     } catch (error) {
       console.log('fulaInit Error', error)
     }
