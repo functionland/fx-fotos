@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Alert, StyleProp, StyleSheet, View, ViewStyle } from 'react-native'
-import { Icon, Input, Text } from '@rneui/themed'
+import { Button, Icon, Input, Text } from '@rneui/themed'
+import { fula } from "@functionland/react-native-fula"
+import * as helper from '../../utils/helper'
 
 import {
   NativeStackNavigationProp,
@@ -20,6 +22,11 @@ import { Screen } from '../../components'
 import { Boxs } from '../../services/localdb'
 import { BoxEntity } from '../../realmdb/entities'
 import { RootStackParamList, AppNavigationNames } from '../../navigators'
+import { useRecoilState } from 'recoil'
+import { dIDCredentialsState } from '../../store'
+import deviceUtils from '../../utils/deviceUtils'
+import Toast from 'react-native-toast-message'
+
 
 type Props = NativeStackScreenProps<
   RootStackParamList,
@@ -33,6 +40,10 @@ interface AddUpdateForm {
 export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
   const pressed = useRef<boolean>(false)
   const [form, setForm] = useState<AddUpdateForm>(null)
+  const [testingConnection, setTestinConnection] = useState(false)
+  const [dIDCredentials, setDIDCredentialsState] =
+    useRecoilState(dIDCredentialsState)
+
   useEffect(() => {
     if (route.params?.box?.peerId) {
       setForm({
@@ -83,6 +94,46 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
       pressed.current = false
     }
   }
+  const checkConnection = async () => {
+    if (dIDCredentials?.username && dIDCredentials?.password) {
+      setTestinConnection(true)
+      const keyPair = helper.getMyDIDKeyPair(dIDCredentials.username, dIDCredentials.password)
+      try {
+        const newClient = await fula.newClient(
+          keyPair.secretKey.toString(), //bytes of the privateKey of did identity in string format
+          `${deviceUtils.DocumentDirectoryPath}/testconnection`, // leave empty to use the default temp one
+          form.address,
+          '', //leave empty for testing without a backend node
+        )
+        if (newClient) {
+          Toast.show({
+            type: 'success',
+            text1: 'Connected successfully!',
+            position: 'bottom',
+            bottomOffset: 0,
+          })
+        } else {
+          Toast.show({
+            type: 'error',
+            text1: 'Connection failed!',
+            position: 'bottom',
+            bottomOffset: 0,
+          })
+        }
+      } catch (error) {
+        Toast.show({
+          type: 'error',
+          text1: 'Unknown error',
+          text2: 'There is an issue to test the connection!',
+          position: 'bottom',
+          bottomOffset: 0,
+        })
+      } finally {
+        setTestinConnection(false)
+      }
+    }
+
+  }
   return (
     <Screen
       preset="scroll"
@@ -127,6 +178,10 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
             }))
           }}
         />
+        <Button title="Test the connection"
+          loading={testingConnection}
+          onPress={checkConnection}>
+        </Button>
       </>
     </Screen>
   )
