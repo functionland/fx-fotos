@@ -154,23 +154,25 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         KeyChain.Service.FULARootObject,
       )
       const box = (await Boxs.getAll())?.[0]
-      const fulaInit = await fula.init(
-        keyPair.secretKey.toString(), //bytes of the privateKey of did identity in string format
-        `${deviceUtils.DocumentDirectoryPath}/wnfs`, // leave empty to use the default temp one
-        box ? box.address : '',
-        box ? '' : 'noop', //leave empty for testing without a backend node
-        fulaRootObject ? fulaRootObject.password : null,
-      )
-      if (!fulaRootObject && fulaInit) {
-        await KeyChain.save(
-          'rootCid',
-          fulaInit.rootCid,
-          KeyChain.Service.FULARootObject,
+      if (box) {
+        console.log('box.address', box?.address)
+        const fulaInit = await fula.init(
+          keyPair.secretKey.toString(), //bytes of the privateKey of did identity in string format
+          `${deviceUtils.DocumentDirectoryPath}/wnfs`, // leave empty to use the default temp one
+          box.address ? box.address : '',
+          box.address ? '' : 'noop', //leave empty for testing without a backend node
+          false,
+          fulaRootObject ? fulaRootObject.password : null
         )
+        if (!fulaRootObject && fulaInit) {
+          await KeyChain.save(
+            'rootCid',
+            fulaInit.rootCid,
+            KeyChain.Service.FULARootObject,
+          )
+        }
+        const checkFailedActions = await fula.checkFailedActions(true)
       }
-      console.log('fulaInit', fulaInit)
-      const checkFailedActions = await fula.checkFailedActions(true)
-      console.log('checkFailedActions',checkFailedActions)
     } catch (error) {
       console.log('fulaInit Error', error)
     }
@@ -375,11 +377,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                               '.svg',
                             )
                               ? helper.getWalletImage(
-                                  walletConnector.peerMeta?.name,
-                                )
+                                walletConnector.peerMeta?.name,
+                              )
                               : {
-                                  uri: walletConnector.peerMeta?.icons?.[0],
-                                }
+                                uri: walletConnector.peerMeta?.icons?.[0],
+                              }
                           }
                           style={{
                             height: 35,
