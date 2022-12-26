@@ -75,8 +75,8 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
   const addUpdate = async () => {
     try {
       pressed.current = true
-      if (!form.address || !form.name) {
-        Alert.alert('Warning', 'Please fill all the fields!')
+      if (!form.name) {
+        Alert.alert('Warning', 'Please fill the name fields!')
         return
       }
       //await fula.addBox(form.address)
@@ -95,7 +95,7 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   }
   const checkConnection = async () => {
-    if (dIDCredentials?.username && dIDCredentials?.password) {
+    if (dIDCredentials?.username && dIDCredentials?.password && form.address) {
       setTestinConnection(true)
       const keyPair = helper.getMyDIDKeyPair(dIDCredentials.username, dIDCredentials.password)
       try {
@@ -166,7 +166,7 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
         <Input
           label="Address"
           defaultValue={form?.address}
-          placeholder="Enter your box address"
+          placeholder="Leave it empty just for test"
           leftIcon={{
             type: 'material-community',
             name: 'transit-connection-variant',
@@ -180,6 +180,7 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
         />
         <Button title="Test the connection"
           loading={testingConnection}
+          disabled={!form?.address}
           onPress={checkConnection}>
         </Button>
       </>
