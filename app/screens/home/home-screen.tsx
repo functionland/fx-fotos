@@ -72,6 +72,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     useRef<Realm.Results<Entities.AssetEntity & Realm.Object>>(null)
   const [medias, setMedias] = useRecoilState(mediasState)
   const [loading, setLoading] = useState(false)
+  const [mediasRefObj, setMediasRefObj] = useState<Record<string, Asset>>({})
 
   const requestAndroidPermission = useCallback(async () => {
     try {
@@ -182,7 +183,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       realmAssets.current?.removeAllListeners()
       realmAssets.current = await Assets.getAll()
       realmAssets.current.addListener(onLocalDbAssetChange)
-      setMedias(realmAssets.current.slice(0, realmAssets.current.length - 1))
+      const obj = {}
+      const assetSlice = realmAssets.current?.slice()
+      assetSlice?.forEach(asset => obj[asset.id] = asset)
+      setMedias(assetSlice)
+      setMediasRefObj(obj)
       if (syncMetadata) {
         await syncAssets(
           realmAssets.current?.[0]?.modificationTime,
@@ -212,16 +217,46 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     collection: Realm.Collection<Entities.AssetEntity>,
     changes: Realm.CollectionChangeSet,
   ) => {
-    if (changes.insertions?.length || changes.newModifications?.length) {
-      loadAssets(false)
-    } else if (changes.deletions?.length) {
-      setMedias(prev => {
-        let assets = [...prev]
-        assets = assets.filter(
-          (_, index) => !changes.deletions.some(i => i === index),
-        )
-        return [...assets]
+    if (changes.insertions?.length) {
+      changes.insertions.forEach(index => {
+        mediasRefObj[collection[index].id] = collection[index]
       })
+      
+      setMediasRefObj(prev => {
+        const next = {
+          ...prev,
+          ...mediasRefObj
+        }
+        setMedias(Object.values(next))
+        return next;
+      })
+
+      //loadAssets(false)
+    } else if (changes.newModifications?.length) {
+      changes.newModifications.forEach(index => {
+        mediasRefObj[collection[index].id] = collection[index]
+      })
+      setMediasRefObj(prev => {
+        const next = {
+          ...prev,
+          ...mediasRefObj
+        }
+        return next;
+      })
+    } else if (changes.deletions?.length) {
+      changes.deletions.forEach(index => {
+        delete mediasRefObj[collection[index].id]
+      })
+
+      setMediasRefObj(prev => {
+        const next = {
+          ...prev,
+          ...mediasRefObj
+        }
+        setMedias(Object.values(next))
+        return next;
+      })
+
     }
   }
 
@@ -427,6 +462,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       <AssetListScreen
         navigation={navigation}
         medias={isReady ? medias : null}
+        externalState={mediasRefObj}
         loading={loading}
         showStoryHighlight
         defaultHeader={renderHeader}

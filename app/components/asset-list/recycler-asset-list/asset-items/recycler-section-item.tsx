@@ -21,6 +21,7 @@ interface Props {
   section: RecyclerAssetListSection
   selectionMode: boolean
   selected: boolean
+  externalState: Asset
   onLongPress: (section: RecyclerAssetListSection) => void
   onPress: (section: RecyclerAssetListSection) => void
   onStoryPress?: (story: AssetStory) => void
@@ -30,6 +31,7 @@ const getSectionByType = (
   section: RecyclerAssetListSection,
   selectionMode: boolean,
   selected: boolean,
+  externalState: Asset,
   onAssetLoadError?: (error: NativeSyntheticEvent<ImageErrorEventData>) => void,
   onStoryPress?: (story: AssetStory) => void,
 ) => {
@@ -51,8 +53,8 @@ const getSectionByType = (
           asset={section.data}
           selectionMode={selectionMode}
           selected={selected}
-          isSynced={data.syncStatus === SyncStatus.SYNCED}
-          isDeleted={section?.data?.isDeleted}
+          isSynced={externalState?.syncStatus === SyncStatus.SYNCED}
+          isDeleted={externalState?.isDeleted}
         />
       )
     }
@@ -87,6 +89,7 @@ const RecyclerSectionItem: React.FC<Props> = ({
   section,
   selectionMode,
   selected,
+  externalState,
   onLongPress,
   onPress,
   onStoryPress,
@@ -115,6 +118,7 @@ const RecyclerSectionItem: React.FC<Props> = ({
         section,
         selectionMode,
         selected,
+        externalState,
         onAssetLoadError,
         onStoryPress,
       )}

@@ -61,6 +61,8 @@ export interface Props {
   onStoryPress?: (story: AssetStory) => void
   contentContainerStyle?: ViewStyle
   refreshControl?: React.ReactElement<RefreshControlProps> | undefined
+  waitFor?: React.Ref<unknown> | React.Ref<unknown>[] | undefined
+  externalState?: any
 }
 
 export interface ExtendedState {
@@ -71,12 +73,12 @@ export interface ExtendedState {
     [key: string]: boolean
   }
   selectionMode: boolean
+  externalState: any
 }
 export interface RecyclerAssetListHandler {
   resetSelectedItems: () => void
   toggleSelectionMode: () => void
   scrollToItem: (item: RecyclerAssetListSection, animated?: boolean) => void
-  waitFor?: React.Ref<unknown> | React.Ref<unknown>[] | undefined
 }
 // eslint-disable-next-line react/display-name
 const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(
@@ -94,6 +96,7 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(
       contentContainerStyle,
       waitFor,
       refreshControl,
+      externalState,
       ...extras
     },
     ref,
@@ -112,7 +115,15 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(
       selectedAssets: {},
       selectedGroups: {},
       selectionMode: false,
+      externalState: externalState
     })
+
+    useEffect(() => {
+      setExtendedState(prev => ({
+        ...prev,
+        externalState
+      }))
+    }, [externalState])
 
     useImperativeHandle(ref, () => ({
       resetSelectedItems: () => {
@@ -225,7 +236,8 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(
           <RecyclerSectionItem
             section={data}
             selectionMode={extendedState?.selectionMode}
-            selected={!!extendedState.selectedAssets[data.id]}
+            selected={!!extendedState?.selectedAssets[data.id]}
+            externalState={extendedState?.externalState?.[data.id]}
             onLongPress={onLongPress}
             onPress={onPress}
             onStoryPress={onStoryPress}

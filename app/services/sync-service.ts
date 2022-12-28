@@ -14,7 +14,7 @@ import deviceUtils from '../utils/deviceUtils'
 // import * as helper from '../utils/helper'
 
 type TaskParams = {
-  callback: (success: boolean) => void
+  callback: (success: boolean, error: Error) => void
   assets: AssetEntity[]
 }
 const defaultOptions = {
@@ -78,13 +78,13 @@ const backgroundTask = async (taskParameters: TaskParams) => {
       //return the callback function
       try {
         callback?.(true)
-      } catch {}
+      } catch { }
     }
   } catch (error) {
     console.log('backgroundTask:', error)
     try {
-      callback?.(false)
-    } catch {}
+      callback?.(false, error)
+    } catch { }
   } finally {
     Assets.addOrUpdate(updateAssets)
     await BackgroundJob.stop()

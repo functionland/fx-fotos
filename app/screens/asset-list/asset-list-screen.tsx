@@ -46,6 +46,7 @@ interface Props {
   externalScrollY?: SharedValue<number>
   contentContainerStyle?: ViewStyle
   refreshControl?: React.ReactElement<RefreshControlProps> | undefined
+  externalState:any
 }
 
 export const AssetListScreen: React.FC<Props> = ({
@@ -56,6 +57,7 @@ export const AssetListScreen: React.FC<Props> = ({
   externalScrollY,
   contentContainerStyle,
   refreshControl,
+  externalState
 }) => {
   const setRecyclerSectionsStore = useSetRecoilState(recyclerSectionsState)
   const [recyclerSections, setRecyclerSections] = useState(null)
@@ -266,6 +268,7 @@ export const AssetListScreen: React.FC<Props> = ({
           onStoryPress={onStoryPress}
           contentContainerStyle={contentContainerStyle}
           refreshControl={refreshControl}
+          externalState={externalState}
         />
       )}
     </>

@@ -32,6 +32,7 @@ interface Props {
   onStoryPress?: (story: AssetStory) => void
   contentContainerStyle?: ViewStyle
   refreshControl?: React.ReactElement<RefreshControlProps> | undefined
+  externalState: any
 }
 export interface AssetListHandle {
   resetSelectedItems: () => void
@@ -52,6 +53,7 @@ const AssetList = forwardRef<AssetListHandle, Props>(
       onStoryPress,
       contentContainerStyle,
       refreshControl,
+      externalState,
     },
     ref,
   ): JSX.Element => {
@@ -96,6 +98,7 @@ const AssetList = forwardRef<AssetListHandle, Props>(
             onStoryPress={onStoryPress}
             contentContainerStyle={contentContainerStyle}
             refreshControl={refreshControl}
+            externalState={externalState}
           />
         </PinchZoom>
       </GridProvider>

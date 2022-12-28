@@ -278,7 +278,7 @@ export const ImageGalleryViewerScreen: React.FC<
 
             //Run the background task to upload all assets where SyncStatus are SYNC
             await SyncService.uploadAssetsInBackground({
-              callback: success => {
+              callback: (success,error) => {
                 if (success)
                   setAsset(prev => ({
                     ...prev,
@@ -291,6 +291,7 @@ export const ImageGalleryViewerScreen: React.FC<
                     position: 'bottom',
                     bottomOffset: 0,
                   })
+                  alert(error.toString())
               },
             })
           } catch (error) {
