@@ -226,7 +226,7 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
                   SETTINGS
                 </Card.Title>
                 <ListItem
-                  key="Boxes"
+                  key="Bloxes"
                   bottomDivider
                   onPress={() =>
                     navigation.navigate(AppNavigationNames.BoxList)
@@ -234,9 +234,9 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
                 >
                   <Icon type="material-community" name="alpha-f-box-outline" />
                   <ListItem.Content>
-                    <ListItem.Title lineBreakMode="tail">Boxes</ListItem.Title>
+                    <ListItem.Title lineBreakMode="tail">Bloxes</ListItem.Title>
                     <ListItem.Subtitle lineBreakMode="tail">
-                      Add your box address
+                      Add your blox address
                     </ListItem.Subtitle>
                   </ListItem.Content>
                 </ListItem>

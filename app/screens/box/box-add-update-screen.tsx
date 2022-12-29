@@ -63,7 +63,7 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
     <Header
       centerComponent={
         <Text lineBreakMode="tail" h4>
-          {form && form.peerId ? 'Edit box' : 'Add box'}
+          {form && form.peerId ? 'Edit blox' : 'Add blox'}
         </Text>
       }
       leftComponent={<HeaderArrowBack navigation={navigation} />}
@@ -147,7 +147,7 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
           label="Name"
           defaultValue={form?.name}
           returnKeyType="next"
-          placeholder="Choose a nickname for your box"
+          placeholder="Choose a nickname for your blox"
           leftIcon={{
             type: 'material-community',
             name: 'alpha-f-box-outline',
