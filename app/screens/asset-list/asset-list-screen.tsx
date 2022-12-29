@@ -46,7 +46,7 @@ interface Props {
   externalScrollY?: SharedValue<number>
   contentContainerStyle?: ViewStyle
   refreshControl?: React.ReactElement<RefreshControlProps> | undefined
-  externalState:any
+  externalState?: Record<string, Asset> | undefined
 }
 
 export const AssetListScreen: React.FC<Props> = ({

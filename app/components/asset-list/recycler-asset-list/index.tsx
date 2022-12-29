@@ -27,7 +27,7 @@ import Animated, {
 } from 'react-native-reanimated'
 import { DataProvider, RecyclerListView } from 'fula-recyclerlistview'
 import { Constants } from '../../../theme/constants'
-import { RecyclerAssetListSection, ViewType, AssetStory } from '../../../types'
+import { RecyclerAssetListSection, ViewType, AssetStory, Asset } from '../../../types'
 import RecyclerSectionItem from './asset-items/recycler-section-item'
 import ExternalScrollView from '../external-scroll-view'
 import Cell from '../grid-provider/cell'
@@ -62,7 +62,7 @@ export interface Props {
   contentContainerStyle?: ViewStyle
   refreshControl?: React.ReactElement<RefreshControlProps> | undefined
   waitFor?: React.Ref<unknown> | React.Ref<unknown>[] | undefined
-  externalState?: any
+  externalState?: Record<string, Asset> | undefined
 }
 
 export interface ExtendedState {
@@ -73,7 +73,7 @@ export interface ExtendedState {
     [key: string]: boolean
   }
   selectionMode: boolean
-  externalState: any
+  externalState?: Record<string, Asset> | undefined
 }
 export interface RecyclerAssetListHandler {
   resetSelectedItems: () => void
