@@ -22,10 +22,11 @@ import { Screen } from '../../components'
 import { Boxs } from '../../services/localdb'
 import { BoxEntity } from '../../realmdb/entities'
 import { RootStackParamList, AppNavigationNames } from '../../navigators'
-import { useRecoilState } from 'recoil'
-import { dIDCredentialsState } from '../../store'
+import { useRecoilState, useSetRecoilState } from 'recoil'
+import { dIDCredentialsState, fulaPeerIdState } from '../../store'
 import deviceUtils from '../../utils/deviceUtils'
 import Toast from 'react-native-toast-message'
+import * as KeyChain from '../../utils/keychain'
 
 
 type Props = NativeStackScreenProps<
@@ -43,6 +44,8 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
   const [testingConnection, setTestinConnection] = useState(false)
   const [dIDCredentials, setDIDCredentialsState] =
     useRecoilState(dIDCredentialsState)
+  const setFulaPeerId =
+    useSetRecoilState(fulaPeerIdState)
 
   useEffect(() => {
     if (route.params?.box?.peerId) {
@@ -99,11 +102,13 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
       setTestinConnection(true)
       const keyPair = helper.getMyDIDKeyPair(dIDCredentials.username, dIDCredentials.password)
       try {
+        await fula.shutdown()
         const newClient = await fula.newClient(
           keyPair.secretKey.toString(), //bytes of the privateKey of did identity in string format
-          `${deviceUtils.DocumentDirectoryPath}/testconnection`, // leave empty to use the default temp one
+          `${deviceUtils.DocumentDirectoryPath}/wnfs`, // leave empty to use the default temp one
           form.address,
           '', //leave empty for testing without a backend node
+          false
         )
         if (newClient) {
           Toast.show({
@@ -112,6 +117,14 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
             position: 'bottom',
             bottomOffset: 0,
           })
+          const fulaPeerId = await KeyChain.save(
+            'peerId',
+            newClient,
+            KeyChain.Service.FULAPeerIdObject,
+          )
+          if (fulaPeerId) {
+            setFulaPeerId(fulaPeerId)
+          }
         } else {
           Toast.show({
             type: 'error',
@@ -121,6 +134,7 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
           })
         }
       } catch (error) {
+        console.log('checkConnection', error)
         Toast.show({
           type: 'error',
           text1: 'Unknown error',
