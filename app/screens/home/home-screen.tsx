@@ -26,6 +26,7 @@ import Realm from 'realm'
 import {
   dIDCredentialsState,
   foldersSettingsState,
+  fulaPeerIdState,
   mediasState,
 } from '../../store'
 import { Assets, Boxs, FolderSettings } from '../../services/localdb'
@@ -64,6 +65,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const walletConnector = useWalletConnect()
   const [dIDCredentials, setDIDCredentialsState] =
     useRecoilState(dIDCredentialsState)
+
+  const [, setFulaPeerid] =
+    useRecoilState(fulaPeerIdState)
   const setFoldersSettings = useSetRecoilState(foldersSettingsState)
 
   const { toggleTheme } = useContext(ThemeContext)
@@ -145,6 +149,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const initDID = async () => {
     const didCredentials = await KeyChain.load(KeyChain.Service.DIDCredentials)
     if (didCredentials) {
+      const fulaPeerIdObject = await KeyChain.load(
+        KeyChain.Service.FULAPeerIdObject,
+      )
+      if (fulaPeerIdObject) {
+        setFulaPeerid(fula.password)
+      }
       setDIDCredentialsState(didCredentials)
     }
   }
@@ -154,6 +164,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       const fulaRootObject = await KeyChain.load(
         KeyChain.Service.FULARootObject,
       )
+
       const box = (await Boxs.getAll())?.[0]
       if (box) {
         console.log('box.address', box?.address)
@@ -171,6 +182,14 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             fulaInit.rootCid,
             KeyChain.Service.FULARootObject,
           )
+        }
+        const fulaPerrId = await KeyChain.save(
+          'peerId',
+          fulaInit.peerId,
+          KeyChain.Service.FULAPeerIdObject,
+        )
+        if (fulaPerrId) {
+          setFulaPeerid(fulaPerrId)
         }
         const checkFailedActions = await fula.checkFailedActions(true)
       }
@@ -221,7 +240,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       changes.insertions.forEach(index => {
         mediasRefObj[collection[index].id] = collection[index]
       })
-      
+
       setMediasRefObj(prev => {
         const next = {
           ...prev,
