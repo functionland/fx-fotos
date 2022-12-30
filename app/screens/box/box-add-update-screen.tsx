@@ -77,12 +77,38 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
   )
   const addUpdate = async () => {
     try {
+      if (pressed.current)
+        return
       pressed.current = true
       if (!form.name) {
-        Alert.alert('Warning', 'Please fill the name fields!')
+        Alert.alert('Warning', 'Please fill the name field!')
         return
       }
-      //await fula.addBox(form.address)
+      try {
+        const peerId = await newFulaClient()
+        if (peerId) {
+          const fulaPeerId = await KeyChain.save(
+            'peerId',
+            peerId,
+            KeyChain.Service.FULAPeerIdObject,
+          )
+          if (fulaPeerId) {
+            setFulaPeerId(fulaPeerId)
+          }
+        } else {
+          throw 'Address is invalid'
+        }
+
+      } catch (error) {
+        Toast.show({
+          type: 'error',
+          text1: 'Invalid Address',
+          text2: 'Please make sure the address is a valid address!',
+          position: 'bottom',
+          bottomOffset: 0,
+        })
+        return
+      }
       const box = {
         name: form.name,
         address: form.address,
@@ -92,49 +118,65 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
       navigation.pop()
     } catch (error) {
       console.log(error)
-      Alert.alert('Error', 'Make sure the address format is correct!')
     } finally {
       pressed.current = false
     }
   }
-  const checkConnection = async () => {
+
+  const newFulaClient = async () => {
     if (dIDCredentials?.username && dIDCredentials?.password && form.address) {
-      setTestinConnection(true)
       const keyPair = helper.getMyDIDKeyPair(dIDCredentials.username, dIDCredentials.password)
       try {
         await fula.shutdown()
-        const newClient = await fula.newClient(
+        const peerId = await fula.newClient(
           keyPair.secretKey.toString(), //bytes of the privateKey of did identity in string format
           `${deviceUtils.DocumentDirectoryPath}/wnfs`, // leave empty to use the default temp one
           form.address,
           '', //leave empty for testing without a backend node
           false
         )
-        if (newClient) {
-          Toast.show({
-            type: 'success',
-            text1: 'Connected successfully!',
-            position: 'bottom',
-            bottomOffset: 0,
-          })
-          const fulaPeerId = await KeyChain.save(
-            'peerId',
-            newClient,
-            KeyChain.Service.FULAPeerIdObject,
-          )
-          if (fulaPeerId) {
-            setFulaPeerId(fulaPeerId)
+        return peerId
+      } catch (error) {
+        console.log('newFulaClient', error)
+        return null
+      }
+    }
+  }
+
+  const checkConnection = async () => {
+    if (dIDCredentials?.username && dIDCredentials?.password && form.address) {
+      setTestinConnection(true)
+      try {
+        const peerId = await newFulaClient()
+        if (peerId) {
+          const connection = await fula.checkConnection()
+          if (connection) {
+            Toast.show({
+              type: 'success',
+              text1: 'Connected successfully!',
+              position: 'bottom',
+              bottomOffset: 0,
+            })
+          } else {
+            Toast.show({
+              type: 'error',
+              text1: 'Failed',
+              text2: 'Unable to connect to this address!',
+              position: 'bottom',
+              bottomOffset: 0,
+            })
           }
         } else {
           Toast.show({
             type: 'error',
-            text1: 'Connection failed!',
+            text1: 'Invalid Address',
+            text2: 'Please make sure the address is a valid address!',
             position: 'bottom',
             bottomOffset: 0,
           })
         }
+
       } catch (error) {
-        console.log('checkConnection', error)
         Toast.show({
           type: 'error',
           text1: 'Unknown error',
