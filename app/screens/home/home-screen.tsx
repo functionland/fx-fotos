@@ -167,7 +167,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
       const box = (await Boxs.getAll())?.[0]
       if (box) {
-        console.log('box.address', box?.address)
         const fulaInit = await fula.init(
           keyPair.secretKey.toString(), //bytes of the privateKey of did identity in string format
           `${deviceUtils.DocumentDirectoryPath}/wnfs`, // leave empty to use the default temp one
