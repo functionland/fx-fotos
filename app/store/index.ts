@@ -36,3 +36,8 @@ export const dIDCredentialsState = atom<KeyChain.UserCredentials>({
   key: 'dIDCredentials',
   default: null,
 })
+
+export const fulaPeerIdState = atom<KeyChain.UserCredentials>({
+  key: 'fulaPeerIdState',
+  default: null,
+})

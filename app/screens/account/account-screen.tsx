@@ -16,7 +16,7 @@ import {
 import { AppNavigationNames, RootStackParamList } from '../../navigators'
 import * as helper from '../../utils/helper'
 import { useRecoilState } from 'recoil'
-import { dIDCredentialsState } from '../../store'
+import { dIDCredentialsState, fulaPeerIdState } from '../../store'
 import Clipboard from '@react-native-clipboard/clipboard'
 
 type Props = NativeStackScreenProps<
@@ -28,6 +28,8 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
   const walletConnector = useWalletConnect()
   const [dIDCredentials, setDIDCredentialsState] =
     useRecoilState(dIDCredentialsState)
+  const [fulaPeerId] =
+    useRecoilState(fulaPeerIdState)
   const [did, setDID] = useState(null)
   useEffect(() => {
     if (dIDCredentials?.username) {
@@ -88,6 +90,24 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
       console.log(error)
     }
   }
+  const copyToClipboardDID = (did: string) => {
+    Clipboard.setString(did)
+    Toast.show({
+      type: 'success',
+      text1: 'Your DID copied to the clipboard!',
+      position: 'bottom',
+      bottomOffset: 0,
+    })
+  }
+  const copyToClipboardPeerId = (peerId: string) => {
+    Clipboard.setString(peerId)
+    Toast.show({
+      type: 'success',
+      text1: 'Your peerId copied to the clipboard!',
+      position: 'bottom',
+      bottomOffset: 0,
+    })
+  }
   const renderHeader = () => (
     <Header
       centerComponent={
@@ -147,8 +167,8 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
                       walletConnector.peerMeta?.icons?.[0].endsWith('.svg')
                         ? helper.getWalletImage(walletConnector.peerMeta?.name)
                         : {
-                            uri: walletConnector.peerMeta?.icons?.[0],
-                          }
+                          uri: walletConnector.peerMeta?.icons?.[0],
+                        }
                     }
                     style={{
                       height: 90,
@@ -186,23 +206,47 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
               </View>
               {did && (
                 <View style={styles.section}>
-                  <Text h4>Your DID</Text>
-                  <Text ellipsizeMode="tail" style={styles.textCenter}>
-                    {did}
-                  </Text>
-                  <Icon
-                    name="content-copy"
-                    type="material-community"
-                    onPress={() => {
-                      Clipboard.setString(did)
-                      Toast.show({
-                        type: 'success',
-                        text1: 'Your DID copied to the clipboard!',
-                        position: 'bottom',
-                        bottomOffset: 0,
-                      })
-                    }}
-                  />
+                  <ListItem onPress={() => copyToClipboardDID(did)}
+                    containerStyle={{ width: "100%" }}>
+                    <ListItem.Content>
+                      <View style={{ flexDirection: 'row' }}>
+                        <Card.Title
+                          style={{
+                            textAlign: 'left',
+                            paddingRight: 10
+                          }}
+                        >
+                          YOUR DID
+                        </Card.Title>
+                        <Icon
+                          name="content-copy"
+                          type="material-community"
+                        />
+                      </View>
+                      <ListItem.Subtitle> {did}</ListItem.Subtitle>
+                    </ListItem.Content>
+
+                  </ListItem>
+                  {fulaPeerId && <ListItem onPress={() => copyToClipboardPeerId(fulaPeerId.password)}
+                    containerStyle={{ width: "100%" }}>
+                    <ListItem.Content>
+                      <View style={{ flexDirection: 'row' }}>
+                        <Card.Title
+                          style={{
+                            textAlign: 'left',
+                            paddingRight: 10
+                          }}
+                        >
+                          YOUR PEERID
+                        </Card.Title>
+                        <Icon
+                          name="content-copy"
+                          type="material-community"
+                        />
+                      </View>
+                      <ListItem.Subtitle> {fulaPeerId.password}</ListItem.Subtitle>
+                    </ListItem.Content>
+                  </ListItem>}
                 </View>
               )}
             </>
