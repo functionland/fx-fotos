@@ -160,6 +160,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   }
   const initFula = async (password: string, signiture: string) => {
     try {
+      if (await fula.isReady())
+        return
+
       const keyPair = helper.getMyDIDKeyPair(password, signiture)
       const fulaRootObject = await KeyChain.load(
         KeyChain.Service.FULARootObject,

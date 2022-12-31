@@ -127,7 +127,8 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
     if (dIDCredentials?.username && dIDCredentials?.password && form.address) {
       const keyPair = helper.getMyDIDKeyPair(dIDCredentials.username, dIDCredentials.password)
       try {
-        await fula.shutdown()
+        if (await fula.isReady())
+          await fula.shutdown()
         const peerId = await fula.newClient(
           keyPair.secretKey.toString(), //bytes of the privateKey of did identity in string format
           `${deviceUtils.DocumentDirectoryPath}/wnfs`, // leave empty to use the default temp one
