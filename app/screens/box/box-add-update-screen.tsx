@@ -22,10 +22,11 @@ import { Screen } from '../../components'
 import { Boxs } from '../../services/localdb'
 import { BoxEntity } from '../../realmdb/entities'
 import { RootStackParamList, AppNavigationNames } from '../../navigators'
-import { useRecoilState } from 'recoil'
-import { dIDCredentialsState } from '../../store'
+import { useRecoilState, useSetRecoilState } from 'recoil'
+import { dIDCredentialsState, fulaPeerIdState } from '../../store'
 import deviceUtils from '../../utils/deviceUtils'
 import Toast from 'react-native-toast-message'
+import * as KeyChain from '../../utils/keychain'
 
 
 type Props = NativeStackScreenProps<
@@ -43,6 +44,8 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
   const [testingConnection, setTestinConnection] = useState(false)
   const [dIDCredentials, setDIDCredentialsState] =
     useRecoilState(dIDCredentialsState)
+  const setFulaPeerId =
+    useSetRecoilState(fulaPeerIdState)
 
   useEffect(() => {
     if (route.params?.box?.peerId) {
@@ -74,12 +77,38 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
   )
   const addUpdate = async () => {
     try {
+      if (pressed.current)
+        return
       pressed.current = true
       if (!form.name) {
-        Alert.alert('Warning', 'Please fill the name fields!')
+        Alert.alert('Warning', 'Please fill the name field!')
         return
       }
-      //await fula.addBox(form.address)
+      try {
+        const peerId = await newFulaClient()
+        if (peerId) {
+          const fulaPeerId = await KeyChain.save(
+            'peerId',
+            peerId,
+            KeyChain.Service.FULAPeerIdObject,
+          )
+          if (fulaPeerId) {
+            setFulaPeerId(fulaPeerId)
+          }
+        } else {
+          throw 'Address is invalid'
+        }
+
+      } catch (error) {
+        Toast.show({
+          type: 'error',
+          text1: 'Invalid Address',
+          text2: 'Please make sure the address is a valid address!',
+          position: 'bottom',
+          bottomOffset: 0,
+        })
+        return
+      }
       const box = {
         name: form.name,
         address: form.address,
@@ -89,37 +118,65 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
       navigation.pop()
     } catch (error) {
       console.log(error)
-      Alert.alert('Error', 'Make sure the address format is correct!')
     } finally {
       pressed.current = false
     }
   }
+
+  const newFulaClient = async () => {
+    if (dIDCredentials?.username && dIDCredentials?.password && form.address) {
+      const keyPair = helper.getMyDIDKeyPair(dIDCredentials.username, dIDCredentials.password)
+      try {
+        if (await fula.isReady())
+          await fula.shutdown()
+        const peerId = await fula.newClient(
+          keyPair.secretKey.toString(), //bytes of the privateKey of did identity in string format
+          `${deviceUtils.DocumentDirectoryPath}/wnfs`, // leave empty to use the default temp one
+          form.address,
+          '', //leave empty for testing without a backend node
+          false
+        )
+        return peerId
+      } catch (error) {
+        console.log('newFulaClient', error)
+        return null
+      }
+    }
+  }
+
   const checkConnection = async () => {
     if (dIDCredentials?.username && dIDCredentials?.password && form.address) {
       setTestinConnection(true)
-      const keyPair = helper.getMyDIDKeyPair(dIDCredentials.username, dIDCredentials.password)
       try {
-        const newClient = await fula.newClient(
-          keyPair.secretKey.toString(), //bytes of the privateKey of did identity in string format
-          `${deviceUtils.DocumentDirectoryPath}/testconnection`, // leave empty to use the default temp one
-          form.address,
-          '', //leave empty for testing without a backend node
-        )
-        if (newClient) {
-          Toast.show({
-            type: 'success',
-            text1: 'Connected successfully!',
-            position: 'bottom',
-            bottomOffset: 0,
-          })
+        const peerId = await newFulaClient()
+        if (peerId) {
+          const connection = await fula.checkConnection()
+          if (connection) {
+            Toast.show({
+              type: 'success',
+              text1: 'Connected successfully!',
+              position: 'bottom',
+              bottomOffset: 0,
+            })
+          } else {
+            Toast.show({
+              type: 'error',
+              text1: 'Failed',
+              text2: 'Unable to connect to this address!',
+              position: 'bottom',
+              bottomOffset: 0,
+            })
+          }
         } else {
           Toast.show({
             type: 'error',
-            text1: 'Connection failed!',
+            text1: 'Invalid Address',
+            text2: 'Please make sure the address is a valid address!',
             position: 'bottom',
             bottomOffset: 0,
           })
         }
+
       } catch (error) {
         Toast.show({
           type: 'error',

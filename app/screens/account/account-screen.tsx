@@ -227,7 +227,7 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
                     </ListItem.Content>
 
                   </ListItem>
-                  {fulaPeerId && <ListItem onPress={() => copyToClipboardPeerId(fulaPeerId.password)}
+                  <ListItem onPress={() => fulaPeerId ? copyToClipboardPeerId(fulaPeerId.password) : null}
                     containerStyle={{ width: "100%" }}>
                     <ListItem.Content>
                       <View style={{ flexDirection: 'row' }}>
@@ -239,14 +239,14 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
                         >
                           YOUR PEERID
                         </Card.Title>
-                        <Icon
+                        {fulaPeerId && <Icon
                           name="content-copy"
                           type="material-community"
-                        />
+                        />}
                       </View>
-                      <ListItem.Subtitle> {fulaPeerId.password}</ListItem.Subtitle>
+                      <ListItem.Subtitle> {fulaPeerId ? fulaPeerId.password : 'To get your peerId, First add a valid blox address!'}</ListItem.Subtitle>
                     </ListItem.Content>
-                  </ListItem>}
+                  </ListItem>
                 </View>
               )}
             </>

@@ -66,7 +66,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [dIDCredentials, setDIDCredentialsState] =
     useRecoilState(dIDCredentialsState)
 
-  const [, setFulaPeerid] =
+  const [, setFulaPeerId] =
     useRecoilState(fulaPeerIdState)
   const setFoldersSettings = useSetRecoilState(foldersSettingsState)
 
@@ -147,19 +147,22 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   }
 
   const initDID = async () => {
-    const didCredentials = await KeyChain.load(KeyChain.Service.DIDCredentials)
-    if (didCredentials) {
+    const didCredentialsObj = await KeyChain.load(KeyChain.Service.DIDCredentials)
+    if (didCredentialsObj) {
       const fulaPeerIdObject = await KeyChain.load(
         KeyChain.Service.FULAPeerIdObject,
       )
       if (fulaPeerIdObject) {
-        setFulaPeerid(fula.password)
+        setFulaPeerId(fulaPeerIdObject)
       }
-      setDIDCredentialsState(didCredentials)
+      setDIDCredentialsState(didCredentialsObj)
     }
   }
   const initFula = async (password: string, signiture: string) => {
     try {
+      if (await fula.isReady())
+        return
+
       const keyPair = helper.getMyDIDKeyPair(password, signiture)
       const fulaRootObject = await KeyChain.load(
         KeyChain.Service.FULARootObject,
@@ -167,7 +170,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
       const box = (await Boxs.getAll())?.[0]
       if (box) {
-        console.log('box.address', box?.address)
         const fulaInit = await fula.init(
           keyPair.secretKey.toString(), //bytes of the privateKey of did identity in string format
           `${deviceUtils.DocumentDirectoryPath}/wnfs`, // leave empty to use the default temp one
@@ -183,13 +185,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             KeyChain.Service.FULARootObject,
           )
         }
-        const fulaPerrId = await KeyChain.save(
+        const fulaPeerId = await KeyChain.save(
           'peerId',
           fulaInit.peerId,
           KeyChain.Service.FULAPeerIdObject,
         )
-        if (fulaPerrId) {
-          setFulaPeerid(fulaPerrId)
+        if (fulaPeerId) {
+          setFulaPeerId(fulaPeerId)
         }
         const checkFailedActions = await fula.checkFailedActions(true)
       }
