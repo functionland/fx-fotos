@@ -80,7 +80,7 @@ import com.android.build.OutputFile
 
 project.ext.react = [
     entryFile: "index.js",
-    enableHermes: false,  // clean and rebuild if changing
+    enableHermes: true,  // clean and rebuild if changing
     cliPath: new File(["node", "--print", "require.resolve('react-native/package.json')"].execute().text.trim(), "../cli.js"),
 ]
 
@@ -139,7 +139,7 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 10
-        versionName "0.8.5"
+        versionName "0.8.6"
     }
     splits {
         abi {
