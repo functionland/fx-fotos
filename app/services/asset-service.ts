@@ -47,7 +47,7 @@ export const categorizeAssets = (assets: Asset[], storyHighlight = false) => {
       (storyHighlight &&
         asset?.modificationTime &&
         (Platform.OS === 'ios' ||
-          asset.uri?.toLowerCase().includes('/dcim/camera/')))
+          asset.uri?.includes('/DCIM/Camera/')))
     ) {
       const categoryName = getAssetStoryCategory(
         assets?.[0].modificationTime,
