@@ -28,9 +28,16 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
   const walletConnector = useWalletConnect()
   const [dIDCredentials, setDIDCredentialsState] =
     useRecoilState(dIDCredentialsState)
-  const [fulaPeerId] =
+  const [fulaPeerId, setFulaPeerId] =
     useRecoilState(fulaPeerIdState)
   const [did, setDID] = useState(null)
+
+  useEffect(() => {
+    if (!fulaPeerId) {
+      loadPeerId()
+    }
+  }, [])
+
   useEffect(() => {
     if (dIDCredentials?.username) {
       const myDID = helper.getMyDID(
@@ -40,6 +47,14 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
       setDID(myDID)
     }
   }, [dIDCredentials])
+
+  const loadPeerId = async () => {
+    const peerIdObj = await helper.getFulaPeerId()
+    if (peerIdObj) {
+      setFulaPeerId(peerIdObj)
+    }
+  }
+  
   const connectToWallet = async () => {
     navigation.navigate(AppNavigationNames.ConnectWalletScreen)
   }

@@ -1,4 +1,5 @@
 import { HDKEY, DID, EncryptJWT, DecryptJWT } from '@functionland/fula-sec'
+import { KeyChain } from '.'
 export const translateOrigin = (center: number, d: number) => center - d / 2
 export const convertDurationToTime = (duration: number): string => {
   const h = Math.floor(duration / 3600)
@@ -56,4 +57,29 @@ export const secondToTimeString = (second: number) => {
   date.setSeconds(Math.floor(second))
   if (Math.floor(second) > 60 * 60) return date.toISOString().substring(11, 19)
   else return date.toISOString().substring(14, 19)
+}
+
+export const storeFulaRootCID = async (rootCID: string): Promise<false | KeyChain.UserCredentials> => {
+  return await KeyChain.save(
+    'rootCid',
+    rootCID,
+    KeyChain.Service.FULARootObject,
+  )
+}
+export const getFulaRootCID = async (): Promise<false | KeyChain.UserCredentials> => {
+  return await KeyChain.load(
+    KeyChain.Service.FULARootObject,
+  )
+}
+export const storeFulaPeerId = async (peerId: string): Promise<false | KeyChain.UserCredentials> => {
+  return await KeyChain.save(
+    'peerId',
+    peerId,
+    KeyChain.Service.FULAPeerIdObject,
+  )
+}
+export const getFulaPeerId = async (): Promise<false | KeyChain.UserCredentials> => {
+  return await KeyChain.load(
+    KeyChain.Service.FULAPeerIdObject,
+  )
 }

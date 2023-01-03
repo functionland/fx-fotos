@@ -163,37 +163,19 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       if (await fula.isReady())
         return
 
-      const keyPair = helper.getMyDIDKeyPair(password, signiture)
-      const fulaRootObject = await KeyChain.load(
-        KeyChain.Service.FULARootObject,
-      )
-
       const box = (await Boxs.getAll())?.[0]
       if (box) {
-        const fulaInit = await fula.init(
-          keyPair.secretKey.toString(), //bytes of the privateKey of did identity in string format
-          `${deviceUtils.DocumentDirectoryPath}/wnfs`, // leave empty to use the default temp one
-          box.address ? box.address : '',
-          box.address ? '' : 'noop', //leave empty for testing without a backend node
-          false,
-          fulaRootObject ? fulaRootObject.password : null
-        )
-        if (!fulaRootObject && fulaInit) {
-          await KeyChain.save(
-            'rootCid',
-            fulaInit.rootCid,
-            KeyChain.Service.FULARootObject,
-          )
+        const fulaInit = await SyncService.initFula({
+          bloxAddr: box.address,
+          exchange: box.address ? '' : 'noop',
+        })
+      
+        if (fulaInit) {
+          await helper.storeFulaRootCID(fulaInit.rootCid)
+          const fulaPeerId = await helper.storeFulaPeerId(fulaInit.peerId)
+          if (fulaPeerId) setFulaPeerId(fulaPeerId)
+          await fula.checkFailedActions(true)
         }
-        const fulaPeerId = await KeyChain.save(
-          'peerId',
-          fulaInit.peerId,
-          KeyChain.Service.FULAPeerIdObject,
-        )
-        if (fulaPeerId) {
-          setFulaPeerId(fulaPeerId)
-        }
-        const checkFailedActions = await fula.checkFailedActions(true)
       }
     } catch (error) {
       console.log('fulaInit Error', error)
