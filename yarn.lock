@@ -1870,8 +1870,8 @@
     uint8arrays "^3.0.0"
 
 "@functionland/react-native-fula@github:https://github.com/functionland/react-native-fula.git":
-  version "1.0.8"
-  resolved "https://codeload.github.com/functionland/react-native-fula/tar.gz/479573323f5bbda1247d3facd019144971237988"
+  version "1.0.9"
+  resolved "https://codeload.github.com/functionland/react-native-fula/tar.gz/f4d0acaf5c776172eee5ea52dd0b317300eddeaf"
 
 "@gar/promisify@^1.0.1":
   version "1.1.3"

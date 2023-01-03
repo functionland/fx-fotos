@@ -271,7 +271,7 @@ export const ImageGalleryViewerScreen: React.FC<
           try {
             Toast.show({
               type: 'info',
-              text1: 'Adding file to wnfds ...',
+              text1: 'Uploading asset ...',
               position: 'bottom',
               bottomOffset: 0,
             })
