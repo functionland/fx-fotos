@@ -10,7 +10,8 @@ import { SyncStatus } from '../types'
 import { Assets, Boxs, FolderSettings } from './localdb/index'
 import * as Constances from './../utils/constance'
 import { reject } from 'lodash'
-import deviceUtils from '../utils/deviceUtils'
+import { Helper, DeviceUtils, KeyChain } from '../utils'
+
 // import * as helper from '../utils/helper'
 
 type TaskParams = {
@@ -40,6 +41,12 @@ const backgroundTask = async (taskParameters: TaskParams) => {
   const updateAssets: AssetEntity[] = []
 
   try {
+    const fulaConfig = await initFula()
+    if (fulaConfig) {
+      Helper.storeFulaPeerId(fulaConfig.peerId)
+      Helper.storeFulaRootCID(fulaConfig.rootCid)
+    }
+
     for (let index = 0; index < assets.length; index++) {
       const asset = assets[index]
 
@@ -125,7 +132,7 @@ export const downloadAsset = async ({
 }) => {
   try {
     if (!localStorePath) {
-      localStorePath = `${deviceUtils.DocumentDirectoryPath}/fula/${filename}`
+      localStorePath = `${DeviceUtils.DocumentDirectoryPath}/fula/${filename}`
     }
     console.log(
       'downloadAsset',
@@ -187,6 +194,68 @@ export const unSetAutoBackupAssets = async (folders: string[]) => {
         syncStatus: SyncStatus.NOTSYNCED,
       })),
     )
+  }
+}
+interface FulaConfig {
+  identity?: string | null,
+  storePath?: string | null,
+  bloxAddr?: string | null,
+  exchange?: string | null,
+  autoFlush?: boolean,
+  rootCID?: string | null
+}
+export const initFula = async (config?: FulaConfig): Promise<{ peerId: string; rootCid: string; private_ref: string } | undefined> => {
+  try {
+    let {
+      identity = null,
+      storePath = null,
+      bloxAddr = null,
+      exchange = 'noop',
+      autoFlush = false,
+      rootCID = null
+    } = config || {}
+    
+    const isReady = await fula.isReady()
+    if (isReady)
+      return
+
+    if (!identity) {
+      const didCredentialsObj = await KeyChain.load(KeyChain.Service.DIDCredentials)
+      if (didCredentialsObj) {
+        const keyPair = Helper.getMyDIDKeyPair(didCredentialsObj.username, didCredentialsObj.password)
+        identity = keyPair.secretKey.toString()
+      } else
+        throw 'Could not find default identity from KeyChain!'
+    }
+    if (!rootCID) {
+      const fulaRootObject = await KeyChain.load(
+        KeyChain.Service.FULARootObject,
+      )
+      if (fulaRootObject) {
+        rootCID = fulaRootObject.password
+      }
+    }
+    if (!storePath) {
+      storePath = `${DeviceUtils.DocumentDirectoryPath}/wnfs`
+    }
+    if (!bloxAddr) {
+      const box = (await Boxs.getAll())?.[0]
+      if (box) {
+        bloxAddr = box?.address as string
+      } else
+        throw 'Could not find default blox address!'
+    }
+    const fulaInit = await fula.init(
+      identity, //bytes of the privateKey of did identity in string format
+      storePath, // leave empty to use the default temp one
+      bloxAddr,
+      exchange,
+      autoFlush,
+      rootCID
+    )
+    return fulaInit
+  } catch (error) {
+    console.log('fulaInit Error', error)
   }
 }
 
