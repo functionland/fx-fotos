@@ -8,7 +8,7 @@ import { fula } from '@functionland/react-native-fula'
 import { AssetEntity } from '../realmdb/entities'
 import { SyncStatus } from '../types'
 import { Assets, Boxs, FolderSettings } from './localdb/index'
-import * as Constances from './../utils/constance'
+import * as Constances from '../utils/constants'
 import { reject } from 'lodash'
 import { Helper, DeviceUtils, KeyChain } from '../utils'
 
