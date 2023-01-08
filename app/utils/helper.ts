@@ -1,5 +1,6 @@
 import { HDKEY, DID, EncryptJWT, DecryptJWT } from '@functionland/fula-sec'
 import { KeyChain } from '.'
+import { BoxEntity } from '../realmdb/entities'
 export const translateOrigin = (center: number, d: number) => center - d / 2
 export const convertDurationToTime = (duration: number): string => {
   const h = Math.floor(duration / 3600)
@@ -59,27 +60,42 @@ export const secondToTimeString = (second: number) => {
   else return date.toISOString().substring(14, 19)
 }
 
-export const storeFulaRootCID = async (rootCID: string): Promise<false | KeyChain.UserCredentials> => {
+export const storeFulaRootCID = async (
+  rootCID: string,
+): Promise<false | KeyChain.UserCredentials> => {
   return await KeyChain.save(
     'rootCid',
     rootCID,
     KeyChain.Service.FULARootObject,
   )
 }
-export const getFulaRootCID = async (): Promise<false | KeyChain.UserCredentials> => {
-  return await KeyChain.load(
-    KeyChain.Service.FULARootObject,
-  )
+export const getFulaRootCID = async (): Promise<
+  false | KeyChain.UserCredentials
+> => {
+  return await KeyChain.load(KeyChain.Service.FULARootObject)
 }
-export const storeFulaPeerId = async (peerId: string): Promise<false | KeyChain.UserCredentials> => {
+export const storeFulaPeerId = async (
+  peerId: string,
+): Promise<false | KeyChain.UserCredentials> => {
   return await KeyChain.save(
     'peerId',
     peerId,
     KeyChain.Service.FULAPeerIdObject,
   )
 }
-export const getFulaPeerId = async (): Promise<false | KeyChain.UserCredentials> => {
-  return await KeyChain.load(
-    KeyChain.Service.FULAPeerIdObject,
-  )
+export const getFulaPeerId = async (): Promise<
+  false | KeyChain.UserCredentials
+> => {
+  return await KeyChain.load(KeyChain.Service.FULAPeerIdObject)
+}
+
+export const generateBloxAddress = (box: BoxEntity) => {
+  if (!box || !box.peerId) {
+    throw 'Blox complex addres is invalid!'
+  }
+  if (box.connection) {
+    return `${box.connection}/p2p/${box.peerId}`.trim()
+  } else {
+    return `/ip4/${box.ipAddress}/${box.protocol}/${box.port}/p2p/${box.peerId}`.trim()
+  }
 }
