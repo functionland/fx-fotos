@@ -91,7 +91,7 @@ export const getFulaPeerId = async (): Promise<
 
 export const generateBloxAddress = (box: BoxEntity) => {
   if (!box || !box.peerId) {
-    throw 'Blox complex addres is invalid!'
+    throw 'Blox complex address is invalid!'
   }
   if (box.connection) {
     return `${box.connection}/p2p/${box.peerId}`.trim()
