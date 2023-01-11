@@ -1,24 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Alert, StyleProp, StyleSheet, View, ViewStyle } from 'react-native'
 import { Button, Icon, Input, Text } from '@rneui/themed'
-import { fula } from "@functionland/react-native-fula"
+import { fula } from '@functionland/react-native-fula'
 import * as helper from '../../utils/helper'
 
-import {
-  NativeStackNavigationProp,
-  NativeStackScreenProps,
-} from '@react-navigation/native-stack'
-import { StyleProps } from 'react-native-reanimated'
-import {
-  HomeNavigationParamList,
-  HomeNavigationTypes,
-} from '../../navigators/home-navigator'
-import {
-  Header,
-  HeaderLeftContainer,
-  HeaderArrowBack,
-} from '../../components/header'
-import { Screen } from '../../components'
+import { NativeStackScreenProps } from '@react-navigation/native-stack'
+import { Header, HeaderArrowBack } from '../../components/header'
+import { Screen, SelectInput, SelectInputItem } from '../../components'
 import { Boxs } from '../../services/localdb'
 import { BoxEntity } from '../../realmdb/entities'
 import { RootStackParamList, AppNavigationNames } from '../../navigators'
@@ -27,38 +15,46 @@ import { dIDCredentialsState, fulaPeerIdState } from '../../store'
 import deviceUtils from '../../utils/deviceUtils'
 import Toast from 'react-native-toast-message'
 import * as KeyChain from '../../utils/keychain'
-
+import { BLOX_CONNECTION_TYPES } from '../../utils/constants'
+import { Helper } from '../../utils'
 
 type Props = NativeStackScreenProps<
   RootStackParamList,
   AppNavigationNames.BoxAddUpdate
 >
 interface AddUpdateForm {
-  peerId?: string | undefined
+  id: string | undefined
   name: string | undefined
-  address: string | undefined
+  connection: string | undefined
+  protocol: string
+  ipAddress: string | undefined
+  port: string
+  peerId?: string | undefined
 }
 export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
   const pressed = useRef<boolean>(false)
   const [form, setForm] = useState<AddUpdateForm>(null)
+  const [formErros, setFormErros] = useState<Record<string, string>>({})
   const [testingConnection, setTestinConnection] = useState(false)
   const [dIDCredentials, setDIDCredentialsState] =
     useRecoilState(dIDCredentialsState)
-  const setFulaPeerId =
-    useSetRecoilState(fulaPeerIdState)
-
+  const setFulaPeerId = useSetRecoilState(fulaPeerIdState)
   useEffect(() => {
-    if (route.params?.box?.peerId) {
+    if (route.params?.box?.id) {
       setForm({
-        peerId: route.params?.box?.peerId,
-        name: route.params?.box?.name,
-        address: route.params?.box?.address,
+        ...route.params?.box,
+        port: route.params?.box?.port?.toString(),
       })
     } else {
       setForm({
-        peerId: undefined,
+        id: undefined,
         name: '',
-        address: '',
+        connection: BLOX_CONNECTION_TYPES.find(item => item.title === 'FxRelay')
+          ?.value,
+        port: '40001',
+        protocol: 'tcp',
+        ipAddress: '',
+        peerId: '',
       })
     }
   }, [])
@@ -66,7 +62,7 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
     <Header
       centerComponent={
         <Text lineBreakMode="tail" h4>
-          {form && form.peerId ? 'Edit blox' : 'Add blox'}
+          {form && form.id ? 'Edit Blox' : 'Add Blox'}
         </Text>
       }
       leftComponent={<HeaderArrowBack navigation={navigation} />}
@@ -75,13 +71,36 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
       }
     />
   )
+  const validateForm = (): boolean => {
+    const errors = {}
+    if (!form.name) {
+      errors['name'] = 'The Blox name is mandatory'
+    }
+    if (!form.connection && !form.ipAddress) {
+      errors['ipAddress'] = 'The Blox IP address is mandatory'
+    }
+    if (!form.connection && !form.port) {
+      errors['port'] = 'The Blox port number is mandatory'
+    } else if (
+      !form.connection &&
+      (isNaN(Number(form.port)) || !Number.isInteger(Number(form.port)))
+    ) {
+      errors['port'] = 'The Blox port number is invalid'
+    }
+    if (!form.peerId) {
+      errors['peerId'] = 'The Blox peerId is mandatory'
+    }
+    if (Object.keys(errors)?.length > 0) {
+      setFormErros(errors)
+      return false
+    }
+    return true
+  }
   const addUpdate = async () => {
     try {
-      if (pressed.current)
-        return
+      if (pressed.current) return
       pressed.current = true
-      if (!form.name) {
-        Alert.alert('Warning', 'Please fill the name field!')
+      if (!validateForm()) {
         return
       }
       try {
@@ -98,8 +117,9 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
         } else {
           throw 'Address is invalid'
         }
-
       } catch (error) {
+        console.log('error', error)
+
         Toast.show({
           type: 'error',
           text1: 'Invalid Address',
@@ -110,8 +130,12 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
         return
       }
       const box = {
+        id: form.id,
         name: form.name,
-        address: form.address,
+        connection: form.connection,
+        ipAddress: form.ipAddress,
+        protocol: form.protocol,
+        port: Number(form.port),
         peerId: form.peerId,
       } as BoxEntity
       await Boxs.addOrUpdate([box])
@@ -124,17 +148,21 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
   }
 
   const newFulaClient = async () => {
-    if (dIDCredentials?.username && dIDCredentials?.password && form.address) {
-      const keyPair = helper.getMyDIDKeyPair(dIDCredentials.username, dIDCredentials.password)
+    if (dIDCredentials?.username && dIDCredentials?.password) {
+      const keyPair = helper.getMyDIDKeyPair(
+        dIDCredentials.username,
+        dIDCredentials.password,
+      )
       try {
-        if (await fula.isReady())
-          await fula.shutdown()
+        const bloxAddress = Helper.generateBloxAddress({ ...form } as BoxEntity)
+        const isReady = await fula.isReady()
+        if (isReady) await fula.shutdown()
         const peerId = await fula.newClient(
           keyPair.secretKey.toString(), //bytes of the privateKey of did identity in string format
           `${deviceUtils.DocumentDirectoryPath}/wnfs`, // leave empty to use the default temp one
-          form.address,
-          '', //leave empty for testing without a backend node
-          false
+          bloxAddress,
+          '',
+          false,
         )
         return peerId
       } catch (error) {
@@ -145,7 +173,7 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
   }
 
   const checkConnection = async () => {
-    if (dIDCredentials?.username && dIDCredentials?.password && form.address) {
+    if (dIDCredentials?.username && dIDCredentials?.password) {
       setTestinConnection(true)
       try {
         const peerId = await newFulaClient()
@@ -176,7 +204,6 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
             bottomOffset: 0,
           })
         }
-
       } catch (error) {
         Toast.show({
           type: 'error',
@@ -189,7 +216,6 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
         setTestinConnection(false)
       }
     }
-
   }
   return (
     <Screen
@@ -204,13 +230,10 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
           label="Name"
           defaultValue={form?.name}
           returnKeyType="next"
-          placeholder="Choose a nickname for your blox"
+          placeholder="Choose a nickname for your Blox"
           leftIcon={{
             type: 'material-community',
             name: 'alpha-f-box-outline',
-          }}
-          containerStyle={{
-            marginTop: 20,
           }}
           onChangeText={text => {
             setForm(prev => ({
@@ -218,12 +241,93 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
               name: text,
             }))
           }}
-          errorProps
+          errorMessage={formErros?.['name']}
         />
+        <SelectInput
+          label="Connection"
+          placeholder="Choose a nickname for your Blox"
+          leftIcon={{
+            type: 'material-community',
+            name: 'alpha-f-box-outline',
+          }}
+          onSelectChange={item => {
+            setForm(prev => ({
+              ...prev,
+              connection: item.value,
+            }))
+          }}
+          items={BLOX_CONNECTION_TYPES.map<SelectInputItem>(item => ({
+            value: item.value,
+            title: item.title,
+            description: item.description,
+          }))}
+          errorMessage={formErros?.['connection']}
+        />
+        {!form?.connection && (
+          <Input
+            label="IP Address"
+            defaultValue={form?.ipAddress}
+            returnKeyType="next"
+            placeholder="Enter the Blox IP address"
+            leftIcon={{
+              type: 'material-community',
+              name: 'alpha-f-box-outline',
+            }}
+            onChangeText={text => {
+              setForm(prev => ({
+                ...prev,
+                ipAddress: text,
+              }))
+            }}
+            errorMessage={formErros?.['ipAddress']}
+          />
+        )}
+        {!form?.connection && (
+          <Input
+            label="Port"
+            keyboardType="numeric"
+            defaultValue={form?.port}
+            returnKeyType="next"
+            placeholder="Enter the Blox port number (40001)"
+            leftIcon={{
+              type: 'material-community',
+              name: 'alpha-f-box-outline',
+            }}
+            onChangeText={text => {
+              setForm(prev => ({
+                ...prev,
+                port: text,
+              }))
+            }}
+            errorMessage={formErros?.['port']}
+          />
+        )}
+        {!form?.connection && (
+          <SelectInput
+            label="Protocol"
+            leftIcon={{
+              type: 'material-community',
+              name: 'alpha-f-box-outline',
+            }}
+            onSelectChange={item => {
+              setForm(prev => ({
+                ...prev,
+                protocol: item.value,
+              }))
+            }}
+            items={[
+              {
+                title: 'TCP',
+                value: 'tcp',
+              },
+            ]}
+            errorMessage={formErros?.['protocol']}
+          />
+        )}
         <Input
-          label="Address"
-          defaultValue={form?.address}
-          placeholder="Leave it empty just for test"
+          label="Blox PeerId"
+          defaultValue={form?.peerId}
+          placeholder="Enter the Blox peerId"
           leftIcon={{
             type: 'material-community',
             name: 'transit-connection-variant',
@@ -231,15 +335,17 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
           onChangeText={text => {
             setForm(prev => ({
               ...prev,
-              address: text,
+              peerId: text,
             }))
           }}
+          errorMessage={formErros?.['peerId']}
         />
-        <Button title="Test the connection"
+        <Button
+          title="Test the connection"
           loading={testingConnection}
-          disabled={!form?.address}
-          onPress={checkConnection}>
-        </Button>
+          disabled={!form?.peerId}
+          onPress={checkConnection}
+        ></Button>
       </>
     </Screen>
   )

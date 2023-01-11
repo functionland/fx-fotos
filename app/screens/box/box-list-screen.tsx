@@ -36,14 +36,13 @@ export const BoxListScreen: React.FC<Props> = ({ route, navigation }) => {
 
   const loadBoxs = async () => {
     try {
-      const boxs = await Boxs.getAll()
-      setBoxs(boxs.map(m => m.toJSON()))
+      const boxList = await Boxs.getAll()
+      setBoxs(boxList.map(m => m.toJSON()))
     } catch (error) {
       console.log('loadBoxs', error)
     } finally {
       setReady(true)
     }
-
   }
   const deleteBox = async (box: BoxEntity) => {
     try {
@@ -67,14 +66,16 @@ export const BoxListScreen: React.FC<Props> = ({ route, navigation }) => {
         leftComponent={<HeaderArrowBack navigation={navigation} />}
         rightComponent={
           <HeaderRightContainer>
-            {ready && boxs?.length<1 && <Icon
-              type="material-community"
-              name="plus"
-              size={28}
-              onPress={() =>
-                navigation.navigate(AppNavigationNames.BoxAddUpdate)
-              }
-            />}
+            {ready && boxs?.length < 1 && (
+              <Icon
+                type="material-community"
+                name="plus"
+                size={28}
+                onPress={() =>
+                  navigation.navigate(AppNavigationNames.BoxAddUpdate)
+                }
+              />
+            )}
           </HeaderRightContainer>
         }
       />
@@ -82,7 +83,6 @@ export const BoxListScreen: React.FC<Props> = ({ route, navigation }) => {
   )
 
   const onItemPress = (box: BoxEntity) => {
-    console.log('onItemPress', box)
     navigation.navigate(AppNavigationNames.BoxAddUpdate, {
       box,
     })
@@ -95,7 +95,7 @@ export const BoxListScreen: React.FC<Props> = ({ route, navigation }) => {
           {item.name || 'No name'}
         </ListItem.Title>
         <ListItem.Subtitle lineBreakMode="tail">
-          {item.address}
+          {item.peerId}
         </ListItem.Subtitle>
       </ListItem.Content>
       <Icon

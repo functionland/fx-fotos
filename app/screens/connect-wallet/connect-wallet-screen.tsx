@@ -79,7 +79,7 @@ export const ConnectWalletScreen: React.FC<Props> = ({ navigation, route }) => {
         </View>
         <View style={styles.section}>
           <Text style={{ textAlign: 'center' }}>
-            You need to connect the Fx Fotos to a wallet to generate your
+            You need to connect the FxFotos to a wallet to generate your
             decentralized ID (DID)
           </Text>
         </View>

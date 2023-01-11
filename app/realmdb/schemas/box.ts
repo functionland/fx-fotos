@@ -3,17 +3,33 @@ export const Box = {
   primaryKey: 'peerId',
   properties: {
     /**
-     * Box peerId
+     * Box Id
      */
-    peerId: 'string',
+    id: 'string',
     /**
      * Filename of the asset.
      */
-    name: 'string?',
+    name: 'string',
     /**
-     * URI that points to the asset. `assets://*` (iOS), `file://*` (Android)
+     * The connection type which can be direct or based on a relay
      */
-    address: 'string?',
+    connection: 'string?',
+    /**
+     * If connection is Direct we can use Blox IP address
+     */
+    ipAddress: 'string?',
+    /**
+     * The connection protocol, like TCP
+     */
+    protocol: 'string',
+    /**
+     * The Blox port number
+     */
+    port: 'int',
+    /**
+     * The Blox peerId
+     */
+    peerId: 'string',
     /**
      * Determin the default device for connectio
      */

@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>Fx Fotos</string>
+	<string>FxFotos</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -51,11 +51,11 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string></string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Fx Fotos needs to access your microphone so that you can play the videos inside the app</string>
+	<string>FxFotos needs to access your microphone so that you can play the videos inside the app</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Fx Fotos needs permission to save or delete so that you can change the photos</string>
+	<string>FxFotos needs permission to save or delete so that you can change the photos</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Fx Fotos needs to access your photos so that you can scroll and view them inside the app</string>
+	<string>FxFotos needs to access your photos so that you can scroll and view them inside the app</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>AntDesign.ttf</string>
