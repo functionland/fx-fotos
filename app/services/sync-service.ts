@@ -8,7 +8,7 @@ import { fula } from '@functionland/react-native-fula'
 import { AssetEntity } from '../realmdb/entities'
 import { SyncStatus } from '../types'
 import { Assets, Boxs, FolderSettings } from './localdb/index'
-import * as Constances from './../utils/constance'
+import * as Constances from '../utils/constants'
 import { reject } from 'lodash'
 import { Helper, DeviceUtils, KeyChain } from '../utils'
 
@@ -85,13 +85,13 @@ const backgroundTask = async (taskParameters: TaskParams) => {
       //return the callback function
       try {
         callback?.(true)
-      } catch { }
+      } catch {}
     }
   } catch (error) {
     console.log('backgroundTask:', error)
     try {
       callback?.(false, error)
-    } catch { }
+    } catch {}
   } finally {
     Assets.addOrUpdate(updateAssets)
     await BackgroundJob.stop()
@@ -197,35 +197,42 @@ export const unSetAutoBackupAssets = async (folders: string[]) => {
   }
 }
 interface FulaConfig {
-  identity?: string | null,
-  storePath?: string | null,
-  bloxAddr?: string | null,
-  exchange?: string | null,
-  autoFlush?: boolean,
+  identity?: string | null
+  storePath?: string | null
+  bloxAddr?: string | null
+  exchange?: string | null
+  autoFlush?: boolean
   rootCID?: string | null
 }
-export const initFula = async (config?: FulaConfig): Promise<{ peerId: string; rootCid: string; private_ref: string } | undefined> => {
+export const initFula = async (
+  config?: FulaConfig,
+): Promise<
+  { peerId: string; rootCid: string; private_ref: string } | undefined
+> => {
   try {
     let {
       identity = null,
       storePath = null,
       bloxAddr = null,
-      exchange = 'noop',
+      exchange = '',
       autoFlush = false,
-      rootCID = null
+      rootCID = null,
     } = config || {}
-    
+
     const isReady = await fula.isReady()
-    if (isReady)
-      return
+    if (isReady) return
 
     if (!identity) {
-      const didCredentialsObj = await KeyChain.load(KeyChain.Service.DIDCredentials)
+      const didCredentialsObj = await KeyChain.load(
+        KeyChain.Service.DIDCredentials,
+      )
       if (didCredentialsObj) {
-        const keyPair = Helper.getMyDIDKeyPair(didCredentialsObj.username, didCredentialsObj.password)
+        const keyPair = Helper.getMyDIDKeyPair(
+          didCredentialsObj.username,
+          didCredentialsObj.password,
+        )
         identity = keyPair.secretKey.toString()
-      } else
-        throw 'Could not find default identity from KeyChain!'
+      } else throw 'Could not find default identity from KeyChain!'
     }
     if (!rootCID) {
       const fulaRootObject = await KeyChain.load(
@@ -241,9 +248,8 @@ export const initFula = async (config?: FulaConfig): Promise<{ peerId: string; r
     if (!bloxAddr) {
       const box = (await Boxs.getAll())?.[0]
       if (box) {
-        bloxAddr = box?.address as string
-      } else
-        throw 'Could not find default blox address!'
+        bloxAddr = Helper.generateBloxAddress(box)
+      } else throw 'Could not find default blox address!'
     }
     const fulaInit = await fula.init(
       identity, //bytes of the privateKey of did identity in string format
@@ -251,7 +257,7 @@ export const initFula = async (config?: FulaConfig): Promise<{ peerId: string; r
       bloxAddr,
       exchange,
       autoFlush,
-      rootCID
+      rootCID,
     )
     return fulaInit
   } catch (error) {

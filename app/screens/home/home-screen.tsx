@@ -66,8 +66,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [dIDCredentials, setDIDCredentialsState] =
     useRecoilState(dIDCredentialsState)
 
-  const [, setFulaPeerId] =
-    useRecoilState(fulaPeerIdState)
+  const [, setFulaPeerId] = useRecoilState(fulaPeerIdState)
   const setFoldersSettings = useSetRecoilState(foldersSettingsState)
 
   const { toggleTheme } = useContext(ThemeContext)
@@ -147,7 +146,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   }
 
   const initDID = async () => {
-    const didCredentialsObj = await KeyChain.load(KeyChain.Service.DIDCredentials)
+    const didCredentialsObj = await KeyChain.load(
+      KeyChain.Service.DIDCredentials,
+    )
     if (didCredentialsObj) {
       const fulaPeerIdObject = await KeyChain.load(
         KeyChain.Service.FULAPeerIdObject,
@@ -160,16 +161,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   }
   const initFula = async (password: string, signiture: string) => {
     try {
-      if (await fula.isReady())
-        return
+      if (await fula.isReady()) return
 
       const box = (await Boxs.getAll())?.[0]
       if (box) {
-        const fulaInit = await SyncService.initFula({
-          bloxAddr: box.address,
-          exchange: box.address ? '' : 'noop',
-        })
-      
+        const fulaInit = await SyncService.initFula()
+
         if (fulaInit) {
           await helper.storeFulaRootCID(fulaInit.rootCid)
           const fulaPeerId = await helper.storeFulaPeerId(fulaInit.peerId)
@@ -188,7 +185,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       realmAssets.current.addListener(onLocalDbAssetChange)
       const obj = {}
       const assetSlice = realmAssets.current?.slice()
-      assetSlice?.forEach(asset => obj[asset.id] = asset)
+      assetSlice?.forEach(asset => (obj[asset.id] = asset))
       setMedias(assetSlice)
       setMediasRefObj(obj)
       if (syncMetadata) {
@@ -228,10 +225,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       setMediasRefObj(prev => {
         const next = {
           ...prev,
-          ...mediasRefObj
+          ...mediasRefObj,
         }
         setMedias(Object.values(next))
-        return next;
+        return next
       })
 
       //loadAssets(false)
@@ -242,9 +239,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       setMediasRefObj(prev => {
         const next = {
           ...prev,
-          ...mediasRefObj
+          ...mediasRefObj,
         }
-        return next;
+        return next
       })
     } else if (changes.deletions?.length) {
       changes.deletions.forEach(index => {
@@ -254,12 +251,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       setMediasRefObj(prev => {
         const next = {
           ...prev,
-          ...mediasRefObj
+          ...mediasRefObj,
         }
         setMedias(Object.values(next))
-        return next;
+        return next
       })
-
     }
   }
 
@@ -415,11 +411,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                               '.svg',
                             )
                               ? helper.getWalletImage(
-                                walletConnector.peerMeta?.name,
-                              )
+                                  walletConnector.peerMeta?.name,
+                                )
                               : {
-                                uri: walletConnector.peerMeta?.icons?.[0],
-                              }
+                                  uri: walletConnector.peerMeta?.icons?.[0],
+                                }
                           }
                           style={{
                             height: 35,
