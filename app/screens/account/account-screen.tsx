@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from 'react'
-import { StyleSheet, View, Image, Alert, Share, ScrollView } from 'react-native'
+import {
+  StyleSheet,
+  View,
+  Image,
+  Alert,
+  Share,
+  ScrollView,
+  Linking,
+} from 'react-native'
 import { Avatar, Button, Card, Icon, ListItem, Text } from '@rneui/themed'
 import { useWalletConnect } from '@walletconnect/react-native-dapp'
 import * as Keychain from '../../utils/keychain'
@@ -28,8 +36,7 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
   const walletConnector = useWalletConnect()
   const [dIDCredentials, setDIDCredentialsState] =
     useRecoilState(dIDCredentialsState)
-  const [fulaPeerId, setFulaPeerId] =
-    useRecoilState(fulaPeerIdState)
+  const [fulaPeerId, setFulaPeerId] = useRecoilState(fulaPeerIdState)
   const [did, setDID] = useState(null)
 
   useEffect(() => {
@@ -54,7 +61,7 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
       setFulaPeerId(peerIdObj)
     }
   }
-  
+
   const connectToWallet = async () => {
     navigation.navigate(AppNavigationNames.ConnectWalletScreen)
   }
@@ -123,6 +130,11 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
       bottomOffset: 0,
     })
   }
+  const authorizeApp = () => {
+    Linking.openURL(
+      `fxblox://connectdapp/FxFotos/land.fx.fotos/${fulaPeerId?.password}`,
+    )
+  }
   const renderHeader = () => (
     <Header
       centerComponent={
@@ -182,8 +194,8 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
                       walletConnector.peerMeta?.icons?.[0].endsWith('.svg')
                         ? helper.getWalletImage(walletConnector.peerMeta?.name)
                         : {
-                          uri: walletConnector.peerMeta?.icons?.[0],
-                        }
+                            uri: walletConnector.peerMeta?.icons?.[0],
+                          }
                     }
                     style={{
                       height: 90,
@@ -221,45 +233,62 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
               </View>
               {did && (
                 <View style={styles.section}>
-                  <ListItem onPress={() => copyToClipboardDID(did)}
-                    containerStyle={{ width: "100%" }}>
+                  <ListItem
+                    onPress={() => copyToClipboardDID(did)}
+                    containerStyle={{ width: '100%' }}
+                  >
                     <ListItem.Content>
                       <View style={{ flexDirection: 'row' }}>
                         <Card.Title
                           style={{
                             textAlign: 'left',
-                            paddingRight: 10
+                            paddingRight: 10,
                           }}
                         >
                           YOUR DID
                         </Card.Title>
-                        <Icon
-                          name="content-copy"
-                          type="material-community"
-                        />
+                        <Icon name="content-copy" type="material-community" />
                       </View>
                       <ListItem.Subtitle> {did}</ListItem.Subtitle>
                     </ListItem.Content>
-
                   </ListItem>
-                  <ListItem onPress={() => fulaPeerId ? copyToClipboardPeerId(fulaPeerId.password) : null}
-                    containerStyle={{ width: "100%" }}>
+                  <ListItem
+                    onPress={() =>
+                      fulaPeerId
+                        ? copyToClipboardPeerId(fulaPeerId.password)
+                        : null
+                    }
+                    containerStyle={{ width: '100%' }}
+                  >
                     <ListItem.Content>
                       <View style={{ flexDirection: 'row' }}>
                         <Card.Title
                           style={{
                             textAlign: 'left',
-                            paddingRight: 10
+                            paddingRight: 10,
                           }}
                         >
                           YOUR PEERID
                         </Card.Title>
-                        {fulaPeerId && <Icon
-                          name="content-copy"
-                          type="material-community"
-                        />}
+                        {fulaPeerId && (
+                          <Icon name="content-copy" type="material-community" />
+                        )}
                       </View>
-                      <ListItem.Subtitle> {fulaPeerId ? fulaPeerId.password : 'To get your peerId, First add a valid blox address!'}</ListItem.Subtitle>
+                      <ListItem.Subtitle>
+                        {fulaPeerId
+                          ? fulaPeerId.password
+                          : 'To get your peerId, First add a valid blox address!'}
+                      </ListItem.Subtitle>
+                      <ListItem.Subtitle>
+                        <View style={styles.section}>
+                          {fulaPeerId?.password && (
+                            <Button
+                              title="Authorize FxFotos by FxBlox"
+                              onPress={authorizeApp}
+                            />
+                          )}
+                        </View>
+                      </ListItem.Subtitle>
                     </ListItem.Content>
                   </ListItem>
                 </View>
