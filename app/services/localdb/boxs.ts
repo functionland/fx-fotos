@@ -1,3 +1,4 @@
+import Realm from 'realm'
 import { Entities, RealmDB, Schemas } from '../../realmdb'
 
 const { UUID } = Realm.BSON
@@ -43,7 +44,7 @@ export const addOrUpdate = (
                 Schemas.Box.name,
                 {
                   ...box,
-                  peerId: box.peerId ? box.peerId : new UUID().toHexString(),
+                  id: box.id ?? new UUID().toHexString(),
                 },
                 Realm.UpdateMode.Modified,
               ),
@@ -61,11 +62,11 @@ export const addOrUpdate = (
       throw error
     })
 
-export const remove = (peerIds: string[]): Promise<void> =>
+export const remove = (ids: string[]): Promise<void> =>
   RealmDB()
     .then(realm => {
       try {
-        const idsQuery = peerIds.map(id => `peerId = '${id}'`).join(' OR ')
+        const idsQuery = ids.map(id => `id = '${id}'`).join(' OR ')
         const boxs = realm
           .objects<Entities.BoxEntity>(Schemas.Box.name)
           .filtered(idsQuery)

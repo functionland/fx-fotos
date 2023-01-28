@@ -45,6 +45,7 @@ export const getAll = (
     orderby: 'asc' | 'desc'
     filter: string
     filenameFilter: string | undefined
+    uris?: string[] | undefined
     searchOptions?: SearchOptionValueType[]
   } = {},
 ): Promise<Realm.Results<Entities.AssetEntity & Realm.Object>> =>
@@ -56,6 +57,7 @@ export const getAll = (
         filter = 'isDeleted=false or syncStatus=2',
         filenameFilter,
         searchOptions,
+        uris = [],
       } = params
       let assets = realm
         .objects<Entities.AssetEntity>(Schemas.Asset.name)
@@ -65,6 +67,12 @@ export const getAll = (
         assets = assets.filtered(
           `filenameNormalized CONTAINS '${filenameFilter.toLowerCase()}'`,
         )
+
+      //Filter assets by uris
+      const urisFilter = uris.map(uri => `uri CONTAINS '${uri}'`).join(' OR ')
+      if (urisFilter) {
+        assets = assets.filtered(urisFilter)
+      }
 
       // filter the query based on search options
       const dynamicFilter = dynamicFilterGenerator(searchOptions)
@@ -101,7 +109,7 @@ export const getAllNeedToSync = (): Promise<
       const assets = realm
         .objects<Entities.AssetEntity>(Schemas.Asset.name)
         .filtered('syncStatus=1')
-      return assets
+      return assets.slice()
     })
     .catch(error => {
       console.error('RealmDB getAllAssets error!', error)

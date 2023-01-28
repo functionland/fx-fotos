@@ -8,7 +8,7 @@ interface Props {
   selected: boolean
   selectionMode: boolean
   textStyle: TextStyle
-  containerStyle: ViewStyle
+  containerStyle?: ViewStyle | undefined
   children: any
 }
 

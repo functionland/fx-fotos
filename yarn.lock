@@ -1869,6 +1869,10 @@
     tslib "^2.4.0"
     uint8arrays "^3.0.0"
 
+"@functionland/react-native-fula@github:https://github.com/functionland/react-native-fula.git":
+  version "1.0.9"
+  resolved "https://codeload.github.com/functionland/react-native-fula/tar.gz/f4d0acaf5c776172eee5ea52dd0b317300eddeaf"
+
 "@gar/promisify@^1.0.1":
   version "1.1.3"
   resolved "https://registry.npmjs.org/@gar/promisify/-/promisify-1.1.3.tgz"
@@ -14564,10 +14568,10 @@ react-lifecycles-compat@^3.0.4:
   resolved "https://registry.npmjs.org/react-lifecycles-compat/-/react-lifecycles-compat-3.0.4.tgz"
   integrity sha512-fBASbA6LnOU9dOU2eW7aQ8xmYBSXUIWr+UmF9b1efZBazGNO+rcXT/icdKnYm2pTwcRylVUYwW7H1PHfLekVzA==
 
-react-native-background-actions@^2.6.7:
-  version "2.6.7"
-  resolved "https://registry.npmjs.org/react-native-background-actions/-/react-native-background-actions-2.6.7.tgz"
-  integrity sha512-qjHeks9EbLIXeb2xn3AR0eLVlUh/sAboKt0tI3ZN8leEEL1xmZUvpbk0fN6RKRpxpv7ATVHgWjGMK1FNoYh+Ug==
+react-native-background-actions@^2.6.8:
+  version "2.6.8"
+  resolved "https://registry.yarnpkg.com/react-native-background-actions/-/react-native-background-actions-2.6.8.tgz#f9eeff5d30d2b8710ff63eb1e06c20226c5acfa2"
+  integrity sha512-ImJI+pKTag+W7Y8fubUhtwS7ALU3ePhaZ6tCaTdgBdJcXQ2baILigxKm7XL7+O6N0hHfVpkHC2ZbCJcGpV2vPQ==
   dependencies:
     eventemitter3 "^4.0.7"
 
@@ -14610,6 +14614,14 @@ react-native-flipper@^0.34.0:
   version "0.34.0"
   resolved "https://registry.npmjs.org/react-native-flipper/-/react-native-flipper-0.34.0.tgz"
   integrity sha512-48wgm29HJTOlZ0DibBsvXueEOY0EPIVL0wWKbwRfgrk86+luSEuLW3aZC50oJa95zSFb9qYShTV/6dWqh4Jamg==
+
+react-native-fs@^2.20.0:
+  version "2.20.0"
+  resolved "https://registry.yarnpkg.com/react-native-fs/-/react-native-fs-2.20.0.tgz#05a9362b473bfc0910772c0acbb73a78dbc810f6"
+  integrity sha512-VkTBzs7fIDUiy/XajOSNk0XazFE9l+QlMAce7lGuebZcag5CnjszB+u4BdqzwaQOdcYb5wsJIsqq4kxInIRpJQ==
+  dependencies:
+    base-64 "^0.1.0"
+    utf8 "^3.0.0"
 
 react-native-gesture-handler@^2.4.1:
   version "2.4.1"
@@ -14716,10 +14728,10 @@ react-native-safe-modules@^1.0.3:
   dependencies:
     dedent "^0.6.0"
 
-react-native-screens@^3.13.1:
-  version "3.13.1"
-  resolved "https://registry.npmjs.org/react-native-screens/-/react-native-screens-3.13.1.tgz"
-  integrity sha512-xcrnuUs0qUrGpc2gOTDY4VgHHADQwp80mwR1prU/Q0JqbZN5W3koLhuOsT6FkSRKjR5t40l+4LcjhHdpqRB2HA==
+react-native-screens@^3.18.2:
+  version "3.18.2"
+  resolved "https://registry.yarnpkg.com/react-native-screens/-/react-native-screens-3.18.2.tgz#d7ab2d145258d3db9fa630fa5379dc4474117866"
+  integrity sha512-ANUEuvMUlsYJ1QKukEhzhfrvOUO9BVH9Nzg+6eWxpn3cfD/O83yPBOF8Mx6x5H/2+sMy+VS5x/chWOOo/U7QJw==
   dependencies:
     react-freeze "^1.0.0"
     warn-once "^0.1.0"
@@ -17438,6 +17450,11 @@ utf8-byte-length@^1.0.1:
   version "1.0.4"
   resolved "https://registry.npmjs.org/utf8-byte-length/-/utf8-byte-length-1.0.4.tgz"
   integrity sha1-9F8VDExm7uloGGUFq5P8u4rWv2E=
+
+utf8@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/utf8/-/utf8-3.0.0.tgz#f052eed1364d696e769ef058b183df88c87f69d1"
+  integrity sha512-E8VjFIQ/TyQgp+TZfS6l8yp/xWppSAHzidGiRrqe4bK4XP9pTRyKFgGJpO3SN7zdX4DeomTrwaseCHovfpFcqQ==
 
 utif@^2.0.1:
   version "2.0.1"

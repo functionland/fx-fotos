@@ -9,6 +9,7 @@ import Animated, {
 import {
   ImageErrorEventData,
   NativeSyntheticEvent,
+  RefreshControlProps,
   ViewStyle,
 } from 'react-native'
 import RecyclerAssetList, {
@@ -17,7 +18,7 @@ import RecyclerAssetList, {
 import GridProvider from './grid-provider/gridContext'
 import PinchZoom from './grid-provider/pinchZoom'
 
-import { AssetStory, RecyclerAssetListSection } from '../../types'
+import { Asset, AssetStory, RecyclerAssetListSection } from '../../types'
 import { PinchGestureHandler } from 'react-native-gesture-handler'
 
 interface Props {
@@ -30,6 +31,8 @@ interface Props {
   onItemPress?: (section: RecyclerAssetListSection) => void
   onStoryPress?: (story: AssetStory) => void
   contentContainerStyle?: ViewStyle
+  refreshControl?: React.ReactElement<RefreshControlProps> | undefined
+  externalState: Record<string, Asset>
 }
 export interface AssetListHandle {
   resetSelectedItems: () => void
@@ -49,6 +52,8 @@ const AssetList = forwardRef<AssetListHandle, Props>(
       onItemPress,
       onStoryPress,
       contentContainerStyle,
+      refreshControl,
+      externalState,
     },
     ref,
   ): JSX.Element => {
@@ -92,6 +97,8 @@ const AssetList = forwardRef<AssetListHandle, Props>(
             onItemPress={onItemPress}
             onStoryPress={onStoryPress}
             contentContainerStyle={contentContainerStyle}
+            refreshControl={refreshControl}
+            externalState={externalState}
           />
         </PinchZoom>
       </GridProvider>

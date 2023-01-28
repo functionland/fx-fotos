@@ -1,5 +1,5 @@
 import { Dimensions, Platform } from 'react-native'
-
+var RNFS = require('react-native-fs')
 const { height, width } = Dimensions.get('window')
 
 const deviceUtils: {
@@ -17,6 +17,7 @@ const deviceUtils: {
     height: number
     width: number
   }
+  DocumentDirectoryPath: string
 } = {}
 
 deviceUtils.iPhoneXHeight = 812
@@ -37,5 +38,5 @@ deviceUtils.dimensions = {
   height,
   width,
 }
-
+deviceUtils.DocumentDirectoryPath = RNFS.DocumentDirectoryPath
 export default deviceUtils

@@ -2,6 +2,8 @@ import * as ReactNativeKeychain from 'react-native-keychain'
 export { UserCredentials, Result } from 'react-native-keychain'
 export enum Service {
   DIDCredentials = 'DIDCredentials',
+  FULARootObject = 'FULARootObject',
+  FULAPeerIdObject = 'FULAPeerIdObject',
 }
 /**
  * Saves some credentials securely.

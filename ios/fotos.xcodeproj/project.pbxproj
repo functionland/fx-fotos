@@ -735,7 +735,7 @@
 				INFOPLIST_FILE = fotos/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 0.8.4;
+				MARKETING_VERSION = 0.8.9;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -766,7 +766,7 @@
 				INFOPLIST_FILE = fotos/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 0.8.4;
+				MARKETING_VERSION = 0.8.9;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",

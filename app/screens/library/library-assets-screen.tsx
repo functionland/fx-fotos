@@ -1,18 +1,27 @@
 import React from 'react'
-import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native'
-import { Text } from '@rneui/themed'
+import { StyleProp, StyleSheet, ViewStyle } from 'react-native'
+import { Icon, Text } from '@rneui/themed'
 import { useRecoilState } from 'recoil'
-import Animated, { StyleProps } from 'react-native-reanimated'
+import Animated from 'react-native-reanimated'
 
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import {
   HomeNavigationParamList,
   HomeNavigationTypes,
 } from '../../navigators/home-navigator'
-import { selectedLibraryState } from '../../store'
+import {
+  dIDCredentialsState,
+  foldersSettingsState,
+  selectedLibraryState,
+} from '../../store'
 import { AssetListScreen } from '../index'
-import { Header, HeaderArrowBack } from '../../components/header'
+import {
+  Header,
+  HeaderArrowBack,
+  HeaderLeftContainer,
+} from '../../components/header'
 import { Screen } from '../../components'
+import { LocalDbService, SyncService } from '../../services'
 
 interface Props {
   navigation: NativeStackNavigationProp<
@@ -23,6 +32,35 @@ interface Props {
 
 export const LibraryAssetsScreen: React.FC<Props> = ({ navigation }) => {
   const [selectedLibrary] = useRecoilState(selectedLibraryState)
+
+  const [foldersSettingsObj, setFoldersSettingsObj] =
+    useRecoilState(foldersSettingsState)
+  const [dIDCredentials] = useRecoilState(dIDCredentialsState)
+
+  const folderAutoBuckupChanged = async () => {
+    const flag = foldersSettingsObj?.[selectedLibrary.title]
+      ? !foldersSettingsObj?.[selectedLibrary.title]?.autoBackup
+      : true
+    const folders = await LocalDbService.FolderSettings.addOrUpdate([
+      {
+        name: selectedLibrary.title,
+        autoBackup: flag,
+      },
+    ])
+    setFoldersSettingsObj({
+      ...foldersSettingsObj,
+      [folders?.[0].name]: folders?.[0],
+    })
+
+    setTimeout(() => {
+      // Update folder's contents sync status
+      if (flag) {
+        SyncService.setAutoBackupAssets([selectedLibrary.title])
+      } else {
+        SyncService.unSetAutoBackupAssets([selectedLibrary.title])
+      }
+    }, 0)
+  }
   const renderHeader = (
     style?: StyleProp<Animated.AnimateStyle<StyleProp<ViewStyle>>>,
   ) => (
@@ -40,10 +78,25 @@ export const LibraryAssetsScreen: React.FC<Props> = ({ navigation }) => {
             {selectedLibrary?.title}
           </Text>
         }
+        rightComponent={
+          <HeaderLeftContainer style={{ flex: 1 }}>
+            {dIDCredentials?.password && (
+              <Icon
+                type="material-community"
+                name={
+                  foldersSettingsObj[selectedLibrary?.title]?.autoBackup
+                    ? 'cloud-check'
+                    : 'cloud-outline'
+                }
+                size={28}
+                onPress={folderAutoBuckupChanged}
+              />
+            )}
+          </HeaderLeftContainer>
+        }
         leftComponent={<HeaderArrowBack navigation={navigation} />}
       />
     </Animated.View>
-
   )
   return (
     <Screen

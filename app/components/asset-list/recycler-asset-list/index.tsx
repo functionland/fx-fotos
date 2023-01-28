@@ -13,6 +13,7 @@ import {
   View,
   ImageErrorEventData,
   ViewStyle,
+  RefreshControlProps,
 } from 'react-native'
 import Animated, {
   useSharedValue,
@@ -26,7 +27,7 @@ import Animated, {
 } from 'react-native-reanimated'
 import { DataProvider, RecyclerListView } from 'fula-recyclerlistview'
 import { Constants } from '../../../theme/constants'
-import { RecyclerAssetListSection, ViewType, AssetStory } from '../../../types'
+import { RecyclerAssetListSection, ViewType, AssetStory, Asset } from '../../../types'
 import RecyclerSectionItem from './asset-items/recycler-section-item'
 import ExternalScrollView from '../external-scroll-view'
 import Cell from '../grid-provider/cell'
@@ -59,6 +60,9 @@ export interface Props {
   onItemPress?: (section: RecyclerAssetListSection) => void
   onStoryPress?: (story: AssetStory) => void
   contentContainerStyle?: ViewStyle
+  refreshControl?: React.ReactElement<RefreshControlProps> | undefined
+  waitFor?: React.Ref<unknown> | React.Ref<unknown>[] | undefined
+  externalState?: Record<string, Asset> | undefined
 }
 
 export interface ExtendedState {
@@ -69,12 +73,12 @@ export interface ExtendedState {
     [key: string]: boolean
   }
   selectionMode: boolean
+  externalState?: Record<string, Asset> | undefined
 }
 export interface RecyclerAssetListHandler {
   resetSelectedItems: () => void
   toggleSelectionMode: () => void
   scrollToItem: (item: RecyclerAssetListSection, animated?: boolean) => void
-  waitFor?: React.Ref<unknown> | React.Ref<unknown>[] | undefined
 }
 // eslint-disable-next-line react/display-name
 const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(
@@ -91,6 +95,8 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(
       onStoryPress,
       contentContainerStyle,
       waitFor,
+      refreshControl,
+      externalState,
       ...extras
     },
     ref,
@@ -109,7 +115,15 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(
       selectedAssets: {},
       selectedGroups: {},
       selectionMode: false,
+      externalState: externalState
     })
+
+    useEffect(() => {
+      setExtendedState(prev => ({
+        ...prev,
+        externalState
+      }))
+    }, [externalState])
 
     useImperativeHandle(ref, () => ({
       resetSelectedItems: () => {
@@ -222,7 +236,8 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(
           <RecyclerSectionItem
             section={data}
             selectionMode={extendedState?.selectionMode}
-            selected={!!extendedState.selectedAssets[data.id]}
+            selected={!!extendedState?.selectedAssets[data.id]}
+            externalState={extendedState?.externalState?.[data.id]}
             onLongPress={onLongPress}
             onPress={onPress}
             onStoryPress={onStoryPress}
@@ -390,6 +405,7 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(
               updateContainerSize()
             },
             waitFor: waitFor,
+            refreshControl: refreshControl,
           }}
           onVisibleIndicesChanged={(all = [], now, notNow) => {
             const visibleIndexValue = all[Math.floor(all.length / 2)] || 0

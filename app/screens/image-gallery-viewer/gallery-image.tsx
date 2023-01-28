@@ -46,6 +46,7 @@ import { palette } from '../../theme'
 import { Asset, VideoPlayerMetadata, VideoPlayerProgress } from '../../types'
 import { AssetService } from '../../services'
 import { VideoPlayerControl } from '../../components'
+import { DeletedAssetTemplate } from './deleted-asset-template'
 
 type GalleryImageProps = {
   asset: Asset
@@ -384,7 +385,54 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
   const _onVideoProgress = useCallback(event => {
     setCurrnetVideoProgress(event)
   }, [])
-
+  const renderAsset = () => {
+    if (isCurrentView && asset.mediaType === 'video')
+      return (
+        <Video
+          ref={videoPlayerRef}
+          source={{
+            uri:
+              Platform.OS === 'ios'
+                ? AssetService.getIOSVideoUri(asset.uri, asset.filename)
+                : asset.uri,
+          }}
+          style={{
+            height: ScreenHeight,
+            width: ScreenWidth,
+          }}
+          repeat={true}
+          fullscreenAutorotate={true}
+          resizeMode="contain"
+          shouldPlay
+          paused={videoPaused}
+          muted={videoMuted}
+          onLoad={_onVideoLoad}
+          onProgress={_onVideoProgress}
+        />
+      )
+    else if (Platform.OS === 'android')
+      return (
+        <FastImage
+          source={{
+            uri: asset.uri,
+            priority: FastImage.priority.high,
+          }}
+          resizeMode="contain"
+          style={imageStyle}
+        />
+      )
+    else
+      return (
+        <Image
+          source={{
+            uri: asset.uri,
+          }}
+          fadeDuration={0}
+          resizeMode="contain"
+          style={imageStyle}
+        />
+      )
+  }
   return (
     <Animated.View style={styles.screenStyle}>
       <TapGestureHandler
@@ -414,52 +462,13 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
                     simultaneousHandlers={[pinchHandlerRef, listGestureRef]}
                   >
                     <Animated.View style={animatedImageContainerStyle}>
-                      <SharedElement id={sharedElementId}>
-                        {isCurrentView && asset.mediaType === 'video' ? (
-                          <Video
-                            ref={videoPlayerRef}
-                            source={{
-                              uri:
-                                Platform.OS === 'ios'
-                                  ? AssetService.getIOSVideoUri(
-                                      asset.uri,
-                                      asset.filename,
-                                    )
-                                  : asset.uri,
-                            }}
-                            style={{
-                              height: ScreenHeight,
-                              width: ScreenWidth,
-                            }}
-                            repeat={true}
-                            fullscreenAutorotate={true}
-                            resizeMode="contain"
-                            shouldPlay
-                            paused={videoPaused}
-                            muted={videoMuted}
-                            onLoad={_onVideoLoad}
-                            onProgress={_onVideoProgress}
-                          />
-                        ) : Platform.OS === 'android' ? (
-                          <FastImage
-                            source={{
-                              uri: asset.uri,
-                              priority: FastImage.priority.high,
-                            }}
-                            resizeMode="contain"
-                            style={imageStyle}
-                          />
-                        ) : (
-                          <Image
-                            source={{
-                              uri: asset.uri,
-                            }}
-                            fadeDuration={0}
-                            resizeMode="contain"
-                            style={imageStyle}
-                          />
-                        )}
-                      </SharedElement>
+                      {!asset.isDeleted ? (
+                        <SharedElement id={sharedElementId}>
+                          {renderAsset()}
+                        </SharedElement>
+                      ) : (
+                        <DeletedAssetTemplate />
+                      )}
                       <Animated.View
                         style={[styles.bottomSheet, animatedBottomSheetStyle]}
                       >

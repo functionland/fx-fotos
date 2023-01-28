@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react'
-import { StyleSheet } from 'react-native'
+import React, { useEffect, useRef, useState } from 'react'
+import { StyleSheet, View } from 'react-native'
 import { useRecoilState } from 'recoil'
 import { Icon, ListItem, Text } from '@rneui/themed'
 
@@ -24,6 +24,7 @@ type Props = NativeStackScreenProps<
 export const BoxListScreen: React.FC<Props> = ({ route, navigation }) => {
   const pressed = useRef<boolean>(false)
   const [boxs, setBoxs] = useRecoilState(boxsState)
+  const [ready, setReady] = useState(false)
 
   useEffect(() => {
     navigation.addListener('focus', loadBoxs)
@@ -34,8 +35,14 @@ export const BoxListScreen: React.FC<Props> = ({ route, navigation }) => {
   }, [])
 
   const loadBoxs = async () => {
-    const boxs = await Boxs.getAll()
-    setBoxs(boxs.map(m => m.toJSON()))
+    try {
+      const boxList = await Boxs.getAll()
+      setBoxs(boxList.map(m => m.toJSON()))
+    } catch (error) {
+      console.log('loadBoxs', error)
+    } finally {
+      setReady(true)
+    }
   }
   const deleteBox = async (box: BoxEntity) => {
     try {
@@ -49,28 +56,33 @@ export const BoxListScreen: React.FC<Props> = ({ route, navigation }) => {
     }
   }
   const renderHeader = () => (
-    <Header
-      centerComponent={
-        <Text lineBreakMode="tail" h4>
-          Boxs
-        </Text>
-      }
-      leftComponent={<HeaderArrowBack navigation={navigation} />}
-      rightComponent={
-        <HeaderRightContainer>
-          <Icon
-            type="material-community"
-            name="plus"
-            size={28}
-            onPress={() => navigation.navigate(AppNavigationNames.BoxAddUpdate)}
-          />
-        </HeaderRightContainer>
-      }
-    />
+    <View style={{ position: 'absolute', top: 0, zIndex: 99, width: '100%' }}>
+      <Header
+        centerComponent={
+          <Text lineBreakMode="tail" h4>
+            Bloxs
+          </Text>
+        }
+        leftComponent={<HeaderArrowBack navigation={navigation} />}
+        rightComponent={
+          <HeaderRightContainer>
+            {ready && boxs?.length < 1 && (
+              <Icon
+                type="material-community"
+                name="plus"
+                size={28}
+                onPress={() =>
+                  navigation.navigate(AppNavigationNames.BoxAddUpdate)
+                }
+              />
+            )}
+          </HeaderRightContainer>
+        }
+      />
+    </View>
   )
 
   const onItemPress = (box: BoxEntity) => {
-    console.log('onItemPress', box)
     navigation.navigate(AppNavigationNames.BoxAddUpdate, {
       box,
     })
@@ -83,7 +95,7 @@ export const BoxListScreen: React.FC<Props> = ({ route, navigation }) => {
           {item.name || 'No name'}
         </ListItem.Title>
         <ListItem.Subtitle lineBreakMode="tail">
-          {item.address}
+          {item.peerId}
         </ListItem.Subtitle>
       </ListItem.Content>
       <Icon
@@ -96,7 +108,6 @@ export const BoxListScreen: React.FC<Props> = ({ route, navigation }) => {
   )
   return (
     <Screen
-      preset="fixed"
       scrollEventThrottle={16}
       automaticallyAdjustContentInsets
       style={styles.screen}
@@ -118,6 +129,7 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     flex: 1,
+    paddingTop: 60,
   },
   card: {
     flex: 1,

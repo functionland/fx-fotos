@@ -7,6 +7,7 @@ import {
   ImageErrorEventData,
   NativeSyntheticEvent,
   ViewStyle,
+  RefreshControlProps,
 } from 'react-native'
 import LottieView from 'lottie-react-native'
 import { Icon, Text, useTheme } from '@rneui/themed'
@@ -44,6 +45,8 @@ interface Props {
   showStoryHighlight: boolean
   externalScrollY?: SharedValue<number>
   contentContainerStyle?: ViewStyle
+  refreshControl?: React.ReactElement<RefreshControlProps> | undefined
+  externalState?: Record<string, Asset> | undefined
 }
 
 export const AssetListScreen: React.FC<Props> = ({
@@ -53,6 +56,8 @@ export const AssetListScreen: React.FC<Props> = ({
   showStoryHighlight,
   externalScrollY,
   contentContainerStyle,
+  refreshControl,
+  externalState
 }) => {
   const setRecyclerSectionsStore = useSetRecoilState(recyclerSectionsState)
   const [recyclerSections, setRecyclerSections] = useState(null)
@@ -262,6 +267,8 @@ export const AssetListScreen: React.FC<Props> = ({
           onItemPress={onItemPress}
           onStoryPress={onStoryPress}
           contentContainerStyle={contentContainerStyle}
+          refreshControl={refreshControl}
+          externalState={externalState}
         />
       )}
     </>

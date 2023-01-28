@@ -5,19 +5,31 @@ import React, {
   useCallback,
   useContext,
 } from 'react'
-import { Alert, Platform, StyleSheet, View, ViewStyle } from 'react-native'
+import {
+  Alert,
+  Platform,
+  RefreshControl,
+  StyleSheet,
+  ViewStyle,
+} from 'react-native'
 import { useRecoilState, useSetRecoilState } from 'recoil'
 import { request, PERMISSIONS, openSettings } from 'react-native-permissions'
+import { fula } from '@functionland/react-native-fula'
 
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import { AssetService } from '../../services'
+import { AssetService, SyncService } from '../../services'
 import {
   HomeNavigationParamList,
   HomeNavigationTypes,
 } from '../../navigators/home-navigator'
 import Realm from 'realm'
-import { dIDCredentials, mediasState } from '../../store'
-import { Assets } from '../../services/localdb'
+import {
+  dIDCredentialsState,
+  foldersSettingsState,
+  fulaPeerIdState,
+  mediasState,
+} from '../../store'
+import { Assets, Boxs, FolderSettings } from '../../services/localdb'
 import { Entities } from '../../realmdb'
 import { AssetListScreen } from '../index'
 import { Asset, PagedInfo } from '../../types'
@@ -36,6 +48,8 @@ import { useWalletConnect } from '@walletconnect/react-native-dapp'
 import { ThemeContext } from '../../theme'
 import * as helper from '../../utils/helper'
 import Animated from 'react-native-reanimated'
+import deviceUtils from '../../utils/deviceUtils'
+import { FolderSettingsEntity } from '../../realmdb/entities'
 
 interface HomeScreenProps {
   navigation: NativeStackNavigationProp<
@@ -47,8 +61,13 @@ interface HomeScreenProps {
 export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [isReady, setIsReady] = useState(false)
   const [syncing, setSyncing] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
   const walletConnector = useWalletConnect()
-  const setDIDCredentialsState = useSetRecoilState(dIDCredentials)
+  const [dIDCredentials, setDIDCredentialsState] =
+    useRecoilState(dIDCredentialsState)
+
+  const [, setFulaPeerId] = useRecoilState(fulaPeerIdState)
+  const setFoldersSettings = useSetRecoilState(foldersSettingsState)
 
   const { toggleTheme } = useContext(ThemeContext)
 
@@ -56,6 +75,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     useRef<Realm.Results<Entities.AssetEntity & Realm.Object>>(null)
   const [medias, setMedias] = useRecoilState(mediasState)
   const [loading, setLoading] = useState(false)
+  const [mediasRefObj, setMediasRefObj] = useState<Record<string, Asset>>({})
 
   const requestAndroidPermission = useCallback(async () => {
     try {
@@ -89,8 +109,15 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   }, [])
 
   useEffect(() => {
+    loadFoldersSettings()
     initDID()
   }, [])
+
+  useEffect(() => {
+    if (dIDCredentials?.username && dIDCredentials?.password) {
+      initFula(dIDCredentials.username, dIDCredentials.password)
+    }
+  }, [dIDCredentials])
 
   useEffect(() => {
     requestAndroidPermission()
@@ -105,19 +132,62 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     }
   }, [isReady])
 
-  const initDID = async () => {
-    const didCredentials = await KeyChain.load(KeyChain.Service.DIDCredentials)
-    if (didCredentials) {
-      setDIDCredentialsState(didCredentials)
+  const loadFoldersSettings = async () => {
+    try {
+      const folders = await FolderSettings.getAll()
+      const foldersObj = folders.reduce((obj, folder) => {
+        obj[folder?.name] = folder
+        return obj
+      }, {} as Record<string, FolderSettingsEntity>)
+      setFoldersSettings(foldersObj)
+    } catch (error) {
+      console.log(error)
     }
   }
 
+  const initDID = async () => {
+    const didCredentialsObj = await KeyChain.load(
+      KeyChain.Service.DIDCredentials,
+    )
+    if (didCredentialsObj) {
+      const fulaPeerIdObject = await KeyChain.load(
+        KeyChain.Service.FULAPeerIdObject,
+      )
+      if (fulaPeerIdObject) {
+        setFulaPeerId(fulaPeerIdObject)
+      }
+      setDIDCredentialsState(didCredentialsObj)
+    }
+  }
+  const initFula = async (password: string, signiture: string) => {
+    try {
+      if (await fula.isReady()) return
+
+      const box = (await Boxs.getAll())?.[0]
+      if (box) {
+        const fulaInit = await SyncService.initFula()
+
+        if (fulaInit) {
+          await helper.storeFulaRootCID(fulaInit.rootCid)
+          const fulaPeerId = await helper.storeFulaPeerId(fulaInit.peerId)
+          if (fulaPeerId) setFulaPeerId(fulaPeerId)
+          await fula.checkFailedActions(true)
+        }
+      }
+    } catch (error) {
+      console.log('fulaInit Error', error)
+    }
+  }
   const loadAssets = async (syncMetadata: boolean = true) => {
     try {
       realmAssets.current?.removeAllListeners()
       realmAssets.current = await Assets.getAll()
       realmAssets.current.addListener(onLocalDbAssetChange)
-      setMedias(realmAssets.current.slice(0, realmAssets.current.length - 1))
+      const obj = {}
+      const assetSlice = realmAssets.current?.slice()
+      assetSlice?.forEach(asset => (obj[asset.id] = asset))
+      setMedias(assetSlice)
+      setMediasRefObj(obj)
       if (syncMetadata) {
         await syncAssets(
           realmAssets.current?.[0]?.modificationTime,
@@ -125,24 +195,66 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             ?.modificationTime,
         )
         syncAssetsMetadata()
+        await SyncService.setAutoBackupAssets()
+        SyncService.uploadAssetsInBackground()
       }
     } catch (error) {
       console.error(error)
     }
   }
+
+  const onRefresh = async () => {
+    try {
+      setRefreshing(true)
+      await loadAssets(true)
+    } catch (error) {
+      console.log(error)
+    }
+    setRefreshing(false)
+  }
+
   const onLocalDbAssetChange = (
     collection: Realm.Collection<Entities.AssetEntity>,
     changes: Realm.CollectionChangeSet,
   ) => {
-    if (changes.insertions?.length || changes.newModifications?.length) {
-      loadAssets(false)
+    if (changes.insertions?.length) {
+      changes.insertions.forEach(index => {
+        mediasRefObj[collection[index].id] = collection[index]
+      })
+
+      setMediasRefObj(prev => {
+        const next = {
+          ...prev,
+          ...mediasRefObj,
+        }
+        setMedias(Object.values(next))
+        return next
+      })
+
+      //loadAssets(false)
+    } else if (changes.newModifications?.length) {
+      changes.newModifications.forEach(index => {
+        mediasRefObj[collection[index].id] = collection[index]
+      })
+      setMediasRefObj(prev => {
+        const next = {
+          ...prev,
+          ...mediasRefObj,
+        }
+        return next
+      })
     } else if (changes.deletions?.length) {
-      setMedias(prev => {
-        let assets = [...prev]
-        assets = assets.filter(
-          (_, index) => !changes.deletions.some(i => i === index),
-        )
-        return [...assets]
+      changes.deletions.forEach(index => {
+        delete mediasRefObj[collection[index].id]
+      })
+
+      setMediasRefObj(prev => {
+        const next = {
+          ...prev,
+          ...mediasRefObj,
+        }
+        setMedias(Object.values(next))
+        return next
       })
     }
   }
@@ -286,7 +398,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             </HeaderLeftContainer>
           }
           rightComponent={
-            Platform.OS === 'android' || Platform.OS === "ios"? (
+            Platform.OS === 'android' || Platform.OS === 'ios' ? (
               <HeaderRightContainer style={{ flex: 1 }}>
                 <SharedElement id="AccountAvatar">
                   {walletConnector.connected ? (
@@ -349,9 +461,17 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       <AssetListScreen
         navigation={navigation}
         medias={isReady ? medias : null}
+        externalState={mediasRefObj}
         loading={loading}
         showStoryHighlight
         defaultHeader={renderHeader}
+        refreshControl={
+          <RefreshControl
+            progressViewOffset={60}
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+          />
+        }
       />
     </Screen>
   )
