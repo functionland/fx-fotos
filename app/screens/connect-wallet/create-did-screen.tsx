@@ -13,6 +13,9 @@ import { Screen } from '../../components'
 import { RootStackParamList, AppNavigationNames } from '../../navigators'
 import { useWalletConnect } from '@walletconnect/react-native-dapp'
 import { dIDCredentialsState } from '../../store'
+import { fula } from '@functionland/react-native-fula'
+import { DeviceUtils, Helper, KeyChain } from '../../utils'
+import { fulaPeerIdState } from '../../store'
 type Props = NativeStackScreenProps<
   RootStackParamList,
   AppNavigationNames.BoxAddUpdate
@@ -21,9 +24,9 @@ type Props = NativeStackScreenProps<
 export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
   const walletConnector = useWalletConnect()
   const setDIDCredentialsState = useSetRecoilState(dIDCredentialsState)
+  const setFulaPeerIdState = useSetRecoilState(fulaPeerIdState)
   const [iKnow, setIKnow] = useState(false)
   const [passwod, setPassword] = useState('')
-  useEffect(() => {}, [])
   const renderHeader = () => (
     <Header
       centerComponent={
@@ -32,7 +35,7 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
         </Text>
       }
       leftComponent={<HeaderArrowBack navigation={navigation} />}
-      //rightComponent={<Icon type="material-community" name="check" />}
+    //rightComponent={<Icon type="material-community" name="check" />}
     />
   )
   const signPassword = async () => {
@@ -45,6 +48,39 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
         chainCode,
         walletConnector?.accounts[0],
       ])
+
+      //Create Fotos app peerId
+      const keyPair = Helper.getMyDIDKeyPair(
+        passwod,
+        walletSignature
+      )
+      await fula.shutdown()
+      const peerId = await fula.newClient(
+        keyPair.secretKey.toString(), //bytes of the privateKey of did identity in string format
+        `${DeviceUtils.DocumentDirectoryPath}/wnfs`, // leave empty to use the default temp one
+        '',
+        'noop',
+        true,
+        true,
+        true,
+      )
+      if (peerId) {
+        const fulaPeerId = await KeyChain.save(
+          'peerId',
+          peerId,
+          KeyChain.Service.FULAPeerIdObject,
+        )
+        if (fulaPeerId)
+          setFulaPeerIdState(fulaPeerId)
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: 'Unable to create FxFotos peerId',
+          position: 'bottom',
+          bottomOffset: 0,
+        })
+        return
+      }
       const passwordCredentials = await Keychain.save(
         passwod,
         walletSignature,
@@ -53,7 +89,7 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
       if (passwordCredentials) {
         setDIDCredentialsState(passwordCredentials)
         navigation.reset({
-          index: 0,
+          index: 1,
           routes: [
             { name: AppNavigationNames.HomeScreen },
             { name: AppNavigationNames.AccountScreen },
