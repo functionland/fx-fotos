@@ -258,7 +258,7 @@ export const initFula = async (
       autoFlush,
       rootCID,
       true,
-      true
+      true,
     )
     return fulaInit
   } catch (error) {

@@ -32,7 +32,10 @@ export type RootStackParamList = {
   AccountScreen: undefined
   Account: undefined
   Settings: undefined
-  BoxList: undefined
+  BoxList: {
+    bloxName?: string
+    bloxPeerId?: string
+  }
   BoxAddUpdate: { box: Partial<BoxEntity> }
   SharedViewer: { assetURI: string }
   ImageGalleryViewer: {
@@ -216,11 +219,13 @@ export function AppNavigator(props: NavigationProps) {
             'https://fotos.fx.land',
             'http://fotos.fx.land',
             'fotos://fotos.fx.land',
+            'fotos://',
           ],
           config: {
             initialRouteName: AppNavigationNames.HomeScreen,
             screens: {
               [AppNavigationNames.SharedViewer]: 'shared/:jwe',
+              [AppNavigationNames.BoxList]: 'addblox/:bloxName/:bloxPeerId',
             },
           },
         }}

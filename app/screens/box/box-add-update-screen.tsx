@@ -24,7 +24,7 @@ type Props = NativeStackScreenProps<
 >
 interface AddUpdateForm {
   id?: string
-  name: string | undefined
+  name?: string
   connection: string | undefined
   protocol: string
   ipAddress: string | undefined
@@ -38,23 +38,27 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
   const [testingConnection, setTestinConnection] = useState(false)
   const [dIDCredentials, setDIDCredentialsState] =
     useRecoilState(dIDCredentialsState)
-  const setFulaPeerId = useSetRecoilState(fulaPeerIdState)
+    
   useEffect(() => {
-    if (route.params?.box?.id) {
+    const defaultBloxForm = {
+      id: undefined,
+      name: '',
+      connection: BLOX_CONNECTION_TYPES.find(item => item.title === 'FxRelay')
+        ?.value,
+      port: '40001',
+      protocol: 'tcp',
+      ipAddress: '',
+      peerId: '',
+    }
+    if (route.params?.box) {
       setForm({
+        ...defaultBloxForm,
         ...route.params?.box,
-        port: route.params?.box?.port?.toString() || '',
+        port: route.params?.box?.port?.toString() || '40001',
       })
     } else {
       setForm({
-        id: undefined,
-        name: '',
-        connection: BLOX_CONNECTION_TYPES.find(item => item.title === 'FxRelay')
-          ?.value,
-        port: '40001',
-        protocol: 'tcp',
-        ipAddress: '',
-        peerId: '',
+        ...defaultBloxForm,
       })
     }
   }, [])
@@ -73,6 +77,8 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
   )
   const validateForm = (): boolean => {
     const errors = {}
+    if (!form)
+      return false
     if (!form.name) {
       errors['name'] = 'The Blox name is mandatory'
     }
