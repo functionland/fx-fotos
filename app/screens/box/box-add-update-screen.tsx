@@ -23,7 +23,7 @@ type Props = NativeStackScreenProps<
   AppNavigationNames.BoxAddUpdate
 >
 interface AddUpdateForm {
-  id: string | undefined
+  id?: string
   name: string | undefined
   connection: string | undefined
   protocol: string
@@ -33,7 +33,7 @@ interface AddUpdateForm {
 }
 export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
   const pressed = useRef<boolean>(false)
-  const [form, setForm] = useState<AddUpdateForm>(null)
+  const [form, setForm] = useState<AddUpdateForm>()
   const [formErros, setFormErros] = useState<Record<string, string>>({})
   const [testingConnection, setTestinConnection] = useState(false)
   const [dIDCredentials, setDIDCredentialsState] =
@@ -43,7 +43,7 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
     if (route.params?.box?.id) {
       setForm({
         ...route.params?.box,
-        port: route.params?.box?.port?.toString(),
+        port: route.params?.box?.port?.toString() || '',
       })
     } else {
       setForm({
@@ -103,32 +103,32 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
       if (!validateForm()) {
         return
       }
-      try {
-        const peerId = await newFulaClient()
-        if (peerId) {
-          const fulaPeerId = await KeyChain.save(
-            'peerId',
-            peerId,
-            KeyChain.Service.FULAPeerIdObject,
-          )
-          if (fulaPeerId) {
-            setFulaPeerId(fulaPeerId)
-          }
-        } else {
-          throw 'Address is invalid'
-        }
-      } catch (error) {
-        console.log('error', error)
+      // try {
+      //   //const peerId = await newFulaClient()
+      //   // if (peerId) {
+      //   //   const fulaPeerId = await KeyChain.save(
+      //   //     'peerId',
+      //   //     peerId,
+      //   //     KeyChain.Service.FULAPeerIdObject,
+      //   //   )
+      //   //   if (fulaPeerId) {
+      //   //     setFulaPeerId(fulaPeerId)
+      //   //   }
+      //   // } else {
+      //   //   throw 'Address is invalid'
+      //   // }
+      // } catch (error) {
+      //   console.log('error', error)
 
-        Toast.show({
-          type: 'error',
-          text1: 'Invalid Address',
-          text2: 'Please make sure the address is a valid address!',
-          position: 'bottom',
-          bottomOffset: 0,
-        })
-        return
-      }
+      //   Toast.show({
+      //     type: 'error',
+      //     text1: 'Invalid Address',
+      //     text2: 'Please make sure the address is a valid address!',
+      //     position: 'bottom',
+      //     bottomOffset: 0,
+      //   })
+      //   return
+      // }
       const box = {
         id: form.id,
         name: form.name,
@@ -155,8 +155,9 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
       )
       try {
         const bloxAddress = Helper.generateBloxAddress({ ...form } as BoxEntity)
-        const isReady = await fula.isReady()
-        if (isReady) await fula.shutdown()
+        //const isReady = await fula.isReady()
+        //if (isReady)
+        await fula.shutdown()
         const peerId = await fula.newClient(
           keyPair.secretKey.toString(), //bytes of the privateKey of did identity in string format
           `${deviceUtils.DocumentDirectoryPath}/wnfs`, // leave empty to use the default temp one

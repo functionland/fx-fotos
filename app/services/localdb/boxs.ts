@@ -34,28 +34,31 @@ export const addOrUpdate = (
   boxs: Entities.BoxEntity[],
 ): Promise<Entities.BoxEntity[]> =>
   RealmDB()
-    .then(realm => {
-      try {
-        const result = []
-        realm.write(() => {
-          for (const box of boxs) {
-            result.push(
-              realm.create<Entities.BoxEntity>(
-                Schemas.Box.name,
-                {
-                  ...box,
-                  id: box.id ?? new UUID().toHexString(),
-                },
-                Realm.UpdateMode.Modified,
-              ),
-            )
-          }
-          return result
-        })
-      } catch (error) {
-        console.error('addOrUpdate Box error!', error)
-        throw error
-      }
+    .then(async realm => {
+      return new Promise<Entities.BoxEntity[]>((resolve, reject) => {
+        try {
+          const result = [] as Entities.BoxEntity[]
+          realm.write(() => {
+            for (const box of boxs) {
+              console.log('realm.write', box)
+              result.push(
+                realm.create<Entities.BoxEntity>(
+                  Schemas.Box.name,
+                  {
+                    ...box,
+                    id: box.id ? box.id : new UUID().toHexString(),
+                  },
+                  Realm.UpdateMode.Modified,
+                )
+              )
+            }
+            resolve(result as Entities.BoxEntity[])
+          })
+        } catch (error) {
+          console.error('addOrUpdate Box error!', error)
+          reject(error)
+        }
+      })
     })
     .catch(error => {
       console.error('RealmDB addOrUpdateAssets error!', error)

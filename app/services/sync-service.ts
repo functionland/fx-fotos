@@ -9,7 +9,6 @@ import { AssetEntity } from '../realmdb/entities'
 import { SyncStatus } from '../types'
 import { Assets, Boxs, FolderSettings } from './localdb/index'
 import * as Constances from '../utils/constants'
-import { reject } from 'lodash'
 import { Helper, DeviceUtils, KeyChain } from '../utils'
 
 // import * as helper from '../utils/helper'
@@ -38,7 +37,7 @@ const backgroundTask = async (taskParameters: TaskParams) => {
     )
   }
   const { callback = null, assets = [] } = taskParameters
-  const updateAssets: AssetEntity[] = []
+  const updateAssets: Partial<AssetEntity>[] = []
 
   try {
     const fulaConfig = await initFula()
@@ -200,7 +199,7 @@ interface FulaConfig {
   identity?: string | null
   storePath?: string | null
   bloxAddr?: string | null
-  exchange?: string | null
+  exchange?: string
   autoFlush?: boolean
   rootCID?: string | null
 }
@@ -258,6 +257,8 @@ export const initFula = async (
       exchange,
       autoFlush,
       rootCID,
+      true,
+      true
     )
     return fulaInit
   } catch (error) {

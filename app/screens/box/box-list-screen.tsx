@@ -47,8 +47,8 @@ export const BoxListScreen: React.FC<Props> = ({ route, navigation }) => {
   const deleteBox = async (box: BoxEntity) => {
     try {
       pressed.current = true
-      await Boxs.remove([box.peerId])
-      setBoxs(prev => prev.filter(item => item.peerId != box.peerId))
+      await Boxs.remove([box.id])
+      setBoxs(prev => prev.filter(item => item.id != box.id))
     } catch (error) {
       console.log(error)
     } finally {

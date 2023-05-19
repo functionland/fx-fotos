@@ -33,7 +33,7 @@ export type RootStackParamList = {
   Account: undefined
   Settings: undefined
   BoxList: undefined
-  BoxAddUpdate: { box: BoxEntity }
+  BoxAddUpdate: { box: Partial<BoxEntity> }
   SharedViewer: { assetURI: string }
   ImageGalleryViewer: {
     assetId: Asset['id']
