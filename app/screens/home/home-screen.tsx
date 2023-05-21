@@ -166,7 +166,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       const box = (await Boxs.getAll())?.[0]
       if (box) {
         const fulaInit = await SyncService.initFula()
-
         if (fulaInit) {
           await helper.storeFulaRootCID(fulaInit.rootCid)
           const fulaPeerId = await helper.storeFulaPeerId(fulaInit.peerId)
@@ -411,11 +410,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                               '.svg',
                             )
                               ? helper.getWalletImage(
-                                  walletConnector.peerMeta?.name,
-                                )
+                                walletConnector.peerMeta?.name,
+                              )
                               : {
-                                  uri: walletConnector.peerMeta?.icons?.[0],
-                                }
+                                uri: walletConnector.peerMeta?.icons?.[0],
+                              }
                           }
                           style={{
                             height: 35,

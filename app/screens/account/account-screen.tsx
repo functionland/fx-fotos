@@ -132,7 +132,7 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
   }
   const authorizeApp = () => {
     Linking.openURL(
-      `fxblox://connectdapp/FxFotos/land.fx.fotos/${fulaPeerId?.password}`,
+      `fxblox://connectdapp/FxFotos/land.fx.fotos/${fulaPeerId?.password}/${encodeURIComponent('fotos://addblox/$bloxName/$bloxPeerId')}`,
     )
   }
   const renderHeader = () => (
