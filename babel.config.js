@@ -1,11 +1,22 @@
 module.exports = {
-  presets: ['module:metro-react-native-babel-preset'],
+  presets: [
+    [
+      'module:metro-react-native-babel-preset',
+      { useTransformReactJSXExperimental: true },
+    ],
+  ],
   env: {
     production: {
       plugins: ['transform-remove-console'],
     },
   },
   plugins: [
+    [
+      '@babel/plugin-transform-react-jsx',
+      {
+        runtime: 'automatic',
+      },
+    ],
     [
       '@babel/plugin-proposal-decorators',
       {

@@ -1,6 +1,8 @@
 import { HDKEY, DID, EncryptJWT, DecryptJWT } from '@functionland/fula-sec'
 import { KeyChain } from '.'
 import { BoxEntity } from '../realmdb/entities'
+import { utf8ToHex } from '@walletconnect/encoding'
+import { ethers } from 'ethers'
 export const translateOrigin = (center: number, d: number) => center - d / 2
 export const convertDurationToTime = (duration: number): string => {
   const h = Math.floor(duration / 3600)
@@ -98,4 +100,26 @@ export const generateBloxAddress = (box: BoxEntity) => {
   } else {
     return `/ip4/${box.ipAddress}/${box.protocol}/${box.port}/p2p/${box.peerId}`.trim()
   }
+}
+
+export interface RpcRequestParams {
+  message: string
+  web3Provider: ethers.providers.Web3Provider
+}
+
+export const signMessage = async ({
+  web3Provider,
+  message,
+}: RpcRequestParams): Promise<string> => {
+  if (!web3Provider) {
+    throw new Error('web3Provider not connected')
+  }
+  const hexMsg = utf8ToHex(message, true)
+  const [address] = await web3Provider.listAccounts()
+  if (!address) {
+    throw new Error('No address found')
+  }
+
+  const signature = await web3Provider.send('personal_sign', [hexMsg, address])
+  return signature
 }
