@@ -19,10 +19,6 @@ import {
 } from 'react-native-safe-area-context'
 import { RecoilRoot } from 'recoil'
 import { ThemeProvider as RneThemeProvider } from '@rneui/themed'
-import WalletConnectProvider from '@walletconnect/react-native-dapp'
-import AsyncStorage from '@react-native-async-storage/async-storage'
-
-import NetInfo from '@react-native-community/netinfo'
 
 import * as storage from './utils/storage'
 import {
@@ -91,14 +87,7 @@ function App() {
           <SafeAreaProvider initialMetrics={initialWindowMetrics}>
             <ErrorBoundary catchErrors="prod">
               <RecoilRoot>
-                <WalletConnectProvider
-                  redirectUrl="fotos://"
-                  storageOptions={{
-                    asyncStorage: AsyncStorage,
-                  }}
-                >
-                  <AppNavigator onStateChange={onNavigationStateChange} />
-                </WalletConnectProvider>
+                <AppNavigator onStateChange={onNavigationStateChange} />
               </RecoilRoot>
             </ErrorBoundary>
           </SafeAreaProvider>

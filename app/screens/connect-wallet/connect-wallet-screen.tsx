@@ -52,7 +52,7 @@ export const ConnectWalletScreen: React.FC<Props> = ({ navigation, route }) => {
       }
       setConnectToWalletStatus('Connecting')
       await open()
-      setConnectToWalletStatus('Connected')
+      //setConnectToWalletStatus('Connected')
     } catch (error) {
       console.log(error)
       setConnectToWalletStatus('Failed')

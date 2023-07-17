@@ -79,7 +79,7 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
       [
         {
           text: 'No',
-          cancelable: true,
+          style: 'cancel',
         },
         {
           text: 'Yes',
@@ -136,7 +136,9 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
   }
   const authorizeApp = () => {
     Linking.openURL(
-      `fxblox://connectdapp/FxFotos/land.fx.fotos/${fulaPeerId?.password}/${encodeURIComponent('fotos://addblox/$bloxName/$bloxPeerId')}`,
+      `fxblox://connectdapp/FxFotos/land.fx.fotos/${
+        fulaPeerId?.password
+      }/${encodeURIComponent('fotos://addblox/$bloxName/$bloxPeerId')}`,
     )
   }
   const renderHeader = () => (
@@ -182,7 +184,7 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
       <ScrollView>
         <View style={styles.container}>
           <SharedElement id="AccountAvatar">
-            {isConnected ? (
+            {/* {isConnected ? (
               <Avatar
                 containerStyle={{
                   backgroundColor: 'gray',
@@ -192,6 +194,12 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
                   justifyContent: 'center',
                   alignItems: 'center',
                 }}
+                icon={{
+                  name: 'account-alert',
+                  type: 'material-community',
+                  size: 84,
+                }}
+                rounded
                 // ImageComponent={() => (
                 //   <Image
                 //     source={
@@ -219,7 +227,16 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
                 }}
                 rounded
               />
-            )}
+            )} */}
+            <Avatar
+              containerStyle={styles.avatarLarge}
+              icon={{
+                name: 'account-alert',
+                type: 'material-community',
+                size: 84,
+              }}
+              rounded
+            />
           </SharedElement>
 
           {isConnected ? (
