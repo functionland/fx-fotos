@@ -136,26 +136,28 @@ export const addOrUpdate = (
 ): Promise<Entities.AssetEntity[]> =>
   RealmDB()
     .then(realm => {
-      try {
-        const result = []
-        realm.write(() => {
-          for (const asset of assets) {
-            result.push(
-              realm.create<Entities.AssetEntity>(
-                Schemas.Asset.name,
-                {
-                  ...asset,
-                },
-                Realm.UpdateMode.Modified,
-              ),
-            )
-          }
-          return result
-        })
-      } catch (error) {
-        console.error('addOrUpdateAssets error!', error)
-        throw error
-      }
+      return new Promise<Entities.AssetEntity[]>((resolve, reject) => {
+        try {
+          const result: Entities.AssetEntity[] = []
+          realm.write(() => {
+            for (const asset of assets) {
+              result.push(
+                realm.create<Entities.AssetEntity>(
+                  Schemas.Asset.name,
+                  {
+                    ...asset,
+                  },
+                  Realm.UpdateMode.Modified,
+                ),
+              )
+            }
+            resolve(result)
+          })
+        } catch (error) {
+          console.error('addOrUpdateAssets error!', error)
+          reject(error)
+        }
+      })
     })
     .catch(error => {
       console.error('RealmDB addOrUpdateAssets error!', error)

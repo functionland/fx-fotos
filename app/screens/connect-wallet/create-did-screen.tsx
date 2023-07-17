@@ -16,8 +16,10 @@ import {
   WalletConnectModal,
   useWalletConnectModal,
 } from '@walletconnect/modal-react-native'
-import { Helper, WalletConnectConifg } from '../../utils'
 import { ethers } from 'ethers'
+import { fula } from '@functionland/react-native-fula'
+import { DeviceUtils, KeyChain, Helper, WalletConnectConifg } from '../../utils'
+import { fulaPeerIdState } from '../../store'
 type Props = NativeStackScreenProps<
   RootStackParamList,
   AppNavigationNames.BoxAddUpdate
@@ -26,6 +28,7 @@ type Props = NativeStackScreenProps<
 export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
   const { isConnected, provider } = useWalletConnectModal()
   const setDIDCredentialsState = useSetRecoilState(dIDCredentialsState)
+  const setFulaPeerIdState = useSetRecoilState(fulaPeerIdState)
   const [iKnow, setIKnow] = useState(false)
   const [passwod, setPassword] = useState('')
   const web3Provider = useMemo(
@@ -48,10 +51,48 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
     try {
       const ed = new HDKEY(passwod)
       const chainCode = ed.chainCode
+      if (!web3Provider) {
+        Toast.show({
+          type: 'error',
+          text1: 'Web3 provider is not ready!',
+          position: 'bottom',
+          bottomOffset: 0,
+        })
+        return
+      }
       const walletSignature = await Helper.signMessage({
         message: chainCode,
         web3Provider,
       })
+
+      //Create Fotos app peerId
+      const keyPair = Helper.getMyDIDKeyPair(passwod, walletSignature)
+      await fula.shutdown()
+      const peerId = await fula.newClient(
+        keyPair.secretKey.toString(), //bytes of the privateKey of did identity in string format
+        `${DeviceUtils.DocumentDirectoryPath}/wnfs`, // leave empty to use the default temp one
+        '',
+        'noop',
+        true,
+        true,
+        true,
+      )
+      if (peerId) {
+        const fulaPeerId = await KeyChain.save(
+          'peerId',
+          peerId,
+          KeyChain.Service.FULAPeerIdObject,
+        )
+        if (fulaPeerId) setFulaPeerIdState(fulaPeerId)
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: 'Unable to create FxFotos peerId',
+          position: 'bottom',
+          bottomOffset: 0,
+        })
+        return
+      }
       const passwordCredentials = await Keychain.save(
         passwod,
         walletSignature,
@@ -60,7 +101,7 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
       if (passwordCredentials) {
         setDIDCredentialsState(passwordCredentials)
         navigation.reset({
-          index: 0,
+          index: 1,
           routes: [
             { name: AppNavigationNames.HomeScreen },
             { name: AppNavigationNames.AccountScreen },
