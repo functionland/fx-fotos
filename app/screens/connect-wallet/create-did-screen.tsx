@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { StyleSheet, View } from 'react-native'
 import { Button, CheckBox, Icon, Input, Text } from '@rneui/themed'
 
@@ -11,10 +11,14 @@ import * as Keychain from '../../utils/keychain'
 import { Header, HeaderArrowBack } from '../../components/header'
 import { Screen } from '../../components'
 import { RootStackParamList, AppNavigationNames } from '../../navigators'
-import { useWalletConnect } from '@walletconnect/react-native-dapp'
 import { dIDCredentialsState } from '../../store'
+import {
+  WalletConnectModal,
+  useWalletConnectModal,
+} from '@walletconnect/modal-react-native'
+import { ethers } from 'ethers'
 import { fula } from '@functionland/react-native-fula'
-import { DeviceUtils, Helper, KeyChain } from '../../utils'
+import { DeviceUtils, KeyChain, Helper, WalletConnectConifg } from '../../utils'
 import { fulaPeerIdState } from '../../store'
 type Props = NativeStackScreenProps<
   RootStackParamList,
@@ -22,11 +26,16 @@ type Props = NativeStackScreenProps<
 >
 
 export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
-  const walletConnector = useWalletConnect()
+  const { isConnected, provider } = useWalletConnectModal()
   const setDIDCredentialsState = useSetRecoilState(dIDCredentialsState)
   const setFulaPeerIdState = useSetRecoilState(fulaPeerIdState)
   const [iKnow, setIKnow] = useState(false)
   const [passwod, setPassword] = useState('')
+  const web3Provider = useMemo(
+    () => (provider ? new ethers.providers.Web3Provider(provider) : undefined),
+    [provider],
+  )
+  useEffect(() => {}, [])
   const renderHeader = () => (
     <Header
       centerComponent={
@@ -35,25 +44,29 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
         </Text>
       }
       leftComponent={<HeaderArrowBack navigation={navigation} />}
-    //rightComponent={<Icon type="material-community" name="check" />}
+      //rightComponent={<Icon type="material-community" name="check" />}
     />
   )
   const signPassword = async () => {
     try {
       const ed = new HDKEY(passwod)
       const chainCode = ed.chainCode
-      if (!walletConnector.session?.connected)
-        await walletConnector.createSession()
-      const walletSignature = await walletConnector.signPersonalMessage([
-        chainCode,
-        walletConnector?.accounts[0],
-      ])
+      if (!web3Provider) {
+        Toast.show({
+          type: 'error',
+          text1: 'Web3 provider is not ready!',
+          position: 'bottom',
+          bottomOffset: 0,
+        })
+        return
+      }
+      const walletSignature = await Helper.signMessage({
+        message: chainCode,
+        web3Provider,
+      })
 
       //Create Fotos app peerId
-      const keyPair = Helper.getMyDIDKeyPair(
-        passwod,
-        walletSignature
-      )
+      const keyPair = Helper.getMyDIDKeyPair(passwod, walletSignature)
       await fula.shutdown()
       const peerId = await fula.newClient(
         keyPair.secretKey.toString(), //bytes of the privateKey of did identity in string format
@@ -70,8 +83,7 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
           peerId,
           KeyChain.Service.FULAPeerIdObject,
         )
-        if (fulaPeerId)
-          setFulaPeerIdState(fulaPeerId)
+        if (fulaPeerId) setFulaPeerIdState(fulaPeerId)
       } else {
         Toast.show({
           type: 'error',
@@ -163,12 +175,18 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
         </View>
         <View style={styles.section}>
           <Button
+            loading={!isConnected || !provider}
             disabled={!iKnow || !passwod?.length}
             onPress={signPassword}
             title="Link password"
           />
         </View>
       </View>
+      <WalletConnectModal
+        projectId={WalletConnectConifg.WaletConnect_Project_Id}
+        providerMetadata={WalletConnectConifg.providerMetadata}
+        sessionParams={WalletConnectConifg.sessionParams()}
+      />
     </Screen>
   )
 }

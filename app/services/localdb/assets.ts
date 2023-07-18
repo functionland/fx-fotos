@@ -158,7 +158,6 @@ export const addOrUpdate = (
           reject(error)
         }
       })
-
     })
     .catch(error => {
       console.error('RealmDB addOrUpdateAssets error!', error)

@@ -44,12 +44,11 @@ import * as KeyChain from '../../utils/keychain'
 import { Avatar, Icon, Image, LinearProgress } from '@rneui/themed'
 import { SharedElement } from 'react-navigation-shared-element'
 import { AppNavigationNames } from '../../navigators'
-import { useWalletConnect } from '@walletconnect/react-native-dapp'
 import { ThemeContext } from '../../theme'
 import * as helper from '../../utils/helper'
 import Animated from 'react-native-reanimated'
-import deviceUtils from '../../utils/deviceUtils'
 import { FolderSettingsEntity } from '../../realmdb/entities'
+import { useWalletConnectModal } from '@walletconnect/modal-react-native'
 
 interface HomeScreenProps {
   navigation: NativeStackNavigationProp<
@@ -62,7 +61,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [isReady, setIsReady] = useState(false)
   const [syncing, setSyncing] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
-  const walletConnector = useWalletConnect()
+  const { isConnected } = useWalletConnectModal()
   const [dIDCredentials, setDIDCredentialsState] =
     useRecoilState(dIDCredentialsState)
 
@@ -400,7 +399,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             Platform.OS === 'android' || Platform.OS === 'ios' ? (
               <HeaderRightContainer style={{ flex: 1 }}>
                 <SharedElement id="AccountAvatar">
-                  {walletConnector.connected ? (
+                  {/* {isConnected ? (
                     <Avatar
                       containerStyle={styles.avatar}
                       ImageComponent={() => (
@@ -410,11 +409,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                               '.svg',
                             )
                               ? helper.getWalletImage(
-                                walletConnector.peerMeta?.name,
-                              )
+                                  walletConnector.peerMeta?.name,
+                                )
                               : {
-                                uri: walletConnector.peerMeta?.icons?.[0],
-                              }
+                                  uri: walletConnector.peerMeta?.icons?.[0],
+                                }
                           }
                           style={{
                             height: 35,
@@ -441,7 +440,20 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                         navigation.navigate(AppNavigationNames.AccountScreen)
                       }
                     />
-                  )}
+                  )} */}
+                  <Avatar
+                    containerStyle={styles.disconnectedAvatar}
+                    icon={{
+                      name: 'account-alert',
+                      type: 'material-community',
+                      size: 34,
+                    }}
+                    size="small"
+                    rounded
+                    onPress={() =>
+                      navigation.navigate(AppNavigationNames.AccountScreen)
+                    }
+                  />
                 </SharedElement>
               </HeaderRightContainer>
             ) : null
