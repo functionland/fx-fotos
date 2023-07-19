@@ -7,7 +7,7 @@ export const providerMetadata: IProviderMetadata = {
   url: 'https://fx.land/',
   icons: ['https://fx.land/favicon-32x32.png'],
   redirect: {
-    native: 'fxfotos://',
+    native: 'fotos://',
   },
 }
 
