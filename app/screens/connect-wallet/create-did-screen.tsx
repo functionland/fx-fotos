@@ -31,6 +31,7 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
   const setFulaPeerIdState = useSetRecoilState(fulaPeerIdState)
   const [iKnow, setIKnow] = useState(false)
   const [passwod, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const web3Provider = useMemo(
     () => (provider ? new ethers.providers.Web3Provider(provider) : undefined),
     [provider],
@@ -155,7 +156,12 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
               marginTop: 20,
             }}
             textContentType="password"
-            secureTextEntry={true}
+            secureTextEntry={!showPassword}
+            rightIcon={{
+              name: showPassword ? 'visibility-off' : 'visibility',
+              color: 'white',
+              onPress: () => setShowPassword(!showPassword),
+            }}
             style={{ textAlign: 'center' }}
             onChangeText={text => setPassword(text)}
             errorProps

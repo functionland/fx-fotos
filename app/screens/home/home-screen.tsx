@@ -13,7 +13,12 @@ import {
   ViewStyle,
 } from 'react-native'
 import { useRecoilState, useSetRecoilState } from 'recoil'
-import { request, PERMISSIONS, openSettings } from 'react-native-permissions'
+import {
+  request,
+  requestMultiple,
+  PERMISSIONS,
+  openSettings,
+} from 'react-native-permissions'
 import { fula } from '@functionland/react-native-fula'
 
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
@@ -79,11 +84,21 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const requestAndroidPermission = useCallback(async () => {
     try {
       const permissions = Platform.select({
-        android: PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE,
-        ios: PERMISSIONS.IOS.PHOTO_LIBRARY,
+        android:
+          Platform.Version >= 33
+            ? [
+                PERMISSIONS.ANDROID.READ_MEDIA_IMAGES,
+                PERMISSIONS.ANDROID.READ_MEDIA_VIDEO,
+              ]
+            : [PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE],
+        ios: [PERMISSIONS.IOS.PHOTO_LIBRARY],
       })
-      const result = await request(permissions)
-      if (result === 'granted') {
+      const result = await requestMultiple(permissions)
+      if (
+        result[PERMISSIONS.ANDROID.READ_MEDIA_IMAGES] === 'granted' ||
+        result[PERMISSIONS.ANDROID.READ_MEDIA_VIDEO] === 'granted' ||
+        result[PERMISSIONS.IOS.PHOTO_LIBRARY] === 'granted'
+      ) {
         setIsReady(true)
       } else {
         Alert.alert(
