@@ -29,8 +29,10 @@ import {
 } from '../../navigators/home-navigator'
 import Realm from 'realm'
 import {
+  appPreferencesState,
   dIDCredentialsState,
   foldersSettingsState,
+  fulaIsReadyState,
   fulaPeerIdState,
   mediasState,
 } from '../../store'
@@ -52,8 +54,9 @@ import { AppNavigationNames } from '../../navigators'
 import { ThemeContext } from '../../theme'
 import * as helper from '../../utils/helper'
 import Animated from 'react-native-reanimated'
-import { FolderSettingsEntity } from '../../realmdb/entities'
-import { useWalletConnectModal } from '@walletconnect/modal-react-native'
+import { AssetEntity, FolderSettingsEntity } from '../../realmdb/entities'
+import * as Constants from '../../utils/constants'
+import { FulaFileList } from '../../types/fula'
 
 interface HomeScreenProps {
   navigation: NativeStackNavigationProp<
@@ -66,13 +69,14 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [isReady, setIsReady] = useState(false)
   const [syncing, setSyncing] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
-  const { isConnected } = useWalletConnectModal()
+  const [fulaIsReady, setFulaIsReady] = useRecoilState(fulaIsReadyState)
   const [dIDCredentials, setDIDCredentialsState] =
     useRecoilState(dIDCredentialsState)
 
   const [, setFulaPeerId] = useRecoilState(fulaPeerIdState)
+  const [appPreferences, setAppPreferences] =
+    useRecoilState(appPreferencesState)
   const setFoldersSettings = useSetRecoilState(foldersSettingsState)
-
   const { toggleTheme } = useContext(ThemeContext)
 
   const realmAssets =
@@ -80,7 +84,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [medias, setMedias] = useRecoilState(mediasState)
   const [loading, setLoading] = useState(false)
   const [mediasRefObj, setMediasRefObj] = useState<Record<string, Asset>>({})
-
+  console.log('appPreferences', appPreferences)
   const requestAndroidPermission = useCallback(async () => {
     try {
       const permissions = Platform.select({
@@ -146,6 +150,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     }
   }, [isReady])
 
+  useEffect(() => {
+    if (fulaIsReady && !loading && !appPreferences?.firstTimeBackendSynced) {
+      getAndDownloadBackendAssets()
+    }
+  }, [fulaIsReady, loading, appPreferences])
+
   const loadFoldersSettings = async () => {
     try {
       const folders = await FolderSettings.getAll()
@@ -184,11 +194,37 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           await helper.storeFulaRootCID(fulaInit.rootCid)
           const fulaPeerId = await helper.storeFulaPeerId(fulaInit.peerId)
           if (fulaPeerId) setFulaPeerId(fulaPeerId)
-          await fula.checkFailedActions(true)
+          setFulaIsReady(true)
+          //await fula.checkFailedActions(true)
         }
       }
     } catch (error) {
       console.log('fulaInit Error', error)
+    }
+  }
+
+  // first time app loaded, it gets all backend assets and add them to the local db
+  // before calling this method make sure fula is ready
+  const getAndDownloadBackendAssets = async () => {
+    try {
+      console.log('getBackendAssets', await fula.isReady())
+      if (!(await fula.isReady())) return
+      const files = (await fula.ls(Constants.FOTOS_WNFS_ROOT)) as FulaFileList
+      console.log('fula.ls', files)
+      if (files) {
+        const result = await Assets.addOrUpdateBackendAssets(
+          files,
+          realmAssets.current,
+        )
+      }
+      //Mark the app preferences that in the first time app loaded, it synced the backend assets
+      setAppPreferences({
+        firstTimeBackendSynced: true,
+      })
+      //Download the assets
+      await SyncService.uploadAssetsInBackground()
+    } catch (error) {
+      console.log('getBackendAssets', error)
     }
   }
   const loadAssets = async (syncMetadata: boolean = true) => {
@@ -209,7 +245,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         )
         syncAssetsMetadata()
         await SyncService.setAutoBackupAssets()
-        SyncService.uploadAssetsInBackground()
+        await SyncService.downloadAssetsInBackground()
+        await SyncService.uploadAssetsInBackground()
       }
     } catch (error) {
       console.error(error)
@@ -347,7 +384,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       }
 
       setSyncing(true)
-      const assetsMetadatas = []
+      const assetsMetadatas: Partial<AssetEntity>[] = []
       for (let index = 0; index < syncBundaries.length; index++) {
         const toTime = Number.parseInt(syncBundaries[index])
         const fromTime = Number.parseInt(syncBundariesObj[syncBundaries[index]])
@@ -366,7 +403,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
               'playableDuration',
             ],
           })
-          allMedias?.assets.map<Asset>(asset =>
+          allMedias?.assets?.forEach(asset =>
             assetsMetadatas.push({
               id: asset.id,
               filename: asset.filename,

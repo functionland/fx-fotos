@@ -123,3 +123,6 @@ export const signMessage = async ({
   const signature = await web3Provider.send('personal_sign', [hexMsg, address])
   return signature
 }
+
+export const sleep = (milliseconds: number) =>
+  new Promise<void>(resolve => setTimeout(() => resolve(), milliseconds))
