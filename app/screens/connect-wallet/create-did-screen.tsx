@@ -188,11 +188,6 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
           />
         </View>
       </View>
-      <WalletConnectModal
-        projectId={WalletConnectConifg.WaletConnect_Project_Id}
-        providerMetadata={WalletConnectConifg.providerMetadata}
-        sessionParams={WalletConnectConifg.sessionParams()}
-      />
     </Screen>
   )
 }

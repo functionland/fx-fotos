@@ -18,6 +18,7 @@ import { Screen } from '../../components'
 import {
   Header,
   HeaderArrowBack,
+  HeaderAvatar,
   HeaderRightContainer,
 } from '../../components/header'
 import { AppNavigationNames, RootStackParamList } from '../../navigators'
@@ -25,11 +26,7 @@ import * as helper from '../../utils/helper'
 import { useRecoilState } from 'recoil'
 import { dIDCredentialsState, fulaPeerIdState } from '../../store'
 import Clipboard from '@react-native-clipboard/clipboard'
-import {
-  WalletConnectModal,
-  useWalletConnectModal,
-} from '@walletconnect/modal-react-native'
-import { WalletConnectConifg } from '../../utils'
+import { useWalletConnectModal } from '@walletconnect/modal-react-native'
 
 type Props = NativeStackScreenProps<
   RootStackParamList,
@@ -174,69 +171,12 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
     />
   )
   return (
-    <Screen
-      preset="scroll"
-      scrollEventThrottle={16}
-      automaticallyAdjustContentInsets
-      style={styles.screen}
-    >
+    <Screen preset="scroll" style={styles.screen}>
       {renderHeader()}
       <ScrollView>
         <View style={styles.container}>
           <SharedElement id="AccountAvatar">
-            {/* {isConnected ? (
-              <Avatar
-                containerStyle={{
-                  backgroundColor: 'gray',
-                  width: 100,
-                  height: 100,
-                  borderRadius: 50,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}
-                icon={{
-                  name: 'account-alert',
-                  type: 'material-community',
-                  size: 84,
-                }}
-                rounded
-                // ImageComponent={() => (
-                //   <Image
-                //     source={
-                //       walletConnector.peerMeta?.icons?.[0].endsWith('.svg')
-                //         ? helper.getWalletImage(walletConnector.peerMeta?.name)
-                //         : {
-                //             uri: walletConnector.peerMeta?.icons?.[0],
-                //           }
-                //     }
-                //     style={{
-                //       height: 90,
-                //       width: 90,
-                //     }}
-                //     resizeMode="contain"
-                //   />
-                // )}
-              />
-            ) : (
-              <Avatar
-                containerStyle={styles.avatarLarge}
-                icon={{
-                  name: 'account-alert',
-                  type: 'material-community',
-                  size: 84,
-                }}
-                rounded
-              />
-            )} */}
-            <Avatar
-              containerStyle={styles.avatarLarge}
-              icon={{
-                name: 'account-alert',
-                type: 'material-community',
-                size: 84,
-              }}
-              rounded
-            />
+            <HeaderAvatar size={100} iconSize={80} />
           </SharedElement>
 
           {isConnected ? (
@@ -358,11 +298,6 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
           )}
         </View>
       </ScrollView>
-      <WalletConnectModal
-        projectId={WalletConnectConifg.WaletConnect_Project_Id}
-        providerMetadata={WalletConnectConifg.providerMetadata}
-        sessionParams={WalletConnectConifg.sessionParams()}
-      />
     </Screen>
   )
 }

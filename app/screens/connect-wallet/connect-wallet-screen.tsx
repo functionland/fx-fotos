@@ -45,6 +45,7 @@ export const ConnectWalletScreen: React.FC<Props> = ({ navigation, route }) => {
     try {
       if (isConnected || connectToWalletStatus === 'Connected') {
         await provider?.disconnect()
+        await provider?.cleanupPendingPairings()
         setConnectToWalletStatus('None')
       } else if (connectToWalletStatus !== 'None') {
         setConnectToWalletStatus('None')
@@ -130,11 +131,6 @@ export const ConnectWalletScreen: React.FC<Props> = ({ navigation, route }) => {
           </>
         )}
       </View>
-      <WalletConnectModal
-        projectId={WalletConnectConifg.WaletConnect_Project_Id}
-        providerMetadata={WalletConnectConifg.providerMetadata}
-        sessionParams={WalletConnectConifg.sessionParams()}
-      />
     </Screen>
   )
 }

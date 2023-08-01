@@ -42,6 +42,7 @@ import { AssetListScreen } from '../index'
 import { Asset, PagedInfo } from '../../types'
 import { Header, Screen } from '../../components'
 import {
+  HeaderAvatar,
   HeaderLeftContainer,
   HeaderLogo,
   HeaderRightContainer,
@@ -448,67 +449,15 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             </HeaderLeftContainer>
           }
           rightComponent={
-            Platform.OS === 'android' || Platform.OS === 'ios' ? (
-              <HeaderRightContainer style={{ flex: 1 }}>
-                <SharedElement id="AccountAvatar">
-                  {/* {isConnected ? (
-                    <Avatar
-                      containerStyle={styles.avatar}
-                      ImageComponent={() => (
-                        <Image
-                          source={
-                            walletConnector.peerMeta?.icons?.[0].endsWith(
-                              '.svg',
-                            )
-                              ? helper.getWalletImage(
-                                  walletConnector.peerMeta?.name,
-                                )
-                              : {
-                                  uri: walletConnector.peerMeta?.icons?.[0],
-                                }
-                          }
-                          style={{
-                            height: 35,
-                            width: 35,
-                          }}
-                          resizeMode="contain"
-                        />
-                      )}
-                      onPress={() =>
-                        navigation.navigate(AppNavigationNames.AccountScreen)
-                      }
-                    />
-                  ) : (
-                    <Avatar
-                      containerStyle={styles.disconnectedAvatar}
-                      icon={{
-                        name: 'account-alert',
-                        type: 'material-community',
-                        size: 34,
-                      }}
-                      size="small"
-                      rounded
-                      onPress={() =>
-                        navigation.navigate(AppNavigationNames.AccountScreen)
-                      }
-                    />
-                  )} */}
-                  <Avatar
-                    containerStyle={styles.disconnectedAvatar}
-                    icon={{
-                      name: 'account-alert',
-                      type: 'material-community',
-                      size: 34,
-                    }}
-                    size="small"
-                    rounded
-                    onPress={() =>
-                      navigation.navigate(AppNavigationNames.AccountScreen)
-                    }
-                  />
-                </SharedElement>
-              </HeaderRightContainer>
-            ) : null
+            <HeaderRightContainer style={{ flex: 1 }}>
+              <SharedElement id="AccountAvatar">
+                <HeaderAvatar
+                  onPress={() =>
+                    navigation.navigate(AppNavigationNames.AccountScreen)
+                  }
+                />
+              </SharedElement>
+            </HeaderRightContainer>
           }
         />
         {syncing && <LinearProgress />}
@@ -516,11 +465,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     )
   }
   return (
-    <Screen
-      scrollEventThrottle={16}
-      automaticallyAdjustContentInsets
-      style={styles.screen}
-    >
+    <Screen style={styles.screen}>
       <AssetListScreen
         navigation={navigation}
         medias={isReady ? medias : null}
