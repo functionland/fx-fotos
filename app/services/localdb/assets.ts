@@ -1,6 +1,9 @@
 import Realm from 'realm'
 import { Entities, RealmDB, Schemas } from '../../realmdb'
 import { SearchOptionValueType, SyncStatus } from '../../types'
+import { FulaFileList } from '../../types/fula'
+import { mimeToMediaType } from '../asset-service'
+const mime = require('mime-types')
 
 const dynamicFilterGenerator = (
   searchOptions: SearchOptionValueType[],
@@ -41,10 +44,10 @@ const dynamicFilterGenerator = (
 }
 export const getAll = (
   params: {
-    descriptor: string
-    orderby: 'asc' | 'desc'
-    filter: string
-    filenameFilter: string | undefined
+    descriptor?: string
+    orderby?: 'asc' | 'desc'
+    filter?: string
+    filenameFilter?: string | undefined
     uris?: string[] | undefined
     searchOptions?: SearchOptionValueType[]
   } = {},
@@ -54,7 +57,7 @@ export const getAll = (
       const {
         descriptor = 'modificationTime',
         orderby = 'desc',
-        filter = 'isDeleted=false or syncStatus=2',
+        filter = 'isDeleted=false or syncStatus=2 or syncStatus=3',
         filenameFilter,
         searchOptions,
         uris = [],
@@ -102,7 +105,7 @@ export const getById = (
     })
 
 export const getAllNeedToSync = (): Promise<
-  Realm.Results<Entities.AssetEntity & Realm.Object>
+  (Entities.AssetEntity & Realm.Object)[]
 > =>
   RealmDB()
     .then(realm => {
@@ -112,10 +115,24 @@ export const getAllNeedToSync = (): Promise<
       return assets.slice()
     })
     .catch(error => {
-      console.error('RealmDB getAllAssets error!', error)
+      console.error('RealmDB getAllNeedToSync error!', error)
       throw error
     })
 
+export const getAllNeedToDownload = (): Promise<
+  (Entities.AssetEntity & Realm.Object)[]
+> =>
+  RealmDB()
+    .then(realm => {
+      const assets = realm
+        .objects<Entities.AssetEntity>(Schemas.Asset.name)
+        .filtered('syncStatus=3 and isDeleted=true')
+      return assets.slice()
+    })
+    .catch(error => {
+      console.error('RealmDB getAllNeedToDownload error!', error)
+      throw error
+    })
 export const removeAll = (): Promise<void> =>
   RealmDB()
     .then(realm =>
@@ -132,7 +149,7 @@ export const removeAll = (): Promise<void> =>
     })
 
 export const addOrUpdate = (
-  assets: Entities.AssetEntity[],
+  assets: Partial<Entities.AssetEntity>[],
 ): Promise<Entities.AssetEntity[]> =>
   RealmDB()
     .then(realm => {
@@ -226,5 +243,91 @@ export const removeByUri = (uri: string): Promise<void> =>
     })
     .catch(error => {
       console.error('RealmDB removeAssets error!', error)
+      throw error
+    })
+
+export const addOrUpdateBackendAssets = (
+  backendFiles: FulaFileList,
+  currentAssets: Entities.AssetEntity[],
+): Promise<Entities.AssetEntity[]> => {
+  const assetsObj = currentAssets?.reduce((obj, asset) => {
+    if (asset.filenameNormalized) obj[asset.filenameNormalized] = asset
+    return obj
+  }, {})
+  const updateAsset = backendFiles.map<Entities.AssetEntity>(file => {
+    if (assetsObj[file.name.toLowerCase()])
+      return {
+        id: assetsObj[file.name.toLowerCase()].id,
+        syncStatus: SyncStatus.Saved,
+      }
+    else
+      return {
+        id: new Realm.BSON.UUID().toHexString(),
+        filename: file.name,
+        filenameNormalized: file.name.toLocaleLowerCase(),
+        creationTime: new Date().getTime(), // new Date(file.created),
+        modificationTime: new Date().getTime(), // new Date(file.modified),
+        mediaType: mimeToMediaType(mime.lookup(file.name)),
+        mediaSubtypes: [],
+        isDeleted: true,
+        syncStatus: SyncStatus.Saved,
+      }
+  })
+  return RealmDB()
+    .then(realm => {
+      return new Promise<Entities.AssetEntity[]>((resolve, reject) => {
+        try {
+          const result: Entities.AssetEntity[] = []
+          realm.write(() => {
+            for (const asset of updateAsset) {
+              result.push(
+                realm.create<Entities.AssetEntity>(
+                  Schemas.Asset.name,
+                  {
+                    ...asset,
+                  },
+                  Realm.UpdateMode.Modified,
+                ),
+              )
+            }
+            resolve(result)
+          })
+        } catch (error) {
+          console.error('addOrUpdateBackendAssets error!', error)
+          reject(error)
+        }
+      })
+    })
+    .catch(error => {
+      console.error('RealmDB addOrUpdateBackendAssets error!', error)
+      throw error
+    })
+}
+/**
+ * Find assets based on cids and make them as Saved
+ * @param cids
+ * @returns
+ */
+export const markAsSaved = (cids: string[]): Promise<void> =>
+  RealmDB()
+    .then(realm => {
+      try {
+        const idsQuery = cids.map(id => `cid != '${id}'`).join(' and ')
+        const assets = realm
+          .objects<Entities.AssetEntity>(Schemas.Asset.name)
+          .filtered(`syncStatus=${SyncStatus.SYNCED}`)
+          .filtered(idsQuery)
+        realm.write(() => {
+          for (const asset of assets) {
+            asset.syncStatus = SyncStatus.Saved
+          }
+        })
+      } catch (error) {
+        console.error('markAsSaved error!', error)
+        throw error
+      }
+    })
+    .catch(error => {
+      console.error('RealmDB markAsSaved error!', error)
       throw error
     })

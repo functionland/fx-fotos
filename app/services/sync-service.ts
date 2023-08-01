@@ -8,13 +8,13 @@ import { fula } from '@functionland/react-native-fula'
 import { AssetEntity } from '../realmdb/entities'
 import { SyncStatus } from '../types'
 import { Assets, Boxs, FolderSettings } from './localdb/index'
-import * as Constances from '../utils/constants'
+import * as Constants from '../utils/constants'
 import { Helper, DeviceUtils, KeyChain } from '../utils'
 
 // import * as helper from '../utils/helper'
 
 type TaskParams = {
-  callback: (success: boolean, error: Error) => void
+  callback?: (success: boolean, error?: Error) => void
   assets: AssetEntity[]
 }
 const defaultOptions = {
@@ -29,15 +29,14 @@ const defaultOptions = {
   linkingURI: 'fotos://',
 } as BackgroundTaskOptions
 
-const backgroundTask = async (taskParameters: TaskParams) => {
+const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
   if (Platform.OS === 'ios') {
     console.warn(
       'This task will not keep your app alive in the background by itself, use other library like react-native-track-player that use audio,',
       'geolocalization, etc. to keep your app alive in the background while you excute the JS from this library.',
     )
   }
-  const { callback = null, assets = [] } = taskParameters
-  const updateAssets: Partial<AssetEntity>[] = []
+  const { callback = null, assets = [] } = taskParameters || {}
 
   try {
     const fulaConfig = await initFula()
@@ -50,15 +49,17 @@ const backgroundTask = async (taskParameters: TaskParams) => {
       const asset = assets[index]
 
       // Prepare task notification message
-      await BackgroundJob.updateNotification({
-        taskTitle: `Uploading asset #${index + 1}/${assets.length}`,
-        taskDesc: `Syncing your assets ...`,
-        progressBar: {
-          max: assets.length,
-          value: index,
-          indeterminate: assets.length == 1,
-        },
-      })
+      if (BackgroundJob.isRunning()) {
+        await BackgroundJob.updateNotification({
+          taskTitle: `Uploading asset #${index + 1}/${assets.length}`,
+          taskDesc: `Syncing your assets ...`,
+          progressBar: {
+            max: assets.length,
+            value: index,
+            indeterminate: assets.length == 1,
+          },
+        })
+      }
 
       // Prepare the filepath and filename
       const _filePath = asset.uri?.split('file:')[1]
@@ -69,30 +70,94 @@ const backgroundTask = async (taskParameters: TaskParams) => {
       }
       // Upload file to the WNFS
       const cid = await fula.writeFile(
-        `${Constances.FOTOS_WNFS_ROOT}/${filename}`,
+        `${Constants.FOTOS_WNFS_ROOT}/${filename}`,
         _filePath,
       )
 
       //Update asset record in database
-      updateAssets.push({
+      const newAsset = {
         id: asset.id,
         cid: cid,
         syncDate: new Date(),
         syncStatus: SyncStatus.SYNCED,
-      })
+      }
+      Assets.addOrUpdate([newAsset])
 
       //return the callback function
       try {
         callback?.(true)
-      } catch {}
+      } catch {
+        /* empty */
+      }
     }
   } catch (error) {
-    console.log('backgroundTask:', error)
+    console.log('uploadAssetBackgroundTask:', error)
     try {
       callback?.(false, error)
-    } catch {}
+    } catch {
+      /* empty */
+    }
   } finally {
-    Assets.addOrUpdate(updateAssets)
+    await BackgroundJob.stop()
+  }
+}
+/**
+ * Download assets from the Blox
+ * @param taskParameters
+ */
+const downloadAssetsBackgroundTask = async (taskParameters?: TaskParams) => {
+  const { callback = null, assets = [] } = taskParameters || {}
+
+  try {
+    const fulaConfig = await initFula()
+    if (fulaConfig) {
+      Helper.storeFulaPeerId(fulaConfig.peerId)
+      Helper.storeFulaRootCID(fulaConfig.rootCid)
+    }
+
+    for (let index = 0; index < assets.length; index++) {
+      const asset = assets[index]
+
+      // Prepare task notification message
+      if (BackgroundJob.isRunning()) {
+        await BackgroundJob.updateNotification({
+          taskTitle: `Downloading asset #${index + 1}/${assets.length}`,
+          taskDesc: `Download your assets ...`,
+          progressBar: {
+            max: assets.length,
+            value: index,
+            indeterminate: assets.length == 1,
+          },
+        })
+      }
+
+      if (!asset?.filename) continue
+      const path = await downloadAsset({ filename: asset.filename })
+
+      //Update asset record in database
+      const newAsset = {
+        id: asset.id,
+        uri: path,
+        syncDate: new Date(),
+        isDeleted: false,
+        syncStatus: SyncStatus.Saved,
+      }
+      Assets.addOrUpdate([newAsset])
+      //return the callback function
+      try {
+        callback?.(true)
+      } catch {
+        /* empty */
+      }
+    }
+  } catch (error) {
+    console.log('downloadAssetsBackgroundTask:', error)
+    try {
+      callback?.(false, error)
+    } catch {
+      /* empty */
+    }
+  } finally {
     await BackgroundJob.stop()
   }
 }
@@ -100,14 +165,18 @@ const backgroundTask = async (taskParameters: TaskParams) => {
 //  * You need to make sure the box addresses are added and then call this method
 //  * @param options
 //  */
-export const uploadAssetsInBackground = async (options: {
+export const uploadAssetsInBackground = async (options?: {
   callback?: (success: boolean) => void
 }) => {
   try {
+    while (BackgroundJob.isRunning()) {
+      console.log('Waiting for BackgroundJob: uploadAssetsInBackground')
+      await Helper.sleep(10 * 1000)
+    }
+    const assets = await Assets.getAllNeedToSync()
     if (!BackgroundJob.isRunning()) {
-      const assets = await Assets.getAllNeedToSync()
       if (assets.length) {
-        await BackgroundJob.start<TaskParams>(backgroundTask, {
+        await BackgroundJob.start<TaskParams>(uploadAssetBackgroundTask, {
           ...defaultOptions,
           parameters: {
             callback: options?.callback,
@@ -117,17 +186,46 @@ export const uploadAssetsInBackground = async (options: {
       }
     }
   } catch (e) {
-    console.log('Error', e)
     await BackgroundJob.stop()
+    console.log('Error in uploadAssetsInBackground:', e)
+  }
+}
+
+export const downloadAssetsInBackground = async (options?: {
+  callback?: (success: boolean) => void
+}) => {
+  try {
+    //Wait until background jobs finished
+    while (BackgroundJob.isRunning()) {
+      console.log('Waiting for BackgroundJob: downloadAssetsInBackground')
+      await Helper.sleep(10 * 1000)
+    }
+    if (!BackgroundJob.isRunning()) {
+      const assets = await Assets.getAllNeedToDownload()
+      if (assets.length) {
+        await BackgroundJob.start<TaskParams>(downloadAssetsBackgroundTask, {
+          ...defaultOptions,
+          taskName: 'downloadAssetsBackgroundTask',
+          taskTitle: 'Preparing download...',
+          parameters: {
+            callback: options?.callback,
+            assets,
+          },
+        })
+      }
+    }
+  } catch (e) {
+    await BackgroundJob.stop()
+    console.log('Error in downloadAssetsInBackground: ', e)
   }
 }
 
 export const downloadAsset = async ({
   filename,
-  localStorePath = null,
+  localStorePath,
 }: {
   filename: string
-  localStorePath: string | null
+  localStorePath?: string
 }) => {
   try {
     if (!localStorePath) {
@@ -135,16 +233,16 @@ export const downloadAsset = async ({
     }
     console.log(
       'downloadAsset',
-      `${Constances.FOTOS_WNFS_ROOT}/${filename}`,
+      `${Constants.FOTOS_WNFS_ROOT}/${filename}`,
       localStorePath,
     )
     const filePath = await fula.readFile(
-      `${Constances.FOTOS_WNFS_ROOT}/${filename}`,
+      `${Constants.FOTOS_WNFS_ROOT}/${filename}`,
       localStorePath,
     )
     return `file://${filePath}`
   } catch (e) {
-    console.log('Error', e)
+    console.log('Error in downloadAsset: ', e)
     throw e
   }
 }
@@ -153,8 +251,8 @@ export const downloadAsset = async ({
  *
  * @param folders List of folders you want to set their assets as SYNC, If leave it empty all autoBackup folders will be included
  */
-export const setAutoBackupAssets = async (folders: string[] | undefined) => {
-  let uris = []
+export const setAutoBackupAssets = async (folders?: string[] | undefined) => {
+  let uris: string[] = []
   if (!folders?.length) {
     uris = (await FolderSettings.getAllAutoBackups())?.map(
       folder => `/${folder.name}/`,
