@@ -278,7 +278,7 @@ export const ImageGalleryViewerScreen: React.FC<
 
             //Run the background task to upload all assets where SyncStatus are SYNC
             await SyncService.uploadAssetsInBackground({
-              callback: (success,error) => {
+              callback: (success, error) => {
                 if (success)
                   setAsset(prev => ({
                     ...prev,
@@ -291,7 +291,7 @@ export const ImageGalleryViewerScreen: React.FC<
                     position: 'bottom',
                     bottomOffset: 0,
                   })
-                  alert(error.toString())
+                alert(error.toString())
               },
             })
           } catch (error) {
@@ -315,7 +315,11 @@ export const ImageGalleryViewerScreen: React.FC<
     }
   }
   const downloadFormBox = async () => {
-    if (asset?.syncStatus === SyncStatus.SYNCED && asset?.isDeleted) {
+    if (
+      (asset?.syncStatus === SyncStatus.SYNCED ||
+        asset?.syncStatus === SyncStatus.Saved) &&
+      asset?.isDeleted
+    ) {
       const path = await SyncService.downloadAsset({ filename: asset.filename })
       console.log('path', path)
       setAsset({
@@ -539,18 +543,20 @@ export const ImageGalleryViewerScreen: React.FC<
               <Text style={styles.actionText}>Delete</Text>
             </View>
           )}
-          {asset.isDeleted && asset.syncStatus === SyncStatus.SYNCED && (
-            <View style={styles.iconContainer}>
-              <Icon
-                name="cloud-download"
-                type="material-community"
-                size={30}
-                color={palette.white}
-                onPress={downloadFormBox}
-              />
-              <Text style={styles.actionText}>Download</Text>
-            </View>
-          )}
+          {asset.isDeleted &&
+            (asset.syncStatus === SyncStatus.SYNCED ||
+              asset.syncStatus === SyncStatus.Saved) && (
+              <View style={styles.iconContainer}>
+                <Icon
+                  name="cloud-download"
+                  type="material-community"
+                  size={30}
+                  color={palette.white}
+                  onPress={downloadFormBox}
+                />
+                <Text style={styles.actionText}>Download</Text>
+              </View>
+            )}
           <View style={styles.iconContainer}>
             <Icon
               name={
@@ -562,7 +568,11 @@ export const ImageGalleryViewerScreen: React.FC<
               }
               type="material-community"
               size={30}
-              color={palette.white}
+              color={
+                asset.syncStatus === SyncStatus.Saved
+                  ? palette.green
+                  : palette.white
+              }
               onPress={uploadToBox}
             />
             <Text style={styles.actionText}>
