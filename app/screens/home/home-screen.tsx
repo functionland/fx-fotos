@@ -20,6 +20,7 @@ import {
   openSettings,
 } from 'react-native-permissions'
 import { fula } from '@functionland/react-native-fula'
+import Toast from 'react-native-toast-message'
 
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { AssetService, SyncService } from '../../services'
@@ -152,6 +153,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   }, [isReady])
 
   useEffect(() => {
+    if (fulaIsReady) {
+      checkFailedActions()
+    }
+  }, [fulaIsReady])
+
+  useEffect(() => {
     if (fulaIsReady && !loading && !appPreferences?.firstTimeBackendSynced) {
       getAndDownloadBackendAssets()
     }
@@ -166,10 +173,26 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       }, {} as Record<string, FolderSettingsEntity>)
       setFoldersSettings(foldersObj)
     } catch (error) {
-      console.log(error)
+      console.log('loadFoldersSettings', error)
     }
   }
-
+  const checkFailedActions = async () => {
+    try {
+      if (await fula.checkFailedActions(true)) {
+        const cids = await fula.listFailedActions()
+        await Assets.markAsSaved(cids)
+      }
+    } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: 'Check failed actions error',
+        text2: error,
+        position: 'top',
+        topOffset: 10,
+      })
+      console.log('checkFailedActions', error)
+    }
+  }
   const initDID = async () => {
     const didCredentialsObj = await KeyChain.load(
       KeyChain.Service.DIDCredentials,
@@ -196,7 +219,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           const fulaPeerId = await helper.storeFulaPeerId(fulaInit.peerId)
           if (fulaPeerId) setFulaPeerId(fulaPeerId)
           setFulaIsReady(true)
-          //await fula.checkFailedActions(true)
         }
       }
     } catch (error) {
@@ -208,10 +230,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   // before calling this method make sure fula is ready
   const getAndDownloadBackendAssets = async () => {
     try {
-      console.log('getBackendAssets', await fula.isReady())
       if (!(await fula.isReady())) return
       const files = (await fula.ls(Constants.FOTOS_WNFS_ROOT)) as FulaFileList
-      console.log('fula.ls', files)
       if (files) {
         const result = await Assets.addOrUpdateBackendAssets(
           files,
@@ -225,7 +245,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       //Download the assets
       await SyncService.uploadAssetsInBackground()
     } catch (error) {
-      console.log('getBackendAssets', error)
+      console.log('getAndDownloadBackendAssets error:', error)
     }
   }
   const loadAssets = async (syncMetadata: boolean = true) => {
