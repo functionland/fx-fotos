@@ -126,7 +126,7 @@ export const getAllNeedToDownload = (): Promise<
     .then(realm => {
       const assets = realm
         .objects<Entities.AssetEntity>(Schemas.Asset.name)
-        .filtered('syncStatus=3 and isDeleted=true')
+        .filtered('(syncStatus=3 or syncStatus=2) and isDeleted=true')
       return assets.slice()
     })
     .catch(error => {

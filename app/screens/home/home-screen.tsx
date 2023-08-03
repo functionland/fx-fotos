@@ -14,7 +14,6 @@ import {
 } from 'react-native'
 import { useRecoilState, useSetRecoilState } from 'recoil'
 import {
-  request,
   requestMultiple,
   PERMISSIONS,
   openSettings,
@@ -50,7 +49,7 @@ import {
 } from '../../components/header'
 import * as KeyChain from '../../utils/keychain'
 
-import { Avatar, Icon, Image, LinearProgress } from '@rneui/themed'
+import { Icon, LinearProgress } from '@rneui/themed'
 import { SharedElement } from 'react-navigation-shared-element'
 import { AppNavigationNames } from '../../navigators'
 import { ThemeContext } from '../../theme'
@@ -59,6 +58,7 @@ import Animated from 'react-native-reanimated'
 import { AssetEntity, FolderSettingsEntity } from '../../realmdb/entities'
 import * as Constants from '../../utils/constants'
 import { FulaFileList } from '../../types/fula'
+import { Helper } from '../../utils'
 
 interface HomeScreenProps {
   navigation: NativeStackNavigationProp<
@@ -154,7 +154,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
   useEffect(() => {
     if (fulaIsReady) {
-      checkFailedActions()
+      fulaReadyTasks()
     }
   }, [fulaIsReady])
 
@@ -163,6 +163,18 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       getAndDownloadBackendAssets()
     }
   }, [fulaIsReady, loading, appPreferences])
+
+  const fulaReadyTasks = async () => {
+    try {
+      await checkFailedActions()
+    } catch (error) {}
+    try {
+      await SyncService.downloadAssetsInBackground()
+    } catch (error) {}
+    try {
+      await SyncService.uploadAssetsInBackground()
+    } catch (error) {}
+  }
 
   const loadFoldersSettings = async () => {
     try {
@@ -209,7 +221,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const initFula = async (password: string, signiture: string) => {
     try {
       if (await fula.isReady()) return
-
       const box = (await Boxs.getAll())?.[0]
       if (box) {
         const fulaInit = await SyncService.initFula()
@@ -230,12 +241,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const getAndDownloadBackendAssets = async () => {
     try {
       if (!(await fula.isReady())) return
+      await makeTheRootDirctory()
       const files = (await fula.ls(Constants.FOTOS_WNFS_ROOT)) as FulaFileList
       if (files) {
-        const result = await Assets.addOrUpdateBackendAssets(
-          files,
-          realmAssets.current,
-        )
+        await Assets.addOrUpdateBackendAssets(files, realmAssets.current)
       }
       //Mark the app preferences that in the first time app loaded, it synced the backend assets
       setAppPreferences({
@@ -245,6 +254,15 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       await SyncService.uploadAssetsInBackground()
     } catch (error) {
       console.log('getAndDownloadBackendAssets error:', error)
+    }
+  }
+  const makeTheRootDirctory = async () => {
+    try {
+      if (!(await fula.isReady())) return
+      const rootCid = await fula.mkdir(Constants.FOTOS_WNFS_ROOT)
+      Helper.storeFulaRootCID(rootCid)
+    } catch (error) {
+      console.log('makeTheRootDirctory error:', error)
     }
   }
   const loadAssets = async (syncMetadata: boolean = true) => {
@@ -265,8 +283,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         )
         syncAssetsMetadata()
         await SyncService.setAutoBackupAssets()
-        await SyncService.downloadAssetsInBackground()
-        await SyncService.uploadAssetsInBackground()
       }
     } catch (error) {
       console.error(error)

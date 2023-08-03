@@ -72,6 +72,7 @@ export const ImageGalleryViewerScreen: React.FC<
   const [DID, setDID] = useState('')
   const [sharing, setSharing] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [downloading, setDownloading] = useState(false)
   const screenOpacity = useSharedValue(1)
   const currentAssetRef = useRef(asset)
   const [transitionDone, setTransitionDone] = useState(false)
@@ -336,28 +337,38 @@ export const ImageGalleryViewerScreen: React.FC<
     }
   }
   const downloadFormBox = async () => {
-    if (
-      (asset?.syncStatus === SyncStatus.SYNCED ||
-        asset?.syncStatus === SyncStatus.Saved) &&
-      asset?.isDeleted
-    ) {
-      const path = await SyncService.downloadAsset({ filename: asset.filename })
-      console.log('path', path)
-      setAsset({
-        ...asset,
-        uri: path,
-        isDeleted: false,
-      })
-      await Assets.addOrUpdate([
-        {
-          id: asset.id,
+    try {
+      setDownloading(true)
+
+      if (
+        (asset?.syncStatus === SyncStatus.SYNCED ||
+          asset?.syncStatus === SyncStatus.Saved) &&
+        asset?.isDeleted
+      ) {
+        const path = await SyncService.downloadAsset({
+          filename: asset.filename,
+        })
+        console.log('path', path)
+        setAsset({
+          ...asset,
           uri: path,
           isDeleted: false,
-        },
-      ])
-      setExtendedState(prev => ({
-        ...prev,
-      }))
+        })
+        await Assets.addOrUpdate([
+          {
+            id: asset.id,
+            uri: path,
+            isDeleted: false,
+          },
+        ])
+        setExtendedState(prev => ({
+          ...prev,
+        }))
+      }
+    } catch (error) {
+      console.log('downloadFormBox', error)
+    } finally {
+      setDownloading(false)
     }
   }
   const animatedOptionsStyle = useAnimatedStyle(() => ({
@@ -574,13 +585,17 @@ export const ImageGalleryViewerScreen: React.FC<
             (asset.syncStatus === SyncStatus.SYNCED ||
               asset.syncStatus === SyncStatus.Saved) && (
               <View style={styles.iconContainer}>
-                <Icon
-                  name="cloud-download"
-                  type="material-community"
-                  size={30}
-                  color={palette.white}
-                  onPress={downloadFormBox}
-                />
+                {!downloading ? (
+                  <Icon
+                    name="cloud-download"
+                    type="material-community"
+                    size={30}
+                    color={palette.white}
+                    onPress={downloadFormBox}
+                  />
+                ) : (
+                  <ActivityIndicator />
+                )}
                 <Text style={styles.actionText}>Download</Text>
               </View>
             )}

@@ -116,38 +116,44 @@ const downloadAssetsBackgroundTask = async (taskParameters?: TaskParams) => {
     }
 
     for (let index = 0; index < assets.length; index++) {
-      const asset = assets[index]
-
-      // Prepare task notification message
-      if (BackgroundJob.isRunning()) {
-        await BackgroundJob.updateNotification({
-          taskTitle: `Downloading asset #${index + 1}/${assets.length}`,
-          taskDesc: `Download your assets ...`,
-          progressBar: {
-            max: assets.length,
-            value: index,
-            indeterminate: assets.length == 1,
-          },
-        })
-      }
-
-      if (!asset?.filename) continue
-      const path = await downloadAsset({ filename: asset.filename })
-
-      //Update asset record in database
-      const newAsset = {
-        id: asset.id,
-        uri: path,
-        syncDate: new Date(),
-        isDeleted: false,
-        syncStatus: SyncStatus.Saved,
-      }
-      Assets.addOrUpdate([newAsset])
-      //return the callback function
       try {
-        callback?.(true)
-      } catch {
-        /* empty */
+        const asset = assets[index]
+
+        // Prepare task notification message
+        if (BackgroundJob.isRunning()) {
+          await BackgroundJob.updateNotification({
+            taskTitle: `Downloading asset #${index + 1}/${assets.length}`,
+            taskDesc: `Download your assets ...`,
+            progressBar: {
+              max: assets.length,
+              value: index,
+              indeterminate: assets.length == 1,
+            },
+          })
+        }
+
+        if (!asset?.filename) continue
+        const path = await downloadAsset({
+          filename: asset.filename,
+        })
+
+        //Update asset record in database
+        const newAsset = {
+          id: asset.id,
+          uri: path,
+          syncDate: new Date(),
+          isDeleted: false,
+          syncStatus: SyncStatus.Saved,
+        }
+        Assets.addOrUpdate([newAsset])
+        //return the callback function
+        try {
+          callback?.(true)
+        } catch {
+          /* empty */
+        }
+      } catch (error) {
+        console.log('downloadAssetsBackgroundTask asset:', assets[index])
       }
     }
   } catch (error) {
@@ -170,7 +176,6 @@ export const uploadAssetsInBackground = async (options?: {
 }) => {
   try {
     while (BackgroundJob.isRunning()) {
-      console.log('Waiting for BackgroundJob: uploadAssetsInBackground')
       await Helper.sleep(10 * 1000)
     }
     const assets = await Assets.getAllNeedToSync()
@@ -197,7 +202,6 @@ export const downloadAssetsInBackground = async (options?: {
   try {
     //Wait until background jobs finished
     while (BackgroundJob.isRunning()) {
-      console.log('Waiting for BackgroundJob: downloadAssetsInBackground')
       await Helper.sleep(10 * 1000)
     }
     if (!BackgroundJob.isRunning()) {
