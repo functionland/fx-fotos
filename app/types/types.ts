@@ -131,3 +131,7 @@ export type SearchOptionValueType = {
   icon: string | undefined
   iconType: string | undefined
 }
+
+export type AppPreferences = {
+  firstTimeBackendSynced: boolean
+}

@@ -71,6 +71,8 @@ export const ImageGalleryViewerScreen: React.FC<
   const [showShareBottomSheet, setShowShareBottomSheet] = useState(false)
   const [DID, setDID] = useState('')
   const [sharing, setSharing] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [downloading, setDownloading] = useState(false)
   const screenOpacity = useSharedValue(1)
   const currentAssetRef = useRef(asset)
   const [transitionDone, setTransitionDone] = useState(false)
@@ -82,9 +84,9 @@ export const ImageGalleryViewerScreen: React.FC<
     currentAssetId: assetId,
   })
   const footerHeightRef = useRef(0)
-  const [assetSections, setAssetSections] = useState<RecyclerAssetListSection>(
-    recyclerList.filter(section => section.type === ViewType.ASSET),
-  )
+  const [assetSections, setAssetSections] = useState<
+    RecyclerAssetListSection[]
+  >(recyclerList.filter(section => section.type === ViewType.ASSET))
   useEffect(() => {
     setAssetSections(
       recyclerList.filter(section => section.type === ViewType.ASSET),
@@ -190,43 +192,63 @@ export const ImageGalleryViewerScreen: React.FC<
   }, [])
 
   const deleteAsset = () => {
-    Alert.alert('Delete', 'Are you sure want to delete these assets?', [
-      {
-        text: 'No',
-        style: 'cancel',
-      },
-      {
-        text: 'Yes',
-        onPress: async () => {
-          try {
-            const currentIndex = assetSections.findIndex(
-              section => section?.data?.id == currentAssetRef.current?.id,
-            )
-            const nextAssetIndex =
-              currentIndex === assetSections.length - 1
-                ? currentIndex - 1 //Go to the next asset
-                : currentIndex // Go to the previouse asset
-            rclRef.current.scrollToIndex(nextAssetIndex, true)
-            currentAssetRef.current = assetSections[nextAssetIndex]?.data
-            //await AssetService.deleteAssets([assetSections[currentIndex]?.id])
-            await Assets.addOrUpdate([
-              {
-                id: assetSections[currentIndex]?.id,
-                isDeleted: true,
-              },
-            ])
-            setRecyclerList(
-              recyclerList.filter(
-                section => section?.data?.id != assetSections[currentIndex]?.id,
-              ),
-            )
-            return
-          } catch (error) {
-            console.log('deleteAssets: ', error)
-          }
+    Alert.alert(
+      'Delete',
+      'Are you sure want to delete these assets from the Blox?',
+      [
+        {
+          text: 'No',
+          style: 'cancel',
         },
-      },
-    ])
+        {
+          text: 'Yes',
+          onPress: async () => {
+            try {
+              setDeleting(true)
+              const currentIndex = assetSections.findIndex(
+                section => section?.id == currentAssetRef.current?.id,
+              )
+              // const nextAssetIndex =
+              //   currentIndex === assetSections.length - 1
+              //     ? currentIndex - 1 //Go to the next asset
+              //     : currentIndex // Go to the previouse asset
+              // rclRef.current.scrollToIndex(nextAssetIndex, true)
+              // currentAssetRef.current = assetSections[nextAssetIndex]?.data
+              await SyncService.deleteAsset(
+                (assetSections[currentIndex]?.data as Asset)?.filename,
+              )
+              await Assets.addOrUpdate([
+                {
+                  id: assetSections[currentIndex]?.id,
+                  //isDeleted: true,
+                  syncStatus: SyncStatus.NOTSYNCED,
+                  cid: undefined,
+                },
+              ])
+              currentAssetRef.current = {
+                ...assetSections[currentIndex]?.data,
+                syncStatus: SyncStatus.NOTSYNCED,
+              } as Asset
+              setAsset(prev => ({
+                ...prev,
+                syncStatus: SyncStatus.NOTSYNCED,
+              }))
+              // setRecyclerList(
+              //   recyclerList.filter(
+              //     section => section?.id != assetSections[currentIndex]?.id,
+              //   ),
+              // )
+              return
+            } catch (error) {
+              Alert.alert('Error', error)
+              console.log('deleteAssets: ', error)
+            } finally {
+              setDeleting(false)
+            }
+          },
+        },
+      ],
+    )
   }
   const cancelUpdate = useCallback(() => {
     Alert.alert('Waiting for connection', 'Will upload when connected', [
@@ -278,7 +300,7 @@ export const ImageGalleryViewerScreen: React.FC<
 
             //Run the background task to upload all assets where SyncStatus are SYNC
             await SyncService.uploadAssetsInBackground({
-              callback: (success,error) => {
+              callback: (success, error) => {
                 if (success)
                   setAsset(prev => ({
                     ...prev,
@@ -291,7 +313,7 @@ export const ImageGalleryViewerScreen: React.FC<
                     position: 'bottom',
                     bottomOffset: 0,
                   })
-                  alert(error.toString())
+                alert(error.toString())
               },
             })
           } catch (error) {
@@ -315,24 +337,38 @@ export const ImageGalleryViewerScreen: React.FC<
     }
   }
   const downloadFormBox = async () => {
-    if (asset?.syncStatus === SyncStatus.SYNCED && asset?.isDeleted) {
-      const path = await SyncService.downloadAsset({ filename: asset.filename })
-      console.log('path', path)
-      setAsset({
-        ...asset,
-        uri: path,
-        isDeleted: false,
-      })
-      await Assets.addOrUpdate([
-        {
-          id: asset.id,
+    try {
+      setDownloading(true)
+
+      if (
+        (asset?.syncStatus === SyncStatus.SYNCED ||
+          asset?.syncStatus === SyncStatus.Saved) &&
+        asset?.isDeleted
+      ) {
+        const path = await SyncService.downloadAsset({
+          filename: asset.filename,
+        })
+        console.log('path', path)
+        setAsset({
+          ...asset,
           uri: path,
           isDeleted: false,
-        },
-      ])
-      setExtendedState(prev => ({
-        ...prev,
-      }))
+        })
+        await Assets.addOrUpdate([
+          {
+            id: asset.id,
+            uri: path,
+            isDeleted: false,
+          },
+        ])
+        setExtendedState(prev => ({
+          ...prev,
+        }))
+      }
+    } catch (error) {
+      console.log('downloadFormBox', error)
+    } finally {
+      setDownloading(false)
     }
   }
   const animatedOptionsStyle = useAnimatedStyle(() => ({
@@ -527,30 +563,42 @@ export const ImageGalleryViewerScreen: React.FC<
           ]}
           style={[styles.gradientContainer, { justifyContent: 'space-around' }]}
         >
-          {!asset.isDeleted && (
-            <View style={styles.iconContainer}>
-              <Icon
-                name="delete"
-                type="material-community"
-                size={30}
-                color={palette.white}
-                onPress={deleteAsset}
-              />
-              <Text style={styles.actionText}>Delete</Text>
-            </View>
-          )}
-          {asset.isDeleted && asset.syncStatus === SyncStatus.SYNCED && (
-            <View style={styles.iconContainer}>
-              <Icon
-                name="cloud-download"
-                type="material-community"
-                size={30}
-                color={palette.white}
-                onPress={downloadFormBox}
-              />
-              <Text style={styles.actionText}>Download</Text>
-            </View>
-          )}
+          {!asset.isDeleted &&
+            (asset.syncStatus === SyncStatus.SYNCED ||
+              asset.syncStatus === SyncStatus.Saved) && (
+              <View style={styles.iconContainer}>
+                {!deleting ? (
+                  <Icon
+                    name="cloud-off-outline"
+                    type="material-community"
+                    size={30}
+                    color={palette.white}
+                    onPress={deleteAsset}
+                  />
+                ) : (
+                  <ActivityIndicator />
+                )}
+                <Text style={styles.actionText}>Delete</Text>
+              </View>
+            )}
+          {asset.isDeleted &&
+            (asset.syncStatus === SyncStatus.SYNCED ||
+              asset.syncStatus === SyncStatus.Saved) && (
+              <View style={styles.iconContainer}>
+                {!downloading ? (
+                  <Icon
+                    name="cloud-download"
+                    type="material-community"
+                    size={30}
+                    color={palette.white}
+                    onPress={downloadFormBox}
+                  />
+                ) : (
+                  <ActivityIndicator />
+                )}
+                <Text style={styles.actionText}>Download</Text>
+              </View>
+            )}
           <View style={styles.iconContainer}>
             <Icon
               name={
@@ -562,7 +610,11 @@ export const ImageGalleryViewerScreen: React.FC<
               }
               type="material-community"
               size={30}
-              color={palette.white}
+              color={
+                asset.syncStatus === SyncStatus.Saved
+                  ? palette.green
+                  : palette.white
+              }
               onPress={uploadToBox}
             />
             <Text style={styles.actionText}>

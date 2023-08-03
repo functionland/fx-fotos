@@ -32,6 +32,7 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
   const [iKnow, setIKnow] = useState(false)
   const [passwod, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [linking, setLinking] = useState(false)
   const web3Provider = useMemo(
     () => (provider ? new ethers.providers.Web3Provider(provider) : undefined),
     [provider],
@@ -50,6 +51,7 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
   )
   const signPassword = async () => {
     try {
+      setLinking(true)
       const ed = new HDKEY(passwod)
       const chainCode = ed.chainCode
       if (!web3Provider) {
@@ -125,6 +127,8 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
         position: 'bottom',
         bottomOffset: 0,
       })
+    } finally {
+      setLinking(false)
     }
   }
   return (
@@ -181,18 +185,13 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
         </View>
         <View style={styles.section}>
           <Button
-            loading={!isConnected || !provider}
+            loading={!isConnected || !provider || linking}
             disabled={!iKnow || !passwod?.length}
             onPress={signPassword}
             title="Link password"
           />
         </View>
       </View>
-      <WalletConnectModal
-        projectId={WalletConnectConifg.WaletConnect_Project_Id}
-        providerMetadata={WalletConnectConifg.providerMetadata}
-        sessionParams={WalletConnectConifg.sessionParams()}
-      />
     </Screen>
   )
 }

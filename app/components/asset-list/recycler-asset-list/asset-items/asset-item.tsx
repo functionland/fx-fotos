@@ -17,18 +17,20 @@ import { SharedElement } from 'react-navigation-shared-element'
 import { Asset } from '../../../../types'
 import { Checkbox } from '../../../checkbox/checkbox'
 import { convertDurationToTime } from '../../../../utils/helper'
+import { palette } from '../../../../theme'
 
 interface Props {
   asset: Asset
   selected: boolean
   selectionMode: boolean
   isSynced: boolean
+  fullSynced: boolean
   isDeleted: boolean
   onError?: (error: NativeSyntheticEvent<ImageErrorEventData>) => void
 }
 // eslint-disable-next-line no-undef
 function AssetItem(props: Props): JSX.Element {
-  const { asset, selected, selectionMode } = props
+  const { asset, selected, selectionMode, fullSynced } = props
   const { theme } = useTheme()
   const scaleSharedValue = useSharedValue<number>(1)
   // const borderRadiusSharedValue = useSharedValue<number>(0)
@@ -64,12 +66,12 @@ function AssetItem(props: Props): JSX.Element {
       <Animated.View
         style={[styles.imageContainer, imageContainerAnimatedStyle]}
       >
-        {props?.isDeleted && props?.isSynced ? (
+        {props?.isDeleted && (props?.isSynced || props?.fullSynced) ? (
           <Icon
             type="material-community"
             name="alpha-f-box-outline"
             size={50}
-            color="gray"
+            color={fullSynced ? palette.green : 'gray'}
           />
         ) : (
           <SharedElement style={styles.sharedElementContainer} id={asset.id}>
@@ -98,13 +100,13 @@ function AssetItem(props: Props): JSX.Element {
           />
         </View>
       )}
-      {props?.isSynced && (
+      {(props?.isSynced || props?.fullSynced) && (
         <View style={styles.syncIconContainer}>
           <Icon
             name="cloud-check"
             type="material-community"
             size={15}
-            color="gray"
+            color={fullSynced ? 'green' : 'gray'}
           />
         </View>
       )}
@@ -177,5 +179,6 @@ const areEqual = (prev: Props, next: Props) =>
   prev?.selectionMode === next?.selectionMode &&
   prev?.selected === next?.selected &&
   prev?.isSynced === next?.isSynced &&
+  prev?.fullSynced === next?.fullSynced &&
   prev?.isDeleted === next?.isDeleted
 export default memo(AssetItem, areEqual)

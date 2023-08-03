@@ -9,4 +9,5 @@ export enum SyncStatus {
   NOTSYNCED = 0,
   SYNC = 1, // Selected for sync
   SYNCED = 2,
+  Saved = 3,
 }

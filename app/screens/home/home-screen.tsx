@@ -14,12 +14,12 @@ import {
 } from 'react-native'
 import { useRecoilState, useSetRecoilState } from 'recoil'
 import {
-  request,
   requestMultiple,
   PERMISSIONS,
   openSettings,
 } from 'react-native-permissions'
 import { fula } from '@functionland/react-native-fula'
+import Toast from 'react-native-toast-message'
 
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { AssetService, SyncService } from '../../services'
@@ -29,8 +29,10 @@ import {
 } from '../../navigators/home-navigator'
 import Realm from 'realm'
 import {
+  appPreferencesState,
   dIDCredentialsState,
   foldersSettingsState,
+  fulaIsReadyState,
   fulaPeerIdState,
   mediasState,
 } from '../../store'
@@ -40,20 +42,23 @@ import { AssetListScreen } from '../index'
 import { Asset, PagedInfo } from '../../types'
 import { Header, Screen } from '../../components'
 import {
+  HeaderAvatar,
   HeaderLeftContainer,
   HeaderLogo,
   HeaderRightContainer,
 } from '../../components/header'
 import * as KeyChain from '../../utils/keychain'
 
-import { Avatar, Icon, Image, LinearProgress } from '@rneui/themed'
+import { Icon, LinearProgress } from '@rneui/themed'
 import { SharedElement } from 'react-navigation-shared-element'
 import { AppNavigationNames } from '../../navigators'
 import { ThemeContext } from '../../theme'
 import * as helper from '../../utils/helper'
 import Animated from 'react-native-reanimated'
-import { FolderSettingsEntity } from '../../realmdb/entities'
-import { useWalletConnectModal } from '@walletconnect/modal-react-native'
+import { AssetEntity, FolderSettingsEntity } from '../../realmdb/entities'
+import * as Constants from '../../utils/constants'
+import { FulaFileList } from '../../types/fula'
+import { Helper } from '../../utils'
 
 interface HomeScreenProps {
   navigation: NativeStackNavigationProp<
@@ -66,13 +71,14 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [isReady, setIsReady] = useState(false)
   const [syncing, setSyncing] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
-  const { isConnected } = useWalletConnectModal()
+  const [fulaIsReady, setFulaIsReady] = useRecoilState(fulaIsReadyState)
   const [dIDCredentials, setDIDCredentialsState] =
     useRecoilState(dIDCredentialsState)
 
   const [, setFulaPeerId] = useRecoilState(fulaPeerIdState)
+  const [appPreferences, setAppPreferences] =
+    useRecoilState(appPreferencesState)
   const setFoldersSettings = useSetRecoilState(foldersSettingsState)
-
   const { toggleTheme } = useContext(ThemeContext)
 
   const realmAssets =
@@ -80,7 +86,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [medias, setMedias] = useRecoilState(mediasState)
   const [loading, setLoading] = useState(false)
   const [mediasRefObj, setMediasRefObj] = useState<Record<string, Asset>>({})
-
+  console.log('appPreferences', appPreferences)
   const requestAndroidPermission = useCallback(async () => {
     try {
       const permissions = Platform.select({
@@ -146,6 +152,30 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     }
   }, [isReady])
 
+  useEffect(() => {
+    if (fulaIsReady) {
+      fulaReadyTasks()
+    }
+  }, [fulaIsReady])
+
+  useEffect(() => {
+    if (fulaIsReady && !loading && !appPreferences?.firstTimeBackendSynced) {
+      getAndDownloadBackendAssets()
+    }
+  }, [fulaIsReady, loading, appPreferences])
+
+  const fulaReadyTasks = async () => {
+    try {
+      await checkFailedActions()
+    } catch (error) {}
+    try {
+      await SyncService.downloadAssetsInBackground()
+    } catch (error) {}
+    try {
+      await SyncService.uploadAssetsInBackground()
+    } catch (error) {}
+  }
+
   const loadFoldersSettings = async () => {
     try {
       const folders = await FolderSettings.getAll()
@@ -155,10 +185,25 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       }, {} as Record<string, FolderSettingsEntity>)
       setFoldersSettings(foldersObj)
     } catch (error) {
-      console.log(error)
+      console.log('loadFoldersSettings', error)
     }
   }
-
+  const checkFailedActions = async () => {
+    try {
+      const checkFailed = await fula.checkFailedActions(true)
+      const cids = checkFailed ? await fula.listFailedActions() : []
+      await Assets.markAsSaved(cids)
+    } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: 'Check failed actions error',
+        text2: error,
+        position: 'top',
+        topOffset: 10,
+      })
+      console.log('checkFailedActions', error)
+    }
+  }
   const initDID = async () => {
     const didCredentialsObj = await KeyChain.load(
       KeyChain.Service.DIDCredentials,
@@ -176,7 +221,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const initFula = async (password: string, signiture: string) => {
     try {
       if (await fula.isReady()) return
-
       const box = (await Boxs.getAll())?.[0]
       if (box) {
         const fulaInit = await SyncService.initFula()
@@ -184,11 +228,41 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
           await helper.storeFulaRootCID(fulaInit.rootCid)
           const fulaPeerId = await helper.storeFulaPeerId(fulaInit.peerId)
           if (fulaPeerId) setFulaPeerId(fulaPeerId)
-          await fula.checkFailedActions(true)
+          setFulaIsReady(true)
         }
       }
     } catch (error) {
       console.log('fulaInit Error', error)
+    }
+  }
+
+  // first time app loaded, it gets all backend assets and add them to the local db
+  // before calling this method make sure fula is ready
+  const getAndDownloadBackendAssets = async () => {
+    try {
+      if (!(await fula.isReady())) return
+      await makeTheRootDirctory()
+      const files = (await fula.ls(Constants.FOTOS_WNFS_ROOT)) as FulaFileList
+      if (files) {
+        await Assets.addOrUpdateBackendAssets(files, realmAssets.current)
+      }
+      //Mark the app preferences that in the first time app loaded, it synced the backend assets
+      setAppPreferences({
+        firstTimeBackendSynced: true,
+      })
+      //Download the assets
+      await SyncService.uploadAssetsInBackground()
+    } catch (error) {
+      console.log('getAndDownloadBackendAssets error:', error)
+    }
+  }
+  const makeTheRootDirctory = async () => {
+    try {
+      if (!(await fula.isReady())) return
+      const rootCid = await fula.mkdir(Constants.FOTOS_WNFS_ROOT)
+      Helper.storeFulaRootCID(rootCid)
+    } catch (error) {
+      console.log('makeTheRootDirctory error:', error)
     }
   }
   const loadAssets = async (syncMetadata: boolean = true) => {
@@ -209,7 +283,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         )
         syncAssetsMetadata()
         await SyncService.setAutoBackupAssets()
-        SyncService.uploadAssetsInBackground()
       }
     } catch (error) {
       console.error(error)
@@ -347,7 +420,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       }
 
       setSyncing(true)
-      const assetsMetadatas = []
+      const assetsMetadatas: Partial<AssetEntity>[] = []
       for (let index = 0; index < syncBundaries.length; index++) {
         const toTime = Number.parseInt(syncBundaries[index])
         const fromTime = Number.parseInt(syncBundariesObj[syncBundaries[index]])
@@ -366,7 +439,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
               'playableDuration',
             ],
           })
-          allMedias?.assets.map<Asset>(asset =>
+          allMedias?.assets?.forEach(asset =>
             assetsMetadatas.push({
               id: asset.id,
               filename: asset.filename,
@@ -411,67 +484,15 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             </HeaderLeftContainer>
           }
           rightComponent={
-            Platform.OS === 'android' || Platform.OS === 'ios' ? (
-              <HeaderRightContainer style={{ flex: 1 }}>
-                <SharedElement id="AccountAvatar">
-                  {/* {isConnected ? (
-                    <Avatar
-                      containerStyle={styles.avatar}
-                      ImageComponent={() => (
-                        <Image
-                          source={
-                            walletConnector.peerMeta?.icons?.[0].endsWith(
-                              '.svg',
-                            )
-                              ? helper.getWalletImage(
-                                  walletConnector.peerMeta?.name,
-                                )
-                              : {
-                                  uri: walletConnector.peerMeta?.icons?.[0],
-                                }
-                          }
-                          style={{
-                            height: 35,
-                            width: 35,
-                          }}
-                          resizeMode="contain"
-                        />
-                      )}
-                      onPress={() =>
-                        navigation.navigate(AppNavigationNames.AccountScreen)
-                      }
-                    />
-                  ) : (
-                    <Avatar
-                      containerStyle={styles.disconnectedAvatar}
-                      icon={{
-                        name: 'account-alert',
-                        type: 'material-community',
-                        size: 34,
-                      }}
-                      size="small"
-                      rounded
-                      onPress={() =>
-                        navigation.navigate(AppNavigationNames.AccountScreen)
-                      }
-                    />
-                  )} */}
-                  <Avatar
-                    containerStyle={styles.disconnectedAvatar}
-                    icon={{
-                      name: 'account-alert',
-                      type: 'material-community',
-                      size: 34,
-                    }}
-                    size="small"
-                    rounded
-                    onPress={() =>
-                      navigation.navigate(AppNavigationNames.AccountScreen)
-                    }
-                  />
-                </SharedElement>
-              </HeaderRightContainer>
-            ) : null
+            <HeaderRightContainer style={{ flex: 1 }}>
+              <SharedElement id="AccountAvatar">
+                <HeaderAvatar
+                  onPress={() =>
+                    navigation.navigate(AppNavigationNames.AccountScreen)
+                  }
+                />
+              </SharedElement>
+            </HeaderRightContainer>
           }
         />
         {syncing && <LinearProgress />}
@@ -479,11 +500,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     )
   }
   return (
-    <Screen
-      scrollEventThrottle={16}
-      automaticallyAdjustContentInsets
-      style={styles.screen}
-    >
+    <Screen style={styles.screen}>
       <AssetListScreen
         navigation={navigation}
         medias={isReady ? medias : null}
