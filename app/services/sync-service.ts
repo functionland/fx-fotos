@@ -364,6 +364,17 @@ export const initFula = async (
   }
 }
 
+export const deleteAsset = async (filename: string) => {
+  try {
+    await initFula()
+    const rootCid = await fula.rm(`${Constants.FOTOS_WNFS_ROOT}/${filename}`)
+    Helper.storeFulaRootCID(rootCid)
+  } catch (error) {
+    console.log('deleteAsset from Blox:', error)
+    throw error
+  }
+}
+
 // /// Configure BackgroundFetch.
 // ///
 // export const initBackgroundFetch = async () =>

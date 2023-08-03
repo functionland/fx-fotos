@@ -313,10 +313,10 @@ export const markAsSaved = (cids: string[]): Promise<void> =>
     .then(realm => {
       try {
         const idsQuery = cids.map(id => `cid != '${id}'`).join(' and ')
-        const assets = realm
+        let assets = realm
           .objects<Entities.AssetEntity>(Schemas.Asset.name)
           .filtered(`syncStatus=${SyncStatus.SYNCED}`)
-          .filtered(idsQuery)
+        if (idsQuery) assets = assets.filtered(idsQuery)
         realm.write(() => {
           for (const asset of assets) {
             asset.syncStatus = SyncStatus.Saved

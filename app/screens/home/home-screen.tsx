@@ -178,10 +178,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   }
   const checkFailedActions = async () => {
     try {
-      if (await fula.checkFailedActions(true)) {
-        const cids = await fula.listFailedActions()
-        await Assets.markAsSaved(cids)
-      }
+      const checkFailed = await fula.checkFailedActions(true)
+      const cids = checkFailed ? await fula.listFailedActions() : []
+      await Assets.markAsSaved(cids)
     } catch (error) {
       Toast.show({
         type: 'error',
