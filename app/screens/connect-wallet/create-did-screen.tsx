@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { StyleSheet, View } from 'react-native'
+import { ActivityIndicator, StyleSheet, View } from 'react-native'
 import { Button, CheckBox, Icon, Input, Text } from '@rneui/themed'
 
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
@@ -49,6 +49,11 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
       //rightComponent={<Icon type="material-community" name="check" />}
     />
   )
+  const cancelLinking = () => {
+    provider?.abortPairingAttempt()
+    provider?.cleanupPendingPairings()
+    setLinking(false)
+  }
   const signPassword = async () => {
     try {
       setLinking(true)
@@ -185,11 +190,13 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
         </View>
         <View style={styles.section}>
           <Button
-            loading={!isConnected || !provider || linking}
+            loading={!isConnected || !provider}
             disabled={!iKnow || !passwod?.length}
-            onPress={signPassword}
-            title="Link password"
-          />
+            onPress={linking ? cancelLinking : signPassword}
+          >
+            {linking && <ActivityIndicator />}
+            {linking ? ' Cancel' : 'Link password'}
+          </Button>
         </View>
       </View>
     </Screen>
