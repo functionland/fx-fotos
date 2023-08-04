@@ -18,6 +18,11 @@ export function HeaderAvatar({ size, iconSize, onPress }: Props) {
       {provider || isConnected ? (
         <Avatar
           containerStyle={styles.disconnectedAvatar}
+          source={
+            isConnected
+              ? require('../../../assets/images/elephant.png')
+              : undefined
+          }
           icon={{
             name: isConnected ? 'wallet' : 'account-alert',
             type: 'material-community',
