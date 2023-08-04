@@ -366,7 +366,7 @@ export const ImageGalleryViewerScreen: React.FC<
         }))
       }
     } catch (error) {
-      console.log('downloadFormBox', error)
+      console.log('downloadFormBox erro', error)
     } finally {
       setDownloading(false)
     }
@@ -622,6 +622,8 @@ export const ImageGalleryViewerScreen: React.FC<
                 ? 'upload'
                 : asset.syncStatus === SyncStatus.SYNC
                 ? 'Waiting'
+                : asset.syncStatus === SyncStatus.SYNCED
+                ? 'Queued'
                 : 'Synced'}
             </Text>
           </View>

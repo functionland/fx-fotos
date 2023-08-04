@@ -22,7 +22,7 @@ import { fula } from '@functionland/react-native-fula'
 import Toast from 'react-native-toast-message'
 
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import { AssetService, SyncService } from '../../services'
+import { AssetService, LocalDbService, SyncService } from '../../services'
 import {
   HomeNavigationParamList,
   HomeNavigationTypes,
@@ -86,7 +86,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [medias, setMedias] = useRecoilState(mediasState)
   const [loading, setLoading] = useState(false)
   const [mediasRefObj, setMediasRefObj] = useState<Record<string, Asset>>({})
-  console.log('appPreferences', appPreferences)
+
   const requestAndroidPermission = useCallback(async () => {
     try {
       const permissions = Platform.select({
@@ -161,19 +161,37 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   useEffect(() => {
     if (fulaIsReady && !loading && !appPreferences?.firstTimeBackendSynced) {
       getAndDownloadBackendAssets()
+      addDefaultAutoSyncFolders()
     }
   }, [fulaIsReady, loading, appPreferences])
+
+  const addDefaultAutoSyncFolders = async () => {
+    await LocalDbService.FolderSettings.addOrUpdate([
+      {
+        name: 'Camera',
+        autoBackup: true,
+      },
+    ])
+    await SyncService.setAutoBackupAssets()
+    SyncService.uploadAssetsInBackground()
+  }
 
   const fulaReadyTasks = async () => {
     try {
       await checkFailedActions()
     } catch (error) {}
     try {
-      await SyncService.downloadAssetsInBackground()
-    } catch (error) {}
-    try {
       await SyncService.uploadAssetsInBackground()
     } catch (error) {}
+    pollingDownloadAssets()
+  }
+
+  const pollingDownloadAssets = async () => {
+    try {
+      await SyncService.downloadAssetsInBackground()
+    } catch (error) {}
+    await Helper.sleep(30 * 1000)
+    pollingDownloadAssets()
   }
 
   const loadFoldersSettings = async () => {
@@ -199,7 +217,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         text1: 'Check failed actions error',
         text2: error,
         position: 'top',
-        topOffset: 10,
+        topOffset: 60,
       })
       console.log('checkFailedActions', error)
     }
