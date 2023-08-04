@@ -169,11 +169,17 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       await checkFailedActions()
     } catch (error) {}
     try {
-      await SyncService.downloadAssetsInBackground()
+      await SyncService.uploadAssetsInBackground()
     } catch (error) {}
+    pollingDownloadAssets()
+  }
+
+  const pollingDownloadAssets = async () => {
     try {
       await SyncService.uploadAssetsInBackground()
     } catch (error) {}
+    await Helper.sleep(30 * 1000)
+    pollingDownloadAssets()
   }
 
   const loadFoldersSettings = async () => {

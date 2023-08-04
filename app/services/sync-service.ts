@@ -73,7 +73,7 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
         `${Constants.FOTOS_WNFS_ROOT}/${filename}`,
         _filePath,
       )
-
+      Helper.storeFulaRootCID(cid)
       //Update asset record in database
       const newAsset = {
         id: asset.id,
