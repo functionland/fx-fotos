@@ -22,7 +22,7 @@ import { fula } from '@functionland/react-native-fula'
 import Toast from 'react-native-toast-message'
 
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import { AssetService, SyncService } from '../../services'
+import { AssetService, LocalDbService, SyncService } from '../../services'
 import {
   HomeNavigationParamList,
   HomeNavigationTypes,
@@ -161,8 +161,20 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   useEffect(() => {
     if (fulaIsReady && !loading && !appPreferences?.firstTimeBackendSynced) {
       getAndDownloadBackendAssets()
+      addDefaultAutoSyncFolders()
     }
   }, [fulaIsReady, loading, appPreferences])
+
+  const addDefaultAutoSyncFolders = async () => {
+    await LocalDbService.FolderSettings.addOrUpdate([
+      {
+        name: 'Camera',
+        autoBackup: true,
+      },
+    ])
+    await SyncService.setAutoBackupAssets()
+    SyncService.uploadAssetsInBackground()
+  }
 
   const fulaReadyTasks = async () => {
     try {

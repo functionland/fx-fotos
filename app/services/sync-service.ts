@@ -39,6 +39,8 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
   const { callback = null, assets = [] } = taskParameters || {}
 
   try {
+    console.log('uploadAssetBackgroundTask...')
+
     const fulaConfig = await initFula()
     if (fulaConfig) {
       Helper.storeFulaPeerId(fulaConfig.peerId)
@@ -47,6 +49,7 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
 
     for (let index = 0; index < assets.length; index++) {
       const asset = assets[index]
+      console.log('uploadAssetBackgroundTask asset...', index)
 
       // Prepare task notification message
       if (BackgroundJob.isRunning()) {
@@ -109,6 +112,7 @@ const downloadAssetsBackgroundTask = async (taskParameters?: TaskParams) => {
   const { callback = null, assets = [] } = taskParameters || {}
 
   try {
+    console.log('downloadAssetsBackgroundTask...')
     const fulaConfig = await initFula()
     if (fulaConfig) {
       Helper.storeFulaPeerId(fulaConfig.peerId)
@@ -116,6 +120,8 @@ const downloadAssetsBackgroundTask = async (taskParameters?: TaskParams) => {
     }
 
     for (let index = 0; index < assets.length; index++) {
+      console.log('downloadAssetsBackgroundTask asset...', index)
+
       try {
         const asset = assets[index]
 
@@ -175,7 +181,9 @@ export const uploadAssetsInBackground = async (options?: {
   callback?: (success: boolean) => void
 }) => {
   try {
+    console.log('uploadAssetsInBackground...')
     while (BackgroundJob.isRunning()) {
+      console.log('wating uploadAssetsInBackground...')
       await Helper.sleep(10 * 1000)
     }
     const assets = await Assets.getAllNeedToSync()
@@ -200,8 +208,10 @@ export const downloadAssetsInBackground = async (options?: {
   callback?: (success: boolean) => void
 }) => {
   try {
+    console.log('downloadAssetsInBackground...')
     //Wait until background jobs finished
     while (BackgroundJob.isRunning()) {
+      console.log('waiting downloadAssetsInBackground...')
       await Helper.sleep(10 * 1000)
     }
     if (!BackgroundJob.isRunning()) {
