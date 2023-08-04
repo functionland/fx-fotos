@@ -23,11 +23,15 @@ export function HeaderAvatar({ size, iconSize, onPress }: Props) {
               ? require('../../../assets/images/elephant.png')
               : undefined
           }
-          icon={{
-            name: isConnected ? 'wallet' : 'account-alert',
-            type: 'material-community',
-            size: iconSize ?? 27,
-          }}
+          icon={
+            !isConnected
+              ? {
+                  name: 'account-alert',
+                  type: 'material-community',
+                  size: iconSize ?? 27,
+                }
+              : undefined
+          }
           size={size ?? 'small'}
           rounded
           onPress={onPress}

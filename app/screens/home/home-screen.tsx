@@ -205,7 +205,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         text1: 'Check failed actions error',
         text2: error,
         position: 'top',
-        topOffset: 10,
+        topOffset: 60,
       })
       console.log('checkFailedActions', error)
     }
