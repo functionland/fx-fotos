@@ -86,7 +86,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [medias, setMedias] = useRecoilState(mediasState)
   const [loading, setLoading] = useState(false)
   const [mediasRefObj, setMediasRefObj] = useState<Record<string, Asset>>({})
-  console.log('appPreferences', appPreferences)
+
   const requestAndroidPermission = useCallback(async () => {
     try {
       const permissions = Platform.select({
@@ -176,7 +176,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
   const pollingDownloadAssets = async () => {
     try {
-      await SyncService.uploadAssetsInBackground()
+      await SyncService.downloadAssetsInBackground()
     } catch (error) {}
     await Helper.sleep(30 * 1000)
     pollingDownloadAssets()
