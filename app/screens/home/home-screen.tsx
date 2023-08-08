@@ -7,6 +7,7 @@ import React, {
 } from 'react'
 import {
   Alert,
+  AppState,
   Platform,
   RefreshControl,
   StyleSheet,
@@ -134,6 +135,24 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   }, [])
 
   useEffect(() => {
+    const appStateFocus = AppState.addEventListener('focus', () => {
+      if (
+        isReady &&
+        realmAssets.current?.[0]?.modificationTime &&
+        realmAssets.current?.[realmAssets.current.length - 1]?.modificationTime
+      ) {
+        syncAssets(
+          realmAssets.current?.[0]?.modificationTime,
+          realmAssets.current?.[realmAssets.current.length - 1]
+            ?.modificationTime,
+        )
+      }
+    })
+    return () => {
+      appStateFocus.remove()
+    }
+  }, [isReady])
+  useEffect(() => {
     if (dIDCredentials?.username && dIDCredentials?.password) {
       initFula(dIDCredentials.username, dIDCredentials.password)
     }
@@ -164,6 +183,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       addDefaultAutoSyncFolders()
     }
   }, [fulaIsReady, loading, appPreferences])
+
+  useEffect(() => {
+    const newMedia = Object.values(mediasRefObj)
+    setMedias(newMedia)
+  }, [mediasRefObj])
 
   const addDefaultAutoSyncFolders = async () => {
     await LocalDbService.FolderSettings.addOrUpdate([
@@ -325,13 +349,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       changes.insertions.forEach(index => {
         mediasRefObj[collection[index].id] = collection[index]
       })
-
       setMediasRefObj(prev => {
         const next = {
-          ...prev,
           ...mediasRefObj,
+          ...prev,
         }
-        setMedias(Object.values(next))
         return next
       })
 
@@ -342,8 +364,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       })
       setMediasRefObj(prev => {
         const next = {
-          ...prev,
           ...mediasRefObj,
+          ...prev,
         }
         return next
       })
@@ -354,10 +376,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
       setMediasRefObj(prev => {
         const next = {
-          ...prev,
           ...mediasRefObj,
+          ...prev,
         }
-        setMedias(Object.values(next))
         return next
       })
     }
@@ -521,7 +542,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     <Screen style={styles.screen}>
       <AssetListScreen
         navigation={navigation}
-        medias={isReady ? medias : null}
+        medias={isReady ? medias : []}
         externalState={mediasRefObj}
         loading={loading}
         showStoryHighlight
