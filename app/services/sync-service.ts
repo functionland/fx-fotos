@@ -51,6 +51,12 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
       const asset = assets[index]
       console.log('uploadAssetBackgroundTask asset...', index)
 
+      //Ignore asset greater than 200 MB
+      if (!asset?.fileSize || asset.fileSize > 200 * 1000 * 1000) {
+        console.log('Ignore large asset ...', asset)
+        continue
+      }
+
       // Prepare task notification message
       if (BackgroundJob.isRunning()) {
         await BackgroundJob.updateNotification({
