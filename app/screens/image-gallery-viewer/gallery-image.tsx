@@ -47,6 +47,7 @@ import { Asset, VideoPlayerMetadata, VideoPlayerProgress } from '../../types'
 import { AssetService } from '../../services'
 import { VideoPlayerControl } from '../../components'
 import { DeletedAssetTemplate } from './deleted-asset-template'
+import { Conversions } from '../../utils'
 
 type GalleryImageProps = {
   asset: Asset
@@ -92,7 +93,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
   const videoPlayerRef = useRef(null)
   const [videoMuted, setVideoMuted] = useState(true)
   const [videoPaused, setVideoPaused] = useState(false)
-  const videoControlVisibilty = useSharedValue(false)
+  const videoControlVisibilty = useSharedValue(true)
 
   const [currentVideoMetadata, setCurrentVideoMetadata] =
     useState<VideoPlayerMetadata>(null)
@@ -493,6 +494,18 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
                             </Text>
                           </View>
                         )}
+                        {asset?.fileSize && (
+                          <View style={styles.dimensionInfoContainer}>
+                            <Text style={styles.dimensionHeading}>
+                              Asset size:
+                            </Text>
+                            <Text style={styles.dimensionText}>
+                              {Conversions.convertByteToCapacityUnit(
+                                asset?.fileSize,
+                              )}
+                            </Text>
+                          </View>
+                        )}
                       </Animated.View>
                     </Animated.View>
                   </PanGestureHandler>
@@ -607,6 +620,7 @@ const styles = StyleSheet.create({
   },
   dimensionInfoContainer: {
     flexDirection: 'row',
+    marginVertical: 4,
   },
   dimensionHeading: {
     color: palette.black,

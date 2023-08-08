@@ -76,8 +76,8 @@ export const ImageGalleryViewerScreen: React.FC<
   const screenOpacity = useSharedValue(1)
   const currentAssetRef = useRef(asset)
   const [transitionDone, setTransitionDone] = useState(false)
-  const optionsVisibleRef = useRef(false)
-  const headerOpacity = useSharedValue(asset.mediaType === 'photo' ? 1 : 0)
+  const optionsVisibleRef = useRef(true)
+  const headerOpacity = useSharedValue(asset.mediaType === 'photo' ? 1 : 1)
   const [extendedState, setExtendedState] = useState<ExtendedState>({
     currentVideoMuted: true,
     currentVideoPaused: false,
@@ -276,6 +276,17 @@ export const ImageGalleryViewerScreen: React.FC<
 
   const uploadToBox = async () => {
     if (asset?.syncStatus === SyncStatus.NOTSYNCED && !asset?.isDeleted) {
+      //Ignore asset greater than 200 MB
+      if (!asset?.fileSize || asset.fileSize > 200 * 1000 * 1000) {
+        Toast.show({
+          type: 'info',
+          text1: 'Large asset!',
+          text2: 'Unable to upload assets greater than 200 MB for now!',
+          position: 'top',
+          bottomOffset: 40,
+        })
+        return
+      }
       setLoading(true)
       setTimeout(async () => {
         try {
