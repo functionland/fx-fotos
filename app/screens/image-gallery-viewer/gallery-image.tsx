@@ -92,7 +92,7 @@ export const GalleryImage: React.FC<GalleryImageProps> = ({
   const videoPlayerRef = useRef(null)
   const [videoMuted, setVideoMuted] = useState(true)
   const [videoPaused, setVideoPaused] = useState(false)
-  const videoControlVisibilty = useSharedValue(false)
+  const videoControlVisibilty = useSharedValue(true)
 
   const [currentVideoMetadata, setCurrentVideoMetadata] =
     useState<VideoPlayerMetadata>(null)

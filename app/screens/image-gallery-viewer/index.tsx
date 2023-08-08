@@ -76,8 +76,8 @@ export const ImageGalleryViewerScreen: React.FC<
   const screenOpacity = useSharedValue(1)
   const currentAssetRef = useRef(asset)
   const [transitionDone, setTransitionDone] = useState(false)
-  const optionsVisibleRef = useRef(false)
-  const headerOpacity = useSharedValue(asset.mediaType === 'photo' ? 1 : 0)
+  const optionsVisibleRef = useRef(true)
+  const headerOpacity = useSharedValue(asset.mediaType === 'photo' ? 1 : 1)
   const [extendedState, setExtendedState] = useState<ExtendedState>({
     currentVideoMuted: true,
     currentVideoPaused: false,
