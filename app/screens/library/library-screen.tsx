@@ -30,7 +30,6 @@ import { Header, HeaderLogo } from '../../components/header'
 import { Constants } from '../../theme'
 import { useFloatHederAnimation } from '../../utils/hooks'
 import { AppNavigationNames } from '../../navigators'
-import { FolderSettingsEntity } from '../../realmdb/entities'
 
 interface HomeScreenProps {
   navigation: NativeStackNavigationProp<

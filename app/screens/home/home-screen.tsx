@@ -364,8 +364,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       })
       setMediasRefObj(prev => {
         const next = {
-          ...mediasRefObj,
           ...prev,
+          ...mediasRefObj,
         }
         return next
       })
@@ -376,8 +376,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
       setMediasRefObj(prev => {
         const next = {
-          ...mediasRefObj,
           ...prev,
+          ...mediasRefObj,
         }
         return next
       })
