@@ -2014,10 +2014,10 @@
     tslib "^2.4.0"
     uint8arrays "^3.0.0"
 
-"@functionland/react-native-fula@^1.14.1":
-  version "1.14.1"
-  resolved "https://registry.yarnpkg.com/@functionland/react-native-fula/-/react-native-fula-1.14.1.tgz#4c562060b95913f8a33dac8528390197cf593585"
-  integrity sha512-/8dmdoBnMJ21p05XBQO4It2oQXoyaKRymqHXuJpVe3cBusU/uBxSK1MQ4ImwcBcprHbM+c24ib7tC7HYUje8zQ==
+"@functionland/react-native-fula@^1.14.2":
+  version "1.14.2"
+  resolved "https://registry.yarnpkg.com/@functionland/react-native-fula/-/react-native-fula-1.14.2.tgz#e66dc86b9913ec898cd6465f4839bb5f07027337"
+  integrity sha512-+KnTfZaJKQOAeK+OCH9hgOY24SUYRo0ilKkxK86A3tuxMPlqDJqwS8JwIyTXei03ruTkJWoCRNJ2yyp22KJCCA==
   dependencies:
     "@polkadot/api" "^9.11.3"
     "@polkadot/keyring" "^10.2.6"

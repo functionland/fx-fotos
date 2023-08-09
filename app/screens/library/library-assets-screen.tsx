@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { StyleProp, StyleSheet, ViewStyle } from 'react-native'
 import { Icon, Text } from '@rneui/themed'
 import { useRecoilState } from 'recoil'
@@ -36,7 +36,12 @@ export const LibraryAssetsScreen: React.FC<Props> = ({ navigation }) => {
   const [foldersSettingsObj, setFoldersSettingsObj] =
     useRecoilState(foldersSettingsState)
   const [dIDCredentials] = useRecoilState(dIDCredentialsState)
-
+  const mediasRefObj = useMemo(() => {
+    return selectedLibrary?.assets?.reduce((obj, asset) => {
+      obj[asset.id] = asset
+      return obj
+    }, {})
+  }, [selectedLibrary])
   const folderAutoBuckupChanged = async () => {
     const flag = foldersSettingsObj?.[selectedLibrary.title]
       ? !foldersSettingsObj?.[selectedLibrary.title]?.autoBackup
@@ -107,6 +112,7 @@ export const LibraryAssetsScreen: React.FC<Props> = ({ navigation }) => {
       <AssetListScreen
         navigation={navigation}
         medias={selectedLibrary?.assets}
+        externalState={mediasRefObj}
         defaultHeader={renderHeader}
       />
     </Screen>
