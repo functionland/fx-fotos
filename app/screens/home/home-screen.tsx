@@ -92,7 +92,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     try {
       const permissions = Platform.select({
         android:
-          Platform.Version >= 33
+          Number(Platform.Version) >= 33
             ? [
                 PERMISSIONS.ANDROID.READ_MEDIA_IMAGES,
                 PERMISSIONS.ANDROID.READ_MEDIA_VIDEO,
@@ -104,6 +104,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       if (
         result[PERMISSIONS.ANDROID.READ_MEDIA_IMAGES] === 'granted' ||
         result[PERMISSIONS.ANDROID.READ_MEDIA_VIDEO] === 'granted' ||
+        result[PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE] === 'granted' ||
         result[PERMISSIONS.IOS.PHOTO_LIBRARY] === 'granted'
       ) {
         setIsReady(true)
