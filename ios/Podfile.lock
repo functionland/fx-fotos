@@ -3,6 +3,7 @@ PODS:
   - BVLinearGradient (2.7.3):
     - React-Core
   - CocoaAsyncSocket (7.6.5)
+  - CryptoSwift (1.7.1)
   - DoubleConversion (1.1.6)
   - FBLazyVector (0.66.3)
   - FBReactNativeSpec (0.66.3):
@@ -73,23 +74,26 @@ PODS:
     - FlipperKit/Core
     - FlipperKit/FlipperKitNetworkPlugin
   - fmt (6.2.1)
+  - Fula (1.0.0)
   - glog (0.3.5)
   - hermes-engine (0.9.0)
   - libevent (2.1.12)
-  - libwebp (1.2.2):
-    - libwebp/demux (= 1.2.2)
-    - libwebp/mux (= 1.2.2)
-    - libwebp/webp (= 1.2.2)
-  - libwebp/demux (1.2.2):
+  - libwebp (1.3.1):
+    - libwebp/demux (= 1.3.1)
+    - libwebp/mux (= 1.3.1)
+    - libwebp/sharpyuv (= 1.3.1)
+    - libwebp/webp (= 1.3.1)
+  - libwebp/demux (1.3.1):
     - libwebp/webp
-  - libwebp/mux (1.2.2):
+  - libwebp/mux (1.3.1):
     - libwebp/demux
-  - libwebp/webp (1.2.2)
+  - libwebp/sharpyuv (1.3.1)
+  - libwebp/webp (1.3.1):
+    - libwebp/sharpyuv
   - lottie-ios (3.4.0)
   - lottie-react-native (5.1.6):
     - lottie-ios (~> 3.4.0)
     - React-Core
-  - Mobile (0.0.3)
   - OpenSSL-Universal (1.1.180)
   - Permission-PhotoLibrary (3.8.4):
     - RNPermissions
@@ -312,9 +316,11 @@ PODS:
     - React-Core
   - react-native-cameraroll (5.6.1):
     - React-Core
-  - react-native-fula (1.14.2):
-    - Mobile (~> 0.0.3)
+  - react-native-fula (1.14.4):
+    - CryptoSwift (~> 1.7.1)
+    - Fula (~> 1.0.0)
     - React-Core
+    - Wnfs (= 1.1.1)
   - react-native-get-random-values (1.9.0):
     - React-Core
   - react-native-netinfo (8.3.1):
@@ -455,6 +461,9 @@ PODS:
   - SDWebImageWebPCoder (0.8.5):
     - libwebp (~> 1.0)
     - SDWebImage/Core (~> 5.10)
+  - Wnfs (1.1.1):
+    - WnfsBindings (= 1.1.0)
+  - WnfsBindings (1.1.0)
   - Yoga (1.14.0)
   - YogaKit (1.18.1):
     - Yoga (~> 1.14)
@@ -546,6 +555,7 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - CocoaAsyncSocket
+    - CryptoSwift
     - Flipper
     - Flipper-Boost-iOSX
     - Flipper-DoubleConversion
@@ -556,13 +566,15 @@ SPEC REPOS:
     - Flipper-RSocket
     - FlipperKit
     - fmt
+    - Fula
     - hermes-engine
     - libevent
     - libwebp
-    - Mobile
     - OpenSSL-Universal
     - SDWebImage
     - SDWebImageWebPCoder
+    - Wnfs
+    - WnfsBindings
     - YogaKit
 
 EXTERNAL SOURCES:
@@ -685,6 +697,7 @@ SPEC CHECKSUMS:
   boost: a7c83b31436843459a1961bfd74b96033dc77234
   BVLinearGradient: fbe308a1d19a8133f69e033abc85d8008644f5e3
   CocoaAsyncSocket: 065fd1e645c7abab64f7a6a2007a48038fdc6a99
+  CryptoSwift: d3d18dc357932f7e6d580689e065cf1f176007c1
   DoubleConversion: 831926d9b8bf8166fd87886c4abab286c2422662
   FBLazyVector: de148e8310b8b878db304ceea2fec13f2c02e3a0
   FBReactNativeSpec: 6192956c9e346013d5f1809ba049af720b11c6a4
@@ -698,13 +711,13 @@ SPEC CHECKSUMS:
   Flipper-RSocket: d9d9ade67cbecf6ac10730304bf5607266dd2541
   FlipperKit: d8d346844eca5d9120c17d441a2f38596e8ed2b9
   fmt: ff9d55029c625d3757ed641535fd4a75fedc7ce9
+  Fula: a7b468e11348ba96ba565d142cb0ed7187b0e583
   glog: 5337263514dd6f09803962437687240c5dc39aa4
   hermes-engine: bf7577d12ac6ccf53ab8b5af3c6ccf0dd8458c5c
   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
-  libwebp: 72a0094b0fc1ac526d5b69e1feb7c41c75ced029
+  libwebp: 33dc822fbbf4503668d09f7885bbfedc76c45e96
   lottie-ios: 69495122151a378fdc7d1bb4c5930347e37baf1f
   lottie-react-native: 8f9d4be452e23f6e5ca0fdc11669dc99ab52be81
-  Mobile: 449b0e95a46cd4fcae842696036dc606f95a486b
   OpenSSL-Universal: 1aa4f6a6ee7256b83db99ec1ccdaa80d10f9af9b
   Permission-PhotoLibrary: 6db9318df71ad74e9774cecedde95285f5a32d6a
   RCT-Folly: a21c126816d8025b547704b777a2ba552f3d9fa9
@@ -722,7 +735,7 @@ SPEC CHECKSUMS:
   React-logger: e522e76fa3e9ec3e7d7115b49485cc065cf4ae06
   react-native-background-actions: 30c71460dd98a2aaae31f6f5c87546dd243b8921
   react-native-cameraroll: 2f08db1ecc9b73dbc01f89335d6d5179fac2894c
-  react-native-fula: f5df65aaf01fc035b204ab1e7fdcc7fa09ef46db
+  react-native-fula: 2c06d9f4e6fb823b222b42082bb6e8bfb1443ee5
   react-native-get-random-values: dee677497c6a740b71e5612e8dbd83e7539ed5bb
   react-native-netinfo: 1a6035d3b9780221d407c277ebfb5722ace00658
   react-native-randombytes: 421f1c7d48c0af8dbcd471b0324393ebf8fe7846
@@ -756,9 +769,11 @@ SPEC CHECKSUMS:
   RNVectorIcons: fcc2f6cb32f5735b586e66d14103a74ce6ad61f8
   SDWebImage: a7f831e1a65eb5e285e3fb046a23fcfbf08e696d
   SDWebImageWebPCoder: 908b83b6adda48effe7667cd2b7f78c897e5111d
+  Wnfs: e3020bb0c212642a605625424ed263c8ac280e44
+  WnfsBindings: 10742440a02c258dd9c065d8f29f24e7029955c3
   Yoga: 32a18c0e845e185f4a2a66ec76e1fd1f958f22fa
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
-PODFILE CHECKSUM: de16bcb542bb72c99ecfbb5283af87dde803d282
+PODFILE CHECKSUM: 2e9bbc9a5a5c1256ea7b216d331755112de680f8
 
 COCOAPODS: 1.12.1
