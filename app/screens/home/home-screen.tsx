@@ -61,6 +61,7 @@ import * as Constants from '../../utils/constants'
 import { FulaFileList } from '../../types/fula'
 import { Helper } from '../../utils'
 
+
 interface HomeScreenProps {
   navigation: NativeStackNavigationProp<
     HomeNavigationParamList,
@@ -75,7 +76,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [fulaIsReady, setFulaIsReady] = useRecoilState(fulaIsReadyState)
   const [dIDCredentials, setDIDCredentialsState] =
     useRecoilState(dIDCredentialsState)
-
   const [, setFulaPeerId] = useRecoilState(fulaPeerIdState)
   const [appPreferences, setAppPreferences] =
     useRecoilState(appPreferencesState)
@@ -87,7 +87,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [medias, setMedias] = useRecoilState(mediasState)
   const [loading, setLoading] = useState(false)
   const [mediasRefObj, setMediasRefObj] = useState<Record<string, Asset>>({})
-
   const requestAndroidPermission = useCallback(async () => {
     try {
       const permissions = Platform.select({
@@ -154,6 +153,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     }
   }, [isReady])
   useEffect(() => {
+
     if (dIDCredentials?.username && dIDCredentials?.password) {
       initFula(dIDCredentials.username, dIDCredentials.password)
     }
@@ -228,6 +228,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       }, {} as Record<string, FolderSettingsEntity>)
       setFoldersSettings(foldersObj)
     } catch (error) {
+
       console.log('loadFoldersSettings', error)
     }
   }
@@ -247,6 +248,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       console.log('checkFailedActions', error)
     }
   }
+
   const initDID = async () => {
     const didCredentialsObj = await KeyChain.load(
       KeyChain.Service.DIDCredentials,
@@ -278,7 +280,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       console.log('fulaInit Error', error)
     }
   }
-
+  const initFula = async (password: string, signiture: string) => {
+    try {
+      if (await fula.isReady()) return
   // first time app loaded, it gets all backend assets and add them to the local db
   // before calling this method make sure fula is ready
   const getAndDownloadBackendAssets = async () => {

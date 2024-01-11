@@ -1,4 +1,6 @@
+
 import React, { useEffect, useMemo, useRef, useState } from 'react'
+
 import { StyleSheet, View } from 'react-native'
 import { useRecoilState } from 'recoil'
 import { Icon, ListItem, Text } from '@rneui/themed'
@@ -26,6 +28,7 @@ export const BoxListScreen: React.FC<Props> = ({ route, navigation }) => {
   const [boxs, setBoxs] = useRecoilState(boxsState)
   const [ready, setReady] = useState(false)
   const { bloxName, bloxPeerId } = useMemo(() => route.params || {}, [])
+
   useEffect(() => {
     navigation.addListener('focus', loadBoxs)
     loadBoxs()

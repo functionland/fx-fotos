@@ -3,6 +3,7 @@ import { KeyChain } from '.'
 import { BoxEntity } from '../realmdb/entities'
 import { utf8ToHex } from '@walletconnect/encoding'
 import { ethers } from 'ethers'
+
 export const translateOrigin = (center: number, d: number) => center - d / 2
 export const convertDurationToTime = (duration: number): string => {
   const h = Math.floor(duration / 3600)

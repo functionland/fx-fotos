@@ -20,12 +20,14 @@ import { ethers } from 'ethers'
 import { fula } from '@functionland/react-native-fula'
 import { DeviceUtils, KeyChain, Helper, WalletConnectConifg } from '../../utils'
 import { fulaPeerIdState } from '../../store'
+
 type Props = NativeStackScreenProps<
   RootStackParamList,
   AppNavigationNames.BoxAddUpdate
 >
 
 export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
+
   const { isConnected, provider } = useWalletConnectModal()
   const setDIDCredentialsState = useSetRecoilState(dIDCredentialsState)
   const setFulaPeerIdState = useSetRecoilState(fulaPeerIdState)

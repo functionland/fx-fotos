@@ -107,6 +107,7 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
       if (pressed.current) return
       pressed.current = true
       if (!validateForm()) {
+
         return
       }
       // try {
@@ -161,9 +162,11 @@ export const BoxAddUpdateScreen: React.FC<Props> = ({ navigation, route }) => {
       )
       try {
         const bloxAddress = Helper.generateBloxAddress({ ...form } as BoxEntity)
+
         //const isReady = await fula.isReady()
         //if (isReady)
         await fula.shutdown()
+
         const peerId = await fula.newClient(
           keyPair.secretKey.toString(), //bytes of the privateKey of did identity in string format
           `${deviceUtils.DocumentDirectoryPath}/wnfs`, // leave empty to use the default temp one

@@ -40,7 +40,6 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
 
   try {
     console.log('uploadAssetBackgroundTask...')
-
     const fulaConfig = await initFula()
     if (fulaConfig) {
       Helper.storeFulaPeerId(fulaConfig.peerId)
