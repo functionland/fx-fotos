@@ -12,7 +12,7 @@ import { StyleProp, TextStyle } from 'react-native'
 interface Props extends InputProps {
   items: SelectInputItem[]
   value: SelectInputItem
-  titleStyle: StyleProp<TextStyle>
+  titleStyle?: StyleProp<TextStyle>
   onSelectChange: (item: SelectInputItem) => void
 }
 export interface SelectInputItem {

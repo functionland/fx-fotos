@@ -1,4 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react'
+
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+
 import { StyleSheet, View } from 'react-native'
 import { useRecoilState } from 'recoil'
 import { Icon, ListItem, Text } from '@rneui/themed'
@@ -25,10 +27,19 @@ export const BoxListScreen: React.FC<Props> = ({ route, navigation }) => {
   const pressed = useRef<boolean>(false)
   const [boxs, setBoxs] = useRecoilState(boxsState)
   const [ready, setReady] = useState(false)
+  const { bloxName, bloxPeerId } = useMemo(() => route.params || {}, [])
 
   useEffect(() => {
     navigation.addListener('focus', loadBoxs)
     loadBoxs()
+    if (bloxPeerId) {
+      navigation.navigate(AppNavigationNames.BoxAddUpdate, {
+        box: {
+          name: bloxName,
+          peerId: bloxPeerId
+        }
+      })
+    }
     return () => {
       navigation.removeListener('focus')
     }
@@ -47,8 +58,8 @@ export const BoxListScreen: React.FC<Props> = ({ route, navigation }) => {
   const deleteBox = async (box: BoxEntity) => {
     try {
       pressed.current = true
-      await Boxs.remove([box.peerId])
-      setBoxs(prev => prev.filter(item => item.peerId != box.peerId))
+      await Boxs.remove([box.id])
+      setBoxs(prev => prev.filter(item => item.id != box.id))
     } catch (error) {
       console.log(error)
     } finally {

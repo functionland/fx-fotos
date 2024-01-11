@@ -11,7 +11,11 @@ import Toast from 'react-native-toast-message'
 import { Header, HeaderArrowBack } from '../../components/header'
 import { Screen } from '../../components'
 import { RootStackParamList, AppNavigationNames } from '../../navigators'
-import { useWalletConnect } from '@walletconnect/react-native-dapp'
+import {
+  useWalletConnectModal,
+  WalletConnectModal,
+} from '@walletconnect/modal-react-native'
+import { WalletConnectConifg } from '../../utils'
 
 type Props = NativeStackScreenProps<
   RootStackParamList,
@@ -20,13 +24,13 @@ type Props = NativeStackScreenProps<
 type ConnectToWalletStatus = 'None' | 'Connecting' | 'Connected' | 'Failed'
 
 export const ConnectWalletScreen: React.FC<Props> = ({ navigation, route }) => {
-  const walletConnector = useWalletConnect()
+  const { isConnected, provider, open, address } = useWalletConnectModal()
   const [connectToWalletStatus, setConnectToWalletStatus] =
-    useState<ConnectToWalletStatus>(
-      walletConnector.connected ? 'Connected' : 'None',
-    )
-  console.log('connectToWalletStatus', connectToWalletStatus)
-  useEffect(() => {}, [])
+    useState<ConnectToWalletStatus>(isConnected ? 'Connected' : 'None')
+
+  useEffect(() => {
+    if (isConnected) setConnectToWalletStatus('Connected')
+  }, [isConnected])
   const renderHeader = () => (
     <Header
       centerComponent={
@@ -39,16 +43,17 @@ export const ConnectWalletScreen: React.FC<Props> = ({ navigation, route }) => {
   )
   const connectToWallet = async () => {
     try {
-      if (connectToWalletStatus === 'Connected') {
-        await walletConnector.killSession()
+      if (isConnected || connectToWalletStatus === 'Connected') {
+        await provider?.disconnect()
+        await provider?.cleanupPendingPairings()
         setConnectToWalletStatus('None')
       } else if (connectToWalletStatus !== 'None') {
         setConnectToWalletStatus('None')
         return
       }
       setConnectToWalletStatus('Connecting')
-      await walletConnector.connect()
-      setConnectToWalletStatus('Connected')
+      await open()
+      //setConnectToWalletStatus('Connected')
     } catch (error) {
       console.log(error)
       setConnectToWalletStatus('Failed')
@@ -92,7 +97,8 @@ export const ConnectWalletScreen: React.FC<Props> = ({ navigation, route }) => {
         </View>
         <View style={styles.section}>
           <Button
-            onPress={connectToWallet}
+            loading={!provider}
+            onPress={provider ? connectToWallet : undefined}
             type={connectToWalletStatus === 'Connected' ? 'outline' : 'solid'}
             title={
               connectToWalletStatus == 'None'
@@ -105,12 +111,12 @@ export const ConnectWalletScreen: React.FC<Props> = ({ navigation, route }) => {
         </View>
         {connectToWalletStatus === 'Connected' && (
           <>
-            <View style={styles.section}>
+            {/* <View style={styles.section}>
               <Text>{walletConnector?.peerMeta?.name}</Text>
               <Text style={{ textAlign: 'center' }}>
                 {walletConnector?.accounts?.[0]}
               </Text>
-            </View>
+            </View> */}
             <View style={styles.section}>
               <Button
                 containerStyle={{
@@ -119,7 +125,7 @@ export const ConnectWalletScreen: React.FC<Props> = ({ navigation, route }) => {
                 onPress={() =>
                   navigation.navigate(AppNavigationNames.CreateDIDScreen)
                 }
-                title="Next step"
+                title="Link DID"
               />
             </View>
           </>

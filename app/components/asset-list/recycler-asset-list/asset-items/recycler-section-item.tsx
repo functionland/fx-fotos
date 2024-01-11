@@ -55,7 +55,8 @@ const getSectionByType = (
           selectionMode={selectionMode}
           selected={selected}
           isSynced={externalState?.syncStatus === SyncStatus.SYNCED}
-          isDeleted={externalState?.isDeleted || data?.isDeleted }
+          fullSynced={externalState?.syncStatus === SyncStatus.Saved}
+          isDeleted={externalState?.isDeleted || data?.isDeleted}
         />
       )
     }

@@ -2,6 +2,14 @@
 const path = require('path')
 // eslint-disable-next-line no-undef
 module.exports = {
+  transformer: {
+    getTransformOptions: async () => ({
+      transform: {
+        experimentalImportSupport: false,
+        inlineRequires: true,
+      },
+    }),
+  },
   resolver: {
     extraNodeModules: {
       // eslint-disable-next-line no-undef

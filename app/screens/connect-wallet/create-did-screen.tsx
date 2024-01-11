@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react'
-import { StyleSheet, View } from 'react-native'
+import React, { useEffect, useMemo, useState } from 'react'
+import { ActivityIndicator, StyleSheet, View } from 'react-native'
 import { Button, CheckBox, Icon, Input, Text } from '@rneui/themed'
 
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
@@ -11,18 +11,34 @@ import * as Keychain from '../../utils/keychain'
 import { Header, HeaderArrowBack } from '../../components/header'
 import { Screen } from '../../components'
 import { RootStackParamList, AppNavigationNames } from '../../navigators'
-import { useWalletConnect } from '@walletconnect/react-native-dapp'
 import { dIDCredentialsState } from '../../store'
+import {
+  WalletConnectModal,
+  useWalletConnectModal,
+} from '@walletconnect/modal-react-native'
+import { ethers } from 'ethers'
+import { fula } from '@functionland/react-native-fula'
+import { DeviceUtils, KeyChain, Helper, WalletConnectConifg } from '../../utils'
+import { fulaPeerIdState } from '../../store'
+
 type Props = NativeStackScreenProps<
   RootStackParamList,
   AppNavigationNames.BoxAddUpdate
 >
 
 export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
-  const walletConnector = useWalletConnect()
+
+  const { isConnected, provider } = useWalletConnectModal()
   const setDIDCredentialsState = useSetRecoilState(dIDCredentialsState)
+  const setFulaPeerIdState = useSetRecoilState(fulaPeerIdState)
   const [iKnow, setIKnow] = useState(false)
   const [passwod, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [linking, setLinking] = useState(false)
+  const web3Provider = useMemo(
+    () => (provider ? new ethers.providers.Web3Provider(provider) : undefined),
+    [provider],
+  )
   useEffect(() => {}, [])
   const renderHeader = () => (
     <Header
@@ -35,16 +51,58 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
       //rightComponent={<Icon type="material-community" name="check" />}
     />
   )
+  const cancelLinking = () => {
+    provider?.abortPairingAttempt()
+    provider?.cleanupPendingPairings()
+    setLinking(false)
+  }
   const signPassword = async () => {
     try {
+      setLinking(true)
       const ed = new HDKEY(passwod)
       const chainCode = ed.chainCode
-      if (!walletConnector.session?.connected)
-        await walletConnector.createSession()
-      const walletSignature = await walletConnector.signPersonalMessage([
-        chainCode,
-        walletConnector?.accounts[0],
-      ])
+      if (!web3Provider) {
+        Toast.show({
+          type: 'error',
+          text1: 'Web3 provider is not ready!',
+          position: 'bottom',
+          bottomOffset: 0,
+        })
+        return
+      }
+      const walletSignature = await Helper.signMessage({
+        message: chainCode,
+        web3Provider,
+      })
+
+      //Create Fotos app peerId
+      const keyPair = Helper.getMyDIDKeyPair(passwod, walletSignature)
+      await fula.shutdown()
+      const peerId = await fula.newClient(
+        keyPair.secretKey.toString(), //bytes of the privateKey of did identity in string format
+        `${DeviceUtils.DocumentDirectoryPath}/wnfs`, // leave empty to use the default temp one
+        '',
+        'noop',
+        true,
+        true,
+        true,
+      )
+      if (peerId) {
+        const fulaPeerId = await KeyChain.save(
+          'peerId',
+          peerId,
+          KeyChain.Service.FULAPeerIdObject,
+        )
+        if (fulaPeerId) setFulaPeerIdState(fulaPeerId)
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: 'Unable to create FxFotos peerId',
+          position: 'bottom',
+          bottomOffset: 0,
+        })
+        return
+      }
       const passwordCredentials = await Keychain.save(
         passwod,
         walletSignature,
@@ -53,7 +111,7 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
       if (passwordCredentials) {
         setDIDCredentialsState(passwordCredentials)
         navigation.reset({
-          index: 0,
+          index: 1,
           routes: [
             { name: AppNavigationNames.HomeScreen },
             { name: AppNavigationNames.AccountScreen },
@@ -76,6 +134,8 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
         position: 'bottom',
         bottomOffset: 0,
       })
+    } finally {
+      setLinking(false)
     }
   }
   return (
@@ -107,7 +167,12 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
               marginTop: 20,
             }}
             textContentType="password"
-            secureTextEntry={true}
+            secureTextEntry={!showPassword}
+            rightIcon={{
+              name: showPassword ? 'visibility-off' : 'visibility',
+              color: 'white',
+              onPress: () => setShowPassword(!showPassword),
+            }}
             style={{ textAlign: 'center' }}
             onChangeText={text => setPassword(text)}
             errorProps
@@ -127,10 +192,13 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
         </View>
         <View style={styles.section}>
           <Button
+            loading={!isConnected || !provider}
             disabled={!iKnow || !passwod?.length}
-            onPress={signPassword}
-            title="Link password"
-          />
+            onPress={linking ? cancelLinking : signPassword}
+          >
+            {linking && <ActivityIndicator />}
+            {linking ? ' Cancel' : 'Link password'}
+          </Button>
         </View>
       </View>
     </Screen>

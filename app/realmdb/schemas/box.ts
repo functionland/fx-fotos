@@ -1,6 +1,6 @@
 export const Box = {
   name: 'Box',
-  primaryKey: 'peerId',
+  primaryKey: 'id',
   properties: {
     /**
      * Box Id

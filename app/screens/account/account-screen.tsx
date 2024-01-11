@@ -9,7 +9,6 @@ import {
   Linking,
 } from 'react-native'
 import { Avatar, Button, Card, Icon, ListItem, Text } from '@rneui/themed'
-import { useWalletConnect } from '@walletconnect/react-native-dapp'
 import * as Keychain from '../../utils/keychain'
 import Toast from 'react-native-toast-message'
 
@@ -19,6 +18,7 @@ import { Screen } from '../../components'
 import {
   Header,
   HeaderArrowBack,
+  HeaderAvatar,
   HeaderRightContainer,
 } from '../../components/header'
 import { AppNavigationNames, RootStackParamList } from '../../navigators'
@@ -26,6 +26,7 @@ import * as helper from '../../utils/helper'
 import { useRecoilState } from 'recoil'
 import { dIDCredentialsState, fulaPeerIdState } from '../../store'
 import Clipboard from '@react-native-clipboard/clipboard'
+import { useWalletConnectModal } from '@walletconnect/modal-react-native'
 
 type Props = NativeStackScreenProps<
   RootStackParamList,
@@ -33,12 +34,12 @@ type Props = NativeStackScreenProps<
 >
 
 export const AccountScreen: React.FC<Props> = ({ navigation }) => {
-  const walletConnector = useWalletConnect()
+  // const walletConnector = useWalletConnect()
   const [dIDCredentials, setDIDCredentialsState] =
     useRecoilState(dIDCredentialsState)
   const [fulaPeerId, setFulaPeerId] = useRecoilState(fulaPeerIdState)
   const [did, setDID] = useState(null)
-
+  const { isConnected, provider, open, address } = useWalletConnectModal()
   useEffect(() => {
     if (!fulaPeerId) {
       loadPeerId()
@@ -75,13 +76,13 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
       [
         {
           text: 'No',
-          cancelable: true,
+          style: 'cancel',
         },
         {
           text: 'Yes',
           onPress: async () => {
             try {
-              await walletConnector.killSession()
+              await provider?.disconnect()
               await Keychain.reset(Keychain.Service.DIDCredentials)
             } catch (error) {
               console.log(error)
@@ -132,7 +133,9 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
   }
   const authorizeApp = () => {
     Linking.openURL(
-      `fxblox://connectdapp/FxFotos/land.fx.fotos/${fulaPeerId?.password}`,
+      `fxblox://connectdapp/FxFotos/land.fx.fotos/${
+        fulaPeerId?.password
+      }/${encodeURIComponent('fotos://addblox/$bloxName/$bloxPeerId')}`,
     )
   }
   const renderHeader = () => (
@@ -145,7 +148,7 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
       leftComponent={<HeaderArrowBack navigation={navigation} />}
       rightComponent={
         <HeaderRightContainer>
-          {walletConnector?.connected && (
+          {isConnected && (
             <Icon
               type="material-community"
               size={28}
@@ -168,63 +171,21 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
     />
   )
   return (
-    <Screen
-      preset="scroll"
-      scrollEventThrottle={16}
-      automaticallyAdjustContentInsets
-      style={styles.screen}
-    >
+    <Screen preset="scroll" style={styles.screen}>
       {renderHeader()}
       <ScrollView>
         <View style={styles.container}>
           <SharedElement id="AccountAvatar">
-            {walletConnector.connected ? (
-              <Avatar
-                containerStyle={{
-                  backgroundColor: 'gray',
-                  width: 100,
-                  height: 100,
-                  borderRadius: 50,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}
-                ImageComponent={() => (
-                  <Image
-                    source={
-                      walletConnector.peerMeta?.icons?.[0].endsWith('.svg')
-                        ? helper.getWalletImage(walletConnector.peerMeta?.name)
-                        : {
-                            uri: walletConnector.peerMeta?.icons?.[0],
-                          }
-                    }
-                    style={{
-                      height: 90,
-                      width: 90,
-                    }}
-                    resizeMode="contain"
-                  />
-                )}
-              />
-            ) : (
-              <Avatar
-                containerStyle={styles.avatarLarge}
-                icon={{
-                  name: 'account-alert',
-                  type: 'material-community',
-                  size: 84,
-                }}
-                rounded
-              />
-            )}
+            <HeaderAvatar size={100} iconSize={80} />
           </SharedElement>
 
-          {walletConnector.connected ? (
+          {isConnected ? (
             <>
               <View style={styles.section}>
-                <Text h4>{walletConnector.peerMeta?.name}</Text>
+                {/* <Text h4>{walletConnector.peerMeta?.name}</Text>
                 <Text ellipsizeMode="tail" style={styles.textCenter}>
                   {walletConnector.accounts?.[0]}
-                </Text>
+                </Text> */}
                 <View style={styles.section}>
                   {!dIDCredentials ? (
                     <Button title="Link DID" onPress={signWalletAddress} />
@@ -296,7 +257,11 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
             </>
           ) : (
             <View style={styles.section}>
-              <Button onPress={connectToWallet} title="Create DID" />
+              <Button
+                loading={!provider}
+                onPress={provider ? connectToWallet : undefined}
+                title="Create DID"
+              />
             </View>
           )}
           {did && (
