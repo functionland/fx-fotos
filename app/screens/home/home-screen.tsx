@@ -280,9 +280,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       console.log('fulaInit Error', error)
     }
   }
-  const initFula = async (password: string, signiture: string) => {
-    try {
-      if (await fula.isReady()) return
+
   // first time app loaded, it gets all backend assets and add them to the local db
   // before calling this method make sure fula is ready
   const getAndDownloadBackendAssets = async () => {

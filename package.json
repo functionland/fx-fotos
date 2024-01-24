@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "@functionland/fula-sec": "^2.0.0",
-    "@functionland/react-native-fula": "^1.14.8",
+    "@functionland/react-native-fula": "^1.41.0",
     "@react-native-async-storage/async-storage": "^1.19.1",
     "@react-native-camera-roll/camera-roll": "5.6.1",
     "@react-native-clipboard/clipboard": "^1.11.1",
