@@ -4,7 +4,7 @@ import {
   DataProvider,
   GridLayoutProvider,
   RecyclerListView,
-} from 'fula-recyclerlistview'
+} from '@functionland/recyclerlistview'
 import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react'
 import {
   ActivityIndicator,

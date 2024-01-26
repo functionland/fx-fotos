@@ -25,7 +25,7 @@ import Animated, {
   Extrapolate,
   SharedValue,
 } from 'react-native-reanimated'
-import { DataProvider, RecyclerListView } from 'fula-recyclerlistview'
+import { DataProvider, RecyclerListView } from '@functionland/recyclerlistview'
 import { Constants } from '../../../theme/constants'
 import { RecyclerAssetListSection, ViewType, AssetStory, Asset } from '../../../types'
 import RecyclerSectionItem from './asset-items/recycler-section-item'

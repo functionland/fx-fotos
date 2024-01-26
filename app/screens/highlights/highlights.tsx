@@ -27,7 +27,7 @@ import {
   DataProvider,
   LayoutProvider,
   RecyclerListView,
-} from 'fula-recyclerlistview'
+} from '@functionland/recyclerlistview'
 import { Asset, AssetStory } from '../../types'
 import { TimerProgress, TimerProgressHandler } from '../../components'
 import { Text } from '@rneui/themed'

@@ -50,7 +50,7 @@
     "big-integer": "^1.6.51",
     "eslint-import-resolver-typescript": "^3.5.1",
     "ethers": "5.7.2",
-    "fula-recyclerlistview": "^3.1.0-beta.7",
+    "@functionland/recyclerlistview": "^4.2.3",
     "i18n-js": "3.8.0",
     "lodash": "^4.17.21",
     "lottie-ios": "3.4.0",
