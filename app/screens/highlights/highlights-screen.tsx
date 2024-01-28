@@ -25,7 +25,7 @@ import Animated, {
   useAnimatedReaction,
   useAnimatedGestureHandler,
   interpolate,
-  Extrapolate,
+  Extrapolation,
   withDelay,
 } from 'react-native-reanimated'
 import { snapPoint } from 'react-native-redash'
@@ -113,7 +113,7 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
       translateY.value,
       [0, screenHeight],
       [1, 0.9],
-      Extrapolate.CLAMP,
+      Extrapolation.CLAMP,
     )
     return {
       flex: 1,
@@ -142,7 +142,7 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
             translationY,
             [0, 400],
             [1, 0.5],
-            Extrapolate.CLAMP,
+            Extrapolation.CLAMP,
           )
         }
         pauseTimeProgress.value = true
@@ -167,7 +167,7 @@ export const HighlightScreen: React.FC<HighlightScreenProps> = ({ route }) => {
             velocityY,
             [velocityY, 0],
             [1, 0.5],
-            Extrapolate.CLAMP,
+            Extrapolation.CLAMP,
           )
         }
         isPanGestureActive.value = false

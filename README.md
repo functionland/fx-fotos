@@ -142,6 +142,10 @@ git clone https://github.com/functionland/photos.git
 cd photos
 ```
 
+## EPERM issue
+
+On Windows, you may get an EPERM error when running. This is a known bug and you may need to follow workaround 2 in this article: https://bitstopixels.blogspot.com/2017/04/react-native-windows-10-eperm-operation.html
+
 ## Install requirements
 
 You can install dependencies with `yarn` by running:

@@ -1,7 +1,7 @@
 import React, { useEffect, useCallback } from 'react'
 import { ViewStyle } from 'react-native'
 import Reanimated, {
-  Extrapolate,
+  Extrapolation,
   interpolate,
   SharedValue,
   useAnimatedStyle,
@@ -26,8 +26,8 @@ const Cell = React.forwardRef<unknown, CellProps>(
     const externalStyle = useSharedValue<ViewStyle>(style)
     const animationStyle = useAnimatedStyle(() => {
       const extrapolation = {
-        extrapolateLeft: Extrapolate.CLAMP,
-        extrapolateRight: Extrapolate.CLAMP,
+        extrapolateLeft: Extrapolation.CLAMP,
+        extrapolateRight: Extrapolation.CLAMP,
       }
       if (!sharedFinalRangeValues.value)
         return {
