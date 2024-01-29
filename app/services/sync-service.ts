@@ -98,6 +98,7 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
         /* empty */
       }
     }
+    //TODO: Replicate request should be sent to blockchain
   } catch (error) {
     console.log('uploadAssetBackgroundTask:', error)
     try {

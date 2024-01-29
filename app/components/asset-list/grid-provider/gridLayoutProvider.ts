@@ -3,7 +3,7 @@ import {
   Layout,
   LayoutManager,
   BaseLayoutProvider,
-} from 'fula-recyclerlistview'
+} from '@functionland/recyclerlistview'
 import Reanimated, { SharedValue } from 'react-native-reanimated'
 import { widthPercentageToDP as wp } from 'react-native-responsive-screen'
 import {

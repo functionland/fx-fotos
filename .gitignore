@@ -85,3 +85,4 @@ app/config/env.*.js
 !env.js
 *.lock
 yarn.lock
+.history

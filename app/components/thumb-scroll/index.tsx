@@ -10,7 +10,7 @@ import {
 import Animated, {
   default as Reanimated,
   useAnimatedStyle,
-  Extrapolate,
+  Extrapolation,
   useAnimatedGestureHandler,
   withDelay,
   withTiming,
@@ -133,12 +133,12 @@ export const ThumbScroll: React.FC<Props> = props => {
           props.scrollY.value, //* (props.viewPortHeight / (props.layoutHeight - props.viewPortHeight)),
           [0, props.layoutHeight],
           [props.headerHeight, props.viewPortHeight - props.footerHeight],
-          Extrapolate.CLAMP,
+          Extrapolation.CLAMP,
         ),
       },
       {
         translateX: withTiming(
-          interpolate(opacity.value, [0, 1], [60, 0], Extrapolate.CLAMP),
+          interpolate(opacity.value, [0, 1], [60, 0], Extrapolation.CLAMP),
           {
             duration: 500,
           },
@@ -166,7 +166,7 @@ export const ThumbScroll: React.FC<Props> = props => {
               layout.y + props.viewPortHeight / 2, // * (props.viewPortHeight / (props.layoutHeight - props.viewPortHeight)),
               [0, props.layoutHeight],
               [props.headerHeight, props.viewPortHeight - props.footerHeight],
-              Extrapolate.CLAMP,
+              Extrapolation.CLAMP,
             ) + 10
 
           // If years overlap then will increase the lastYIndex

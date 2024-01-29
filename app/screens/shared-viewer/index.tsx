@@ -3,7 +3,7 @@ import Animated, {
   runOnJS,
   withTiming,
   interpolate,
-  Extrapolate,
+  Extrapolation,
   useSharedValue,
   useAnimatedStyle,
   useAnimatedGestureHandler,
@@ -116,7 +116,7 @@ export const ShareViewerScreen: React.FC<Props> = ({ navigation, route }) => {
       translateY.value,
       [0, height],
       [1, 0.5],
-      Extrapolate.CLAMP,
+      Extrapolation.CLAMP,
     )
     return {
       alignItems: 'center',
@@ -149,7 +149,7 @@ export const ShareViewerScreen: React.FC<Props> = ({ navigation, route }) => {
           translationY,
           [0, 400],
           [1, 0.5],
-          Extrapolate.CLAMP,
+          Extrapolation.CLAMP,
         )
       }
     },
@@ -168,7 +168,7 @@ export const ShareViewerScreen: React.FC<Props> = ({ navigation, route }) => {
           velocityY,
           [velocityY, 0],
           [1, 0.5],
-          Extrapolate.CLAMP,
+          Extrapolation.CLAMP,
         )
       }
       isPanGestureActive.value = false
@@ -193,7 +193,7 @@ export const ShareViewerScreen: React.FC<Props> = ({ navigation, route }) => {
           imageScale.value,
           [1, 0.5],
           [1, 0],
-          Extrapolate.CLAMP,
+          Extrapolation.CLAMP,
         )
       },
       onEnd: ({ scale }) => {

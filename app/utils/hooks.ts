@@ -5,6 +5,7 @@ import Animated, {
   interpolate,
   useAnimatedReaction,
   SharedValue,
+  Extrapolation,
 } from 'react-native-reanimated'
 
 export const useFloatHederAnimation = (
@@ -21,7 +22,7 @@ export const useFloatHederAnimation = (
           diffY.value + diff,
           [-maxHeight * 2, 0],
           [-maxHeight * 2, 0],
-          Animated.Extrapolate.CLAMP,
+          Extrapolation.CLAMP,
         )
       }
     },

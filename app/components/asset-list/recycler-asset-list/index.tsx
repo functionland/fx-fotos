@@ -22,12 +22,17 @@ import Animated, {
   scrollTo,
   runOnJS,
   useAnimatedReaction,
-  Extrapolate,
+  Extrapolation,
   SharedValue,
 } from 'react-native-reanimated'
-import { DataProvider, RecyclerListView } from 'fula-recyclerlistview'
+import { DataProvider, RecyclerListView } from '@functionland/recyclerlistview'
 import { Constants } from '../../../theme/constants'
-import { RecyclerAssetListSection, ViewType, AssetStory, Asset } from '../../../types'
+import {
+  RecyclerAssetListSection,
+  ViewType,
+  AssetStory,
+  Asset,
+} from '../../../types'
 import RecyclerSectionItem from './asset-items/recycler-section-item'
 import ExternalScrollView from '../external-scroll-view'
 import Cell from '../grid-provider/cell'
@@ -317,8 +322,8 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(
 
         if (layoutTransitionRange.value) {
           const extrapolation = {
-            extrapolateLeft: Extrapolate.CLAMP,
-            extrapolateRight: Extrapolate.CLAMP,
+            extrapolateLeft: Extrapolation.CLAMP,
+            extrapolateRight: Extrapolation.CLAMP,
           }
           const diffScrollY = interpolate(
             next.scaleValue,
@@ -335,8 +340,8 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(
 
       if (!containerSize || !layoutTransitionRange.value) return style
       const extrapolation = {
-        extrapolateLeft: Extrapolate.CLAMP,
-        extrapolateRight: Extrapolate.CLAMP,
+        extrapolateLeft: Extrapolation.CLAMP,
+        extrapolateRight: Extrapolation.CLAMP,
       }
 
       style = {

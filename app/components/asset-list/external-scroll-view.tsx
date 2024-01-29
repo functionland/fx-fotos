@@ -1,5 +1,5 @@
 import React from 'react'
-import { BaseScrollView } from 'fula-recyclerlistview'
+import { BaseScrollView } from '@functionland/recyclerlistview'
 import Animated from 'react-native-reanimated'
 import { ScrollView } from 'react-native-gesture-handler'
 const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView)
