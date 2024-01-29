@@ -1,30 +1,33 @@
 import { Avatar } from '@rneui/themed'
 import React from 'react'
 import { ActivityIndicator, StyleSheet } from 'react-native'
-import {
-  WalletConnectModal,
-  useWalletConnectModal,
-} from '@walletconnect/modal-react-native'
-import { WalletConnectConifg } from '../../utils'
+import { useSDK } from '@metamask/sdk-react'
 type Props = {
   iconSize?: number
   size?: ('small' | 'medium' | 'large' | 'xlarge') | number
+  connected?: boolean
+  provider?: any
   onPress?: () => void
 }
-export function HeaderAvatar({ size, iconSize, onPress }: Props) {
-  const { isConnected, provider } = useWalletConnectModal()
+export function HeaderAvatar({
+  size,
+  iconSize,
+  connected,
+  provider,
+  onPress,
+}: Props) {
   return (
     <>
-      {provider || isConnected ? (
+      {provider || connected ? (
         <Avatar
           containerStyle={styles.disconnectedAvatar}
           source={
-            isConnected
+            connected
               ? require('../../../assets/images/elephant.png')
               : undefined
           }
           icon={
-            !isConnected
+            !connected
               ? {
                   name: 'account-alert',
                   type: 'material-community',
@@ -39,11 +42,6 @@ export function HeaderAvatar({ size, iconSize, onPress }: Props) {
       ) : (
         <ActivityIndicator />
       )}
-      <WalletConnectModal
-        projectId={WalletConnectConifg.WaletConnect_Project_Id}
-        providerMetadata={WalletConnectConifg.providerMetadata}
-        sessionParams={WalletConnectConifg.sessionParams()}
-      />
     </>
   )
 }

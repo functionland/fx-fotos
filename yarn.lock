@@ -2915,7 +2915,7 @@
     react-dom "^18.2.0"
     react-i18next "^13.2.2"
 
-"@metamask/sdk-react@0.14.2":
+"@metamask/sdk-react@^0.14.2":
   version "0.14.2"
   resolved "https://registry.yarnpkg.com/@metamask/sdk-react/-/sdk-react-0.14.2.tgz#b698280b66deeba18182e586632a3558b19e6075"
   integrity sha512-C7nqkWOTxSwSV7RsmtwC3NWtie2enBiUmztXpDn/Tu3tT6tr9BbXM3xyG0UJh2xjdZ3pHgBUFjwc4FoDetrl/w==

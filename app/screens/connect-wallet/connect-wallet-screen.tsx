@@ -11,11 +11,12 @@ import Toast from 'react-native-toast-message'
 import { Header, HeaderArrowBack } from '../../components/header'
 import { Screen } from '../../components'
 import { RootStackParamList, AppNavigationNames } from '../../navigators'
+import { useSDK } from '@metamask/sdk-react'
 import {
-  useWalletConnectModal,
-  WalletConnectModal,
-} from '@walletconnect/modal-react-native'
-import { WalletConnectConifg } from '../../utils'
+  chains,
+  goerliChainId,
+  mumbaiChainId,
+} from '../../utils/walletConnectConifg'
 
 type Props = NativeStackScreenProps<
   RootStackParamList,
@@ -24,13 +25,13 @@ type Props = NativeStackScreenProps<
 type ConnectToWalletStatus = 'None' | 'Connecting' | 'Connected' | 'Failed'
 
 export const ConnectWalletScreen: React.FC<Props> = ({ navigation, route }) => {
-  const { isConnected, provider, open, address } = useWalletConnectModal()
+  const { account, chainId, provider, sdk, connected } = useSDK();
   const [connectToWalletStatus, setConnectToWalletStatus] =
-    useState<ConnectToWalletStatus>(isConnected ? 'Connected' : 'None')
+    useState<ConnectToWalletStatus>(connected ? 'Connected' : 'None')
 
   useEffect(() => {
-    if (isConnected) setConnectToWalletStatus('Connected')
-  }, [isConnected])
+    if (connected) setConnectToWalletStatus('Connected')
+  }, [connected])
   const renderHeader = () => (
     <Header
       centerComponent={
@@ -43,16 +44,15 @@ export const ConnectWalletScreen: React.FC<Props> = ({ navigation, route }) => {
   )
   const connectToWallet = async () => {
     try {
-      if (isConnected || connectToWalletStatus === 'Connected') {
-        await provider?.disconnect()
-        await provider?.cleanupPendingPairings()
+      if (connected || connectToWalletStatus === 'Connected') {
+        sdk?.terminate()
         setConnectToWalletStatus('None')
       } else if (connectToWalletStatus !== 'None') {
         setConnectToWalletStatus('None')
         return
       }
       setConnectToWalletStatus('Connecting')
-      await open()
+      await sdk?.connect();
       //setConnectToWalletStatus('Connected')
     } catch (error) {
       console.log(error)

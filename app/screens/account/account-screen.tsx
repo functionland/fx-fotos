@@ -27,6 +27,7 @@ import { useRecoilState } from 'recoil'
 import { dIDCredentialsState, fulaPeerIdState } from '../../store'
 import Clipboard from '@react-native-clipboard/clipboard'
 import { useWalletConnectModal } from '@walletconnect/modal-react-native'
+import { useSDK } from '@metamask/sdk-react'
 
 type Props = NativeStackScreenProps<
   RootStackParamList,
@@ -37,9 +38,10 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
   // const walletConnector = useWalletConnect()
   const [dIDCredentials, setDIDCredentialsState] =
     useRecoilState(dIDCredentialsState)
+  const { account, chainId, provider, sdk, connected } = useSDK()
+
   const [fulaPeerId, setFulaPeerId] = useRecoilState(fulaPeerIdState)
   const [did, setDID] = useState(null)
-  const { isConnected, provider, open, address } = useWalletConnectModal()
   useEffect(() => {
     if (!fulaPeerId) {
       loadPeerId()
@@ -82,7 +84,7 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
           text: 'Yes',
           onPress: async () => {
             try {
-              await provider?.disconnect()
+              await sdk?.terminate()
               await Keychain.reset(Keychain.Service.DIDCredentials)
             } catch (error) {
               console.log(error)
@@ -148,7 +150,7 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
       leftComponent={<HeaderArrowBack navigation={navigation} />}
       rightComponent={
         <HeaderRightContainer>
-          {isConnected && (
+          {connected && (
             <Icon
               type="material-community"
               size={28}
@@ -176,10 +178,10 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
       <ScrollView>
         <View style={styles.container}>
           <SharedElement id="AccountAvatar">
-            <HeaderAvatar size={100} iconSize={80} />
+            <HeaderAvatar size={100} iconSize={80} connected={connected} provider={provider} />
           </SharedElement>
 
-          {isConnected ? (
+          {connected ? (
             <>
               <View style={styles.section}>
                 {/* <Text h4>{walletConnector.peerMeta?.name}</Text>

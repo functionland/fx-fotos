@@ -33,7 +33,7 @@
     "@functionland/react-native-fula": "^1.41.0",
     "@functionland/recyclerlistview": "^4.2.3",
     "@gorhom/bottom-sheet": "^4.6.0",
-    "@metamask/sdk-react": "0.14.2",
+    "@metamask/sdk-react": "^0.14.2",
     "@react-native-async-storage/async-storage": "^1.19.1",
     "@react-native-camera-roll/camera-roll": "5.6.1",
     "@react-native-clipboard/clipboard": "^1.11.1",
