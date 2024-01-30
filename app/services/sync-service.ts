@@ -3,7 +3,7 @@ import { Platform } from 'react-native'
 import BackgroundJob, {
   BackgroundTaskOptions,
 } from 'react-native-background-actions'
-import { fula } from '@functionland/react-native-fula'
+import { fula, chainApi } from '@functionland/react-native-fula'
 // import { TaggedEncryption } from '@functionland/fula-sec'
 import { AssetEntity } from '../realmdb/entities'
 import { SyncStatus } from '../types'
@@ -381,6 +381,64 @@ export const initFula = async (
     return fulaInit
   } catch (error) {
     console.log('fulaInit Error', error)
+  }
+}
+interface FulaAccountConfig {
+  fulaAccount?: string | null
+  fulaAccountSeed?: string | null
+  identity?: string | null
+}
+export const initFulaAccount = async (
+  accountConfig: FulaAccountConfig,
+): Promise<{ fulaAccount: string; fulaAccountSeed: string } | undefined> => {
+  try {
+    let {
+      fulaAccount = null,
+      fulaAccountSeed = null,
+      identity = null,
+    } = accountConfig || {}
+    if (!fulaAccount) {
+      const fulaAccountObj = await KeyChain.load(KeyChain.Service.FULAAccount)
+      if (fulaAccountObj && fulaAccountObj.password) {
+        fulaAccount = fulaAccountObj.password
+      } else {
+        if (!identity) {
+          const didCredentialsObj = await KeyChain.load(
+            KeyChain.Service.DIDCredentials,
+          )
+          if (didCredentialsObj) {
+            const keyPair = Helper.getMyDIDKeyPair(
+              didCredentialsObj.username,
+              didCredentialsObj.password,
+            )
+            identity = keyPair.secretKey.toString()
+            fulaAccountSeed = await chainApi.createHexSeedFromString(identity)
+            fulaAccount = chainApi.getLocalAccount(fulaAccountSeed)?.account
+          } else
+            throw new Error('Could not find default identity from KeyChain!')
+        } else {
+          fulaAccountSeed = await chainApi.createHexSeedFromString(identity)
+          fulaAccount = chainApi.getLocalAccount(fulaAccountSeed)?.account
+        }
+      }
+    }
+
+    if (!fulaAccountSeed) {
+      const fulaAccountSeedObj = await KeyChain.load(
+        KeyChain.Service.FULAAccountSeed,
+      )
+      if (fulaAccountSeedObj) {
+        fulaAccountSeed = fulaAccountSeedObj.password
+      } else
+        throw new Error('Could not find default accountSeed from KeyChain!')
+    }
+    return Promise.resolve({
+      fulaAccount: fulaAccount,
+      fulaAccountSeed: fulaAccountSeed,
+    })
+  } catch (error) {
+    console.log('initAccount Error', error)
+    return Promise.reject(error)
   }
 }
 

@@ -52,7 +52,7 @@ export const ConnectWalletScreen: React.FC<Props> = ({ navigation, route }) => {
         return
       }
       setConnectToWalletStatus('Connecting')
-      await sdk?.connect();
+      await sdk?.connect()
       //setConnectToWalletStatus('Connected')
     } catch (error) {
       console.log(error)
@@ -96,7 +96,7 @@ export const ConnectWalletScreen: React.FC<Props> = ({ navigation, route }) => {
             onPress={provider ? connectToWallet : undefined}
             type={connectToWalletStatus === 'Connected' ? 'outline' : 'solid'}
             title={
-              connectToWalletStatus == 'None'
+              connectToWalletStatus == 'None' && !connected
                 ? 'Connect wallet'
                 : connectToWalletStatus === 'Connecting'
                 ? 'Cancel'

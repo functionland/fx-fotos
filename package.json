@@ -3,9 +3,9 @@
   "version": "1.4.0",
   "private": true,
   "scripts": {
-    "start": "react-native start",
-    "ios": "react-native run-ios",
-    "android": "react-native run-android",
+    "start": "SET NODE_OPTIONS=--openssl-legacy-provider && react-native start",
+    "ios": "SET NODE_OPTIONS=--openssl-legacy-provider && react-native run-ios",
+    "android": "SET NODE_OPTIONS=--openssl-legacy-provider && react-native run-android",
     "test:e2e": "detox test -c ios.sim.debug",
     "build:e2e": "detox build -c ios.sim.debug",
     "ci:test:e2e": "detox test -c ios.sim.release -l verbose --cleanup",

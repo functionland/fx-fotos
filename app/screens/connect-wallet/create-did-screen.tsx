@@ -11,9 +11,14 @@ import * as Keychain from '../../utils/keychain'
 import { Header, HeaderArrowBack } from '../../components/header'
 import { Screen } from '../../components'
 import { RootStackParamList, AppNavigationNames } from '../../navigators'
-import { fulaPeerIdState, dIDCredentialsState } from '../../store'
+import {
+  fulaPeerIdState,
+  dIDCredentialsState,
+  fulaAccountState,
+  fulaAccountSeedState,
+} from '../../store'
 import { useSDK } from '@metamask/sdk-react'
-import { fula } from '@functionland/react-native-fula'
+import { fula, chainApi } from '@functionland/react-native-fula'
 import { DeviceUtils, KeyChain, Helper } from '../../utils'
 
 type Props = NativeStackScreenProps<
@@ -26,6 +31,8 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
   const [signatureData, setSignatureData] = useState<string>('')
   const setDIDCredentialsState = useSetRecoilState(dIDCredentialsState)
   const setFulaPeerIdState = useSetRecoilState(fulaPeerIdState)
+  const setFulaAccountState = useSetRecoilState(fulaAccountState)
+  const setFulaAccountSeedState = useSetRecoilState(fulaAccountSeedState)
   const [iKnow, setIKnow] = useState(false)
   const [passwod, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -110,9 +117,10 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
       const walletSignature = sig.toString()
       //Create Fotos app peerId
       const keyPair = Helper.getMyDIDKeyPair(passwod, walletSignature)
+      const secretSeed = keyPair.secretKey.toString()
       await fula.shutdown()
       const peerId = await fula.newClient(
-        keyPair.secretKey.toString(), //bytes of the privateKey of did identity in string format
+        secretSeed, //bytes of the privateKey of did identity in string format
         `${DeviceUtils.DocumentDirectoryPath}/wnfs`, // leave empty to use the default temp one
         '',
         'noop',
@@ -120,6 +128,7 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
         true,
         true,
       )
+      console.log("PeerId created: "+peerId)
       if (peerId) {
         const fulaPeerId = await KeyChain.save(
           'peerId',
@@ -127,6 +136,44 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
           KeyChain.Service.FULAPeerIdObject,
         )
         if (fulaPeerId) setFulaPeerIdState(fulaPeerId)
+        if (secretSeed) {
+          const fulaAccountSeed = await chainApi.createHexSeedFromString(
+            secretSeed,
+          )
+          if (fulaAccountSeed) {
+            const fulaAccountSeedObj = await KeyChain.save(
+              'accountSeed',
+              fulaAccountSeed,
+              KeyChain.Service.FULAAccountSeed,
+            )
+            if (fulaAccountSeedObj) setFulaAccountSeedState(fulaAccountSeedObj)
+            const fulaAccount = chainApi.getLocalAccount(fulaAccountSeed)
+            if (fulaAccount?.account) {
+              const fulaAccountObj = await KeyChain.save(
+                'account',
+                fulaAccount.account,
+                KeyChain.Service.FULAAccount,
+              )
+              if (fulaAccountObj) setFulaAccountState(fulaAccountObj)
+            } else {
+              Toast.show({
+                type: 'error',
+                text1: 'Unable to create account',
+                position: 'bottom',
+                bottomOffset: 0,
+              })
+              return
+            }
+          } else {
+            Toast.show({
+              type: 'error',
+              text1: 'Unable to create account seed',
+              position: 'bottom',
+              bottomOffset: 0,
+            })
+            return
+          }
+        }
       } else {
         Toast.show({
           type: 'error',

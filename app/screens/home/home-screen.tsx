@@ -36,6 +36,8 @@ import {
   fulaIsReadyState,
   fulaPeerIdState,
   mediasState,
+  fulaAccountState,
+  fulaAccountSeedState,
 } from '../../store'
 import { Assets, Boxs, FolderSettings } from '../../services/localdb'
 import { Entities } from '../../realmdb'
@@ -78,6 +80,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [fulaIsReady, setFulaIsReady] = useRecoilState(fulaIsReadyState)
   const [dIDCredentials, setDIDCredentialsState] =
     useRecoilState(dIDCredentialsState)
+  const setFulaAccountState = useSetRecoilState(fulaAccountState)
+  const setFulaAccountSeedState = useSetRecoilState(fulaAccountSeedState)
   const [, setFulaPeerId] = useRecoilState(fulaPeerIdState)
   const [appPreferences, setAppPreferences] =
     useRecoilState(appPreferencesState)
@@ -263,6 +267,18 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         setFulaPeerId(fulaPeerIdObject)
       }
       setDIDCredentialsState(didCredentialsObj)
+
+      //Init FulaAccount
+      const fulaAccountObj = await KeyChain.load(KeyChain.Service.FULAAccount)
+      if (fulaAccountObj) {
+        const fulaAccountSeedObj = await KeyChain.load(
+          KeyChain.Service.FULAAccountSeed,
+        )
+        if (fulaAccountSeedObj) {
+          setFulaAccountSeedState(fulaAccountSeedObj)
+        }
+        setFulaAccountState(fulaAccountObj)
+      }
     }
   }
   const initFula = async (password: string, signiture: string) => {

@@ -24,7 +24,11 @@ import {
 import { AppNavigationNames, RootStackParamList } from '../../navigators'
 import * as helper from '../../utils/helper'
 import { useRecoilState } from 'recoil'
-import { dIDCredentialsState, fulaPeerIdState } from '../../store'
+import {
+  dIDCredentialsState,
+  fulaPeerIdState,
+  fulaAccountState,
+} from '../../store'
 import Clipboard from '@react-native-clipboard/clipboard'
 import { useSDK } from '@metamask/sdk-react'
 
@@ -34,9 +38,9 @@ type Props = NativeStackScreenProps<
 >
 
 export const AccountScreen: React.FC<Props> = ({ navigation }) => {
-  // const walletConnector = useWalletConnect()
   const [dIDCredentials, setDIDCredentialsState] =
     useRecoilState(dIDCredentialsState)
+  const [fulaAccount, setFulaAccountState] = useRecoilState(fulaAccountState)
   const { account, chainId, provider, sdk, connected } = useSDK()
 
   const [fulaPeerId, setFulaPeerId] = useRecoilState(fulaPeerIdState)
@@ -114,11 +118,20 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
       console.log(error)
     }
   }
-  const copyToClipboardDID = (did: string) => {
-    Clipboard.setString(did)
+  const copyToClipboardDID = (didCp: string) => {
+    Clipboard.setString(didCp)
     Toast.show({
       type: 'success',
       text1: 'Your DID copied to the clipboard!',
+      position: 'bottom',
+      bottomOffset: 0,
+    })
+  }
+  const copyToClipboardFulaAccount = (fulaAccountCp: string) => {
+    Clipboard.setString(fulaAccountCp)
+    Toast.show({
+      type: 'success',
+      text1: 'Your Fula Account copied to the clipboard!',
       position: 'bottom',
       bottomOffset: 0,
     })
@@ -133,11 +146,13 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
     })
   }
   const authorizeApp = () => {
-    Linking.openURL(
-      `fxblox://connectdapp/FxFotos/land.fx.fotos/${
-        fulaPeerId?.password
-      }/${encodeURIComponent('fotos://addblox/$bloxName/$bloxPeerId')}`,
-    )
+    const url = `fxblox://connectdapp/FxFotos/land.fx.fotos/${
+      fulaPeerId?.password
+    }/${encodeURIComponent('fotos://addblox/$bloxName/$bloxPeerId')}/${
+      fulaAccount?.password
+    }`
+    console.log('Authorize app by FxBlox url is:' + url)
+    Linking.openURL(url)
   }
   const renderHeader = () => (
     <Header
@@ -146,7 +161,7 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
           Account
         </Text>
       }
-      leftComponent={<HeaderArrowBack navigation={navigation} />}
+      leftComponent={<HeaderArrowBack navigation={navigation as any} />}
       rightComponent={
         <HeaderRightContainer>
           {connected && (
@@ -177,16 +192,25 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
       <ScrollView>
         <View style={styles.container}>
           <SharedElement id="AccountAvatar">
-            <HeaderAvatar size={100} iconSize={80} connected={connected} provider={provider} />
+            <HeaderAvatar
+              size={100}
+              iconSize={80}
+              connected={connected}
+              provider={provider}
+            />
           </SharedElement>
 
           {connected ? (
             <>
               <View style={styles.section}>
-                {/* <Text h4>{walletConnector.peerMeta?.name}</Text>
-                <Text ellipsizeMode="tail" style={styles.textCenter}>
-                  {walletConnector.accounts?.[0]}
-                </Text> */}
+                {
+                  <>
+                    <Text h4>{chainId}</Text>
+                    <Text ellipsizeMode="tail" style={styles.textCenter}>
+                      {account}
+                    </Text>
+                  </>
+                }
                 <View style={styles.section}>
                   {!dIDCredentials ? (
                     <Button title="Link DID" onPress={signWalletAddress} />
@@ -212,6 +236,31 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
                         <Icon name="content-copy" type="material-community" />
                       </View>
                       <ListItem.Subtitle> {did}</ListItem.Subtitle>
+                    </ListItem.Content>
+                  </ListItem>
+                  <ListItem
+                    onPress={() =>
+                      fulaAccount
+                        ? copyToClipboardFulaAccount(fulaAccount.password)
+                        : null
+                    }
+                    containerStyle={{ width: '100%' }}
+                  >
+                    <ListItem.Content>
+                      <View style={{ flexDirection: 'row' }}>
+                        <Card.Title
+                          style={{
+                            textAlign: 'left',
+                            paddingRight: 10,
+                          }}
+                        >
+                          Fula Account
+                        </Card.Title>
+                        <Icon name="content-copy" type="material-community" />
+                      </View>
+                      <ListItem.Subtitle>
+                        {fulaAccount.password}
+                      </ListItem.Subtitle>
                     </ListItem.Content>
                   </ListItem>
                   <ListItem

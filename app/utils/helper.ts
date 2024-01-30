@@ -96,6 +96,11 @@ export const getFulaPeerId = async (): Promise<
 > => {
   return await KeyChain.load(KeyChain.Service.FULAPeerIdObject)
 }
+export const getFulaAccount = async (): Promise<
+  false | KeyChain.UserCredentials
+> => {
+  return await KeyChain.load(KeyChain.Service.FULAAccount)
+}
 
 export const generateBloxAddress = (box: BoxEntity) => {
   if (!box || !box.peerId) {

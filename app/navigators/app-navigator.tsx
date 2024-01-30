@@ -205,9 +205,13 @@ export function AppNavigator(props: NavigationProps) {
   const { theme } = useContext(ThemeContext)
   const [toastVisible, setToastVisible] = useState(false)
   useEffect(() => {
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       setToastVisible(true)
     }, 1000)
+    // Cleanup function
+    return () => {
+      clearTimeout(timeoutId)
+    }
   }, [])
   return (
     <Animated.View style={{ flex: 1 }}>
