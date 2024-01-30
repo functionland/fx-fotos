@@ -153,8 +153,10 @@ export const addOrUpdate = (
 ): Promise<Entities.AssetEntity[]> =>
   RealmDB()
     .then(realm => {
+      console.log('addOrUpdate started')
       return new Promise<Entities.AssetEntity[]>((resolve, reject) => {
         try {
+          console.log('addOrUpdate try')
           const result: Entities.AssetEntity[] = []
           realm.write(() => {
             for (const asset of assets) {
@@ -163,11 +165,17 @@ export const addOrUpdate = (
                   Schemas.Asset.name,
                   {
                     ...asset,
+                    albumId:
+                      Array.isArray(asset.albumId) && asset.albumId.length > 0
+                        ? asset.albumId[0]
+                        : '',
+                    // If there are other fields that need similar transformations, handle them here.
                   },
                   Realm.UpdateMode.Modified,
                 ),
               )
             }
+            console.log('addOrUpdateAssets result reached')
             resolve(result)
           })
         } catch (error) {
@@ -180,7 +188,6 @@ export const addOrUpdate = (
       console.error('RealmDB addOrUpdateAssets error!', error)
       throw error
     })
-
 export const markAsSYNC = (assetIds: string[]): Promise<void> =>
   RealmDB()
     .then(realm => {

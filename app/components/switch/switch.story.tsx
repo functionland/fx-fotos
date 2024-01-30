@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { View, ViewStyle } from 'react-native'
 import { storiesOf } from '@storybook/react-native'
-import { Toggle } from 'react-powerplug'
+import { useToggle } from 'react-use'
 import { StoryScreen, Story, UseCase } from '../../../storybook/views'
 import { Switch } from './switch'
 
@@ -53,14 +53,17 @@ storiesOf('Switch', module)
         text="The Toggle Switch"
         usage="Use the switch to represent on/off states."
       >
-        <Toggle initial={false}>
-          {({ on, toggle }) => <Switch value={on} onToggle={toggle} />}
-        </Toggle>
+        <View>
+          {(() => {
+            const [on, toggle] = useToggle(false);
+            return <Switch value={on} onToggle={toggle} />;
+          })()}
+        </View>
       </UseCase>
       <UseCase text="value = true" usage="This is permanently on.">
         <Switch value />
       </UseCase>
-      <UseCase text="value = false" usage="This is permanantly off.">
+      <UseCase text="value = false" usage="This is permanently off.">
         <Switch value={false} />
       </UseCase>
     </Story>
@@ -68,9 +71,10 @@ storiesOf('Switch', module)
   .add('Styling', () => (
     <Story>
       <UseCase text="Custom Styling" usage="Promise me this won't happen.">
-        <Toggle initial={false}>
-          {({ on, toggle }) => (
-            <View>
+        <View>
+          {(() => {
+            const [on, toggle] = useToggle(false)
+            return (
               <Switch
                 trackOnStyle={{
                   backgroundColor: 'green',
@@ -89,32 +93,28 @@ storiesOf('Switch', module)
                 value={on}
                 onToggle={toggle}
               />
-            </View>
-          )}
-        </Toggle>
+            )
+          })()}
+        </View>
       </UseCase>
 
       <UseCase text="Style array" usage="This either.">
-        <Toggle initial={false}>
-          {({ on, toggle }) => (
-            <View>
+        <View>
+          {(() => {
+            const [on, toggle] = useToggle(false)
+            return (
               <Switch
                 style={styleArray}
                 trackOffStyle={trackOffStyle}
                 trackOnStyle={trackOnStyle}
                 thumbOffStyle={thumbOffStyle}
                 thumbOnStyle={thumbOnStyle}
-                // trackOnStyle={{ backgroundColor: "green", borderColor: "black" }}
-                // trackOffStyle={{ backgroundColor: "red", borderColor: "maroon" }}
-                // thumbOnStyle={{ backgroundColor: "cyan" }}
-                // thumbOffStyle={{ backgroundColor: "pink" }}
-
                 value={on}
                 onToggle={toggle}
               />
-            </View>
-          )}
-        </Toggle>
+            )
+          })()}
+        </View>
       </UseCase>
     </Story>
   ))

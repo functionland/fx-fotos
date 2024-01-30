@@ -62,7 +62,6 @@ import { FulaFileList } from '../../types/fula'
 import { Helper } from '../../utils'
 import { useSDK } from '@metamask/sdk-react'
 
-
 interface HomeScreenProps {
   navigation: NativeStackNavigationProp<
     HomeNavigationParamList,
@@ -92,14 +91,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const requestAndroidPermission = useCallback(async () => {
     try {
       const permissions = Platform.select({
-        android:
-          Number(Platform.Version) >= 33
-            ? [
-                PERMISSIONS.ANDROID.READ_MEDIA_IMAGES,
-                PERMISSIONS.ANDROID.READ_MEDIA_VIDEO,
-              ]
-            : [PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE],
+        android: [
+          PERMISSIONS.ANDROID.READ_MEDIA_IMAGES,
+          PERMISSIONS.ANDROID.READ_MEDIA_VIDEO,
+          PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE, // Adjust as needed
+        ],
         ios: [PERMISSIONS.IOS.PHOTO_LIBRARY],
+        default: [],
       })
       const result = await requestMultiple(permissions)
       if (
@@ -134,6 +132,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   useEffect(() => {
     loadFoldersSettings()
     initDID()
+    console.log('[]2 effect at the end')
   }, [])
 
   useEffect(() => {
@@ -151,11 +150,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       }
     })
     return () => {
+      console.log('isReady effect at the end')
       appStateFocus.remove()
     }
   }, [isReady])
   useEffect(() => {
-
     if (dIDCredentials?.username && dIDCredentials?.password) {
       initFula(dIDCredentials.username, dIDCredentials.password)
     }
@@ -206,17 +205,26 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const fulaReadyTasks = async () => {
     try {
       await checkFailedActions()
-    } catch (error) {}
+    } catch (error) {
+      console.log('error in fulaReadyTasks first try')
+      console.log(error)
+    }
     try {
       await SyncService.uploadAssetsInBackground()
-    } catch (error) {}
+    } catch (error) {
+      console.log('error in fulaReadyTasks second try')
+      console.log(error)
+    }
     pollingDownloadAssets()
   }
 
   const pollingDownloadAssets = async () => {
     try {
       await SyncService.downloadAssetsInBackground()
-    } catch (error) {}
+    } catch (error) {
+      console.log('error in pollingDownloadAssets try')
+      console.log(error)
+    }
     await Helper.sleep(30 * 1000)
     pollingDownloadAssets()
   }
@@ -230,7 +238,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       }, {} as Record<string, FolderSettingsEntity>)
       setFoldersSettings(foldersObj)
     } catch (error) {
-
       console.log('loadFoldersSettings', error)
     }
   }
@@ -289,16 +296,22 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     try {
       if (!(await fula.isReady())) return
       await makeTheRootDirctory()
-      const files = (await fula.ls(Constants.FOTOS_WNFS_ROOT)) as FulaFileList
-      if (files) {
-        await Assets.addOrUpdateBackendAssets(files, realmAssets.current)
+      let tmp = (await fula.ls(Constants.FOTOS_WNFS_ROOT)) as unknown
+      if (tmp) {
+        const files = tmp as FulaFileList
+        if (files && realmAssets.current) {
+          const convertedAssets = Array.from(
+            realmAssets.current,
+          ) as AssetEntity[]
+          await Assets.addOrUpdateBackendAssets(files, convertedAssets)
+        }
+        //Mark the app preferences that in the first time app loaded, it synced the backend assets
+        setAppPreferences({
+          firstTimeBackendSynced: true,
+        })
+        //Download the assets
+        await SyncService.uploadAssetsInBackground()
       }
-      //Mark the app preferences that in the first time app loaded, it synced the backend assets
-      setAppPreferences({
-        firstTimeBackendSynced: true,
-      })
-      //Download the assets
-      await SyncService.uploadAssetsInBackground()
     } catch (error) {
       console.log('getAndDownloadBackendAssets error:', error)
     }
@@ -312,16 +325,81 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       console.log('makeTheRootDirctory error:', error)
     }
   }
-  const loadAssets = async (syncMetadata: boolean = true) => {
+
+  // Asynchronous processing of each batch
+  const processBatchAsync = (batch: AssetEntity[]): Promise<AssetEntity[]> => {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        const processedBatch = batch.map(asset => ({
+          ...asset,
+          // Add any additional fields from 'AssetEntity' that are required in 'Asset'
+          // Example: location: asset.location ? { latitude: asset.location.latitude, ... } : undefined,
+        }))
+        resolve(processedBatch)
+      }, 0)
+    })
+  }
+  // Process the data in batches
+  const processInBatches = async (
+    data: AssetEntity[],
+    batchSize: number,
+  ): Promise<AssetEntity[]> => {
+    let result: AssetEntity[] = []
+    for (let i = 0; i < data.length; i += batchSize) {
+      const batch = data.slice(i, i + batchSize)
+      const processedBatch = await processBatchAsync(batch)
+      result = [...result, ...processedBatch]
+    }
+    return result
+  }
+  const loadAssets = async (syncMetadata = true) => {
     try {
       realmAssets.current?.removeAllListeners()
-      realmAssets.current = await Assets.getAll()
+      const assets = await Assets.getAll()
+      realmAssets.current = assets
       realmAssets.current.addListener(onLocalDbAssetChange)
+
       const obj = {}
       const assetSlice = realmAssets.current?.slice()
-      assetSlice?.forEach(asset => (obj[asset.id] = asset))
-      setMedias(assetSlice)
+
+      // Optimized mapping
+      const batchSize = 100 // Adjust based on performance
+      const plainAssets = []
+      // Use a for loop for optimized performance
+      if (assetSlice) {
+        for (let i = 0; i < assetSlice.length; i++) {
+          const asset = assetSlice[i]
+          const plainAsset = {
+            id: asset.id,
+            filename: asset.filename || '', // Assuming filename is required
+            uri: asset.uri || '', // Assuming uri is required
+            mediaType: asset.mediaType || 'unknown', // Default to 'unknown' if undefined
+            mediaSubtypes: asset.mediaSubtypes || [],
+            width: asset.width || 0,
+            height: asset.height || 0,
+            creationTime: asset.creationTime || 0,
+            modificationTime: asset.modificationTime || 0,
+            duration: asset.duration || 0,
+            albumId: asset.albumId || '',
+            fileSize: asset.fileSize || 0,
+            filenameNormalized: asset.filenameNormalized,
+            syncStatus: asset.syncStatus,
+            syncDate: asset.syncDate,
+            cid: asset.cid,
+            jwe: asset.jwe,
+            isDeleted: asset.isDeleted,
+            location: asset.location,
+            metadataIsSynced: asset.metadataIsSynced,
+            mimeType: asset.mimeType,
+          }
+          plainAssets.push(plainAsset)
+          obj[asset.id] = plainAsset
+        }
+      }
+
+      setMedias(plainAssets)
       setMediasRefObj(obj)
+
       if (syncMetadata) {
         await syncAssets(
           realmAssets.current?.[0]?.modificationTime,
@@ -393,6 +471,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     lastAssetTime = 0,
     firstAssetTime = new Date().getTime(),
   ) => {
+    console.log('syncAssets lastAssetTime:' + lastAssetTime)
+    console.log('syncAssets firstAssetTime:' + firstAssetTime)
     try {
       let first = 20
       let allMedias: PagedInfo<Asset> = null
@@ -534,7 +614,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                   connected={connected}
                   provider={provider}
                   onPress={() =>
-                    navigation.navigate(AppNavigationNames.AccountScreen)
+                    navigation.navigate(AppNavigationNames.AccountScreen as any)
                   }
                 />
               </SharedElement>

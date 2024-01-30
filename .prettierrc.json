@@ -6,7 +6,8 @@
   "singleQuote": true,
   "trailingComma": "all",
   "bracketSpacing": true,
-  "arrowParens": "avoid",
   "proseWrap": "always",
+  "arrowParens": "avoid",
+  "bracketSameLine": true,
   "endOfLine": "auto"
 }
