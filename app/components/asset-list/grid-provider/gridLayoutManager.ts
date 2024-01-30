@@ -73,7 +73,7 @@ export default class GridLayoutManager extends LayoutManager {
   }
 
   public getLayoutsForIndex(index: number): Layout[] {
-    if (this._allLayouts.every(layout => index < layout.length)) {
+    if (this._allLayouts.every(layout => index < layout?.length)) {
       return this._allLayouts.map(layouts => layouts[index])
       // .map((layouts, idx) => ({
       //   layout: layouts[index],
@@ -173,7 +173,7 @@ export default class GridLayoutManager extends LayoutManager {
         }
 
         // initializing
-        const oldItemCount = layouts.length
+        const oldItemCount = layouts?.length
         const itemDim = { height: 0, width: 0 }
         let itemRect = null
         let oldLayout = null

@@ -369,7 +369,7 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(
         gridLayoutProvider.getLayoutManager?.()?.getAllContentDimension()
           ?.height || {},
       )
-      if (heights.length) {
+      if (heights?.length) {
         setContainerSize(heights)
       }
     }
@@ -413,8 +413,8 @@ const RecyclerAssetList = forwardRef<RecyclerAssetListHandler, Props>(
             refreshControl: refreshControl,
           }}
           onVisibleIndicesChanged={(all = [], now, notNow) => {
-            const visibleIndexValue = all[Math.floor(all.length / 2)] || 0
-            if (!pinching.value && all && all.length) {
+            const visibleIndexValue = all[Math.floor(all?.length / 2)] || 0
+            if (!pinching.value && all && all?.length) {
               visibileIndices.value = [...all]
               try {
                 layoutTransitionRange.value = gridLayoutProvider

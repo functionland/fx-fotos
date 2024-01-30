@@ -35,8 +35,8 @@ const Cell = React.forwardRef<unknown, CellProps>(
         }
       const finalRangeValues = sharedFinalRangeValues.value
       const { colsRange } = finalRangeValues
-      if (colsRange.length) {
-        if (colsRange.length === 1)
+      if (colsRange?.length) {
+        if (colsRange?.length === 1)
           return {
             ...externalStyle.value,
           }

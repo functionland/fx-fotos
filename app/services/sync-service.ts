@@ -46,12 +46,12 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
       Helper.storeFulaRootCID(fulaConfig.rootCid)
     }
 
-    for (let index = 0; index < assets.length; index++) {
+    for (let index = 0; index < assets?.length; index++) {
       const asset = assets[index]
       console.log('uploadAssetBackgroundTask asset...', index)
 
       //Ignore asset greater than 200 MB
-      if (!asset?.fileSize || asset.fileSize > 200 * 1000 * 1000) {
+      if (!asset?.fileSize || asset?.fileSize > 200 * 1000 * 1000) {
         console.log('Ignore large asset ...', asset)
         continue
       }
@@ -59,12 +59,12 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
       // Prepare task notification message
       if (BackgroundJob.isRunning()) {
         await BackgroundJob.updateNotification({
-          taskTitle: `Uploading asset #${index + 1}/${assets.length}`,
+          taskTitle: `Uploading asset #${index + 1}/${assets?.length}`,
           taskDesc: `Syncing your assets ...`,
           progressBar: {
-            max: assets.length,
+            max: assets?.length,
             value: index,
-            indeterminate: assets.length == 1,
+            indeterminate: assets?.length == 1,
           },
         })
       }
@@ -125,7 +125,7 @@ const downloadAssetsBackgroundTask = async (taskParameters?: TaskParams) => {
       Helper.storeFulaRootCID(fulaConfig.rootCid)
     }
 
-    for (let index = 0; index < assets.length; index++) {
+    for (let index = 0; index < assets?.length; index++) {
       console.log('downloadAssetsBackgroundTask asset...', index)
 
       try {
@@ -134,12 +134,12 @@ const downloadAssetsBackgroundTask = async (taskParameters?: TaskParams) => {
         // Prepare task notification message
         if (BackgroundJob.isRunning()) {
           await BackgroundJob.updateNotification({
-            taskTitle: `Downloading asset #${index + 1}/${assets.length}`,
+            taskTitle: `Downloading asset #${index + 1}/${assets?.length}`,
             taskDesc: `Download your assets ...`,
             progressBar: {
-              max: assets.length,
+              max: assets?.length,
               value: index,
-              indeterminate: assets.length == 1,
+              indeterminate: assets?.length == 1,
             },
           })
         }
@@ -194,7 +194,7 @@ export const uploadAssetsInBackground = async (options?: {
     }
     const assets = await Assets.getAllNeedToSync()
     if (!BackgroundJob.isRunning()) {
-      if (assets.length) {
+      if (assets?.length) {
         await BackgroundJob.start<TaskParams>(uploadAssetBackgroundTask, {
           ...defaultOptions,
           parameters: {
@@ -222,7 +222,7 @@ export const downloadAssetsInBackground = async (options?: {
     }
     if (!BackgroundJob.isRunning()) {
       const assets = await Assets.getAllNeedToDownload()
-      if (assets.length) {
+      if (assets?.length) {
         await BackgroundJob.start<TaskParams>(downloadAssetsBackgroundTask, {
           ...defaultOptions,
           taskName: 'downloadAssetsBackgroundTask',
