@@ -25,7 +25,7 @@ type Props = NativeStackScreenProps<
 type ConnectToWalletStatus = 'None' | 'Connecting' | 'Connected' | 'Failed'
 
 export const ConnectWalletScreen: React.FC<Props> = ({ navigation, route }) => {
-  const { account, chainId, provider, sdk, connected } = useSDK();
+  const { account, chainId, provider, sdk, connected } = useSDK()
   const [connectToWalletStatus, setConnectToWalletStatus] =
     useState<ConnectToWalletStatus>(connected ? 'Connected' : 'None')
 
@@ -67,12 +67,7 @@ export const ConnectWalletScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   }
   return (
-    <Screen
-      preset="scroll"
-      scrollEventThrottle={16}
-      automaticallyAdjustContentInsets
-      style={styles.screen}
-    >
+    <Screen preset="scroll" style={styles.screen}>
       {renderHeader()}
       <View
         style={{

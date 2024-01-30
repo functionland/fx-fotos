@@ -26,7 +26,6 @@ import * as helper from '../../utils/helper'
 import { useRecoilState } from 'recoil'
 import { dIDCredentialsState, fulaPeerIdState } from '../../store'
 import Clipboard from '@react-native-clipboard/clipboard'
-import { useWalletConnectModal } from '@walletconnect/modal-react-native'
 import { useSDK } from '@metamask/sdk-react'
 
 type Props = NativeStackScreenProps<

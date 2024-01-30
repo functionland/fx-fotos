@@ -11,15 +11,10 @@ import * as Keychain from '../../utils/keychain'
 import { Header, HeaderArrowBack } from '../../components/header'
 import { Screen } from '../../components'
 import { RootStackParamList, AppNavigationNames } from '../../navigators'
-import { dIDCredentialsState } from '../../store'
-import {
-  WalletConnectModal,
-  useWalletConnectModal,
-} from '@walletconnect/modal-react-native'
-import { ethers } from 'ethers'
+import { fulaPeerIdState, dIDCredentialsState } from '../../store'
+import { useSDK } from '@metamask/sdk-react'
 import { fula } from '@functionland/react-native-fula'
-import { DeviceUtils, KeyChain, Helper, WalletConnectConifg } from '../../utils'
-import { fulaPeerIdState } from '../../store'
+import { DeviceUtils, KeyChain, Helper } from '../../utils'
 
 type Props = NativeStackScreenProps<
   RootStackParamList,
@@ -27,19 +22,59 @@ type Props = NativeStackScreenProps<
 >
 
 export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
-
-  const { isConnected, provider } = useWalletConnectModal()
+  const { account, chainId, provider, sdk, connected } = useSDK()
+  const [signatureData, setSignatureData] = useState<string>('')
   const setDIDCredentialsState = useSetRecoilState(dIDCredentialsState)
   const setFulaPeerIdState = useSetRecoilState(fulaPeerIdState)
   const [iKnow, setIKnow] = useState(false)
   const [passwod, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [linking, setLinking] = useState(false)
-  const web3Provider = useMemo(
-    () => (provider ? new ethers.providers.Web3Provider(provider) : undefined),
-    [provider],
-  )
-  useEffect(() => {}, [])
+
+  const personalSign = async (chainCode: string) => {
+    return await provider?.request({
+      method: 'personal_sign',
+      params: [chainCode, account],
+    })
+  }
+  const handleLinkPassword = async (passwordInput: string) => {
+    try {
+      if (linking) {
+        setLinking(false)
+        return
+      }
+      setLinking(true)
+      const ed = new HDKEY(passwordInput)
+      const chainCode = ed.chainCode
+
+      if (!connected || !sdk) {
+        throw new Error('web3Provider not connected')
+      }
+      if (!account) {
+        throw new Error('No address found')
+      }
+      console.log('before signing...')
+      const sig = await personalSign(chainCode)
+      if (!sig || sig === undefined || sig === null) {
+        throw 'Sign failed'
+      }
+      console.log('Signature: ', sig)
+      setSignatureData(sig)
+      console.log('after signing...')
+      return sig
+    } catch (err) {
+      console.log(err)
+      Toast.show({
+        text1: 'Error',
+        text2: 'Unable to sign the wallet address!',
+        position: 'bottom',
+        bottomOffset: 0,
+      })
+      return null
+    } finally {
+      setLinking(false)
+    }
+  }
   const renderHeader = () => (
     <Header
       centerComponent={
@@ -52,29 +87,27 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
     />
   )
   const cancelLinking = () => {
-    provider?.abortPairingAttempt()
-    provider?.cleanupPendingPairings()
+    provider?.handleDisconnect({ terminate: true })
+    provider?.removeAllListeners()
     setLinking(false)
   }
   const signPassword = async () => {
     try {
       setLinking(true)
-      const ed = new HDKEY(passwod)
-      const chainCode = ed.chainCode
-      if (!web3Provider) {
+      if (!provider) {
         Toast.show({
           type: 'error',
-          text1: 'Web3 provider is not ready!',
+          text1: 'Metamask provider is not ready!',
           position: 'bottom',
           bottomOffset: 0,
         })
         return
       }
-      const walletSignature = await Helper.signMessage({
-        message: chainCode,
-        web3Provider,
-      })
-
+      let sig = await handleLinkPassword(passwod)
+      if (!sig) {
+        throw new Error('could not get the signature')
+      }
+      const walletSignature = sig.toString()
       //Create Fotos app peerId
       const keyPair = Helper.getMyDIDKeyPair(passwod, walletSignature)
       await fula.shutdown()
@@ -139,12 +172,7 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   }
   return (
-    <Screen
-      preset="scroll"
-      scrollEventThrottle={16}
-      automaticallyAdjustContentInsets
-      style={styles.screen}
-    >
+    <Screen preset="scroll" style={styles.screen}>
       {renderHeader()}
       <View
         style={{
@@ -175,7 +203,6 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
             }}
             style={{ textAlign: 'center' }}
             onChangeText={text => setPassword(text)}
-            errorProps
           />
         </View>
         <View style={styles.section}>
@@ -192,7 +219,7 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
         </View>
         <View style={styles.section}>
           <Button
-            loading={!isConnected || !provider}
+            loading={!connected || !provider}
             disabled={!iKnow || !passwod?.length}
             onPress={linking ? cancelLinking : signPassword}
           >

@@ -1,8 +1,8 @@
 import { HDKEY, DID, EncryptJWT, DecryptJWT } from '@functionland/fula-sec'
 import { KeyChain } from '.'
 import { BoxEntity } from '../realmdb/entities'
-import { utf8ToHex } from '@walletconnect/encoding'
 import { ethers } from 'ethers'
+import { useSDK } from '@metamask/sdk-react'
 
 export const translateOrigin = (center: number, d: number) => center - d / 2
 export const convertDurationToTime = (duration: number): string => {
@@ -29,6 +29,7 @@ export const getMyDID = (password: string, signiture: string): string => {
   const did = new DID(keyPair.secretKey)
   return did.did()
 }
+
 export const getMyDIDKeyPair = (
   password: string,
   signiture: string,
@@ -44,15 +45,19 @@ export const getMyDIDKeyPair = (
 export const decryptJWE = async (
   DID,
   jwe,
-): {
+): Promise<{
   CID: string
-  symetricKey: { id: string; iv: SVGFESpecularLightingElement; key: string }
-} => {
-  // if (DID && jwe) {
-  //   const myTag = new TaggedEncryption(DID)
-  //   const dec_jwe = await myTag.decrypt(jwe)
-  //   return dec_jwe
-  // }
+  symetricKey: {
+    id: string
+    iv: SVGFESpecularLightingElement
+    key: string
+  }
+} | null> => {
+  if (DID && jwe) {
+    //   const myTag = new TaggedEncryption(DID)
+    //   const dec_jwe = await myTag.decrypt(jwe)
+    //   return dec_jwe
+  }
   return null
 }
 
@@ -108,21 +113,28 @@ export interface RpcRequestParams {
   web3Provider: ethers.providers.Web3Provider
 }
 
-export const signMessage = async ({
-  web3Provider,
-  message,
-}: RpcRequestParams): Promise<string> => {
-  if (!web3Provider) {
-    throw new Error('web3Provider not connected')
+export const personalSign = async ({
+  chainId,
+  account,
+  provider,
+}: {
+  chainId: string | undefined
+  account: string | undefined
+  provider: any
+}): Promise<string> => {
+  if (!provider) {
+    throw new Error('provider not set')
   }
-  const hexMsg = utf8ToHex(message, true)
-  const [address] = await web3Provider.listAccounts()
-  if (!address) {
-    throw new Error('No address found')
+  if (!chainId) {
+    throw new Error('chainId not set')
   }
-
-  const signature = await web3Provider.send('personal_sign', [hexMsg, address])
-  return signature
+  if (!account) {
+    throw new Error('account not set')
+  }
+  return await provider?.request({
+    method: 'personal_sign',
+    params: [chainId, account],
+  })
 }
 
 export const sleep = (milliseconds: number) =>
