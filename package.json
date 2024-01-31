@@ -123,7 +123,6 @@
     "@babel/runtime": "^7.20.0",
     "@react-native/babel-preset": "0.73.19",
     "@react-native/eslint-config": "0.73.2",
-    "@react-native/metro-config": "0.73.3",
     "@react-native/typescript-config": "0.73.1",
     "@storybook/addon-storyshots": "7.6.10",
     "@storybook/react-native": "6.5.7",

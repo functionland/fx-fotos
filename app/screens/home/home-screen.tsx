@@ -36,7 +36,7 @@ import {
   fulaIsReadyState,
   fulaPeerIdState,
   mediasState,
-  fulaAccountState,
+  fulaPoolIdState,
   fulaAccountSeedState,
 } from '../../store'
 import { Assets, Boxs, FolderSettings } from '../../services/localdb'
@@ -79,12 +79,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [fulaIsReady, setFulaIsReady] = useRecoilState(fulaIsReadyState)
   const [dIDCredentials, setDIDCredentialsState] =
     useRecoilState(dIDCredentialsState)
-  const setFulaAccountState = useSetRecoilState(fulaAccountState)
-  const setFulaAccountSeedState = useSetRecoilState(fulaAccountSeedState)
   const [, setFulaPeerId] = useRecoilState(fulaPeerIdState)
   const [appPreferences, setAppPreferences] =
     useRecoilState(appPreferencesState)
   const setFoldersSettings = useSetRecoilState(foldersSettingsState)
+  const [fulaPoolId, setFulaPoolId] = useRecoilState(fulaPoolIdState)
+  const [fulaAccountSeed, setFulaAccountSeed] =
+    useRecoilState(fulaAccountSeedState)
   const { toggleTheme } = useContext(ThemeContext)
 
   const realmAssets =
@@ -136,7 +137,24 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   useEffect(() => {
     loadFoldersSettings()
     initDID()
-    console.log('[]2 effect at the end')
+    const fetchFulaAccountSeed = async () => {
+      if (!fulaAccountSeed) {
+        const fulaAcountSeedObj = await helper.getFulaAccountSeed()
+        if (fulaAcountSeedObj) {
+          setFulaAccountSeed(fulaAcountSeedObj.password)
+        }
+      }
+    }
+    const fetchFulaPoolId = async () => {
+      if (!fulaPoolId) {
+        const fulaPoolIdObj = await helper.getFulaPoolId()
+        if (fulaPoolIdObj) {
+          setFulaPoolId(fulaPoolIdObj.password)
+        }
+      }
+    }
+    fetchFulaAccountSeed()
+    fetchFulaPoolId()
   }, [])
 
   useEffect(() => {
@@ -276,17 +294,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       }
       setDIDCredentialsState(didCredentialsObj)
 
-      //Init FulaAccount
-      const fulaAccountObj = await KeyChain.load(KeyChain.Service.FULAAccount)
-      if (fulaAccountObj) {
-        const fulaAccountSeedObj = await KeyChain.load(
-          KeyChain.Service.FULAAccountSeed,
-        )
-        if (fulaAccountSeedObj) {
-          setFulaAccountSeedState(fulaAccountSeedObj)
-        }
-        setFulaAccountState(fulaAccountObj)
-      }
+      //Init FulaAccount?
     }
   }
   const initFula = async (password: string, signiture: string) => {

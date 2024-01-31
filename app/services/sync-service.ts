@@ -10,12 +10,16 @@ import { SyncStatus } from '../types'
 import { Assets, Boxs, FolderSettings } from './localdb/index'
 import * as Constants from '../utils/constants'
 import { Helper, DeviceUtils, KeyChain } from '../utils'
-
-// import * as helper from '../utils/helper'
+import { ApiPromise } from '@polkadot/api'
+import * as helper from '../utils/helper'
 
 type TaskParams = {
   callback?: (success: boolean, error?: Error) => void
   assets: AssetEntity[]
+  api?: ApiPromise
+  fulaAccountSeed?: string
+  fulaPoolId?: number
+  fulaReplicationFactor?: number
 }
 const defaultOptions = {
   taskName: 'BackgroundSyncTask',
@@ -36,7 +40,14 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
       'geolocalization, etc. to keep your app alive in the background while you excute the JS from this library.',
     )
   }
-  const { callback = null, assets = [] } = taskParameters || {}
+  let {
+    callback = null,
+    assets = [],
+    api = undefined,
+    fulaAccountSeed = '',
+    fulaPoolId = 0,
+    fulaReplicationFactor = 0,
+  } = taskParameters || {}
 
   try {
     console.log('uploadAssetBackgroundTask...')
@@ -98,7 +109,27 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
         /* empty */
       }
     }
-    //TODO: Replicate request should be sent to blockchain
+    try {
+      //TODO: Replicate request should be sent to blockchain
+      let storedCids = await fula.listRecentCidsAsString()
+      if (!api) {
+        api = await chainApi.init()
+      }
+      if (api && storedCids.length && fulaPoolId && fulaReplicationFactor) {
+        let hashRes = await chainApi.batchUploadManifest(
+          api,
+          fulaAccountSeed,
+          storedCids,
+          fulaPoolId,
+          fulaReplicationFactor,
+        )
+        if (hashRes) {
+          await fula.clearCidsFromRecent()
+        }
+      }
+    } catch (error) {
+      console.log('upload to Fula network failed: ' + error)
+    }
   } catch (error) {
     console.log('uploadAssetBackgroundTask:', error)
     try {
@@ -193,6 +224,27 @@ export const uploadAssetsInBackground = async (options?: {
       await Helper.sleep(10 * 1000)
     }
     const assets = await Assets.getAllNeedToSync()
+
+    let fulaAccountSeed = ''
+    const fulaAcountSeedObj = await helper.getFulaAccountSeed()
+    if (fulaAcountSeedObj) {
+      fulaAccountSeed = fulaAcountSeedObj.password
+    }
+
+    let fulaPoolId = 0
+    const fulaPoolIdObj = await helper.getFulaPoolId()
+    if (fulaPoolIdObj) {
+      fulaPoolId = fulaPoolIdObj.password
+    }
+
+    const fulaReplicationFactor = 6
+    /*const fulaReplicationFactorObj = await helper.getFulaReplicationFactor()
+    if (fulaReplicationFactorObj) {
+      fulaReplicationFactor = fulaReplicationFactorObj.password
+    }*/
+
+    let api = await chainApi.init()
+
     if (!BackgroundJob.isRunning()) {
       if (assets?.length) {
         await BackgroundJob.start<TaskParams>(uploadAssetBackgroundTask, {
@@ -200,6 +252,10 @@ export const uploadAssetsInBackground = async (options?: {
           parameters: {
             callback: options?.callback,
             assets,
+            fulaAccountSeed,
+            fulaPoolId,
+            fulaReplicationFactor,
+            api,
           },
         })
       }
@@ -397,40 +453,28 @@ export const initFulaAccount = async (
       fulaAccountSeed = null,
       identity = null,
     } = accountConfig || {}
-    if (!fulaAccount) {
-      const fulaAccountObj = await KeyChain.load(KeyChain.Service.FULAAccount)
-      if (fulaAccountObj && fulaAccountObj.password) {
-        fulaAccount = fulaAccountObj.password
-      } else {
-        if (!identity) {
-          const didCredentialsObj = await KeyChain.load(
-            KeyChain.Service.DIDCredentials,
+    if (!fulaAccount || !fulaAccountSeed) {
+      if (!identity) {
+        const didCredentialsObj = await KeyChain.load(
+          KeyChain.Service.DIDCredentials,
+        )
+        if (didCredentialsObj) {
+          const keyPair = Helper.getMyDIDKeyPair(
+            didCredentialsObj.username,
+            didCredentialsObj.password,
           )
-          if (didCredentialsObj) {
-            const keyPair = Helper.getMyDIDKeyPair(
-              didCredentialsObj.username,
-              didCredentialsObj.password,
-            )
-            identity = keyPair.secretKey.toString()
-            fulaAccountSeed = await chainApi.createHexSeedFromString(identity)
-            fulaAccount = chainApi.getLocalAccount(fulaAccountSeed)?.account
-          } else
-            throw new Error('Could not find default identity from KeyChain!')
-        } else {
+          identity = keyPair.secretKey.toString()
           fulaAccountSeed = await chainApi.createHexSeedFromString(identity)
           fulaAccount = chainApi.getLocalAccount(fulaAccountSeed)?.account
-        }
+        } else throw new Error('Could not find default identity from KeyChain!')
+      } else {
+        fulaAccountSeed = await chainApi.createHexSeedFromString(identity)
+        fulaAccount = chainApi.getLocalAccount(fulaAccountSeed)?.account
       }
     }
 
     if (!fulaAccountSeed) {
-      const fulaAccountSeedObj = await KeyChain.load(
-        KeyChain.Service.FULAAccountSeed,
-      )
-      if (fulaAccountSeedObj) {
-        fulaAccountSeed = fulaAccountSeedObj.password
-      } else
-        throw new Error('Could not find default accountSeed from KeyChain!')
+      throw new Error('Could not find default accountSeed!')
     }
     return Promise.resolve({
       fulaAccount: fulaAccount,
