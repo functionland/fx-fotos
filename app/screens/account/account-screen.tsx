@@ -70,29 +70,54 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
         }
       }
     }
-    const fetchFulaPoolId = async () => {
-      if (!fulaPoolId) {
-        const fulaPoolIdObj = await helper.getFulaPoolId()
-        if (fulaPoolIdObj) {
-          setFulaPoolId(fulaPoolIdObj.password)
-        }
-      }
-    }
 
-    const fetchPools = async () => {
+    const fetchPoolsAndSetPoolId = async () => {
       try {
         const api = await chainApi.init()
         const pools = await chainApi.listPools(api, 1, 30)
-        console.log(pools)
         setPoolOptions(pools.pools as any)
+
+        // Fetch and set the fulaPoolId only after the poolOptions are available
+        const fulaPoolIdObj = await helper.getFulaPoolId()
+        if (fulaPoolIdObj) {
+          setFulaPoolId(parseInt(fulaPoolIdObj.password, 10))
+        }
       } catch (error) {
         console.error('Error fetching pools:', error)
       }
     }
     fetchFulaAccountSeed()
-    fetchFulaPoolId()
-    fetchPools()
+    fetchPoolsAndSetPoolId()
   }, [])
+
+  useEffect(() => {
+    const saveFulaPoolId = async () => {
+      let _poolId = '0'
+      console.log(
+        'fethcing last poolId in savePoolId with fulaPoolId=' + fulaPoolId,
+      )
+      const fulaPoolIdObj = await helper.getFulaPoolId()
+      if (fulaPoolIdObj) {
+        console.log(fulaPoolIdObj)
+        _poolId = fulaPoolIdObj.password
+      }
+
+      if (
+        fulaPoolId &&
+        fulaPoolId.toString() != '0' &&
+        _poolId != fulaPoolId.toString() &&
+        poolOptions.length
+      ) {
+        console.log('saving selected fula poolId' + fulaPoolId.toString())
+        await Keychain.save(
+          'fulaPoolId',
+          fulaPoolId.toString(),
+          Keychain.Service.FULAPoolIdObject,
+        )
+      }
+    }
+    saveFulaPoolId()
+  }, [fulaPoolId])
 
   useEffect(() => {
     // Define an asynchronous function inside the useEffect
@@ -394,6 +419,16 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
                           }
                           style={[{ width: '100%', height: 50 }]}
                         >
+                          <Picker.Item
+                            style={[{ width: '100%', height: 50 }]}
+                            key={-1}
+                            label={
+                              poolOptions.length
+                                ? 'choose a pool for uploads'
+                                : 'Loading Available Pools...'
+                            }
+                            value={0}
+                          />
                           {poolOptions.map((pool, index) => (
                             <Picker.Item
                               style={[{ width: '100%', height: 50 }]}

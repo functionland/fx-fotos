@@ -78,7 +78,7 @@ export const fulaAccountSeedState = atom<string>({
 })
 export const fulaPoolIdState = atom<number>({
   key: 'fulaPoolIdState',
-  default: '',
+  default: 0,
 })
 
 export const fulaIsReadyState = atom<boolean>({
