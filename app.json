@@ -15,20 +15,12 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true
     },
     "web": {
       "favicon": "./assets/images/icon.png"
-    },
-    "extra": {
-      "eas": {
-        "projectId": "173b90c9-055f-4855-917e-e6170e312e75"
-      }
-    },
-    "owner": "functionland"
+    }
   }
 }
