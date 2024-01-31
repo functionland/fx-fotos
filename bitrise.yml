@@ -1,0 +1,258 @@
+---
+format_version: '11'
+default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
+project_type: react-native
+workflows:
+  fotos iOS:
+    description: |
+      Installs dependencies.
+
+      Next steps:
+      - Add tests to your project and configure the workflow to run them.
+      - Check out [Getting started with Expo apps](https://devcenter.bitrise.io/en/getting-started/getting-started-with-expo-apps.html).
+    steps:
+    - activate-ssh-key@4: {}
+    - git-clone@6: {}
+    - nvm@1:
+        inputs:
+        - node_version: 16.18.1
+    - yarn@0:
+        inputs:
+        - command: install
+    - npm@1:
+        inputs:
+        - command: run ensure:symlink
+        title: Ensure Symlink
+    - cocoapods-install@2:
+        inputs:
+        - podfile_path: "$BITRISE_SOURCE_DIR/ios/Podfile"
+        - source_root_path: "$BITRISE_SOURCE_DIR/ios/"
+    - certificate-and-profile-installer@1: {}
+    - set-xcode-build-number@1:
+        inputs:
+        - plist_path: "$BITRISE_SOURCE_DIR/ios/fotos/info.plist"
+    - xcode-archive@4:
+        inputs:
+        - certificate_url_list: "$BITRISE_DEFAULT_CERTIFICATE_URL"
+        - scheme: fotos
+        - project_path: "$BITRISE_SOURCE_DIR/ios/fotos.xcworkspace"
+        - configuration: Release
+        - upload_bitcode: 'no'
+        - compile_bitcode: 'no'
+        - automatic_code_signing: api-key
+        - distribution_method: app-store
+    - deploy-to-bitrise-io@2: {}
+    - deploy-to-itunesconnect-deliver@2.21:
+        inputs:
+        - bundle_id: land.fx.fotos
+  fotos_Android_Build:
+    description: |
+      Installs dependencies.
+
+      Next steps:
+      - Add tests to your project and configure the workflow to run them.
+      - Check out [Getting started with Expo apps](https://devcenter.bitrise.io/en/getting-started/getting-started-with-expo-apps.html).
+    steps:
+    - activate-ssh-key@4: {}
+    - git-clone@8.1: {}
+    - script@1:
+        title: "Install node-gyp globally"
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -ex
+            yarn global add node-gyp
+    - yarn@0:
+        inputs:
+        - command: install
+    - script@1:
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            # fail if any commands fails
+            #set -e
+            # make pipelines' return status equal the last command to exit with a non-zero status, or zero if all commands exit #successfully
+            #set -o pipefail
+            # debug log
+            set -x
+
+            # write your script here
+            sdkmanager --install "cmake;3.10.2.4988404"
+            yes | sdkmanager --licenses
+        title: Install CMake
+    - get-npm-package-version@1:
+        inputs:
+        - package_json_path: "$BITRISE_SOURCE_DIR/package.json"
+    - change-android-versioncode-and-versionname@1:
+        inputs:
+        - new_version_name: "$NPM_PACKAGE_VERSION"
+        - build_gradle_path: "$BITRISE_SOURCE_DIR/android/app/build.gradle"
+    - android-build@1:
+        inputs:
+        - variant: release
+        - module: app
+        - project_location: "$BITRISE_SOURCE_DIR/android"
+    - sign-apk@1: {}
+    - deploy-to-bitrise-io@2.6: {}
+  fotos_Android_Build_With_Version:
+    description: |
+      Installs dependencies.
+
+      Next steps:
+      - Add tests to your project and configure the workflow to run them.
+      - Check out [Getting started with Expo apps](https://devcenter.bitrise.io/en/getting-started/getting-started-with-expo-apps.html).
+    steps:
+    - activate-ssh-key@4: {}
+    - git-clone@6: {}
+    - yarn@0:
+        inputs:
+        - command: install
+    - npm@1:
+        inputs:
+        - command: run ensure:symlink
+        title: Ensure Symlink
+    - script@1:
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            # fail if any commands fails
+            #set -e
+            # make pipelines' return status equal the last command to exit with a non-zero status, or zero if all commands exit #successfully
+            #set -o pipefail
+            # debug log
+            set -x
+
+            # write your script here
+            sdkmanager --install "cmake;3.10.2.4988404"
+            yes | sdkmanager --licenses
+        title: Install CMake
+    - get-npm-package-version@1:
+        inputs:
+        - package_json_path: "$BITRISE_SOURCE_DIR/package.json"
+    - change-android-versioncode-and-versionname@1:
+        inputs:
+        - new_version_name: "$NPM_PACKAGE_VERSION"
+        - build_gradle_path: "$BITRISE_SOURCE_DIR/android/app/build.gradle"
+    - android-build@1:
+        inputs:
+        - variant: release
+        - module: app
+        - project_location: "$BITRISE_SOURCE_DIR/android"
+    - sign-apk@1: {}
+    - deploy-to-bitrise-io@2.2: {}
+  fotos_Android_Deploy:
+    description: |
+      Installs dependencies.
+
+      Next steps:
+      - Add tests to your project and configure the workflow to run them.
+      - Check out [Getting started with Expo apps](https://devcenter.bitrise.io/en/getting-started/getting-started-with-expo-apps.html).
+    steps:
+    - activate-ssh-key@4: {}
+    - git-clone@8.1: {}
+    - yarn@0:
+        inputs:
+        - command: install
+    - script@1:
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            # fail if any commands fails
+            #set -e
+            # make pipelines' return status equal the last command to exit with a non-zero status, or zero if all commands exit #successfully
+            #set -o pipefail
+            # debug log
+            set -x
+
+            # write your script here
+            sdkmanager --install "cmake;3.10.2.4988404"
+            yes | sdkmanager --licenses
+        title: Install CMake
+    - get-npm-package-version@1:
+        inputs:
+        - package_json_path: "$BITRISE_SOURCE_DIR/package.json"
+    - change-android-versioncode-and-versionname@1:
+        inputs:
+        - new_version_name: "$NPM_PACKAGE_VERSION"
+        - build_gradle_path: "$BITRISE_SOURCE_DIR/android/app/build.gradle"
+    - android-build@1:
+        inputs:
+        - variant: release
+        - module: app
+        - build_type: aab
+        - project_location: "$BITRISE_SOURCE_DIR/android"
+    - sign-apk@1: {}
+    - deploy-to-bitrise-io@2.6: {}
+    - google-play-deploy@3.7:
+        inputs:
+        - package_name: land.fx.fotos
+        - track: production
+        - service_account_json_key_path: "$BITRISEIO_GooglePlay_API_JSON_URL"
+  fotos_IOS_Deploy:
+    description: |
+      Installs dependencies.
+
+      Next steps:
+      - Add tests to your project and configure the workflow to run them.
+      - Check out [Getting started with Expo apps](https://devcenter.bitrise.io/en/getting-started/getting-started-with-expo-apps.html).
+    steps:
+    - script@1:
+        inputs:
+        - content: |2-
+                 - script:
+                    title: Activate correct Ruby version
+                    inputs:
+                    - content: |-
+                        #!/bin/bash
+                        set -ex
+                        RUBY_VERSION=3.1.4
+                        asdf install ruby $RUBY_VERSION
+                        asdf global ruby $RUBY_VERSION
+    - activate-ssh-key@4: {}
+    - git-clone@6: {}
+    - nvm@1:
+        inputs:
+        - node_version: '16'
+    - yarn@0:
+        inputs:
+        - command: install
+    - npm@1:
+        inputs:
+        - command: run ensure:symlink
+        title: Ensure Symlink
+    - cocoapods-install@2:
+        inputs:
+        - podfile_path: "$BITRISE_SOURCE_DIR/ios/Podfile"
+        - source_root_path: "$BITRISE_SOURCE_DIR/ios/"
+    - get-npm-package-version@1:
+        inputs:
+        - package_json_path: "$BITRISE_SOURCE_DIR/package.json"
+    - set-xcode-build-number@1:
+        inputs:
+        - build_short_version_string: "$NPM_PACKAGE_VERSION"
+        - plist_path: "$BITRISE_SOURCE_DIR/ios/fotos/info.plist"
+    - xcode-archive@5.0:
+        inputs:
+        - scheme: fotos
+        - project_path: "$BITRISE_SOURCE_DIR/ios/fotos.xcworkspace"
+        - configuration: Release
+        - upload_bitcode: 'no'
+        - compile_bitcode: 'no'
+        - automatic_code_signing: api-key
+        - export_development_team: 656TD8GM9B
+        - distribution_method: app-store
+    - deploy-to-bitrise-io@2: {}
+    - deploy-to-itunesconnect-deliver@2.22:
+        inputs:
+        - app_id: '1640008383'
+        - team_name: 656TD8GM9B
+        - bundle_id: land.fx.fotos
+meta:
+  bitrise.io:
+    stack: osx-xcode-14.3.x-ventura
+    machine_type_id: g2-m1.4core
+app:
+  envs:
+  - opts:
+      is_expand: false
+    PLATFORM: android
