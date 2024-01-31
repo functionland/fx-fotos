@@ -52,7 +52,7 @@ export const ThumbScroll: React.FC<Props> = props => {
       let lastYear = null
 
       // Prepare the year filter indices
-      for (let index = 0; index < props.sections.length; index++) {
+      for (let index = 0; index < props?.sections?.length; index++) {
         const item = props.sections[index]
         if (item.type === ViewType.DAY) {
           const data = item.data as GroupHeader

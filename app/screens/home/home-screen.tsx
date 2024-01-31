@@ -36,6 +36,8 @@ import {
   fulaIsReadyState,
   fulaPeerIdState,
   mediasState,
+  fulaAccountState,
+  fulaAccountSeedState,
 } from '../../store'
 import { Assets, Boxs, FolderSettings } from '../../services/localdb'
 import { Entities } from '../../realmdb'
@@ -77,6 +79,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [fulaIsReady, setFulaIsReady] = useRecoilState(fulaIsReadyState)
   const [dIDCredentials, setDIDCredentialsState] =
     useRecoilState(dIDCredentialsState)
+  const setFulaAccountState = useSetRecoilState(fulaAccountState)
+  const setFulaAccountSeedState = useSetRecoilState(fulaAccountSeedState)
   const [, setFulaPeerId] = useRecoilState(fulaPeerIdState)
   const [appPreferences, setAppPreferences] =
     useRecoilState(appPreferencesState)
@@ -136,15 +140,16 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   }, [])
 
   useEffect(() => {
-    const appStateFocus = AppState.addEventListener('focus', () => {
+    const appStateFocus = AppState?.addEventListener('focus', () => {
       if (
         isReady &&
         realmAssets.current?.[0]?.modificationTime &&
-        realmAssets.current?.[realmAssets.current.length - 1]?.modificationTime
+        realmAssets.current?.[realmAssets?.current?.length - 1]
+          ?.modificationTime
       ) {
         syncAssets(
           realmAssets.current?.[0]?.modificationTime,
-          realmAssets.current?.[realmAssets.current.length - 1]
+          realmAssets.current?.[realmAssets?.current?.length - 1]
             ?.modificationTime,
         )
       }
@@ -163,7 +168,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   useEffect(() => {
     requestAndroidPermission()
     return () => {
-      realmAssets.current?.removeAllListeners()
+      realmAssets?.current?.removeAllListeners()
     }
   }, [])
 
@@ -192,14 +197,14 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   }, [mediasRefObj])
 
   const addDefaultAutoSyncFolders = async () => {
-    await LocalDbService.FolderSettings.addOrUpdate([
+    await LocalDbService?.FolderSettings?.addOrUpdate([
       {
         name: 'Camera',
         autoBackup: true,
       },
     ])
-    await SyncService.setAutoBackupAssets()
-    SyncService.uploadAssetsInBackground()
+    await SyncService?.setAutoBackupAssets()
+    SyncService?.uploadAssetsInBackground()
   }
 
   const fulaReadyTasks = async () => {
@@ -270,6 +275,18 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         setFulaPeerId(fulaPeerIdObject)
       }
       setDIDCredentialsState(didCredentialsObj)
+
+      //Init FulaAccount
+      const fulaAccountObj = await KeyChain.load(KeyChain.Service.FULAAccount)
+      if (fulaAccountObj) {
+        const fulaAccountSeedObj = await KeyChain.load(
+          KeyChain.Service.FULAAccountSeed,
+        )
+        if (fulaAccountSeedObj) {
+          setFulaAccountSeedState(fulaAccountSeedObj)
+        }
+        setFulaAccountState(fulaAccountObj)
+      }
     }
   }
   const initFula = async (password: string, signiture: string) => {

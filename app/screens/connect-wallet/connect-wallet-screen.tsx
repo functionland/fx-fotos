@@ -25,13 +25,16 @@ type Props = NativeStackScreenProps<
 type ConnectToWalletStatus = 'None' | 'Connecting' | 'Connected' | 'Failed'
 
 export const ConnectWalletScreen: React.FC<Props> = ({ navigation, route }) => {
-  const { account, chainId, provider, sdk, connected } = useSDK()
+  const { account, chainId, provider, sdk, connected, connecting } = useSDK()
   const [connectToWalletStatus, setConnectToWalletStatus] =
     useState<ConnectToWalletStatus>(connected ? 'Connected' : 'None')
 
   useEffect(() => {
     if (connected) setConnectToWalletStatus('Connected')
   }, [connected])
+  useEffect(() => {
+    if (connecting) setConnectToWalletStatus('Connecting')
+  }, [connecting])
   const renderHeader = () => (
     <Header
       centerComponent={
@@ -44,7 +47,7 @@ export const ConnectWalletScreen: React.FC<Props> = ({ navigation, route }) => {
   )
   const connectToWallet = async () => {
     try {
-      if (connected || connectToWalletStatus === 'Connected') {
+      if (connected || connecting) {
         sdk?.terminate()
         setConnectToWalletStatus('None')
       } else if (connectToWalletStatus !== 'None') {
@@ -52,7 +55,7 @@ export const ConnectWalletScreen: React.FC<Props> = ({ navigation, route }) => {
         return
       }
       setConnectToWalletStatus('Connecting')
-      await sdk?.connect();
+      await sdk?.connect()
       //setConnectToWalletStatus('Connected')
     } catch (error) {
       console.log(error)
@@ -93,18 +96,26 @@ export const ConnectWalletScreen: React.FC<Props> = ({ navigation, route }) => {
         <View style={styles.section}>
           <Button
             loading={!provider}
-            onPress={provider ? connectToWallet : undefined}
-            type={connectToWalletStatus === 'Connected' ? 'outline' : 'solid'}
+            onPress={
+              provider
+                ? connected
+                  ? connectToWallet
+                  : connecting
+                  ? connectToWallet
+                  : connectToWallet
+                : undefined
+            }
+            type={connected ? 'outline' : 'solid'}
             title={
               connectToWalletStatus == 'None'
                 ? 'Connect wallet'
-                : connectToWalletStatus === 'Connecting'
+                : connecting
                 ? 'Cancel'
                 : 'Change wallet'
             }
           />
         </View>
-        {connectToWalletStatus === 'Connected' && (
+        {connected && (
           <>
             {/* <View style={styles.section}>
               <Text>{walletConnector?.peerMeta?.name}</Text>
