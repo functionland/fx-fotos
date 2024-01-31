@@ -325,9 +325,40 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       if (tmp) {
         const files = tmp as FulaFileList
         if (files && realmAssets.current) {
-          const convertedAssets = Array.from(
-            realmAssets.current,
-          ) as AssetEntity[]
+          const assetSlice = realmAssets.current?.slice()
+
+          // Optimized mapping
+          const batchSize = 100 // Adjust based on performance
+          const convertedAssets = [] as AssetEntity[]
+          // Use a for loop for optimized performance
+          if (assetSlice) {
+            for (const asset of assetSlice) {
+              const plainAsset = {
+                id: asset.id,
+                filename: asset.filename || '', // Assuming filename is required
+                uri: asset.uri || '', // Assuming uri is required
+                mediaType: asset.mediaType || 'unknown', // Default to 'unknown' if undefined
+                mediaSubtypes: asset.mediaSubtypes || [],
+                width: asset.width || 0,
+                height: asset.height || 0,
+                creationTime: asset.creationTime || 0,
+                modificationTime: asset.modificationTime || 0,
+                duration: asset.duration || 0,
+                albumId: asset.albumId || '',
+                fileSize: asset.fileSize || 0,
+                filenameNormalized: asset.filenameNormalized,
+                syncStatus: asset.syncStatus,
+                syncDate: asset.syncDate,
+                cid: asset.cid,
+                jwe: asset.jwe,
+                isDeleted: asset.isDeleted,
+                location: asset.location,
+                metadataIsSynced: asset.metadataIsSynced,
+                mimeType: asset.mimeType,
+              }
+              convertedAssets.push(plainAsset)
+            }
+          }
           await Assets.addOrUpdateBackendAssets(files, convertedAssets)
         }
         //Mark the app preferences that in the first time app loaded, it synced the backend assets
@@ -428,7 +459,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       if (syncMetadata) {
         await syncAssets(
           realmAssets.current?.[0]?.modificationTime,
-          realmAssets.current?.[realmAssets.current.length - 1]
+          realmAssets.current?.[realmAssets.current?.length - 1]
             ?.modificationTime,
         )
         syncAssetsMetadata()
@@ -636,7 +667,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             <HeaderRightContainer style={{ flex: 1 }}>
               <SharedElement id="AccountAvatar">
                 <HeaderAvatar
-                  connected={connected}
+                  connected={fulaAccountSeed}
                   provider={provider}
                   onPress={() =>
                     navigation.navigate(AppNavigationNames.AccountScreen as any)
