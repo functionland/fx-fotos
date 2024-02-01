@@ -210,7 +210,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   }, [fulaIsReady, loading, appPreferences])
 
   useEffect(() => {
-    const newMedia = Object.values(mediasRefObj)
+    console.log(["Original mediasRefObj", Object.entries(mediasRefObj)[0]]);
+    const newMedia = Object.values(mediasRefObj).map(realmObj =>
+      convertToPlainObject(realmObj),
+    )
+    console.log("Converted newMedia:", newMedia[0]);
     setMedias(newMedia)
   }, [mediasRefObj])
 
@@ -480,6 +484,33 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     setRefreshing(false)
   }
 
+  // Utility function to convert Realm object to plain object
+  const convertToPlainObject = realmObject => {
+    return {
+      id: realmObject.id,
+      filename: realmObject.filename,
+      uri: realmObject.uri,
+      mediaType: realmObject.mediaType,
+      mediaSubtypes: realmObject.mediaSubtypes,
+      width: realmObject.width,
+      height: realmObject.height,
+      creationTime: realmObject.creationTime,
+      modificationTime: realmObject.modificationTime,
+      duration: realmObject.duration,
+      albumId: realmObject.albumId,
+      fileSize: realmObject.fileSize,
+      filenameNormalized: realmObject.filenameNormalized,
+      syncStatus: realmObject.syncStatus,
+      syncDate: realmObject.syncDate,
+      cid: realmObject.cid,
+      jwe: realmObject.jwe,
+      isDeleted: realmObject.isDeleted,
+      location: realmObject.location, // Assuming location is directly assignable
+      metadataIsSynced: realmObject.metadataIsSynced,
+      mimeType: realmObject.mimeType,
+      // Add any other properties that are required by the Asset type
+    }
+  }
   const onLocalDbAssetChange = (
     collection: Realm.Collection<Entities.AssetEntity>,
     changes: Realm.CollectionChangeSet,

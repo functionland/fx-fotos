@@ -246,12 +246,12 @@ export const uploadAssetsInBackground = async (options?: {
       return
     }
     console.log('uploadAssetsInBackground assets')
-    console.log(assets)
     let fulaAccountSeed = ''
     const fulaAcountSeedObj = await helper.getFulaAccountSeed()
     if (fulaAcountSeedObj) {
       fulaAccountSeed = fulaAcountSeedObj.password
     }
+    console.log('creating  uploadCallback')
     const uploadCallback = (success, assetId) => {
       uploadingAssets.delete(assetId)
       if (options?.callback) {
@@ -270,12 +270,8 @@ export const uploadAssetsInBackground = async (options?: {
     console.log('uploadAssetsInBackground fulaPoolId')
     console.log(fulaPoolId)
     const fulaReplicationFactor = 6
-    /*const fulaReplicationFactorObj = await helper.getFulaReplicationFactor()
-    if (fulaReplicationFactorObj) {
-      fulaReplicationFactor = fulaReplicationFactorObj.password
-    }*/
-
     let api = await chainApi.init()
+    console.log('api was initialized')
 
     if (!BackgroundJob.isRunning()) {
       if (assets?.length) {
@@ -292,6 +288,7 @@ export const uploadAssetsInBackground = async (options?: {
         })
       }
     }
+
   } catch (e) {
     await BackgroundJob.stop()
     console.log('Error in uploadAssetsInBackground:', e)

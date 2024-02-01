@@ -112,7 +112,9 @@
     "stream-browserify": "^1.0.0",
     "text-encoding-polyfill": "^0.6.7",
     "uuid": "9.0.1",
-    "validate.js": "0.13.1"
+    "validate.js": "0.13.1",
+    "@polkadot/util": "^12.6.2",
+    "@polkadot/types-create": "10.11.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
