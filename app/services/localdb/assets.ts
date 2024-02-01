@@ -5,9 +5,34 @@ import { FulaFileList } from '../../types/fula'
 import { mimeToMediaType } from '../asset-service'
 const mime = require('mime-types')
 
+const copyAssetProperties = asset => ({
+  id: asset.id,
+  filename: asset.filename,
+  filenameNormalized: asset.filenameNormalized,
+  fileSize: asset.fileSize,
+  uri: asset.uri,
+  mediaType: asset.mediaType,
+  mediaSubtypes: asset.mediaSubtypes,
+  width: asset.width,
+  height: asset.height,
+  creationTime: asset.creationTime,
+  modificationTime: asset.modificationTime,
+  duration: asset.duration,
+  albumId: asset.albumId,
+  syncStatus: asset.syncStatus,
+  syncDate: asset.syncDate,
+  cid: asset.cid,
+  jwe: asset.jwe,
+  isDeleted: asset.isDeleted,
+  location: asset.location ? { ...asset.location } : undefined,
+  metadataIsSynced: asset.metadataIsSynced,
+  mimeType: asset.mimeType,
+})
+
 const dynamicFilterGenerator = (
   searchOptions: SearchOptionValueType[],
 ): string[] => {
+  console.log('dynamicFilterGenerator started')
   const searchOptionsObj = searchOptions?.reduce<
     Record<string, SearchOptionValueType[]>
   >((obj, option) => {
@@ -94,25 +119,26 @@ export const getById = (
 ): Promise<Realm.Results<Entities.AssetEntity & Realm.Object>> =>
   RealmDB()
     .then(realm => {
+      console.error('getById then!')
       const assets = realm
         .objects<Entities.AssetEntity>(Schemas.Asset.name)
         .filtered(`id = '${id}'`)
-      return assets
+      return assets.map(copyAssetProperties)
     })
     .catch(error => {
       console.error('RealmDB getById error!', error)
       throw error
     })
 
-export const getAllNeedToSync = (): Promise<
-  (Entities.AssetEntity & Realm.Object)[]
-> =>
+export const getAllNeedToSync = (): Promise<Entities.AssetEntity[]> =>
   RealmDB()
     .then(realm => {
+      console.log('getAllNeedToSync then!')
       const assets = realm
         .objects<Entities.AssetEntity>(Schemas.Asset.name)
         .filtered('syncStatus=1')
-      return assets.slice()
+      // Copy properties from Realm objects to plain JavaScript objects
+      return assets.map(copyAssetProperties)
     })
     .catch(error => {
       console.error('RealmDB getAllNeedToSync error!', error)
@@ -124,10 +150,11 @@ export const getAllNeedToDownload = (): Promise<
 > =>
   RealmDB()
     .then(realm => {
+      console.error('getAllNeedToDownload then!')
       const assets = realm
         .objects<Entities.AssetEntity>(Schemas.Asset.name)
         .filtered('(syncStatus=3 or syncStatus=2) and isDeleted=true')
-      return assets.slice()
+      return assets.map(copyAssetProperties)
     })
     .catch(error => {
       console.error('RealmDB getAllNeedToDownload error!', error)
@@ -153,8 +180,10 @@ export const addOrUpdate = (
 ): Promise<Entities.AssetEntity[]> =>
   RealmDB()
     .then(realm => {
+      console.log('addOrUpdate started')
       return new Promise<Entities.AssetEntity[]>((resolve, reject) => {
         try {
+          console.log('addOrUpdate try')
           const result: Entities.AssetEntity[] = []
           realm.write(() => {
             for (const asset of assets) {
@@ -163,11 +192,17 @@ export const addOrUpdate = (
                   Schemas.Asset.name,
                   {
                     ...asset,
+                    albumId:
+                      Array.isArray(asset.albumId) && asset.albumId.length > 0
+                        ? asset.albumId[0]
+                        : '',
+                    // If there are other fields that need similar transformations, handle them here.
                   },
                   Realm.UpdateMode.Modified,
                 ),
               )
             }
+            console.log('addOrUpdateAssets result reached')
             resolve(result)
           })
         } catch (error) {
@@ -180,11 +215,11 @@ export const addOrUpdate = (
       console.error('RealmDB addOrUpdateAssets error!', error)
       throw error
     })
-
 export const markAsSYNC = (assetIds: string[]): Promise<void> =>
   RealmDB()
     .then(realm => {
       try {
+        console.error('markAsSYNC try!')
         const idsQuery = assetIds.map(id => `id = '${id}'`).join(' OR ')
         const assets = realm
           .objects<Entities.AssetEntity>(Schemas.Asset.name)
@@ -250,6 +285,7 @@ export const addOrUpdateBackendAssets = (
   backendFiles: FulaFileList,
   currentAssets: Entities.AssetEntity[],
 ): Promise<Entities.AssetEntity[]> => {
+  console.error('addOrUpdateBackendAssets started!')
   const assetsObj = currentAssets?.reduce((obj, asset) => {
     if (asset.filenameNormalized) obj[asset.filenameNormalized] = asset
     return obj

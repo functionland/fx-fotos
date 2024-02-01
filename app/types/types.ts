@@ -19,40 +19,40 @@ export type Asset = {
   /**
    * Filename of the asset.
    */
-  filename: string
+  filename?: string
   /**
    * URI that points to the asset. `assets://*` (iOS), `file://*` (Android)
    */
-  uri: string
+  uri?: string
   /**
    * Media type.
    */
-  mediaType: MediaTypeValue
+  mediaType?: string
   /**
    * An array of media subtypes.
    * @platform ios
    */
-  mediaSubtypes?: MediaSubtype[]
+  mediaSubtypes?: string[]
   /**
    * Width of the image or video.
    */
-  width: number
+  width?: number
   /**
    * Height of the image or video.
    */
-  height: number
+  height?: number
   /**
    * File creation timestamp.
    */
-  creationTime: number
+  creationTime?: number
   /**
    * Last modification timestamp.
    */
-  modificationTime: number
+  modificationTime?: number
   /**
    * Duration of the video or audio asset in seconds.
    */
-  duration: number
+  duration?: number
   /**
    * Album ID that the asset belongs to.
    * @platform android

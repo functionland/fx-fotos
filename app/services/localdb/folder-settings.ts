@@ -1,18 +1,25 @@
 import Realm from 'realm'
 import { Entities, RealmDB, Schemas } from '../../realmdb'
 
-export const getAll = (): Promise<Entities.FolderSettingsEntity[]> =>
-  RealmDB()
-    .then(realm => {
-      const foldersSettings = realm.objects<Entities.FolderSettingsEntity>(
-        Schemas.FolderSettings.name,
-      )
-      return foldersSettings.slice()
+export const getAll = async (): Promise<Entities.FolderSettingsEntity[]> => {
+  try {
+    const realm = await RealmDB()
+    const foldersSettings = realm.objects<Entities.FolderSettingsEntity>(
+      Schemas.FolderSettings.name,
+    )
+
+    // Convert Realm objects to plain JavaScript objects
+    return foldersSettings.map(folderSetting => {
+      return {
+        name: folderSetting.name,
+        autoBackup: folderSetting.autoBackup,
+      }
     })
-    .catch(error => {
-      console.error('RealmDB getAll FolderSettings error!', error)
-      throw error
-    })
+  } catch (error) {
+    console.error('RealmDB getAll FolderSettings error!', error)
+    throw error
+  }
+}
 
 export const getAllAutoBackups = (): Promise<Entities.FolderSettingsEntity[]> =>
   RealmDB()

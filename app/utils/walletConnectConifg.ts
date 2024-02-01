@@ -28,3 +28,12 @@ export const chains: Record<string, any> = {
   '0x13881': mumbaiChainParams,
   '0x5': goerliChainParams,
 }
+
+export const getChainName = chainId => {
+  console.log('ChainId: ' + chainId)
+  // Convert chainId to hex if it's a number
+  const hexChainId =
+    typeof chainId === 'number' ? '0x' + chainId.toString(16) : chainId
+  console.log('hexChainId: ' + hexChainId)
+  return chainNames[hexChainId] || 'Unknown Chain'
+}

@@ -4,8 +4,9 @@ export enum Service {
   DIDCredentials = 'DIDCredentials',
   FULARootObject = 'FULARootObject',
   FULAPeerIdObject = 'FULAPeerIdObject',
-  FULAAccount = 'FULAAccount',
-  FULAAccountSeed = 'FULAAccountSeed',
+  FULAAccountSeedObject = 'FULAAccountSeedObject',
+  FULAPoolIdObject = 'FULAPoolIdObject',
+  FULAReplicationFactorObject = 'FULAReplicationFactorObject',
 }
 /**
  * Saves some credentials securely.

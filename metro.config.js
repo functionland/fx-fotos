@@ -26,3 +26,4 @@ const customConfig = {
 
 // Merge your custom configuration with the default configuration
 module.exports = mergeConfig(defaultConfig, customConfig)
+

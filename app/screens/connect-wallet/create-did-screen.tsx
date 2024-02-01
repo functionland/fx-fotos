@@ -15,7 +15,6 @@ import {
   fulaPeerIdState,
   dIDCredentialsState,
   fulaAccountState,
-  fulaAccountSeedState,
 } from '../../store'
 import { useSDK } from '@metamask/sdk-react'
 import { fula, chainApi } from '@functionland/react-native-fula'
@@ -31,8 +30,7 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
   const [signatureData, setSignatureData] = useState<string>('')
   const setDIDCredentialsState = useSetRecoilState(dIDCredentialsState)
   const setFulaPeerIdState = useSetRecoilState(fulaPeerIdState)
-  const setFulaAccountState = useSetRecoilState(fulaAccountState)
-  const setFulaAccountSeedState = useSetRecoilState(fulaAccountSeedState)
+  const setFulaAccount = useSetRecoilState(fulaAccountState)
   const [iKnow, setIKnow] = useState(false)
   const [passwod, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -141,20 +139,14 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
             secretSeed,
           )
           if (fulaAccountSeed) {
-            const fulaAccountSeedObj = await KeyChain.save(
-              'accountSeed',
+            await KeyChain.save(
+              'fulaAccountSeed',
               fulaAccountSeed,
-              KeyChain.Service.FULAAccountSeed,
+              KeyChain.Service.FULAAccountSeedObject,
             )
-            if (fulaAccountSeedObj) setFulaAccountSeedState(fulaAccountSeedObj)
             const fulaAccount = chainApi.getLocalAccount(fulaAccountSeed)
             if (fulaAccount?.account) {
-              const fulaAccountObj = await KeyChain.save(
-                'account',
-                fulaAccount.account,
-                KeyChain.Service.FULAAccount,
-              )
-              if (fulaAccountObj) setFulaAccountState(fulaAccountObj)
+              if (fulaAccount?.account) setFulaAccount(fulaAccount?.account)
             } else {
               Toast.show({
                 type: 'error',

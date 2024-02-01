@@ -59,7 +59,7 @@ export const LibraryScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     const libs = AssetService.getLibraries(medias)
     setLibraries(libs)
     if (selectedLibrary) {
-      const lib = libs.find(lib => lib.title === selectedLibrary.title)
+      const lib = libs.find(lib1 => lib1.title === selectedLibrary.title)
       if (lib) setSelectedLibrary(lib)
     }
   }, [medias])

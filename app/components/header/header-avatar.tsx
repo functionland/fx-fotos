@@ -1,7 +1,6 @@
 import { Avatar } from '@rneui/themed'
 import React from 'react'
 import { ActivityIndicator, StyleSheet } from 'react-native'
-import { useSDK } from '@metamask/sdk-react'
 type Props = {
   iconSize?: number
   size?: ('small' | 'medium' | 'large' | 'xlarge') | number

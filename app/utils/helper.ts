@@ -96,10 +96,20 @@ export const getFulaPeerId = async (): Promise<
 > => {
   return await KeyChain.load(KeyChain.Service.FULAPeerIdObject)
 }
-export const getFulaAccount = async (): Promise<
+export const getFulaAccountSeed = async (): Promise<
   false | KeyChain.UserCredentials
 > => {
-  return await KeyChain.load(KeyChain.Service.FULAAccount)
+  return await KeyChain.load(KeyChain.Service.FULAAccountSeedObject)
+}
+export const getFulaPoolId = async (): Promise<
+  false | KeyChain.UserCredentials
+> => {
+  return await KeyChain.load(KeyChain.Service.FULAPoolIdObject)
+}
+export const getFulaReplicationFactor = async (): Promise<
+  false | KeyChain.UserCredentials
+> => {
+  return await KeyChain.load(KeyChain.Service.FULAReplicationFactorObject)
 }
 
 export const generateBloxAddress = (box: BoxEntity) => {
