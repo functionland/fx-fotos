@@ -3,48 +3,6 @@ format_version: '11'
 default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
 project_type: react-native
 workflows:
-  fotos iOS:
-    description: |
-      Installs dependencies.
-
-      Next steps:
-      - Add tests to your project and configure the workflow to run them.
-      - Check out [Getting started with Expo apps](https://devcenter.bitrise.io/en/getting-started/getting-started-with-expo-apps.html).
-    steps:
-    - activate-ssh-key@4: {}
-    - git-clone@6: {}
-    - nvm@1:
-        inputs:
-        - node_version: 16.18.1
-    - yarn@0:
-        inputs:
-        - command: install
-    - npm@1:
-        inputs:
-        - command: run ensure:symlink
-        title: Ensure Symlink
-    - cocoapods-install@2:
-        inputs:
-        - podfile_path: "$BITRISE_SOURCE_DIR/ios/Podfile"
-        - source_root_path: "$BITRISE_SOURCE_DIR/ios/"
-    - certificate-and-profile-installer@1: {}
-    - set-xcode-build-number@1:
-        inputs:
-        - plist_path: "$BITRISE_SOURCE_DIR/ios/fotos/info.plist"
-    - xcode-archive@4:
-        inputs:
-        - certificate_url_list: "$BITRISE_DEFAULT_CERTIFICATE_URL"
-        - scheme: fotos
-        - project_path: "$BITRISE_SOURCE_DIR/ios/fotos.xcworkspace"
-        - configuration: Release
-        - upload_bitcode: 'no'
-        - compile_bitcode: 'no'
-        - automatic_code_signing: api-key
-        - distribution_method: app-store
-    - deploy-to-bitrise-io@2: {}
-    - deploy-to-itunesconnect-deliver@2.21:
-        inputs:
-        - bundle_id: land.fx.fotos
   fotos_Android_Build:
     description: |
       Installs dependencies.
@@ -122,10 +80,6 @@ workflows:
     - set-java-version@1:
         inputs:
         - set_java_version: '17'
-    - npm@1:
-        inputs:
-        - command: run ensure:symlink
-        title: Ensure Symlink
     - script@1:
         inputs:
         - content: |-
@@ -191,10 +145,6 @@ workflows:
     - yarn@0:
         inputs:
         - command: install
-    - npm@1:
-        inputs:
-        - command: run ensure:symlink
-        title: Ensure Symlink
     - cocoapods-install@2:
         inputs:
         - podfile_path: "$BITRISE_SOURCE_DIR/ios/Podfile"
@@ -222,44 +172,6 @@ workflows:
         - app_id: '1640008383'
         - team_name: 656TD8GM9B
         - bundle_id: land.fx.fotos
-  FxFotos Android:
-    description: |
-      Installs dependencies.
-
-      Next steps:
-      - Add tests to your project and configure the workflow to run them.
-      - Check out [Getting started with Expo apps](https://devcenter.bitrise.io/en/getting-started/getting-started-with-expo-apps.html).
-    steps:
-    - activate-ssh-key@4: {}
-    - git-clone@6: {}
-    - yarn@0:
-        inputs:
-        - command: install
-    - npm@1:
-        inputs:
-        - command: run ensure:symlink
-        title: Ensure Symlink
-    - script@1:
-        inputs:
-        - content: |-
-            #!/usr/bin/env bash
-            # fail if any commands fails
-            #set -e
-            # make pipelines' return status equal the last command to exit with a non-zero status, or zero if all commands exit #successfully
-            #set -o pipefail
-            # debug log
-            set -x
-
-            # write your script here
-            sdkmanager --install "cmake;3.10.2.4988404"
-            yes | sdkmanager --licenses
-        title: Install CMake
-    - android-build@1:
-        inputs:
-        - variant: release
-        - module: app
-        - project_location: "$BITRISE_SOURCE_DIR/android"
-    - deploy-to-bitrise-io@2: {}
 meta:
   bitrise.io:
     stack: osx-xcode-14.3.x-ventura
