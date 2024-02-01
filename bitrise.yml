@@ -95,7 +95,9 @@ workflows:
         - variant: release
         - module: app
         - project_location: "$BITRISE_SOURCE_DIR/android"
-    - sign-apk@1: {}
+    - sign-apk@1:
+        inputs:
+        - use_apk_signer: 'true'
     - deploy-to-bitrise-io@2.6: {}
   fotos_Android_Build_With_Version:
     description: |
@@ -153,19 +155,13 @@ workflows:
     steps:
     - activate-ssh-key@4: {}
     - git-clone@8.1: {}
-    - script@1:
-        title: Install node-gyp globally
-        inputs:
-        - content: |-
-            #!/usr/bin/env bash
-            set -ex
-            yarn global add node-gyp
     - yarn@0:
         inputs:
         - command: install
-    - set-java-version@1:
+    - npm@1:
         inputs:
-        - set_java_version: '17'
+        - command: run ensure:symlink
+        title: Ensure Symlink
     - script@1:
         inputs:
         - content: |-
@@ -194,7 +190,9 @@ workflows:
         - module: app
         - build_type: aab
         - project_location: "$BITRISE_SOURCE_DIR/android"
-    - sign-apk@1: {}
+    - sign-apk@1:
+        inputs:
+        - use_apk_signer: 'true'
     - deploy-to-bitrise-io@2.6: {}
     - google-play-deploy@3.7:
         inputs:
