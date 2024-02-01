@@ -153,13 +153,19 @@ workflows:
     steps:
     - activate-ssh-key@4: {}
     - git-clone@8.1: {}
+    - script@1:
+        title: Install node-gyp globally
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -ex
+            yarn global add node-gyp
     - yarn@0:
         inputs:
         - command: install
-    - npm@1:
+    - set-java-version@1:
         inputs:
-        - command: run ensure:symlink
-        title: Ensure Symlink
+        - set_java_version: '17'
     - script@1:
         inputs:
         - content: |-
