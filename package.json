@@ -1,6 +1,6 @@
 {
   "name": "fotos",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "private": true,
   "scripts": {
     "start": "SET NODE_OPTIONS=--openssl-legacy-provider && react-native start",
@@ -37,7 +37,7 @@
     "@metamask/sdk-react": "^0.14.2",
     "@polkadot/types-create": "10.11.2",
     "@polkadot/util": "^12.6.2",
-    "@react-native-async-storage/async-storage": "^1.19.1",
+    "@react-native-async-storage/async-storage": "^1.21.0",
     "@react-native-camera-roll/camera-roll": "7.4.0",
     "@react-native-clipboard/clipboard": "^1.11.1",
     "@react-native-community/cli-platform-android": "^13.5.1",

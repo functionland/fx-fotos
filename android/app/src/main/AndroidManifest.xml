@@ -13,67 +13,15 @@
     <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
     <uses-permission android:name="android.permission.CAMERA" />
 
-    <!-- Walletconnect integration -->
-    <queries>
-        <intent>
-            <action android:name="android.intent.action.VIEW" />
-            <data android:scheme="wc"/>
-        </intent>
-        <intent>
-            <action android:name="android.intent.action.VIEW" />
-            <data android:scheme="https"/>
-        </intent>
-        <package android:name="io.metamask"/>
-        <package android:name="com.wallet.crypto.trustapp"/>
-        <package android:name="io.gnosis.safe"/>
-        <package android:name="me.rainbow"/>
-        <package android:name="io.zerion.android"/>
-        <package android:name="im.token.app"/>
-        <package android:name="im.argent.contractwalletclient"/>
-        <package android:name="com.spot.spot"/>
-        <package android:name="fi.steakwallet.app"/>
-        <package android:name="com.defi.wallet"/>
-        <package android:name="vip.mytokenpocket"/>
-        <package android:name="com.frontierwallet"/>
-        <package android:name="piuk.blockchain.android"/>
-        <package android:name="io.safepal.wallet"/>
-        <package android:name="com.zengo.wallet"/>
-        <package android:name="io.oneinch.android"/>
-        <package android:name="exodusmovement.exodus"/>
-        <package android:name="com.ledger.live"/>
-        <package android:name="com.myetherwallet.mewwallet"/>
-        <package android:name="io.stormbird.wallet"/>
-        <package android:name="co.bacoor.keyring"/>
-        <package android:name="com.lobstr.client"/>
-        <package android:name="com.mathwallet.android"/>
-        <package android:name="com.unstoppabledomains.manager"/>
-        <package android:name="com.hashhalli.obvious"/>
-        <package android:name="com.fireblocks.client"/>
-        <package android:name="com.ambire.wallet"/>
-        <package android:name="com.mtpelerin.bridge"/>
-        <package android:name="com.internetmoneywallet.app"/>
-        <package android:name="com.bitcoin.mwallet"/>
-        <package android:name="coin98.crypto.finance.media"/>
-        <package android:name="io.myabcwallet.mpc"/>
-        <package android:name="finance.ottr.android"/>
-        <package android:name="co.arculus.wallet.android"/>
-        <package android:name="com.huddln"/>
-        <package android:name="com.permutize.haha"/>
-        <package android:name="com.modular"/>
-        <package android:name="com.carrieverse.cling.wallet"/>
-        <package android:name="com.broearn.browser"/>
-        <package android:name="com.ripio.android"/>
-        <package android:name="kh.com.sabay.sabaywallet"/>
-        <package android:name="com.tokoin.wallet"/>
-    </queries>
-
     <application
-      android:name="land.fx.fotos.MainApplication"
+      android:name=".MainApplication"
       android:label="@string/app_name"
       android:icon="@mipmap/ic_launcher"
       android:roundIcon="@mipmap/ic_launcher_round"
       android:allowBackup="true"
       android:theme="@style/AppTheme"
+      android:usesCleartextTraffic="true"
+      android:networkSecurityConfig="@xml/network_security_config"
       android:requestLegacyExternalStorage="true">
       <activity
         android:name="MainActivity"
@@ -104,6 +52,6 @@
               <data android:host="fotos.fx.land" />
           </intent-filter>
       </activity>
-      <service android:name="com.asterinet.react.bgactions.RNBackgroundActionsTask" />
+      <service android:name="com.asterinet.react.bgactions.RNBackgroundActionsTask"  android:exported="false" />
     </application>
 </manifest>
