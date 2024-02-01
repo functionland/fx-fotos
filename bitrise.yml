@@ -99,52 +99,6 @@ workflows:
         inputs:
         - use_apk_signer: 'true'
     - deploy-to-bitrise-io@2.6: {}
-  fotos_Android_Build_With_Version:
-    description: |
-      Installs dependencies.
-
-      Next steps:
-      - Add tests to your project and configure the workflow to run them.
-      - Check out [Getting started with Expo apps](https://devcenter.bitrise.io/en/getting-started/getting-started-with-expo-apps.html).
-    steps:
-    - activate-ssh-key@4: {}
-    - git-clone@6: {}
-    - yarn@0:
-        inputs:
-        - command: install
-    - npm@1:
-        inputs:
-        - command: run ensure:symlink
-        title: Ensure Symlink
-    - script@1:
-        inputs:
-        - content: |-
-            #!/usr/bin/env bash
-            # fail if any commands fails
-            #set -e
-            # make pipelines' return status equal the last command to exit with a non-zero status, or zero if all commands exit #successfully
-            #set -o pipefail
-            # debug log
-            set -x
-
-            # write your script here
-            sdkmanager --install "cmake;3.10.2.4988404"
-            yes | sdkmanager --licenses
-        title: Install CMake
-    - get-npm-package-version@1:
-        inputs:
-        - package_json_path: "$BITRISE_SOURCE_DIR/package.json"
-    - change-android-versioncode-and-versionname@1:
-        inputs:
-        - new_version_name: "$NPM_PACKAGE_VERSION"
-        - build_gradle_path: "$BITRISE_SOURCE_DIR/android/app/build.gradle"
-    - android-build@1:
-        inputs:
-        - variant: release
-        - module: app
-        - project_location: "$BITRISE_SOURCE_DIR/android"
-    - sign-apk@1: {}
-    - deploy-to-bitrise-io@2.2: {}
   fotos_Android_Deploy:
     description: |
       Installs dependencies.
@@ -155,9 +109,19 @@ workflows:
     steps:
     - activate-ssh-key@4: {}
     - git-clone@8.1: {}
+    - script@1:
+        title: Install node-gyp globally
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -ex
+            yarn global add node-gyp
     - yarn@0:
         inputs:
         - command: install
+    - set-java-version@1:
+        inputs:
+        - set_java_version: '17'
     - npm@1:
         inputs:
         - command: run ensure:symlink
