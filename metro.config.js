@@ -1,7 +1,12 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const path = require('path')
-// eslint-disable-next-line no-undef
-module.exports = {
+const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config')
+const nodeLibs = require('node-libs-react-native')
+
+// Get the default Metro configuration for the current project
+const defaultConfig = getDefaultConfig(__dirname)
+
+// Custom configuration adjustments
+const customConfig = {
   transformer: {
     getTransformOptions: async () => ({
       transform: {
@@ -11,11 +16,14 @@ module.exports = {
     }),
   },
   resolver: {
+    // Merging node-libs-react-native with any additional configurations
     extraNodeModules: {
-      // eslint-disable-next-line no-undef
-      ...require('node-libs-react-native'),
-      // eslint-disable-next-line no-undef
+      ...nodeLibs,
       crypto: require.resolve('react-native-crypto'),
     },
   },
 }
+
+// Merge your custom configuration with the default configuration
+module.exports = mergeConfig(defaultConfig, customConfig)
+

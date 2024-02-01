@@ -183,7 +183,7 @@ export const AssetListScreen: React.FC<Props> = ({
   }
 
   React.useEffect(() => {
-    setSelectionMode(() => selectedItems.length !== 0)
+    setSelectionMode(() => selectedItems?.length !== 0)
   }, [selectedItems])
 
   const renderHeader = () => {

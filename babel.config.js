@@ -1,7 +1,7 @@
 module.exports = {
   presets: [
     [
-      'module:metro-react-native-babel-preset',
+      'module:@react-native/babel-preset',
       { useTransformReactJSXExperimental: true },
     ],
   ],
@@ -23,8 +23,8 @@ module.exports = {
         legacy: true,
       },
     ],
-    ['@babel/plugin-proposal-optional-catch-binding'],
-    ['@babel/plugin-proposal-export-namespace-from'],
+    ['@babel/plugin-transform-optional-catch-binding'],
+    ['@babel/plugin-transform-export-namespace-from'],
     'react-native-reanimated/plugin',
   ],
 }

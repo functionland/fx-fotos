@@ -11,11 +11,12 @@ import Toast from 'react-native-toast-message'
 import { Header, HeaderArrowBack } from '../../components/header'
 import { Screen } from '../../components'
 import { RootStackParamList, AppNavigationNames } from '../../navigators'
+import { useSDK } from '@metamask/sdk-react'
 import {
-  useWalletConnectModal,
-  WalletConnectModal,
-} from '@walletconnect/modal-react-native'
-import { WalletConnectConifg } from '../../utils'
+  chains,
+  goerliChainId,
+  mumbaiChainId,
+} from '../../utils/walletConnectConifg'
 
 type Props = NativeStackScreenProps<
   RootStackParamList,
@@ -24,13 +25,16 @@ type Props = NativeStackScreenProps<
 type ConnectToWalletStatus = 'None' | 'Connecting' | 'Connected' | 'Failed'
 
 export const ConnectWalletScreen: React.FC<Props> = ({ navigation, route }) => {
-  const { isConnected, provider, open, address } = useWalletConnectModal()
+  const { account, chainId, provider, sdk, connected, connecting } = useSDK()
   const [connectToWalletStatus, setConnectToWalletStatus] =
-    useState<ConnectToWalletStatus>(isConnected ? 'Connected' : 'None')
+    useState<ConnectToWalletStatus>(connected ? 'Connected' : 'None')
 
   useEffect(() => {
-    if (isConnected) setConnectToWalletStatus('Connected')
-  }, [isConnected])
+    if (connected) setConnectToWalletStatus('Connected')
+  }, [connected])
+  useEffect(() => {
+    if (connecting) setConnectToWalletStatus('Connecting')
+  }, [connecting])
   const renderHeader = () => (
     <Header
       centerComponent={
@@ -41,19 +45,13 @@ export const ConnectWalletScreen: React.FC<Props> = ({ navigation, route }) => {
       leftComponent={<HeaderArrowBack navigation={navigation} />}
     />
   )
+  const disconnectWallet = () => {
+    sdk?.terminate()
+  }
   const connectToWallet = async () => {
     try {
-      if (isConnected || connectToWalletStatus === 'Connected') {
-        await provider?.disconnect()
-        await provider?.cleanupPendingPairings()
-        setConnectToWalletStatus('None')
-      } else if (connectToWalletStatus !== 'None') {
-        setConnectToWalletStatus('None')
-        return
-      }
       setConnectToWalletStatus('Connecting')
-      await open()
-      //setConnectToWalletStatus('Connected')
+      await sdk?.connect()
     } catch (error) {
       console.log(error)
       setConnectToWalletStatus('Failed')
@@ -64,15 +62,11 @@ export const ConnectWalletScreen: React.FC<Props> = ({ navigation, route }) => {
         position: 'bottom',
         bottomOffset: 0,
       })
+      disconnectWallet()
     }
   }
   return (
-    <Screen
-      preset="scroll"
-      scrollEventThrottle={16}
-      automaticallyAdjustContentInsets
-      style={styles.screen}
-    >
+    <Screen preset="scroll" style={styles.screen}>
       {renderHeader()}
       <View
         style={{
@@ -97,38 +91,36 @@ export const ConnectWalletScreen: React.FC<Props> = ({ navigation, route }) => {
         </View>
         <View style={styles.section}>
           <Button
-            loading={!provider}
-            onPress={provider ? connectToWallet : undefined}
-            type={connectToWalletStatus === 'Connected' ? 'outline' : 'solid'}
+            loading={!provider || connectToWalletStatus == 'Connecting'}
+            onPress={
+              provider
+                ? connectToWalletStatus == 'None' ||
+                  connectToWalletStatus == 'Failed'
+                  ? connectToWallet
+                  : disconnectWallet
+                : undefined
+            }
+            type={connectToWalletStatus == 'Connected' ? 'outline' : 'solid'}
             title={
-              connectToWalletStatus == 'None'
+              connectToWalletStatus == 'None' ||
+              connectToWalletStatus == 'Failed'
                 ? 'Connect wallet'
-                : connectToWalletStatus === 'Connecting'
-                ? 'Cancel'
-                : 'Change wallet'
+                : 'Disconnect Wallet'
             }
           />
         </View>
-        {connectToWalletStatus === 'Connected' && (
-          <>
-            {/* <View style={styles.section}>
-              <Text>{walletConnector?.peerMeta?.name}</Text>
-              <Text style={{ textAlign: 'center' }}>
-                {walletConnector?.accounts?.[0]}
-              </Text>
-            </View> */}
-            <View style={styles.section}>
-              <Button
-                containerStyle={{
-                  width: 200,
-                }}
-                onPress={() =>
-                  navigation.navigate(AppNavigationNames.CreateDIDScreen)
-                }
-                title="Link DID"
-              />
-            </View>
-          </>
+        {connectToWalletStatus == 'Connected' && (
+          <View style={styles.section}>
+            <Button
+              containerStyle={{
+                width: 200,
+              }}
+              onPress={() =>
+                navigation.navigate(AppNavigationNames.CreateDIDScreen)
+              }
+              title="Link DID"
+            />
+          </View>
         )}
       </View>
     </Screen>

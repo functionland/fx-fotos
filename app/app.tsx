@@ -11,7 +11,7 @@
  */
 import './utils/ignore-warnings'
 import React, { useRef } from 'react'
-import { useColorScheme } from 'react-native'
+import { useColorScheme, Linking } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import {
   SafeAreaProvider,
@@ -27,15 +27,81 @@ import {
   canExit,
   useNavigationPersistence,
 } from './navigators'
-
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import {
+  MetaMaskProvider,
+  SDKConfigProvider,
+  useSDKConfig,
+} from '@metamask/sdk-react'
+import { COMM_SERVER_URL, INFURA_API_KEY } from './utils/walletConnectConifg'
 import { ErrorBoundary } from './screens/error/error-boundary'
 import { ThemeProvider, RneLightTheme, RneDarkTheme } from './theme'
+import BackgroundTimer from 'react-native-background-timer'
+
+// TODO how to properly make sure we only try to open link when the app is active?
+// current problem is that sdk declaration is outside of the react scope so I cannot directly verify the state
+// hence usage of a global variable.
+const canOpenLink = true
 
 // This puts screens in a native ViewController or Activity. If you want fully native
 // stack navigation, use `createNativeStackNavigator` in place of `createStackNavigator`:
 // https://github.com/kmagiera/react-native-screens#using-native-stack-navigator
 
 export const NAVIGATION_PERSISTENCE_KEY = 'NAVIGATION_STATE'
+
+const WithSDKConfig = ({ children }: { children: React.ReactNode }) => {
+  const {
+    socketServer,
+    infuraAPIKey,
+    useDeeplink,
+    debug,
+    checkInstallationImmediately,
+  } = useSDKConfig()
+
+  return (
+    <MetaMaskProvider
+      // debug={debug}
+      sdkOptions={{
+        // communicationServerUrl: socketServer,
+        // TODO: change to enableAnalytics when updating the SDK version
+        // enableDebug: true,
+        infuraAPIKey,
+        readonlyRPCMap: {
+          '0x539': process.env.NEXT_PUBLIC_PROVIDER_RPCURL ?? '',
+        },
+        logging: {
+          developerMode: true,
+          plaintext: true,
+        },
+        openDeeplink: (link: string, _target?: string) => {
+          console.debug(`App::openDeepLink() ${link}`)
+          if (canOpenLink) {
+            Linking.openURL(link)
+          } else {
+            console.debug(
+              'useBlockchainProiver::openDeepLink app is not active - skip link',
+              link,
+            )
+          }
+        },
+        timer: BackgroundTimer,
+        useDeeplink,
+        checkInstallationImmediately,
+        storage: {
+          enabled: true,
+        },
+        dappMetadata: {
+          name: 'fxfotos',
+        },
+        i18nOptions: {
+          enabled: true,
+        },
+      }}
+    >
+      {children}
+    </MetaMaskProvider>
+  )
+}
 
 /**
  * This is the root component of our app.
@@ -80,19 +146,26 @@ function App() {
   // otherwise, we're ready to render the app
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <RneThemeProvider
-        theme={scheme === 'dark' ? RneDarkTheme : RneLightTheme}
+      <SDKConfigProvider
+        initialSocketServer={COMM_SERVER_URL}
+        initialInfuraKey={INFURA_API_KEY}
       >
-        <ThemeProvider>
-          <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-            <ErrorBoundary catchErrors="prod">
-              <RecoilRoot>
-                <AppNavigator onStateChange={onNavigationStateChange} />
-              </RecoilRoot>
-            </ErrorBoundary>
-          </SafeAreaProvider>
-        </ThemeProvider>
-      </RneThemeProvider>
+        <WithSDKConfig>
+          <RneThemeProvider
+            theme={scheme === 'dark' ? RneDarkTheme : RneLightTheme}
+          >
+            <ThemeProvider>
+              <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+                <ErrorBoundary catchErrors="prod">
+                  <RecoilRoot>
+                    <AppNavigator onStateChange={onNavigationStateChange} />
+                  </RecoilRoot>
+                </ErrorBoundary>
+              </SafeAreaProvider>
+            </ThemeProvider>
+          </RneThemeProvider>
+        </WithSDKConfig>
+      </SDKConfigProvider>
     </GestureHandlerRootView>
   )
 }

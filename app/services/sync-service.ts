@@ -3,19 +3,23 @@ import { Platform } from 'react-native'
 import BackgroundJob, {
   BackgroundTaskOptions,
 } from 'react-native-background-actions'
-import { fula } from '@functionland/react-native-fula'
+import { fula, chainApi } from '@functionland/react-native-fula'
 // import { TaggedEncryption } from '@functionland/fula-sec'
 import { AssetEntity } from '../realmdb/entities'
 import { SyncStatus } from '../types'
 import { Assets, Boxs, FolderSettings } from './localdb/index'
 import * as Constants from '../utils/constants'
 import { Helper, DeviceUtils, KeyChain } from '../utils'
-
-// import * as helper from '../utils/helper'
+import { ApiPromise } from '@polkadot/api'
+import * as helper from '../utils/helper'
 
 type TaskParams = {
-  callback?: (success: boolean, error?: Error) => void
+  callback?: (success: boolean, assetId: string, error?: Error) => void
   assets: AssetEntity[]
+  api?: ApiPromise
+  fulaAccountSeed?: string
+  fulaPoolId?: number
+  fulaReplicationFactor?: number
 }
 const defaultOptions = {
   taskName: 'BackgroundSyncTask',
@@ -29,14 +33,24 @@ const defaultOptions = {
   linkingURI: 'fotos://',
 } as BackgroundTaskOptions
 
+const uploadingAssets = new Set()
+
 const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
+  console.log('uploadAssetBackgroundTask started')
   if (Platform.OS === 'ios') {
     console.warn(
       'This task will not keep your app alive in the background by itself, use other library like react-native-track-player that use audio,',
       'geolocalization, etc. to keep your app alive in the background while you excute the JS from this library.',
     )
   }
-  const { callback = null, assets = [] } = taskParameters || {}
+  let {
+    callback = null,
+    assets = [],
+    api = undefined,
+    fulaAccountSeed = '',
+    fulaPoolId = 0,
+    fulaReplicationFactor = 0,
+  } = taskParameters || {}
 
   try {
     console.log('uploadAssetBackgroundTask...')
@@ -45,13 +59,14 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
       Helper.storeFulaPeerId(fulaConfig.peerId)
       Helper.storeFulaRootCID(fulaConfig.rootCid)
     }
-
-    for (let index = 0; index < assets.length; index++) {
+    console.log('uploadAssetBackgroundTask fulaConfig')
+    console.log(fulaConfig)
+    for (let index = 0; index < assets?.length; index++) {
       const asset = assets[index]
       console.log('uploadAssetBackgroundTask asset...', index)
 
       //Ignore asset greater than 200 MB
-      if (!asset?.fileSize || asset.fileSize > 200 * 1000 * 1000) {
+      if (!asset?.fileSize || asset?.fileSize > 200 * 1000 * 1000) {
         console.log('Ignore large asset ...', asset)
         continue
       }
@@ -59,12 +74,12 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
       // Prepare task notification message
       if (BackgroundJob.isRunning()) {
         await BackgroundJob.updateNotification({
-          taskTitle: `Uploading asset #${index + 1}/${assets.length}`,
+          taskTitle: `Uploading asset #${index + 1}/${assets?.length}`,
           taskDesc: `Syncing your assets ...`,
           progressBar: {
-            max: assets.length,
+            max: assets?.length,
             value: index,
-            indeterminate: assets.length == 1,
+            indeterminate: assets?.length == 1,
           },
         })
       }
@@ -74,31 +89,56 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
       let filename = asset?.filename
       if (!filename) {
         const slashSplit = asset.uri?.split('/')
-        filename = slashSplit[slashSplit?.length - 1]
+        filename = slashSplit
+          ? slashSplit[slashSplit?.length - 1]
+          : 'unknown' + index
       }
       // Upload file to the WNFS
-      const cid = await fula.writeFile(
-        `${Constants.FOTOS_WNFS_ROOT}/${filename}`,
-        _filePath,
-      )
-      await Helper.storeFulaRootCID(cid)
-      //Update asset record in database
-      const newAsset = {
-        id: asset.id,
-        cid: cid,
-        syncDate: new Date(),
-        syncStatus: SyncStatus.SYNCED,
-      }
-      Assets.addOrUpdate([newAsset])
+      if (_filePath) {
+        const cid = await fula.writeFile(
+          `${Constants.FOTOS_WNFS_ROOT}/${filename}`,
+          _filePath,
+        )
+        await Helper.storeFulaRootCID(cid)
+        //Update asset record in database
+        const newAsset = {
+          id: asset.id,
+          cid: cid,
+          syncDate: new Date(),
+          syncStatus: SyncStatus.SYNCED,
+        }
+        Assets.addOrUpdate([newAsset])
 
-      //return the callback function
-      try {
-        callback?.(true)
-      } catch {
-        /* empty */
+        //return the callback function
+        try {
+          callback?.(true, asset.id)
+        } catch (e) {
+          console.log('error happened in calling callback')
+          console.log(e)
+        }
       }
     }
-    //TODO: Replicate request should be sent to blockchain
+    try {
+      //TODO: Replicate request should be sent to blockchain
+      let storedCids = await fula.listRecentCidsAsString()
+      if (!api) {
+        api = await chainApi.init()
+      }
+      if (api && storedCids.length && fulaPoolId && fulaReplicationFactor) {
+        let hashRes = await chainApi.batchUploadManifest(
+          api,
+          fulaAccountSeed,
+          storedCids,
+          fulaPoolId,
+          fulaReplicationFactor,
+        )
+        if (hashRes) {
+          await fula.clearCidsFromRecent()
+        }
+      }
+    } catch (error) {
+      console.log('upload to Fula network failed: ' + error)
+    }
   } catch (error) {
     console.log('uploadAssetBackgroundTask:', error)
     try {
@@ -125,7 +165,7 @@ const downloadAssetsBackgroundTask = async (taskParameters?: TaskParams) => {
       Helper.storeFulaRootCID(fulaConfig.rootCid)
     }
 
-    for (let index = 0; index < assets.length; index++) {
+    for (let index = 0; index < assets?.length; index++) {
       console.log('downloadAssetsBackgroundTask asset...', index)
 
       try {
@@ -134,12 +174,12 @@ const downloadAssetsBackgroundTask = async (taskParameters?: TaskParams) => {
         // Prepare task notification message
         if (BackgroundJob.isRunning()) {
           await BackgroundJob.updateNotification({
-            taskTitle: `Downloading asset #${index + 1}/${assets.length}`,
+            taskTitle: `Downloading asset #${index + 1}/${assets?.length}`,
             taskDesc: `Download your assets ...`,
             progressBar: {
-              max: assets.length,
+              max: assets?.length,
               value: index,
-              indeterminate: assets.length == 1,
+              indeterminate: assets?.length == 1,
             },
           })
         }
@@ -160,7 +200,7 @@ const downloadAssetsBackgroundTask = async (taskParameters?: TaskParams) => {
         Assets.addOrUpdate([newAsset])
         //return the callback function
         try {
-          callback?.(true)
+          callback?.(true, asset.id)
         } catch {
           /* empty */
         }
@@ -192,18 +232,63 @@ export const uploadAssetsInBackground = async (options?: {
       console.log('wating uploadAssetsInBackground...')
       await Helper.sleep(10 * 1000)
     }
-    const assets = await Assets.getAllNeedToSync()
+    let assets = await Assets.getAllNeedToSync()
+    // Filter out assets that are already being uploaded
+    assets = assets.filter(asset => {
+      if (uploadingAssets.has(asset.id)) {
+        return false
+      }
+      uploadingAssets.add(asset.id)
+      return true
+    })
+    if (!assets.length) {
+      console.log('No new assets to upload.')
+      return
+    }
+    console.log('uploadAssetsInBackground assets')
+    let fulaAccountSeed = ''
+    const fulaAcountSeedObj = await helper.getFulaAccountSeed()
+    if (fulaAcountSeedObj) {
+      fulaAccountSeed = fulaAcountSeedObj.password
+    }
+    console.log('creating  uploadCallback')
+    const uploadCallback = (success, assetId) => {
+      uploadingAssets.delete(assetId)
+      if (options?.callback) {
+        options.callback(success)
+      }
+    }
+    console.log('uploadAssetsInBackground fulaAccountSeed')
+    console.log(fulaAccountSeed)
+    let fulaPoolId = 0
+    const fulaPoolIdObj = await helper.getFulaPoolId()
+    console.log('uploadAssetsInBackground fulaPoolIdObj')
+    console.log(fulaPoolIdObj)
+    if (fulaPoolIdObj) {
+      fulaPoolId = parseInt(fulaPoolIdObj.password, 10)
+    }
+    console.log('uploadAssetsInBackground fulaPoolId')
+    console.log(fulaPoolId)
+    const fulaReplicationFactor = 6
+    let api = await chainApi.init()
+    console.log('api was initialized')
+
     if (!BackgroundJob.isRunning()) {
-      if (assets.length) {
+      if (assets?.length) {
         await BackgroundJob.start<TaskParams>(uploadAssetBackgroundTask, {
           ...defaultOptions,
           parameters: {
-            callback: options?.callback,
+            callback: uploadCallback,
             assets,
+            fulaAccountSeed,
+            fulaPoolId,
+            fulaReplicationFactor,
+            api,
           },
         })
       }
     }
+
   } catch (e) {
     await BackgroundJob.stop()
     console.log('Error in uploadAssetsInBackground:', e)
@@ -222,7 +307,7 @@ export const downloadAssetsInBackground = async (options?: {
     }
     if (!BackgroundJob.isRunning()) {
       const assets = await Assets.getAllNeedToDownload()
-      if (assets.length) {
+      if (assets?.length) {
         await BackgroundJob.start<TaskParams>(downloadAssetsBackgroundTask, {
           ...defaultOptions,
           taskName: 'downloadAssetsBackgroundTask',
@@ -381,6 +466,52 @@ export const initFula = async (
     return fulaInit
   } catch (error) {
     console.log('fulaInit Error', error)
+  }
+}
+interface FulaAccountConfig {
+  fulaAccount?: string | null
+  fulaAccountSeed?: string | null
+  identity?: string | null
+}
+export const initFulaAccount = async (
+  accountConfig: FulaAccountConfig,
+): Promise<{ fulaAccount: string; fulaAccountSeed: string } | undefined> => {
+  try {
+    let {
+      fulaAccount = null,
+      fulaAccountSeed = null,
+      identity = null,
+    } = accountConfig || {}
+    if (!fulaAccount || !fulaAccountSeed) {
+      if (!identity) {
+        const didCredentialsObj = await KeyChain.load(
+          KeyChain.Service.DIDCredentials,
+        )
+        if (didCredentialsObj) {
+          const keyPair = Helper.getMyDIDKeyPair(
+            didCredentialsObj.username,
+            didCredentialsObj.password,
+          )
+          identity = keyPair.secretKey.toString()
+          fulaAccountSeed = await chainApi.createHexSeedFromString(identity)
+          fulaAccount = chainApi.getLocalAccount(fulaAccountSeed)?.account
+        } else throw new Error('Could not find default identity from KeyChain!')
+      } else {
+        fulaAccountSeed = await chainApi.createHexSeedFromString(identity)
+        fulaAccount = chainApi.getLocalAccount(fulaAccountSeed)?.account
+      }
+    }
+
+    if (!fulaAccountSeed) {
+      throw new Error('Could not find default accountSeed!')
+    }
+    return Promise.resolve({
+      fulaAccount: fulaAccount,
+      fulaAccountSeed: fulaAccountSeed,
+    })
+  } catch (error) {
+    console.log('initAccount Error', error)
+    return Promise.reject(error)
   }
 }
 

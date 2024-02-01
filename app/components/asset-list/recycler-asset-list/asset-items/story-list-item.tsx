@@ -16,7 +16,7 @@ function StoryListItem({ stories, onPress }: Props): JSX.Element {
   const { theme } = useTheme()
   const renderItem = useCallback(
     ({ item }) => {
-      if (item.data.length === 0) {
+      if (item?.data?.length === 0) {
         return null
       }
       const onItemPress = () => {

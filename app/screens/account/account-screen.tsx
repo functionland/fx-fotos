@@ -11,9 +11,10 @@ import {
 import { Avatar, Button, Card, Icon, ListItem, Text } from '@rneui/themed'
 import * as Keychain from '../../utils/keychain'
 import Toast from 'react-native-toast-message'
-
+import { chainApi } from '@functionland/react-native-fula'
 import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { SharedElement } from 'react-navigation-shared-element'
+import { Picker } from '@react-native-picker/picker'
 import { Screen } from '../../components'
 import {
   Header,
@@ -24,9 +25,16 @@ import {
 import { AppNavigationNames, RootStackParamList } from '../../navigators'
 import * as helper from '../../utils/helper'
 import { useRecoilState } from 'recoil'
-import { dIDCredentialsState, fulaPeerIdState } from '../../store'
+import {
+  dIDCredentialsState,
+  fulaPeerIdState,
+  fulaAccountState,
+  fulaPoolIdState,
+  fulaAccountSeedState,
+} from '../../store'
 import Clipboard from '@react-native-clipboard/clipboard'
-import { useWalletConnectModal } from '@walletconnect/modal-react-native'
+import { useSDK } from '@metamask/sdk-react'
+import { getChainName } from '../../utils/walletConnectConifg'
 
 type Props = NativeStackScreenProps<
   RootStackParamList,
@@ -34,32 +42,131 @@ type Props = NativeStackScreenProps<
 >
 
 export const AccountScreen: React.FC<Props> = ({ navigation }) => {
-  // const walletConnector = useWalletConnect()
   const [dIDCredentials, setDIDCredentialsState] =
     useRecoilState(dIDCredentialsState)
+  const [fulaAccount, setFulaAccount] = useRecoilState(fulaAccountState)
+  const [fulaPoolId, setFulaPoolId] = useRecoilState(fulaPoolIdState)
+  const [fulaAccountSeed, setFulaAccountSeed] =
+    useRecoilState(fulaAccountSeedState)
+  const { account, chainId, provider, sdk, connected } = useSDK()
+
   const [fulaPeerId, setFulaPeerId] = useRecoilState(fulaPeerIdState)
   const [did, setDID] = useState(null)
-  const { isConnected, provider, open, address } = useWalletConnectModal()
+  const [poolOptions, setPoolOptions] = useState([])
+
   useEffect(() => {
     if (!fulaPeerId) {
       loadPeerId()
     }
+    if (!fulaAccount) {
+      loadFulaAccountSeed()
+    }
+
+    const fetchFulaAccountSeed = async () => {
+      if (!fulaAccountSeed) {
+        const fulaAcountSeedObj = await helper.getFulaAccountSeed()
+        if (fulaAcountSeedObj) {
+          setFulaAccountSeed(fulaAcountSeedObj.password)
+        }
+      }
+    }
+
+    const fetchPoolsAndSetPoolId = async () => {
+      try {
+        const api = await chainApi.init()
+        const pools = await chainApi.listPools(api, 1, 30)
+        setPoolOptions(pools.pools as any)
+
+        // Fetch and set the fulaPoolId only after the poolOptions are available
+        const fulaPoolIdObj = await helper.getFulaPoolId()
+        if (fulaPoolIdObj) {
+          setFulaPoolId(parseInt(fulaPoolIdObj.password, 10))
+        }
+      } catch (error) {
+        console.error('Error fetching pools:', error)
+      }
+    }
+    fetchFulaAccountSeed()
+    fetchPoolsAndSetPoolId()
   }, [])
 
   useEffect(() => {
-    if (dIDCredentials?.username) {
-      const myDID = helper.getMyDID(
-        dIDCredentials.username,
-        dIDCredentials.password,
+    const saveFulaPoolId = async () => {
+      let _poolId = '0'
+      console.log(
+        'fethcing last poolId in savePoolId with fulaPoolId=' + fulaPoolId,
       )
-      setDID(myDID)
+      const fulaPoolIdObj = await helper.getFulaPoolId()
+      if (fulaPoolIdObj) {
+        console.log(fulaPoolIdObj)
+        _poolId = fulaPoolIdObj.password
+      }
+
+      if (
+        fulaPoolId &&
+        fulaPoolId.toString() != '0' &&
+        _poolId != fulaPoolId.toString() &&
+        poolOptions.length
+      ) {
+        console.log('saving selected fula poolId' + fulaPoolId.toString())
+        await Keychain.save(
+          'fulaPoolId',
+          fulaPoolId.toString(),
+          Keychain.Service.FULAPoolIdObject,
+        )
+      }
     }
+    saveFulaPoolId()
+  }, [fulaPoolId])
+
+  useEffect(() => {
+    // Define an asynchronous function inside the useEffect
+    const fetchData = async () => {
+      if (dIDCredentials?.username && dIDCredentials?.password) {
+        const myDID = helper.getMyDID(
+          dIDCredentials.username,
+          dIDCredentials.password,
+        )
+        setDID(myDID)
+        console.log('did was set')
+        const keyPair = helper.getMyDIDKeyPair(
+          dIDCredentials.username,
+          dIDCredentials.password,
+        )
+        const secretSeed = keyPair.secretKey.toString()
+        console.log('secretSeed was set' + secretSeed)
+        if (secretSeed && !fulaAccount) {
+          const fulaAccountSeed = await chainApi.createHexSeedFromString(
+            secretSeed,
+          )
+          if (fulaAccountSeed) {
+            const _fulaAccount = chainApi.getLocalAccount(fulaAccountSeed)
+            setFulaAccount(_fulaAccount?.account)
+          }
+        }
+      }
+    }
+
+    // Call the async function
+    fetchData()
   }, [dIDCredentials])
 
   const loadPeerId = async () => {
     const peerIdObj = await helper.getFulaPeerId()
     if (peerIdObj) {
       setFulaPeerId(peerIdObj)
+    }
+  }
+
+  const loadFulaAccountSeed = async () => {
+    const fulaAccountSeedObj = await helper.getFulaAccountSeed()
+    if (fulaAccountSeedObj) {
+      if (fulaAccountSeedObj?.password) {
+        const _fulaAccount = chainApi.getLocalAccount(
+          fulaAccountSeedObj?.password,
+        )
+        setFulaAccount(_fulaAccount?.account)
+      }
     }
   }
 
@@ -82,7 +189,7 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
           text: 'Yes',
           onPress: async () => {
             try {
-              await provider?.disconnect()
+              await sdk?.terminate()
               await Keychain.reset(Keychain.Service.DIDCredentials)
             } catch (error) {
               console.log(error)
@@ -95,6 +202,7 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
             } finally {
               setDIDCredentialsState(null)
               setDID(null)
+              setFulaAccount('')
             }
           },
         },
@@ -113,11 +221,20 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
       console.log(error)
     }
   }
-  const copyToClipboardDID = (did: string) => {
-    Clipboard.setString(did)
+  const copyToClipboardDID = (didCp: string) => {
+    Clipboard.setString(didCp)
     Toast.show({
       type: 'success',
       text1: 'Your DID copied to the clipboard!',
+      position: 'bottom',
+      bottomOffset: 0,
+    })
+  }
+  const copyToClipboardFulaAccount = (fulaAccountCp: string) => {
+    Clipboard.setString(fulaAccountCp)
+    Toast.show({
+      type: 'success',
+      text1: 'Your Fula Account copied to the clipboard!',
       position: 'bottom',
       bottomOffset: 0,
     })
@@ -132,11 +249,13 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
     })
   }
   const authorizeApp = () => {
-    Linking.openURL(
-      `fxblox://connectdapp/FxFotos/land.fx.fotos/${
-        fulaPeerId?.password
-      }/${encodeURIComponent('fotos://addblox/$bloxName/$bloxPeerId')}`,
-    )
+    const url = `fxblox://connectdapp/FxFotos/land.fx.fotos/${
+      fulaPeerId?.password
+    }/${encodeURIComponent(
+      'fotos://addblox/$bloxName/$bloxPeerId',
+    )}/${fulaAccount}`
+    console.log('Authorize app by FxBlox url is:' + url)
+    Linking.openURL(url)
   }
   const renderHeader = () => (
     <Header
@@ -145,10 +264,10 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
           Account
         </Text>
       }
-      leftComponent={<HeaderArrowBack navigation={navigation} />}
+      leftComponent={<HeaderArrowBack navigation={navigation as any} />}
       rightComponent={
         <HeaderRightContainer>
-          {isConnected && (
+          {connected && (
             <Icon
               type="material-community"
               size={28}
@@ -176,22 +295,35 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
       <ScrollView>
         <View style={styles.container}>
           <SharedElement id="AccountAvatar">
-            <HeaderAvatar size={100} iconSize={80} />
+            <HeaderAvatar
+              size={100}
+              iconSize={80}
+              connected={fulaAccount && fulaPeerId}
+              provider={provider}
+            />
           </SharedElement>
 
-          {isConnected ? (
+          {fulaAccount && fulaPeerId ? (
             <>
               <View style={styles.section}>
-                {/* <Text h4>{walletConnector.peerMeta?.name}</Text>
-                <Text ellipsizeMode="tail" style={styles.textCenter}>
-                  {walletConnector.accounts?.[0]}
-                </Text> */}
-                <View style={styles.section}>
-                  {!dIDCredentials ? (
-                    <Button title="Link DID" onPress={signWalletAddress} />
-                  ) : null}
-                </View>
+                {chainId ? (
+                  <>
+                    <Text h4>{getChainName(chainId)}</Text>
+                    <Text ellipsizeMode="tail" style={styles.textCenter}>
+                      {account}
+                    </Text>
+                  </>
+                ) : (
+                  !dIDCredentials &&
+                  chainId && (
+                    <Button
+                      title="Link to Account"
+                      onPress={signWalletAddress}
+                    />
+                  )
+                )}
               </View>
+
               {did && (
                 <View style={styles.section}>
                   <ListItem
@@ -215,6 +347,29 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
                   </ListItem>
                   <ListItem
                     onPress={() =>
+                      fulaAccount
+                        ? copyToClipboardFulaAccount(fulaAccount)
+                        : null
+                    }
+                    containerStyle={{ width: '100%' }}
+                  >
+                    <ListItem.Content>
+                      <View style={{ flexDirection: 'row' }}>
+                        <Card.Title
+                          style={{
+                            textAlign: 'left',
+                            paddingRight: 10,
+                          }}
+                        >
+                          Fula Account
+                        </Card.Title>
+                        <Icon name="content-copy" type="material-community" />
+                      </View>
+                      <ListItem.Subtitle>{fulaAccount}</ListItem.Subtitle>
+                    </ListItem.Content>
+                  </ListItem>
+                  <ListItem
+                    onPress={() =>
                       fulaPeerId
                         ? copyToClipboardPeerId(fulaPeerId.password)
                         : null
@@ -231,15 +386,17 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
                         >
                           YOUR PEERID
                         </Card.Title>
-                        {fulaPeerId && (
+                        {fulaPeerId?.password && (
                           <Icon name="content-copy" type="material-community" />
                         )}
                       </View>
                       <ListItem.Subtitle>
-                        {fulaPeerId
-                          ? fulaPeerId.password
-                          : 'To get your peerId, First add a valid blox address!'}
+                        {fulaPeerId?.password}
                       </ListItem.Subtitle>
+                    </ListItem.Content>
+                  </ListItem>
+                  <ListItem containerStyle={{ width: '100%' }}>
+                    <ListItem.Content>
                       <ListItem.Subtitle>
                         <View style={styles.section}>
                           {fulaPeerId?.password && (
@@ -251,6 +408,43 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
                         </View>
                       </ListItem.Subtitle>
                     </ListItem.Content>
+                  </ListItem>
+                  <ListItem containerStyle={{ width: '100%' }}>
+                    <View style={[{ width: '100%', height: 50 }]}>
+                      {fulaPeerId?.password && (
+                        <Picker
+                          selectedValue={fulaPoolId}
+                          onValueChange={(itemValue, itemIndex) =>
+                            setFulaPoolId(itemValue)
+                          }
+                          style={[{ width: '100%', height: 50 }]}
+                        >
+                          <Picker.Item
+                            style={[{ width: '100%', height: 50 }]}
+                            key={-1}
+                            label={
+                              poolOptions.length
+                                ? 'choose a pool for uploads'
+                                : 'Loading Available Pools...'
+                            }
+                            value={0}
+                          />
+                          {poolOptions.map((pool, index) => (
+                            <Picker.Item
+                              style={[{ width: '100%', height: 50 }]}
+                              key={index}
+                              label={
+                                pool.name +
+                                ' (' +
+                                pool.participants.length +
+                                ' members)'
+                              }
+                              value={pool.poolID}
+                            />
+                          ))}
+                        </Picker>
+                      )}
+                    </View>
                   </ListItem>
                 </View>
               )}

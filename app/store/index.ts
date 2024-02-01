@@ -68,6 +68,18 @@ export const fulaPeerIdState = atom<KeyChain.UserCredentials>({
   key: 'fulaPeerIdState',
   default: null,
 })
+export const fulaAccountState = atom<string>({
+  key: 'fulaAccountState',
+  default: '',
+})
+export const fulaAccountSeedState = atom<string>({
+  key: 'fulaAccountSeedState',
+  default: '',
+})
+export const fulaPoolIdState = atom<number>({
+  key: 'fulaPoolIdState',
+  default: 0,
+})
 
 export const fulaIsReadyState = atom<boolean>({
   key: 'fulaIsReadyState',

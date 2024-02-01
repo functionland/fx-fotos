@@ -1,11 +1,9 @@
 import * as React from 'react'
 import { View, ViewStyle } from 'react-native'
 import { storiesOf } from '@storybook/react-native'
-import { Toggle } from 'react-powerplug'
+import { useToggle } from 'react-use'
 import { StoryScreen, Story, UseCase } from '../../../storybook/views'
 import { Checkbox } from './checkbox'
-
-declare let module
 
 const arrayStyle: ViewStyle[] = [
   { paddingVertical: 40 },
@@ -19,46 +17,28 @@ const arrayFillStyle: ViewStyle[] = [{ backgroundColor: '#55e0ff' }]
 
 storiesOf('Checkbox', module)
   .addDecorator(fn => <StoryScreen>{fn()}</StoryScreen>)
-  .add('Behaviour', () => (
-    <Story>
-      <UseCase
-        text="The Checkbox"
-        usage="Use the checkbox to represent on/off states."
-      >
-        <Toggle initial={false}>
-          {({ on, toggle }) => (
-            <Checkbox value={on} onToggle={toggle} text="Toggle me" />
-          )}
-        </Toggle>
-      </UseCase>
-      <UseCase text="value = true" usage="This is permanently on.">
-        <Checkbox value text="Always on" />
-      </UseCase>
-      <UseCase text="value = false" usage="This is permanantly off.">
-        <Checkbox value={false} text="Always off" />
-      </UseCase>
-    </Story>
-  ))
   .add('Styling', () => (
     <Story>
       <UseCase text="multiline = true" usage="For really really long text">
-        <Toggle initial={false}>
-          {({ on, toggle }) => (
-            <View>
+        <View>
+          {(() => {
+            const [on, toggle] = useToggle(false)
+            return (
               <Checkbox
                 text="We’re an App Design & Development Team. Experts in mobile & web technologies. We create beautiful, functional mobile apps and websites."
                 value={on}
                 multiline
                 onToggle={toggle}
               />
-            </View>
-          )}
-        </Toggle>
+            )
+          })()}
+        </View>
       </UseCase>
       <UseCase text=".style" usage="Override the container style">
-        <Toggle initial={false}>
-          {({ on, toggle }) => (
-            <View>
+        <View>
+          {(() => {
+            const [on, toggle] = useToggle(false)
+            return (
               <Checkbox
                 text="Hello there!"
                 value={on}
@@ -70,14 +50,15 @@ storiesOf('Checkbox', module)
                 }}
                 onToggle={toggle}
               />
-            </View>
-          )}
-        </Toggle>
+            )
+          })()}
+        </View>
       </UseCase>
       <UseCase text=".outlineStyle" usage="Override the outline style">
-        <Toggle initial={false}>
-          {({ on, toggle }) => (
-            <View>
+        <View>
+          {(() => {
+            const [on, toggle] = useToggle(false)
+            return (
               <Checkbox
                 text="Outline is the box frame"
                 value={on}
@@ -90,14 +71,15 @@ storiesOf('Checkbox', module)
                 }}
                 onToggle={toggle}
               />
-            </View>
-          )}
-        </Toggle>
+            )
+          })()}
+        </View>
       </UseCase>
       <UseCase text=".fillStyle" usage="Override the fill style">
-        <Toggle initial={false}>
-          {({ on, toggle }) => (
-            <View>
+        <View>
+          {(() => {
+            const [on, toggle] = useToggle(false)
+            return (
               <Checkbox
                 text="Fill er up"
                 value={on}
@@ -107,15 +89,15 @@ storiesOf('Checkbox', module)
                 }}
                 onToggle={toggle}
               />
-            </View>
-          )}
-        </Toggle>
+            )
+          })()}
+        </View>
       </UseCase>
-
       <UseCase text="Array style" usage="Use array styles">
-        <Toggle initial={false}>
-          {({ on, toggle }) => (
-            <View>
+        <View>
+          {(() => {
+            const [on, toggle] = useToggle(false)
+            return (
               <Checkbox
                 text="Check it twice"
                 value={on}
@@ -124,9 +106,9 @@ storiesOf('Checkbox', module)
                 outlineStyle={arrayOutlineStyle}
                 fillStyle={arrayFillStyle}
               />
-            </View>
-          )}
-        </Toggle>
+            )
+          })()}
+        </View>
       </UseCase>
     </Story>
   ))
