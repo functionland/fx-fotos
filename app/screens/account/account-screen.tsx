@@ -171,7 +171,7 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
   }
 
   const connectToWallet = async () => {
-    navigation.navigate(AppNavigationNames.ConnectWalletScreen)
+    navigation.navigate(AppNavigationNames.CreateDIDScreen)
   }
   const signWalletAddress = async () => {
     navigation.navigate(AppNavigationNames.CreateDIDScreen)

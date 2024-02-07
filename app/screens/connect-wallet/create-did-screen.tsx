@@ -36,12 +36,8 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
   const [showPassword, setShowPassword] = useState(false)
   const [linking, setLinking] = useState(false)
 
-  const personalSign = async (chainCode: string) => {
-    return await provider?.request({
-      method: 'personal_sign',
-      params: [chainCode, account],
-    })
-  }
+  const personalSign = async (chainCode: string) => sdk?.connectAndSign({msg: chainCode})
+
   const handleLinkPassword = async (passwordInput: string) => {
     try {
       if (linking) {
@@ -52,12 +48,12 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
       const ed = new HDKEY(passwordInput)
       const chainCode = ed.chainCode
 
-      if (!connected || !sdk) {
+      if (!sdk) {
         throw new Error('web3Provider not connected')
       }
-      if (!account) {
-        throw new Error('No address found')
-      }
+      // if (!account) {
+      //   throw new Error('No address found')
+      // }
       console.log('before signing...')
       const sig = await personalSign(chainCode)
       if (!sig || sig === undefined || sig === null) {
@@ -258,7 +254,7 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
         </View>
         <View style={styles.section}>
           <Button
-            loading={!connected || !provider}
+            // loading={!connected || !provider}
             disabled={!iKnow || !passwod?.length}
             onPress={linking ? cancelLinking : signPassword}
           >
