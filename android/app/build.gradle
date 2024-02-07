@@ -81,12 +81,12 @@ android {
         versionName "1.4.0"
     }
     signingConfigs {
-        // release {
-        //     storeFile file('photos.keystore')
-        //     storePassword 'photos'
-        //     keyAlias 'photos_alias'
-        //     keyPassword 'photos'
-        // }
+        release {
+            storeFile file('photos.keystore')
+            storePassword 'photos'
+            keyAlias 'photos_alias'
+            keyPassword 'photos'
+        }
         debug {
             storeFile file('debug.keystore')
             storePassword 'android'
@@ -104,6 +104,7 @@ android {
             //signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            signingConfig signingConfigs.release
         }
     }
 }
