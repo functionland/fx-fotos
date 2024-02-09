@@ -101,6 +101,7 @@ workflows:
     - change-android-versioncode-and-versionname@1:
         inputs:
         - new_version_name: "$NPM_PACKAGE_VERSION"
+        - version_code_offset: '63'
         - build_gradle_path: "$BITRISE_SOURCE_DIR/android/app/build.gradle"
     - android-build@1:
         inputs:
@@ -111,7 +112,7 @@ workflows:
     - sign-apk@1:
         inputs:
         - use_apk_signer: 'true'
-    - deploy-to-bitrise-io@2.6: {}
+    - deploy-to-bitrise-io@2: {}
     - google-play-deploy@3.7:
         inputs:
         - package_name: land.fx.fotos
