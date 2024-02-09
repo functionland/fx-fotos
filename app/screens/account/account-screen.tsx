@@ -35,6 +35,7 @@ import {
 import Clipboard from '@react-native-clipboard/clipboard'
 import { useSDK } from '@metamask/sdk-react'
 import { getChainName } from '../../utils/walletConnectConifg'
+import notifee from '@notifee/react-native'
 
 type Props = NativeStackScreenProps<
   RootStackParamList,
@@ -171,6 +172,29 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
   }
 
   const connectToWallet = async () => {
+    await notifee.requestPermission()
+    notifee.registerForegroundService(async () => {})
+    await notifee.createChannel({
+      id: 'sticky',
+      name: 'Sticky Channel'
+    })
+    await notifee.displayNotification({
+    id: 'wallet',
+      title: 'Connecting wallet...',
+      body: 'Wallet Connection in progress, click to move back to the app',
+      android: {
+        progress: {
+          indeterminate: true
+        },
+        pressAction: {
+          id: 'default'
+        },
+        ongoing: true,
+        asForegroundService: true,
+        channelId: 'sticky'
+      }
+    })
+    notifee.stopForegroundService()
     navigation.navigate(AppNavigationNames.CreateDIDScreen)
   }
   const signWalletAddress = async () => {
@@ -451,6 +475,9 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
             </>
           ) : (
             <View style={styles.section}>
+              <Text>App needs notification permission to connect your wallet</Text>
+              <Text>Tap allow in the prompt</Text>
+              <View style={styles.space} />
               <Button
                 loading={!provider}
                 onPress={provider ? connectToWallet : undefined}
@@ -533,5 +560,8 @@ const styles = StyleSheet.create({
   },
   headerIcon: {
     marginHorizontal: 5,
+  },
+  space: {
+    marginTop: 20,
   },
 })

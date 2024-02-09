@@ -26,7 +26,8 @@
     "build-android": "react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res",
     "clean": "react-native-clean-project",
     "clean-all": "npx react-native clean-project-auto",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "log": "react-native log-android"
   },
   "dependencies": {
     "@babel/preset-env": "^7.20.0",
