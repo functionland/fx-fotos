@@ -49,7 +49,7 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
     await notifee.displayNotification({
     id: 'wallet',
       title: 'Connecting wallet...',
-      body: 'Wallet Connection in progress, click to move back to the app',
+      body: 'Wallet connection in progress, click to move back to the app',
       android: {
         progress: {
           indeterminate: true
@@ -119,6 +119,7 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
     />
   )
   const cancelLinking = () => {
+    notifee.stopForegroundService()
     sdk?.terminate()
     setLinking(false)
   }
