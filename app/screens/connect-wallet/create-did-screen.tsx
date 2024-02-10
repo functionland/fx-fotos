@@ -37,39 +37,37 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
   const [showPassword, setShowPassword] = useState(false)
   const [linking, setLinking] = useState(false)
 
-  const showPersistentNotification = async () => {
-    console.log('---------')
-    console.log('in notif')
-    await notifee.requestPermission();
 
-    const channelId = await notifee.createChannel({
-      id: 'sticky',
-      name: 'Sticky Channel'
+  const personalSign = async (chainCode: string) => {
+    let signature = ''
+    let resolveSigned = () => {};
+    const signed = new Promise<void>(resolve => {
+      resolveSigned = resolve
     })
 
+    notifee.registerForegroundService(() => signed)
     await notifee.displayNotification({
-      id: 'sticky',
-      title: 'FxFotos Setup',
-      body: 'Setup in progress, click to move back to the app',
+    id: 'wallet',
+      title: 'Connecting wallet...',
+      body: 'Wallet Connection in progress, click to move back to the app',
       android: {
-        ongoing: true,
-        channelId,
+        progress: {
+          indeterminate: true
+        },
         pressAction: {
           id: 'default'
-        }
+        },
+        ongoing: true,
+        asForegroundService: true,
+        channelId: 'sticky'
       }
     })
-    console.log('notif done')    
-    console.log('---------')
+    signature = await sdk?.connectAndSign({msg: chainCode}) as string
+    resolveSigned()
+    notifee.stopForegroundService()
+
+    return signature;
   }
-
-  const terminatePersistentNotification = () => notifee.cancelDisplayedNotification('sticky')
-
-  useEffect(() => {
-    showPersistentNotification()
-  }, [])
-
-  const personalSign = async (chainCode: string) => sdk?.connectAndSign({msg: chainCode})
 
   const handleLinkPassword = async (passwordInput: string) => {
     try {
@@ -95,7 +93,6 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
       console.log('Signature: ', sig)
       setSignatureData(sig)
       console.log('after signing...')
-      terminatePersistentNotification()
       return sig
     } catch (err) {
       console.log(err)
