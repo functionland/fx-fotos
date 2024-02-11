@@ -180,8 +180,8 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
     })
     await notifee.displayNotification({
     id: 'wallet',
-      title: 'Connecting wallet...',
-      body: 'Wallet Connection in progress, click to move back to the app',
+      title: 'warmup',
+      body: 'warmup',
       android: {
         progress: {
           indeterminate: true
@@ -475,7 +475,7 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
             </>
           ) : (
             <View style={styles.section}>
-              <Text>App needs notification permission to connect your wallet</Text>
+              <Text>App needs notification permission to connect your wallet and perform data sync</Text>
               <Text>Tap allow in the prompt</Text>
               <View style={styles.space} />
               <Button
