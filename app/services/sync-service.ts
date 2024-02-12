@@ -12,6 +12,7 @@ import * as Constants from '../utils/constants'
 import { Helper, DeviceUtils, KeyChain } from '../utils'
 import { ApiPromise } from '@polkadot/api'
 import * as helper from '../utils/helper'
+import notifee from '@notifee/react-native'
 
 type TaskParams = {
   callback?: (success: boolean, assetId: string, error?: Error) => void
@@ -61,6 +62,10 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
     }
     console.log('uploadAssetBackgroundTask fulaConfig')
     console.log(fulaConfig)
+    let resolveUploadCompleted = () => {}
+    const uploadCompleted = new Promise<void>(resolve => {
+      resolveUploadCompleted = resolve
+    })
     for (let index = 0; index < assets?.length; index++) {
       const asset = assets[index]
       console.log('uploadAssetBackgroundTask asset...', index)
@@ -71,18 +76,40 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
         continue
       }
 
-      // Prepare task notification message
-      if (BackgroundJob.isRunning()) {
-        await BackgroundJob.updateNotification({
-          taskTitle: `Uploading asset #${index + 1}/${assets?.length}`,
-          taskDesc: `Syncing your assets ...`,
-          progressBar: {
+      // // Prepare task notification message
+      // if (BackgroundJob.isRunning()) {
+      //   await BackgroundJob.updateNotification({
+      //     taskTitle: `Uploading asset #${index + 1}/${assets?.length}`,
+      //     taskDesc: `Syncing your assets ...`,
+      //     progressBar: {
+      //       max: assets?.length,
+      //       value: index,
+      //       indeterminate: assets?.length == 1,
+      //     },
+      //   })
+      // }
+
+      // Show notification      
+      await notifee.requestPermission()
+      await notifee.createChannel({
+        id: 'sync',
+        name: "Sync Status"
+      })
+      notifee.registerForegroundService(() => uploadCompleted)
+      await notifee.displayNotification({
+        title: 'Sync in progress...',
+        subtitle: `Syncing ${assets?.length} photo${assets?.length > 1 ? 's': ''}`,
+        android: {
+          channelId: 'sync',
+          groupSummary: true,
+          groupId: 'syncGroup',
+          asForegroundService: true,
+          progress: {
             max: assets?.length,
-            value: index,
-            indeterminate: assets?.length == 1,
-          },
-        })
-      }
+            current: index
+          }
+        }
+      })
 
       // Prepare the filepath and filename
       const _filePath = asset.uri?.split('file:')[1]
@@ -93,6 +120,17 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
           ? slashSplit[slashSplit?.length - 1]
           : 'unknown' + index
       }
+      await notifee.displayNotification({
+        title: 'Uploading Photo',
+        subtitle: `File ${filename} in progress...`,
+        android: {
+          channelId: 'sync',
+          groupId: 'syncGroup',
+          progress: {
+            indeterminate: true
+          }
+        }
+      })
       // Upload file to the WNFS
       if (_filePath) {
         const cid = await fula.writeFile(
@@ -118,6 +156,7 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
         }
       }
     }
+    resolveUploadCompleted()
     try {
       //TODO: Replicate request should be sent to blockchain
       let storedCids = await fula.listRecentCidsAsString()
