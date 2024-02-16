@@ -6,13 +6,15 @@ import BackgroundJob, {
 import { fula, chainApi } from '@functionland/react-native-fula'
 // import { TaggedEncryption } from '@functionland/fula-sec'
 import { AssetEntity } from '../realmdb/entities'
-import { SyncStatus } from '../types'
+import { Asset, SyncStatus } from '../types'
 import { Assets, Boxs, FolderSettings } from './localdb/index'
 import * as Constants from '../utils/constants'
 import { Helper, DeviceUtils, KeyChain } from '../utils'
 import { ApiPromise } from '@polkadot/api'
 import * as helper from '../utils/helper'
-import notifee from '@notifee/react-native'
+import Toast from 'react-native-toast-message'
+import notifee, { AndroidColor } from '@notifee/react-native'
+import { createForegroundTask } from './foreground'
 
 type TaskParams = {
   callback?: (success: boolean, assetId: string, error?: Error) => void
@@ -258,6 +260,124 @@ const downloadAssetsBackgroundTask = async (taskParameters?: TaskParams) => {
     await BackgroundJob.stop()
   }
 }
+
+let [successCount, failCount] = [0, 0]
+
+export async function uploadAssets(assets: Asset[]) {
+  if (!assets || assets.length == 0) {
+    return
+  }
+  const uploadAndNotifyResult = async asset => {
+    try {
+      await uploadAsset(asset)
+      successCount++      
+      await notifee.displayNotification({
+        title: `${asset.filename}`,
+        subtitle: 'uploaded',
+        // body: ``,
+        android: {
+          channelId: 'syncStatus',
+          groupId: 'syncStatusGroup'
+        }
+      })
+    } catch (error) {
+      console.error(error)
+      failCount++
+      await notifee.displayNotification({
+        title: `${asset.filename}`,
+        subtitle: 'failed',
+        body: `Error: ${JSON.stringify(error)}`,
+        android: {
+          channelId: 'syncStatus',
+          groupId: 'syncStatusGroup'
+        }
+      })
+    }    
+    await notifee.displayNotification({
+      id: 'statusSummary',
+      subtitle: `upload ${successCount ? `${successCount} succeeded` : '' }` +
+      `${successCount? ', ': ''}${failCount ? `${failCount} failed` : '' }`,
+      android: {
+        channelId: 'syncStatus',
+        groupSummary: true,
+        groupId: 'syncStatusGroup'
+      }   
+    })
+  }  
+  await notifee.requestPermission()
+  await notifee.createChannel({
+    id: 'sync',
+    name: 'Sync',
+    vibration: false
+  })
+  await notifee.createChannel({
+    id: 'syncStatus',
+    name: 'Sync Status',
+    vibration: false
+  })
+  notifee.registerForegroundService(async notification => {
+    const uploads: Promise<void>[] = []
+    for (let index = 0; index < assets.length; index++) {
+      let asset = assets[index]
+      const remainingCount = assets.length - index
+      await notifee.displayNotification({
+        id: notification.id,
+        title: `Uploading ${remainingCount} photo${remainingCount > 1 ? 's': ''}`,
+        body: `${asset.filename} in progress`,
+        android: {
+          ...notification.android,
+          progress: {
+            max: assets.length,
+            current: index
+          }
+        }
+      })
+      uploads.push(uploadAndNotifyResult(asset))
+      await Promise.all(uploads)
+    }
+  })
+
+  await notifee.displayNotification({
+    title: 'Upload started',
+    android: {
+      channelId: 'sync',
+      ongoing: true,
+      asForegroundService: true,
+      colorized: true,
+      color: AndroidColor.NAVY
+    }
+  })
+}
+
+async function uploadAsset(asset: Asset) {  
+  Toast.show({
+    type: 'info',
+    text1: asset.filename,
+    text2: 'uploadingg',
+    position: 'top',
+    bottomOffset: 40,
+  })
+  await new Promise(resolve => setTimeout(resolve, 3000))
+  throw new Error('pfff')
+  // const filePath = asset.uri?.split('file:')[1]
+  // if (!filePath) {
+  //   throw Error('Invalid asset uri')
+  // }
+  // const cid = await fula.writeFile(`${Constants.FOTOS_WNFS_ROOT}/${asset.filename}`, filePath)
+  // console.log('----------')
+  // console.log(cid)
+  // console.log('----------')
+  // await Helper.storeFulaRootCID(cid)
+  // //Update asset record in database
+  // const newAsset = {
+  //   id: asset.id,
+  //   cid: cid,
+  //   syncDate: new Date(),
+  //   syncStatus: SyncStatus.SYNCED,
+  // }
+  // Assets.addOrUpdate([newAsset])
+}
+
 // /**
 //  * You need to make sure the box addresses are added and then call this method
 //  * @param options

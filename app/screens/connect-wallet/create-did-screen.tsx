@@ -6,7 +6,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack'
 import Toast from 'react-native-toast-message'
 import { HDKEY } from '@functionland/fula-sec'
 import { useSetRecoilState } from 'recoil'
-import notifee from '@notifee/react-native'
+import notifee, { AndroidColor } from '@notifee/react-native'
 
 import * as Keychain from '../../utils/keychain'
 import { Header, HeaderArrowBack } from '../../components/header'
@@ -57,6 +57,8 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
         pressAction: {
           id: 'default'
         },
+        colorized: true,
+        color: AndroidColor.RED,
         ongoing: true,
         asForegroundService: true,
         channelId: 'sticky'

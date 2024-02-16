@@ -46,6 +46,7 @@ import { GalleryImage } from './gallery-image'
 import { palette } from '../../theme'
 import LinearGradient from 'react-native-linear-gradient'
 import { SyncService } from '../../services'
+import { uploadAssets } from '../../services/sync-service'
 
 interface ImageGalleryViewerScreenProps {
   navigation: NavigationProp<RootStackParamList>
@@ -274,7 +275,29 @@ export const ImageGalleryViewerScreen: React.FC<
     ])
   }, [asset])
 
-  const uploadToBox = async () => {
+  async function uploadToBox() {
+    //Ignore asset greater than 200 MB
+    if (!asset?.fileSize || asset.fileSize > 200 * 1000 * 1000) {
+      Toast.show({
+        type: 'info',
+        text1: 'Large asset!',
+        text2: 'Unable to upload assets greater than 200 MB for now!',
+        position: 'top',
+        bottomOffset: 40,
+      })
+      return
+    }    
+    setLoading(true)
+    try {
+      await uploadAssets([asset])
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const uploadToBoxOld = async () => {
     if (asset?.syncStatus === SyncStatus.NOTSYNCED && !asset?.isDeleted) {
       //Ignore asset greater than 200 MB
       if (!asset?.fileSize || asset.fileSize > 200 * 1000 * 1000) {
