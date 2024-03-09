@@ -30,6 +30,7 @@ import {
   fulaPeerIdState,
   fulaAccountState,
   fulaPoolIdState,
+  fulaPoolCreatorState,
   fulaAccountSeedState,
 } from '../../store'
 import Clipboard from '@react-native-clipboard/clipboard'
@@ -47,6 +48,7 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
     useRecoilState(dIDCredentialsState)
   const [fulaAccount, setFulaAccount] = useRecoilState(fulaAccountState)
   const [fulaPoolId, setFulaPoolId] = useRecoilState(fulaPoolIdState)
+  const [fulaPoolCreator, setFulaPoolCreator] = useRecoilState(fulaPoolCreatorState)
   const [fulaAccountSeed, setFulaAccountSeed] =
     useRecoilState(fulaAccountSeedState)
   const { account, chainId, provider, sdk, connected } = useSDK()
@@ -92,10 +94,35 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
   }, [])
 
   useEffect(() => {
+    const saveFulaPoolCreator = async (poolId: number) => {
+      console.log(
+        'fetching poolCreator for fulaPoolId=' + poolId,
+      )
+
+      if (
+        poolId &&
+        poolId.toString() != '0'
+      ) {
+        console.log('selected pool: ' + poolId.toString())
+        let poolCreator = await helper.getPoolCreatorPeerId(poolId)
+        console.log('fula pool creator is: '+ poolCreator)
+        if (poolCreator) {
+          await Keychain.save(
+            'fulaPoolCreator',
+            poolCreator,
+            Keychain.Service.FULAPoolCreatorObject,
+          )
+          setFulaPoolCreator(poolCreator)
+        }
+      }
+    }
+
     const saveFulaPoolId = async () => {
       let _poolId = '0'
+      let _poolCreator = ''
+      let _resetPoolCreator = false
       console.log(
-        'fethcing last poolId in savePoolId with fulaPoolId=' + fulaPoolId,
+        'fetching last poolId in savePoolId with fulaPoolId=' + fulaPoolId,
       )
       const fulaPoolIdObj = await helper.getFulaPoolId()
       if (fulaPoolIdObj) {
@@ -115,8 +142,26 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
           fulaPoolId.toString(),
           Keychain.Service.FULAPoolIdObject,
         )
+        await Keychain.reset(
+          Keychain.Service.FULAPoolCreatorObject,
+        )
+        setFulaPoolCreator('')
+        _resetPoolCreator = true
+      }
+      const fulaPoolCreatorObj = await helper.getFulaPoolCreator()
+      if (fulaPoolCreatorObj && !_resetPoolCreator) {
+        console.log(fulaPoolCreatorObj)
+        _poolCreator = fulaPoolCreatorObj.password
+        if (_poolCreator) {
+          setFulaPoolCreator(_poolCreator)
+        }
+      }
+      console.log('poolCreator at launch is: '+_poolCreator)
+      if (!_poolCreator && fulaPoolId && fulaPoolId.toString() != '0') {
+        await saveFulaPoolCreator(fulaPoolId)
       }
     }
+
     saveFulaPoolId()
   }, [fulaPoolId])
 
@@ -169,6 +214,18 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
         setFulaAccount(_fulaAccount?.account)
       }
     }
+  }
+  const clearPool = async () => {
+    console.log('clearing pool selection')
+    setFulaPoolId(0)
+    setFulaPoolCreator('')
+    await Keychain.reset(
+      Keychain.Service.FULAPoolIdObject,
+    )
+    await Keychain.reset(
+      Keychain.Service.FULAPoolCreatorObject,
+    )
+
   }
 
   const connectToWallet = async () => {
@@ -419,11 +476,11 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
                       </ListItem.Subtitle>
                     </ListItem.Content>
                   </ListItem>
-                  <ListItem containerStyle={{ width: '100%' }}>
+                  <ListItem containerStyle={{ width: '100%', display: 'none' }}>
                     <ListItem.Content>
                       <ListItem.Subtitle>
                         <View style={styles.section}>
-                          {fulaPeerId?.password && (
+                          {fulaPeerId?.password && false && (
                             <Button
                               title="Authorize FxFotos by FxBlox"
                               onPress={authorizeApp}
@@ -470,6 +527,20 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
                       )}
                     </View>
                   </ListItem>
+                  <ListItem containerStyle={{ width: '100%'}}>
+                    <ListItem.Content>
+                      <ListItem.Subtitle>
+                        <View style={styles.section}>
+                          {fulaPeerId?.password && (
+                            <Button
+                              title="Clear pool selection"
+                              onPress={clearPool}
+                            />
+                          )}
+                        </View>
+                      </ListItem.Subtitle>
+                    </ListItem.Content>
+                  </ListItem>
                 </View>
               )}
             </>
@@ -485,8 +556,8 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
               />
             </View>
           )}
-          {did && (
-            <View style={[{ width: '100%' }]}>
+          {did && false && (
+            <View style={[{ width: '100%', display: 'none' }]}>
               <Card
                 containerStyle={{
                   borderWidth: 0,
@@ -499,6 +570,7 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
                 >
                   SETTINGS
                 </Card.Title>
+
                 <ListItem
                   key="Bloxes"
                   bottomDivider

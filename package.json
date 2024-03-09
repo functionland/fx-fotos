@@ -32,7 +32,7 @@
   "dependencies": {
     "@babel/preset-env": "^7.20.0",
     "@functionland/fula-sec": "^2.0.0",
-    "@functionland/react-native-fula": "^1.43.0",
+    "@functionland/react-native-fula": "^1.54.0",
     "@functionland/recyclerlistview": "^4.2.3",
     "@gorhom/bottom-sheet": "^4.6.0",
     "@metamask/sdk-react": "^0.14.2",

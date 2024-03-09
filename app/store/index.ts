@@ -80,7 +80,10 @@ export const fulaPoolIdState = atom<number>({
   key: 'fulaPoolIdState',
   default: 0,
 })
-
+export const fulaPoolCreatorState = atom<string>({
+  key: 'fulaPoolCreatorState',
+  default: '',
+})
 export const fulaIsReadyState = atom<boolean>({
   key: 'fulaIsReadyState',
   default: false,

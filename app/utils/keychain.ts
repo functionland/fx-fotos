@@ -6,6 +6,7 @@ export enum Service {
   FULAPeerIdObject = 'FULAPeerIdObject',
   FULAAccountSeedObject = 'FULAAccountSeedObject',
   FULAPoolIdObject = 'FULAPoolIdObject',
+  FULAPoolCreatorObject = 'FULAPoolCreatorObject',
   FULAReplicationFactorObject = 'FULAReplicationFactorObject',
 }
 /**
