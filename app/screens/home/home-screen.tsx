@@ -234,7 +234,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     await LocalDbService?.FolderSettings?.addOrUpdate([
       {
         name: 'Camera',
-        autoBackup: true,
+        autoBackup: false,
       },
     ])
     await SyncService?.setAutoBackupAssets()

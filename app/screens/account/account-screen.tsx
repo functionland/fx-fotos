@@ -37,6 +37,7 @@ import Clipboard from '@react-native-clipboard/clipboard'
 import { useSDK } from '@metamask/sdk-react'
 import { getChainName } from '../../utils/walletConnectConifg'
 import notifee from '@notifee/react-native'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type Props = NativeStackScreenProps<
   RootStackParamList,
@@ -56,6 +57,17 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
   const [fulaPeerId, setFulaPeerId] = useRecoilState(fulaPeerIdState)
   const [did, setDID] = useState(null)
   const [poolOptions, setPoolOptions] = useState([])
+  const [cid, setCid] = useState<string | null>(null);
+  const getCid = async () => {
+    try {
+      const cid_ = await AsyncStorage.getItem('@lastUploadedCid');
+      if (cid_ !== null) {
+        setCid(cid_)
+      }
+    } catch (e) {
+      // error reading value
+    }
+  };
 
   useEffect(() => {
     if (!fulaPeerId) {
@@ -370,6 +382,31 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
       }
     />
   )
+  const copyToClipboardCID = (cidValue: string) => {
+    Clipboard.setString(cidValue);
+    Toast.show({
+      type: 'success',
+      text1: 'Your CID copied to the clipboard!',
+      position: 'bottom',
+      bottomOffset: 0,
+    });
+  };
+  const renderCIDListItem = () => (
+    <ListItem onPress={() => cid && copyToClipboardCID(cid)} containerStyle={{ width: '100%' }}>
+      <ListItem.Content>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Card.Title style={{ textAlign: 'left', paddingRight: 10 }}>
+              YOUR CONTENT ROOT
+            </Card.Title>
+            <Icon name="content-copy" type="material-community" onPress={() => cid && copyToClipboardCID(cid)} />
+          </View>
+          <Icon name="refresh" type="material-community" onPress={getCid} />
+        </View>
+        <ListItem.Subtitle>{cid || 'No CID Available'}</ListItem.Subtitle>
+      </ListItem.Content>
+    </ListItem>
+  );
   return (
     <Screen preset="scroll" style={styles.screen}>
       {renderHeader()}
@@ -426,6 +463,7 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
                       <ListItem.Subtitle> {did}</ListItem.Subtitle>
                     </ListItem.Content>
                   </ListItem>
+                  {renderCIDListItem()}
                   <ListItem
                     onPress={() =>
                       fulaAccount

@@ -12,6 +12,7 @@ import * as Constants from '../utils/constants'
 import { Helper, DeviceUtils, KeyChain } from '../utils'
 import { ApiPromise } from '@polkadot/api'
 import * as helper from '../utils/helper'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type TaskParams = {
   callback?: (success: boolean, assetId: string, error?: Error) => void
@@ -43,6 +44,13 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
       'geolocalization, etc. to keep your app alive in the background while you excute the JS from this library.',
     )
   }
+  const storeCid = async (cid) => {
+    try {
+      await AsyncStorage.setItem('@lastUploadedCid', cid);
+    } catch (e) {
+      // saving error
+    }
+  };
   let {
     callback = null,
     assets = [],
@@ -54,7 +62,7 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
 
   try {
     console.log('uploadAssetBackgroundTask...')
-    const fulaConfig = await initFula()
+    let fulaConfig = await initFula()
     if (fulaConfig) {
       Helper.storeFulaPeerId(fulaConfig.peerId)
       Helper.storeFulaRootCID(fulaConfig.rootCid)
@@ -104,6 +112,7 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
           `${Constants.FOTOS_WNFS_ROOT}/${filename}`,
           _filePath,
         )
+        storeCid(cid);
         console.log("cid="+cid)
         await Helper.storeFulaRootCID(cid)
         //Update asset record in database
