@@ -37,6 +37,7 @@ import {
   fulaPeerIdState,
   mediasState,
   fulaPoolIdState,
+  fulaPoolCreatorState,
   fulaAccountSeedState,
 } from '../../store'
 import { Assets, Boxs, FolderSettings } from '../../services/localdb'
@@ -84,6 +85,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     useRecoilState(appPreferencesState)
   const setFoldersSettings = useSetRecoilState(foldersSettingsState)
   const [fulaPoolId, setFulaPoolId] = useRecoilState(fulaPoolIdState)
+  const [fulaPoolCreator, setFulaPoolCreator] = useRecoilState(fulaPoolCreatorState)
   const [fulaAccountSeed, setFulaAccountSeed] =
     useRecoilState(fulaAccountSeedState)
   const { toggleTheme } = useContext(ThemeContext)
@@ -149,12 +151,22 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       if (!fulaPoolId) {
         const fulaPoolIdObj = await helper.getFulaPoolId()
         if (fulaPoolIdObj) {
-          setFulaPoolId(fulaPoolIdObj.password)
+          setFulaPoolId(parseInt(fulaPoolIdObj.password))
+        }
+      }
+    }
+
+    const fetchFulaPoolCreator = async () => {
+      if (!fulaPoolCreator) {
+        const fulaPoolCreatorObj = await helper.getFulaPoolCreator()
+        if (fulaPoolCreatorObj) {
+          setFulaPoolCreator(fulaPoolCreatorObj.password)
         }
       }
     }
     fetchFulaAccountSeed()
     fetchFulaPoolId()
+    fetchFulaPoolCreator()
   }, [])
 
   useEffect(() => {
@@ -222,7 +234,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     await LocalDbService?.FolderSettings?.addOrUpdate([
       {
         name: 'Camera',
-        autoBackup: true,
+        autoBackup: false,
       },
     ])
     await SyncService?.setAutoBackupAssets()
@@ -304,15 +316,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const initFula = async (password: string, signiture: string) => {
     try {
       if (await fula.isReady()) return
-      const box = (await Boxs.getAll())?.[0]
-      if (box) {
-        const fulaInit = await SyncService.initFula()
-        if (fulaInit) {
-          await helper.storeFulaRootCID(fulaInit.rootCid)
-          const fulaPeerId = await helper.storeFulaPeerId(fulaInit.peerId)
-          if (fulaPeerId) setFulaPeerId(fulaPeerId)
-          setFulaIsReady(true)
-        }
+      const fulaInit = await SyncService.initFula()
+      if (fulaInit) {
+        await helper.storeFulaRootCID(fulaInit.rootCid)
+        const fulaPeerId = await helper.storeFulaPeerId(fulaInit.peerId)
+        if (fulaPeerId) setFulaPeerId(fulaPeerId)
+        setFulaIsReady(true)
       }
     } catch (error) {
       console.log('fulaInit Error', error)

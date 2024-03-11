@@ -106,6 +106,11 @@ export const getFulaPoolId = async (): Promise<
 > => {
   return await KeyChain.load(KeyChain.Service.FULAPoolIdObject)
 }
+export const getFulaPoolCreator = async (): Promise<
+  false | KeyChain.UserCredentials
+> => {
+  return await KeyChain.load(KeyChain.Service.FULAPoolCreatorObject)
+}
 export const getFulaReplicationFactor = async (): Promise<
   false | KeyChain.UserCredentials
 > => {
@@ -114,13 +119,20 @@ export const getFulaReplicationFactor = async (): Promise<
 
 export const generateBloxAddress = (box: BoxEntity) => {
   if (!box || !box.peerId) {
-    throw 'Blox complex address is invalid!'
+    throw Error('Blox complex address is invalid!')
   }
   if (box.connection) {
     return `${box.connection}/p2p/${box.peerId}`.trim()
   } else {
     return `/ip4/${box.ipAddress}/${box.protocol}/${box.port}/p2p/${box.peerId}`.trim()
   }
+}
+
+export const generatePoolAddress = (poolId: string, peerId: string) => {
+  if (!poolId || !peerId || poolId=='0') {
+    throw Error('Information is incomplete!')
+  }
+  return `/dns4/${poolId}.pools.functionyard.fula.network/tcp/40001/p2p/${peerId}`.trim()
 }
 
 export interface RpcRequestParams {
@@ -154,3 +166,77 @@ export const personalSign = async ({
 
 export const sleep = (milliseconds: number) =>
   new Promise<void>(resolve => setTimeout(() => resolve(), milliseconds))
+
+
+  interface Pool {
+    pool_id: number;
+    creator: string;
+  }
+
+  interface PoolResponse {
+    pools: Pool[];
+  }
+
+  interface User {
+    account: string;
+    pool_id: number | null;
+    request_pool_id: number | null;
+    peer_id: string;
+  }
+
+  interface UsersResponse {
+    users: User[];
+  }
+const timeout = (ms: number): Promise<null> => new Promise((_, reject) =>
+  setTimeout(() => reject(new Error('Timeout')), ms)
+);
+export const getPoolCreatorPeerId = async (poolId: number): Promise<string | null> => {
+    // You can store the cluster URL in AsyncStorage or some other configuration storage.
+    const clusterUrl = "https://api.node3.functionyard.fula.network";
+
+    try {
+      // Fetch pool data
+      const poolDataResponse = await Promise.race([
+        fetch(`${clusterUrl}/fula/pool`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pool_id: poolId }),
+        }),
+        timeout(10000) // Set timeout to 10000ms (10 seconds)
+      ]);
+      console.log(poolDataResponse)
+
+      if (!poolDataResponse || !poolDataResponse.ok) {
+        console.error(`Failed to fetch pool data. Status: ${poolDataResponse?.status}`)
+        throw new Error(`Failed to fetch pool data. Status: ${poolDataResponse?.status}`);
+      }
+
+      const { pools }: PoolResponse = await poolDataResponse.json();
+      const pool = pools.find(p => p.pool_id === poolId);
+
+      // Fetch users in the pool
+      const poolUsersResponse = await fetch(`${clusterUrl}/fula/pool/users`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pool_id: pool?.pool_id }),
+      });
+
+      if (!poolUsersResponse.ok) {
+        console.error(`Failed to fetch pool users. Status: ${poolUsersResponse.status}`)
+        throw new Error(`Failed to fetch pool users. Status: ${poolUsersResponse.status}`);
+      }
+
+      const { users }: UsersResponse = await poolUsersResponse.json();
+      const creatorUser = users.find(user => user.account === pool?.creator);
+      console.log(users)
+      if (!creatorUser) {
+        console.error(`Creator ${pool?.creator} not found in pool users.`);
+        throw new Error(`Creator ${pool?.creator} not found in pool users.`);
+      }
+
+      return creatorUser.peer_id;
+    } catch (error) {
+      console.error(`Error getting pool creator's peer_id: ${error}`);
+      return null;
+    }
+};

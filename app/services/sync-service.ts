@@ -12,6 +12,7 @@ import * as Constants from '../utils/constants'
 import { Helper, DeviceUtils, KeyChain } from '../utils'
 import { ApiPromise } from '@polkadot/api'
 import * as helper from '../utils/helper'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type TaskParams = {
   callback?: (success: boolean, assetId: string, error?: Error) => void
@@ -43,6 +44,13 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
       'geolocalization, etc. to keep your app alive in the background while you excute the JS from this library.',
     )
   }
+  const storeCid = async (cid) => {
+    try {
+      await AsyncStorage.setItem('@lastUploadedCid', cid);
+    } catch (e) {
+      // saving error
+    }
+  };
   let {
     callback = null,
     assets = [],
@@ -54,7 +62,7 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
 
   try {
     console.log('uploadAssetBackgroundTask...')
-    const fulaConfig = await initFula()
+    let fulaConfig = await initFula()
     if (fulaConfig) {
       Helper.storeFulaPeerId(fulaConfig.peerId)
       Helper.storeFulaRootCID(fulaConfig.rootCid)
@@ -73,6 +81,7 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
 
       // Prepare task notification message
       if (BackgroundJob.isRunning()) {
+        console.log("BackgroundJob.isRunning")
         await BackgroundJob.updateNotification({
           taskTitle: `Uploading asset #${index + 1}/${assets?.length}`,
           taskDesc: `Syncing your assets ...`,
@@ -93,12 +102,18 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
           ? slashSplit[slashSplit?.length - 1]
           : 'unknown' + index
       }
+      console.log("filename="+filename)
+      console.log(asset.uri)
+      console.log("_filePath="+_filePath)
       // Upload file to the WNFS
       if (_filePath) {
+        console.log("calling fula.writeFile writting in "+`${Constants.FOTOS_WNFS_ROOT}/${filename}`)
         const cid = await fula.writeFile(
           `${Constants.FOTOS_WNFS_ROOT}/${filename}`,
           _filePath,
         )
+        storeCid(cid);
+        console.log("cid="+cid)
         await Helper.storeFulaRootCID(cid)
         //Update asset record in database
         const newAsset = {
@@ -107,6 +122,8 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
           syncDate: new Date(),
           syncStatus: SyncStatus.SYNCED,
         }
+        console.log("newAsset")
+        console.log(newAsset)
         Assets.addOrUpdate([newAsset])
 
         //return the callback function
@@ -116,6 +133,8 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
           console.log('error happened in calling callback')
           console.log(e)
         }
+      } else {
+        console.log("filepath could not be found")
       }
     }
     try {
@@ -409,20 +428,21 @@ interface FulaConfig {
 export const initFula = async (
   config?: FulaConfig,
 ): Promise<
-  { peerId: string; rootCid: string; private_ref: string } | undefined
+  { peerId: string; rootCid: string; } | undefined
 > => {
+  console.log("called initFula")
   try {
     let {
       identity = null,
       storePath = null,
       bloxAddr = null,
-      exchange = '',
-      autoFlush = false,
+      exchange = 'blox',
+      autoFlush = true,
       rootCID = null,
     } = config || {}
 
     const isReady = await fula.isReady()
-    if (isReady) return
+    //if (isReady) return
 
     if (!identity) {
       const didCredentialsObj = await KeyChain.load(
@@ -434,7 +454,7 @@ export const initFula = async (
           didCredentialsObj.password,
         )
         identity = keyPair.secretKey.toString()
-      } else throw 'Could not find default identity from KeyChain!'
+      } else throw Error('Could not find default identity from KeyChain!')
     }
     if (!rootCID) {
       const fulaRootObject = await KeyChain.load(
@@ -451,7 +471,25 @@ export const initFula = async (
       const box = (await Boxs.getAll())?.[0]
       if (box) {
         bloxAddr = Helper.generateBloxAddress(box)
-      } else throw 'Could not find default blox address!'
+      } else {
+          let _poolCreator = ''
+          let _poolId = '0'
+          const fulaPoolCreatorObj = await helper.getFulaPoolCreator()
+          if (fulaPoolCreatorObj) {
+            _poolCreator = fulaPoolCreatorObj.password
+          }
+          const fulaPoolIdObj = await helper.getFulaPoolId()
+          if (fulaPoolIdObj) {
+            _poolId = fulaPoolIdObj.password
+          }
+          if (_poolCreator && _poolId !== '0') {
+            bloxAddr = Helper.generatePoolAddress(_poolId, _poolCreator)
+          }
+      }
+      if (!bloxAddr) {
+        throw Error('Could not find default blox address!')
+      }
+      console.log('blox Address created: '+ bloxAddr)
     }
     const fulaInit = await fula.init(
       identity, //bytes of the privateKey of did identity in string format
@@ -463,6 +501,8 @@ export const initFula = async (
       true,
       true,
     )
+    console.log('init complete');
+    console.log(fulaInit);
     return fulaInit
   } catch (error) {
     console.log('fulaInit Error', error)

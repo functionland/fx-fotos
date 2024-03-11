@@ -116,10 +116,10 @@ export const getAll = (
 
 export const getById = (
   id: string,
-): Promise<Realm.Results<Entities.AssetEntity & Realm.Object>> =>
+): Promise<Entities.AssetEntity[]> =>
   RealmDB()
     .then(realm => {
-      console.error('getById then!')
+      console.log('getById then!')
       const assets = realm
         .objects<Entities.AssetEntity>(Schemas.Asset.name)
         .filtered(`id = '${id}'`)
@@ -145,12 +145,10 @@ export const getAllNeedToSync = (): Promise<Entities.AssetEntity[]> =>
       throw error
     })
 
-export const getAllNeedToDownload = (): Promise<
-  (Entities.AssetEntity & Realm.Object)[]
-> =>
+export const getAllNeedToDownload = (): Promise<Entities.AssetEntity[]> =>
   RealmDB()
     .then(realm => {
-      console.error('getAllNeedToDownload then!')
+      console.log('getAllNeedToDownload then!')
       const assets = realm
         .objects<Entities.AssetEntity>(Schemas.Asset.name)
         .filtered('(syncStatus=3 or syncStatus=2) and isDeleted=true')
@@ -219,7 +217,7 @@ export const markAsSYNC = (assetIds: string[]): Promise<void> =>
   RealmDB()
     .then(realm => {
       try {
-        console.error('markAsSYNC try!')
+        console.log('markAsSYNC try!')
         const idsQuery = assetIds.map(id => `id = '${id}'`).join(' OR ')
         const assets = realm
           .objects<Entities.AssetEntity>(Schemas.Asset.name)
@@ -285,7 +283,7 @@ export const addOrUpdateBackendAssets = (
   backendFiles: FulaFileList,
   currentAssets: Entities.AssetEntity[],
 ): Promise<Entities.AssetEntity[]> => {
-  console.error('addOrUpdateBackendAssets started!')
+  console.log('addOrUpdateBackendAssets started!')
   const assetsObj = currentAssets?.reduce((obj, asset) => {
     if (asset.filenameNormalized) obj[asset.filenameNormalized] = asset
     return obj
