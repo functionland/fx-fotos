@@ -473,16 +473,24 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
                     containerStyle={{ width: '100%' }}
                   >
                     <ListItem.Content>
-                      <View style={{ flexDirection: 'row' }}>
-                        <Card.Title
-                          style={{
-                            textAlign: 'left',
-                            paddingRight: 10,
-                          }}
-                        >
-                          Fula Account
-                        </Card.Title>
-                        <Icon name="content-copy" type="material-community" />
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                          <Card.Title
+                            style={{
+                              textAlign: 'left',
+                              paddingRight: 10,
+                            }}
+                          >
+                            Fula Account
+                          </Card.Title>
+                          <Icon name="content-copy" type="material-community" onPress={() => fulaAccount ? copyToClipboardFulaAccount(fulaAccount) : null} />
+                        </View>
+                        {/* New Icon for opening the browser with accountId */}
+                        <Icon
+                          name="open-in-new"
+                          type="material-community"
+                          onPress={() => fulaAccount && Linking.openURL(`https://fund.functionyard.fula.network?appId=land.fx.fotos&accountId=${fulaAccount}`)}
+                        />
                       </View>
                       <ListItem.Subtitle>{fulaAccount}</ListItem.Subtitle>
                     </ListItem.Content>

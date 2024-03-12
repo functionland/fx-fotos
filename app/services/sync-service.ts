@@ -36,6 +36,10 @@ const defaultOptions = {
 
 const uploadingAssets = new Set()
 
+const sleep = async(ms: number) => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
   console.log('uploadAssetBackgroundTask started')
   if (Platform.OS === 'ios') {
@@ -59,6 +63,8 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
     fulaPoolId = 0,
     fulaReplicationFactor = 0,
   } = taskParameters || {}
+  let fulaAccount = ''
+  let gasBalance = 0
 
   try {
     console.log('uploadAssetBackgroundTask...')
@@ -69,6 +75,33 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
     }
     console.log('uploadAssetBackgroundTask fulaConfig')
     console.log(fulaConfig)
+    try {
+      if (!api) {
+        api = await chainApi.init()
+        fulaAccount = await chainApi.getAccountIdFromSeed(fulaAccountSeed)
+        while (gasBalance <= 1000000) {
+          let gasBalanceStr = await chainApi.checkAccountBalance(api, fulaAccount)
+          if (gasBalanceStr) {
+            gasBalance = parseInt(gasBalanceStr)
+          }
+          if (gasBalance <= 1000000){
+            await BackgroundJob.updateNotification({
+              taskTitle: `Waiting for enough gas balance in ${fulaAccount}`,
+              taskDesc: `Uploads are resumed as soon as gas balance is enough ...`,
+              progressBar: {
+                max: 100,
+                value: 0,
+                indeterminate: true,
+              },
+            })
+          }
+          await sleep(10000);
+        }
+      }
+    } catch (e) {
+      console.error("Error happened in initializing chainApi")
+    }
+
     for (let index = 0; index < assets?.length; index++) {
       const asset = assets[index]
       console.log('uploadAssetBackgroundTask asset...', index)
@@ -140,9 +173,6 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
     try {
       //TODO: Replicate request should be sent to blockchain
       let storedCids = await fula.listRecentCidsAsString()
-      if (!api) {
-        api = await chainApi.init()
-      }
       if (api && storedCids.length && fulaPoolId && fulaReplicationFactor) {
         let hashRes = await chainApi.batchUploadManifest(
           api,

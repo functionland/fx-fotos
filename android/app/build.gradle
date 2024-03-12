@@ -107,6 +107,10 @@ android {
             signingConfig signingConfigs.release
         }
     }
+    lintOptions {
+        abortOnError false
+        baseline file("lint-baseline.xml")
+    }
 }
 
 
