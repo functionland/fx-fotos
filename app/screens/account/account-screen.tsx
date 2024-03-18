@@ -58,11 +58,24 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
   const [did, setDID] = useState(null)
   const [poolOptions, setPoolOptions] = useState([])
   const [cid, setCid] = useState<string | null>(null);
+  const [pk, setPk] = useState<string | null>(null);
   const getCid = async () => {
     try {
       const cid_ = await AsyncStorage.getItem('@lastUploadedCid');
       if (cid_ !== null) {
         setCid(cid_)
+      }
+    } catch (e) {
+      // error reading value
+    }
+  };
+
+  const getPk = async () => {
+    try {
+      const _pk = await helper.getMyDIDKeyPair(dIDCredentials.username, dIDCredentials.password);
+      const identity = _pk.secretKey.toString();
+      if (identity) {
+        setPk(identity)
       }
     } catch (e) {
       // error reading value
@@ -407,6 +420,32 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
       </ListItem.Content>
     </ListItem>
   );
+
+  const copyToClipboardPrivateKey = (pkValue: string) => {
+    Clipboard.setString(pkValue);
+    Toast.show({
+      type: 'success',
+      text1: 'Your Private Key copied to the clipboard!',
+      position: 'bottom',
+      bottomOffset: 0,
+    });
+  };
+  const renderPrivateKeyListItem = () => (
+    <ListItem onPress={() => cid && copyToClipboardPrivateKey(pk)} containerStyle={{ width: '100%' }}>
+      <ListItem.Content>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Card.Title style={{ textAlign: 'left', paddingRight: 10 }}>
+              Private Key
+            </Card.Title>
+            <Icon name="content-copy" type="material-community" onPress={() => pk && copyToClipboardPrivateKey(pk)} />
+          </View>
+          <Icon name="refresh" type="material-community" onPress={getPk} />
+        </View>
+        <ListItem.Subtitle>{pk || 'No Private Key Available'}</ListItem.Subtitle>
+      </ListItem.Content>
+    </ListItem>
+  );
   return (
     <Screen preset="scroll" style={styles.screen}>
       {renderHeader()}
@@ -464,6 +503,7 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
                     </ListItem.Content>
                   </ListItem>
                   {renderCIDListItem()}
+                  {renderPrivateKeyListItem()}
                   <ListItem
                     onPress={() =>
                       fulaAccount

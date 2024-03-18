@@ -79,12 +79,12 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
       if (!api) {
         api = await chainApi.init()
         fulaAccount = await chainApi.getAccountIdFromSeed(fulaAccountSeed)
-        while (gasBalance <= 1000000) {
+        while (gasBalance <= 10000000) {
           let gasBalanceStr = await chainApi.checkAccountBalance(api, fulaAccount)
           if (gasBalanceStr) {
             gasBalance = parseInt(gasBalanceStr)
           }
-          if (gasBalance <= 1000000){
+          if (gasBalance <= 10000000){
             await BackgroundJob.updateNotification({
               taskTitle: `Waiting for enough gas balance in ${fulaAccount}`,
               taskDesc: `Uploads are resumed as soon as gas balance is enough ...`,
@@ -521,6 +521,8 @@ export const initFula = async (
       }
       console.log('blox Address created: '+ bloxAddr)
     }
+    console.log('identity:')
+    console.log(identity)
     const fulaInit = await fula.init(
       identity, //bytes of the privateKey of did identity in string format
       storePath, // leave empty to use the default temp one
