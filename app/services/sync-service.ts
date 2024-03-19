@@ -3,7 +3,7 @@ import { Platform } from 'react-native'
 import BackgroundJob, {
   BackgroundTaskOptions,
 } from 'react-native-background-actions'
-import { fula, chainApi } from '@functionland/react-native-fula'
+import { fula, chainApi, blockchain } from '@functionland/react-native-fula'
 // import { TaggedEncryption } from '@functionland/fula-sec'
 import { AssetEntity } from '../realmdb/entities'
 import { SyncStatus } from '../types'
@@ -79,12 +79,12 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
       if (!api) {
         api = await chainApi.init()
         fulaAccount = await chainApi.getAccountIdFromSeed(fulaAccountSeed)
-        while (gasBalance <= 10000000) {
+        while (gasBalance <= 10000000000000000000) {
           let gasBalanceStr = await chainApi.checkAccountBalance(api, fulaAccount)
           if (gasBalanceStr) {
             gasBalance = parseInt(gasBalanceStr)
           }
-          if (gasBalance <= 10000000){
+          if (gasBalance <= 10000000000000000000){
             await BackgroundJob.updateNotification({
               taskTitle: `Waiting for enough gas balance in ${fulaAccount}`,
               taskDesc: `Uploads are resumed as soon as gas balance is enough ...`,
@@ -160,12 +160,15 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
         Assets.addOrUpdate([newAsset])
 
         //return the callback function
-        try {
-          callback?.(true, asset.id)
-        } catch (e) {
-          console.log('error happened in calling callback')
-          console.log(e)
-        }
+        /*
+          // Now calling thi part after pool replication
+          try {
+            callback?.(true, asset.id)
+          } catch (e) {
+            console.log('error happened in calling callback')
+            console.log(e)
+          }
+        */
       } else {
         console.log("filepath could not be found")
       }
@@ -174,16 +177,40 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
       //TODO: Replicate request should be sent to blockchain
       let storedCids = await fula.listRecentCidsAsString()
       if (api && storedCids.length && fulaPoolId && fulaReplicationFactor) {
-        let hashRes = await chainApi.batchUploadManifest(
+        console.log("calling batchUploadManifest")
+        console.log(storedCids)
+        let res = await fula.replicateRecentCids(
           api,
           fulaAccountSeed,
-          storedCids,
           fulaPoolId,
           fulaReplicationFactor,
         )
-        if (hashRes) {
-          await fula.clearCidsFromRecent()
+        if (res && res.status && res.cids.length) {
+          console.log(res)
+          if ((!fulaAccount || fulaAccount == "") && fulaAccountSeed) {
+            fulaAccount = await chainApi.getAccountIdFromSeed(fulaAccountSeed)
+          }
+          console.log("accontId before sending replicate request is :"+fulaAccount)
+          let res2 = await blockchain.replicateInPool(res.cids, fulaAccount, fulaPoolId)
+          if (res2.length) {
+            await fula.clearCidsFromRecent()
+            try {
+              for (let index = 0; index < assets?.length; index++) {
+                const asset = assets[index]
+                if (asset.cid && res2.includes(asset.cid)) {
+                  callback?.(true, asset.id)
+                } else {
+                  callback?.(false, "Asset was not replicated in the pool")
+                }
+              }
+            } catch {
+              /* empty */
+            }
+          }
         }
+      } else {
+        console.log("not calling batchUploadManifest")
+        console.log({api:api, storedCids:storedCids, fulaPoolId:fulaPoolId, fulaReplicationFactor: fulaReplicationFactor})
       }
     } catch (error) {
       console.log('upload to Fula network failed: ' + error)
