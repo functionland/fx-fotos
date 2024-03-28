@@ -13,6 +13,7 @@ import { Helper, DeviceUtils, KeyChain } from '../utils'
 import { ApiPromise } from '@polkadot/api'
 import * as helper from '../utils/helper'
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Sentry from "@sentry/react-native";
 
 type TaskParams = {
   callback?: (success: boolean, assetId: string, error?: Error) => void
@@ -41,7 +42,7 @@ const sleep = async(ms: number) => {
 }
 
 const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
-  console.log('uploadAssetBackgroundTask started')
+  Sentry.captureMessage('uploadAssetBackgroundTask started', 'info')
   if (Platform.OS === 'ios') {
     console.warn(
       'This task will not keep your app alive in the background by itself, use other library like react-native-track-player that use audio,',
@@ -67,14 +68,14 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
   let gasBalance = 0
 
   try {
-    console.log('uploadAssetBackgroundTask...')
+    Sentry.captureMessage('uploadAssetBackgroundTask...', 'info')
     let fulaConfig = await initFula()
     if (fulaConfig) {
       Helper.storeFulaPeerId(fulaConfig.peerId)
       Helper.storeFulaRootCID(fulaConfig.rootCid)
     }
-    console.log('uploadAssetBackgroundTask fulaConfig')
-    console.log(fulaConfig)
+    Sentry.captureMessage('uploadAssetBackgroundTask fulaConfig', "info")
+    Sentry.captureMessage(JSON.stringify(fulaConfig), "info")
     try {
       if (!api) {
         api = await chainApi.init()
@@ -99,22 +100,22 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
         }
       }
     } catch (e) {
-      console.error("Error happened in initializing chainApi")
+      Sentry.captureException(e)
     }
 
     for (let index = 0; index < assets?.length; index++) {
       const asset = assets[index]
-      console.log('uploadAssetBackgroundTask asset...', index)
+      Sentry.captureMessage('uploadAssetBackgroundTask asset...'+ index, "info")
 
       //Ignore asset greater than 200 MB
       if (!asset?.fileSize || asset?.fileSize > 200 * 1000 * 1000) {
-        console.log('Ignore large asset ...', asset)
+        Sentry.captureMessage('Ignore large asset ...'+ JSON.stringify(asset), "warning")
         continue
       }
 
       // Prepare task notification message
       if (BackgroundJob.isRunning()) {
-        console.log("BackgroundJob.isRunning")
+        Sentry.captureMessage("BackgroundJob.isRunning", "info")
         await BackgroundJob.updateNotification({
           taskTitle: `Uploading asset #${index + 1}/${assets?.length}`,
           taskDesc: `Syncing your assets ...`,
@@ -135,18 +136,18 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
           ? slashSplit[slashSplit?.length - 1]
           : 'unknown' + index
       }
-      console.log("filename="+filename)
-      console.log(asset.uri)
-      console.log("_filePath="+_filePath)
+      Sentry.captureMessage("filename="+filename, "info")
+      Sentry.captureMessage(asset?.uri, "info")
+      Sentry.captureMessage("_filePath="+_filePath, "info")
       // Upload file to the WNFS
       if (_filePath) {
-        console.log("calling fula.writeFile writting in "+`${Constants.FOTOS_WNFS_ROOT}/${filename}`)
+        Sentry.captureMessage("calling fula.writeFile writting in "+`${Constants.FOTOS_WNFS_ROOT}/${filename}`, "info")
         const cid = await fula.writeFile(
           `${Constants.FOTOS_WNFS_ROOT}/${filename}`,
           _filePath,
         )
         storeCid(cid);
-        console.log("cid="+cid)
+        Sentry.captureMessage("cid="+cid, "info")
         await Helper.storeFulaRootCID(cid)
         //Update asset record in database
         const newAsset = {
@@ -155,8 +156,8 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
           syncDate: new Date(),
           syncStatus: SyncStatus.SYNCED,
         }
-        console.log("newAsset")
-        console.log(newAsset)
+        Sentry.captureMessage("newAsset", "info")
+        Sentry.captureMessage(JSON.stringify(newAsset), "info")
         Assets.addOrUpdate([newAsset])
 
         //return the callback function
@@ -170,15 +171,15 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
           }
         */
       } else {
-        console.log("filepath could not be found")
+        Sentry.captureException(new Error("filepath could not be found"))
       }
     }
     try {
       //TODO: Replicate request should be sent to blockchain
       let storedCids = await fula.listRecentCidsAsString()
       if (api && storedCids.length && fulaPoolId && fulaReplicationFactor) {
-        console.log("calling batchUploadManifest")
-        console.log(storedCids)
+        Sentry.captureMessage("calling batchUploadManifest", "info")
+        Sentry.captureMessage(JSON.stringify(storedCids), "info")
         let res = await fula.replicateRecentCids(
           api,
           fulaAccountSeed,
@@ -186,11 +187,11 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
           fulaReplicationFactor,
         )
         if (res && res.status && res.cids.length) {
-          console.log(res)
+          Sentry.captureMessage(JSON.stringify(res), "info")
           if ((!fulaAccount || fulaAccount == "") && fulaAccountSeed) {
             fulaAccount = await chainApi.getAccountIdFromSeed(fulaAccountSeed)
           }
-          console.log("accontId before sending replicate request is :"+fulaAccount)
+          Sentry.captureMessage("accontId before sending replicate request is :"+fulaAccount,"info")
           let res2 = await blockchain.replicateInPool(res.cids, fulaAccount, fulaPoolId)
           if (res2.length) {
             await fula.clearCidsFromRecent()
@@ -209,14 +210,14 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
           }
         }
       } else {
-        console.log("not calling batchUploadManifest")
-        console.log({api:api, storedCids:storedCids, fulaPoolId:fulaPoolId, fulaReplicationFactor: fulaReplicationFactor})
+        Sentry.captureException(new Error("not calling batchUploadManifest"))
+        Sentry.captureException(JSON.stringify({api:api, storedCids:storedCids, fulaPoolId:fulaPoolId, fulaReplicationFactor: fulaReplicationFactor}))
       }
     } catch (error) {
-      console.log('upload to Fula network failed: ' + error)
+      Sentry.captureException(error)
     }
   } catch (error) {
-    console.log('uploadAssetBackgroundTask:', error)
+    Sentry.captureException(error)
     try {
       callback?.(false, error)
     } catch {
@@ -303,9 +304,9 @@ export const uploadAssetsInBackground = async (options?: {
   callback?: (success: boolean) => void
 }) => {
   try {
-    console.log('uploadAssetsInBackground...')
+    Sentry.captureMessage('uploadAssetsInBackground...', "info")
     while (BackgroundJob.isRunning()) {
-      console.log('wating uploadAssetsInBackground...')
+      Sentry.captureMessage('wating uploadAssetsInBackground...', "info")
       await Helper.sleep(10 * 1000)
     }
     let assets = await Assets.getAllNeedToSync()
@@ -318,36 +319,36 @@ export const uploadAssetsInBackground = async (options?: {
       return true
     })
     if (!assets.length) {
-      console.log('No new assets to upload.')
+      Sentry.captureMessage('No new assets to upload.', "info")
       return
     }
-    console.log('uploadAssetsInBackground assets')
+    Sentry.captureMessage('uploadAssetsInBackground assets', "info")
     let fulaAccountSeed = ''
     const fulaAcountSeedObj = await helper.getFulaAccountSeed()
     if (fulaAcountSeedObj) {
       fulaAccountSeed = fulaAcountSeedObj.password
     }
-    console.log('creating  uploadCallback')
+    Sentry.captureMessage('creating  uploadCallback', "info")
     const uploadCallback = (success, assetId) => {
       uploadingAssets.delete(assetId)
       if (options?.callback) {
         options.callback(success)
       }
     }
-    console.log('uploadAssetsInBackground fulaAccountSeed')
-    console.log(fulaAccountSeed)
+    Sentry.captureMessage('uploadAssetsInBackground fulaAccountSeed', "info")
+    Sentry.captureMessage(fulaAccountSeed, "info")
     let fulaPoolId = 0
     const fulaPoolIdObj = await helper.getFulaPoolId()
-    console.log('uploadAssetsInBackground fulaPoolIdObj')
-    console.log(fulaPoolIdObj)
+    Sentry.captureMessage('uploadAssetsInBackground fulaPoolIdObj', "info")
+    Sentry.captureMessage(JSON.stringify(fulaPoolIdObj), "info")
     if (fulaPoolIdObj) {
       fulaPoolId = parseInt(fulaPoolIdObj.password, 10)
     }
-    console.log('uploadAssetsInBackground fulaPoolId')
-    console.log(fulaPoolId)
+    Sentry.captureMessage('uploadAssetsInBackground fulaPoolId', 'info')
+    Sentry.captureMessage(fulaPoolId.toString(), 'info')
     const fulaReplicationFactor = 6
     let api = await chainApi.init()
-    console.log('api was initialized')
+    Sentry.captureMessage('api was initialized', 'info')
 
     if (!BackgroundJob.isRunning()) {
       if (assets?.length) {
@@ -367,7 +368,7 @@ export const uploadAssetsInBackground = async (options?: {
 
   } catch (e) {
     await BackgroundJob.stop()
-    console.log('Error in uploadAssetsInBackground:', e)
+    Sentry.captureException(e)
   }
 }
 
@@ -487,7 +488,7 @@ export const initFula = async (
 ): Promise<
   { peerId: string; rootCid: string; } | undefined
 > => {
-  console.log("called initFula")
+  Sentry.captureMessage("called initFula", "info")
   try {
     let {
       identity = null,
@@ -534,10 +535,16 @@ export const initFula = async (
           const fulaPoolCreatorObj = await helper.getFulaPoolCreator()
           if (fulaPoolCreatorObj) {
             _poolCreator = fulaPoolCreatorObj.password
+            Sentry.captureMessage('_poolCreator '+ _poolCreator, "info")
+          } else {
+            Sentry.captureMessage('no _poolCreator ', "error")
           }
           const fulaPoolIdObj = await helper.getFulaPoolId()
           if (fulaPoolIdObj) {
             _poolId = fulaPoolIdObj.password
+            Sentry.captureMessage('_poolId '+ _poolId, "info")
+          } else {
+            Sentry.captureMessage('no _poolId ', "error")
           }
           if (_poolCreator && _poolId !== '0') {
             bloxAddr = Helper.generatePoolAddress(_poolId, _poolCreator)
@@ -546,10 +553,10 @@ export const initFula = async (
       if (!bloxAddr) {
         throw Error('Could not find default blox address!')
       }
-      console.log('blox Address created: '+ bloxAddr)
+      Sentry.captureMessage('blox Address created: '+ bloxAddr, "info")
     }
-    console.log('identity:')
-    console.log(identity)
+    Sentry.captureMessage('identity:'+identity, "info")
+
     const fulaInit = await fula.init(
       identity, //bytes of the privateKey of did identity in string format
       storePath, // leave empty to use the default temp one
@@ -560,11 +567,11 @@ export const initFula = async (
       true,
       true,
     )
-    console.log('init complete');
-    console.log(fulaInit);
+    Sentry.captureMessage('init complete', 'info')
+    Sentry.captureMessage(JSON.stringify(fulaInit), 'info')
     return fulaInit
   } catch (error) {
-    console.log('fulaInit Error', error)
+    Sentry.captureException(error)
   }
 }
 interface FulaAccountConfig {
@@ -602,6 +609,7 @@ export const initFulaAccount = async (
     }
 
     if (!fulaAccountSeed) {
+      Sentry.captureException(new Error('Could not find default accountSeed!'))
       throw new Error('Could not find default accountSeed!')
     }
     return Promise.resolve({
@@ -609,7 +617,7 @@ export const initFulaAccount = async (
       fulaAccountSeed: fulaAccountSeed,
     })
   } catch (error) {
-    console.log('initAccount Error', error)
+    Sentry.captureException(error)
     return Promise.reject(error)
   }
 }

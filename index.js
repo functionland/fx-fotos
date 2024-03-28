@@ -14,7 +14,12 @@ import 'text-encoding-polyfill'
 import 'react-native-url-polyfill/auto'
 import { AppRegistry } from 'react-native'
 import App from './app/app'
+import * as Sentry from '@sentry/react-native';
+
+Sentry.init({
+  dsn: 'https://c705a33a416c4ba7a24bf6b5febcf2e4@o4506985840312320.ingest.us.sentry.io/4506986575298560',
+});
 
 AppRegistry.registerComponent('fotos', () => App)
 
-export default App
+export default Sentry.wrap(App);
