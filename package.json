@@ -1,6 +1,6 @@
 {
   "name": "fotos",
-  "version": "1.5.3",
+  "version": "1.5.4",
   "private": true,
   "scripts": {
     "start": "SET NODE_OPTIONS=--openssl-legacy-provider && react-native start",
