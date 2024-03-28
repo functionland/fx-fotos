@@ -336,7 +336,7 @@ export const uploadAssetsInBackground = async (options?: {
       }
     }
     Sentry.captureMessage('uploadAssetsInBackground fulaAccountSeed', "debug")
-    Sentry.captureMessage(fulaAccountSeed, "debug")
+    Sentry.captureMessage('fulaAccountSeed fetched', "debug")
     let fulaPoolId = 0
     const fulaPoolIdObj = await helper.getFulaPoolId()
     Sentry.captureMessage('uploadAssetsInBackground fulaPoolIdObj', "debug")
