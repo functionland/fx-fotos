@@ -68,14 +68,14 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
   let gasBalance = 0
 
   try {
-    Sentry.captureMessage('uploadAssetBackgroundTask...', 'info')
+    Sentry.captureMessage('uploadAssetBackgroundTask...', 'debug')
     let fulaConfig = await initFula()
     if (fulaConfig) {
       Helper.storeFulaPeerId(fulaConfig.peerId)
       Helper.storeFulaRootCID(fulaConfig.rootCid)
     }
-    Sentry.captureMessage('uploadAssetBackgroundTask fulaConfig', "info")
-    Sentry.captureMessage(JSON.stringify(fulaConfig), "info")
+    Sentry.captureMessage('uploadAssetBackgroundTask fulaConfig', "debug")
+    Sentry.captureMessage(JSON.stringify(fulaConfig), "debug")
     try {
       if (!api) {
         api = await chainApi.init()
@@ -105,7 +105,7 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
 
     for (let index = 0; index < assets?.length; index++) {
       const asset = assets[index]
-      Sentry.captureMessage('uploadAssetBackgroundTask asset...'+ index, "info")
+      Sentry.captureMessage('uploadAssetBackgroundTask asset...'+ index, "debug")
 
       //Ignore asset greater than 200 MB
       if (!asset?.fileSize || asset?.fileSize > 200 * 1000 * 1000) {
@@ -115,7 +115,7 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
 
       // Prepare task notification message
       if (BackgroundJob.isRunning()) {
-        Sentry.captureMessage("BackgroundJob.isRunning", "info")
+        Sentry.captureMessage("BackgroundJob.isRunning", "debug")
         await BackgroundJob.updateNotification({
           taskTitle: `Uploading asset #${index + 1}/${assets?.length}`,
           taskDesc: `Syncing your assets ...`,
@@ -136,18 +136,18 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
           ? slashSplit[slashSplit?.length - 1]
           : 'unknown' + index
       }
-      Sentry.captureMessage("filename="+filename, "info")
-      Sentry.captureMessage(asset?.uri, "info")
-      Sentry.captureMessage("_filePath="+_filePath, "info")
+      Sentry.captureMessage("filename="+filename, "debug")
+      Sentry.captureMessage(asset?.uri, "debug")
+      Sentry.captureMessage("_filePath="+_filePath, "debug")
       // Upload file to the WNFS
       if (_filePath) {
-        Sentry.captureMessage("calling fula.writeFile writting in "+`${Constants.FOTOS_WNFS_ROOT}/${filename}`, "info")
+        Sentry.captureMessage("calling fula.writeFile writting in "+`${Constants.FOTOS_WNFS_ROOT}/${filename}`, "debug")
         const cid = await fula.writeFile(
           `${Constants.FOTOS_WNFS_ROOT}/${filename}`,
           _filePath,
         )
         storeCid(cid);
-        Sentry.captureMessage("cid="+cid, "info")
+        Sentry.captureMessage("cid="+cid, "debug")
         await Helper.storeFulaRootCID(cid)
         //Update asset record in database
         const newAsset = {
@@ -156,8 +156,8 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
           syncDate: new Date(),
           syncStatus: SyncStatus.SYNCED,
         }
-        Sentry.captureMessage("newAsset", "info")
-        Sentry.captureMessage(JSON.stringify(newAsset), "info")
+        Sentry.captureMessage("newAsset", "debug")
+        Sentry.captureMessage(JSON.stringify(newAsset), "debug")
         Assets.addOrUpdate([newAsset])
 
         //return the callback function
@@ -178,8 +178,8 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
       //TODO: Replicate request should be sent to blockchain
       let storedCids = await fula.listRecentCidsAsString()
       if (api && storedCids.length && fulaPoolId && fulaReplicationFactor) {
-        Sentry.captureMessage("calling batchUploadManifest", "info")
-        Sentry.captureMessage(JSON.stringify(storedCids), "info")
+        Sentry.captureMessage("calling batchUploadManifest", "debug")
+        Sentry.captureMessage(JSON.stringify(storedCids), "debug")
         let res = await fula.replicateRecentCids(
           api,
           fulaAccountSeed,
@@ -187,11 +187,11 @@ const uploadAssetBackgroundTask = async (taskParameters?: TaskParams) => {
           fulaReplicationFactor,
         )
         if (res && res.status && res.cids.length) {
-          Sentry.captureMessage(JSON.stringify(res), "info")
+          Sentry.captureMessage(JSON.stringify(res), "debug")
           if ((!fulaAccount || fulaAccount == "") && fulaAccountSeed) {
             fulaAccount = await chainApi.getAccountIdFromSeed(fulaAccountSeed)
           }
-          Sentry.captureMessage("accontId before sending replicate request is :"+fulaAccount,"info")
+          Sentry.captureMessage("accontId before sending replicate request is :"+fulaAccount,"debug")
           let res2 = await blockchain.replicateInPool(res.cids, fulaAccount, fulaPoolId)
           if (res2.length) {
             await fula.clearCidsFromRecent()
@@ -304,9 +304,9 @@ export const uploadAssetsInBackground = async (options?: {
   callback?: (success: boolean) => void
 }) => {
   try {
-    Sentry.captureMessage('uploadAssetsInBackground...', "info")
+    Sentry.captureMessage('uploadAssetsInBackground...', "debug")
     while (BackgroundJob.isRunning()) {
-      Sentry.captureMessage('wating uploadAssetsInBackground...', "info")
+      Sentry.captureMessage('wating uploadAssetsInBackground...', "debug")
       await Helper.sleep(10 * 1000)
     }
     let assets = await Assets.getAllNeedToSync()
@@ -319,33 +319,33 @@ export const uploadAssetsInBackground = async (options?: {
       return true
     })
     if (!assets.length) {
-      Sentry.captureMessage('No new assets to upload.', "info")
+      Sentry.captureMessage('No new assets to upload.', "debug")
       return
     }
-    Sentry.captureMessage('uploadAssetsInBackground assets', "info")
+    Sentry.captureMessage('uploadAssetsInBackground assets', "debug")
     let fulaAccountSeed = ''
     const fulaAcountSeedObj = await helper.getFulaAccountSeed()
     if (fulaAcountSeedObj) {
       fulaAccountSeed = fulaAcountSeedObj.password
     }
-    Sentry.captureMessage('creating  uploadCallback', "info")
+    Sentry.captureMessage('creating  uploadCallback', "debug")
     const uploadCallback = (success, assetId) => {
       uploadingAssets.delete(assetId)
       if (options?.callback) {
         options.callback(success)
       }
     }
-    Sentry.captureMessage('uploadAssetsInBackground fulaAccountSeed', "info")
-    Sentry.captureMessage(fulaAccountSeed, "info")
+    Sentry.captureMessage('uploadAssetsInBackground fulaAccountSeed', "debug")
+    Sentry.captureMessage(fulaAccountSeed, "debug")
     let fulaPoolId = 0
     const fulaPoolIdObj = await helper.getFulaPoolId()
-    Sentry.captureMessage('uploadAssetsInBackground fulaPoolIdObj', "info")
-    Sentry.captureMessage(JSON.stringify(fulaPoolIdObj), "info")
+    Sentry.captureMessage('uploadAssetsInBackground fulaPoolIdObj', "debug")
+    Sentry.captureMessage(JSON.stringify(fulaPoolIdObj), "debug")
     if (fulaPoolIdObj) {
       fulaPoolId = parseInt(fulaPoolIdObj.password, 10)
     }
-    Sentry.captureMessage('uploadAssetsInBackground fulaPoolId', 'info')
-    Sentry.captureMessage(fulaPoolId.toString(), 'info')
+    Sentry.captureMessage('uploadAssetsInBackground fulaPoolId', 'debug')
+    Sentry.captureMessage(fulaPoolId.toString(), 'debug')
     const fulaReplicationFactor = 6
     let api = await chainApi.init()
     Sentry.captureMessage('api was initialized', 'info')
@@ -488,7 +488,7 @@ export const initFula = async (
 ): Promise<
   { peerId: string; rootCid: string; } | undefined
 > => {
-  Sentry.captureMessage("called initFula", "info")
+  Sentry.captureMessage("called initFula", "debug")
   try {
     let {
       identity = null,
@@ -535,14 +535,14 @@ export const initFula = async (
           const fulaPoolCreatorObj = await helper.getFulaPoolCreator()
           if (fulaPoolCreatorObj) {
             _poolCreator = fulaPoolCreatorObj.password
-            Sentry.captureMessage('_poolCreator '+ _poolCreator, "info")
+            Sentry.captureMessage('_poolCreator '+ _poolCreator, "debug")
           } else {
             Sentry.captureMessage('no _poolCreator ', "error")
           }
           const fulaPoolIdObj = await helper.getFulaPoolId()
           if (fulaPoolIdObj) {
             _poolId = fulaPoolIdObj.password
-            Sentry.captureMessage('_poolId '+ _poolId, "info")
+            Sentry.captureMessage('_poolId '+ _poolId, "debug")
           } else {
             Sentry.captureMessage('no _poolId ', "error")
           }
@@ -555,7 +555,7 @@ export const initFula = async (
       }
       Sentry.captureMessage('blox Address created: '+ bloxAddr, "info")
     }
-    Sentry.captureMessage('identity:'+identity, "info")
+    Sentry.captureMessage('identity created', "debug")
 
     const fulaInit = await fula.init(
       identity, //bytes of the privateKey of did identity in string format
