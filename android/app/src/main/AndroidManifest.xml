@@ -13,6 +13,7 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SHORT_SERVICE" />
 
     <application
       android:name=".MainApplication"
@@ -54,5 +55,6 @@
           </intent-filter>
       </activity>
       <service android:name="com.asterinet.react.bgactions.RNBackgroundActionsTask" android:foregroundServiceType="dataSync" android:exported="false" />
+      <service android:name="app.notifee.core.ForegroundService" android:foregroundServiceType="shortService" />
     </application>
 </manifest>
