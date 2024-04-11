@@ -3760,7 +3760,7 @@ index b67ef4d..cf8cab4 100644
      <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
      <application>
 -        <service android:name=".RNBackgroundActionsTask"/>
-+        <service android:name=".RNBackgroundActionsTask" android:foregroundServiceType="shortService"/>
++        <service android:name=".RNBackgroundActionsTask" android:foregroundServiceType="dataSync"/>
      </application>
  </manifest>
 diff --git a/node_modules/react-native-background-actions/android/src/main/java/com/asterinet/react/bgactions/RNBackgroundActionsTask.java b/node_modules/react-native-background-actions/android/src/main/java/com/asterinet/react/bgactions/RNBackgroundActionsTask.java
