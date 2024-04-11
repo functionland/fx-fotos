@@ -54,12 +54,7 @@
               <data android:host="fotos.fx.land" />
           </intent-filter>
       </activity>
-      <service
-          android:name=".MetamaskSDKService"
-          android:foregroundServiceType="shortService"
-          android:exported="false">
-      </service>
-      <service android:name="com.asterinet.react.bgactions.RNBackgroundActionsTask"  android:exported="false" />
-      <service android:name="app.notifee.core.ForegroundService" android:foregroundServiceType="dataSync" />
+      <service android:name="com.asterinet.react.bgactions.RNBackgroundActionsTask" android:foregroundServiceType="dataSync" android:exported="false" />
+      <service android:name="app.notifee.core.ForegroundService" android:foregroundServiceType="shortService" />
     </application>
 </manifest>
