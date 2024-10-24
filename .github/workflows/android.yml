@@ -33,15 +33,6 @@ jobs:
     - name: Decode Keystore
       run: echo "${{ secrets.MYAPP_RELEASE_STORE_FILE_BASE64 }}" | base64 -d > $GITHUB_WORKSPACE/android/app/fotos-upload-key.jks
 
-    - name: Update Version Code and Name
-      run: |
-        latest_version=$(curl --silent "https://api.github.com/repos/${{ github.repository }}/releases/latest" | jq -r .tag_name)
-        new_version_code=$(grep 'versionCode' android/app/build.gradle | sed 's/[^0-9]*//g' | awk '{print $1 + 1}')
-        sed -i "s/versionCode [0-9]*/versionCode ${new_version_code}/" android/app/build.gradle
-        sed -i "s/versionName \".*\"/versionName \"${latest_version}\"/" android/app/build.gradle
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
     - name: Build Android Bundle
       run: |
         cd android
