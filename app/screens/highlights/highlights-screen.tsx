@@ -29,7 +29,7 @@ import Animated, {
   withDelay,
 } from 'react-native-reanimated'
 import { snapPoint } from 'react-native-redash'
-import FastImage from 'react-native-fast-image'
+import FastImage from '@changwoolab/react-native-fast-image'
 import { useRecoilState } from 'recoil'
 import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
 import { SharedElement } from 'react-navigation-shared-element'

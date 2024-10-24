@@ -3,11 +3,11 @@
 buildscript {
     ext {
 		buildToolsVersion = "34.0.0"
-        minSdkVersion = 26
+        minSdkVersion = 30
         compileSdkVersion = 34
         targetSdkVersion = 34
         ndkVersion = "26.2.11394342"
-        kotlin_version = "1.9.22" // Update this to your version
+        kotlin_version = "2.0.0" // Update this to your version
         enableHermes = true
     }
     repositories {

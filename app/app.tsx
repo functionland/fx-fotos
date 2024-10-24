@@ -37,6 +37,7 @@ import { COMM_SERVER_URL, INFURA_API_KEY } from './utils/walletConnectConifg'
 import { ErrorBoundary } from './screens/error/error-boundary'
 import { ThemeProvider, RneLightTheme, RneDarkTheme } from './theme'
 import BackgroundTimer from 'react-native-background-timer'
+import { MetaMaskSDKProvider } from './contexts/MetaMaskContext';
 
 // TODO how to properly make sure we only try to open link when the app is active?
 // current problem is that sdk declaration is outside of the react scope so I cannot directly verify the state
@@ -49,6 +50,18 @@ const canOpenLink = true
 
 export const NAVIGATION_PERSISTENCE_KEY = 'NAVIGATION_STATE'
 
+const openDeeplink = (link: string, _target?: string) => {
+  console.debug(`App::openDeepLink() ${link}`);
+  if (canOpenLink) {
+    Linking.openURL(link);
+  } else {
+    console.debug(
+      'useBlockchainProiver::openDeepLink app is not active - skip link',
+      link
+    );
+  }
+};
+
 const WithSDKConfig = ({ children }: { children: React.ReactNode }) => {
   const {
     socketServer,
@@ -56,11 +69,11 @@ const WithSDKConfig = ({ children }: { children: React.ReactNode }) => {
     useDeeplink,
     debug,
     checkInstallationImmediately,
-  } = useSDKConfig()
+  } = useSDKConfig();
 
   return (
     <MetaMaskProvider
-      // debug={debug}
+      debug={true}
       sdkOptions={{
         // communicationServerUrl: socketServer,
         // TODO: change to enableAnalytics when updating the SDK version
@@ -73,35 +86,31 @@ const WithSDKConfig = ({ children }: { children: React.ReactNode }) => {
           developerMode: true,
           plaintext: true,
         },
-        openDeeplink: (link: string, _target?: string) => {
-          console.debug(`App::openDeepLink() ${link}`)
-          if (canOpenLink) {
-            Linking.openURL(link)
-          } else {
-            console.debug(
-              'useBlockchainProiver::openDeepLink app is not active - skip link',
-              link,
-            )
-          }
-        },
+        openDeeplink: openDeeplink,
         timer: BackgroundTimer,
         useDeeplink,
-        checkInstallationImmediately,
+        checkInstallationImmediately: false,
         storage: {
           enabled: true,
         },
         dappMetadata: {
-          name: 'fxfotos',
+          name: 'land.fx.fotos',
+          url: 'https://fx.land',
+          scheme: 'fotos',
+          iconUrl:
+            'https://ipfs.cloud.fx.land/gateway/bafkreigl4s3qehoblwqglo5zjjjwtzkomxg4i6gygfeqk5s5h33m5iuyra',
         },
         i18nOptions: {
           enabled: true,
         },
       }}
     >
-      {children}
+      <MetaMaskSDKProvider>
+        {children}
+      </MetaMaskSDKProvider>
     </MetaMaskProvider>
-  )
-}
+  );
+};
 
 /**
  * This is the root component of our app.

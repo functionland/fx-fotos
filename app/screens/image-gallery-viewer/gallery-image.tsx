@@ -16,7 +16,7 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from 'react-native'
-import FastImage from 'react-native-fast-image'
+import FastImage from '@changwoolab/react-native-fast-image'
 import {
   NativeViewGestureHandler,
   PanGestureHandler,
