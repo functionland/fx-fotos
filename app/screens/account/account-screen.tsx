@@ -34,7 +34,7 @@ import {
   fulaAccountSeedState,
 } from '../../store'
 import Clipboard from '@react-native-clipboard/clipboard'
-import { useSDK } from '@metamask/sdk-react'
+import { useWalletConnectModal } from '@walletconnect/modal-react-native';
 import { getChainName } from '../../utils/walletConnectConifg'
 import notifee from '@notifee/react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -52,7 +52,7 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
   const [fulaPoolCreator, setFulaPoolCreator] = useRecoilState(fulaPoolCreatorState)
   const [fulaAccountSeed, setFulaAccountSeed] =
     useRecoilState(fulaAccountSeedState)
-  const { account, chainId, provider, sdk, connected } = useSDK()
+    const { open, isConnected, provider, address } = useWalletConnectModal()
 
   const [fulaPeerId, setFulaPeerId] = useRecoilState(fulaPeerIdState)
   const [did, setDID] = useState(null)
@@ -295,7 +295,7 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
           text: 'Yes',
           onPress: async () => {
             try {
-              await sdk?.terminate()
+              await provider?.disconnect()
               await Keychain.reset(Keychain.Service.DIDCredentials)
             } catch (error) {
               console.log(error)
@@ -373,7 +373,7 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
       leftComponent={<HeaderArrowBack navigation={navigation as any} />}
       rightComponent={
         <HeaderRightContainer>
-          {connected && (
+          {isConnected && (
             <Icon
               type="material-community"
               size={28}
@@ -455,24 +455,22 @@ export const AccountScreen: React.FC<Props> = ({ navigation }) => {
             <HeaderAvatar
               size={100}
               iconSize={80}
-              connected={fulaAccount && fulaPeerId}
-              provider={provider}
+              connected={(fulaAccount && fulaPeerId)?true:false}
             />
           </SharedElement>
 
           {fulaAccount && fulaPeerId ? (
             <>
               <View style={styles.section}>
-                {chainId ? (
+                {address ? (
                   <>
-                    <Text h4>{getChainName(chainId)}</Text>
                     <Text ellipsizeMode="tail" style={styles.textCenter}>
-                      {account}
+                      {address}
                     </Text>
                   </>
                 ) : (
                   !dIDCredentials &&
-                  chainId && (
+                  address && (
                     <Button
                       title="Link to Account"
                       onPress={signWalletAddress}

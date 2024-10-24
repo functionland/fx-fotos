@@ -20,6 +20,7 @@ import { useSDK } from '@metamask/sdk-react'
 import { fula, chainApi } from '@functionland/react-native-fula'
 import { DeviceUtils, KeyChain, Helper } from '../../utils'
 import { useMetaMask } from '../../contexts/MetaMaskContext';
+import { useWalletConnectModal } from '@walletconnect/modal-react-native';
 
 type Props = NativeStackScreenProps<
   RootStackParamList,
@@ -43,6 +44,7 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
   const cancelLinking = () => {
     cancelSign();
   };
+  const { isConnected } = useWalletConnectModal();
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
@@ -213,43 +215,47 @@ export const CreateDIDScreen: React.FC<Props> = ({ navigation, route }) => {
             You need to link a password to your wallet to generate your DID
           </Text>
         </View>
-        <View style={styles.section}>
-          <Input
-            returnKeyType="done"
-            placeholder="Enter your password"
-            containerStyle={{
-              marginTop: 20,
-            }}
-            textContentType="password"
-            secureTextEntry={!showPassword}
-            rightIcon={{
-              name: showPassword ? 'visibility-off' : 'visibility',
-              color: 'white',
-              onPress: () => setShowPassword(!showPassword),
-            }}
-            style={{ textAlign: 'center' }}
-            onChangeText={text => setPassword(text)}
-          />
-        </View>
-        <View style={styles.section}>
-          <Icon name="md-warning-outline" type="ionicon" size={24} />
-          <Text style={styles.textCenter}>
-            You should always use the same password or you cannot retrieve your
-            identity and data!
-          </Text>
-          <CheckBox
-            title="I understand the risk of losing my password"
-            checked={iKnow}
-            onPress={() => setIKnow(!iKnow)}
-          />
-        </View>
+        {isConnected && (
+          <>
+          <View style={styles.section}>
+            <Input
+              returnKeyType="done"
+              placeholder="Enter your password"
+              containerStyle={{
+                marginTop: 20,
+              }}
+              textContentType="password"
+              secureTextEntry={!showPassword}
+              rightIcon={{
+                name: showPassword ? 'visibility-off' : 'visibility',
+                color: 'white',
+                onPress: () => setShowPassword(!showPassword),
+              }}
+              style={{ textAlign: 'center' }}
+              onChangeText={text => setPassword(text)}
+            />
+          </View>
+          <View style={styles.section}>
+            <Icon name="md-warning-outline" type="ionicon" size={24} />
+            <Text style={styles.textCenter}>
+              You should always use the same password or you cannot retrieve your
+              identity and data!
+            </Text>
+            <CheckBox
+              title="I understand the risk of losing my password"
+              checked={iKnow}
+              onPress={() => setIKnow(!iKnow)}
+            />
+          </View>
+          </>
+        )}
         <View style={styles.section}>
         <Button
-          disabled={!iKnow || !passwod?.length}
+          disabled={isConnected && (!iKnow || !passwod?.length)}
           onPress={isLinking ? cancelLinking : signPassword}
         >
           {isLinking && <ActivityIndicator />}
-          {isLinking ? ' Cancel' : 'Link password'}
+          {isLinking ? ' Cancel' : !isConnected ? 'Connect' : 'Link password'}
         </Button>
         </View>
       </View>

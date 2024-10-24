@@ -224,6 +224,7 @@ export function AppNavigator(props: NavigationProps) {
             'http://fotos.fx.land',
             'fotos://fotos.fx.land',
             'fotos://',
+            'fxfotos://',
           ],
           config: {
             initialRouteName: AppNavigationNames.HomeScreen,

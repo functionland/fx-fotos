@@ -31,6 +31,7 @@
   },
   "dependencies": {
     "@babel/preset-env": "^7.20.0",
+    "@changwoolab/react-native-fast-image": "^8.6.7",
     "@functionland/fula-sec": "^2.0.0",
     "@functionland/react-native-fula": "1.54.28",
     "@functionland/recyclerlistview": "^4.2.3",
@@ -62,6 +63,7 @@
     "@types/shortid": "^0.0.29",
     "@types/uuid": "^8.3.4",
     "@visx/scale": "^3.5.0",
+    "@walletconnect/modal-react-native": "^1.1.0",
     "@walletconnect/react-native-compat": "^2.17.1",
     "big-integer": "^1.6.51",
     "eciesjs": "^0.4.8",
@@ -83,7 +85,6 @@
     "react-native-background-actions": "^3.0.0",
     "react-native-background-timer": "^2.4.1",
     "react-native-crypto": "^2.2.0",
-    "@changwoolab/react-native-fast-image": "^8.6.7",
     "react-native-fs": "^2.20.0",
     "react-native-gesture-handler": "^2.14.1",
     "react-native-get-random-values": "^1.11.0",
