@@ -28,15 +28,12 @@ import {
   useNavigationPersistence,
 } from './navigators'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import {
-  MetaMaskProvider,
-  SDKConfigProvider,
-  useSDKConfig,
-} from '@metamask/sdk-react'
 import { COMM_SERVER_URL, INFURA_API_KEY } from './utils/walletConnectConifg'
 import { ErrorBoundary } from './screens/error/error-boundary'
 import { ThemeProvider, RneLightTheme, RneDarkTheme } from './theme'
 import BackgroundTimer from 'react-native-background-timer'
+import { MetaMaskSDKProvider } from './contexts/MetaMaskContext';
+import { WalletConnectModal } from '@walletconnect/modal-react-native';
 
 // TODO how to properly make sure we only try to open link when the app is active?
 // current problem is that sdk declaration is outside of the react scope so I cannot directly verify the state
@@ -48,60 +45,6 @@ const canOpenLink = true
 // https://github.com/kmagiera/react-native-screens#using-native-stack-navigator
 
 export const NAVIGATION_PERSISTENCE_KEY = 'NAVIGATION_STATE'
-
-const WithSDKConfig = ({ children }: { children: React.ReactNode }) => {
-  const {
-    socketServer,
-    infuraAPIKey,
-    useDeeplink,
-    debug,
-    checkInstallationImmediately,
-  } = useSDKConfig()
-
-  return (
-    <MetaMaskProvider
-      // debug={debug}
-      sdkOptions={{
-        // communicationServerUrl: socketServer,
-        // TODO: change to enableAnalytics when updating the SDK version
-        // enableDebug: true,
-        infuraAPIKey,
-        readonlyRPCMap: {
-          '0x539': process.env.NEXT_PUBLIC_PROVIDER_RPCURL ?? '',
-        },
-        logging: {
-          developerMode: true,
-          plaintext: true,
-        },
-        openDeeplink: (link: string, _target?: string) => {
-          console.debug(`App::openDeepLink() ${link}`)
-          if (canOpenLink) {
-            Linking.openURL(link)
-          } else {
-            console.debug(
-              'useBlockchainProiver::openDeepLink app is not active - skip link',
-              link,
-            )
-          }
-        },
-        timer: BackgroundTimer,
-        useDeeplink,
-        checkInstallationImmediately,
-        storage: {
-          enabled: true,
-        },
-        dappMetadata: {
-          name: 'fxfotos',
-        },
-        i18nOptions: {
-          enabled: true,
-        },
-      }}
-    >
-      {children}
-    </MetaMaskProvider>
-  )
-}
 
 /**
  * This is the root component of our app.
@@ -142,15 +85,23 @@ function App() {
   // In Android: https://stackoverflow.com/a/45838109/204044
   // You can replace with your own loading component if you wish.
   if (!isNavigationStateRestored) return null
+  const projectId = '56755e4e110a783c85b3e6f74beedb2e';
+
+  const providerMetadata = {
+    name: 'FxFotos',
+    description: 'A Decentralized Galley app',
+    url: 'https://fx.land/',
+    icons: ['https://your-project-logo.com/'],
+    redirect: {
+      native: 'fotos://',
+      universal: 'fx.land'
+    }
+  };
 
   // otherwise, we're ready to render the app
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <SDKConfigProvider
-        initialSocketServer={COMM_SERVER_URL}
-        initialInfuraKey={INFURA_API_KEY}
-      >
-        <WithSDKConfig>
+        <MetaMaskSDKProvider>
           <RneThemeProvider
             theme={scheme === 'dark' ? RneDarkTheme : RneLightTheme}
           >
@@ -164,8 +115,11 @@ function App() {
               </SafeAreaProvider>
             </ThemeProvider>
           </RneThemeProvider>
-        </WithSDKConfig>
-      </SDKConfigProvider>
+        </MetaMaskSDKProvider>
+        <WalletConnectModal
+          projectId={projectId}
+          providerMetadata={providerMetadata}
+        ></WalletConnectModal>
     </GestureHandlerRootView>
   )
 }

@@ -21,7 +21,7 @@ import Animated, {
   interpolateColor,
   useDerivedValue,
 } from 'react-native-reanimated'
-import FastImage from 'react-native-fast-image'
+import FastImage from '@changwoolab/react-native-fast-image'
 import { useRecoilState } from 'recoil'
 import {
   DataProvider,

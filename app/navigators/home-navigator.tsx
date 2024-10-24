@@ -6,7 +6,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { HomeScreen, LibraryScreen, SearchScreen } from '../screens'
+import { HomeScreen, LibraryScreen, SearchScreen, RewardsScreen } from '../screens'
 import { TabHeader } from '../components/header/tab-header'
 import { UnderConstruction } from '../components'
 
@@ -20,6 +20,7 @@ export enum HomeNavigationTypes {
   HomeScreen = 'HomeTab',
   LibraryScreen = 'LibraryTab',
   SearchScreen = 'SearchTab',
+  RewardsScreen = 'RewardsTab',
 }
 function UnderConstructionScreen() {
   return (
@@ -123,6 +124,23 @@ export function HomeNavigator() {
           },
         }}
         component={LibraryScreen}
+      />
+      <HomeTabs.Screen
+        name={HomeNavigationTypes.RewardsScreen}
+        options={{
+          tabBarLabel: 'Rewards',
+          tabBarIcon: function tabIcon(props) {
+            return (
+              <FontAwesome5
+                name="gift"
+                color={props?.focused ? colors.text : 'gray'}
+                size={25}
+                style={{}}
+              />
+            )
+          },
+        }}
+        component={RewardsScreen}
       />
     </HomeTabs.Navigator>
   )

@@ -63,7 +63,6 @@ import { AssetEntity, FolderSettingsEntity } from '../../realmdb/entities'
 import * as Constants from '../../utils/constants'
 import { FulaFileList } from '../../types/fula'
 import { Helper } from '../../utils'
-import { useSDK } from '@metamask/sdk-react'
 
 interface HomeScreenProps {
   navigation: NativeStackNavigationProp<
@@ -75,7 +74,6 @@ interface HomeScreenProps {
 export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [isReady, setIsReady] = useState(false)
   const [syncing, setSyncing] = useState(false)
-  const { account, chainId, provider, sdk, connected } = useSDK()
   const [refreshing, setRefreshing] = useState(false)
   const [fulaIsReady, setFulaIsReady] = useRecoilState(fulaIsReadyState)
   const [dIDCredentials, setDIDCredentialsState] =
@@ -707,8 +705,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             <HeaderRightContainer style={{ flex: 1 }}>
               <SharedElement id="AccountAvatar">
                 <HeaderAvatar
-                  connected={fulaAccountSeed}
-                  provider={provider}
+                  connected={fulaAccountSeed?true:false}
                   onPress={() =>
                     navigation.navigate(AppNavigationNames.AccountScreen as any)
                   }

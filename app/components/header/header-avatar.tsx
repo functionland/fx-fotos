@@ -5,19 +5,15 @@ type Props = {
   iconSize?: number
   size?: ('small' | 'medium' | 'large' | 'xlarge') | number
   connected?: boolean
-  provider?: any
   onPress?: () => void
 }
 export function HeaderAvatar({
   size,
   iconSize,
   connected,
-  provider,
   onPress,
 }: Props) {
   return (
-    <>
-      {provider || connected ? (
         <Avatar
           containerStyle={styles.disconnectedAvatar}
           source={
@@ -38,10 +34,6 @@ export function HeaderAvatar({
           rounded
           onPress={onPress}
         />
-      ) : (
-        <ActivityIndicator />
-      )}
-    </>
   )
 }
 
