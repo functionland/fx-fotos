@@ -19,12 +19,27 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
-    - name: Go to android folder
-      run: cd ./android
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-    - name: Build with Gradle
-      run: ./gradlew bundleRelease
+    - name: Decode Keystore
+      run: echo "${{ secrets.MYAPP_RELEASE_STORE_FILE_BASE64 }}" | base64 -d > android/app/fotos-upload-key.jks
+
+    - name: Update Version Code and Name
+      run: |
+        latest_version=$(curl --silent "https://api.github.com/repos/${{ github.repository }}/releases/latest" | jq -r .tag_name)
+        new_version_code=$(grep 'versionCode' android/app/build.gradle | sed 's/[^0-9]*//g' | awk '{print $1 + 1}')
+        sed -i "s/versionCode [0-9]*/versionCode ${new_version_code}/" android/app/build.gradle
+        sed -i "s/versionName \".*\"/versionName \"${latest_version}\"/" android/app/build.gradle
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build Android Bundle
+      run: |
+        cd android
+        chmod +x gradlew
+        ./gradlew bundleRelease -Pandroid.injected.signing.store.file=android/app/fotos-upload-key.jks -Pandroid.injected.signing.store.password=$MYAPP_RELEASE_STORE_PASSWORD -Pandroid.injected.signing.key.alias=$MYAPP_RELEASE_KEY_ALIAS -Pandroid.injected.signing.key.password=$MYAPP_RELEASE_KEY_PASSWORD
+      env:
+        MYAPP_RELEASE_STORE_PASSWORD: ${{ secrets.MYAPP_RELEASE_STORE_PASSWORD }}
+        MYAPP_RELEASE_KEY_ALIAS: ${{ secrets.MYAPP_RELEASE_KEY_ALIAS }}
+        MYAPP_RELEASE_KEY_PASSWORD: ${{ secrets.MYAPP_RELEASE_KEY_PASSWORD }}
 
     - name: Get Release Info
       id: get-release-info
@@ -53,7 +68,7 @@ jobs:
         script: |
           const fs = require('fs');
           const path = require('path');
-          const directory = './app/build/outputs/bundle/release';
+          const directory = './android/app/build/outputs/bundle/release';
           const files = fs.readdirSync(directory);
           for (const file of files) {
             if (file.startsWith('app')) {
