@@ -24,7 +24,7 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
-      run: ./gradlew assembleRelease
+      run: ./gradlew bundleRelease
 
     - name: Get Release Info
       id: get-release-info
@@ -53,7 +53,7 @@ jobs:
         script: |
           const fs = require('fs');
           const path = require('path');
-          const directory = './app/build/outputs/apk/release';
+          const directory = './app/build/outputs/bundle/release';
           const files = fs.readdirSync(directory);
           for (const file of files) {
             if (file.startsWith('app')) {
