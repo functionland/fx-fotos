@@ -48,6 +48,7 @@ jobs:
         chmod +x gradlew
         ./gradlew bundleRelease -Pandroid.injected.signing.store.file=$GITHUB_WORKSPACE/android/app/fotos-upload-key.jks -Pandroid.injected.signing.store.password=$MYAPP_RELEASE_STORE_PASSWORD -Pandroid.injected.signing.key.alias=$MYAPP_RELEASE_KEY_ALIAS -Pandroid.injected.signing.key.password=$MYAPP_RELEASE_KEY_PASSWORD
       env:
+        MYAPP_RELEASE_STORE_FILE: "$GITHUB_WORKSPACE/android/app/fotos-upload-key.jks"
         MYAPP_RELEASE_STORE_PASSWORD: ${{ secrets.MYAPP_RELEASE_STORE_PASSWORD }}
         MYAPP_RELEASE_KEY_ALIAS: ${{ secrets.MYAPP_RELEASE_KEY_ALIAS }}
         MYAPP_RELEASE_KEY_PASSWORD: ${{ secrets.MYAPP_RELEASE_KEY_PASSWORD }}
