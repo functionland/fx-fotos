@@ -78,15 +78,15 @@ android {
         applicationId "land.fx.fotos"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 15
-        versionName "1.4.0"
+        versionCode 123
+        versionName "1.6.8"
     }
     signingConfigs {
         release {
-            storeFile file('photos.keystore')
-            storePassword 'photos'
-            keyAlias 'photos_alias'
-            keyPassword 'photos'
+            storeFile file(System.getenv("MYAPP_RELEASE_STORE_FILE"))
+            storePassword System.getenv("MYAPP_RELEASE_STORE_PASSWORD")
+            keyAlias System.getenv("MYAPP_RELEASE_KEY_ALIAS")
+            keyPassword System.getenv("MYAPP_RELEASE_KEY_PASSWORD")
         }
         debug {
             storeFile file('debug.keystore')
