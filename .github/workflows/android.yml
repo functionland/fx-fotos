@@ -1,0 +1,70 @@
+name: Android CI
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: set up JDK 18
+      uses: actions/setup-java@v4
+      with:
+        java-version: '18'
+        distribution: 'temurin'
+        cache: gradle
+
+    - name: Go to android folder
+      run: cd ./android
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    - name: Build with Gradle
+      run: ./gradlew assembleRelease
+
+    - name: Get Release Info
+      id: get-release-info
+      uses: actions/github-script@v5
+      with:
+        script: |
+          let uploadUrl = 0;
+          try {
+            const release = await github.rest.repos.getLatestRelease({
+             owner: context.repo.owner,
+             repo: context.repo.repo,
+            });
+            uploadUrl = release.data.id;
+          } catch (error) {
+            console.log('Error fetching latest release: ', error.message);
+          }
+          return uploadUrl;
+    - name: Print release upload URL
+      run: echo "Upload URL is ${{ steps.get-release-info.outputs.result }}"
+
+    - name: Upload Update File Parts to Release
+      uses: actions/github-script@v5
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        script: |
+          const fs = require('fs');
+          const path = require('path');
+          const directory = './app/build/outputs/apk/release';
+          const files = fs.readdirSync(directory);
+          for (const file of files) {
+            if (file.startsWith('app')) {
+              const filePath = path.join(directory, file);
+              console.log(`Uploading ${file}...`);
+              await github.rest.repos.uploadReleaseAsset({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                release_id: ${{ steps.get-release-info.outputs.result }},
+                name: `Fxfotos_${file}`,
+                data: fs.readFileSync(filePath)
+              });
+            }
+          }
