@@ -484,6 +484,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 656TD8GM9B;
 				ENABLE_BITCODE = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				INFOPLIST_FILE = fotos/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = FxFotos;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
@@ -513,6 +514,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 656TD8GM9B;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				INFOPLIST_FILE = fotos/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = FxFotos;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
