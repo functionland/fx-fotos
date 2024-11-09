@@ -26,6 +26,7 @@ if linkage != nil
 end
 
 target 'fotos' do
+  pod 'Fula', :podspec => 'https://raw.githubusercontent.com/functionland/go-fula/main/Fula.podspec'
   config = use_native_modules!
 
   use_react_native!(
@@ -45,6 +46,40 @@ target 'fotos' do
   end
 
   post_install do |installer|
+    PLIST_BUDDY_PATH = '/usr/libexec/PlistBuddy'
+    # https://github.com/facebook/react-native/issues/34997
+    `sed -i -e  $'s/__IPHONE_10_0/__IPHONE_13_0/' #{installer.sandbox.root}/RCT-Folly/folly/portability/Time.h`
+    # https://github.com/facebook/react-native/issues/43335
+    installer.pods_project.targets.each do |target|
+      # https://stackoverflow.com/questions/74517344/when-compiling-with-xcode14-i-get-error-unsupported-swift-architecture-how-to-s
+      target.build_configurations.each do |config|
+        config.build_settings['ONLY_ACTIVE_ARCH'] = 'NO'
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)', '_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION']
+      end
+      if target.name == 'Flipper'
+        file_path = 'Pods/Flipper/xplat/Flipper/FlipperTransportTypes.h'
+        contents = File.read(file_path)
+        unless contents.include?('#include <functional>')
+          File.open(file_path, 'w') do |file|
+            file.puts('#include <functional>')
+            file.puts(contents)
+          end
+        end
+      end
+      if target.name == "hermes-engine"
+        installer.pods_project.files.each do |fileref|
+          if fileref.path.end_with? "hermes.xcframework"
+            hermes_plist_file = "#{fileref.real_path}/Info.plist"
+            # Patch Hermes to remove the debug symbols entry from the Info.plist (as it's not shipped with it)
+            # This might be removed once Hermes starts to ship with Debug symbols or we remove our
+            # direct dependency from the Main iOS target on "hermes.xcframework"
+            Open3.capture3(PLIST_BUDDY_PATH, '-c', 'Delete :AvailableLibraries:0:DebugSymbolsPath', hermes_plist_file)
+            Open3.capture3(PLIST_BUDDY_PATH, '-c', 'Delete :AvailableLibraries:1:DebugSymbolsPath', hermes_plist_file)
+            Open3.capture3(PLIST_BUDDY_PATH, '-c', 'Delete :AvailableLibraries:2:DebugSymbolsPath', hermes_plist_file)
+          end
+        end
+      end
+    end
     # https://github.com/facebook/react-native/blob/main/packages/react-native/scripts/react_native_pods.rb#L197-L202
     react_native_post_install(
       installer,
