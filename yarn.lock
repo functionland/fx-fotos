@@ -1910,10 +1910,10 @@
     tslib "^2.4.0"
     uint8arrays "^3.0.0"
 
-"@functionland/react-native-fula@1.54.28":
-  version "1.54.28"
-  resolved "https://registry.yarnpkg.com/@functionland/react-native-fula/-/react-native-fula-1.54.28.tgz#f97636016d0a0a6d5a68c3973e139d66dd7326a4"
-  integrity sha512-nyInRNOLA7l/NaW6xgi4iYA2L4Z/QzjunaRpDpJBxjsV0CzqUOglx4PQV43YwQYu17Nd6n4TZl5YxytqPFmI6g==
+"@functionland/react-native-fula@1.54.29":
+  version "1.54.29"
+  resolved "https://registry.yarnpkg.com/@functionland/react-native-fula/-/react-native-fula-1.54.29.tgz#c1c62b4c15d44e5d03b2fb9a8fb51eb9602581dc"
+  integrity sha512-zvYdzALUO4MdhWQHl4tHAGJJUBPyRm3NJAv0vb59lnipMBxM5tdHTtwf1x2XYyrePbx8eYhkN+5qgkqaf4gSrA==
   dependencies:
     "@polkadot/api" "^9.11.3"
     "@polkadot/keyring" "^10.2.6"
@@ -14614,15 +14614,10 @@ loose-envify@^1.0.0, loose-envify@^1.1.0, loose-envify@^1.4.0:
   dependencies:
     js-tokens "^3.0.0 || ^4.0.0"
 
-lottie-ios@4.4.0:
-  version "4.4.0"
-  resolved "https://registry.yarnpkg.com/lottie-ios/-/lottie-ios-4.4.0.tgz#bfcfffa3295717a9f1d5af7b0ca5af8a55e334c2"
-  integrity sha512-TdM7cJ+TJeejjy6sGGpsjrDCJmhEh/NJeq2X4R8+SB7grZW13BtTWv0eI+vWLU2LV5UaFE5juONdifhCVPHHkw==
-
-lottie-react-native@^6.6.0:
-  version "6.7.2"
-  resolved "https://registry.yarnpkg.com/lottie-react-native/-/lottie-react-native-6.7.2.tgz#615fc16f88970fcbdf63699537f499b5937afe8a"
-  integrity sha512-MZVx6N1EeO/EaSx8T44mJ0aHc5Mqee+xIfWwszni0oz8U2wlHdaWGjES44dHxaxgAp/0dRaFt3PkpZ6egTzcBg==
+lottie-react-native@^7.1.0:
+  version "7.1.0"
+  resolved "https://registry.yarnpkg.com/lottie-react-native/-/lottie-react-native-7.1.0.tgz#705d1f7603b7a1b3d0cf0b4bb9a193d0dba4efa4"
+  integrity sha512-73jtQySxRZ8KTTSKf6CtcpCt8tpOCw4NRiCST4HTYgXlycxIihIp89jRcK8rS/QiBKl5bzyixMzpVmd4mYVH5Q==
 
 loud-rejection@^1.0.0:
   version "1.6.0"
